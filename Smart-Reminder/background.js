@@ -22,8 +22,27 @@ function scheduleAlarm(reminder) {
   if (!reminder.enabled) return;
 
   if (reminder.type === 'repeat') {
+    const now = Date.now();
+    let targetTime = now + reminder.intervalMinutes * 60000;
+
+    if (reminder.repeatStartTime) {
+      const [h, m] = reminder.repeatStartTime.split(':').map(Number);
+      let dayStart = new Date();
+      dayStart.setHours(h, m, 0, 0);
+
+      const intervalMs = reminder.intervalMinutes * 60000;
+
+      if (dayStart.getTime() > now) {
+        targetTime = dayStart.getTime();
+      } else {
+        const diff = now - dayStart.getTime();
+        const intervalsPassed = Math.floor(diff / intervalMs);
+        targetTime = dayStart.getTime() + (intervalsPassed + 1) * intervalMs;
+      }
+    }
+
     chrome.alarms.create(reminder.id, {
-      delayInMinutes: reminder.intervalMinutes,
+      when: targetTime,
       periodInMinutes: reminder.intervalMinutes
     });
   } else if (reminder.type === 'fixed') {
@@ -145,6 +164,23 @@ async function showInPageToast(reminder) {
   }
 }
 
+// --- Offscreen Sound ---
+async function playSoundOffscreen() {
+  try {
+    const hasDocument = await chrome.offscreen.hasDocument();
+    if (!hasDocument) {
+      await chrome.offscreen.createDocument({
+        url: 'offscreen.html',
+        reasons: ['AUDIO_PLAYBACK'],
+        justification: 'Play reminder alert sound'
+      });
+    }
+    await chrome.runtime.sendMessage({ action: 'play_sound' });
+  } catch (err) {
+    console.error('Failed to play sound via offscreen:', err);
+  }
+}
+
 // --- Update badge count ---
 async function updateBadge() {
   const reminders = await getReminders();
@@ -194,8 +230,21 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   
   if (!reminder || !reminder.enabled) return;
   
-  // Show toast on the active tab
+  // 1. Show in-page UI toast
   showInPageToast(reminder);
+  
+  // 2. Play sound via offscreen
+  playSoundOffscreen();
+
+  // 3. Desktop Notification
+  chrome.notifications.create(reminder.id + '_' + Date.now(), {
+    type: 'basic',
+    iconUrl: 'icons/icon-128.png',
+    title: reminder.title || 'Smart Reminder',
+    message: reminder.message || 'Đã đến giờ nhắc nhở!',
+    priority: 2,
+    silent: true // Prevent double sounding since we play the custom offscreen ting
+  });
   
   // If fixed time, reschedule for tomorrow
   if (reminder.type === 'fixed') {

@@ -118,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
       fixedTimeGroup.classList.add('hidden');
       repeatGroup.classList.remove('hidden');
       document.getElementById('intervalMinutes').value = reminder.intervalMinutes || 30;
+      document.getElementById('repeatStartTime').value = reminder.repeatStartTime || '00:00';
     }
     
     switchView('form');
@@ -168,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!reminderData.fixedTime) return;
     } else {
       reminderData.intervalMinutes = parseInt(document.getElementById('intervalMinutes').value, 10);
+      reminderData.repeatStartTime = document.getElementById('repeatStartTime').value;
       if (!reminderData.intervalMinutes || reminderData.intervalMinutes < 1) return;
     }
 
@@ -254,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const timeDisplay = reminder.type === 'fixed'
       ? reminder.fixedTime
-      : `mỗi ${reminder.intervalMinutes} phút`;
+      : `mỗi ${reminder.intervalMinutes} phút${reminder.repeatStartTime ? ` (từ ${reminder.repeatStartTime})` : ''}`;
     
     div.innerHTML = `
       <div class="reminder-top">

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Facebook Auto Poster</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h2>FB Auto Poster</h2>
+    
+    <div class="form-group">
+      <label for="keyword">Từ khóa Nhóm:</label>
+      <input type="text" id="keyword" placeholder="Nhập từ khóa (v.d: BDS)">
+    </div>
+
+    <div class="form-group">
+      <label for="content">Nội dung đăng:</label>
+      <textarea id="content" rows="4" placeholder="Nhập nội dung bài viết..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="images">Chọn Ảnh (Tối đa 10):</label>
+      <input type="file" id="images" accept="image/*,video/*" multiple>
+      <div id="file-list" class="file-list"></div>
+    </div>
+
+    <!-- Advanced Settings -->
+    <details class="settings-group">
+      <summary>⚙️ Cấu hình chống spam</summary>
+      <div class="settings-content">
+        <div class="form-group row">
+          <label for="crossPostCount" title="Số lượng nhóm tick đăng chéo ở nút 'Thêm nhóm'">SL nhóm đăng chéo/mẻ:</label>
+          <input type="number" id="crossPostCount" value="9" min="0" max="20">
+        </div>
+        
+        <div class="form-group row">
+          <label for="clickDelayInfo">Thời gian chờ click (giây):</label>
+          <div class="min-max">
+            <input type="number" id="minDelay" value="2" min="1" max="10" title="Tối thiểu">
+            <span>-</span>
+            <input type="number" id="maxDelay" value="6" min="2" max="20" title="Tối đa">
+          </div>
+        </div>
+
+        <div class="form-group row">
+          <label for="typingSpeed">Tốc độ gõ phím:</label>
+          <select id="typingSpeed">
+            <option value="fast">Nhanh (Random 20-50ms)</option>
+            <option value="normal" selected>Bình thường (Random 50-150ms)</option>
+            <option value="slow">Chậm như rùa (Random 100-300ms)</option>
+          </select>
+        </div>
+      </div>
+    </details>
+
+    <div class="status-container">
+      <span id="status-text">Trạng thái: Đang rảnh</span>
+    </div>
+
+    <div class="button-group">
+      <button id="btn-start" class="btn primary">Bắt đầu Đăng</button>
+      <button id="btn-stop" class="btn danger" disabled>Dừng lại</button>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

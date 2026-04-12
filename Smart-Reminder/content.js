@@ -9,13 +9,27 @@
   // Ensure container exists
   function getContainer() {
     let container = document.getElementById('sr-toast-container');
+    const target = document.fullscreenElement || document.body;
+    
     if (!container) {
       container = document.createElement('div');
       container.id = 'sr-toast-container';
-      document.body.appendChild(container);
+      target.appendChild(container);
+    } else if (container.parentNode !== target) {
+      target.appendChild(container);
     }
     return container;
   }
+
+  document.addEventListener('fullscreenchange', () => {
+    const container = document.getElementById('sr-toast-container');
+    if (container) {
+      const target = document.fullscreenElement || document.body;
+      if (container.parentNode !== target) {
+        target.appendChild(container);
+      }
+    }
+  });
 
   // Format current time
   function formatTime() {
