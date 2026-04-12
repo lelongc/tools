@@ -9,27 +9,31 @@
   // Ensure container exists
   function getContainer() {
     let container = document.getElementById('sr-toast-container');
-    const target = document.fullscreenElement || document.body;
-    
     if (!container) {
       container = document.createElement('div');
       container.id = 'sr-toast-container';
-      target.appendChild(container);
-    } else if (container.parentNode !== target) {
-      target.appendChild(container);
+      // Sử dụng Popover API (Native HTML5 Top Layer)
+      // Giúp nó luôn nằm trên CÙNG, đè lên mọi thứ kể cả Fullscreen
+      container.setAttribute('popover', 'manual');
+      document.body.appendChild(container);
     }
     return container;
   }
 
-  document.addEventListener('fullscreenchange', () => {
+  const syncContainer = () => {
     const container = document.getElementById('sr-toast-container');
-    if (container) {
-      const target = document.fullscreenElement || document.body;
-      if (container.parentNode !== target) {
-        target.appendChild(container);
-      }
+    if (container && container.matches && container.matches(':popover-open')) {
+      // Khi Web đổi trạng thái Fullscreen, ta hạ container xuống và đẩy lên lại
+      // để nó chiếm quyền top-layer cao nhất
+      container.hidePopover();
+      container.showPopover();
     }
-  });
+  };
+
+  document.addEventListener('fullscreenchange', syncContainer);
+  document.addEventListener('webkitfullscreenchange', syncContainer);
+  document.addEventListener('mozfullscreenchange', syncContainer);
+  document.addEventListener('MSFullscreenChange', syncContainer);
 
   // Format current time
   function formatTime() {
@@ -90,6 +94,12 @@
     });
 
     container.appendChild(toast);
+    
+    try {
+      if (!container.matches(':popover-open')) {
+        container.showPopover();
+      }
+    } catch(e) {}
 
     // Auto-dismiss after custom duration
     const durationMs = (data.duration || 8) * 1000;
@@ -106,7 +116,13 @@
     if (toast.classList.contains('sr-closing')) return;
     toast.classList.add('sr-closing');
     setTimeout(() => {
-      if (toast.parentNode) toast.parentNode.removeChild(toast);
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+        const container = document.getElementById('sr-toast-container');
+        if (container && container.querySelectorAll('.sr-toast').length === 0) {
+          try { container.hidePopover(); } catch(e) {}
+        }
+      }
     }, 350);
   }
 
