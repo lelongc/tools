@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Click Tracker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-icon">🎯</div>
+      <div class="header-text">
+        <h1>Click Tracker</h1>
+        <p class="subtitle">DOM Action Recorder</p>
+      </div>
+      <div class="rec-indicator" id="rec-indicator">
+        <span class="rec-dot"></span>
+        <span class="rec-text">REC</span>
+      </div>
+    </header>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat">
+        <span class="stat-value" id="event-count">0</span>
+        <span class="stat-label">Events</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="duration">00:00</span>
+        <span class="stat-label">Thời lượng</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="click-count">0</span>
+        <span class="stat-label">Clicks</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="input-count">0</span>
+        <span class="stat-label">Inputs</span>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <button class="btn btn-record" id="btn-record">
+        <span class="btn-icon">⏺</span>
+        <span class="btn-text">Bắt đầu ghi</span>
+      </button>
+      <button class="btn btn-stop hidden" id="btn-stop">
+        <span class="btn-icon">⏹</span>
+        <span class="btn-text">Dừng ghi</span>
+      </button>
+      <div class="controls-row">
+        <button class="btn btn-small btn-export" id="btn-export-json" title="Xuất JSON (cho AI)">
+          <span>💾 JSON</span>
+        </button>
+        <button class="btn btn-small btn-export" id="btn-export-text" title="Xuất Text (dễ đọc)">
+          <span>📋 Text</span>
+        </button>
+        <button class="btn btn-small btn-danger" id="btn-clear" title="Xóa log">
+          <span>🗑️ Xóa</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Live Log -->
+    <div class="log-section">
+      <div class="log-header">
+        <span>📡 Live Log</span>
+        <span class="log-badge" id="log-badge">0</span>
+      </div>
+      <div class="log-box" id="log-box">
+        <div class="log-empty">Bấm <strong>Bắt đầu ghi</strong> rồi thao tác trên trang web.</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
