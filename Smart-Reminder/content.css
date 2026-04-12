@@ -55,15 +55,15 @@
 }
 
 /* Progress bar at bottom */
-.sr-toast::after {
-  content: '';
+.sr-toast-progress {
   position: absolute;
   bottom: 0;
   left: 0;
   height: 3px;
   background: linear-gradient(90deg, #6C63FF, #3F8EFC);
   border-radius: 0 0 14px 14px;
-  animation: sr-progress 8s linear forwards;
+  width: 100%;
+  animation: sr-progress var(--duration, 8s) linear forwards;
 }
 
 .sr-toast-icon {

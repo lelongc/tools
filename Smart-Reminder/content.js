@@ -55,6 +55,7 @@
         <div class="sr-toast-message">${escapeHtml(message)}</div>
         <div class="sr-toast-time">${formatTime()}</div>
       </div>
+      <div class="sr-toast-progress" style="--duration: ${data.duration}s"></div>
       <button class="sr-toast-close" title="Đóng">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
           <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -76,8 +77,9 @@
 
     container.appendChild(toast);
 
-    // Auto-dismiss after 8 seconds
-    setTimeout(() => dismissToast(toast), 8000);
+    // Auto-dismiss after custom duration
+    const durationMs = (data.duration || 8) * 1000;
+    setTimeout(() => dismissToast(toast), durationMs);
 
     // Limit max toasts to 5
     const toasts = container.querySelectorAll('.sr-toast:not(.sr-closing)');

@@ -71,7 +71,8 @@ function rescheduleFixedReminder(reminder) {
 async function showInPageToast(reminder) {
   const data = {
     title: reminder.title || 'Smart Reminder',
-    message: reminder.message || 'Đã đến giờ nhắc nhở!'
+    message: reminder.message || 'Đã đến giờ nhắc nhở!',
+    duration: reminder.duration || 8
   };
 
   try {

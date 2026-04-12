@@ -4,6 +4,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   const btnToggleForm = document.getElementById('btnToggleForm');
+  const listView = document.getElementById('listView');
+  const formView = document.getElementById('formView');
   const formSection = document.getElementById('formSection');
   const formTitle = document.getElementById('formTitle');
   const btnCancel = document.getElementById('btnCancel');
@@ -19,31 +21,64 @@ document.addEventListener('DOMContentLoaded', () => {
   const repeatGroup = document.getElementById('repeatGroup');
   
   let currentType = 'fixed';
-  let isFormVisible = false;
+  let activeView = 'list'; // 'list' or 'form'
   let isEditMode = false;
   
   // --- Initialize ---
   loadReminders();
   
+  // --- View Switching ---
+  function switchView(viewName) {
+    if (viewName === 'form') {
+      // Switch from list to form
+      listView.classList.remove('visible');
+      setTimeout(() => {
+        listView.classList.add('hidden');
+        
+        formView.classList.remove('hidden');
+        // Small delay to allow browser to register display: block before animating opacity
+        requestAnimationFrame(() => {
+          formView.classList.add('visible');
+          formSection.classList.add('visible');
+          btnToggleForm.classList.add('active');
+          activeView = 'form';
+          // Focus title input
+          setTimeout(() => document.getElementById('title').focus(), 100);
+        });
+      }, 150);
+    } else {
+      // Switch from form to list
+      formSection.classList.remove('visible');
+      formView.classList.remove('visible');
+      btnToggleForm.classList.remove('active');
+      
+      setTimeout(() => {
+        formView.classList.add('hidden');
+        
+        listView.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          listView.classList.add('visible');
+          activeView = 'list';
+          isEditMode = false;
+          editIdField.value = '';
+          reminderForm.reset();
+          resetTypeSelector();
+        });
+      }, 150);
+    }
+  }
+
   // --- Toggle Form (for creating new) ---
   btnToggleForm.addEventListener('click', () => {
-    if (isEditMode) {
-      // If currently editing, cancel edit and close
-      closeForm();
-      return;
-    }
-    
-    isFormVisible = !isFormVisible;
-    
-    if (isFormVisible) {
-      openFormForCreate();
+    if (activeView === 'form') {
+      switchView('list');
     } else {
-      closeForm();
+      openFormForCreate();
     }
   });
   
   btnCancel.addEventListener('click', () => {
-    closeForm();
+    switchView('list');
   });
   
   function openFormForCreate() {
@@ -54,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     reminderForm.reset();
     resetTypeSelector();
-    showForm();
+    switchView('form');
   }
   
   function openFormForEdit(reminder) {
@@ -66,6 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Pre-fill form
     document.getElementById('title').value = reminder.title;
     document.getElementById('message').value = reminder.message || '';
+    document.getElementById('duration').value = reminder.duration || 8;
     
     // Set type
     currentType = reminder.type;
@@ -84,35 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('intervalMinutes').value = reminder.intervalMinutes || 30;
     }
     
-    showForm();
-  }
-  
-  function showForm() {
-    isFormVisible = true;
-    formSection.classList.remove('hidden');
-    formSection.offsetHeight; // Force reflow
-    formSection.classList.add('visible');
-    btnToggleForm.classList.add('active');
-    
-    // Focus title input
-    setTimeout(() => document.getElementById('title').focus(), 100);
-  }
-  
-  function closeForm() {
-    formSection.classList.remove('visible');
-    btnToggleForm.classList.remove('active');
-    isFormVisible = false;
-    isEditMode = false;
-    editIdField.value = '';
-    
-    setTimeout(() => {
-      if (!isFormVisible) {
-        formSection.classList.add('hidden');
-      }
-    }, 350);
-    
-    reminderForm.reset();
-    resetTypeSelector();
+    switchView('form');
   }
   
   // --- Type Selector ---
@@ -162,6 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
       reminderData.intervalMinutes = parseInt(document.getElementById('intervalMinutes').value, 10);
       if (!reminderData.intervalMinutes || reminderData.intervalMinutes < 1) return;
     }
+
+    reminderData.duration = parseInt(document.getElementById('duration').value, 10) || 8;
     
     try {
       const editId = editIdField.value;
@@ -175,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         if (response.success) {
-          closeForm();
+          switchView('list');
           loadReminders();
         }
       } else {
@@ -186,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         if (response.success) {
-          closeForm();
+          switchView('list');
           loadReminders();
         }
       }
@@ -328,7 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (response.success) {
         // If currently editing this reminder, close form
         if (editIdField.value === id) {
-          closeForm();
+          switchView('list');
         }
         setTimeout(() => {
           loadReminders();
