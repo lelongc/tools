@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>M-Scheduler</title>
+  <link rel="stylesheet" href="popup.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="window">
+    <header>
+      <div class="logo">
+        <span class="icon">💻</span>
+        <h2>Auto Macro</h2>
+      </div>
+      <p class="subtitle">Tự động hoá mọi thao tác Web</p>
+    </header>
+
+    <div class="main-content">
+      <div class="action-card">
+        <button id="startRecordBtn" class="btn btn-record">
+          <span class="pulse-dot"></span> Bắt đầu Nhớ Thao Tác (Record)
+        </button>
+        <button id="stopRecordBtn" class="btn btn-stop hidden">
+          ⏹ Dừng & Lưu Bản Ghi
+        </button>
+      </div>
+
+      <div id="saveMacroSection" class="save-section hidden">
+        <div class="input-group">
+          <label>Tên Bản Ghi</label>
+          <input type="text" id="macroName" placeholder="VD: Đăng nhập hàng ngày" />
+        </div>
+        <div class="input-group row-group">
+          <label>⏰ Chạy hàng ngày lúc:</label>
+          <input type="time" id="macroTime" required />
+        </div>
+        <div class="button-group">
+          <button id="cancelSaveBtn" class="btn btn-outline">Huỷ bỏ</button>
+          <button id="saveMacroBtn" class="btn btn-success">✅ Lưu & Kích hoạt</button>
+        </div>
+      </div>
+
+      <div class="list-header">
+        <h3>Các Macro đã lưu</h3>
+        <span id="macroCount" class="badge">0</span>
+      </div>
+      
+      <div id="macroList" class="macro-list">
+        <!-- Javascript populates this -->
+      </div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
