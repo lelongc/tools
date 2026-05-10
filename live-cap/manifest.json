@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Live-Cap",
+  "version": "4.0",
+  "description": "Live captions for any browser tab audio.",
+  "permissions": ["activeTab", "tabCapture", "offscreen", "scripting", "storage"],
+  "host_permissions": ["https://api.groq.com/*", "<all_urls>"],
+  "background": { "service_worker": "bg.js" },
+  "action": { "default_popup": "popup.html" }
+}

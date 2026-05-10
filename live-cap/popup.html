@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  body{font-family:Segoe UI,sans-serif;width:240px;padding:14px;background:#1a1a2e;color:#eee;margin:0}
+  h3{margin:0 0 10px;color:#a78bfa;font-size:15px;text-align:center}
+  .g{margin-bottom:8px}
+  .g label{display:block;font-size:11px;color:#94a3b8;margin-bottom:3px}
+  .g input{width:100%;padding:6px;border-radius:6px;background:#11111b;border:1px solid #333;color:#eee;font-size:12px;box-sizing:border-box}
+  .btn{width:100%;padding:10px;border:none;border-radius:8px;font-size:13px;font-weight:bold;cursor:pointer;margin-bottom:6px}
+  .on{background:#4ade80;color:#111}.on:hover{background:#22c55e}
+  .off{background:#f87171;color:#111;display:none}.off:hover{background:#ef4444}
+  #log{font-size:11px;color:#94a3b8;margin-top:8px;max-height:100px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;background:#11111b;padding:6px;border-radius:6px}
+</style>
+</head>
+<body>
+  <h3>🎧 Live-Cap</h3>
+  <div class="g">
+    <label>Groq API Key:</label>
+    <input id="key" type="password" placeholder="gsk_...">
+  </div>
+  <button id="go" class="btn on">▶ Bật Caption</button>
+  <button id="stop" class="btn off">■ Tắt</button>
+  <div id="log">Sẵn sàng.
+</div>
+  <script src="popup.js"></script>
+</body>
+</html>
