@@ -1,6 +1,8 @@
 // caption.js — Content Script (chạy 1 lần, giữ state liên tục)
 (function () {
   'use strict';
+  if (window.__lc_injected) return;
+  window.__lc_injected = true;
 
   let pop, box;
   let dx = 0, dy = 0, sx, sy, dragging = false;

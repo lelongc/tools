@@ -29,6 +29,11 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
             id => chrome.runtime.lastError ? no(chrome.runtime.lastError.message) : ok(id)
           );
         });
+        
+        // Bơm script thủ công để không bắt user phải F5
+        await chrome.scripting.insertCSS({ target: { tabId: m.tabId }, files: ['caption.css'] }).catch(()=>{});
+        await chrome.scripting.executeScript({ target: { tabId: m.tabId }, files: ['caption.js'] }).catch(()=>{});
+
         await createOff(sid);
         forward(m.tabId, '🎧 Đang lắng nghe...');
         reply({ ok: true });
