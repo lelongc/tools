@@ -1,0 +1,53 @@
+/* Live-Cap Caption Overlay */
+
+/* Reset popover mặc định */
+#lc-pop {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  inset: auto !important;
+  overflow: visible !important;
+
+  position: fixed !important;
+  bottom: 10% !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
+}
+
+#lc-box {
+  background: rgba(0,0,0,.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #f1f1f1;
+  font: 600 20px/1.4 'Segoe UI', sans-serif;
+  padding: 12px 24px;
+  border-radius: 10px;
+  max-width: 720px;
+  min-width: 180px;
+  text-align: center;
+  box-shadow: 0 6px 24px rgba(0,0,0,.6);
+  text-shadow: 1px 1px 3px #000;
+  cursor: grab;
+  user-select: none;
+  transition: opacity .3s;
+  white-space: pre-wrap;
+}
+
+#lc-box:active {
+  cursor: grabbing;
+}
+
+/* Typewriter cursor blink */
+#lc-box::after {
+  content: '▎';
+  animation: blink 1s step-end infinite;
+  color: #a78bfa;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}

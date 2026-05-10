@@ -6,5 +6,10 @@
   "permissions": ["activeTab", "tabCapture", "offscreen", "scripting", "storage"],
   "host_permissions": ["https://api.groq.com/*", "<all_urls>"],
   "background": { "service_worker": "bg.js" },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "css": ["caption.css"],
+    "js": ["caption.js"]
+  }],
   "action": { "default_popup": "popup.html" }
 }

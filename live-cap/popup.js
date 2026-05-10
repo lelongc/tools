@@ -1,27 +1,26 @@
 const go = document.getElementById('go');
 const stop = document.getElementById('stop');
 const log = document.getElementById('log');
-const keyInput = document.getElementById('key');
+const srcLangSel = document.getElementById('srcLang');
+const tgtLangSel = document.getElementById('tgtLang');
 
 function addLog(s) {
   log.textContent += s + '\n';
   log.scrollTop = log.scrollHeight;
 }
 
-// Khôi phục API key đã lưu
-chrome.storage.local.get(['groqKey'], r => {
-  if (r.groqKey) keyInput.value = r.groqKey;
+// Khôi phục cài đặt đã lưu
+chrome.storage.local.get(['srcLang', 'tgtLang'], r => {
+  if (r.srcLang) srcLangSel.value = r.srcLang;
+  if (r.tgtLang !== undefined) tgtLangSel.value = r.tgtLang;
 });
 
 go.addEventListener('click', () => {
-  const apiKey = keyInput.value.trim();
-  if (!apiKey) {
-    addLog('❌ Hãy nhập Groq API Key!');
-    return;
-  }
-
-  // Lưu key
-  chrome.storage.local.set({ groqKey: apiKey });
+  // Lưu cài đặt
+  chrome.storage.local.set({
+    srcLang: srcLangSel.value,
+    tgtLang: tgtLangSel.value
+  });
 
   addLog('→ Đang tìm tab...');
 

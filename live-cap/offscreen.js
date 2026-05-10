@@ -6,6 +6,11 @@ if (!sid) { cap('❌ Không có streamId'); }
 else { go(sid); }
 
 async function go(sid) {
+  // Đọc cài đặt ngôn ngữ
+  const prefs = await chrome.storage.local.get(['srcLang', 'tgtLang']);
+  const srcLang = prefs.srcLang || 'en';
+  const tgtLang = prefs.tgtLang || '';
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: sid } }
@@ -50,7 +55,7 @@ async function go(sid) {
         fd.append('file', new File([wav], 'a.wav', { type: 'audio/wav' }));
         fd.append('model', 'whisper-large-v3-turbo');
         fd.append('response_format', 'json');
-        fd.append('language', 'en');
+        fd.append('language', srcLang);
 
         const r = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
           method: 'POST',
@@ -65,8 +70,23 @@ async function go(sid) {
         }
 
         const d = await r.json();
-        const t = (d.text || '').trim();
-        if (t.length > 1) cap(t);
+        let t = (d.text || '').trim();
+        
+        if (t.length > 1) {
+          if (tgtLang) {
+            // Dịch sang ngôn ngữ đích
+            const trRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${srcLang}&tl=${tgtLang}&dt=t&q=` + encodeURIComponent(t));
+            const trData = await trRes.json();
+            let translated = '';
+            if (trData && trData[0]) {
+              trData[0].forEach(part => { if (part[0]) translated += part[0]; });
+            }
+            if (translated) {
+              t = translated + '\n\n---\n' + t;
+            }
+          }
+          cap(t);
+        }
       } catch (e) {
         cap('❌ ' + e.message);
       }

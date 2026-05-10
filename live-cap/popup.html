@@ -17,8 +17,18 @@
 <body>
   <h3>🎧 Live-Cap</h3>
   <div class="g">
-    <label>Groq API Key:</label>
-    <input id="key" type="password" placeholder="gsk_...">
+    <label>Ngôn ngữ âm thanh:</label>
+    <select id="srcLang" class="sel" style="width:100%;padding:6px;border-radius:6px;background:#11111b;border:1px solid #333;color:#eee;">
+      <option value="en">Tiếng Anh</option>
+      <option value="ja">Tiếng Nhật</option>
+    </select>
+  </div>
+  <div class="g">
+    <label>Dịch sang:</label>
+    <select id="tgtLang" class="sel" style="width:100%;padding:6px;border-radius:6px;background:#11111b;border:1px solid #333;color:#eee;">
+      <option value="">Không dịch</option>
+      <option value="vi">Tiếng Việt</option>
+    </select>
   </div>
   <button id="go" class="btn on">▶ Bật Caption</button>
   <button id="stop" class="btn off">■ Tắt</button>
