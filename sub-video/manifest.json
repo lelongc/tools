@@ -9,7 +9,7 @@
   "background": {
     "service_worker": "bg.js"
   },
-  "permissions": ["scripting", "activeTab", "storage"],
+  "permissions": ["scripting", "activeTab", "storage", "webNavigation"],
   "host_permissions": ["<all_urls>", "https://api.groq.com/*"],
   "content_scripts": [
     {
