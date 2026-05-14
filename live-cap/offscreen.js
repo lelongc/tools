@@ -1,16 +1,15 @@
 // offscreen.js — Thu âm tab → WAV → Groq Whisper
 // GROQ_KEY được load từ config.js (trước file này)
 
-const sid = decodeURIComponent(location.hash.substring(1));
+const hashParts = location.hash.substring(1).split('&');
+const sid = decodeURIComponent(hashParts[0]);
+const srcLang = hashParts[1] || 'en';
+const tgtLang = hashParts[2] || '';
+
 if (!sid) { cap('❌ Không có streamId'); }
-else { go(sid); }
+else { go(sid, srcLang, tgtLang); }
 
-async function go(sid) {
-  // Đọc cài đặt ngôn ngữ
-  const prefs = await chrome.storage.local.get(['srcLang', 'tgtLang']);
-  const srcLang = prefs.srcLang || 'en';
-  const tgtLang = prefs.tgtLang || '';
-
+async function go(sid, srcLang, tgtLang) {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: sid } }

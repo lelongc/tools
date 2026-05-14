@@ -1,10 +1,10 @@
 // bg.js — Background Service Worker
 let targetTabId = null;
 
-async function createOff(streamId) {
+async function createOff(streamId, srcLang, tgtLang) {
   try { await chrome.offscreen.closeDocument(); } catch(_){}
   await chrome.offscreen.createDocument({
-    url: 'offscreen.html#' + encodeURIComponent(streamId),
+    url: `offscreen.html#${encodeURIComponent(streamId)}&${srcLang}&${tgtLang}`,
     reasons: ['USER_MEDIA'],
     justification: 'Tab audio capture'
   });
@@ -34,9 +34,14 @@ chrome.runtime.onMessage.addListener((m, sender, reply) => {
         await chrome.scripting.insertCSS({ target: { tabId: m.tabId }, files: ['caption.css'] }).catch(()=>{});
         await chrome.scripting.executeScript({ target: { tabId: m.tabId }, files: ['caption.js'] }).catch(()=>{});
 
-        await createOff(sid);
-        forward(m.tabId, '🎧 Đang lắng nghe...');
-        reply({ ok: true });
+        // Lấy setting ngôn ngữ
+        chrome.storage.local.get(['srcLang', 'tgtLang'], async (r) => {
+          const srcLang = r.srcLang || 'en';
+          const tgtLang = r.tgtLang || '';
+          await createOff(sid, srcLang, tgtLang);
+          forward(m.tabId, '🎧 Đang lắng nghe...');
+          reply({ ok: true });
+        });
       } catch(e) {
         reply({ ok: false, err: String(e) });
       }
