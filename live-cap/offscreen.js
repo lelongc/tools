@@ -1,116 +1,164 @@
-// offscreen.js — Thu âm tab → WAV → Groq Whisper
+// offscreen.js — Thu âm tab → Groq Whisper
 // GROQ_KEY được load từ config.js (trước file này)
 
 const hashParts = location.hash.substring(1).split('&');
 const sid = decodeURIComponent(hashParts[0]);
-const srcLang = hashParts[1] || 'en';
-const tgtLang = hashParts[2] || '';
+let srcLang = hashParts[1] || 'en';
+let tgtLang  = hashParts[2] || '';
 
-if (!sid) { cap('❌ Không có streamId'); }
-else { go(sid, srcLang, tgtLang); }
 
-async function go(sid, srcLang, tgtLang) {
+// cap() gửi text về bg.js — luôn có .catch để tránh crash offscreen
+function cap(text) {
+  chrome.runtime.sendMessage({ action: '_c', t: text }).catch(() => {});
+}
+
+if (!sid) {
+  console.error('[LC] Không có streamId trong hash:', location.hash);
+  cap('❌ Không có streamId');
+} else {
+  console.log('[LC] StreamId OK, bắt đầu go():', sid.substring(0, 20) + '...');
+  go(sid);
+}
+
+async function go(sid) {
   try {
+    console.log('[LC] Đang gọi getUserMedia...');
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: { mandatory: { chromeMediaSource: 'tab', chromeMediaSourceId: sid } }
     });
 
-    // Phát lại âm thanh cho user nghe
-    const a = new Audio();
-    a.srcObject = stream;
-    a.play();
-
-    // Thu PCM 16kHz mono
-    const ctx = new AudioContext({ sampleRate: 16000 });
-    const src = ctx.createMediaStreamSource(stream);
-    const proc = ctx.createScriptProcessor(4096, 1, 1);
-    let buf = [];
-    proc.onaudioprocess = e => buf.push(new Float32Array(e.inputBuffer.getChannelData(0)));
-    src.connect(proc);
-    proc.connect(ctx.destination);
-
+    console.log('[LC] getUserMedia OK, tracks:', stream.getAudioTracks().length);
     cap('🎧 Đang thu âm...');
 
-    // Mỗi 3 giây gửi Groq
-    setInterval(async () => {
-      const chunks = buf;
-      buf = [];
-      if (!chunks.length) return;
+    // --- Phát lại cho user nghe ---
+    const audioEl = new Audio();
+    audioEl.srcObject = stream;
+    audioEl.play().catch(e => console.warn('[LC] audio.play() lỗi:', e.message));
 
-      let len = 0;
-      chunks.forEach(c => len += c.length);
-      const pcm = new Float32Array(len);
-      let off = 0;
-      chunks.forEach(c => { pcm.set(c, off); off += c.length; });
+    // --- MediaRecorder ---
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+      ? 'audio/webm;codecs=opus'
+      : MediaRecorder.isTypeSupported('audio/webm')
+      ? 'audio/webm'
+      : '';
+    console.log('[LC] mimeType sẽ dùng:', mimeType || '(default)');
 
-      // Bỏ qua im lặng
-      let pk = 0;
-      for (let i = 0; i < pcm.length; i++) if (Math.abs(pcm[i]) > pk) pk = Math.abs(pcm[i]);
-      if (pk < 0.005) return;
+    let chunks = [];
+    const recorder = mimeType
+      ? new MediaRecorder(stream, { mimeType })
+      : new MediaRecorder(stream);
 
-      const wav = toWav(pcm, 16000);
-      try {
-        const fd = new FormData();
-        fd.append('file', new File([wav], 'a.wav', { type: 'audio/wav' }));
-        fd.append('model', 'whisper-large-v3-turbo');
-        fd.append('response_format', 'json');
-        fd.append('language', srcLang);
+    recorder.ondataavailable = e => {
+      console.log('[LC] ondataavailable, size:', e.data?.size);
+      if (e.data && e.data.size > 0) chunks.push(e.data);
+    };
 
-        const r = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-          method: 'POST',
-          headers: { Authorization: 'Bearer ' + GROQ_KEY },
-          body: fd
-        });
+    recorder.onerror = e => console.error('[LC] recorder.onerror:', e);
 
-        if (!r.ok) {
-          const t = await r.text();
-          cap('⚠ Groq ' + r.status + ': ' + t.substring(0, 60));
-          return;
-        }
+    recorder.onstop = async () => {
+      console.log('[LC] recorder.onstop, chunks:', chunks.length);
+      const blob = new Blob(chunks, { type: recorder.mimeType });
+      chunks = [];
+      console.log('[LC] Blob size:', blob.size);
 
-        const d = await r.json();
-        let t = (d.text || '').trim();
-        
-        if (t.length > 1) {
-          if (tgtLang) {
-            // Dịch sang ngôn ngữ đích
-            const trRes = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=${srcLang}&tl=${tgtLang}&dt=t&q=` + encodeURIComponent(t));
-            const trData = await trRes.json();
-            let translated = '';
-            if (trData && trData[0]) {
-              trData[0].forEach(part => { if (part[0]) translated += part[0]; });
-            }
-            if (translated) {
-              t = translated + '\n\n---\n' + t;
-            }
-          }
-          cap(t);
-        }
-      } catch (e) {
-        cap('❌ ' + e.message);
+      if (blob.size < 3000) {
+        console.log('[LC] Blob quá nhỏ, bỏ qua');
+        recorder.start();
+        return;
+      }
+
+      await sendToGroq(blob, recorder.mimeType);
+
+      if (recorder.state === 'inactive') {
+        recorder.start();
+      }
+    };
+
+    console.log('[LC] Bắt đầu recorder.start()');
+    recorder.start();
+    console.log('[LC] recorder.state sau start:', recorder.state);
+
+    setInterval(() => {
+      console.log('[LC] tick — recorder.state:', recorder.state);
+      if (recorder.state === 'recording') {
+        recorder.stop();
       }
     }, 3000);
 
   } catch (e) {
-    cap('❌ Audio: ' + e.message);
+    cap('❌ Audio lỗi: ' + e.message);
   }
 }
 
-function toWav(p, sr) {
-  const n = p.length, b = new ArrayBuffer(44 + n * 2), v = new DataView(b);
-  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
-  w(0,'RIFF'); v.setUint32(4, 36+n*2, true); w(8,'WAVE');
-  w(12,'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true);
-  v.setUint16(22, 1, true); v.setUint32(24, sr, true); v.setUint32(28, sr*2, true);
-  v.setUint16(32, 2, true); v.setUint16(34, 16, true);
-  w(36,'data'); v.setUint32(40, n*2, true);
-  for (let i = 0; i < n; i++) {
-    let s = Math.max(-1, Math.min(1, p[i]));
-    v.setInt16(44 + i*2, s < 0 ? s*0x8000 : s*0x7FFF, true);
+async function sendToGroq(blob, mimeType) {
+  const ext = mimeType.includes('ogg') ? 'ogg' : mimeType.includes('mp4') ? 'mp4' : 'webm';
+  console.log('[LC] sendToGroq, mimeType:', mimeType, 'ext:', ext, 'lang:', srcLang);
+  try {
+    const fd = new FormData();
+    fd.append('file', new File([blob], 'audio.' + ext, { type: mimeType }));
+    fd.append('model', 'whisper-large-v3-turbo');
+    fd.append('response_format', 'json');
+    fd.append('language', srcLang);
+
+    const r = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + GROQ_KEY },
+      body: fd
+    });
+
+    if (!r.ok) {
+      const errText = await r.text();
+      cap('⚠ Groq ' + r.status + ': ' + errText.substring(0, 80));
+      return;
+    }
+
+    const data = await r.json();
+    let text = (data.text || '').trim();
+
+    if (text.length < 2) return; // bỏ kết quả rỗng
+
+    if (tgtLang) {
+      text = await translate(text, tgtLang);
+    }
+
+    cap(text);
+  } catch (err) {
+    cap('❌ Fetch lỗi: ' + err.message);
   }
-  return new Blob([b], { type: 'audio/wav' });
 }
 
-function cap(t) {
-  chrome.runtime.sendMessage({ action: '_c', t });
+async function translate(text, targetLang) {
+  const langName = targetLang === 'vi' ? 'Vietnamese'
+    : targetLang === 'en' ? 'English'
+    : targetLang;
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + GROQ_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        messages: [
+          {
+            role: 'system',
+            content: `You are a translator. Translate the text to ${langName}. Output ONLY the translated text, no quotes, no explanation.`
+          },
+          { role: 'user', content: text }
+        ]
+      })
+    });
+
+    if (!res.ok) return text; // nếu dịch lỗi thì hiện bản gốc
+
+    const d = await res.json();
+    const translated = d.choices?.[0]?.message?.content?.trim();
+    if (translated && translated.length > 0) {
+      return translated + '\n\n─────\n' + text;
+    }
+    return text;
+  } catch {
+    return text; // dịch thất bại → vẫn hiện bản gốc
+  }
 }

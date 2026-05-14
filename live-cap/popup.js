@@ -15,13 +15,20 @@ chrome.storage.local.get(['srcLang', 'tgtLang'], r => {
   if (r.tgtLang !== undefined) tgtLangSel.value = r.tgtLang;
 });
 
-go.addEventListener('click', () => {
-  // Lưu cài đặt
-  chrome.storage.local.set({
-    srcLang: srcLangSel.value,
-    tgtLang: tgtLangSel.value
-  });
+// Lưu ngay khi đổi (để offscreen cập nhật tức thì)
+srcLangSel.addEventListener('change', () => chrome.storage.local.set({ srcLang: srcLangSel.value }));
+tgtLangSel.addEventListener('change', () => chrome.storage.local.set({ tgtLang: tgtLangSel.value }));
 
+// Kiểm tra xem đang chạy không để khôi phục nút
+chrome.offscreen.hasDocument(has => {
+  if (has) {
+    go.style.display = 'none';
+    stop.style.display = 'block';
+    addLog('Đang chạy nền...');
+  }
+});
+
+go.addEventListener('click', () => {
   addLog('→ Đang tìm tab...');
 
   chrome.tabs.query({ active: true, currentWindow: true }, tabs => {

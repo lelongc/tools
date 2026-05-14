@@ -1,8 +1,8 @@
 // caption.js — Content Script (chạy 1 lần, giữ state liên tục)
 (function () {
   'use strict';
-  if (window.__lc_injected) return;
-  window.__lc_injected = true;
+  // Bỏ guard window.__lc_injected để luôn đăng ký listener mới khi reload/inject lại
+
 
   let pop, box;
   let dx = 0, dy = 0, sx, sy, dragging = false;
@@ -90,12 +90,23 @@
     }, 40);
   }
 
-  // === Lắng nghe caption từ background ===
-  chrome.runtime.onMessage.addListener((m, sender, reply) => {
+  const listener = (m, sender, reply) => {
     if (m.action === 'show') {
       typewrite(m.text);
       reply({ ok: 1 });
+    } else if (m.action === 'hide') {
+      if (pop && pop.matches(':popover-open')) {
+        pop.hidePopover();
+      }
+      clearInterval(typeTimer);
+      reply({ ok: 1 });
     }
     return true;
-  });
+  };
+
+  if (window.__lc_listener) {
+    chrome.runtime.onMessage.removeListener(window.__lc_listener);
+  }
+  window.__lc_listener = listener;
+  chrome.runtime.onMessage.addListener(listener);
 })();
