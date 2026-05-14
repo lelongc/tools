@@ -1,0 +1,33 @@
+/* caption.css */
+#lc-sub-container {
+  position: absolute;
+  bottom: 8%;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 2147483647;
+}
+
+#lc-sub-text {
+  background: rgba(10, 10, 20, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #fde68a; /* Vàng nhạt giống Netflix/Anime */
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 8px 24px;
+  border-radius: 12px;
+  max-width: 90%;
+  text-align: center;
+  white-space: pre-wrap;
+  text-shadow: 0 2px 4px rgba(0,0,0,1), 0 0 2px rgba(0,0,0,1);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+  transition: opacity 0.2s ease-in-out;
+  opacity: 0; /* Default hidden */
+}
+
+/* Kế thừa giao diện Live-Cap nhưng bỏ Typewriter */
