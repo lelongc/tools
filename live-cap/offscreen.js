@@ -155,7 +155,7 @@ async function translate(text, targetLang) {
     const d = await res.json();
     const translated = d.choices?.[0]?.message?.content?.trim();
     if (translated && translated.length > 0) {
-      return translated + '\n\n─────\n' + text;
+      return translated + '\n─────\n' + text;
     }
     return text;
   } catch {

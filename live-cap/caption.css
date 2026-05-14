@@ -1,4 +1,5 @@
 /* Live-Cap Caption Overlay */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 
 /* Reset popover mặc định */
 #lc-pop {
@@ -10,44 +11,83 @@
   overflow: visible !important;
 
   position: fixed !important;
-  bottom: 10% !important;
+  bottom: 9% !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
   z-index: 2147483647 !important;
   pointer-events: auto !important;
+  width: max-content !important;
+  max-width: min(820px, 92vw) !important;
 }
 
+/* Wrapper chứa cả 2 dòng */
 #lc-box {
-  background: rgba(0,0,0,.88);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: #f1f1f1;
-  font: 600 20px/1.4 'Segoe UI', sans-serif;
-  padding: 12px 24px;
-  border-radius: 10px;
-  max-width: 720px;
-  min-width: 180px;
-  text-align: center;
-  box-shadow: 0 6px 24px rgba(0,0,0,.6);
-  text-shadow: 1px 1px 3px #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
   cursor: grab;
   user-select: none;
-  transition: opacity .3s;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+#lc-box:active { cursor: grabbing; }
+
+/* Dòng dịch (tiếng Việt — nổi bật hơn) */
+#lc-translated {
+  background: rgba(10, 10, 20, 0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: #fde68a;           /* vàng nhạt ấm */
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.45;
+  padding: 10px 28px;
+  border-radius: 12px;
+  max-width: 100%;
+  text-align: center;
   white-space: pre-wrap;
+  text-shadow: 0 1px 6px rgba(0,0,0,.9);
+  box-shadow: 0 4px 20px rgba(0,0,0,.55), 0 0 0 1px rgba(253,230,138,.15);
+  letter-spacing: 0.01em;
 }
 
-#lc-box:active {
-  cursor: grabbing;
+/* Dòng gốc (tiếng Anh / Nhật — nhỏ hơn, mờ hơn) */
+#lc-original {
+  background: rgba(10, 10, 20, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #cbd5e1;           /* xám nhạt */
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.4;
+  padding: 7px 22px;
+  border-radius: 10px;
+  max-width: 100%;
+  text-align: center;
+  white-space: pre-wrap;
+  text-shadow: 0 1px 4px rgba(0,0,0,.8);
+  box-shadow: 0 2px 12px rgba(0,0,0,.4);
+  letter-spacing: 0.01em;
 }
 
-/* Typewriter cursor blink */
-#lc-box::after {
+/* Khi chỉ có 1 dòng (không dịch) — dùng style dòng gốc nhưng lớn hơn */
+#lc-box.single #lc-original {
+  color: #f1f5f9;
+  font-size: 21px;
+  font-weight: 600;
+  padding: 10px 28px;
+}
+
+/* Typewriter cursor — chỉ hiện ở dòng đang gõ */
+#lc-translated.typing::after,
+#lc-original.typing::after {
   content: '▎';
-  animation: blink 1s step-end infinite;
+  animation: lc-blink 0.9s step-end infinite;
   color: #a78bfa;
   margin-left: 2px;
 }
 
-@keyframes blink {
+@keyframes lc-blink {
   50% { opacity: 0; }
 }
