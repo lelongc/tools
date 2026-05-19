@@ -3,3 +3,4 @@ live-cap/config.js
 sub-video/config.js
 short/.env
 short/node_modules
+short/projects/**/output.mp4
