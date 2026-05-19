@@ -8,277 +8,192 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     width: 1080px; height: 1920px;
-    overflow: hidden; background: #000;
+    overflow: hidden;
     font-family: 'Outfit', 'Inter', sans-serif;
     position: relative;
+    background: linear-gradient(160deg, #0a0a1a 0%, #0d1325 30%, #111827 60%, #0f172a 100%);
   }
 
-  /* ========== SCENES ========== */
-  .scene {
-    position: absolute; top: 0; left: 0;
-    width: 100%; height: 100%;
-    opacity: 0; z-index: 1; overflow: hidden;
-    pointer-events: none;
+  /* ========== AMBIENT GLOW ========== */
+  .ambient-glow {
+    position: absolute; width: 600px; height: 600px;
+    border-radius: 50%; filter: blur(120px); opacity: 0.15;
+    pointer-events: none; z-index: 0;
+    transition: background 1.5s ease;
   }
-  .scene.active { opacity: 1; z-index: 2; }
-
-  /* Transitions */
-  .scene.t-fade { transition: opacity 0.7s ease-in-out; }
-  .scene.t-zoom {
-    transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94);
-    transform: scale(1.3);
-  }
-  .scene.t-zoom.active { transform: scale(1); opacity: 1; }
-  .scene.t-slide-left {
-    transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
-    transform: translateX(100%);
-  }
-  .scene.t-slide-left.active { transform: translateX(0); opacity: 1; }
-  .scene.t-slide-right {
-    transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
-    transform: translateX(-100%);
-  }
-  .scene.t-slide-right.active { transform: translateX(0); opacity: 1; }
-  .scene.t-blur { transition: opacity 0.7s ease; filter: blur(20px); }
-  .scene.t-blur.active { filter: blur(0); opacity: 1; }
-
-  /* Image background */
-  .scene-bg-img {
-    position: absolute; top: -10%; left: -10%;
-    width: 120%; height: 120%;
-    background-size: cover; background-position: center;
-    will-change: transform;
-  }
-
-  /* Video background */
-  .scene-bg-vid {
-    position: absolute; top: 50%; left: 50%;
-    min-width: 100%; min-height: 100%;
-    width: auto; height: auto;
-    transform: translate(-50%, -50%) scale(1.05);
-    object-fit: cover;
-  }
-
-  /* Fallback gradients */
-  .fb-0 { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
-  .fb-1 { background: linear-gradient(135deg, #141e30, #243b55); }
-  .fb-2 { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); }
-  .fb-3 { background: linear-gradient(135deg, #0d1117, #161b22, #21262d); }
-
-  /* ========== OVERLAYS ========== */
-  .overlay-gradient {
-    position: absolute; top: 0; left: 0;
-    width: 100%; height: 100%; z-index: 3;
-    background: linear-gradient(to bottom,
-      rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.05) 20%,
-      transparent 45%, rgba(0,0,0,0.05) 60%,
-      rgba(0,0,0,0.6) 80%, rgba(0,0,0,0.85) 100%);
-    pointer-events: none;
-  }
-  .vignette {
-    position: absolute; top: 0; left: 0;
-    width: 100%; height: 100%; z-index: 4;
-    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
-    pointer-events: none;
-  }
-
-  /* Film grain */
-  .film-grain {
-    position: absolute; top: 0; left: 0;
-    width: 100%; height: 100%; z-index: 5;
-    opacity: 0.035; pointer-events: none;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    animation: grain 0.3s steps(3) infinite;
-  }
-  @keyframes grain {
-    0% { transform: translate(0,0); }
-    33% { transform: translate(-2px,1px); }
-    66% { transform: translate(1px,-2px); }
-  }
+  .glow-1 { top: 10%; left: -10%; background: #6366f1; }
+  .glow-2 { bottom: 20%; right: -15%; background: #ec4899; }
 
   /* ========== PARTICLES ========== */
-  .particles { position: absolute; top:0; left:0; width:100%; height:100%; z-index:6; pointer-events:none; overflow:hidden; }
+  .particles { position:absolute; top:0; left:0; width:100%; height:100%; z-index:1; pointer-events:none; overflow:hidden; }
   .particle {
-    position: absolute; border-radius: 50%;
-    background: rgba(255,255,255,0.12);
+    position:absolute; border-radius:50%;
+    background: rgba(255,255,255,0.08);
     animation: floatUp linear infinite;
   }
   @keyframes floatUp {
-    0% { transform: translateY(100vh) scale(0); opacity:0; }
+    0% { transform:translateY(100vh) scale(0); opacity:0; }
     10% { opacity:1; } 90% { opacity:1; }
-    100% { transform: translateY(-10vh) scale(1); opacity:0; }
+    100% { transform:translateY(-10vh) scale(1); opacity:0; }
   }
 
-  /* ========== SUBTITLES — hiện nguyên câu, sync đúng SRT ========== */
-  .subtitle-container {
-    position: absolute; bottom: 22%; left: 5%; right: 5%;
-    z-index: 10; text-align: center; pointer-events: none;
+  /* ========== KEYWORD LABEL (top center) ========== */
+  .keyword-label {
+    position: absolute; top: 180px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 10; text-align: center;
+    font-size: 42px; font-weight: 900;
+    color: #FFD700; letter-spacing: 4px;
+    text-transform: uppercase;
+    text-shadow: 0 0 30px rgba(255,215,0,0.3);
+    opacity: 0; transition: opacity 0.4s ease;
   }
-  .subtitle-line {
-    display: none; font-size: 52px; font-weight: 800;
-    color: #fff; line-height: 1.4; letter-spacing: 0.3px;
-    text-shadow: 0 0 15px rgba(0,0,0,0.95), 0 3px 8px rgba(0,0,0,0.9),
-      3px 3px 6px rgba(0,0,0,0.8), -3px -3px 6px rgba(0,0,0,0.8);
-    word-wrap: break-word;
-    transform: translateY(12px); opacity: 0;
-    transition: opacity 0.2s ease-out, transform 0.25s ease-out;
-  }
-  .subtitle-line.visible {
-    display: block; opacity: 1; transform: translateY(0);
-  }
-  .subtitle-line .highlight {
-    color: #FFD700;
-    text-shadow: 0 0 24px rgba(255,215,0,0.5), 0 3px 8px rgba(0,0,0,0.9);
+  .keyword-label.visible { opacity: 1; }
+
+  /* ========== MEDIA CONTAINER (centered, small) ========== */
+  .media-container {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -55%);
+    width: 680px; height: 500px;
+    border-radius: 24px;
+    overflow: hidden;
+    z-index: 5;
+    box-shadow: 0 0 60px rgba(99,102,241,0.2), 0 20px 60px rgba(0,0,0,0.5);
+    border: 2px solid rgba(255,255,255,0.08);
+    background: #111;
   }
 
-  /* ========== SCENE INDICATOR ========== */
-  .scene-indicator {
-    position: absolute; top: 80px; right: 50px;
-    z-index: 12; display: flex; gap: 10px;
+  .media-slot {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0; transition: opacity 0.6s ease;
   }
-  .scene-dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: rgba(255,255,255,0.25);
-    transition: all 0.4s ease;
+  .media-slot.active { opacity: 1; }
+
+  .media-slot img {
+    width: 100%; height: 100%;
+    object-fit: cover;
   }
-  .scene-dot.active {
-    background: #FFD700; width: 28px; border-radius: 5px;
-    box-shadow: 0 0 12px rgba(255,215,0,0.5);
+  .media-slot video {
+    width: 100%; height: 100%;
+    object-fit: cover;
   }
+
+  /* Gradient overlay on media */
+  .media-overlay {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.3) 100%);
+    border-radius: 24px;
+    pointer-events: none; z-index: 6;
+  }
+
+
 
   /* ========== PROGRESS BAR ========== */
   .progress-bar {
     position: absolute; bottom: 0; left: 0;
     height: 5px; width: 0%; z-index: 20;
-    background: linear-gradient(90deg, #FF6B6B, #FFD93D, #6BCB77, #4ECDC4);
+    background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+    border-radius: 0 3px 3px 0;
   }
 
-  /* ========== ZOOM PULSE ========== */
-  .zoom-pulse {
-    position: absolute; top:50%; left:50%;
-    width:0; height:0; z-index:7; border-radius:50%;
-    background: radial-gradient(circle, rgba(255,215,0,0.12), transparent 70%);
-    transform: translate(-50%,-50%); pointer-events:none;
+  /* ========== FILM GRAIN ========== */
+  .film-grain {
+    position:absolute; top:0; left:0; width:100%; height:100%; z-index:15;
+    opacity:0.03; pointer-events:none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: grain 0.3s steps(3) infinite;
   }
-  .zoom-pulse.fire { animation: pulseRing 0.8s ease-out forwards; }
-  @keyframes pulseRing {
-    0% { width:0; height:0; opacity:1; }
-    100% { width:200%; height:200%; opacity:0; }
+  @keyframes grain {
+    0%{transform:translate(0,0)} 33%{transform:translate(-2px,1px)} 66%{transform:translate(1px,-2px)}
   }
 
-  /* ========== ACCENT LINE ========== */
-  .accent-line {
-    position: absolute; left:50%; top:58%;
-    width:0; height:3px; z-index:8;
-    background: linear-gradient(90deg, transparent, rgba(255,215,0,0.6), transparent);
+  /* ========== DECORATIVE LINES ========== */
+  .deco-line {
+    position: absolute; left: 50%; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(99,102,241,0.4), transparent);
     transform: translateX(-50%);
-    transition: width 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+    z-index: 8; pointer-events: none;
+    width: 0; transition: width 0.6s ease;
   }
-  .accent-line.show { width: 55%; }
+  .deco-line.show { width: 50%; }
+  .deco-top { top: 300px; }
+  .deco-bottom { bottom: 34%; }
 </style>
 </head>
 <body>
-  <div id="scenes-container"></div>
-  <div class="overlay-gradient"></div>
-  <div class="vignette"></div>
-  <div class="film-grain"></div>
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
   <div class="particles" id="particles"></div>
-  <div class="zoom-pulse" id="zoom-pulse"></div>
-  <div class="accent-line" id="accent-line"></div>
-  <div class="scene-indicator" id="scene-indicator"></div>
-  <div class="subtitle-container" id="subtitle-container"></div>
+  <div class="film-grain"></div>
+
+  <div class="keyword-label" id="keyword-label"></div>
+  <div class="deco-line deco-top" id="deco-top"></div>
+
+  <div class="media-container">
+    <div id="media-slots"></div>
+    <div class="media-overlay"></div>
+  </div>
+
+  <div class="deco-line deco-bottom" id="deco-bottom"></div>
+
   <div class="progress-bar" id="progress-bar"></div>
 
 <script>
   const DATA = __TIMELINE_DATA__;
   const { total_duration: totalDuration, scenes, subtitles } = DATA;
 
-  const TRANSITIONS = ['t-fade','t-zoom','t-slide-left','t-blur','t-slide-right','t-zoom','t-fade','t-blur'];
-  const KB = [
-    {fs:1.0,ts:1.22,fx:0,fy:0,tx:-4,ty:-3}, {fs:1.15,ts:1.0,fx:-4,fy:-3,tx:3,ty:2},
-    {fs:1.0,ts:1.18,fx:3,fy:0,tx:-3,ty:-4}, {fs:1.18,ts:1.0,fx:0,fy:-4,tx:0,ty:3},
-    {fs:1.0,ts:1.25,fx:-3,fy:3,tx:4,ty:-2}, {fs:1.2,ts:1.0,fx:4,fy:-2,tx:-3,ty:3},
-    {fs:1.0,ts:1.2,fx:2,fy:2,tx:-4,ty:-3}, {fs:1.15,ts:1.05,fx:-2,fy:4,tx:3,ty:-2},
-  ];
-
-  const scenesEl = document.getElementById('scenes-container');
+  const mediaSlotsEl = document.getElementById('media-slots');
   const subContainer = document.getElementById('subtitle-container');
   const progressBar = document.getElementById('progress-bar');
-  const accentLine = document.getElementById('accent-line');
-  const zoomPulse = document.getElementById('zoom-pulse');
-  const sceneIndicator = document.getElementById('scene-indicator');
+  const kwLabel = document.getElementById('keyword-label');
+  const decoTop = document.getElementById('deco-top');
+  const decoBottom = document.getElementById('deco-bottom');
   const particlesEl = document.getElementById('particles');
 
   // --- Particles ---
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 10; i++) {
     const p = document.createElement('div');
     p.className = 'particle';
-    const sz = 3 + Math.random() * 5;
-    p.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;animation-duration:${8+Math.random()*12}s;animation-delay:${Math.random()*10}s;`;
+    const sz = 2 + Math.random() * 4;
+    p.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;animation-duration:${10+Math.random()*15}s;animation-delay:${Math.random()*8}s;`;
     particlesEl.appendChild(p);
   }
 
-  // --- Scene dots ---
-  scenes.forEach((_, i) => {
-    const d = document.createElement('div');
-    d.className = 'scene-dot'; d.id = 'dot-' + i;
-    sceneIndicator.appendChild(d);
-  });
-
-  // --- Build scenes (video hoặc image) ---
+  // --- Build media slots (video or image per scene) ---
   scenes.forEach((sc, i) => {
-    const div = document.createElement('div');
-    div.className = 'scene ' + TRANSITIONS[i % TRANSITIONS.length];
-    div.id = 'scene-' + i;
+    const slot = document.createElement('div');
+    slot.className = 'media-slot';
+    slot.id = 'media-' + i;
 
     if (sc.media_type === 'video' && sc.has_media) {
-      // Video background
       const vid = document.createElement('video');
-      vid.className = 'scene-bg-vid';
-      vid.id = 'bg-' + i;
-      vid.autoplay = true; vid.muted = true; vid.loop = true; vid.playsInline = true;
+      vid.autoplay = false; vid.muted = true; vid.loop = true; vid.playsInline = true;
       vid.src = sc.video_path;
       vid.load();
-      div.appendChild(vid);
-    } else if (sc.media_type === 'image' && sc.has_media) {
-      // Image background (Ken Burns)
-      const bg = document.createElement('div');
-      bg.className = 'scene-bg-img';
-      bg.id = 'bg-' + i;
-      bg.style.backgroundImage = "url('" + sc.image_path + "')";
-      div.appendChild(bg);
+      slot.appendChild(vid);
+    } else if (sc.has_media) {
+      const img = document.createElement('img');
+      img.src = sc.image_path;
+      img.alt = sc.keyword;
+      slot.appendChild(img);
     } else {
-      // Fallback gradient
-      const bg = document.createElement('div');
-      bg.className = 'scene-bg-img fb-' + (i % 4);
-      bg.id = 'bg-' + i;
-      div.appendChild(bg);
+      slot.style.background = 'linear-gradient(135deg, #1e1b4b, #312e81)';
     }
-
-    scenesEl.appendChild(div);
+    mediaSlotsEl.appendChild(slot);
   });
-
-  // --- Build subtitles (hiện nguyên câu, sync đúng SRT) ---
-  subtitles.forEach((sub, i) => {
-    const div = document.createElement('div');
-    div.className = 'subtitle-line';
-    div.id = 'sub-' + i;
-    div.innerHTML = sub.html;
-    subContainer.appendChild(div);
-  });
-
-  // ===== ANIMATION ENGINE =====
+  // ===== ANIMATION ENGINE (scenes + progress only, subtitles burned by FFmpeg) =====
   let startTime = null;
   let lastScene = -1;
-  let lastSub = -1;
-  function lerp(a, b, t) { return a + (b - a) * t; }
 
   function update(ts) {
     if (!startTime) startTime = ts;
     const t = (ts - startTime) / 1000;
     if (t >= totalDuration + 0.5) return;
 
-    // --- Scenes ---
+    // --- Scene switching ---
     let si = -1;
     for (let i = scenes.length - 1; i >= 0; i--) {
       if (t >= scenes[i].start) { si = i; break; }
@@ -286,64 +201,39 @@
 
     if (si !== lastScene) {
       if (lastScene >= 0) {
-        document.getElementById('scene-' + lastScene).classList.remove('active');
-        document.getElementById('dot-' + lastScene).classList.remove('active');
-        // Pause video cũ
-        const oldBg = document.getElementById('bg-' + lastScene);
-        if (oldBg && oldBg.tagName === 'VIDEO') oldBg.pause();
+        const old = document.getElementById('media-' + lastScene);
+        old.classList.remove('active');
+        const oldVid = old.querySelector('video');
+        if (oldVid) oldVid.pause();
       }
       if (si >= 0) {
-        document.getElementById('scene-' + si).classList.add('active');
-        document.getElementById('dot-' + si).classList.add('active');
-        // Play video mới
-        const newBg = document.getElementById('bg-' + si);
-        if (newBg && newBg.tagName === 'VIDEO') {
-          newBg.currentTime = 0;
-          newBg.play().catch(() => {});
-        }
-        // Zoom pulse + accent line khi chuyển cảnh
-        if (lastScene >= 0) {
-          zoomPulse.classList.remove('fire');
-          void zoomPulse.offsetWidth;
-          zoomPulse.classList.add('fire');
-        }
-        accentLine.classList.remove('show');
-        setTimeout(() => accentLine.classList.add('show'), 100);
-        setTimeout(() => accentLine.classList.remove('show'), 1200);
+        const cur = document.getElementById('media-' + si);
+        cur.classList.add('active');
+        const curVid = cur.querySelector('video');
+        if (curVid) { curVid.currentTime = 0; curVid.play().catch(() => {}); }
+
+        kwLabel.textContent = scenes[si].keyword.toUpperCase();
+        kwLabel.classList.remove('visible');
+        void kwLabel.offsetWidth;
+        kwLabel.classList.add('visible');
+
+        decoTop.classList.remove('show'); decoBottom.classList.remove('show');
+        void decoTop.offsetWidth;
+        decoTop.classList.add('show'); decoBottom.classList.add('show');
+        setTimeout(() => { decoTop.classList.remove('show'); decoBottom.classList.remove('show'); }, 1500);
       }
       lastScene = si;
     }
 
-    // Ken Burns cho image scenes
-    if (si >= 0 && scenes[si].media_type === 'image') {
-      const sc = scenes[si];
-      const p = Math.min((t - sc.start) / (sc.end - sc.start), 1);
-      const k = KB[si % KB.length];
-      const s = lerp(k.fs, k.ts, p);
-      const x = lerp(k.fx, k.tx, p);
-      const y = lerp(k.fy, k.ty, p);
-      const bg = document.getElementById('bg-' + si);
-      if (bg) bg.style.transform = 'scale(' + s + ') translate(' + x + '%,' + y + '%)';
-    }
-
-    // --- Subtitles (hiện nguyên câu đúng timing SRT) ---
-    let ai = -1;
-    for (let i = 0; i < subtitles.length; i++) {
-      if (t >= subtitles[i].start && t < subtitles[i].end) { ai = i; break; }
-    }
-    if (ai !== lastSub) {
-      if (lastSub >= 0) document.getElementById('sub-' + lastSub).classList.remove('visible');
-      if (ai >= 0) document.getElementById('sub-' + ai).classList.add('visible');
-      lastSub = ai;
-    }
-
-    // --- Progress ---
+    // --- Progress bar ---
     progressBar.style.width = Math.min((t / totalDuration) * 100, 100) + '%';
 
     requestAnimationFrame(update);
   }
 
+  // Auto-start
   requestAnimationFrame(update);
+
 </script>
 </body>
 </html>

@@ -358,12 +358,10 @@ def record_with_playwright(html_path: Path, raw_video_path: Path, duration_ms: i
         file_url = html_path.resolve().as_uri()
         page.goto(file_url)
 
-        # Đợi page load + fonts (1s buffer khớp với template __ANIM_DELAY__)
-        page.wait_for_timeout(1000)
+        # Đợi page load + fonts
+        page.wait_for_timeout(500)
 
-        # Trigger animation start
-        page.evaluate("window.startAnimation && window.startAnimation()")
-
+        # Animation tự chạy ngay khi page load (auto-start trong template)
         # Đợi animation chạy hết
         page.wait_for_timeout(duration_ms + 1500)
 
@@ -393,16 +391,78 @@ def record_with_playwright(html_path: Path, raw_video_path: Path, duration_ms: i
 
 
 # ============================================================
-# STEP 6: Merge Video + Audio with FFmpeg
+# STEP 6: Convert SRT → ASS (styled subtitles)
 # ============================================================
-def merge_audio_video(video_path: Path, audio_path: Path, output_path: Path):
-    """Ghép video recording với audio.mp3 bằng FFmpeg."""
+def srt_to_ass(srt_path: str, ass_path: str, keywords_set: set):
+    """Convert SRT sang ASS với style đẹp + highlight keywords."""
+    subs = pysrt.open(srt_path, encoding="utf-8")
+
+    header = """[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+WrapStyle: 0
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Arial,48,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,50,50,340,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+"""
+
+    lines = []
+    for sub in subs:
+        # Format timestamps: H:MM:SS.cs
+        start = f"{sub.start.hours}:{sub.start.minutes:02d}:{sub.start.seconds:02d}.{sub.start.milliseconds // 10:02d}"
+        end = f"{sub.end.hours}:{sub.end.minutes:02d}:{sub.end.seconds:02d}.{sub.end.milliseconds // 10:02d}"
+        text = sub.text.replace("\n", "\\N")
+
+        # Highlight keywords vàng
+        for kw in keywords_set:
+            pattern = re.compile(r"(?i)\\b(" + re.escape(kw) + r")\\b")
+            text = pattern.sub(r"{\\c&H00D7FF&}\1{\\r}", text)
+
+        # Fade in 200ms, fade out 100ms
+        text = "{\\fad(200,100)}" + text
+
+        lines.append(f"Dialogue: 0,{start},{end},Default,,0,0,0,,{text}")
+
+    with open(ass_path, "w", encoding="utf-8") as f:
+        f.write(header)
+        f.write("\n".join(lines))
+        f.write("\n")
+
+    return ass_path
+
+
+# ============================================================
+# STEP 7: Merge Video + Audio + Subtitles with FFmpeg
+# ============================================================
+def merge_audio_video(video_path: Path, audio_path: Path, srt_path: Path, output_path: Path):
+    """Ghép video + audio + burn subtitle từ SRT bằng FFmpeg."""
     ffmpeg_path = get_ffmpeg_path()
+
+    # Convert SRT → ASS với style
+    ass_path = srt_path.parent / "styled.ass"
+    keywords_json = srt_path.parent / "keywords.json"
+    keywords_set = set()
+    if keywords_json.exists():
+        with open(keywords_json, "r", encoding="utf-8") as f:
+            kw_data = json.load(f)
+        keywords_set = {kw["keyword"].lower() for kw in kw_data.get("visual_keywords", [])}
+
+    srt_to_ass(str(srt_path), str(ass_path), keywords_set)
+    print(f"   ✅ Created styled.ass")
+
+    # Escape path cho FFmpeg filter (Windows: C: → C\\:, \\ → /)
+    ass_escaped = str(ass_path).replace("\\", "/").replace(":", "\\:")
+
     cmd = [
         ffmpeg_path, "-y",
-        "-ss", "1.0",           # Trim 1s đầu (page load delay) để sync subtitle với audio
         "-i", str(video_path),
         "-i", str(audio_path),
+        "-vf", f"ass={ass_escaped}",
         "-c:v", "libx264",
         "-preset", "fast",
         "-crf", "18",
@@ -413,12 +473,26 @@ def merge_audio_video(video_path: Path, audio_path: Path, output_path: Path):
         str(output_path),
     ]
 
-    print(f"   Command: ffmpeg -i {video_path.name} -i {audio_path.name} → {output_path.name}")
+    print(f"   Command: ffmpeg -i {video_path.name} -i {audio_path.name} + ass → {output_path.name}")
     result = subprocess.run(cmd, capture_output=True, text=True)
 
     if result.returncode != 0:
-        print(f"   ❌ FFmpeg error:\n{result.stderr[-500:]}")
-        sys.exit(1)
+        print(f"   ⚠️  ASS filter failed, trying without subtitles...")
+        print(f"   {result.stderr[-300:]}")
+        # Fallback: merge without subtitles
+        cmd_fallback = [
+            ffmpeg_path, "-y",
+            "-i", str(video_path),
+            "-i", str(audio_path),
+            "-c:v", "libx264", "-preset", "fast", "-crf", "18",
+            "-c:a", "aac", "-b:a", "192k",
+            "-shortest", "-movflags", "+faststart",
+            str(output_path),
+        ]
+        result = subprocess.run(cmd_fallback, capture_output=True, text=True)
+        if result.returncode != 0:
+            print(f"   ❌ FFmpeg error:\n{result.stderr[-500:]}")
+            sys.exit(1)
 
     print(f"   ✅ Output: {output_path}")
 
@@ -503,10 +577,10 @@ def main():
     raw_video = project_dir / "raw_recording.webm"
     record_with_playwright(html_path, raw_video, int(audio_duration * 1000))
 
-    # ---- Step 6: Merge audio ----
-    print(f"\n🔊 [6/6] Merging audio...")
+    # ---- Step 6: Merge audio + burn subtitles ----
+    print(f"\n🔊 [6/6] Merging audio + burning subtitles...")
     output_path = project_dir / "output.mp4"
-    merge_audio_video(raw_video, audio_path, output_path)
+    merge_audio_video(raw_video, audio_path, srt_path, output_path)
 
     # Cleanup raw recording
     if raw_video.exists():
