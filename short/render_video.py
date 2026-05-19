@@ -455,14 +455,14 @@ def merge_audio_video(video_path: Path, audio_path: Path, srt_path: Path, output
     srt_to_ass(str(srt_path), str(ass_path), keywords_set)
     print(f"   ✅ Created styled.ass")
 
-    # Escape path cho FFmpeg filter (Windows: C: → C\\:, \\ → /)
-    ass_escaped = str(ass_path).replace("\\", "/").replace(":", "\\:")
+    # Chạy FFmpeg từ project dir → dùng relative path tránh lỗi Windows escape
+    project_dir = srt_path.parent
 
     cmd = [
         ffmpeg_path, "-y",
-        "-i", str(video_path),
-        "-i", str(audio_path),
-        "-vf", f"ass={ass_escaped}",
+        "-i", str(video_path.resolve()),
+        "-i", str(audio_path.resolve()),
+        "-vf", "ass=styled.ass",
         "-c:v", "libx264",
         "-preset", "fast",
         "-crf", "18",
@@ -470,11 +470,11 @@ def merge_audio_video(video_path: Path, audio_path: Path, srt_path: Path, output
         "-b:a", "192k",
         "-shortest",
         "-movflags", "+faststart",
-        str(output_path),
+        str(output_path.resolve()),
     ]
 
     print(f"   Command: ffmpeg -i {video_path.name} -i {audio_path.name} + ass → {output_path.name}")
-    result = subprocess.run(cmd, capture_output=True, text=True)
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(project_dir))
 
     if result.returncode != 0:
         print(f"   ⚠️  ASS filter failed, trying without subtitles...")
