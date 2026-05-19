@@ -45,11 +45,17 @@ def parse_srt(srt_path: str) -> list:
 
 
 def get_ffmpeg_path() -> str:
-    """Tìm path của ffmpeg (hệ thống hoặc từ playwright)."""
+    """Tìm path của ffmpeg (ưu tiên local ffmpeg-static, rồi đến hệ thống, playwright)."""
+    # 1. Thử local npm ffmpeg-static
+    local_npm_ffmpeg = Path(__file__).resolve().parent / "node_modules" / "ffmpeg-static" / "ffmpeg.exe"
+    if local_npm_ffmpeg.exists():
+        return str(local_npm_ffmpeg)
+
+    # 2. Thử system PATH
     if shutil.which("ffmpeg"):
         return "ffmpeg"
     
-    # Thử tìm playwright ffmpeg
+    # 3. Thử playwright ffmpeg
     local_appdata = os.getenv("LOCALAPPDATA")
     if local_appdata:
         playwright_dir = Path(local_appdata) / "ms-playwright"
