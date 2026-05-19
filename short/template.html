@@ -6,7 +6,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   body {
     width: 1080px; height: 1920px;
     overflow: hidden; background: #000;
@@ -23,11 +22,11 @@
   }
   .scene.active { opacity: 1; z-index: 2; }
 
-  /* Transition types */
-  .scene.t-fade { transition: opacity 0.6s ease-in-out; }
+  /* Transitions */
+  .scene.t-fade { transition: opacity 0.7s ease-in-out; }
   .scene.t-zoom {
     transition: opacity 0.5s ease, transform 0.7s cubic-bezier(0.25,0.46,0.45,0.94);
-    transform: scale(1.3); opacity: 0;
+    transform: scale(1.3);
   }
   .scene.t-zoom.active { transform: scale(1); opacity: 1; }
   .scene.t-slide-left {
@@ -40,38 +39,40 @@
     transform: translateX(-100%);
   }
   .scene.t-slide-right.active { transform: translateX(0); opacity: 1; }
-  .scene.t-blur {
-    transition: opacity 0.7s ease; filter: blur(20px);
-  }
+  .scene.t-blur { transition: opacity 0.7s ease; filter: blur(20px); }
   .scene.t-blur.active { filter: blur(0); opacity: 1; }
 
-  .scene-bg {
-    position: absolute;
-    top: -10%; left: -10%;
+  /* Image background */
+  .scene-bg-img {
+    position: absolute; top: -10%; left: -10%;
     width: 120%; height: 120%;
     background-size: cover; background-position: center;
     will-change: transform;
   }
 
-  /* Fallback gradients */
-  .scene-bg.fb-0 { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
-  .scene-bg.fb-1 { background: linear-gradient(135deg, #141e30, #243b55); }
-  .scene-bg.fb-2 { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); }
-  .scene-bg.fb-3 { background: linear-gradient(135deg, #0d1117, #161b22, #21262d); }
-  .scene-bg.fb-4 { background: linear-gradient(135deg, #1b1b2f, #162447, #1f4068); }
-  .scene-bg.fb-5 { background: linear-gradient(135deg, #2d1b69, #11998e); }
-  .scene-bg.fb-6 { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); }
-  .scene-bg.fb-7 { background: linear-gradient(135deg, #232526, #414345); }
+  /* Video background */
+  .scene-bg-vid {
+    position: absolute; top: 50%; left: 50%;
+    min-width: 100%; min-height: 100%;
+    width: auto; height: auto;
+    transform: translate(-50%, -50%) scale(1.05);
+    object-fit: cover;
+  }
 
-  /* ========== CINEMATIC OVERLAYS ========== */
+  /* Fallback gradients */
+  .fb-0 { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
+  .fb-1 { background: linear-gradient(135deg, #141e30, #243b55); }
+  .fb-2 { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); }
+  .fb-3 { background: linear-gradient(135deg, #0d1117, #161b22, #21262d); }
+
+  /* ========== OVERLAYS ========== */
   .overlay-gradient {
     position: absolute; top: 0; left: 0;
     width: 100%; height: 100%; z-index: 3;
-    background:
-      linear-gradient(to bottom,
-        rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.05) 20%,
-        rgba(0,0,0,0.0) 45%, rgba(0,0,0,0.05) 60%,
-        rgba(0,0,0,0.6) 80%, rgba(0,0,0,0.85) 100%);
+    background: linear-gradient(to bottom,
+      rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.05) 20%,
+      transparent 45%, rgba(0,0,0,0.05) 60%,
+      rgba(0,0,0,0.6) 80%, rgba(0,0,0,0.85) 100%);
     pointer-events: none;
   }
   .vignette {
@@ -81,46 +82,34 @@
     pointer-events: none;
   }
 
-  /* Film grain overlay */
+  /* Film grain */
   .film-grain {
     position: absolute; top: 0; left: 0;
     width: 100%; height: 100%; z-index: 5;
-    opacity: 0.04; pointer-events: none;
+    opacity: 0.035; pointer-events: none;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    animation: grainShift 0.3s steps(3) infinite;
+    animation: grain 0.3s steps(3) infinite;
   }
-  @keyframes grainShift {
+  @keyframes grain {
     0% { transform: translate(0,0); }
-    33% { transform: translate(-2px, 1px); }
-    66% { transform: translate(1px, -2px); }
-    100% { transform: translate(0,0); }
+    33% { transform: translate(-2px,1px); }
+    66% { transform: translate(1px,-2px); }
   }
 
-  /* ========== FLOATING PARTICLES ========== */
-  .particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 6; pointer-events: none; overflow: hidden; }
+  /* ========== PARTICLES ========== */
+  .particles { position: absolute; top:0; left:0; width:100%; height:100%; z-index:6; pointer-events:none; overflow:hidden; }
   .particle {
     position: absolute; border-radius: 50%;
-    background: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.12);
     animation: floatUp linear infinite;
   }
   @keyframes floatUp {
-    0% { transform: translateY(100vh) scale(0); opacity: 0; }
-    10% { opacity: 1; }
-    90% { opacity: 1; }
-    100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+    0% { transform: translateY(100vh) scale(0); opacity:0; }
+    10% { opacity:1; } 90% { opacity:1; }
+    100% { transform: translateY(-10vh) scale(1); opacity:0; }
   }
 
-  /* ========== ACCENT LINE ========== */
-  .accent-line {
-    position: absolute; left: 50%; top: 58%;
-    width: 0; height: 3px; z-index: 8;
-    background: linear-gradient(90deg, transparent, rgba(255,215,0,0.7), transparent);
-    transform: translateX(-50%);
-    transition: width 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
-  }
-  .accent-line.show { width: 60%; }
-
-  /* ========== SUBTITLES (word-by-word) ========== */
+  /* ========== SUBTITLES — hiện nguyên câu, sync đúng SRT ========== */
   .subtitle-container {
     position: absolute; bottom: 22%; left: 5%; right: 5%;
     z-index: 10; text-align: center; pointer-events: none;
@@ -131,24 +120,18 @@
     text-shadow: 0 0 15px rgba(0,0,0,0.95), 0 3px 8px rgba(0,0,0,0.9),
       3px 3px 6px rgba(0,0,0,0.8), -3px -3px 6px rgba(0,0,0,0.8);
     word-wrap: break-word;
+    transform: translateY(12px); opacity: 0;
+    transition: opacity 0.2s ease-out, transform 0.25s ease-out;
   }
-  .subtitle-line.visible { display: block; }
-
-  .subtitle-line .word {
-    display: inline-block; opacity: 0;
-    transform: translateY(14px) scale(0.9);
-    transition: opacity 0.15s ease-out, transform 0.2s ease-out;
-    margin: 0 4px;
+  .subtitle-line.visible {
+    display: block; opacity: 1; transform: translateY(0);
   }
-  .subtitle-line .word.show {
-    opacity: 1; transform: translateY(0) scale(1);
-  }
-  .subtitle-line .word.highlight {
+  .subtitle-line .highlight {
     color: #FFD700;
     text-shadow: 0 0 24px rgba(255,215,0,0.5), 0 3px 8px rgba(0,0,0,0.9);
   }
 
-  /* ========== SCENE COUNTER ========== */
+  /* ========== SCENE INDICATOR ========== */
   .scene-indicator {
     position: absolute; top: 80px; right: 50px;
     z-index: 12; display: flex; gap: 10px;
@@ -168,52 +151,40 @@
     position: absolute; bottom: 0; left: 0;
     height: 5px; width: 0%; z-index: 20;
     background: linear-gradient(90deg, #FF6B6B, #FFD93D, #6BCB77, #4ECDC4);
-    border-radius: 0 3px 3px 0;
   }
 
-  /* ========== HOOK FLASH ========== */
-  .hook-flash {
-    position: absolute; top: 0; left: 0;
-    width: 100%; height: 100%; z-index: 15;
-    background: rgba(255,255,255,0.95);
-    opacity: 0; pointer-events: none;
-  }
-  .hook-flash.fire {
-    animation: flashBang 0.6s ease-out forwards;
-  }
-  @keyframes flashBang {
-    0% { opacity: 0.7; }
-    100% { opacity: 0; }
-  }
-
-  /* ========== ZOOM PULSE on scene change ========== */
+  /* ========== ZOOM PULSE ========== */
   .zoom-pulse {
-    position: absolute; top: 50%; left: 50%;
-    width: 0; height: 0; z-index: 7;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,215,0,0.15), transparent 70%);
-    transform: translate(-50%,-50%);
-    pointer-events: none;
+    position: absolute; top:50%; left:50%;
+    width:0; height:0; z-index:7; border-radius:50%;
+    background: radial-gradient(circle, rgba(255,215,0,0.12), transparent 70%);
+    transform: translate(-50%,-50%); pointer-events:none;
   }
-  .zoom-pulse.fire {
-    animation: pulseRing 0.8s ease-out forwards;
-  }
+  .zoom-pulse.fire { animation: pulseRing 0.8s ease-out forwards; }
   @keyframes pulseRing {
-    0% { width: 0; height: 0; opacity: 1; }
-    100% { width: 200%; height: 200%; opacity: 0; }
+    0% { width:0; height:0; opacity:1; }
+    100% { width:200%; height:200%; opacity:0; }
   }
+
+  /* ========== ACCENT LINE ========== */
+  .accent-line {
+    position: absolute; left:50%; top:58%;
+    width:0; height:3px; z-index:8;
+    background: linear-gradient(90deg, transparent, rgba(255,215,0,0.6), transparent);
+    transform: translateX(-50%);
+    transition: width 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+  }
+  .accent-line.show { width: 55%; }
 </style>
 </head>
 <body>
-
   <div id="scenes-container"></div>
   <div class="overlay-gradient"></div>
   <div class="vignette"></div>
   <div class="film-grain"></div>
   <div class="particles" id="particles"></div>
-  <div class="accent-line" id="accent-line"></div>
-  <div class="hook-flash" id="hook-flash"></div>
   <div class="zoom-pulse" id="zoom-pulse"></div>
+  <div class="accent-line" id="accent-line"></div>
   <div class="scene-indicator" id="scene-indicator"></div>
   <div class="subtitle-container" id="subtitle-container"></div>
   <div class="progress-bar" id="progress-bar"></div>
@@ -222,89 +193,77 @@
   const DATA = __TIMELINE_DATA__;
   const { total_duration: totalDuration, scenes, subtitles } = DATA;
 
-  // Transition types rotate per scene
-  const TRANSITIONS = ['t-fade', 't-zoom', 't-slide-left', 't-blur', 't-slide-right', 't-zoom', 't-fade', 't-blur'];
-
-  // Ken Burns presets (more dramatic)
+  const TRANSITIONS = ['t-fade','t-zoom','t-slide-left','t-blur','t-slide-right','t-zoom','t-fade','t-blur'];
   const KB = [
-    { fs:1.0, ts:1.22, fx:0, fy:0, tx:-4, ty:-3 },
-    { fs:1.15, ts:1.0, fx:-4, fy:-3, tx:3, ty:2 },
-    { fs:1.0, ts:1.18, fx:3, fy:0, tx:-3, ty:-4 },
-    { fs:1.18, ts:1.0, fx:0, fy:-4, tx:0, ty:3 },
-    { fs:1.0, ts:1.25, fx:-3, fy:3, tx:4, ty:-2 },
-    { fs:1.2, ts:1.0, fx:4, fy:-2, tx:-3, ty:3 },
-    { fs:1.0, ts:1.2, fx:2, fy:2, tx:-4, ty:-3 },
-    { fs:1.15, ts:1.05, fx:-2, fy:4, tx:3, ty:-2 },
+    {fs:1.0,ts:1.22,fx:0,fy:0,tx:-4,ty:-3}, {fs:1.15,ts:1.0,fx:-4,fy:-3,tx:3,ty:2},
+    {fs:1.0,ts:1.18,fx:3,fy:0,tx:-3,ty:-4}, {fs:1.18,ts:1.0,fx:0,fy:-4,tx:0,ty:3},
+    {fs:1.0,ts:1.25,fx:-3,fy:3,tx:4,ty:-2}, {fs:1.2,ts:1.0,fx:4,fy:-2,tx:-3,ty:3},
+    {fs:1.0,ts:1.2,fx:2,fy:2,tx:-4,ty:-3}, {fs:1.15,ts:1.05,fx:-2,fy:4,tx:3,ty:-2},
   ];
 
   const scenesEl = document.getElementById('scenes-container');
   const subContainer = document.getElementById('subtitle-container');
   const progressBar = document.getElementById('progress-bar');
   const accentLine = document.getElementById('accent-line');
-  const hookFlash = document.getElementById('hook-flash');
   const zoomPulse = document.getElementById('zoom-pulse');
   const sceneIndicator = document.getElementById('scene-indicator');
   const particlesEl = document.getElementById('particles');
 
-  // --- Build particles ---
-  for (let i = 0; i < 15; i++) {
+  // --- Particles ---
+  for (let i = 0; i < 12; i++) {
     const p = document.createElement('div');
     p.className = 'particle';
-    const size = 3 + Math.random() * 6;
-    p.style.width = size + 'px';
-    p.style.height = size + 'px';
-    p.style.left = Math.random() * 100 + '%';
-    p.style.animationDuration = (8 + Math.random() * 12) + 's';
-    p.style.animationDelay = Math.random() * 10 + 's';
+    const sz = 3 + Math.random() * 5;
+    p.style.cssText = `width:${sz}px;height:${sz}px;left:${Math.random()*100}%;animation-duration:${8+Math.random()*12}s;animation-delay:${Math.random()*10}s;`;
     particlesEl.appendChild(p);
   }
 
-  // --- Build scene dots ---
+  // --- Scene dots ---
   scenes.forEach((_, i) => {
-    const dot = document.createElement('div');
-    dot.className = 'scene-dot';
-    dot.id = 'dot-' + i;
-    sceneIndicator.appendChild(dot);
+    const d = document.createElement('div');
+    d.className = 'scene-dot'; d.id = 'dot-' + i;
+    sceneIndicator.appendChild(d);
   });
 
-  // --- Build scenes ---
+  // --- Build scenes (video hoặc image) ---
   scenes.forEach((sc, i) => {
     const div = document.createElement('div');
     div.className = 'scene ' + TRANSITIONS[i % TRANSITIONS.length];
     div.id = 'scene-' + i;
-    const bg = document.createElement('div');
-    bg.className = 'scene-bg';
-    if (sc.has_image) bg.style.backgroundImage = "url('" + sc.image_path + "')";
-    else bg.classList.add('fb-' + (i % 8));
-    bg.id = 'bg-' + i;
-    div.appendChild(bg);
+
+    if (sc.media_type === 'video' && sc.has_media) {
+      // Video background
+      const vid = document.createElement('video');
+      vid.className = 'scene-bg-vid';
+      vid.id = 'bg-' + i;
+      vid.autoplay = true; vid.muted = true; vid.loop = true; vid.playsInline = true;
+      vid.src = sc.video_path;
+      vid.load();
+      div.appendChild(vid);
+    } else if (sc.media_type === 'image' && sc.has_media) {
+      // Image background (Ken Burns)
+      const bg = document.createElement('div');
+      bg.className = 'scene-bg-img';
+      bg.id = 'bg-' + i;
+      bg.style.backgroundImage = "url('" + sc.image_path + "')";
+      div.appendChild(bg);
+    } else {
+      // Fallback gradient
+      const bg = document.createElement('div');
+      bg.className = 'scene-bg-img fb-' + (i % 4);
+      bg.id = 'bg-' + i;
+      div.appendChild(bg);
+    }
+
     scenesEl.appendChild(div);
   });
 
-  // --- Build subtitles (word-by-word) ---
+  // --- Build subtitles (hiện nguyên câu, sync đúng SRT) ---
   subtitles.forEach((sub, i) => {
     const div = document.createElement('div');
     div.className = 'subtitle-line';
     div.id = 'sub-' + i;
-    // Split into words, preserve highlight spans
-    const tmp = document.createElement('span');
-    tmp.innerHTML = sub.html;
-    const words = [];
-    tmp.childNodes.forEach(node => {
-      if (node.nodeType === 3) {
-        node.textContent.split(/\s+/).filter(w => w).forEach(w => words.push({ text: w, hl: false }));
-      } else if (node.nodeName === 'SPAN') {
-        node.textContent.split(/\s+/).filter(w => w).forEach(w => words.push({ text: w, hl: true }));
-      }
-    });
-    words.forEach((w, wi) => {
-      const span = document.createElement('span');
-      span.className = 'word' + (w.hl ? ' highlight' : '');
-      span.textContent = w.text;
-      span.dataset.index = wi;
-      div.appendChild(span);
-    });
-    div.dataset.wordCount = words.length;
+    div.innerHTML = sub.html;
     subContainer.appendChild(div);
   });
 
@@ -312,8 +271,6 @@
   let startTime = null;
   let lastScene = -1;
   let lastSub = -1;
-  let hookFired = false;
-
   function lerp(a, b, t) { return a + (b - a) * t; }
 
   function update(ts) {
@@ -331,75 +288,53 @@
       if (lastScene >= 0) {
         document.getElementById('scene-' + lastScene).classList.remove('active');
         document.getElementById('dot-' + lastScene).classList.remove('active');
+        // Pause video cũ
+        const oldBg = document.getElementById('bg-' + lastScene);
+        if (oldBg && oldBg.tagName === 'VIDEO') oldBg.pause();
       }
       if (si >= 0) {
         document.getElementById('scene-' + si).classList.add('active');
         document.getElementById('dot-' + si).classList.add('active');
-        // Zoom pulse on transition
+        // Play video mới
+        const newBg = document.getElementById('bg-' + si);
+        if (newBg && newBg.tagName === 'VIDEO') {
+          newBg.currentTime = 0;
+          newBg.play().catch(() => {});
+        }
+        // Zoom pulse + accent line khi chuyển cảnh
         if (lastScene >= 0) {
           zoomPulse.classList.remove('fire');
           void zoomPulse.offsetWidth;
           zoomPulse.classList.add('fire');
         }
-        // Accent line flash
         accentLine.classList.remove('show');
         setTimeout(() => accentLine.classList.add('show'), 100);
         setTimeout(() => accentLine.classList.remove('show'), 1200);
       }
-      // Hook flash on first scene
-      if (si === 0 && !hookFired) {
-        hookFired = true;
-        hookFlash.classList.add('fire');
-      }
       lastScene = si;
     }
 
-    // Ken Burns
-    if (si >= 0) {
+    // Ken Burns cho image scenes
+    if (si >= 0 && scenes[si].media_type === 'image') {
       const sc = scenes[si];
-      const dur = sc.end - sc.start;
-      const p = Math.min((t - sc.start) / dur, 1);
+      const p = Math.min((t - sc.start) / (sc.end - sc.start), 1);
       const k = KB[si % KB.length];
       const s = lerp(k.fs, k.ts, p);
       const x = lerp(k.fx, k.tx, p);
       const y = lerp(k.fy, k.ty, p);
-      document.getElementById('bg-' + si).style.transform =
-        'scale(' + s + ') translate(' + x + '%,' + y + '%)';
+      const bg = document.getElementById('bg-' + si);
+      if (bg) bg.style.transform = 'scale(' + s + ') translate(' + x + '%,' + y + '%)';
     }
 
-    // --- Subtitles (word-by-word reveal) ---
+    // --- Subtitles (hiện nguyên câu đúng timing SRT) ---
     let ai = -1;
     for (let i = 0; i < subtitles.length; i++) {
       if (t >= subtitles[i].start && t < subtitles[i].end) { ai = i; break; }
     }
-
     if (ai !== lastSub) {
-      // Hide old
-      if (lastSub >= 0) {
-        const old = document.getElementById('sub-' + lastSub);
-        old.classList.remove('visible');
-        old.querySelectorAll('.word').forEach(w => w.classList.remove('show'));
-      }
-      // Show new
-      if (ai >= 0) {
-        document.getElementById('sub-' + ai).classList.add('visible');
-      }
+      if (lastSub >= 0) document.getElementById('sub-' + lastSub).classList.remove('visible');
+      if (ai >= 0) document.getElementById('sub-' + ai).classList.add('visible');
       lastSub = ai;
-    }
-
-    // Animate words for active subtitle
-    if (ai >= 0) {
-      const sub = subtitles[ai];
-      const el = document.getElementById('sub-' + ai);
-      const wc = parseInt(el.dataset.wordCount) || 1;
-      const subDur = sub.end - sub.start;
-      const elapsed = t - sub.start;
-      // Reveal words progressively over 70% of subtitle duration
-      const revealTime = subDur * 0.7;
-      const wordsToShow = Math.min(Math.floor((elapsed / revealTime) * wc) + 1, wc);
-      el.querySelectorAll('.word').forEach((w, wi) => {
-        if (wi < wordsToShow) w.classList.add('show');
-      });
     }
 
     // --- Progress ---

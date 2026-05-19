@@ -159,69 +159,120 @@ def match_keywords_to_timestamps(subtitles: list, keywords: list, total_duration
 
 
 # ============================================================
-# STEP 3: Download Pexels Images
+# STEP 3: Download Pexels Media (Video preferred, Image fallback)
 # ============================================================
-def download_pexels_image(query: str, save_path: str) -> bool:
-    """Tải 1 ảnh portrait từ Pexels API."""
-    url = "https://api.pexels.com/v1/search"
+def download_pexels_video(query: str, save_path: str) -> bool:
+    """Tải 1 video từ Pexels Video API."""
+    url = "https://api.pexels.com/videos/search"
     headers = {"Authorization": PEXELS_API_KEY}
-    params = {
-        "query": query,
-        "orientation": "portrait",
-        "per_page": 5,
-        "size": "large",
-    }
+    params = {"query": query, "per_page": 3, "size": "small"}
 
     try:
         resp = requests.get(url, headers=headers, params=params, timeout=15)
         if resp.status_code != 200:
-            print(f"   ⚠️  Pexels API error {resp.status_code}")
             return False
 
+        videos = resp.json().get("videos", [])
+        if not videos:
+            return False
+
+        # Tìm file HD hoặc SD chất lượng tốt nhất
+        video = videos[0]
+        best = None
+        for vf in video.get("video_files", []):
+            q = vf.get("quality", "")
+            h = vf.get("height", 0)
+            if q in ("hd", "sd") and (best is None or h > best.get("height", 0)):
+                best = vf
+        if not best and video.get("video_files"):
+            best = video["video_files"][0]
+        if not best:
+            return False
+
+        vid_resp = requests.get(best["link"], timeout=60, stream=True)
+        if vid_resp.status_code == 200:
+            with open(save_path, "wb") as f:
+                for chunk in vid_resp.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            return True
+    except Exception as e:
+        print(f"   ⚠️  Video download error: {e}")
+    return False
+
+
+def download_pexels_image(query: str, save_path: str) -> bool:
+    """Tải 1 ảnh portrait từ Pexels API."""
+    url = "https://api.pexels.com/v1/search"
+    headers = {"Authorization": PEXELS_API_KEY}
+    params = {"query": query, "orientation": "portrait", "per_page": 5, "size": "large"}
+
+    try:
+        resp = requests.get(url, headers=headers, params=params, timeout=15)
+        if resp.status_code != 200:
+            return False
         photos = resp.json().get("photos", [])
         if not photos:
             return False
-
-        # Chọn ảnh đầu tiên, lấy bản portrait (800x1200) hoặc large2x
         photo = photos[0]
         img_url = photo["src"].get("portrait") or photo["src"].get("large2x") or photo["src"]["original"]
-
         img_resp = requests.get(img_url, timeout=30)
         if img_resp.status_code == 200:
             with open(save_path, "wb") as f:
                 f.write(img_resp.content)
             return True
     except Exception as e:
-        print(f"   ⚠️  Download error: {e}")
-
+        print(f"   ⚠️  Image download error: {e}")
     return False
 
 
-def download_all_images(segments: list, images_dir: Path):
-    """Tải ảnh cho tất cả segments."""
+def download_all_media(segments: list, project_dir: Path):
+    """Tải video (ưu tiên) hoặc ảnh cho tất cả segments."""
+    videos_dir = project_dir / "videos"
+    images_dir = project_dir / "images"
+    videos_dir.mkdir(exist_ok=True)
+    images_dir.mkdir(exist_ok=True)
+
     for seg in segments:
         slug = re.sub(r"[^a-z0-9]+", "_", seg["keyword"].lower()).strip("_")
-        img_path = images_dir / f"{slug}.jpg"
         seg["image_slug"] = slug
+        vid_path = videos_dir / f"{slug}.mp4"
+        img_path = images_dir / f"{slug}.jpg"
 
+        # Đã có video?
+        if vid_path.exists():
+            seg["media_type"] = "video"
+            seg["has_media"] = True
+            print(f"   ✅ Đã có video: {slug}.mp4")
+            continue
+        # Đã có ảnh?
         if img_path.exists():
-            seg["has_image"] = True
-            print(f"   ✅ Đã có: {slug}.jpg")
+            seg["media_type"] = "image"
+            seg["has_media"] = True
+            print(f"   ✅ Đã có ảnh: {slug}.jpg")
             continue
 
-        print(f"   📥 Tải: \"{seg['search_query']}\"...")
+        # Thử tải video trước
+        print(f"   🎬 Tải video: \"{seg['search_query']}\"...")
+        if download_pexels_video(seg["search_query"], str(vid_path)):
+            seg["media_type"] = "video"
+            seg["has_media"] = True
+            print(f"   ✅ OK video: {slug}.mp4")
+            continue
+
+        # Fallback sang ảnh
+        print(f"   📸 Fallback ảnh: \"{seg['search_query']}\"...")
         if download_pexels_image(seg["search_query"], str(img_path)):
-            seg["has_image"] = True
-            print(f"   ✅ OK: {slug}.jpg")
+            seg["media_type"] = "image"
+            seg["has_media"] = True
+            print(f"   ✅ OK ảnh: {slug}.jpg")
+        elif download_pexels_image(seg["keyword"], str(img_path)):
+            seg["media_type"] = "image"
+            seg["has_media"] = True
+            print(f"   ✅ OK ảnh (fallback): {slug}.jpg")
         else:
-            # Fallback: thử chỉ keyword ngắn
-            print(f"   🔄 Thử fallback: \"{seg['keyword']}\"...")
-            if download_pexels_image(seg["keyword"], str(img_path)):
-                seg["has_image"] = True
-                print(f"   ✅ OK (fallback): {slug}.jpg")
-            else:
-                seg["has_image"] = False
-                print(f"   ⚠️  Không tìm được ảnh, sẽ dùng gradient background.")
+            seg["media_type"] = "none"
+            seg["has_media"] = False
+            print(f"   ⚠️  Không tìm được media, sẽ dùng gradient.")
 
 
 # ============================================================
@@ -251,7 +302,9 @@ def generate_html(segments: list, subtitles: list, total_duration: float, projec
             "start": round(seg["start"], 3),
             "end": round(seg["end"], 3),
             "image_path": f"images/{slug}.jpg",
-            "has_image": seg.get("has_image", False),
+            "video_path": f"videos/{slug}.mp4",
+            "media_type": seg.get("media_type", "image"),
+            "has_media": seg.get("has_media", seg.get("has_image", False)),
             "keyword": seg["keyword"],
         })
 
@@ -431,11 +484,9 @@ def main():
     for seg in segments:
         print(f"     [{seg['start']:.1f}s - {seg['end']:.1f}s] {seg['keyword']}")
 
-    # ---- Step 3: Download Pexels images ----
-    print(f"\n📥 [3/6] Downloading Pexels images...")
-    images_dir = project_dir / "images"
-    images_dir.mkdir(exist_ok=True)
-    download_all_images(segments, images_dir)
+    # ---- Step 3: Download Pexels media (video preferred) ----
+    print(f"\n📥 [3/6] Downloading Pexels media (video + ảnh)...")
+    download_all_media(segments, project_dir)
 
     # ---- Step 4: Generate HTML ----
     print(f"\n🎨 [4/6] Generating HTML animation...")
