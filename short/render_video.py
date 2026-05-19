@@ -358,8 +358,11 @@ def record_with_playwright(html_path: Path, raw_video_path: Path, duration_ms: i
         file_url = html_path.resolve().as_uri()
         page.goto(file_url)
 
-        # Đợi 500ms cho page load + fonts
-        page.wait_for_timeout(500)
+        # Đợi page load + fonts (1s buffer khớp với template __ANIM_DELAY__)
+        page.wait_for_timeout(1000)
+
+        # Trigger animation start
+        page.evaluate("window.startAnimation && window.startAnimation()")
 
         # Đợi animation chạy hết
         page.wait_for_timeout(duration_ms + 1500)
@@ -397,6 +400,7 @@ def merge_audio_video(video_path: Path, audio_path: Path, output_path: Path):
     ffmpeg_path = get_ffmpeg_path()
     cmd = [
         ffmpeg_path, "-y",
+        "-ss", "1.0",           # Trim 1s đầu (page load delay) để sync subtitle với audio
         "-i", str(video_path),
         "-i", str(audio_path),
         "-c:v", "libx264",
