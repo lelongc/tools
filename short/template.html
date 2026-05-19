@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920">
+<style>
+  /* ========== RESET & BASE ========== */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: #000;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    position: relative;
+  }
+
+  /* ========== SCENE BACKGROUNDS ========== */
+  .scene {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .scene.active {
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .scene-bg {
+    position: absolute;
+    top: -10%; left: -10%;
+    width: 120%; height: 120%;
+    background-size: cover;
+    background-position: center;
+    will-change: transform;
+  }
+
+  /* Fallback gradient backgrounds */
+  .scene-bg.fallback-0 { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); }
+  .scene-bg.fallback-1 { background: linear-gradient(135deg, #141e30, #243b55); }
+  .scene-bg.fallback-2 { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460); }
+  .scene-bg.fallback-3 { background: linear-gradient(135deg, #0d1117, #161b22, #21262d); }
+  .scene-bg.fallback-4 { background: linear-gradient(135deg, #1b1b2f, #162447, #1f4068); }
+  .scene-bg.fallback-5 { background: linear-gradient(135deg, #2d1b69, #11998e); }
+  .scene-bg.fallback-6 { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); }
+  .scene-bg.fallback-7 { background: linear-gradient(135deg, #232526, #414345); }
+
+  /* ========== OVERLAYS ========== */
+  .overlay-gradient {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 3;
+    background:
+      linear-gradient(to bottom,
+        rgba(0,0,0,0.4) 0%,
+        rgba(0,0,0,0.05) 25%,
+        rgba(0,0,0,0.05) 50%,
+        rgba(0,0,0,0.5) 75%,
+        rgba(0,0,0,0.75) 100%
+      );
+    pointer-events: none;
+  }
+
+  .vignette {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 4;
+    background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.45) 100%);
+    pointer-events: none;
+  }
+
+  /* ========== SUBTITLES ========== */
+  .subtitle-container {
+    position: absolute;
+    bottom: 28%;
+    left: 6%;
+    right: 6%;
+    z-index: 10;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .subtitle-line {
+    display: none;
+    font-size: 54px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.35;
+    letter-spacing: 0.5px;
+    text-shadow:
+      0 0 12px rgba(0,0,0,0.95),
+      0 2px 6px rgba(0,0,0,0.9),
+      2px 2px 4px rgba(0,0,0,0.8),
+      -2px -2px 4px rgba(0,0,0,0.8);
+    transform: translateY(18px) scale(0.96);
+    opacity: 0;
+    transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .subtitle-line.visible {
+    display: block;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .subtitle-line .highlight {
+    color: #FFD700;
+    text-shadow:
+      0 0 20px rgba(255,215,0,0.5),
+      0 2px 6px rgba(0,0,0,0.9),
+      2px 2px 4px rgba(0,0,0,0.8);
+  }
+
+  /* ========== PROGRESS BAR ========== */
+  .progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 5px;
+    width: 0%;
+    z-index: 20;
+    background: linear-gradient(90deg, #FF6B6B, #FFD93D, #6BCB77);
+    border-radius: 0 3px 3px 0;
+    transition: width 0.08s linear;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Scenes injected here -->
+  <div id="scenes-container"></div>
+
+  <!-- Overlays -->
+  <div class="overlay-gradient"></div>
+  <div class="vignette"></div>
+
+  <!-- Subtitle container -->
+  <div class="subtitle-container" id="subtitle-container"></div>
+
+  <!-- Progress bar -->
+  <div class="progress-bar" id="progress-bar"></div>
+
+<script>
+  // ===== TIMELINE DATA (injected by Python) =====
+  const DATA = __TIMELINE_DATA__;
+
+  const totalDuration = DATA.total_duration;
+  const scenes = DATA.scenes;
+  const subtitles = DATA.subtitles;
+
+  // ===== Ken Burns direction presets =====
+  const KB_DIRECTIONS = [
+    { fromScale: 1.0, toScale: 1.18, fromX: 0, fromY: 0, toX: -3, toY: -2 },
+    { fromScale: 1.1, toScale: 1.0, fromX: -3, fromY: -2, toX: 2, toY: 1 },
+    { fromScale: 1.0, toScale: 1.15, fromX: 2, fromY: 0, toX: -2, toY: -3 },
+    { fromScale: 1.12, toScale: 1.0, fromX: 0, fromY: -3, toX: 0, toY: 2 },
+    { fromScale: 1.0, toScale: 1.2, fromX: -2, fromY: 2, toX: 3, toY: -1 },
+    { fromScale: 1.15, toScale: 1.0, fromX: 3, fromY: -1, toX: -2, toY: 2 },
+    { fromScale: 1.0, toScale: 1.16, fromX: 1, fromY: 1, toX: -3, toY: -2 },
+    { fromScale: 1.1, toScale: 1.05, fromX: -1, fromY: 3, toX: 2, toY: -1 },
+  ];
+
+  // ===== BUILD DOM =====
+  const scenesContainer = document.getElementById('scenes-container');
+  const subtitleContainer = document.getElementById('subtitle-container');
+  const progressBar = document.getElementById('progress-bar');
+
+  // Create scene elements
+  scenes.forEach((scene, i) => {
+    const div = document.createElement('div');
+    div.className = 'scene';
+    div.id = 'scene-' + i;
+
+    const bg = document.createElement('div');
+    bg.className = 'scene-bg';
+    if (scene.has_image) {
+      bg.style.backgroundImage = "url('" + scene.image_path + "')";
+    } else {
+      bg.classList.add('fallback-' + (i % 8));
+    }
+    bg.id = 'scene-bg-' + i;
+
+    div.appendChild(bg);
+    scenesContainer.appendChild(div);
+  });
+
+  // Create subtitle elements
+  subtitles.forEach((sub, i) => {
+    const div = document.createElement('div');
+    div.className = 'subtitle-line';
+    div.id = 'sub-' + i;
+    div.innerHTML = sub.html;
+    subtitleContainer.appendChild(div);
+  });
+
+  // ===== ANIMATION ENGINE =====
+  let startTime = null;
+  let lastSceneIdx = -1;
+  let lastSubIdx = -1;
+
+  function lerp(a, b, t) {
+    return a + (b - a) * t;
+  }
+
+  function update(timestamp) {
+    if (startTime === null) startTime = timestamp;
+    const elapsed = (timestamp - startTime) / 1000;
+
+    if (elapsed >= totalDuration + 0.5) return;
+
+    // --- Update scenes ---
+    let activeSceneIdx = -1;
+    for (let i = scenes.length - 1; i >= 0; i--) {
+      if (elapsed >= scenes[i].start) {
+        activeSceneIdx = i;
+        break;
+      }
+    }
+
+    if (activeSceneIdx !== lastSceneIdx) {
+      // Deactivate old scene
+      if (lastSceneIdx >= 0) {
+        document.getElementById('scene-' + lastSceneIdx).classList.remove('active');
+      }
+      // Activate new scene
+      if (activeSceneIdx >= 0) {
+        document.getElementById('scene-' + activeSceneIdx).classList.add('active');
+      }
+      lastSceneIdx = activeSceneIdx;
+    }
+
+    // Ken Burns on active scene
+    if (activeSceneIdx >= 0) {
+      const scene = scenes[activeSceneIdx];
+      const duration = scene.end - scene.start;
+      const progress = Math.min((elapsed - scene.start) / duration, 1);
+      const kb = KB_DIRECTIONS[activeSceneIdx % KB_DIRECTIONS.length];
+
+      const scale = lerp(kb.fromScale, kb.toScale, progress);
+      const tx = lerp(kb.fromX, kb.toX, progress);
+      const ty = lerp(kb.fromY, kb.toY, progress);
+
+      const bg = document.getElementById('scene-bg-' + activeSceneIdx);
+      bg.style.transform = 'scale(' + scale + ') translate(' + tx + '%, ' + ty + '%)';
+    }
+
+    // --- Update subtitles ---
+    let activeSubIdx = -1;
+    for (let i = 0; i < subtitles.length; i++) {
+      if (elapsed >= subtitles[i].start && elapsed < subtitles[i].end) {
+        activeSubIdx = i;
+        break;
+      }
+    }
+
+    if (activeSubIdx !== lastSubIdx) {
+      // Hide old subtitle
+      if (lastSubIdx >= 0) {
+        document.getElementById('sub-' + lastSubIdx).classList.remove('visible');
+      }
+      // Show new subtitle
+      if (activeSubIdx >= 0) {
+        document.getElementById('sub-' + activeSubIdx).classList.add('visible');
+      }
+      lastSubIdx = activeSubIdx;
+    }
+
+    // --- Update progress bar ---
+    const pct = Math.min((elapsed / totalDuration) * 100, 100);
+    progressBar.style.width = pct + '%';
+
+    requestAnimationFrame(update);
+  }
+
+  // Start animation
+  requestAnimationFrame(update);
+</script>
+</body>
+</html>

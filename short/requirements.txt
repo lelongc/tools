@@ -1,0 +1,6 @@
+google-genai
+requests
+pysrt
+python-dotenv
+jinja2
+playwright
