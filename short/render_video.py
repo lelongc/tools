@@ -44,23 +44,44 @@ def parse_srt(srt_path: str) -> list:
     return entries
 
 
+def get_ffmpeg_path() -> str:
+    """Tìm path của ffmpeg (hệ thống hoặc từ playwright)."""
+    if shutil.which("ffmpeg"):
+        return "ffmpeg"
+    
+    # Thử tìm playwright ffmpeg
+    local_appdata = os.getenv("LOCALAPPDATA")
+    if local_appdata:
+        playwright_dir = Path(local_appdata) / "ms-playwright"
+        if playwright_dir.exists():
+            ffmpeg_files = list(playwright_dir.glob("**/ffmpeg-win64.exe"))
+            if ffmpeg_files:
+                return str(ffmpeg_files[0])
+    
+    return "ffmpeg"
+
+
 def get_audio_duration(audio_path: str) -> float:
-    """Lấy duration của file audio bằng ffprobe."""
+    """Lấy duration của file audio bằng ffmpeg -i."""
+    ffmpeg_path = get_ffmpeg_path()
     try:
+        # Chạy ffmpeg -i để lấy thông tin duration từ stderr
         result = subprocess.run(
-            [
-                "ffprobe", "-v", "error",
-                "-show_entries", "format=duration",
-                "-of", "default=noprint_wrappers=1:nokey=1",
-                audio_path,
-            ],
-            capture_output=True, text=True, check=True,
+            [ffmpeg_path, "-i", audio_path],
+            capture_output=True, text=True, errors="ignore"
         )
-        return float(result.stdout.strip())
+        # Regex tìm Duration: 00:00:00.00
+        match = re.search(r"Duration:\s*(\d+):(\d+):(\d+\.\d+)", result.stderr)
+        if match:
+            hours = int(match.group(1))
+            minutes = int(match.group(2))
+            seconds = float(match.group(3))
+            return hours * 3600 + minutes * 60 + seconds
     except Exception as e:
         print(f"⚠️  Không đọc được duration audio: {e}")
-        print("   Sẽ dùng timestamp cuối cùng trong SRT.")
-        return 0.0
+    
+    print("   Sẽ dùng timestamp cuối cùng trong SRT.")
+    return 0.0
 
 
 # ============================================================
@@ -314,8 +335,9 @@ def record_with_playwright(html_path: Path, raw_video_path: Path, duration_ms: i
 # ============================================================
 def merge_audio_video(video_path: Path, audio_path: Path, output_path: Path):
     """Ghép video recording với audio.mp3 bằng FFmpeg."""
+    ffmpeg_path = get_ffmpeg_path()
     cmd = [
-        "ffmpeg", "-y",
+        ffmpeg_path, "-y",
         "-i", str(video_path),
         "-i", str(audio_path),
         "-c:v", "libx264",
