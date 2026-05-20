@@ -9,8 +9,8 @@ import time
 from pathlib import Path
 
 # Fix Windows encoding
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace", line_buffering=True)
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace", line_buffering=True)
 
 import requests
 import pysrt
@@ -63,101 +63,93 @@ def get_audio_duration(audio_path: str) -> float:
     return 0.0
 
 
+def normalize_token(text: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "", text.lower())
+
+
+def tokenize_text(text: str) -> list:
+    return [t for t in (normalize_token(w) for w in re.split(r"\s+", text)) if t]
+
+
+def match_keywords_to_words(word_timestamps: list, keywords: list) -> list:
+    if not word_timestamps or not keywords:
+        return []
+
+    words_norm = [normalize_token(w["word"]) for w in word_timestamps]
+    matches = []
+    cursor = 0
+
+    for kw in keywords:
+        kw_tokens = tokenize_text(kw["keyword"])
+        if not kw_tokens:
+            continue
+
+        found = False
+        for i in range(cursor, len(words_norm)):
+            if words_norm[i] != kw_tokens[0]:
+                continue
+            j = i
+            k = 0
+            while j < len(words_norm) and k < len(kw_tokens) and words_norm[j] == kw_tokens[k]:
+                j += 1
+                k += 1
+            if k == len(kw_tokens):
+                matches.append({
+                    "keyword": kw["keyword"],
+                    "start_index": i,
+                    "end_index": j - 1
+                })
+                cursor = j
+                found = True
+                break
+        if not found:
+            continue
+
+    return matches
+
+
 def build_visual_timeline(word_timestamps: list, keywords: list, project_dir: Path, total_duration: float) -> list:
     # 1. Map keywords to their downloaded image paths
     keyword_images = {}
     images_dir = project_dir / "images"
+    image_paths_list = []
+    
     for kw in keywords:
         slug = re.sub(r"[^a-z0-9]+", "_", kw["keyword"].lower()).strip("_")
         img_path = images_dir / f"{slug}.jpg"
         if img_path.exists():
-            keyword_images[kw["keyword"].lower()] = f"file:///{str(img_path.resolve()).replace(chr(92), '/')}"
+            img_url = f"file:///{str(img_path.resolve()).replace(chr(92), '/')}"
+            keyword_images[kw["keyword"].lower()] = img_url
+            image_paths_list.append(img_url)
 
-    # 2. Build raw timeline events from words
-    timeline = []
-    
-    stop_words = {
-        "are", "you", "using", "the", "word", "is", "very", "it", "can", "mean", 
-        "or", "something", "also", "use", "to", "describe", "a", "in", "its", 
-        "it's", "common", "way", "express", "how", "by", "different", "and", 
-        "better", "of", "now", "ready", "take", "your", "for", "more", "with", 
-        "this", "that", "them", "their", "they", "from", "here", "there", "then"
-    }
-
-    if not word_timestamps:
-        print("   ⚠️ Không có word timestamps. Sử dụng fallback timeline...")
-        return []
-
-    for w in word_timestamps:
-        word_text = w["word"].strip().replace(".", "").replace(",", "").replace("?", "").replace("!", "")
-        word_lower = word_text.lower()
-        
-        # Check if this word is a keyword or is part of a keyword
-        matched_image_path = None
-        for kw_name, img_url in keyword_images.items():
-            if word_lower == kw_name or word_lower in kw_name.split():
-                matched_image_path = img_url
-                break
-        
-        if matched_image_path:
-            timeline.append({
-                "type": "image",
-                "path": matched_image_path,
-                "start": w["start"],
-                "end": w["end"],
-                "keyword": word_text
-            })
-        elif len(word_lower) > 3 and word_lower not in stop_words:
-            timeline.append({
-                "type": "text_pop",
-                "text": word_text.upper(),
-                "start": w["start"],
-                "end": w["end"]
-            })
-
-    if not timeline:
-        timeline.append({
+    if not image_paths_list:
+        print("   ⚠️ Không có ảnh. Sử dụng fallback...")
+        return [{
             "type": "text_pop",
             "text": project_dir.name.replace("_", " ").upper(),
             "start": 0.0,
             "end": total_duration
-        })
+        }]
 
-    # Sort timeline by start time
-    timeline.sort(key=lambda x: x["start"])
+    # Fixed 5-second intervals for images
+    interval = 5.0
+    timeline = []
+    current_img_idx = 0
     
-    # Merge consecutive events of the same type and text/path if they are very close
-    merged = []
-    for ev in timeline:
-        if not merged:
-            merged.append(ev)
-            continue
-            
-        prev = merged[-1]
-        if (ev["start"] - prev["end"] < 0.2 and 
-            ev["type"] == prev["type"] and 
-            ev.get("path") == prev.get("path") and 
-            ev.get("text") == prev.get("text")):
-            prev["end"] = ev["end"]
-        else:
-            merged.append(ev)
-            
-    timeline = merged
-
-    # Fill gaps and align start/ends sequentially
-    resolved = []
-    for i in range(len(timeline)):
-        current = timeline[i]
-        if i + 1 < len(timeline):
-            next_ev = timeline[i + 1]
-            current["end"] = next_ev["start"]
-        resolved.append(current)
-
-    if resolved:
-        resolved[0]["start"] = 0.0
-        resolved[-1]["end"] = total_duration
-
-    return resolved
+    time = 0.0
+    while time < total_duration:
+        next_time = min(time + interval, total_duration)
+        img_path = image_paths_list[current_img_idx % len(image_paths_list)]
+        timeline.append({
+            "type": "image",
+            "path": img_path,
+            "start": time,
+            "end": next_time
+        })
+        current_img_idx += 1
+        time = next_time
+    
+    return timeline
 
 
 def download_pexels_image(query: str, save_path: str) -> bool:
@@ -265,13 +257,47 @@ def get_word_timestamps(audio_path: Path, project_dir: Path) -> list:
 def align_words_to_subtitles(subtitles: list, word_timestamps: list) -> list:
     if not word_timestamps:
         return subtitles
+
+    words_norm = [normalize_token(w["word"]) for w in word_timestamps]
+    cursor = 0
+
     for sub in subtitles:
-        sub_words = []
-        for w in word_timestamps:
-            # Check if the word starts within the subtitle duration (with buffer)
-            if sub["start"] - 0.1 <= w["start"] < sub["end"]:
-                sub_words.append(w)
-        sub["words"] = sub_words
+        scan_start = cursor
+        tokens = tokenize_text(sub["text"])
+        if not tokens:
+            sub["words"] = []
+            continue
+
+        match_indices = []
+        for token in tokens:
+            while cursor < len(words_norm) and words_norm[cursor] != token:
+                cursor += 1
+            if cursor >= len(words_norm):
+                break
+            match_indices.append(cursor)
+            cursor += 1
+
+        match_ratio = len(match_indices) / max(len(tokens), 1)
+        # Increased threshold from 0.6 to 0.8 for tighter subtitle sync
+        if match_indices and match_ratio >= 0.8:
+            start_idx = match_indices[0]
+            end_idx = match_indices[-1]
+            sub["start"] = max(0.0, word_timestamps[start_idx]["start"])
+            sub["end"] = word_timestamps[end_idx]["end"]
+            sub["words"] = word_timestamps[start_idx:end_idx + 1]
+            continue
+
+        if match_indices:
+            cursor = match_indices[-1] + 1
+        else:
+            cursor = scan_start
+
+        # Fallback: use subtitle's original time range, assign words within that range
+        sub["words"] = [
+            w for w in word_timestamps
+            if sub["start"] <= w["start"] <= sub["end"]
+        ]
+
     return subtitles
 
 
@@ -350,7 +376,7 @@ def encode_video_ffmpeg(frames_dir: Path, audio_path: Path, output_path: Path, f
         "-c:v", "libx264", "-preset", "fast", "-crf", "18",
         "-c:a", "aac", "-b:a", "192k",
         "-pix_fmt", "yuv420p",
-        "-shortest", "-movflags", "+faststart",
+        "-movflags", "+faststart",
         str(output_path)
     ]
     

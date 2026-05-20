@@ -278,10 +278,11 @@
 
             if (activeIdx !== -1) {
                 const activeSeg = window.videoData.segments[activeIdx];
-                const crossfadeDuration = 0.35; // 350ms crossfade
+                const segmentDuration = Math.max(activeSeg.end - activeSeg.start, 0.001);
+                const crossfadeDuration = Math.min(0.35, segmentDuration * 0.35);
                 const timeInSegment = timeSeconds - activeSeg.start;
 
-                if (activeIdx > 0 && timeInSegment < crossfadeDuration) {
+                if (activeIdx > 0 && crossfadeDuration > 0 && timeInSegment < crossfadeDuration) {
                     // Crossfading active!
                     const prevSeg = window.videoData.segments[activeIdx - 1];
                     const progress = timeInSegment / crossfadeDuration;
