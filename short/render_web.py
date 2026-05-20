@@ -63,73 +63,101 @@ def get_audio_duration(audio_path: str) -> float:
     return 0.0
 
 
-def match_keywords_to_timestamps(subtitles: list, keywords: list, total_duration: float) -> list:
-    segments = []
+def build_visual_timeline(word_timestamps: list, keywords: list, project_dir: Path, total_duration: float) -> list:
+    # 1. Map keywords to their downloaded image paths
+    keyword_images = {}
+    images_dir = project_dir / "images"
     for kw in keywords:
-        keyword_lower = kw["keyword"].lower()
-        matched = False
-        for sub in subtitles:
-            text_lower = sub["text"].lower()
-            if keyword_lower in text_lower:
-                char_index = text_lower.find(keyword_lower)
-                total_chars = len(text_lower) if len(text_lower) > 0 else 1
-                sub_duration = sub["end"] - sub["start"]
-                interpolated_start = sub["start"] + (char_index / total_chars) * sub_duration
-                segments.append({
-                    "keyword": kw["keyword"],
-                    "search_query": kw.get("search_query", kw["keyword"]),
-                    "start": round(interpolated_start, 2),
-                })
-                matched = True
+        slug = re.sub(r"[^a-z0-9]+", "_", kw["keyword"].lower()).strip("_")
+        img_path = images_dir / f"{slug}.jpg"
+        if img_path.exists():
+            keyword_images[kw["keyword"].lower()] = f"file:///{str(img_path.resolve()).replace(chr(92), '/')}"
+
+    # 2. Build raw timeline events from words
+    timeline = []
+    
+    stop_words = {
+        "are", "you", "using", "the", "word", "is", "very", "it", "can", "mean", 
+        "or", "something", "also", "use", "to", "describe", "a", "in", "its", 
+        "it's", "common", "way", "express", "how", "by", "different", "and", 
+        "better", "of", "now", "ready", "take", "your", "for", "more", "with", 
+        "this", "that", "them", "their", "they", "from", "here", "there", "then"
+    }
+
+    if not word_timestamps:
+        print("   ⚠️ Không có word timestamps. Sử dụng fallback timeline...")
+        return []
+
+    for w in word_timestamps:
+        word_text = w["word"].strip().replace(".", "").replace(",", "").replace("?", "").replace("!", "")
+        word_lower = word_text.lower()
+        
+        # Check if this word is a keyword or is part of a keyword
+        matched_image_path = None
+        for kw_name, img_url in keyword_images.items():
+            if word_lower == kw_name or word_lower in kw_name.split():
+                matched_image_path = img_url
                 break
+        
+        if matched_image_path:
+            timeline.append({
+                "type": "image",
+                "path": matched_image_path,
+                "start": w["start"],
+                "end": w["end"],
+                "keyword": word_text
+            })
+        elif len(word_lower) > 3 and word_lower not in stop_words:
+            timeline.append({
+                "type": "text_pop",
+                "text": word_text.upper(),
+                "start": w["start"],
+                "end": w["end"]
+            })
 
-        if not matched:
-            words = keyword_lower.split()
-            for sub in subtitles:
-                text_lower = sub["text"].lower()
-                found_word = None
-                for w in words:
-                    if w in text_lower:
-                        found_word = w
-                        break
-                if found_word:
-                    char_index = text_lower.find(found_word)
-                    total_chars = len(text_lower) if len(text_lower) > 0 else 1
-                    sub_duration = sub["end"] - sub["start"]
-                    interpolated_start = sub["start"] + (char_index / total_chars) * sub_duration
-                    segments.append({
-                        "keyword": kw["keyword"],
-                        "search_query": kw.get("search_query", kw["keyword"]),
-                        "start": round(interpolated_start, 2),
-                    })
-                    matched = True
-                    break
+    if not timeline:
+        timeline.append({
+            "type": "text_pop",
+            "text": project_dir.name.replace("_", " ").upper(),
+            "start": 0.0,
+            "end": total_duration
+        })
 
-    if not segments:
-        print("❌ Không match được keyword nào!")
-        sys.exit(1)
-
-    segments.sort(key=lambda x: x["start"])
-    segments[0]["start"] = 0.0
-
-    unique = [segments[0]]
-    for seg in segments[1:]:
-        if seg["start"] > unique[-1]["start"]:
-            unique.append(seg)
-        elif seg["start"] == unique[-1]["start"]:
-            seg["start"] = round(seg["start"] + 0.3, 2)
-            unique.append(seg)
+    # Sort timeline by start time
+    timeline.sort(key=lambda x: x["start"])
+    
+    # Merge consecutive events of the same type and text/path if they are very close
+    merged = []
+    for ev in timeline:
+        if not merged:
+            merged.append(ev)
+            continue
             
-    segments = unique
-    segments.sort(key=lambda x: x["start"])
-
-    for i in range(len(segments)):
-        if i + 1 < len(segments):
-            segments[i]["end"] = segments[i + 1]["start"]
+        prev = merged[-1]
+        if (ev["start"] - prev["end"] < 0.2 and 
+            ev["type"] == prev["type"] and 
+            ev.get("path") == prev.get("path") and 
+            ev.get("text") == prev.get("text")):
+            prev["end"] = ev["end"]
         else:
-            segments[i]["end"] = total_duration
+            merged.append(ev)
+            
+    timeline = merged
 
-    return segments
+    # Fill gaps and align start/ends sequentially
+    resolved = []
+    for i in range(len(timeline)):
+        current = timeline[i]
+        if i + 1 < len(timeline):
+            next_ev = timeline[i + 1]
+            current["end"] = next_ev["start"]
+        resolved.append(current)
+
+    if resolved:
+        resolved[0]["start"] = 0.0
+        resolved[-1]["end"] = total_duration
+
+    return resolved
 
 
 def download_pexels_image(query: str, save_path: str) -> bool:
@@ -156,23 +184,21 @@ def download_pexels_image(query: str, save_path: str) -> bool:
     return False
 
 
-def download_images_for_segments(segments: list, project_dir: Path):
+def download_images_for_keywords(keywords: list, project_dir: Path):
     images_dir = project_dir / "images"
     images_dir.mkdir(exist_ok=True)
 
-    for i, seg in enumerate(segments):
-        slug = re.sub(r"[^a-z0-9]+", "_", seg["keyword"].lower()).strip("_")
+    for kw in keywords:
+        slug = re.sub(r"[^a-z0-9]+", "_", kw["keyword"].lower()).strip("_")
         img_path = images_dir / f"{slug}.jpg"
-        
-        seg["path"] = f"file:///{str(img_path.resolve()).replace(chr(92), '/')}"
 
         if img_path.exists():
             print(f"   ✅ Đã có ảnh: {slug}.jpg")
             continue
             
-        print(f"   📸 Tải ảnh: \"{seg['search_query']}\"...")
-        if not download_pexels_image(seg["search_query"], str(img_path)):
-            if not download_pexels_image(seg["keyword"], str(img_path)):
+        print(f"   📸 Tải ảnh: \"{kw['search_query']}\"...")
+        if not download_pexels_image(kw["search_query"], str(img_path)):
+            if not download_pexels_image(kw["keyword"], str(img_path)):
                 print(f"   ⚠️ Lỗi tải ảnh: {slug}.jpg")
 
 
@@ -371,16 +397,16 @@ def main():
     word_timestamps = get_word_timestamps(audio_path, project_dir)
     subtitles = align_words_to_subtitles(subtitles, word_timestamps)
 
-    print(f"\n🔗 [2/6] Matching keywords...")
+    print(f"\n🔗 [2/6] Loading keywords & Downloading images...")
     with open(keywords_path, "r", encoding="utf-8") as f:
         kw_data = json.load(f)
     keywords = kw_data.get("visual_keywords", [])
-    
     keywords_set = {kw["keyword"].lower() for kw in keywords}
-    segments = match_keywords_to_timestamps(subtitles, keywords, audio_duration)
 
-    print(f"\n📥 [3/6] Tải Ảnh Stock...")
-    download_images_for_segments(segments, project_dir)
+    download_images_for_keywords(keywords, project_dir)
+
+    print(f"\n🎞️ [3/6] Building visual timeline (images + text pops)...")
+    segments = build_visual_timeline(word_timestamps, keywords, project_dir, audio_duration)
 
     frames_dir = render_frames_with_playwright(project_dir, segments, subtitles, keywords_set, audio_duration, fps=30)
     
