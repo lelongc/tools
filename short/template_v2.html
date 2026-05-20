@@ -7,7 +7,7 @@
     <style>
         /* CSS Reset & Setup */
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        @import url('https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@800;900&family=Montserrat:wght@800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@800;900&display=swap');
         
         body, html {
             width: 1080px;
@@ -37,37 +37,25 @@
             pointer-events: none;
         }
 
-        /* Top Progress Bar for Viral Retention */
-        #progress-bar-container {
-            position: absolute;
-            top: 0; left: 0; width: 1080px; height: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            z-index: 30;
-        }
-        #progress-bar {
-            width: 0%; height: 100%;
-            background: linear-gradient(90deg, #ff007f, #00f0ff);
-            box-shadow: 0 0 15px #00f0ff;
-        }
-
-        /* Header (Sleek badge) */
+        /* Header (Sleek badge) - Prevents text wrapping */
         #header-container {
             position: absolute;
-            top: 100px;
+            top: 80px;
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
             backdrop-filter: blur(10px);
-            padding: 18px 45px;
+            padding: 15px 40px;
             border-radius: 50px;
             z-index: 20;
             border: 1px solid rgba(255, 255, 255, 0.15);
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            white-space: nowrap;
         }
 
         #header-text {
-            font-size: 38px;
+            font-size: 32px;
             font-weight: 900;
             color: #fff;
             letter-spacing: 4px;
@@ -77,14 +65,14 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* Image Container (Floating Card Style) */
+        /* Image Container (Floating Card Style) - Smaller to prevent subtitle overlap */
         #media-wrapper {
             position: absolute;
-            top: 240px;
+            top: 180px;
             left: 50%;
             transform: translateX(-50%);
-            width: 900px;
-            height: 1000px;
+            width: 860px;
+            height: 860px;
             z-index: 10;
             display: flex;
             justify-content: center;
@@ -92,33 +80,33 @@
         }
 
         #media-container {
-            width: 860px;
-            height: 960px;
-            border-radius: 48px;
+            width: 800px;
+            height: 800px;
+            border-radius: 40px;
             overflow: hidden;
-            box-shadow: 0 40px 80px rgba(0,0,0,0.7), 0 0 50px rgba(99, 102, 241, 0.3);
-            border: 6px solid rgba(255,255,255,0.1);
+            box-shadow: 0 35px 70px rgba(0,0,0,0.7), 0 0 45px rgba(99, 102, 241, 0.25);
+            border: 6px solid rgba(255,255,255,0.15);
             background: #121026;
             position: relative;
         }
 
-        #media-image {
-            width: 100%;
-            height: 100%;
+        .media-img {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             object-fit: cover;
             transform-origin: center center;
             opacity: 0;
-            transition: opacity 0.3s ease-in-out;
         }
 
-        /* Subtitle Container - PLACED DIRECTLY BELOW THE IMAGE */
+        /* Subtitle Container - PLACED WELL BELOW THE IMAGE (No overlap possible) */
         #subtitle-container {
             position: absolute;
-            bottom: 150px;
+            top: 1080px;
             left: 50%;
             transform: translateX(-50%);
             width: 960px;
-            min-height: 400px;
+            height: 680px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -143,7 +131,6 @@
 
         .word {
             display: inline-block;
-            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.15s ease;
             transform: scale(0.9);
             opacity: 0.4;
         }
@@ -156,7 +143,7 @@
             text-shadow: 0 0 30px rgba(255, 255, 0, 0.6), 0 4px 15px rgba(0,0,0,0.9);
         }
 
-        /* Keyword Highlights (Even if not active, they stand out a bit more) */
+        /* Keyword Highlights */
         .word.keyword-match {
             color: #00f0ff; /* Neon Cyan */
             opacity: 0.85;
@@ -175,10 +162,6 @@
     <div id="bg-gradient"></div>
     <div class="glow"></div>
 
-    <div id="progress-bar-container">
-        <div id="progress-bar"></div>
-    </div>
-
     <div id="header-container">
         <div id="header-text">English Pro</div>
     </div>
@@ -186,7 +169,8 @@
     <!-- Media Container with idle floating animation -->
     <div id="media-wrapper">
         <div id="media-container">
-            <img id="media-image" src="" alt="">
+            <img id="media-image-1" class="media-img" src="" alt="">
+            <img id="media-image-2" class="media-img" src="" alt="">
         </div>
     </div>
 
@@ -203,66 +187,84 @@
         };
 
         const bgGradient = document.getElementById('bg-gradient');
-        const mediaImage = document.getElementById('media-image');
+        const img1 = document.getElementById('media-image-1');
+        const img2 = document.getElementById('media-image-2');
         const subtitleDisplay = document.getElementById('subtitle-display');
         const headerText = document.getElementById('header-text');
-        const progressBar = document.getElementById('progress-bar');
         const mediaWrapper = document.getElementById('media-wrapper');
 
-        // Total Duration variable to calculate progress bar percentage
-        let totalDuration = 1;
-
         window.renderFrame = function(timeSeconds) {
-            // Find total duration
-            if (window.videoData.subtitles.length > 0) {
-                totalDuration = window.videoData.subtitles[window.videoData.subtitles.length - 1].end;
-            }
-
-            // Update Progress Bar
-            const progressPercent = Math.min((timeSeconds / totalDuration) * 100, 100);
-            progressBar.style.width = `${progressPercent}%`;
-
             // Update Header
             if (headerText.innerText !== window.videoData.title) {
                 headerText.innerText = window.videoData.title;
             }
 
-            // Slowly animate background
-            const angle = 135 + (timeSeconds * 8);
+            // Slowly rotate gradient
             bgGradient.style.background = `radial-gradient(circle at 50% 50%, #1e1b4b 0%, #0b0914 100%)`;
 
             // Floating effect on the image wrapper
-            const floatOffset = Math.sin(timeSeconds * 3) * 15; // float 15px up/down
+            const floatOffset = Math.sin(timeSeconds * 3) * 12;
             mediaWrapper.style.transform = `translateX(-50%) translateY(${floatOffset}px)`;
 
-            // Update Media Image & Ken Burns
-            let activeSegment = null;
+            // ---- 1. Image Crossfading and Ken Burns ----
+            let activeIdx = -1;
             for (let i = 0; i < window.videoData.segments.length; i++) {
                 const seg = window.videoData.segments[i];
                 if (timeSeconds >= seg.start && timeSeconds <= seg.end) {
-                    activeSegment = seg;
+                    activeIdx = i;
                     break;
                 }
             }
 
-            if (activeSegment) {
-                if (mediaImage.src !== activeSegment.path) {
-                    mediaImage.src = activeSegment.path;
-                    mediaImage.style.opacity = 1;
+            if (activeIdx !== -1) {
+                const activeSeg = window.videoData.segments[activeIdx];
+                const crossfadeDuration = 0.4; // 400ms crossfade
+                const timeInSegment = timeSeconds - activeSeg.start;
+
+                if (activeIdx > 0 && timeInSegment < crossfadeDuration) {
+                    // Crossfading active!
+                    const prevSeg = window.videoData.segments[activeIdx - 1];
+                    const progress = timeInSegment / crossfadeDuration; // 0 to 1
+
+                    img1.src = prevSeg.path;
+                    img2.src = activeSeg.path;
+
+                    img1.style.opacity = 1 - progress;
+                    img2.style.opacity = progress;
+
+                    // Prev image continues Ken Burns
+                    const prevDur = prevSeg.end - prevSeg.start;
+                    const prevElapsed = timeSeconds - prevSeg.start;
+                    const prevProgress = Math.min(prevElapsed / prevDur, 1);
+                    const prevScale = 1.0 + (0.12 * prevProgress);
+                    const prevRot = Math.sin(prevProgress * Math.PI) * 1.5;
+                    img1.style.transform = `scale(${prevScale}) rotate(${prevRot}deg)`;
+
+                    // Active image starts Ken Burns
+                    const activeProgress = timeInSegment / (activeSeg.end - activeSeg.start);
+                    const activeScale = 1.0 + (0.12 * activeProgress);
+                    const activeRot = Math.sin(activeProgress * Math.PI) * 1.5;
+                    img2.style.transform = `scale(${activeScale}) rotate(${activeRot}deg)`;
+                } else {
+                    // Normal static segment (no crossfade)
+                    img1.style.opacity = 0;
+                    img2.src = activeSeg.path;
+                    img2.style.opacity = 1;
+
+                    const duration = activeSeg.end - activeSeg.start;
+                    const elapsed = timeSeconds - activeSeg.start;
+                    const progress = Math.min(Math.max(elapsed / duration, 0), 1);
+
+                    const scale = 1.0 + (0.12 * progress);
+                    const rot = Math.sin(progress * Math.PI) * 1.5;
+                    img2.style.transform = `scale(${scale}) rotate(${rot}deg)`;
                 }
-                const duration = activeSegment.end - activeSegment.start;
-                const elapsed = timeSeconds - activeSegment.start;
-                const progress = Math.min(Math.max(elapsed / duration, 0), 1);
-                
-                // Slow zoom + subtle rotation to feel dynamic
-                const scale = 1.0 + (0.12 * progress);
-                const rot = Math.sin(progress * Math.PI) * 1.5; // slight tilt
-                mediaImage.style.transform = `scale(${scale}) rotate(${rot}deg)`;
             } else {
-                mediaImage.style.opacity = 0;
+                img1.style.opacity = 0;
+                img2.style.opacity = 0;
             }
 
-            // Subtitles - CapCut Word-by-Word Highlight
+            // ---- 2. Subtitles with exact or estimated word timings ----
             let activeSub = null;
             for (let i = 0; i < window.videoData.subtitles.length; i++) {
                 const sub = window.videoData.subtitles[i];
@@ -273,26 +275,73 @@
             }
 
             if (activeSub) {
-                const words = activeSub.text.split(/\s+/);
-                const duration = activeSub.end - activeSub.start;
-                const elapsed = timeSeconds - activeSub.start;
-
-                // Estimate when each word is spoken (even distribution)
-                const wordDuration = duration / words.length;
-                const activeWordIndex = Math.floor(elapsed / wordDuration);
-
-                // Build HTML string
                 let htmlContent = "";
-                words.forEach((word, idx) => {
-                    let cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"").toLowerCase();
-                    const isKeyword = activeSub.highlighted && cleanWord.includes(activeSub.highlighted.toLowerCase());
-                    
-                    let className = "word";
-                    if (idx === activeWordIndex) className += " active";
-                    if (isKeyword) className += " keyword-match";
 
-                    htmlContent += `<span class="${className}">${word}</span> `;
-                });
+                if (activeSub.words && activeSub.words.length > 0) {
+                    // 2a. Use exact word timestamps from Gemini API
+                    let activeWordIndex = -1;
+                    for (let i = 0; i < activeSub.words.length; i++) {
+                        const w = activeSub.words[i];
+                        if (timeSeconds >= w.start && timeSeconds <= w.end) {
+                            activeWordIndex = i;
+                            break;
+                        }
+                    }
+                    // Fallback for silent gaps: keep the last spoken word highlighted
+                    if (activeWordIndex === -1) {
+                        for (let i = 0; i < activeSub.words.length; i++) {
+                            if (timeSeconds >= activeSub.words[i].start) {
+                                activeWordIndex = i;
+                            }
+                        }
+                    }
+
+                    activeSub.words.forEach((w, idx) => {
+                        let cleanWord = w.word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"").toLowerCase();
+                        const isKeyword = activeSub.highlighted && cleanWord.includes(activeSub.highlighted.toLowerCase());
+                        
+                        let className = "word";
+                        if (idx === activeWordIndex) className += " active";
+                        if (isKeyword) className += " keyword-match";
+
+                        htmlContent += `<span class="${className}">${w.word}</span> `;
+                    });
+                } else {
+                    // 2b. Fallback: Estimate when each word is spoken based on character length
+                    const words = activeSub.text.split(/\s+/);
+                    const duration = activeSub.end - activeSub.start;
+                    const elapsed = timeSeconds - activeSub.start;
+                    const totalChars = words.reduce((sum, word) => sum + word.length, 0) || 1;
+                    
+                    let cumulativeTime = 0;
+                    let activeWordIndex = -1;
+
+                    const wordTimings = words.map((word) => {
+                        const wordDur = duration * (word.length / totalChars);
+                        const start = cumulativeTime;
+                        const end = cumulativeTime + wordDur;
+                        cumulativeTime = end;
+                        return { start, end };
+                    });
+
+                    for (let i = 0; i < wordTimings.length; i++) {
+                        if (elapsed >= wordTimings[i].start && elapsed <= wordTimings[i].end) {
+                            activeWordIndex = i;
+                            break;
+                        }
+                    }
+
+                    words.forEach((word, idx) => {
+                        let cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"").toLowerCase();
+                        const isKeyword = activeSub.highlighted && cleanWord.includes(activeSub.highlighted.toLowerCase());
+                        
+                        let className = "word";
+                        if (idx === activeWordIndex) className += " active";
+                        if (isKeyword) className += " keyword-match";
+
+                        htmlContent += `<span class="${className}">${word}</span> `;
+                    });
+                }
 
                 if (subtitleDisplay.innerHTML !== htmlContent) {
                     subtitleDisplay.innerHTML = htmlContent;

@@ -15,7 +15,9 @@ sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="repla
 import requests
 import pysrt
 from playwright.sync_api import sync_playwright
-from config import PEXELS_API_KEY
+from config import PEXELS_API_KEY, GEMINI_API_KEY
+from google import genai
+from google.genai import types
 
 PROJECTS_DIR = Path(__file__).parent / "projects"
 TEMPLATE_PATH = Path(__file__).parent / "template_v2.html"
@@ -174,6 +176,79 @@ def download_images_for_segments(segments: list, project_dir: Path):
                 print(f"   ⚠️ Lỗi tải ảnh: {slug}.jpg")
 
 
+def get_word_timestamps(audio_path: Path, project_dir: Path) -> list:
+    json_path = project_dir / "word_timestamps.json"
+    if json_path.exists():
+        try:
+            with open(json_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"   ⚠️ Không đọc được word_timestamps.json: {e}. Sẽ tạo lại...")
+
+    if not GEMINI_API_KEY:
+        print("   ⚠️ Thiếu gemini_api trong .env. Sử dụng thuật toán phỏng đoán ký tự làm fallback.")
+        return []
+
+    print("🎙️ Đang dùng Gemini API tự động phân tích âm thanh (word-level alignment)...")
+    try:
+        client = genai.Client(api_key=GEMINI_API_KEY)
+        print("   Upload file lên Gemini...")
+        uploaded_file = client.files.upload(file=str(audio_path))
+        
+        while uploaded_file.state.name == "PROCESSING":
+            time.sleep(2)
+            uploaded_file = client.files.get(name=uploaded_file.name)
+
+        if uploaded_file.state.name == "FAILED":
+            print("   ❌ Lỗi xử lý file trên Gemini server.")
+            return []
+
+        prompt = (
+            "Analyze the spoken audio. Transcribe the audio word-by-word with high precision. "
+            "For every single word spoken, provide its start timestamp (when the word begins, in seconds) "
+            "and end timestamp (when the word ends, in seconds). "
+            "Ensure the timestamps are highly accurate and aligned with the actual audio playback. "
+            "Output ONLY a valid JSON list of word objects, like this:\n"
+            "[\n"
+            "  {\"word\": \"Are\", \"start\": 0.0, \"end\": 0.25},\n"
+            "  {\"word\": \"you\", \"start\": 0.25, \"end\": 0.45}\n"
+            "]\n"
+            "Do not include markdown code block formatting (like ```json ... ```), just return the raw JSON text."
+        )
+
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=[uploaded_file, prompt],
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json"
+            )
+        )
+
+        data = json.loads(response.text)
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+            
+        print("   ✅ Đã tạo xong word_timestamps.json")
+        client.files.delete(name=uploaded_file.name)
+        return data
+    except Exception as e:
+        print(f"   ⚠️ Lỗi gọi Gemini API: {e}. Fallback sang phỏng đoán.")
+        return []
+
+
+def align_words_to_subtitles(subtitles: list, word_timestamps: list) -> list:
+    if not word_timestamps:
+        return subtitles
+    for sub in subtitles:
+        sub_words = []
+        for w in word_timestamps:
+            # Check if the word starts within the subtitle duration (with buffer)
+            if sub["start"] - 0.1 <= w["start"] < sub["end"]:
+                sub_words.append(w)
+        sub["words"] = sub_words
+    return subtitles
+
+
 def render_frames_with_playwright(project_dir: Path, segments: list, subtitles: list, keywords_set: set, audio_duration: float, fps: int = 30):
     frames_dir = project_dir / "frames"
     if frames_dir.exists():
@@ -191,7 +266,8 @@ def render_frames_with_playwright(project_dir: Path, segments: list, subtitles: 
             "start": sub["start"],
             "end": sub["end"],
             "text": sub["text"],
-            "highlighted": hl_word
+            "highlighted": hl_word,
+            "words": sub.get("words", [])
         })
 
     video_data = {
@@ -290,6 +366,10 @@ def main():
     if audio_duration <= 0:
         audio_duration = subtitles[-1]["end"] if subtitles else 45.0
     print(f"   Audio duration: {audio_duration:.1f}s")
+
+    print(f"\n🎙️ [1.5/6] Aligning word-level timestamps...")
+    word_timestamps = get_word_timestamps(audio_path, project_dir)
+    subtitles = align_words_to_subtitles(subtitles, word_timestamps)
 
     print(f"\n🔗 [2/6] Matching keywords...")
     with open(keywords_path, "r", encoding="utf-8") as f:

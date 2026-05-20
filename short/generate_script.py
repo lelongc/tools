@@ -173,9 +173,9 @@ def main():
     print(f"\n{'='*60}")
     print(f"BUOC TIEP THEO:")
     print(f"   1. Copy noi dung script.txt sang Colab de tao TTS")
-    print(f"   2. Tao file audio.mp3 va subtitles.srt")
+    print(f"   2. Tao file audio.mp3 va subtitle.srt")
     print(f"   3. Bo 2 file do vao: {project_dir}")
-    print(f"   4. Chay: python render_video.py {project_dir.name}")
+    print(f"   4. Chay: python render_web.py {project_dir.name}")
     print(f"{'='*60}")
 
 
