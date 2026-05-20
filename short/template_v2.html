@@ -225,23 +225,39 @@
         const mediaWrapper = document.getElementById('media-wrapper');
         let img1Src = "";
         let img2Src = "";
+        
+        // Pre-decode image cache: maps src path -> HTML Image object
+        const imageCache = {};
 
         // Easing function for smooth transitions
         function easeInOutSine(t) {
             return -(Math.cos(Math.PI * t) - 1) / 2;
         }
 
-        function setImgSrc(which, newSrc) {
-            if (which === 'img1') {
-                if (img1Src === newSrc) return null;
-                img1.src = newSrc;
-                img1Src = newSrc;
-                return img1.decode().catch(() => null);
+        // Pre-load and decode image from cache (must call after init)
+        async function preloadImage(src) {
+            if (imageCache[src]) return;
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            await new Promise((resolve) => {
+                img.onload = resolve;
+                img.onerror = resolve;
+                img.src = src;
+            });
+            if (img.decode) {
+                await img.decode().catch(() => null);
             }
-            if (img2Src === newSrc) return null;
-            img2.src = newSrc;
-            img2Src = newSrc;
-            return img2.decode().catch(() => null);
+            imageCache[src] = img;
+        }
+
+        function setImgSrc(which, newSrc) {
+            const elem = which === 'img1' ? img1 : img2;
+            const currentSrc = which === 'img1' ? img1Src : img2Src;
+            if (currentSrc === newSrc) return;
+            
+            elem.src = newSrc;
+            if (which === 'img1') img1Src = newSrc;
+            else img2Src = newSrc;
         }
 
         // Helper to update elements opacity and transform based on segment properties
@@ -276,7 +292,7 @@
             }
         }
 
-        window.renderFrame = async function(timeSeconds) {
+        window.renderFrame = function(timeSeconds) {
             // Update Header
             if (headerText.innerText !== window.videoData.title) {
                 headerText.innerText = window.videoData.title;
@@ -288,8 +304,6 @@
             // Floating card effect (slower + smaller to avoid perceived jitter)
             const floatOffset = Math.sin(timeSeconds * 1.2) * 6;
             mediaWrapper.style.transform = `translateX(-50%) translateY(${floatOffset}px)`;
-
-            const decodePromises = [];
 
             // ---- 1. Segment Visual Timeline Rendering ----
             let activeIdx = -1;
@@ -304,7 +318,7 @@
             if (activeIdx !== -1) {
                 const activeSeg = window.videoData.segments[activeIdx];
                 const segmentDuration = Math.max(activeSeg.end - activeSeg.start, 0.001);
-                const crossfadeDuration = Math.min(1.2, segmentDuration * 0.5);
+                const crossfadeDuration = Math.min(0.35, segmentDuration * 0.5); // Fixed to 350ms max
                 const timeInSegment = timeSeconds - activeSeg.start;
 
                 if (activeIdx > 0 && crossfadeDuration > 0 && timeInSegment < crossfadeDuration) {
@@ -313,40 +327,52 @@
                     const rawProgress = timeInSegment / crossfadeDuration;
                     const progress = easeInOutSine(rawProgress);  // Smooth easing
 
-                    // Set target elements based on type
-                    // Clean up visibility for unused types
-                    const prevType = prevSeg.type;
-                    const nextType = activeSeg.type;
-
-                    // Handle prev elements
-                    if (prevType === 'image') {
-                        const p = setImgSrc('img1', prevSeg.path);
-                        if (p) decodePromises.push(p);
-                        applySegmentStyles(img1, 'image', prevSeg, timeSeconds, 1 - progress);
-                        textPopContainer.style.opacity = 0;
-                    } else if (prevType === 'text_pop') {
-                        img1.style.opacity = 0;
+                    // 1. Handle previous segment (fading out)
+                    if (prevSeg.type === 'image') {
+                        const prevImgSlot = prevSeg.slot === 1 ? 'img1' : 'img2';
+                        const prevImgElem = prevSeg.slot === 1 ? img1 : img2;
+                        
+                        setImgSrc(prevImgSlot, prevSeg.path);
+                        applySegmentStyles(prevImgElem, 'image', prevSeg, timeSeconds, 1 - progress);
+                    } else if (prevSeg.type === 'text_pop') {
                         applySegmentStyles(textPopContainer, 'text_pop', prevSeg, timeSeconds, 1 - progress);
                     }
 
-                    // Handle next elements
-                    if (nextType === 'image') {
-                        const p = setImgSrc('img2', activeSeg.path);
-                        if (p) decodePromises.push(p);
-                        applySegmentStyles(img2, 'image', activeSeg, timeSeconds, progress);
-                    } else if (nextType === 'text_pop') {
-                        img2.style.opacity = 0;
+                    // 2. Handle active segment (fading in)
+                    if (activeSeg.type === 'image') {
+                        const activeImgSlot = activeSeg.slot === 1 ? 'img1' : 'img2';
+                        const activeImgElem = activeSeg.slot === 1 ? img1 : img2;
+                        const otherImgElem = activeSeg.slot === 1 ? img2 : img1;
+
+                        setImgSrc(activeImgSlot, activeSeg.path);
+                        applySegmentStyles(activeImgElem, 'image', activeSeg, timeSeconds, progress);
+                        
+                        // Hide other elements
+                        if (prevSeg.type !== 'image') {
+                            otherImgElem.style.opacity = 0;
+                            textPopContainer.style.opacity = 0;
+                        }
+                    } else if (activeSeg.type === 'text_pop') {
                         applySegmentStyles(textPopContainer, 'text_pop', activeSeg, timeSeconds, progress);
+                        if (prevSeg.type === 'image') {
+                            // Keep fading it out, do not clear opacity immediately
+                        } else {
+                            img1.style.opacity = 0;
+                            img2.style.opacity = 0;
+                        }
                     }
 
                 } else {
                     // Static Segment (No crossfade active)
                     if (activeSeg.type === 'image') {
-                        img1.style.opacity = 0;
+                        const activeImgSlot = activeSeg.slot === 1 ? 'img1' : 'img2';
+                        const activeImgElem = activeSeg.slot === 1 ? img1 : img2;
+                        const otherImgElem = activeSeg.slot === 1 ? img2 : img1;
+
+                        setImgSrc(activeImgSlot, activeSeg.path);
+                        applySegmentStyles(activeImgElem, 'image', activeSeg, timeSeconds, 1.0);
+                        otherImgElem.style.opacity = 0;
                         textPopContainer.style.opacity = 0;
-                        const p = setImgSrc('img2', activeSeg.path);
-                        if (p) decodePromises.push(p);
-                        applySegmentStyles(img2, 'image', activeSeg, timeSeconds, 1.0);
                     } else if (activeSeg.type === 'text_pop') {
                         img1.style.opacity = 0;
                         img2.style.opacity = 0;
@@ -443,12 +469,6 @@
                 }
             } else {
                 subtitleDisplay.innerHTML = "";
-            }
-
-            if (decodePromises.length) {
-                await Promise.all(decodePromises);
-                // Give the browser a chance to paint decoded images before screenshot
-                await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
             }
         };
 

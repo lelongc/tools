@@ -138,9 +138,17 @@ def build_visual_timeline(word_timestamps: list, keywords: list, project_dir: Pa
             "type": "image",
             "path": image_paths[img_idx],
             "start": sub["start"],
-            "end": sub["end"]
+            "end": sub["end"],
+            "slot": 1 if idx % 2 == 0 else 2
         })
     
+    # Fill gaps to make the visual timeline contiguous
+    if timeline:
+        timeline[0]["start"] = 0.0
+        for i in range(len(timeline) - 1):
+            timeline[i]["end"] = timeline[i+1]["start"]
+        timeline[-1]["end"] = total_duration
+
     return timeline
 
 
@@ -333,6 +341,17 @@ def render_frames_with_playwright(project_dir: Path, segments: list, subtitles: 
         page.goto(html_uri)
         
         page.wait_for_function("window.isReady === true")
+        
+        # Pre-load all image files to avoid stuttering
+        unique_image_paths = set()
+        for seg in segments:
+            if seg.get("type") == "image" and seg.get("path"):
+                unique_image_paths.add(seg["path"])
+        
+        if unique_image_paths:
+            print(f"   🖼️ Pre-loading {len(unique_image_paths)} images...")
+            preload_script = "; ".join([f"await window.preloadImage('{path}')" for path in unique_image_paths])
+            page.evaluate(f"(async () => {{ {preload_script} }})()")
         
         print(f"   Đã load xong template. Bắt đầu render {total_frames} frames.")
         start_time = time.time()
