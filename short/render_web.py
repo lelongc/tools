@@ -108,21 +108,19 @@ def match_keywords_to_words(word_timestamps: list, keywords: list) -> list:
     return matches
 
 
-def build_visual_timeline(word_timestamps: list, keywords: list, project_dir: Path, total_duration: float) -> list:
-    # 1. Map keywords to their downloaded image paths
-    keyword_images = {}
+def build_visual_timeline(word_timestamps: list, keywords: list, project_dir: Path, subtitles: list, total_duration: float) -> list:
+    # 1. Collect all downloaded images in order (same as keyword order)
     images_dir = project_dir / "images"
-    image_paths_list = []
+    image_paths = []
     
     for kw in keywords:
         slug = re.sub(r"[^a-z0-9]+", "_", kw["keyword"].lower()).strip("_")
         img_path = images_dir / f"{slug}.jpg"
         if img_path.exists():
             img_url = f"file:///{str(img_path.resolve()).replace(chr(92), '/')}"
-            keyword_images[kw["keyword"].lower()] = img_url
-            image_paths_list.append(img_url)
+            image_paths.append(img_url)
 
-    if not image_paths_list:
+    if not image_paths:
         print("   ⚠️ Không có ảnh. Sử dụng fallback...")
         return [{
             "type": "text_pop",
@@ -131,23 +129,17 @@ def build_visual_timeline(word_timestamps: list, keywords: list, project_dir: Pa
             "end": total_duration
         }]
 
-    # Fixed 5-second intervals for images
-    interval = 5.0
+    # 2. Assign images to subtitles sequentially (cycle through images)
+    # Every subtitle gets exactly one image, in order
     timeline = []
-    current_img_idx = 0
-    
-    time = 0.0
-    while time < total_duration:
-        next_time = min(time + interval, total_duration)
-        img_path = image_paths_list[current_img_idx % len(image_paths_list)]
+    for idx, sub in enumerate(subtitles):
+        img_idx = idx % len(image_paths)  # Cycle through images
         timeline.append({
             "type": "image",
-            "path": img_path,
-            "start": time,
-            "end": next_time
+            "path": image_paths[img_idx],
+            "start": sub["start"],
+            "end": sub["end"]
         })
-        current_img_idx += 1
-        time = next_time
     
     return timeline
 
@@ -278,8 +270,8 @@ def align_words_to_subtitles(subtitles: list, word_timestamps: list) -> list:
             cursor += 1
 
         match_ratio = len(match_indices) / max(len(tokens), 1)
-        # Increased threshold from 0.6 to 0.8 for tighter subtitle sync
-        if match_indices and match_ratio >= 0.8:
+        # Threshold 0.7 for balanced sync (not too loose, not too strict)
+        if match_indices and match_ratio >= 0.7:
             start_idx = match_indices[0]
             end_idx = match_indices[-1]
             sub["start"] = max(0.0, word_timestamps[start_idx]["start"])
@@ -432,7 +424,7 @@ def main():
     download_images_for_keywords(keywords, project_dir)
 
     print(f"\n🎞️ [3/6] Building visual timeline (images + text pops)...")
-    segments = build_visual_timeline(word_timestamps, keywords, project_dir, audio_duration)
+    segments = build_visual_timeline(word_timestamps, keywords, project_dir, subtitles, audio_duration)
 
     frames_dir = render_frames_with_playwright(project_dir, segments, subtitles, keywords_set, audio_duration, fps=30)
     

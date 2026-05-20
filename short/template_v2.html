@@ -223,6 +223,26 @@
         const subtitleDisplay = document.getElementById('subtitle-display');
         const headerText = document.getElementById('header-text');
         const mediaWrapper = document.getElementById('media-wrapper');
+        let img1Src = "";
+        let img2Src = "";
+
+        // Easing function for smooth transitions
+        function easeInOutSine(t) {
+            return -(Math.cos(Math.PI * t) - 1) / 2;
+        }
+
+        function setImgSrc(which, newSrc) {
+            if (which === 'img1') {
+                if (img1Src === newSrc) return null;
+                img1.src = newSrc;
+                img1Src = newSrc;
+                return img1.decode().catch(() => null);
+            }
+            if (img2Src === newSrc) return null;
+            img2.src = newSrc;
+            img2Src = newSrc;
+            return img2.decode().catch(() => null);
+        }
 
         // Helper to update elements opacity and transform based on segment properties
         function applySegmentStyles(elem, type, seg, timeSeconds, targetOpacity) {
@@ -232,10 +252,13 @@
             const duration = seg.end - seg.start;
             const elapsed = timeSeconds - seg.start;
             const progress = Math.min(Math.max(elapsed / duration, 0), 1);
+            const eased = easeInOutSine(progress);
 
             if (type === 'image') {
-                const scale = 1.0 + (0.12 * progress);
-                const rot = Math.sin(progress * Math.PI) * 1.5;
+                // Global time-based motion to avoid per-segment transform "reset" jitter at boundaries
+                const t = timeSeconds * 0.35;
+                const scale = 1.03 + 0.015 * Math.sin(t);
+                const rot = 0.25 * Math.sin(t * 0.8 + 1.2);
                 elem.style.transform = `scale(${scale}) rotate(${rot}deg)`;
             } else if (type === 'text_pop') {
                 // Bounce scale effect (from 0.5 to 1.3 in first 200ms, then settle)
@@ -253,7 +276,7 @@
             }
         }
 
-        window.renderFrame = function(timeSeconds) {
+        window.renderFrame = async function(timeSeconds) {
             // Update Header
             if (headerText.innerText !== window.videoData.title) {
                 headerText.innerText = window.videoData.title;
@@ -262,9 +285,11 @@
             // Slowly rotate background gradient
             bgGradient.style.background = `radial-gradient(circle at 50% 50%, #1e1b4b 0%, #0b0914 100%)`;
 
-            // Floating card effect
-            const floatOffset = Math.sin(timeSeconds * 3) * 10;
+            // Floating card effect (slower + smaller to avoid perceived jitter)
+            const floatOffset = Math.sin(timeSeconds * 1.2) * 6;
             mediaWrapper.style.transform = `translateX(-50%) translateY(${floatOffset}px)`;
+
+            const decodePromises = [];
 
             // ---- 1. Segment Visual Timeline Rendering ----
             let activeIdx = -1;
@@ -279,13 +304,14 @@
             if (activeIdx !== -1) {
                 const activeSeg = window.videoData.segments[activeIdx];
                 const segmentDuration = Math.max(activeSeg.end - activeSeg.start, 0.001);
-                const crossfadeDuration = Math.min(0.35, segmentDuration * 0.35);
+                const crossfadeDuration = Math.min(1.2, segmentDuration * 0.5);
                 const timeInSegment = timeSeconds - activeSeg.start;
 
                 if (activeIdx > 0 && crossfadeDuration > 0 && timeInSegment < crossfadeDuration) {
-                    // Crossfading active!
+                    // Crossfading active with easing!
                     const prevSeg = window.videoData.segments[activeIdx - 1];
-                    const progress = timeInSegment / crossfadeDuration;
+                    const rawProgress = timeInSegment / crossfadeDuration;
+                    const progress = easeInOutSine(rawProgress);  // Smooth easing
 
                     // Set target elements based on type
                     // Clean up visibility for unused types
@@ -294,7 +320,8 @@
 
                     // Handle prev elements
                     if (prevType === 'image') {
-                        img1.src = prevSeg.path;
+                        const p = setImgSrc('img1', prevSeg.path);
+                        if (p) decodePromises.push(p);
                         applySegmentStyles(img1, 'image', prevSeg, timeSeconds, 1 - progress);
                         textPopContainer.style.opacity = 0;
                     } else if (prevType === 'text_pop') {
@@ -304,7 +331,8 @@
 
                     // Handle next elements
                     if (nextType === 'image') {
-                        img2.src = activeSeg.path;
+                        const p = setImgSrc('img2', activeSeg.path);
+                        if (p) decodePromises.push(p);
                         applySegmentStyles(img2, 'image', activeSeg, timeSeconds, progress);
                     } else if (nextType === 'text_pop') {
                         img2.style.opacity = 0;
@@ -316,7 +344,8 @@
                     if (activeSeg.type === 'image') {
                         img1.style.opacity = 0;
                         textPopContainer.style.opacity = 0;
-                        img2.src = activeSeg.path;
+                        const p = setImgSrc('img2', activeSeg.path);
+                        if (p) decodePromises.push(p);
                         applySegmentStyles(img2, 'image', activeSeg, timeSeconds, 1.0);
                     } else if (activeSeg.type === 'text_pop') {
                         img1.style.opacity = 0;
@@ -414,6 +443,12 @@
                 }
             } else {
                 subtitleDisplay.innerHTML = "";
+            }
+
+            if (decodePromises.length) {
+                await Promise.all(decodePromises);
+                // Give the browser a chance to paint decoded images before screenshot
+                await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
             }
         };
 
