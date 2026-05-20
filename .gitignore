@@ -27,8 +27,9 @@ short/projects/**/_recording_tmp/
 short/projects/**/output.mp4
 short/projects/**/styled.ass
 short/projects/**/animation.html
+short/projects/**/frames/
 
 # Logs & Temporary files
 *.log
 .pytest_cache/
-.eslintcache
+.eslintcach

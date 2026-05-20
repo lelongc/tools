@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1080, height=1920, initial-scale=1.0">
+    <title>Viral English Shorts Template</title>
+    <style>
+        /* CSS Reset & Setup */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        @import url('https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@800;900&family=Montserrat:wght@800;900&display=swap');
+        
+        body, html {
+            width: 1080px;
+            height: 1920px;
+            overflow: hidden;
+            background-color: #0b0914;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Dynamic Animated Background */
+        #bg-gradient {
+            position: absolute;
+            top: 0; left: 0; width: 1080px; height: 1920px;
+            background: radial-gradient(circle at 50% 50%, #1e1b4b 0%, #0b0914 100%);
+            z-index: 1;
+        }
+
+        /* Ambient Glow in Background */
+        .glow {
+            position: absolute;
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+            top: 30%;
+            left: 10%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        /* Top Progress Bar for Viral Retention */
+        #progress-bar-container {
+            position: absolute;
+            top: 0; left: 0; width: 1080px; height: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 30;
+        }
+        #progress-bar {
+            width: 0%; height: 100%;
+            background: linear-gradient(90deg, #ff007f, #00f0ff);
+            box-shadow: 0 0 15px #00f0ff;
+        }
+
+        /* Header (Sleek badge) */
+        #header-container {
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+            backdrop-filter: blur(10px);
+            padding: 18px 45px;
+            border-radius: 50px;
+            z-index: 20;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        #header-text {
+            font-size: 38px;
+            font-weight: 900;
+            color: #fff;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #00f0ff, #ff007f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Image Container (Floating Card Style) */
+        #media-wrapper {
+            position: absolute;
+            top: 240px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 1000px;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #media-container {
+            width: 860px;
+            height: 960px;
+            border-radius: 48px;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.7), 0 0 50px rgba(99, 102, 241, 0.3);
+            border: 6px solid rgba(255,255,255,0.1);
+            background: #121026;
+            position: relative;
+        }
+
+        #media-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform-origin: center center;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        /* Subtitle Container - PLACED DIRECTLY BELOW THE IMAGE */
+        #subtitle-container {
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 960px;
+            min-height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 20;
+            padding: 20px;
+        }
+
+        /* Word-by-word CapCut / Hormozi Style */
+        .subtitle-text {
+            font-size: 78px;
+            font-weight: 900;
+            line-height: 1.4;
+            color: #ffffff;
+            text-transform: uppercase;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px 30px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.9);
+        }
+
+        .word {
+            display: inline-block;
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.15s ease;
+            transform: scale(0.9);
+            opacity: 0.4;
+        }
+
+        /* Active Spoken Word gets POPPED and HIGHLIGHTED */
+        .word.active {
+            color: #ffff00; /* Neon Yellow */
+            transform: scale(1.25);
+            opacity: 1;
+            text-shadow: 0 0 30px rgba(255, 255, 0, 0.6), 0 4px 15px rgba(0,0,0,0.9);
+        }
+
+        /* Keyword Highlights (Even if not active, they stand out a bit more) */
+        .word.keyword-match {
+            color: #00f0ff; /* Neon Cyan */
+            opacity: 0.85;
+        }
+
+        .word.active.keyword-match {
+            color: #00ff66; /* Neon Green when spoken */
+            transform: scale(1.3);
+            text-shadow: 0 0 35px rgba(0, 255, 102, 0.7), 0 4px 15px rgba(0,0,0,0.9);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="bg-gradient"></div>
+    <div class="glow"></div>
+
+    <div id="progress-bar-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <div id="header-container">
+        <div id="header-text">English Pro</div>
+    </div>
+
+    <!-- Media Container with idle floating animation -->
+    <div id="media-wrapper">
+        <div id="media-container">
+            <img id="media-image" src="" alt="">
+        </div>
+    </div>
+
+    <div id="subtitle-container">
+        <div class="subtitle-text" id="subtitle-display"></div>
+    </div>
+
+    <script>
+        // Data injected by Python
+        window.videoData = window.videoData || {
+            title: "Learn English",
+            segments: [],
+            subtitles: []
+        };
+
+        const bgGradient = document.getElementById('bg-gradient');
+        const mediaImage = document.getElementById('media-image');
+        const subtitleDisplay = document.getElementById('subtitle-display');
+        const headerText = document.getElementById('header-text');
+        const progressBar = document.getElementById('progress-bar');
+        const mediaWrapper = document.getElementById('media-wrapper');
+
+        // Total Duration variable to calculate progress bar percentage
+        let totalDuration = 1;
+
+        window.renderFrame = function(timeSeconds) {
+            // Find total duration
+            if (window.videoData.subtitles.length > 0) {
+                totalDuration = window.videoData.subtitles[window.videoData.subtitles.length - 1].end;
+            }
+
+            // Update Progress Bar
+            const progressPercent = Math.min((timeSeconds / totalDuration) * 100, 100);
+            progressBar.style.width = `${progressPercent}%`;
+
+            // Update Header
+            if (headerText.innerText !== window.videoData.title) {
+                headerText.innerText = window.videoData.title;
+            }
+
+            // Slowly animate background
+            const angle = 135 + (timeSeconds * 8);
+            bgGradient.style.background = `radial-gradient(circle at 50% 50%, #1e1b4b 0%, #0b0914 100%)`;
+
+            // Floating effect on the image wrapper
+            const floatOffset = Math.sin(timeSeconds * 3) * 15; // float 15px up/down
+            mediaWrapper.style.transform = `translateX(-50%) translateY(${floatOffset}px)`;
+
+            // Update Media Image & Ken Burns
+            let activeSegment = null;
+            for (let i = 0; i < window.videoData.segments.length; i++) {
+                const seg = window.videoData.segments[i];
+                if (timeSeconds >= seg.start && timeSeconds <= seg.end) {
+                    activeSegment = seg;
+                    break;
+                }
+            }
+
+            if (activeSegment) {
+                if (mediaImage.src !== activeSegment.path) {
+                    mediaImage.src = activeSegment.path;
+                    mediaImage.style.opacity = 1;
+                }
+                const duration = activeSegment.end - activeSegment.start;
+                const elapsed = timeSeconds - activeSegment.start;
+                const progress = Math.min(Math.max(elapsed / duration, 0), 1);
+                
+                // Slow zoom + subtle rotation to feel dynamic
+                const scale = 1.0 + (0.12 * progress);
+                const rot = Math.sin(progress * Math.PI) * 1.5; // slight tilt
+                mediaImage.style.transform = `scale(${scale}) rotate(${rot}deg)`;
+            } else {
+                mediaImage.style.opacity = 0;
+            }
+
+            // Subtitles - CapCut Word-by-Word Highlight
+            let activeSub = null;
+            for (let i = 0; i < window.videoData.subtitles.length; i++) {
+                const sub = window.videoData.subtitles[i];
+                if (timeSeconds >= sub.start && timeSeconds <= sub.end) {
+                    activeSub = sub;
+                    break;
+                }
+            }
+
+            if (activeSub) {
+                const words = activeSub.text.split(/\s+/);
+                const duration = activeSub.end - activeSub.start;
+                const elapsed = timeSeconds - activeSub.start;
+
+                // Estimate when each word is spoken (even distribution)
+                const wordDuration = duration / words.length;
+                const activeWordIndex = Math.floor(elapsed / wordDuration);
+
+                // Build HTML string
+                let htmlContent = "";
+                words.forEach((word, idx) => {
+                    let cleanWord = word.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"").toLowerCase();
+                    const isKeyword = activeSub.highlighted && cleanWord.includes(activeSub.highlighted.toLowerCase());
+                    
+                    let className = "word";
+                    if (idx === activeWordIndex) className += " active";
+                    if (isKeyword) className += " keyword-match";
+
+                    htmlContent += `<span class="${className}">${word}</span> `;
+                });
+
+                if (subtitleDisplay.innerHTML !== htmlContent) {
+                    subtitleDisplay.innerHTML = htmlContent;
+                }
+            } else {
+                subtitleDisplay.innerHTML = "";
+            }
+        };
+
+        window.isReady = true;
+    </script>
+</body>
+</html>

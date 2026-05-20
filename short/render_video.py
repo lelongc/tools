@@ -336,11 +336,16 @@ def process_single_clip(seg: dict, idx: int, project_dir: Path, ffmpeg_path: str
     has_media = seg.get("has_media", False)
 
     if media_type == "video" and has_media:
-        # Video stock: scale/crop sang 1080x1920, trim đúng duration
+        # Video stock: loop if short, scale/crop to 900x1200, pad to 1080x1920
         vid_path = project_dir / "videos" / f"{slug}.mp4"
-        vf = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1"
+        vf = (
+            "scale=900:1200:force_original_aspect_ratio=increase,"
+            "crop=900:1200,"
+            "pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=0x1e1b4b"
+        )
         cmd = [
             ffmpeg_path, "-y",
+            "-stream_loop", "-1",
             "-i", str(vid_path),
             "-t", str(duration),
             "-vf", vf,
@@ -349,17 +354,16 @@ def process_single_clip(seg: dict, idx: int, project_dir: Path, ffmpeg_path: str
             str(clip_path),
         ]
     elif media_type == "image" and has_media:
-        # Ảnh: Ken Burns effect (slow zoom in)
+        # Ảnh: Ken Burns effect (slow zoom in) trong khung 900x1200
         img_path = project_dir / "images" / f"{slug}.jpg"
         frames = max(int(duration * 30), 15)
-        # Scale ảnh lên lớn hơn 1080x1920 (x1.1) để có headroom cho zoom
-        # zoompan: zoom từ 1.0 → 1.05 từ từ, pan center
         vf = (
-            "scale=1188:2112:force_original_aspect_ratio=increase,"
-            "crop=1188:2112,"
+            "scale=900:1200:force_original_aspect_ratio=increase,"
+            "crop=900:1200,"
             f"zoompan=z='min(zoom+0.0005\\,1.05)'"
             f":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
-            f":d={frames}:s=1080x1920:fps=30"
+            f":d={frames}:s=900x1200:fps=30,"
+            "pad=1080:1920:(ow-iw)/2:(oh-ih)/2:color=0x1e1b4b"
         )
         cmd = [
             ffmpeg_path, "-y",
