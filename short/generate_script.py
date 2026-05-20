@@ -23,13 +23,14 @@ from config import GROQ_API_KEY
 
 PROJECTS_DIR = Path(__file__).parent / "projects"
 
-PROMPT_TEMPLATE = """You are a top-tier viral YouTube Shorts scriptwriter. Write an English script about: "{topic}"
+PROMPT_TEMPLATE = """You are a top-tier viral YouTube Shorts scriptwriter and English language educator. Write an engaging English learning/storytelling script about: "{topic}"
 
 ## CRITICAL LENGTH REQUIREMENT:
 - The script MUST be 120-140 words long. This is non-negotiable.
 - At normal speaking pace, 120-140 words = approximately 45-50 seconds of audio.
 - Write in a flowing, storytelling narrative — NOT a bullet-point list.
-- Each paragraph should have 3-5 full sentences chained together naturally.
+- Use clear, professional, yet conversational English, making it perfect for English learners to listen and study.
+- Highlight or use useful vocabulary, expressions, or idiomatic phrases relevant to the topic.
 
 ## PUNCTUATION RULES (TTS system reads these as timing cues):
 - COMMAS (,) = chain actions smoothly in one breath, no pause. Use these to connect flowing descriptions.
@@ -38,9 +39,9 @@ PROMPT_TEMPLATE = """You are a top-tier viral YouTube Shorts scriptwriter. Write
 - NEVER use ellipsis (...). Use a period or new paragraph instead.
 
 ## SCRIPT STRUCTURE:
-- Paragraph 1 (HOOK): One shocking statement or curiosity question. 1-2 sentences max.
-- Paragraphs 2-4 (BODY): Vivid, cinematic storytelling. Describe actions, sensations, details. Paint a picture.
-- Final paragraph (CTA): Short call to action.
+- Paragraph 1 (HOOK): An attention-grabbing question or shocking fact related to the topic. 1-2 sentences max.
+- Paragraphs 2-4 (BODY): Educational, informative, or vivid storytelling. Introduce key English vocabulary, idioms, or communication tips and use them in context.
+- Final paragraph (CTA): Short call to action encouraging viewers to practice or subscribe.
 
 ## EXAMPLE SCRIPT (topic: "Why you should wake up at 5 AM"):
 
@@ -58,9 +59,11 @@ That is the power of waking up early.
 Follow for more daily productivity hacks.
 
 ## VISUAL KEYWORDS:
-Extract 5-8 concrete nouns or actions from YOUR script, in order of appearance.
+Extract exactly 10-12 concrete nouns, actions, or phrases from YOUR script, in strict order of appearance.
+- They MUST be evenly distributed throughout the script (roughly one keyword/action for every 10-15 words).
+- This is to ensure a new visual appears on screen every 4-5 seconds.
 - "keyword": 1-3 words that appear literally in the script.
-- "search_query": 3-6 word descriptive phrase for Pexels image search.
+- "search_query": 3-6 word descriptive phrase for Pexels search (prefer high-quality portrait/vertical videos/images that match the keyword's mood/concept perfectly).
 
 ## OUTPUT (valid JSON only, no markdown, no explanation):
 {{

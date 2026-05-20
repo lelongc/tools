@@ -1,6 +1,34 @@
+# API Keys & Sensitive Configs
 .env
+*.env
 live-cap/config.js
 sub-video/config.js
 short/.env
-short/node_modules
+
+# Python Virtual Environments & Packages
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node.js
+node_modules/
+short/node_modules/
+package-lock.json
+
+# Project specific heavy media files (Pexels downloads & Playwright recordings)
+short/projects/**/videos/
+short/projects/**/images/
+short/projects/**/raw_recording.webm
+short/projects/**/_recording_tmp/
 short/projects/**/output.mp4
+short/projects/**/styled.ass
+short/projects/**/animation.html
+
+# Logs & Temporary files
+*.log
+.pytest_cache/
+.eslintcache

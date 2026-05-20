@@ -96,34 +96,53 @@ def get_audio_duration(audio_path: str) -> float:
 def match_keywords_to_timestamps(subtitles: list, keywords: list, total_duration: float) -> list:
     """
     Với mỗi keyword, tìm subtitle entry chứa keyword đó.
-    Trả về danh sách segments (start/end) theo thứ tự thời gian.
+    Nội suy thời điểm xuất hiện của keyword trong câu phụ đề dựa trên vị trí ký tự của nó.
     """
     segments = []
 
     for kw in keywords:
         keyword_lower = kw["keyword"].lower()
-        # Tìm subtitle chứa keyword
         matched = False
+        
+        # 1. Thử match chính xác cụm keyword trong phụ đề
         for sub in subtitles:
-            if keyword_lower in sub["text"].lower():
+            text_lower = sub["text"].lower()
+            if keyword_lower in text_lower:
+                # Nội suy start time dựa trên vị trí ký tự của keyword trong câu
+                char_index = text_lower.find(keyword_lower)
+                total_chars = len(text_lower) if len(text_lower) > 0 else 1
+                sub_duration = sub["end"] - sub["start"]
+                interpolated_start = sub["start"] + (char_index / total_chars) * sub_duration
+                
                 segments.append({
                     "keyword": kw["keyword"],
                     "search_query": kw.get("search_query", kw["keyword"]),
-                    "start": sub["start"],
+                    "start": round(interpolated_start, 2),
                 })
                 matched = True
                 break
 
+        # 2. Nếu không match chính xác, thử tìm từng từ lẻ trong keyword
         if not matched:
-            # Thử match từng từ riêng lẻ trong keyword
             words = keyword_lower.split()
             for sub in subtitles:
                 text_lower = sub["text"].lower()
-                if any(w in text_lower for w in words):
+                # Tìm từ lẻ đầu tiên match được
+                found_word = None
+                for w in words:
+                    if w in text_lower:
+                        found_word = w
+                        break
+                if found_word:
+                    char_index = text_lower.find(found_word)
+                    total_chars = len(text_lower) if len(text_lower) > 0 else 1
+                    sub_duration = sub["end"] - sub["start"]
+                    interpolated_start = sub["start"] + (char_index / total_chars) * sub_duration
+                    
                     segments.append({
                         "keyword": kw["keyword"],
                         "search_query": kw.get("search_query", kw["keyword"]),
-                        "start": sub["start"],
+                        "start": round(interpolated_start, 2),
                     })
                     matched = True
                     break
@@ -141,12 +160,20 @@ def match_keywords_to_timestamps(subtitles: list, keywords: list, total_duration
     # Segment đầu bắt đầu từ 0
     segments[0]["start"] = 0.0
 
-    # Loại bỏ duplicate timestamps
+    # Loại bỏ duplicate timestamps (nếu vẫn còn trùng lặp tuyệt đối)
     unique = [segments[0]]
     for seg in segments[1:]:
+        # Chỉ loại bỏ nếu trùng khớp start time hoàn toàn
         if seg["start"] > unique[-1]["start"]:
             unique.append(seg)
+        elif seg["start"] == unique[-1]["start"]:
+            # Nếu trùng tuyệt đối, dịch chuyển nhẹ 0.3s để giữ lại cả hai
+            seg["start"] = round(seg["start"] + 0.3, 2)
+            unique.append(seg)
+            
     segments = unique
+    # Sort lại sau khi dịch chuyển
+    segments.sort(key=lambda x: x["start"])
 
     # Tính end time cho mỗi segment
     for i in range(len(segments)):
@@ -405,11 +432,14 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Arial,48,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,1,2,50,50,340,1
+Style: Default,Arial Black,72,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,5,1,2,50,50,300,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
+
+    # Sắp xếp các keyword theo độ dài giảm dần để match từ dài trước (tránh lỗi highlight đè)
+    sorted_keywords = sorted(list(keywords_set), key=len, reverse=True)
 
     lines = []
     for sub in subs:
@@ -418,10 +448,12 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         end = f"{sub.end.hours}:{sub.end.minutes:02d}:{sub.end.seconds:02d}.{sub.end.milliseconds // 10:02d}"
         text = sub.text.replace("\n", "\\N")
 
-        # Highlight keywords vàng
-        for kw in keywords_set:
+        # Highlight keywords vàng, sau đó đổi lại màu trắng &HFFFFFF
+        for kw in sorted_keywords:
+            if not kw.strip():
+                continue
             pattern = re.compile(r"(?i)\\b(" + re.escape(kw) + r")\\b")
-            text = pattern.sub(r"{\\c&H00D7FF&}\1{\\r}", text)
+            text = pattern.sub(r"{\\c&H00D7FF&}\1{\\c&HFFFFFF&}", text)
 
         # Fade in 200ms, fade out 100ms
         text = "{\\fad(200,100)}" + text
@@ -508,7 +540,7 @@ def main():
             for d in sorted(PROJECTS_DIR.iterdir()):
                 if d.is_dir():
                     has_audio = (d / "audio.mp3").exists()
-                    has_srt = (d / "subtitles.srt").exists()
+                    has_srt = (d / "subtitles.srt").exists() or (d / "subtitle.srt").exists()
                     status = "✅" if (has_audio and has_srt) else "⏳"
                     print(f"   {status} {d.name}")
         sys.exit(1)
@@ -519,6 +551,8 @@ def main():
     # Check required files
     audio_path = project_dir / "audio.mp3"
     srt_path = project_dir / "subtitles.srt"
+    if not srt_path.exists() and (project_dir / "subtitle.srt").exists():
+        srt_path = project_dir / "subtitle.srt"
     keywords_path = project_dir / "keywords.json"
 
     missing = []
@@ -527,7 +561,7 @@ def main():
     if not audio_path.exists():
         missing.append(f"audio.mp3 (tạo TTS trên Colab)")
     if not srt_path.exists():
-        missing.append(f"subtitles.srt (tạo subtitle)")
+        missing.append(f"subtitles.srt hoặc subtitle.srt (tạo subtitle)")
 
     if missing:
         print(f"❌ Thiếu file trong {project_dir}:")

@@ -1,0 +1,53 @@
+{
+  "script": "Are you using the word get correctly in English? \nThe word get is very versatile, it can mean receive, obtain, or acquire something, \nyou can get a gift, get a job, or get an idea.\n\nYou can also use get to describe a change in situation, \nyou can get tired, get hungry, or get bored, \nit's a very common way to express how you're feeling.\n\nBy using get in different contexts, \nyou can improve your English skills, and get a better understanding of the language.\n\nStart practicing now, and get ready to take your English to the next level, \nfollow for more English learning tips and tricks.",
+  "visual_keywords": [
+    {
+      "keyword": "gift",
+      "search_query": "wrapped gift box morning light"
+    },
+    {
+      "keyword": "job",
+      "search_query": "person working office desk laptop"
+    },
+    {
+      "keyword": "idea",
+      "search_query": "lightbulb moment creative thinking"
+    },
+    {
+      "keyword": "tired",
+      "search_query": "person sleeping bed pillows"
+    },
+    {
+      "keyword": "hungry",
+      "search_query": "person eating food restaurant"
+    },
+    {
+      "keyword": "bored",
+      "search_query": "person staring blank space"
+    },
+    {
+      "keyword": "English skills",
+      "search_query": "person reading book language learning"
+    },
+    {
+      "keyword": "language",
+      "search_query": "globe earth languages flags"
+    },
+    {
+      "keyword": "practicing",
+      "search_query": "person speaking language exchange"
+    },
+    {
+      "keyword": "tips",
+      "search_query": "person giving advice helpful tips"
+    },
+    {
+      "keyword": "tricks",
+      "search_query": "person doing magic tricks"
+    },
+    {
+      "keyword": "level",
+      "search_query": "person climbing stairs success"
+    }
+  ]
+}
