@@ -1,5 +1,5 @@
 """
-Phase 2: Parse SRT + Tải ảnh Pexels + Generate HTML Animation + Record + Merge Audio.
+Phase 2: Parse SRT + Tải media Pexels + Pure FFmpeg Pipeline → Output MP4.
 
 Usage:
     python render_video.py <project_name>
@@ -13,6 +13,7 @@ import json
 import re
 import subprocess
 import shutil
+import random
 from pathlib import Path
 
 # Fix Windows encoding
@@ -24,7 +25,6 @@ import pysrt
 from config import PEXELS_API_KEY
 
 PROJECTS_DIR = Path(__file__).parent / "projects"
-TEMPLATE_PATH = Path(__file__).parent / "template.html"
 
 
 # ============================================================
@@ -91,7 +91,7 @@ def get_audio_duration(audio_path: str) -> float:
 
 
 # ============================================================
-# STEP 2: Match Keywords → Timestamps
+# STEP 2: Match Keywords → Timestamps (Interpolation)
 # ============================================================
 def match_keywords_to_timestamps(subtitles: list, keywords: list, total_duration: float) -> list:
     """
@@ -127,7 +127,6 @@ def match_keywords_to_timestamps(subtitles: list, keywords: list, total_duration
             words = keyword_lower.split()
             for sub in subtitles:
                 text_lower = sub["text"].lower()
-                # Tìm từ lẻ đầu tiên match được
                 found_word = None
                 for w in words:
                     if w in text_lower:
@@ -160,19 +159,17 @@ def match_keywords_to_timestamps(subtitles: list, keywords: list, total_duration
     # Segment đầu bắt đầu từ 0
     segments[0]["start"] = 0.0
 
-    # Loại bỏ duplicate timestamps (nếu vẫn còn trùng lặp tuyệt đối)
+    # Loại bỏ duplicate timestamps
     unique = [segments[0]]
     for seg in segments[1:]:
-        # Chỉ loại bỏ nếu trùng khớp start time hoàn toàn
         if seg["start"] > unique[-1]["start"]:
             unique.append(seg)
         elif seg["start"] == unique[-1]["start"]:
-            # Nếu trùng tuyệt đối, dịch chuyển nhẹ 0.3s để giữ lại cả hai
+            # Nếu trùng tuyệt đối, dịch chuyển nhẹ 0.3s
             seg["start"] = round(seg["start"] + 0.3, 2)
             unique.append(seg)
             
     segments = unique
-    # Sort lại sau khi dịch chuyển
     segments.sort(key=lambda x: x["start"])
 
     # Tính end time cho mỗi segment
@@ -186,7 +183,7 @@ def match_keywords_to_timestamps(subtitles: list, keywords: list, total_duration
 
 
 # ============================================================
-# STEP 3: Download Pexels Media (Video preferred, Image fallback)
+# STEP 3: Download Pexels Media (Random mix video + ảnh)
 # ============================================================
 def download_pexels_video(query: str, save_path: str) -> bool:
     """Tải 1 video từ Pexels Video API."""
@@ -253,13 +250,13 @@ def download_pexels_image(query: str, save_path: str) -> bool:
 
 
 def download_all_media(segments: list, project_dir: Path):
-    """Tải video (ưu tiên) hoặc ảnh cho tất cả segments."""
+    """Tải media cho tất cả segments, random xen kẽ video và ảnh."""
     videos_dir = project_dir / "videos"
     images_dir = project_dir / "images"
     videos_dir.mkdir(exist_ok=True)
     images_dir.mkdir(exist_ok=True)
 
-    for seg in segments:
+    for i, seg in enumerate(segments):
         slug = re.sub(r"[^a-z0-9]+", "_", seg["keyword"].lower()).strip("_")
         seg["image_slug"] = slug
         vid_path = videos_dir / f"{slug}.mp4"
@@ -278,24 +275,43 @@ def download_all_media(segments: list, project_dir: Path):
             print(f"   ✅ Đã có ảnh: {slug}.jpg")
             continue
 
-        # Thử tải video trước
-        print(f"   🎬 Tải video: \"{seg['search_query']}\"...")
-        if download_pexels_video(seg["search_query"], str(vid_path)):
-            seg["media_type"] = "video"
-            seg["has_media"] = True
-            print(f"   ✅ OK video: {slug}.mp4")
-            continue
+        # Random: 55% video, 45% ảnh → tạo sự đa dạng
+        prefer_video = random.random() < 0.55
 
-        # Fallback sang ảnh
-        print(f"   📸 Fallback ảnh: \"{seg['search_query']}\"...")
-        if download_pexels_image(seg["search_query"], str(img_path)):
+        if prefer_video:
+            print(f"   🎬 Tải video: \"{seg['search_query']}\"...")
+            if download_pexels_video(seg["search_query"], str(vid_path)):
+                seg["media_type"] = "video"
+                seg["has_media"] = True
+                print(f"   ✅ OK video: {slug}.mp4")
+                continue
+            # Fallback sang ảnh
+            print(f"   📸 Fallback ảnh...")
+            if download_pexels_image(seg["search_query"], str(img_path)):
+                seg["media_type"] = "image"
+                seg["has_media"] = True
+                print(f"   ✅ OK ảnh: {slug}.jpg")
+                continue
+        else:
+            print(f"   📸 Tải ảnh: \"{seg['search_query']}\"...")
+            if download_pexels_image(seg["search_query"], str(img_path)):
+                seg["media_type"] = "image"
+                seg["has_media"] = True
+                print(f"   ✅ OK ảnh: {slug}.jpg")
+                continue
+            # Fallback sang video
+            print(f"   🎬 Fallback video...")
+            if download_pexels_video(seg["search_query"], str(vid_path)):
+                seg["media_type"] = "video"
+                seg["has_media"] = True
+                print(f"   ✅ OK video: {slug}.mp4")
+                continue
+
+        # Last resort: thử keyword gốc
+        if download_pexels_image(seg["keyword"], str(img_path)):
             seg["media_type"] = "image"
             seg["has_media"] = True
-            print(f"   ✅ OK ảnh: {slug}.jpg")
-        elif download_pexels_image(seg["keyword"], str(img_path)):
-            seg["media_type"] = "image"
-            seg["has_media"] = True
-            print(f"   ✅ OK ảnh (fallback): {slug}.jpg")
+            print(f"   ✅ OK ảnh (keyword): {slug}.jpg")
         else:
             seg["media_type"] = "none"
             seg["has_media"] = False
@@ -303,125 +319,90 @@ def download_all_media(segments: list, project_dir: Path):
 
 
 # ============================================================
-# STEP 4: Generate HTML Animation
+# STEP 4: Process Individual Clips with FFmpeg
 # ============================================================
-def build_subtitle_html(text: str, keywords_set: set) -> str:
-    """Tạo HTML cho subtitle, highlight keywords."""
-    result = text
-    for kw in keywords_set:
-        pattern = re.compile(r"(?i)\b(" + re.escape(kw) + r")\b")
-        result = pattern.sub(r'<span class="highlight">\1</span>', result)
-    return result
+def process_single_clip(seg: dict, idx: int, project_dir: Path, ffmpeg_path: str) -> Path:
+    """Xử lý 1 segment thành clip chuẩn 1080x1920 @ 30fps."""
+    slug = seg.get("image_slug", "unknown")
+    duration = round(seg["end"] - seg["start"], 2)
+    if duration < 0.5:
+        duration = 0.5
 
+    clips_dir = project_dir / "clips"
+    clips_dir.mkdir(exist_ok=True)
+    clip_path = clips_dir / f"clip_{idx:03d}.mp4"
 
-def generate_html(segments: list, subtitles: list, total_duration: float, project_dir: Path) -> Path:
-    """Render HTML animation từ template."""
-    with open(TEMPLATE_PATH, "r", encoding="utf-8") as f:
-        template_content = f.read()
+    media_type = seg.get("media_type", "none")
+    has_media = seg.get("has_media", False)
 
-    keywords_set = {seg["keyword"].lower() for seg in segments}
-
-    # Build timeline data
-    scenes_data = []
-    for i, seg in enumerate(segments):
-        slug = seg.get("image_slug", "unknown")
-        scenes_data.append({
-            "start": round(seg["start"], 3),
-            "end": round(seg["end"], 3),
-            "image_path": f"images/{slug}.jpg",
-            "video_path": f"videos/{slug}.mp4",
-            "media_type": seg.get("media_type", "image"),
-            "has_media": seg.get("has_media", seg.get("has_image", False)),
-            "keyword": seg["keyword"],
-        })
-
-    subs_data = []
-    for sub in subtitles:
-        subs_data.append({
-            "start": round(sub["start"], 3),
-            "end": round(sub["end"], 3),
-            "html": build_subtitle_html(sub["text"], keywords_set),
-        })
-
-    timeline = {
-        "total_duration": round(total_duration, 3),
-        "scenes": scenes_data,
-        "subtitles": subs_data,
-    }
-
-    # Inject data vào template
-    timeline_json = json.dumps(timeline, ensure_ascii=False)
-    html_content = template_content.replace("__TIMELINE_DATA__", timeline_json)
-
-    output_path = project_dir / "animation.html"
-    output_path.write_text(html_content, encoding="utf-8")
-
-    return output_path
-
-
-# ============================================================
-# STEP 5: Record with Playwright
-# ============================================================
-def record_with_playwright(html_path: Path, raw_video_path: Path, duration_ms: int):
-    """Mở HTML trong Chromium headless, record video 1080x1920."""
-    from playwright.sync_api import sync_playwright
-
-    recording_dir = raw_video_path.parent / "_recording_tmp"
-    recording_dir.mkdir(exist_ok=True)
-
-    print(f"   Viewport: 1080x1920 | Duration: {duration_ms/1000:.1f}s")
-
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context(
-            viewport={"width": 1080, "height": 1920},
-            record_video_dir=str(recording_dir),
-            record_video_size={"width": 1080, "height": 1920},
+    if media_type == "video" and has_media:
+        # Video stock: scale/crop sang 1080x1920, trim đúng duration
+        vid_path = project_dir / "videos" / f"{slug}.mp4"
+        vf = "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1"
+        cmd = [
+            ffmpeg_path, "-y",
+            "-i", str(vid_path),
+            "-t", str(duration),
+            "-vf", vf,
+            "-c:v", "libx264", "-preset", "fast", "-crf", "18",
+            "-r", "30", "-an", "-pix_fmt", "yuv420p",
+            str(clip_path),
+        ]
+    elif media_type == "image" and has_media:
+        # Ảnh: Ken Burns effect (slow zoom in)
+        img_path = project_dir / "images" / f"{slug}.jpg"
+        frames = max(int(duration * 30), 15)
+        # Scale ảnh lên lớn hơn 1080x1920 (x1.1) để có headroom cho zoom
+        # zoompan: zoom từ 1.0 → 1.05 từ từ, pan center
+        vf = (
+            "scale=1188:2112:force_original_aspect_ratio=increase,"
+            "crop=1188:2112,"
+            f"zoompan=z='min(zoom+0.0005\\,1.05)'"
+            f":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
+            f":d={frames}:s=1080x1920:fps=30"
         )
-
-        page = context.new_page()
-
-        # Navigate to local HTML file
-        file_url = html_path.resolve().as_uri()
-        page.goto(file_url)
-
-        # Đợi page load + fonts
-        page.wait_for_timeout(500)
-
-        # Animation tự chạy ngay khi page load (auto-start trong template)
-        # Đợi animation chạy hết
-        page.wait_for_timeout(duration_ms + 1500)
-
-        # Lấy path video trước khi close
-        video_path = page.video.path()
-
-        context.close()
-        browser.close()
-
-    # Move recorded file
-    if video_path and os.path.exists(video_path):
-        shutil.move(str(video_path), str(raw_video_path))
-        print(f"   ✅ Recorded: {raw_video_path.name}")
+        cmd = [
+            ffmpeg_path, "-y",
+            "-loop", "1", "-i", str(img_path),
+            "-t", str(duration),
+            "-vf", vf,
+            "-c:v", "libx264", "-preset", "fast", "-crf", "18",
+            "-pix_fmt", "yuv420p",
+            str(clip_path),
+        ]
     else:
-        # Tìm file trong recording dir
-        for f in recording_dir.iterdir():
-            if f.suffix == ".webm":
-                shutil.move(str(f), str(raw_video_path))
-                print(f"   ✅ Recorded: {raw_video_path.name}")
-                break
-        else:
-            print("   ❌ Recording failed!")
-            sys.exit(1)
+        # Gradient fallback (dark indigo)
+        cmd = [
+            ffmpeg_path, "-y",
+            "-f", "lavfi",
+            "-i", f"color=c=0x1e1b4b:s=1080x1920:d={duration}:r=30",
+            "-c:v", "libx264", "-preset", "fast", "-crf", "18",
+            "-pix_fmt", "yuv420p",
+            str(clip_path),
+        ]
 
-    # Cleanup temp dir
-    shutil.rmtree(str(recording_dir), ignore_errors=True)
+    result = subprocess.run(cmd, capture_output=True, text=True, errors="ignore")
+    if result.returncode != 0:
+        print(f"      ⚠️  Clip error, fallback gradient...")
+        # Fallback: gradient
+        cmd_fb = [
+            ffmpeg_path, "-y",
+            "-f", "lavfi",
+            "-i", f"color=c=0x1e1b4b:s=1080x1920:d={duration}:r=30",
+            "-c:v", "libx264", "-preset", "fast", "-crf", "18",
+            "-pix_fmt", "yuv420p",
+            str(clip_path),
+        ]
+        subprocess.run(cmd_fb, capture_output=True, text=True, errors="ignore")
+
+    return clip_path
 
 
 # ============================================================
-# STEP 6: Convert SRT → ASS (styled subtitles)
+# STEP 5: Convert SRT → ASS (styled subtitles - fullscreen friendly)
 # ============================================================
 def srt_to_ass(srt_path: str, ass_path: str, keywords_set: set):
-    """Convert SRT sang ASS với style đẹp + highlight keywords."""
+    """Convert SRT sang ASS với style phù hợp fullscreen video."""
     subs = pysrt.open(srt_path, encoding="utf-8")
 
     header = """[Script Info]
@@ -432,30 +413,29 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Arial Black,72,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,5,1,2,50,50,300,1
+Style: Default,Arial Black,56,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,4,2,2,40,40,120,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
 
-    # Sắp xếp các keyword theo độ dài giảm dần để match từ dài trước (tránh lỗi highlight đè)
+    # Sort keywords theo độ dài giảm dần (tránh highlight đè)
     sorted_keywords = sorted(list(keywords_set), key=len, reverse=True)
 
     lines = []
     for sub in subs:
-        # Format timestamps: H:MM:SS.cs
         start = f"{sub.start.hours}:{sub.start.minutes:02d}:{sub.start.seconds:02d}.{sub.start.milliseconds // 10:02d}"
         end = f"{sub.end.hours}:{sub.end.minutes:02d}:{sub.end.seconds:02d}.{sub.end.milliseconds // 10:02d}"
         text = sub.text.replace("\n", "\\N")
 
-        # Highlight keywords vàng, sau đó đổi lại màu trắng &HFFFFFF
+        # Highlight keywords vàng
         for kw in sorted_keywords:
             if not kw.strip():
                 continue
-            pattern = re.compile(r"(?i)\\b(" + re.escape(kw) + r")\\b")
+            pattern = re.compile(r"(?i)\b(" + re.escape(kw) + r")\b")
             text = pattern.sub(r"{\\c&H00D7FF&}\1{\\c&HFFFFFF&}", text)
 
-        # Fade in 200ms, fade out 100ms
+        # Fade in/out
         text = "{\\fad(200,100)}" + text
 
         lines.append(f"Dialogue: 0,{start},{end},Default,,0,0,0,,{text}")
@@ -469,15 +449,51 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 
 
 # ============================================================
-# STEP 7: Merge Video + Audio + Subtitles with FFmpeg
+# STEP 6: Pure FFmpeg Render Pipeline
 # ============================================================
-def merge_audio_video(video_path: Path, audio_path: Path, srt_path: Path, output_path: Path):
-    """Ghép video + audio + burn subtitle từ SRT bằng FFmpeg."""
+def render_ffmpeg_pipeline(segments: list, project_dir: Path, audio_path: Path, srt_path: Path, audio_duration: float):
+    """Render video hoàn chỉnh bằng pure FFmpeg pipeline."""
     ffmpeg_path = get_ffmpeg_path()
 
-    # Convert SRT → ASS với style
-    ass_path = srt_path.parent / "styled.ass"
-    keywords_json = srt_path.parent / "keywords.json"
+    # ---- Process each segment into individual clip ----
+    print(f"\n🎬 [4/6] Processing {len(segments)} clips with FFmpeg...")
+    clip_paths = []
+    for i, seg in enumerate(segments):
+        duration = round(seg["end"] - seg["start"], 2)
+        media_type = seg.get("media_type", "none")
+        print(f"   [{i+1}/{len(segments)}] {seg['keyword']:<20} {duration:.1f}s [{media_type}]")
+        clip_path = process_single_clip(seg, i, project_dir, ffmpeg_path)
+        clip_paths.append(clip_path)
+    print(f"   ✅ Processed {len(clip_paths)} clips")
+
+    # ---- Concat all clips ----
+    print(f"\n🔗 [5/6] Concatenating {len(clip_paths)} clips...")
+    concat_list = project_dir / "concat_list.txt"
+    with open(concat_list, "w", encoding="utf-8") as f:
+        for cp in clip_paths:
+            safe_path = str(cp.resolve()).replace("\\", "/")
+            f.write(f"file '{safe_path}'\n")
+
+    concat_raw = project_dir / "concat_raw.mp4"
+    cmd_concat = [
+        ffmpeg_path, "-y",
+        "-f", "concat", "-safe", "0",
+        "-i", str(concat_list),
+        "-c", "copy",
+        str(concat_raw),
+    ]
+    result = subprocess.run(cmd_concat, capture_output=True, text=True, errors="ignore")
+    if result.returncode != 0:
+        print(f"   ⚠️  Concat error: {result.stderr[-300:]}")
+        sys.exit(1)
+    print(f"   ✅ Concatenated → {concat_raw.name}")
+
+    # ---- Add audio + burn subtitles ----
+    print(f"\n🔊 [6/6] Adding audio + burning subtitles...")
+
+    # Convert SRT → ASS
+    ass_path = project_dir / "styled.ass"
+    keywords_json = project_dir / "keywords.json"
     keywords_set = set()
     if keywords_json.exists():
         with open(keywords_json, "r", encoding="utf-8") as f:
@@ -487,26 +503,22 @@ def merge_audio_video(video_path: Path, audio_path: Path, srt_path: Path, output
     srt_to_ass(str(srt_path), str(ass_path), keywords_set)
     print(f"   ✅ Created styled.ass")
 
-    # Chạy FFmpeg từ project dir → dùng relative path tránh lỗi Windows escape
-    project_dir = srt_path.parent
+    output_path = project_dir / "output.mp4"
 
-    cmd = [
+    # Chạy FFmpeg từ project dir để dùng relative path cho ASS
+    cmd_final = [
         ffmpeg_path, "-y",
-        "-i", str(video_path.resolve()),
+        "-i", str(concat_raw.resolve()),
         "-i", str(audio_path.resolve()),
         "-vf", "ass=styled.ass",
-        "-c:v", "libx264",
-        "-preset", "fast",
-        "-crf", "18",
-        "-c:a", "aac",
-        "-b:a", "192k",
-        "-shortest",
-        "-movflags", "+faststart",
+        "-c:v", "libx264", "-preset", "fast", "-crf", "18",
+        "-c:a", "aac", "-b:a", "192k",
+        "-shortest", "-movflags", "+faststart",
         str(output_path.resolve()),
     ]
 
-    print(f"   Command: ffmpeg -i {video_path.name} -i {audio_path.name} + ass → {output_path.name}")
-    result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(project_dir))
+    print(f"   Merging: video + audio + subtitles → output.mp4")
+    result = subprocess.run(cmd_final, capture_output=True, text=True, errors="ignore", cwd=str(project_dir))
 
     if result.returncode != 0:
         print(f"   ⚠️  ASS filter failed, trying without subtitles...")
@@ -514,19 +526,33 @@ def merge_audio_video(video_path: Path, audio_path: Path, srt_path: Path, output
         # Fallback: merge without subtitles
         cmd_fallback = [
             ffmpeg_path, "-y",
-            "-i", str(video_path),
-            "-i", str(audio_path),
+            "-i", str(concat_raw.resolve()),
+            "-i", str(audio_path.resolve()),
             "-c:v", "libx264", "-preset", "fast", "-crf", "18",
             "-c:a", "aac", "-b:a", "192k",
             "-shortest", "-movflags", "+faststart",
-            str(output_path),
+            str(output_path.resolve()),
         ]
-        result = subprocess.run(cmd_fallback, capture_output=True, text=True)
+        result = subprocess.run(cmd_fallback, capture_output=True, text=True, errors="ignore")
         if result.returncode != 0:
             print(f"   ❌ FFmpeg error:\n{result.stderr[-500:]}")
             sys.exit(1)
 
     print(f"   ✅ Output: {output_path}")
+
+    # Cleanup temporary files
+    for cp in clip_paths:
+        if cp.exists():
+            cp.unlink()
+    clips_dir = project_dir / "clips"
+    if clips_dir.exists():
+        shutil.rmtree(str(clips_dir), ignore_errors=True)
+    if concat_list.exists():
+        concat_list.unlink()
+    if concat_raw.exists():
+        concat_raw.unlink()
+
+    return output_path
 
 
 # ============================================================
@@ -557,11 +583,11 @@ def main():
 
     missing = []
     if not keywords_path.exists():
-        missing.append(f"keywords.json (chạy generate_script.py trước)")
+        missing.append("keywords.json (chạy generate_script.py trước)")
     if not audio_path.exists():
-        missing.append(f"audio.mp3 (tạo TTS trên Colab)")
+        missing.append("audio.mp3 (tạo TTS trên Colab)")
     if not srt_path.exists():
-        missing.append(f"subtitles.srt hoặc subtitle.srt (tạo subtitle)")
+        missing.append("subtitles.srt hoặc subtitle.srt (tạo subtitle)")
 
     if missing:
         print(f"❌ Thiếu file trong {project_dir}:")
@@ -584,7 +610,7 @@ def main():
         audio_duration = subtitles[-1]["end"] if subtitles else 45.0
     print(f"   Audio duration: {audio_duration:.1f}s")
 
-    # ---- Step 2: Load & match keywords ----
+    # ---- Step 2: Match keywords ----
     print(f"\n🔗 [2/6] Matching keywords → timestamps...")
     with open(keywords_path, "r", encoding="utf-8") as f:
         kw_data = json.load(f)
@@ -592,33 +618,16 @@ def main():
     print(f"   Keywords: {[k['keyword'] for k in keywords]}")
 
     segments = match_keywords_to_timestamps(subtitles, keywords, audio_duration)
-    print(f"   Segments tạo được: {len(segments)}")
+    print(f"   Segments: {len(segments)}")
     for seg in segments:
         print(f"     [{seg['start']:.1f}s - {seg['end']:.1f}s] {seg['keyword']}")
 
-    # ---- Step 3: Download Pexels media (video preferred) ----
-    print(f"\n📥 [3/6] Downloading Pexels media (video + ảnh)...")
+    # ---- Step 3: Download media (random mix) ----
+    print(f"\n📥 [3/6] Downloading Pexels media (random video + ảnh)...")
     download_all_media(segments, project_dir)
 
-    # ---- Step 4: Generate HTML ----
-    print(f"\n🎨 [4/6] Generating HTML animation...")
-    html_path = generate_html(segments, subtitles, audio_duration, project_dir)
-    print(f"   ✅ {html_path.name}")
-    print(f"   👀 Preview: {html_path.resolve().as_uri()}")
-
-    # ---- Step 5: Record with Playwright ----
-    print(f"\n🎬 [5/6] Recording animation (chờ {audio_duration:.0f}s real-time)...")
-    raw_video = project_dir / "raw_recording.webm"
-    record_with_playwright(html_path, raw_video, int(audio_duration * 1000))
-
-    # ---- Step 6: Merge audio + burn subtitles ----
-    print(f"\n🔊 [6/6] Merging audio + burning subtitles...")
-    output_path = project_dir / "output.mp4"
-    merge_audio_video(raw_video, audio_path, srt_path, output_path)
-
-    # Cleanup raw recording
-    if raw_video.exists():
-        raw_video.unlink()
+    # ---- Steps 4-6: Pure FFmpeg Pipeline ----
+    output_path = render_ffmpeg_pipeline(segments, project_dir, audio_path, srt_path, audio_duration)
 
     print(f"\n{'='*60}")
     print(f"🎉 HOÀN TẤT!")
