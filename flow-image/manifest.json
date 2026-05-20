@@ -1,0 +1,33 @@
+{
+   "background": {
+      "service_worker": "background.js"
+   },
+   "content_scripts": [ {
+      "js": [ "qw-4d5e6f7a.js" ],
+      "matches": [ "https://labs.google/fx/*/tools/flow/*", "https://labs.google/fx/tools/flow/*" ],
+      "run_at": "document_start",
+      "world": "MAIN"
+   }, {
+      "js": [ "zr-7f2a1b3c.js" ],
+      "matches": [ "https://labs.google/fx/*/tools/flow/*", "https://labs.google/fx/tools/flow/*" ],
+      "run_at": "document_start",
+      "world": "ISOLATED"
+   } ],
+   "description": "Automate Google Flow, batch image & video generation with Veo 3.1, Nano Banana Pro, auto 4K upscale & bulk download.",
+   "host_permissions": [ "https://labs.google/*", "https://turboflow-server.vercel.app/*", "https://*.lemonsqueezy.com/*" ],
+   "icons": {
+      "128": "icons/icon128.png",
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3EBenyEvHnjvqHGIacbrIDrV8eev2zOAanOI4KALb2RuVOkWeQOqbY+1Az9D40FY83w4txUN+hV41msJnkHqHSlcY4WJDjpW/2oYlsTTrm6gqC+P5XJuzGadgG4bEQUnm31BAAOeTN8xs0t8dZm3zcv9Q4CCcK7I4PYZuHhy8ZGwpYrgoC3NNYEYrq8vxh6Z01f0Mi/+tcGxrM3VszCqOoaZZq/yD1O+5ri3TXc328W7YYLVzUtsTbiprtJ/jDxqKvS8uTZnsXLhYYCZcUNT9AzSeXuOQJmXfam0rf0vRhc3xy9ZmITv0cDuN9I4hUMjpkfR7n7r7EwaGX4nVqqFDwIDAQAB",
+   "manifest_version": 3,
+   "name": "TurboFlow - Auto Veo & Nano Banana Pro on Google Flow",
+   "permissions": [ "identity", "sidePanel", "scripting", "storage", "tabs", "downloads", "activeTab", "alarms" ],
+   "side_panel": {
+      "default_path": "sidepanel.html"
+   },
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "2.2.5"
+}
