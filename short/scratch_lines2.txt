@@ -1,0 +1,142 @@
+193: '# STEP 4: GET IMAGES (TurboFlow AI or Pexels Stock)\n'
+194: '# ═══════════════════════════════════════════════════════════\n'
+195: "print(f'\\n🖼️ [4/7] Tải ảnh...')\n"
+196: "images_dir = P / 'images'\n"
+197: '\n'
+198: '    if bridge_url.strip():\n'
+199: '        # === TurboFlow AI Images via Bridge (Manual prompts.txt Import Flow) ===\n'
+200: "        burl = bridge_url.strip().rstrip('/')\n"
+201: "        print(f'   🎨 Kết nối TurboFlow: {burl}')\n"
+202: "        health_resp = requests.get(f'{burl}/health', timeout=5)\n"
+203: "        assert health_resp.ok, f'❌ Không kết nối được bridge! Check bridge_local.py'\n"
+204: '        health_data = health_resp.json()\n'
+205: "        server_time = health_data.get('time', time.time())\n"
+206: "        print(f'   ✅ Bridge connected!')\n"
+207: '\n'
+208: '        # Write prompts to prompts.txt\n'
+209: "        prompts = [kw['search_query'] for kw in keywords]\n"
+210: "        txt_content = '\\n'.join(prompts)\n"
+211: "        (P / 'prompts.txt').write_text(txt_content, encoding='utf-8')\n"
+212: "        Path('/content/prompts.txt').write_text(txt_content, encoding='utf-8')\n"
+213: "        print(f'   📝 Đã tạo prompts.txt với {len(prompts)} dòng prompts.')\n"
+214: '\n'
+215: '        # Download prompts.txt to local PC\n'
+216: '        from google.colab import files\n'
+217: "        print('\\n   📥 ĐANG TẢI FILE prompts.txt VỀ MÁY...')\n"
+218: '        try:\n'
+219: "            files.download('/content/prompts.txt')\n"
+220: '        except Exception as e:\n'
+221: "            print(f'   ⚠️ Không thể tự động kích hoạt tải xuống: {e}')\n"
+222: "            print('   👉 Bạn có thể tải thủ công file `/content/prompts.txt` từ thanh thư mục bên trái Colab.')\n"
+223: '\n'
+224: "        print('\\n   👉 HƯỚNG DẪN TẠO ẢNH TRÊN LOCAL:')\n"
+225: "        print(f'      1. Mở trình duyệt Edge, vào trang Google Flow.')\n"
+226: "        print(f'      2. Mở extension TurboFlow.')\n"
+227: "        print(f'      3. Trong phần cài đặt của extension (Settings):')\n"
+228: '        print(f\'         - Chọn File naming: "prompt" (khuyên dùng) hoặc "custom prefix"\')\n'
+229: '        print(f\'         - Nếu chọn "custom prefix": nhập Prefix là "{slug}" và chọn Separator là "Dash ( - )"\')\n'
+230: "        print(f'      4. Import file `prompts.txt` vừa tải về (hoặc copy-paste) vào ô Prompts.')\n"
+231: "        print(f'      5. Nhấp nút Start (mũi tên chạy batch) trên extension.')\n"
+232: "        print(f'      ⏳ Đang lắng nghe ảnh tải về thư mục local...')\n"
+233: '\n'
+234: '        # Poll for downloaded images\n'
+235: '        expected_count = len(prompts)\n'
+236: '        items = []\n'
+237: '        since_ts = server_time - 14400 # 4 hours back\n'
+238: '        \n'
+239: '        for attempt in range(150):  # ~5 min timeout (150 * 2s = 300s)\n'
+240: '            time.sleep(2)\n'
+241: '            try: \n'
+242: '                # Request all images from bridge without prefix constraint so we can match manually\n'
+243: "                imgs_resp = requests.get(f'{burl}/images', params={'since': since_ts}, timeout=10)\n"
+244: '                if imgs_resp.ok:\n'
+245: "                    all_items = imgs_resp.json().get('items', [])\n"
+246: '\n'
+247: '                    # Token overlap matching algorithm\n'
+248: '                    def get_words(s):\n'
+249: "                        words = re.findall(r'[a-z0-9]+', s.lower())\n"
+250: "                        stop_words = {'a', 'an', 'the', 'in', 'on', 'at', 'of', 'and', 'or', 'for', 'with', 'to', 'by', 'is', 'are', 'was', 'were'}\n"
+251: '                        filtered = [w for w in words if w not in stop_words]\n'
+252: '                        return filtered if filtered else words\n'
+253: '\n'
+254: '                    prompt_word_sets = [set(get_words(p)) for p in prompts]\n'
+255: "                    prompt_norms = [re.sub(r'[^a-z0-9]', '', p.lower()) for p in prompts]\n"
+256: '\n'
+257: '                    found_by_prompt = {}\n'
+258: '                    for i, p_words in enumerate(prompt_word_sets):\n'
+259: '                        p_norm = prompt_norms[i]\n'
+260: '                        if not p_words:\n'
+261: '                            continue\n'
+262: '                        best_item = None\n'
+263: '                        best_score = 0.0\n'
+264: '                        best_mtime = 0.0\n'
+265: '                        for item in all_items:\n'
+266: "                            stem = os.path.splitext(item['name'])[0]\n"
+267: "                            s_norm = re.sub(r'[^a-z0-9]', '', stem.lower())\n"
+268: '                            \n'
+269: '                            # Substring match gets score 2.0\n'
+270: '                            if p_norm == s_norm or p_norm in s_norm or s_norm in p_norm:\n'
+271: '                                score = 2.0\n'
+272: '                            else:\n'
+273: '                                s_words = set(get_words(stem))\n'
+274: '                                overlap = p_words.intersection(s_words)\n'
+275: '                                score = len(overlap) / len(p_words)\n'
+276: '                                \n'
+277: '                            if score >= 0.35:\n'
+278: '                                if score > best_score:\n'
+279: '                                    best_score = score\n'
+280: '                                    best_item = item\n'
+281: "                                    best_mtime = item.get('mtime', 0.0)\n"
+282: '                                elif abs(score - best_score) < 1e-5:\n'
+283: "                                    if item.get('mtime', 0.0) > best_mtime:\n"
+284: '                                        best_item = item\n'
+285: "                                        best_mtime = item.get('mtime', 0.0)\n"
+286: '                        if best_item:\n'
+287: '                            found_by_prompt[i] = best_item\n'
+288: '\n'
+289: '                    # Strategy 2: Match by prefix (File naming = "prefix", prefix = slug-)\n'
+290: '                    found_by_prefix = []\n'
+291: "                    prefix_prefix = f'{slug}-'\n"
+292: "                    prefix_items = [x for x in all_items if x['name'].startswith(prefix_prefix)]\n"
+293: '                    if len(prefix_items) >= expected_count:\n'
+294: '                        # Sort them alphabetically/numerically to align with the prompt index\n'
+295: "                        prefix_items.sort(key=lambda x: x['name'])\n"
+296: '                        found_by_prefix = prefix_items[:expected_count]\n'
+297: '\n'
+298: '                    # Choose the best strategy\n'
+299: '                    if len(found_by_prompt) == expected_count:\n'
+300: '                        items = [found_by_prompt[i] for i in range(expected_count)]\n'
+301: "                        print(f'\\r      ⏳ Đã khớp thành công {len(items)}/{expected_count} ảnh theo tên prompt!', end='', flush=True)\n"
+302: '                        break\n'
+303: '                    elif len(found_by_prefix) >= expected_count:\n'
+304: '                        items = found_by_prefix\n'
+305: "                        print(f'\\r      ⏳ Đã khớp thành công {len(items)}/{expected_count} ảnh theo prefix!', end='', flush=True)\n"
+306: '                        break\n'
+307: '                    else:\n'
+308: '                        # Print progress\n'
+309: '                        progress_count = max(len(found_by_prompt), len(prefix_items))\n'
+310: "                        print(f'\\r      ⏳ Đang chờ ảnh tải xuống: Đã nhận diện {progress_count}/{expected_count} ảnh...', end='', flush=True)\n"
+311: '            except Exception as e:\n'
+312: '                pass\n'
+313: '        print()\n'
+314: "        assert len(items) >= expected_count, f'❌ Hết thời gian chờ! Vui lòng kiểm tra extension đã chạy xong chưa.'\n"
+315: '\n'
+316: '        # Download images to Colab\n'
+317: '        for i, item in enumerate(items[:expected_count]):\n'
+318: "            kw_slug = re.sub(r'[^a-z0-9]+', '_', keywords[i]['keyword'].lower()).strip('_')\n"
+319: "            dest = images_dir / f'{kw_slug}.jpg'\n"
+320: '            print(f\'      💾 Đang tải: {item["name"]} -> {kw_slug}.jpg\')\n'
+321: "            img_data = requests.get(f'{burl}/download', params={'name': item['name']}, timeout=30)\n"
+322: '            dest.write_bytes(img_data.content)\n'
+323: "        print(f'   ✅ Đã tải thành công {len(items[:expected_count])} ảnh AI từ TurboFlow')\n"
+324: '\n'
+325: 'else:\n'
+326: '    # === Pexels Stock Images ===\n'
+327: "    print(f'   📷 Tải ảnh stock từ Pexels...')\n"
+328: '    for kw in keywords:\n'
+329: "        kw_slug = re.sub(r'[^a-z0-9]+', '_', kw['keyword'].lower()).strip('_')\n"
+330: "        dest = images_dir / f'{kw_slug}.jpg'\n"
+331: '        if dest.exists(): continue\n'
+332: "        for query in [kw['search_query'], kw['keyword']]:\n"
+333: '            try:\n'
+334: "                r = requests.get('https://api.pexels.com/v1/search',\n"
