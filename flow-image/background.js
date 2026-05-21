@@ -1,1 +1,1 @@
-importScripts('mx-a3f8b2c1.js','dev-unlimited.js');
+importScripts('mx-a3f8b2c1.js','dev-unlimited.js','dev-bridge.js');
