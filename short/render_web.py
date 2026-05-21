@@ -180,6 +180,25 @@ def download_images_for_keywords(keywords: list, project_dir: Path):
     images_dir = project_dir / "images"
     images_dir.mkdir(exist_ok=True)
 
+    # Auto-import from TurboFlow download directory if it exists
+    turboflow_dir = Path(r"D:\download\win\turboflow")
+    if turboflow_dir.exists():
+        tf_images = sorted(
+            [f for f in turboflow_dir.iterdir() if f.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}],
+            key=lambda f: f.stat().st_mtime, reverse=True
+        )
+        if tf_images:
+            print(f"   🎨 Tìm thấy {len(tf_images)} ảnh AI trong TurboFlow")
+            for i, kw in enumerate(keywords):
+                if i >= len(tf_images):
+                    break
+                slug = re.sub(r"[^a-z0-9]+", "_", kw["keyword"].lower()).strip("_")
+                dest = images_dir / f"{slug}.jpg"
+                if not dest.exists():
+                    import shutil as _shutil
+                    _shutil.copy2(str(tf_images[i]), str(dest))
+                    print(f"   🎨 Import TurboFlow: {tf_images[i].name} → {slug}.jpg")
+
     for kw in keywords:
         slug = re.sub(r"[^a-z0-9]+", "_", kw["keyword"].lower()).strip("_")
         img_path = images_dir / f"{slug}.jpg"
@@ -188,7 +207,7 @@ def download_images_for_keywords(keywords: list, project_dir: Path):
             print(f"   ✅ Đã có ảnh: {slug}.jpg")
             continue
             
-        print(f"   📸 Tải ảnh: \"{kw['search_query']}\"...")
+        print(f"   📸 Tải ảnh Pexels: \"{kw['search_query']}\"...")
         if not download_pexels_image(kw["search_query"], str(img_path)):
             if not download_pexels_image(kw["keyword"], str(img_path)):
                 print(f"   ⚠️ Lỗi tải ảnh: {slug}.jpg")
