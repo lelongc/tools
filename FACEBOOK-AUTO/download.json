@@ -1,0 +1,157 @@
+{
+  "_description": "File ghi lại thao tác người dùng trên trình duyệt. Dùng để phân tích workflow và xây dựng bot tự động hóa.",
+  "_format_version": "1.0",
+  "_instructions_for_ai": "Mỗi event trong mảng 'events' đại diện một thao tác của người dùng. Dùng 'element.bestSelector' làm CSS selector chính khi build bot. 'timeSincePrevMs' cho biết khoảng delay giữa các bước (đơn vị ms). 'element.textContent' chứa nội dung text hiển thị. Với event type='input', field 'value' chứa nội dung người dùng đã gõ vào. Với type='click', field 'mouse' chứa tọa độ click.",
+  "meta": {
+    "startTime": "2026-05-21T14:48:46.928Z",
+    "endTime": "2026-05-21T14:48:59.063Z",
+    "duration": "0m12s",
+    "durationMs": 12135,
+    "totalEvents": 5,
+    "eventBreakdown": {
+      "click": 3,
+      "scroll": 1,
+      "focus": 1
+    },
+    "pagesVisited": [
+      "https://www.facebook.com/groups/1840850679540577"
+    ]
+  },
+  "events": [
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div > div > div > div",
+        "className": "x6s0dn4 x78zum5 x1l90r2v xv54qhq xf7dkkf xz9dl7a",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 72,
+          "width": 592,
+          "x": 290,
+          "y": 273
+        },
+        "role": "",
+        "tag": "DIV",
+        "textContent": "Bạn viết gì đi...",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]"
+      },
+      "mouse": {
+        "clientX": 528,
+        "clientY": 337
+      },
+      "timeFormatted": "21:48:54",
+      "timeSincePrevMs": 7529,
+      "timestamp": 1779374934462,
+      "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div > div[role=\"button\"] > div > span",
+        "className": "x1lliihq x6ikm8r x10wlt62 x1n2onr6",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 28,
+          "width": 488,
+          "x": 366,
+          "y": 293
+        },
+        "role": "",
+        "tag": "SPAN",
+        "textContent": "Bạn viết gì đi...",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/span[1]"
+      },
+      "mouse": {
+        "clientX": 545,
+        "clientY": 302
+      },
+      "timeFormatted": "21:48:56",
+      "timeSincePrevMs": 1787,
+      "timestamp": 1779374936249,
+      "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "documentHeight": 836,
+      "scrollLeft": 0,
+      "scrollTop": 0,
+      "timeFormatted": "21:48:56",
+      "timeSincePrevMs": 616,
+      "timestamp": 1779374936865,
+      "type": "scroll",
+      "url": "https://www.facebook.com/groups/1840850679540577",
+      "viewportHeight": 782
+    },
+    {
+      "element": {
+        "ariaLabel": "Tạo bài viết công khai...",
+        "bestSelector": "textarea[aria-label=\"Tạo\\ bài\\ viết\\ công\\ khai\\.\\.\\.\"]",
+        "className": "xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 xzsf02u xngnso2 x1xlr1w8 x1u7k74 x1a2a7pz x6ikm8r x10wlt62 x18d9i69 xexx8yu xf7dkkf xv54qhq xtt52l0 xh8yej3 x2s2ed0",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "Tạo bài viết công khai...",
+        "rect": {
+          "height": 38,
+          "width": 500,
+          "x": 556,
+          "y": 268
+        },
+        "role": "",
+        "tag": "TEXTAREA",
+        "textContent": "",
+        "type": "textarea",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
+      },
+      "timeFormatted": "21:48:57",
+      "timeSincePrevMs": 510,
+      "timestamp": 1779374937375,
+      "type": "focus",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "Tạo bài viết công khai...",
+        "bestSelector": "textarea[aria-label=\"Tạo\\ bài\\ viết\\ công\\ khai\\.\\.\\.\"]",
+        "className": "xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 xzsf02u xngnso2 x1xlr1w8 x1u7k74 x1a2a7pz x6ikm8r x10wlt62 x18d9i69 xexx8yu xf7dkkf xv54qhq xtt52l0 xh8yej3 x2s2ed0",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "Tạo bài viết công khai...",
+        "rect": {
+          "height": 38,
+          "width": 500,
+          "x": 556,
+          "y": 268
+        },
+        "role": "",
+        "tag": "TEXTAREA",
+        "textContent": "",
+        "type": "textarea",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
+      },
+      "mouse": {
+        "clientX": 858,
+        "clientY": 302
+      },
+      "timeFormatted": "21:48:59",
+      "timeSincePrevMs": 1688,
+      "timestamp": 1779374939063,
+      "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    }
+  ]
+}
