@@ -76,9 +76,8 @@ Extract exactly 10-12 concrete nouns, actions, or phrases from YOUR script, in s
 }}"""
 
 def generate_script(topic: str) -> dict:
-    url = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key={GEMINI_API_KEY.strip()}"
     headers = {
-        "Authorization": f"Bearer {GEMINI_API_KEY}",
         "Content-Type": "application/json",
     }
 
@@ -92,13 +91,21 @@ def generate_script(topic: str) -> dict:
     data = {}
     for attempt in range(max_retries):
         try:
+            gemini_contents = []
+            system_instruction = None
+            for msg in messages:
+                if msg['role'] == 'system':
+                    system_instruction = {'parts': [{'text': msg['content']}]}
+                else:
+                    role = 'user' if msg['role'] == 'user' else 'model'
+                    gemini_contents.append({'role': role, 'parts': [{'text': msg['content']}]})
+            
             body = {
-                "model": "gemini-1.5-flash",
-                "messages": messages,
-                "response_format": {"type": "json_object"},
-                "temperature": 0.7,
-                "max_tokens": 2000,
+                'contents': gemini_contents,
+                'generationConfig': {'responseMimeType': 'application/json', 'temperature': 0.7}
             }
+            if system_instruction:
+                body['systemInstruction'] = system_instruction
             resp = http_requests.post(url, headers=headers, json=body, timeout=30)
             if resp.status_code == 429 and attempt < max_retries - 1:
                 wait = 10
@@ -108,7 +115,7 @@ def generate_script(topic: str) -> dict:
             resp.raise_for_status()
             
             result = resp.json()
-            raw = result["choices"][0]["message"]["content"].strip()
+            raw = result["candidates"][0]["content"]["parts"][0]["text"].strip()
             raw = re.sub(r"^```json\s*", "", raw)
             raw = re.sub(r"\s*```$", "", raw)
             data = json.loads(raw)
