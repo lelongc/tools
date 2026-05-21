@@ -37,7 +37,9 @@ Hệ thống sẽ:
    - Sinh kịch bản AI (Groq)
    - Tạo giọng đọc (Qwen3-TTS)
    - Tạo phụ đề sync từng từ (Whisper)
-   - Gửi prompt → TurboFlow gen ảnh AI → Kéo ảnh về Colab
+   - Tải file `prompts.txt` xuống máy tính của bạn.
+   - Nhập/paste file này vào extension TurboFlow (Edge), đặt File naming là **prompt** (khuyên dùng, file được lưu theo tên prompt) hoặc **custom prefix** (Prefix là tên slug của dự án), và bấm Start.
+   - Colab tự phát hiện và tải các ảnh hoàn thiện về.
    - Render video hoàn chỉnh (Playwright + FFmpeg)
 6. **Cell 4**: Tải video `.mp4` về máy
 

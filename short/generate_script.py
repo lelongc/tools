@@ -25,48 +25,59 @@ PROJECTS_DIR = Path(__file__).parent / "projects"
 
 PROMPT_TEMPLATE = """You are a top-tier viral YouTube Shorts scriptwriter and English language educator. Write an engaging English learning/storytelling script about: "{topic}"
 
-## CRITICAL LENGTH REQUIREMENT:
-- The script MUST be 120-140 words long. This is non-negotiable.
-- At normal speaking pace, 120-140 words = approximately 45-50 seconds of audio.
+## CRITICAL LENGTH & DURATION REQUIREMENT:
+- The script MUST be around 150 words (strictly between 140 and 155 words). This is a hard requirement.
+- At normal speaking pace, 150 words = approximately 50 seconds of audio.
+- Do NOT be brief. Elaborate on the explanations, use vivid details, storytelling, and multiple practical examples to ensure the script reaches the target length.
 - Write in a flowing, storytelling narrative — NOT a bullet-point list.
 - Use clear, professional, yet conversational English, making it perfect for English learners to listen and study.
 - Highlight or use useful vocabulary, expressions, or idiomatic phrases relevant to the topic.
+- To hit exactly ~150 words, please structure the script length paragraph by paragraph as follows:
+  * Paragraph 1 (HOOK): ~25 words (1-2 sentences).
+  * Paragraph 2 (BODY 1): ~30 words (2-3 sentences).
+  * Paragraph 3 (BODY 2): ~30 words (2-3 sentences).
+  * Paragraph 4 (BODY 3): ~35 words (2-3 sentences).
+  * Paragraph 5 (CTA): ~30 words (2 sentences).
+  * Total Target: 150 words.
+- You MUST count the words in your generated script before outputting. If it is less than 140 words or more than 155 words, rewrite and adjust it to fit the range.
 
 ## PUNCTUATION RULES (TTS system reads these as timing cues):
 - COMMAS (,) = chain actions smoothly in one breath, no pause. Use these to connect flowing descriptions.
 - PERIODS (.) QUESTION MARKS (?) EXCLAMATION (!) SEMICOLONS (;) COLONS (:) = end of sentence, brief 0.1s pause.
 - BLANK LINES between paragraphs = dramatic 0.35s pause for emphasis.
 - NEVER use ellipsis (...). Use a period or new paragraph instead.
+- Do NOT include any markdown bold (* or **) or italic inside the script text.
 
 ## SCRIPT STRUCTURE:
 - Paragraph 1 (HOOK): An attention-grabbing question or shocking fact related to the topic. 1-2 sentences max.
 - Paragraphs 2-4 (BODY): Educational, informative, or vivid storytelling. Introduce key English vocabulary, idioms, or communication tips and use them in context.
 - Final paragraph (CTA): Short call to action encouraging viewers to practice or subscribe.
 
-## EXAMPLE SCRIPT (topic: "Why you should wake up at 5 AM"):
+## EXAMPLE SCRIPT (topic: "Why you should wake up at 5 AM" - EXACTLY 150 WORDS):
 
-You are wasting the most powerful hours of your day.
-Most people wake up at eight, rush through breakfast, and start their day already behind.
+You are wasting the most valuable and quiet hours of your entire day.
+Most people wake up around eight, rush through a quick breakfast, and start their day feeling stressed and already behind.
 
-But imagine this; your alarm goes off at five, the world is silent, the air is cool, and you have three full hours before anyone else is even awake.
-You pour yourself a glass of cold water, sit at your desk, and start working on the thing that actually matters to you.
-No notifications, no distractions, no noise.
+But imagine this instead; your alarm goes off at five in the morning, the whole world is silent, the air is clean, and you have three full hours before anyone else is awake.
+You pour yourself a glass of cold water, sit comfortably at your desk, and start working on the project that actually matters to you.
+No phone notifications, no social media distractions, and no noise.
 
-By the time everyone else opens their eyes, you have already exercised, planned your entire day, and finished your most important task.
-You feel unstoppable, focused, and three steps ahead.
+By the time everyone else finally opens their eyes, you have already exercised, planned your entire day, and completed your most important task.
+You feel completely unstoppable, highly focused, and three steps ahead of everyone.
 
-That is the power of waking up early.
-Follow for more daily productivity hacks.
+That is the true power of early rising.
+Follow us for more daily productivity hacks.
 
 ## VISUAL KEYWORDS:
 Extract exactly 10-12 concrete nouns, actions, or phrases from YOUR script, in strict order of appearance.
 - They MUST be evenly distributed throughout the script (roughly one keyword/action for every 10-15 words).
 - This is to ensure a new visual appears on screen every 4-5 seconds.
 - "keyword": 1-3 words that appear literally in the script.
-- "search_query": 3-6 word descriptive phrase for Pexels search (prefer high-quality portrait/vertical videos/images that match the keyword's mood/concept perfectly).
+- "search_query": 3-6 word descriptive phrase for image generation (prefer high-quality portrait/vertical images that match the keyword's concept perfectly).
 
 ## OUTPUT (valid JSON only, no markdown, no explanation):
 {{
+  "word_count": 150,
   "script": "Full script here with blank lines between paragraphs.",
   "visual_keywords": [
     {{"keyword": "alarm", "search_query": "alarm clock morning dark bedroom"}},
@@ -84,21 +95,22 @@ def generate_script(topic: str) -> dict:
     }
 
     prompt = PROMPT_TEMPLATE.format(topic=topic)
-
-    body = {
-        "model": "llama-3.3-70b-versatile",
-        "messages": [
-            {"role": "system", "content": "You are a JSON-only response bot. Always return valid JSON."},
-            {"role": "user", "content": prompt},
-        ],
-        "response_format": {"type": "json_object"},
-        "temperature": 0.8,
-        "max_tokens": 2000,
-    }
+    messages = [
+        {"role": "system", "content": "You are a JSON-only response bot. Always return valid JSON with keys: word_count, script, and visual_keywords. You MUST strictly follow the word count limits and constraints. Make sure the generated script has around 150 words, absolutely between 140 and 155 words (target 150 words)."},
+        {"role": "user", "content": prompt},
+    ]
 
     max_retries = 3
+    data = {}
     for attempt in range(max_retries):
         try:
+            body = {
+                "model": "llama-3.3-70b-versatile",
+                "messages": messages,
+                "response_format": {"type": "json_object"},
+                "temperature": 0.7,
+                "max_tokens": 2000,
+            }
             resp = http_requests.post(url, headers=headers, json=body, timeout=30)
             if resp.status_code == 429 and attempt < max_retries - 1:
                 wait = 30
@@ -106,21 +118,42 @@ def generate_script(topic: str) -> dict:
                 time.sleep(wait)
                 continue
             resp.raise_for_status()
-            break
+            
+            result = resp.json()
+            raw = result["choices"][0]["message"]["content"].strip()
+            raw = re.sub(r"^```json\s*", "", raw)
+            raw = re.sub(r"\s*```$", "", raw)
+            data = json.loads(raw)
+            
+            # Verify word count
+            script_text = data.get("script", "")
+            word_count = len(script_text.split())
+            print(f"   Generated script word count: {word_count} words (Attempt {attempt+1}/{max_retries})")
+            
+            if 140 <= word_count <= 155:
+                print("   ✅ Word count is within target range [140, 155]!")
+                break
+            else:
+                if attempt < max_retries - 1:
+                    print(f"   ⚠️ Word count {word_count} is outside [140, 155]. Asking Llama to rewrite...")
+                    messages.append({"role": "assistant", "content": raw})
+                    messages.append({
+                        "role": "user",
+                        "content": f"The previous script you generated was too short/long ({word_count} words). Please rewrite and expand/condense the script so that the total word count is strictly between 140 and 155 words (target exactly 150 words). Add more details, storytelling, or examples if it was too short. Make sure to count the words accurately word-by-word, update the 'word_count' field, and keep the exact same JSON format."
+                    })
+                else:
+                    print(f"   ⚠️ Word count {word_count} is outside [140, 155] but reached max retries.")
         except http_requests.exceptions.HTTPError as e:
             if attempt >= max_retries - 1:
                 raise
             print(f"   Error: {e}. Retrying...")
             time.sleep(10)
+        except Exception as e:
+            if attempt >= max_retries - 1:
+                raise
+            print(f"   Parser/Validation error: {e}. Retrying...")
+            time.sleep(5)
 
-    result = resp.json()
-    raw = result["choices"][0]["message"]["content"].strip()
-
-    # Loại bỏ markdown code fences nếu có
-    raw = re.sub(r"^```json\s*", "", raw)
-    raw = re.sub(r"\s*```$", "", raw)
-
-    data = json.loads(raw)
     return data
 
 
@@ -139,6 +172,11 @@ def save_project(topic: str, data: dict) -> Path:
     keywords_path.write_text(
         json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
     )
+
+    # Lưu prompts.txt
+    prompts_path = project_dir / "prompts.txt"
+    prompts = [kw["search_query"] for kw in data.get("visual_keywords", [])]
+    prompts_path.write_text("\n".join(prompts), encoding="utf-8")
 
     return project_dir
 

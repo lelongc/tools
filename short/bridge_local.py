@@ -225,7 +225,7 @@ class BridgeHandler(BaseHTTPRequestHandler):
         qs = parse_qs(parsed.query)
 
         if path == "/health":
-            return self._send_json({"ok": True, "version": "2.0"})
+            return self._send_json({"ok": True, "version": "2.0", "time": _now()})
 
         if path == "/next":
             with LOCK:

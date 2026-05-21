@@ -183,21 +183,89 @@ def download_images_for_keywords(keywords: list, project_dir: Path):
     # Auto-import from TurboFlow download directory if it exists
     turboflow_dir = Path(r"D:\download\win\turboflow")
     if turboflow_dir.exists():
-        tf_images = sorted(
-            [f for f in turboflow_dir.iterdir() if f.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}],
-            key=lambda f: f.stat().st_mtime, reverse=True
-        )
-        if tf_images:
-            print(f"   🎨 Tìm thấy {len(tf_images)} ảnh AI trong TurboFlow")
-            for i, kw in enumerate(keywords):
-                if i >= len(tf_images):
-                    break
-                slug = re.sub(r"[^a-z0-9]+", "_", kw["keyword"].lower()).strip("_")
-                dest = images_dir / f"{slug}.jpg"
-                if not dest.exists():
-                    import shutil as _shutil
-                    _shutil.copy2(str(tf_images[i]), str(dest))
-                    print(f"   🎨 Import TurboFlow: {tf_images[i].name} → {slug}.jpg")
+        all_files = [f for f in turboflow_dir.iterdir() if f.is_file() and f.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}]
+        if all_files:
+            print(f"   🎨 Tìm thấy {len(all_files)} ảnh trong thư mục TurboFlow local.")
+            
+            prompts = [kw['search_query'] for kw in keywords]
+            expected_count = len(prompts)
+            slug = project_dir.name
+
+            # Strategy 1: Match by token overlap similarity
+            def get_words(s):
+                words = re.findall(r'[a-z0-9]+', s.lower())
+                stop_words = {'a', 'an', 'the', 'in', 'on', 'at', 'of', 'and', 'or', 'for', 'with', 'to', 'by', 'is', 'are', 'was', 'were'}
+                filtered = [w for w in words if w not in stop_words]
+                return filtered if filtered else words
+
+            prompt_word_sets = [set(get_words(p)) for p in prompts]
+            prompt_norms = [re.sub(r'[^a-z0-9]', '', p.lower()) for p in prompts]
+
+            found_by_prompt = {}
+            for i, p_words in enumerate(prompt_word_sets):
+                p_norm = prompt_norms[i]
+                if not p_words:
+                    continue
+                best_file = None
+                best_score = 0.0
+                best_mtime = 0.0
+                for f in all_files:
+                    stem = f.stem
+                    s_norm = re.sub(r'[^a-z0-9]', '', stem.lower())
+                    
+                    if p_norm == s_norm or p_norm in s_norm or s_norm in p_norm:
+                        score = 2.0
+                    else:
+                        s_words = set(get_words(stem))
+                        overlap = p_words.intersection(s_words)
+                        score = len(overlap) / len(p_words)
+                        
+                    if score >= 0.35:
+                        f_mtime = f.stat().st_mtime
+                        if score > best_score:
+                            best_score = score
+                            best_file = f
+                            best_mtime = f_mtime
+                        elif abs(score - best_score) < 1e-5:
+                            if f_mtime > best_mtime:
+                                best_file = f
+                                best_mtime = f_mtime
+                if best_file:
+                    found_by_prompt[i] = best_file
+
+            # Strategy 2: Match by prefix (e.g. project_name-1.jpg, etc.)
+            found_by_prefix = []
+            prefix_prefix = f"{slug}-"
+            prefix_files = [x for x in all_files if x.name.startswith(prefix_prefix)]
+            if len(prefix_files) >= expected_count:
+                prefix_files.sort(key=lambda x: x.name)
+                found_by_prefix = prefix_files[:expected_count]
+
+            # Copy files if matching succeeds (always copy & overwrite to allow updating images)
+            if len(found_by_prompt) == expected_count:
+                print(f"   ✅ Đã khớp thành công {expected_count}/{expected_count} ảnh theo tên prompt!")
+                for i in range(expected_count):
+                    src = found_by_prompt[i]
+                    kw_slug = re.sub(r'[^a-z0-9]+', '_', keywords[i]['keyword'].lower()).strip('_')
+                    dest = images_dir / f"{kw_slug}.jpg"
+                    shutil.copy2(src, dest)
+                    print(f"   🎨 Import TurboFlow (prompt): {src.name} → {kw_slug}.jpg")
+            elif len(found_by_prefix) >= expected_count:
+                print(f"   ✅ Đã khớp thành công {expected_count}/{expected_count} ảnh theo prefix!")
+                for i in range(expected_count):
+                    src = found_by_prefix[i]
+                    kw_slug = re.sub(r'[^a-z0-9]+', '_', keywords[i]['keyword'].lower()).strip('_')
+                    dest = images_dir / f"{kw_slug}.jpg"
+                    shutil.copy2(src, dest)
+                    print(f"   🎨 Import TurboFlow (prefix): {src.name} → {kw_slug}.jpg")
+            else:
+                # Partial match fallback
+                print(f"   ⚠️ Chỉ khớp được {len(found_by_prompt)}/{expected_count} ảnh theo tên prompt.")
+                for i, src in found_by_prompt.items():
+                    kw_slug = re.sub(r'[^a-z0-9]+', '_', keywords[i]['keyword'].lower()).strip('_')
+                    dest = images_dir / f"{kw_slug}.jpg"
+                    shutil.copy2(src, dest)
+                    print(f"   🎨 Import TurboFlow (partial prompt): {src.name} → {kw_slug}.jpg")
 
     for kw in keywords:
         slug = re.sub(r"[^a-z0-9]+", "_", kw["keyword"].lower()).strip("_")
