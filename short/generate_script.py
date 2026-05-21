@@ -1,11 +1,3 @@
-"""
-Phase 1: Sinh kịch bản YouTube Shorts + Visual Keywords bằng Groq API (Llama 3).
-
-Usage:
-    python generate_script.py "Morning routine"
-    python generate_script.py "Cooking pasta"
-"""
-
 import sys
 import io
 import json
@@ -19,7 +11,7 @@ import requests as http_requests
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
-from config import GROQ_API_KEY
+from config import GROQ_API_KEY as GEMINI_API_KEY # Assuming config is modified or we just rename it
 
 PROJECTS_DIR = Path(__file__).parent / "projects"
 
@@ -28,8 +20,7 @@ PROMPT_TEMPLATE = """You are a top-tier viral YouTube Shorts scriptwriter and En
 ## CRITICAL LENGTH & DURATION REQUIREMENT:
 - The script MUST be around 150 words (strictly between 140 and 155 words). This is a hard requirement.
 - At normal speaking pace, 150 words = approximately 50 seconds of audio.
-- Do NOT be brief. Elaborate on the explanations, use vivid details, storytelling, and multiple practical examples to ensure the script reaches the target length.
-- Write in a flowing, storytelling narrative — NOT a bullet-point list.
+- Write in a flowing, storytelling narrative — NOT bullet points.
 - Use clear, professional, yet conversational English, making it perfect for English learners to listen and study.
 - Highlight or use useful vocabulary, expressions, or idiomatic phrases relevant to the topic.
 - To hit exactly ~150 words, please structure the script length paragraph by paragraph as follows:
@@ -71,9 +62,8 @@ Follow us for more daily productivity hacks.
 ## VISUAL KEYWORDS:
 Extract exactly 10-12 concrete nouns, actions, or phrases from YOUR script, in strict order of appearance.
 - They MUST be evenly distributed throughout the script (roughly one keyword/action for every 10-15 words).
-- This is to ensure a new visual appears on screen every 4-5 seconds.
 - "keyword": 1-3 words that appear literally in the script.
-- "search_query": 3-6 word descriptive phrase for image generation (prefer high-quality portrait/vertical images that match the keyword's concept perfectly).
+- "search_query": 3-6 word descriptive phrase for image generation.
 
 ## OUTPUT (valid JSON only, no markdown, no explanation):
 {{
@@ -85,18 +75,16 @@ Extract exactly 10-12 concrete nouns, actions, or phrases from YOUR script, in s
   ]
 }}"""
 
-
 def generate_script(topic: str) -> dict:
-    """Gọi Groq API (Llama 3) sinh kịch bản và visual keywords."""
-    url = "https://api.groq.com/openai/v1/chat/completions"
+    url = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
     headers = {
-        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Authorization": f"Bearer {GEMINI_API_KEY}",
         "Content-Type": "application/json",
     }
 
     prompt = PROMPT_TEMPLATE.format(topic=topic)
     messages = [
-        {"role": "system", "content": "You are a JSON-only response bot. Always return valid JSON with keys: word_count, script, and visual_keywords. You MUST strictly follow the word count limits and constraints. Make sure the generated script has around 150 words, absolutely between 140 and 155 words (target 150 words)."},
+        {"role": "system", "content": "You are a JSON-only response bot. Always return valid JSON. Make sure the generated script has around 150 words (strictly 140-155)."},
         {"role": "user", "content": prompt},
     ]
 
@@ -105,7 +93,7 @@ def generate_script(topic: str) -> dict:
     for attempt in range(max_retries):
         try:
             body = {
-                "model": "llama-3.3-70b-versatile",
+                "model": "gemini-1.5-flash",
                 "messages": messages,
                 "response_format": {"type": "json_object"},
                 "temperature": 0.7,
@@ -113,7 +101,7 @@ def generate_script(topic: str) -> dict:
             }
             resp = http_requests.post(url, headers=headers, json=body, timeout=30)
             if resp.status_code == 429 and attempt < max_retries - 1:
-                wait = 30
+                wait = 10
                 print(f"   Rate limit hit. Retrying in {wait}s... ({attempt+1}/{max_retries})")
                 time.sleep(wait)
                 continue
@@ -125,7 +113,6 @@ def generate_script(topic: str) -> dict:
             raw = re.sub(r"\s*```$", "", raw)
             data = json.loads(raw)
             
-            # Verify word count
             script_text = data.get("script", "")
             word_count = len(script_text.split())
             print(f"   Generated script word count: {word_count} words (Attempt {attempt+1}/{max_retries})")
@@ -135,51 +122,33 @@ def generate_script(topic: str) -> dict:
                 break
             else:
                 if attempt < max_retries - 1:
-                    print(f"   ⚠️ Word count {word_count} is outside [140, 155]. Asking Llama to rewrite...")
+                    print(f"   ⚠️ Word count {word_count} is outside [140, 155]. Asking model to rewrite...")
                     messages.append({"role": "assistant", "content": raw})
                     messages.append({
                         "role": "user",
-                        "content": f"The previous script you generated was too short/long ({word_count} words). Please rewrite and expand/condense the script so that the total word count is strictly between 140 and 155 words (target exactly 150 words). Add more details, storytelling, or examples if it was too short. Make sure to count the words accurately word-by-word, update the 'word_count' field, and keep the exact same JSON format."
+                        "content": f"The previous script you generated was too short/long ({word_count} words). Please rewrite so that the total word count is strictly between 140 and 155 words (target exactly 150 words)."
                     })
                 else:
                     print(f"   ⚠️ Word count {word_count} is outside [140, 155] but reached max retries.")
-        except http_requests.exceptions.HTTPError as e:
-            if attempt >= max_retries - 1:
-                raise
-            print(f"   Error: {e}. Retrying...")
-            time.sleep(10)
         except Exception as e:
             if attempt >= max_retries - 1:
                 raise
-            print(f"   Parser/Validation error: {e}. Retrying...")
+            print(f"   Error: {e}. Retrying...")
             time.sleep(5)
 
     return data
 
-
 def save_project(topic: str, data: dict) -> Path:
-    """Tạo thư mục project và lưu script + keywords."""
     slug = re.sub(r"[^a-z0-9]+", "_", topic.lower()).strip("_")
     project_dir = PROJECTS_DIR / slug
     project_dir.mkdir(parents=True, exist_ok=True)
-
-    # Lưu script.txt
-    script_path = project_dir / "script.txt"
-    script_path.write_text(data["script"], encoding="utf-8")
-
-    # Lưu keywords.json
-    keywords_path = project_dir / "keywords.json"
-    keywords_path.write_text(
-        json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8"
-    )
-
-    # Lưu prompts.txt
-    prompts_path = project_dir / "prompts.txt"
+    
+    (project_dir / "script.txt").write_text(data.get("script", ""), encoding="utf-8")
+    (project_dir / "keywords.json").write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
+    
     prompts = [kw["search_query"] for kw in data.get("visual_keywords", [])]
-    prompts_path.write_text("\n".join(prompts), encoding="utf-8")
-
+    (project_dir / "prompts.txt").write_text("\n".join(prompts), encoding="utf-8")
     return project_dir
-
 
 def main():
     if len(sys.argv) < 2:
@@ -193,29 +162,9 @@ def main():
 
     print(f"[*] Dang sinh kich ban cho: '{topic}'...")
     data = generate_script(topic)
-
     project_dir = save_project(topic, data)
-
-    print(f"\n{'='*60}")
-    print(f"[OK] DA TAO KICH BAN THANH CONG!")
-    print(f"{'='*60}")
-    print(f"\nThu muc project: {project_dir}")
-    print(f"\nKICH BAN:")
-    print(f"{'-'*60}")
-    print(data["script"])
-    print(f"{'-'*60}")
-    print(f"\nVISUAL KEYWORDS ({len(data['visual_keywords'])} tu khoa):")
-    for i, kw in enumerate(data["visual_keywords"], 1):
-        print(f"   {i}. {kw['keyword']:<20} -> Pexels: \"{kw['search_query']}\"")
-
-    print(f"\n{'='*60}")
-    print(f"BUOC TIEP THEO:")
-    print(f"   1. Copy noi dung script.txt sang Colab de tao TTS")
-    print(f"   2. Tao file audio.mp3 va subtitle.srt")
-    print(f"   3. Bo 2 file do vao: {project_dir}")
-    print(f"   4. Chay: python render_web.py {project_dir.name}")
-    print(f"{'='*60}")
-
+    print(f"\n[OK] DA TAO KICH BAN THANH CONG!")
+    print(f"Thu muc project: {project_dir}")
 
 if __name__ == "__main__":
     main()
