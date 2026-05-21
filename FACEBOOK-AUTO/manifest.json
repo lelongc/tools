@@ -1,37 +1,33 @@
 {
-  "manifest_version": 3,
-  "name": "Facebook Auto Poster",
-  "version": "1.0",
-  "description": "Tự động đăng bài lên các nhóm Facebook với tính năng đăng chéo.",
-  "permissions": [
-    "storage",
-    "unlimitedStorage",
-    "tabs"
-  ],
-  "host_permissions": [
-    "*://*.facebook.com/*",
-    "*://facebook.com/*"
-  ],
-  "action": {
-    "default_popup": "popup/popup.html"
-  },
-  "background": {
-    "service_worker": "background.js",
-    "type": "module"
-  },
-  "content_scripts": [
-    {
-      "matches": [
-        "*://*.facebook.com/*",
-        "*://facebook.com/*"
-      ],
-      "js": ["content/actor.js"],
-      "run_at": "document_end"
-    }
-  ],
-  "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
-  }
+   "action": {
+      "default_icon": {
+         "128": "assets/icons/icon16.png",
+         "16": "assets/icons/icon16.png",
+         "48": "assets/icons/icon16.png"
+      }
+   },
+   "background": {
+      "service_worker": "background.js"
+   },
+   "content_scripts": [ {
+      "js": [ "content.js" ],
+      "matches": [ "\u003Call_urls>" ]
+   } ],
+   "description": "Auto-post in multiple Facebook groups. Save time with automation, link sharing, and content scheduling.",
+   "host_permissions": [ "https://script.google.com/*" ],
+   "icons": {
+      "128": "assets/icons/icon16.png",
+      "16": "assets/icons/icon16.png",
+      "48": "assets/icons/icon16.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwUDJecJMAeYogPZyO/HRIY76NWQRLUaykT9/fPhYiVUKLGXIGb3Cer13/sssC6/CSqNCvcE9/FfDbEbDsZbYZwYRxLx4flFTOodc19Bl2CaPPy/Mgb5Dhx+Phqk3YMr8bTNgxyi/bFnjBYrMtp1IBiMLLSSfAXO/twAcIfEom2flnAe0k//RXn8lcmFxWOM/PYgNB7VH9TagoE4kUsUTOu6LO1cdCQP1XPEj0aGa68J++2J/xfygXXDDhpLd8zzNr4bJb4m/OKylGJ4Vvbe3s/S58Y6WaA5rSR6XV+9g6GNzZUkz5AZdYxugadrz61WQ4HepAZN7rhsEqojYgyoXWQIDAQAB",
+   "manifest_version": 3,
+   "name": "Facebook Groups Auto Poster | Post Scheduler & Automation Assistant",
+   "permissions": [ "activeTab", "storage", "unlimitedStorage", "system.display", "scripting", "alarms", "https://script.google.com/*" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.1.11",
+   "web_accessible_resources": [ {
+      "matches": [ "http://*/*", "https://*/*" ],
+      "resources": [ "popup.html", "schedual.html", "schedual.js", "popup.js", "bootstrap.bundle.min.js", "assets/icons/*" ]
+   } ]
 }
