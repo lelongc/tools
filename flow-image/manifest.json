@@ -14,7 +14,7 @@
       "world": "ISOLATED"
    } ],
    "description": "Automate Google Flow, batch image & video generation with Veo 3.1, Nano Banana Pro, auto 4K upscale & bulk download.",
-   "host_permissions": [ "https://labs.google/*", "https://turboflow-server.vercel.app/*", "https://*.lemonsqueezy.com/*" ],
+   "host_permissions": [ "https://labs.google/*", "https://turboflow-server.vercel.app/*", "https://*.lemonsqueezy.com/*", "http://127.0.0.1/*", "http://localhost/*" ],
    "icons": {
       "128": "icons/icon128.png",
       "16": "icons/icon16.png",
