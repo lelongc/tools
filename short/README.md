@@ -1,86 +1,72 @@
 # 🎬 SHORT MAKER — Tạo Video Short Dạy Tiếng Anh Viral
 
-Tự động tạo video Short (dọc 9:16) dạy tiếng Anh với giọng đọc AI, phụ đề sync từng từ, ảnh stock/AI đẹp mắt.
+Tự động tạo video YouTube Shorts dạy tiếng Anh viral — từ nhập chủ đề → video hoàn chỉnh.
 
 ---
 
-## 📁 Cấu trúc thư mục
+## 🚀 CÁCH DÙNG (3 Bước)
 
-```
-short/
-├── short_maker.ipynb    ← Chạy trên Google Colab (tạo kịch bản + giọng + phụ đề)
-├── render_web.py        ← Chạy trên máy local (xuất video)
-├── template_v2.html     ← Template hiển thị video
-├── generate_script.py   ← (Tùy chọn) Chạy local để sinh kịch bản
-├── bridge_local.py      ← (Tùy chọn) Cầu nối cho extension TurboFlow
-├── config.py            ← Đọc API key từ .env
-├── .env                 ← API keys
-└── projects/            ← Thư mục chứa các dự án video
-```
+### Bước 1: Chạy Bridge ở local
 
----
-
-## 🚀 HƯỚNG DẪN NHANH (3 Bước)
-
-### Bước 1: Mở Colab — Sinh kịch bản + giọng đọc + phụ đề
-
-1. Upload file `short_maker.ipynb` lên [Google Colab](https://colab.research.google.com)
-2. Chọn Runtime → Change runtime type → **T4 GPU**
-3. Chạy **Bước 1** (Cài đặt — chỉ cần chạy 1 lần)
-4. Ở **Bước 2**, nhập:
-   - **Chủ đề** (ví dụ: `"5 ways to say thank you in English"`)
-   - **Groq API key** (lấy miễn phí tại https://console.groq.com/keys)
-   - Chọn giọng đọc, tốc độ nói
-   - **Nhấn chạy** → Hệ thống tự động:
-     - Sinh kịch bản AI (Groq/Llama 3)
-     - Tạo giọng đọc AI (Qwen3-TTS)
-     - Tạo phụ đề chính xác từng từ (Whisper)
-5. Chạy **Bước 3** → Tải file ZIP về máy
-
-### Bước 2: (Tùy chọn) Tạo ảnh AI bằng TurboFlow
-
-1. Cài extension TurboFlow trên Edge (thư mục `flow-image/`)
-2. Mở https://labs.google/fx/tools/flow
-3. Nhập prompt ảnh → Extension tự tải ảnh về `D:\download\win\turboflow`
-4. Khi chạy render, hệ thống **tự động import** ảnh từ thư mục này
-
-> **Nếu không dùng TurboFlow**: Hệ thống sẽ tự tải ảnh stock từ Pexels (miễn phí).
-
-### Bước 3: Render video trên máy local
+Mở terminal tại `d:\folder\tools\short`:
 
 ```powershell
-# Giải nén ZIP vào thư mục projects/
-# Ví dụ: short/projects/5_ways_to_say_thank_you_in_english/
-
-cd d:\folder\tools\short
-python render_web.py 5_ways_to_say_thank_you_in_english
+python bridge_local.py
 ```
 
-Video thành phẩm: `projects/<tên_dự_án>/output_web.mp4`
+Hệ thống sẽ:
+- Tự tải + chạy **cloudflared** tunnel
+- In ra **Tunnel URL** (dạng `https://xxx.trycloudflare.com`)
+- Copy URL này
+
+> Nếu muốn dùng ảnh Pexels stock thay vì ảnh AI → **bỏ qua bước này**.
+
+### Bước 2: Mở TurboFlow trên Edge
+
+1. Cài extension TurboFlow (thư mục `flow-image/`)
+2. Mở https://labs.google/fx/tools/flow trên Edge
+3. Extension tự kết nối bridge
+
+### Bước 3: Chạy Colab
+
+1. Upload `short_maker.ipynb` lên [Google Colab](https://colab.research.google.com)
+2. Chọn **T4 GPU** runtime
+3. Chạy **Cell 1** (cài đặt, 1 lần)
+4. **Cell 2**: Nhập chủ đề + API keys + paste Tunnel URL
+5. **Cell 3**: Nhấn chạy → Tự động:
+   - Sinh kịch bản AI (Groq)
+   - Tạo giọng đọc (Qwen3-TTS)
+   - Tạo phụ đề sync từng từ (Whisper)
+   - Gửi prompt → TurboFlow gen ảnh AI → Kéo ảnh về Colab
+   - Render video hoàn chỉnh (Playwright + FFmpeg)
+6. **Cell 4**: Tải video `.mp4` về máy
 
 ---
 
-## ⚙️ CẤU HÌNH .env
+## 📁 File cần thiết
 
-Tạo file `.env` trong thư mục `short/`:
+| File | Chức năng | Chạy ở đâu |
+|------|-----------|-------------|
+| `short_maker.ipynb` | Notebook all-in-one | Google Colab |
+| `bridge_local.py` | Cầu nối Colab ↔ TurboFlow | Local (terminal) |
+| `flow-image/` | Extension TurboFlow | Edge browser |
 
-```env
-pexel_api=YOUR_PEXELS_KEY
-gemini_api=YOUR_GEMINI_KEY
-```
+### File tùy chọn (render local):
 
-| Key | Mô tả | Lấy ở đâu |
-|-----|--------|------------|
-| `pexel_api` | Tải ảnh stock tự động | https://www.pexels.com/api/ |
-| `gemini_api` | Align phụ đề từng từ (fallback) | https://aistudio.google.com/apikey |
-
-> **Groq API key** chỉ cần nhập trực tiếp trong Colab, không cần lưu vào .env.
+| File | Chức năng |
+|------|-----------|
+| `render_web.py` | Render video trên máy local |
+| `template_v2.html` | Template hiển thị video |
+| `generate_script.py` | Sinh kịch bản local |
+| `config.py` + `.env` | API keys cho local |
 
 ---
 
-## 💡 MẸO TỐI ƯU
+## ⚙️ API Keys cần có
 
-- **Thay ảnh thủ công**: Thả file `.jpg` vào `projects/<tên>/images/` với tên trùng keyword (vd: `tired.jpg`)
-- **Ảnh AI đẹp hơn**: Dùng TurboFlow extension gen ảnh rồi render
-- **Tùy chỉnh tiêu đề**: Sửa `"title"` trong `keywords.json`
-- **Chạy lại render nhanh**: Nếu đã có `word_timestamps.json` và ảnh, lần render sau sẽ bỏ qua các bước tải
+| Key | Lấy ở đâu | Bắt buộc |
+|-----|-----------|----------|
+| Groq API | https://console.groq.com/keys | ✅ Có (miễn phí) |
+| Pexels API | https://www.pexels.com/api/ | Nếu không dùng TurboFlow |
+
+> Không cần lưu vào `.env` — nhập trực tiếp trong Colab.

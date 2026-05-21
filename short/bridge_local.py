@@ -1,5 +1,6 @@
 import argparse
 import base64
+import io
 import json
 import secrets
 import shutil
@@ -7,9 +8,14 @@ import subprocess
 import sys
 import threading
 import time
+import os
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+
+# Fix Windows console encoding
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace", line_buffering=True)
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace", line_buffering=True)
 
 DOWNLOAD_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 QUEUE = []
@@ -18,6 +24,7 @@ LOCK = threading.Lock()
 PROJECTS = {}
 PROJECT_LOCK = threading.Lock()
 PROJECTS_DIR = Path(__file__).parent / "projects"
+TURBOFLOW_DIR = Path(r"D:\download\win\turboflow")
 
 
 def _now():
@@ -63,6 +70,8 @@ def _prefix_for_job(job: dict, query_prefix: str | None):
 
 def _list_images(downloads: Path, since_ts: float | None, prefix: str | None):
     items = []
+    if not downloads.exists():
+        return items
     for p in downloads.iterdir():
         if not p.is_file():
             continue
@@ -175,7 +184,11 @@ def _auto_render_project(downloads: Path, project_name: str, prefix: str | None,
 
 
 class BridgeHandler(BaseHTTPRequestHandler):
-    server_version = "FlowBridge/1.0"
+    server_version = "FlowBridge/2.0"
+
+    def log_message(self, format, *args):
+        # Suppress default HTTP logs
+        pass
 
     def _send_json(self, obj, status=200):
         body = json.dumps(obj).encode("utf-8")
@@ -212,7 +225,7 @@ class BridgeHandler(BaseHTTPRequestHandler):
         qs = parse_qs(parsed.query)
 
         if path == "/health":
-            return self._send_json({"ok": True})
+            return self._send_json({"ok": True, "version": "2.0"})
 
         if path == "/next":
             with LOCK:
@@ -292,6 +305,7 @@ class BridgeHandler(BaseHTTPRequestHandler):
             with LOCK:
                 QUEUE.append(job)
                 JOBS[job["job_id"]] = job
+            print(f"[bridge] 📥 Job queued: {job['job_id']} ({len(job['prompts'])} prompts)")
             return self._send_json({"ok": True, "job_id": job["job_id"]})
 
         if path == "/status":
@@ -315,26 +329,113 @@ class BridgeHandler(BaseHTTPRequestHandler):
         return self._send_json({"ok": False, "error": "not found"}, status=404)
 
 
+def _start_cloudflared(port: int):
+    """Start cloudflared tunnel and return the public URL."""
+    # Check if cloudflared is installed
+    cf_path = shutil.which("cloudflared")
+    if not cf_path:
+        # Try to find in common locations
+        possible = [
+            Path.home() / "cloudflared.exe",
+            Path(r"C:\Program Files\cloudflared\cloudflared.exe"),
+            Path(__file__).parent / "cloudflared.exe",
+        ]
+        for p in possible:
+            if p.exists():
+                cf_path = str(p)
+                break
+
+    if not cf_path:
+        print("[bridge] ⚠️ cloudflared chưa cài. Đang tải tự động...")
+        # Download cloudflared for Windows
+        dl_url = "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe"
+        dest = Path(__file__).parent / "cloudflared.exe"
+        try:
+            import urllib.request
+            urllib.request.urlretrieve(dl_url, str(dest))
+            cf_path = str(dest)
+            print(f"[bridge] ✅ Đã tải cloudflared → {dest}")
+        except Exception as e:
+            print(f"[bridge] ❌ Không tải được cloudflared: {e}")
+            print(f"[bridge]    Tải thủ công: {dl_url}")
+            print(f"[bridge]    Đặt file vào: {dest}")
+            return None
+
+    # Start cloudflared tunnel
+    proc = subprocess.Popen(
+        [cf_path, "tunnel", "--url", f"http://127.0.0.1:{port}", "--no-autoupdate"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        errors="ignore",
+    )
+
+    # Parse the public URL from cloudflared output
+    import re
+    tunnel_url = None
+    deadline = time.time() + 15  # 15s timeout
+
+    while time.time() < deadline:
+        line = proc.stderr.readline()
+        if not line:
+            time.sleep(0.1)
+            continue
+        match = re.search(r"(https://[a-zA-Z0-9\-]+\.trycloudflare\.com)", line)
+        if match:
+            tunnel_url = match.group(1)
+            break
+
+    if tunnel_url:
+        print(f"\n{'='*60}")
+        print(f"🌐 TUNNEL URL: {tunnel_url}")
+        print(f"{'='*60}")
+        print(f"📋 Copy URL trên → paste vào Google Colab")
+        print(f"{'='*60}\n")
+    else:
+        print("[bridge] ⚠️ Không lấy được tunnel URL. Kiểm tra cloudflared.")
+
+    return proc, tunnel_url
+
+
 def main():
-    parser = argparse.ArgumentParser(description="Local bridge for TurboFlow extension")
+    parser = argparse.ArgumentParser(description="Local bridge for TurboFlow + Colab pipeline")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8787)
     parser.add_argument(
         "--downloads",
-        default=str(Path.home() / "Downloads"),
-        help="Path to Downloads folder where Flow images are saved",
+        default=str(TURBOFLOW_DIR),
+        help="Path to folder where TurboFlow saves images",
+    )
+    parser.add_argument(
+        "--no-tunnel",
+        action="store_true",
+        help="Don't start cloudflared tunnel (local only mode)",
     )
     args = parser.parse_args()
 
     downloads = Path(args.downloads).expanduser().resolve()
-    if not downloads.exists():
-        raise SystemExit(f"Downloads folder not found: {downloads}")
+    downloads.mkdir(parents=True, exist_ok=True)
+
+    # Start cloudflared tunnel
+    tunnel_proc = None
+    if not args.no_tunnel:
+        result = _start_cloudflared(args.port)
+        if result:
+            tunnel_proc, tunnel_url = result
 
     server = ThreadingHTTPServer((args.host, args.port), BridgeHandler)
     server.downloads = downloads
-    print(f"[bridge] Listening on http://{args.host}:{args.port}")
-    print(f"[bridge] Watching downloads: {downloads}")
-    server.serve_forever()
+    print(f"[bridge] 🚀 Bridge server: http://{args.host}:{args.port}")
+    print(f"[bridge] 📁 Watching images: {downloads}")
+    print(f"[bridge] 🖥️ Mở Edge → TurboFlow extension → Google Flow")
+    print(f"[bridge] ⏳ Đang chờ lệnh từ Colab...\n")
+
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\n[bridge] 🛑 Shutting down...")
+        if tunnel_proc:
+            tunnel_proc.terminate()
 
 
 if __name__ == "__main__":
