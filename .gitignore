@@ -33,3 +33,5 @@ short/projects/**/frames/
 *.log
 .pytest_cache/
 .eslintcach
+
+veoup_video
