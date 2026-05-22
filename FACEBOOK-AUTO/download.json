@@ -3,15 +3,16 @@
   "_format_version": "1.0",
   "_instructions_for_ai": "Mỗi event trong mảng 'events' đại diện một thao tác của người dùng. Dùng 'element.bestSelector' làm CSS selector chính khi build bot. 'timeSincePrevMs' cho biết khoảng delay giữa các bước (đơn vị ms). 'element.textContent' chứa nội dung text hiển thị. Với event type='input', field 'value' chứa nội dung người dùng đã gõ vào. Với type='click', field 'mouse' chứa tọa độ click.",
   "meta": {
-    "startTime": "2026-05-21T14:48:46.928Z",
-    "endTime": "2026-05-21T14:48:59.063Z",
-    "duration": "0m12s",
-    "durationMs": 12135,
-    "totalEvents": 5,
+    "startTime": "2026-05-22T05:57:36.252Z",
+    "endTime": "2026-05-22T05:58:05.900Z",
+    "duration": "0m29s",
+    "durationMs": 29648,
+    "totalEvents": 16,
     "eventBreakdown": {
-      "click": 3,
+      "click": 7,
       "scroll": 1,
-      "focus": 1
+      "focus": 5,
+      "input": 3
     },
     "pagesVisited": [
       "https://www.facebook.com/groups/1840850679540577"
@@ -32,7 +33,7 @@
           "height": 72,
           "width": 592,
           "x": 290,
-          "y": 273
+          "y": 470
         },
         "role": "",
         "tag": "DIV",
@@ -41,12 +42,12 @@
         "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]"
       },
       "mouse": {
-        "clientX": 528,
-        "clientY": 337
+        "clientX": 500,
+        "clientY": 527
       },
-      "timeFormatted": "21:48:54",
-      "timeSincePrevMs": 7529,
-      "timestamp": 1779374934462,
+      "timeFormatted": "12:57:38",
+      "timeSincePrevMs": 2601,
+      "timestamp": 1779429458857,
       "type": "click",
       "url": "https://www.facebook.com/groups/1840850679540577"
     },
@@ -64,7 +65,7 @@
           "height": 28,
           "width": 488,
           "x": 366,
-          "y": 293
+          "y": 490
         },
         "role": "",
         "tag": "SPAN",
@@ -73,22 +74,22 @@
         "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/span[1]"
       },
       "mouse": {
-        "clientX": 545,
-        "clientY": 302
+        "clientX": 517,
+        "clientY": 508
       },
-      "timeFormatted": "21:48:56",
-      "timeSincePrevMs": 1787,
-      "timestamp": 1779374936249,
+      "timeFormatted": "12:57:40",
+      "timeSincePrevMs": 2088,
+      "timestamp": 1779429460945,
       "type": "click",
       "url": "https://www.facebook.com/groups/1840850679540577"
     },
     {
-      "documentHeight": 836,
+      "documentHeight": 837,
       "scrollLeft": 0,
       "scrollTop": 0,
-      "timeFormatted": "21:48:56",
-      "timeSincePrevMs": 616,
-      "timestamp": 1779374936865,
+      "timeFormatted": "12:57:41",
+      "timeSincePrevMs": 613,
+      "timestamp": 1779429461558,
       "type": "scroll",
       "url": "https://www.facebook.com/groups/1840850679540577",
       "viewportHeight": 782
@@ -115,9 +116,9 @@
         "type": "textarea",
         "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
       },
-      "timeFormatted": "21:48:57",
-      "timeSincePrevMs": 510,
-      "timestamp": 1779374937375,
+      "timeFormatted": "12:57:41",
+      "timeSincePrevMs": 324,
+      "timestamp": 1779429461882,
       "type": "focus",
       "url": "https://www.facebook.com/groups/1840850679540577"
     },
@@ -144,12 +145,339 @@
         "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
       },
       "mouse": {
-        "clientX": 858,
-        "clientY": 302
+        "clientX": 780,
+        "clientY": 293
       },
-      "timeFormatted": "21:48:59",
-      "timeSincePrevMs": 1688,
-      "timestamp": 1779374939063,
+      "timeFormatted": "12:57:44",
+      "timeSincePrevMs": 2386,
+      "timestamp": 1779429464268,
+      "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "Tạo bài viết công khai...",
+        "bestSelector": "textarea[aria-label=\"Tạo\\ bài\\ viết\\ công\\ khai\\.\\.\\.\"]",
+        "className": "xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 xzsf02u xngnso2 x1xlr1w8 x1u7k74 x1a2a7pz x6ikm8r x10wlt62 x18d9i69 xexx8yu xf7dkkf xv54qhq xtt52l0 xh8yej3 x2s2ed0",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "Tạo bài viết công khai...",
+        "rect": {
+          "height": 38,
+          "width": 500,
+          "x": 556,
+          "y": 268
+        },
+        "role": "",
+        "tag": "TEXTAREA",
+        "textContent": "Trường ngôn ngữ",
+        "type": "textarea",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
+      },
+      "timeFormatted": "12:57:50",
+      "timeSincePrevMs": 6689,
+      "timestamp": 1779429470957,
+      "type": "input",
+      "url": "https://www.facebook.com/groups/1840850679540577",
+      "value": "Trường ngôn ngữ"
+    },
+    {
+      "element": {
+        "ariaLabel": "Tạo bài viết công khai...",
+        "bestSelector": "textarea[aria-label=\"Tạo\\ bài\\ viết\\ công\\ khai\\.\\.\\.\"]",
+        "className": "xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 xzsf02u xngnso2 x1xlr1w8 x1u7k74 x1a2a7pz x6ikm8r x10wlt62 x18d9i69 xexx8yu xf7dkkf xv54qhq xtt52l0 xh8yej3 x2s2ed0",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "Tạo bài viết công khai...",
+        "rect": {
+          "height": 38,
+          "width": 500,
+          "x": 556,
+          "y": 268
+        },
+        "role": "",
+        "tag": "TEXTAREA",
+        "textContent": "Trường ngôn ngữ",
+        "type": "textarea",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
+      },
+      "mouse": {
+        "clientX": 576,
+        "clientY": 280
+      },
+      "timeFormatted": "12:57:55",
+      "timeSincePrevMs": 4440,
+      "timestamp": 1779429475397,
+      "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "Tạo bài viết công khai...",
+        "bestSelector": "textarea[aria-label=\"Tạo\\ bài\\ viết\\ công\\ khai\\.\\.\\.\"]",
+        "className": "xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 xzsf02u xngnso2 x1xlr1w8 x1u7k74 x1a2a7pz x6ikm8r x10wlt62 x18d9i69 xexx8yu xf7dkkf xv54qhq xtt52l0 xh8yej3 x2s2ed0",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "Tạo bài viết công khai...",
+        "rect": {
+          "height": 38,
+          "width": 500,
+          "x": 556,
+          "y": 268
+        },
+        "role": "",
+        "tag": "TEXTAREA",
+        "textContent": "",
+        "type": "textarea",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
+      },
+      "timeFormatted": "12:57:57",
+      "timeSincePrevMs": 1702,
+      "timestamp": 1779429477099,
+      "type": "input",
+      "url": "https://www.facebook.com/groups/1840850679540577",
+      "value": "Trường ngôn ngữ"
+    },
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div[role=\"textbox\"]",
+        "className": "xzsf02u x1a2a7pz x1n2onr6 x14wi4xw x9f619 x1lliihq x5yr21d xh8yej3 notranslate",
+        "contentEditable": "true",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 187,
+          "width": 468,
+          "x": 572,
+          "y": 322
+        },
+        "role": "textbox",
+        "tag": "DIV",
+        "textContent": "A modern, minimalist circular logo for an English learning brand named 'POEnglish'. The design should be clean and profe",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]"
+      },
+      "timeFormatted": "12:58:00",
+      "timeSincePrevMs": 3805,
+      "timestamp": 1779429480904,
+      "type": "focus",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "Thêm tiêu đề",
+        "bestSelector": "textarea[aria-label=\"Thêm\\ tiêu\\ đề\"]",
+        "className": "xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 xzsf02u xngnso2 x1xlr1w8 x1u7k74 x1a2a7pz x6ikm8r x10wlt62 x18d9i69 xexx8yu xf7dkkf xv54qhq xtt52l0 xh8yej3 x2s2ed0",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "Thêm tiêu đề",
+        "rect": {
+          "height": 38,
+          "width": 500,
+          "x": 556,
+          "y": 231
+        },
+        "role": "",
+        "tag": "TEXTAREA",
+        "textContent": "",
+        "type": "textarea",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
+      },
+      "timeFormatted": "12:58:01",
+      "timeSincePrevMs": 549,
+      "timestamp": 1779429481453,
+      "type": "input",
+      "url": "https://www.facebook.com/groups/1840850679540577",
+      "value": "A modern, minimalist circular logo for an English learning brand named 'POEnglish'. The design should be clean and professional, featuring a stylized icon that combines a speech bubble and a spark of ideas. Use a vibrant yet trustworthy color palette of bright blue and white. The background should be a clean, solid color."
+    },
+    {
+      "element": {
+        "ariaLabel": "Thêm tiêu đề",
+        "bestSelector": "textarea[aria-label=\"Thêm\\ tiêu\\ đề\"]",
+        "className": "xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 xzsf02u xngnso2 x1xlr1w8 x1u7k74 x1a2a7pz x6ikm8r x10wlt62 x18d9i69 xexx8yu xf7dkkf xv54qhq xtt52l0 xh8yej3 x2s2ed0",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "Thêm tiêu đề",
+        "rect": {
+          "height": 38,
+          "width": 500,
+          "x": 556,
+          "y": 231
+        },
+        "role": "",
+        "tag": "TEXTAREA",
+        "textContent": "",
+        "type": "textarea",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
+      },
+      "timeFormatted": "12:58:03",
+      "timeSincePrevMs": 1987,
+      "timestamp": 1779429483440,
+      "type": "focus",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "Thêm tiêu đề",
+        "bestSelector": "textarea[aria-label=\"Thêm\\ tiêu\\ đề\"]",
+        "className": "xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 xzsf02u xngnso2 x1xlr1w8 x1u7k74 x1a2a7pz x6ikm8r x10wlt62 x18d9i69 xexx8yu xf7dkkf xv54qhq xtt52l0 xh8yej3 x2s2ed0",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "Thêm tiêu đề",
+        "rect": {
+          "height": 38,
+          "width": 500,
+          "x": 556,
+          "y": 216
+        },
+        "role": "",
+        "tag": "TEXTAREA",
+        "textContent": "",
+        "type": "textarea",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
+      },
+      "mouse": {
+        "clientX": 677,
+        "clientY": 248
+      },
+      "timeFormatted": "12:58:03",
+      "timeSincePrevMs": 94,
+      "timestamp": 1779429483534,
+      "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div[role=\"textbox\"]",
+        "className": "xzsf02u x1a2a7pz x1n2onr6 x14wi4xw x9f619 x1lliihq x5yr21d xh8yej3 notranslate",
+        "contentEditable": "true",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 187,
+          "width": 448,
+          "x": 572,
+          "y": 270
+        },
+        "role": "textbox",
+        "tag": "DIV",
+        "textContent": "A modern, minimalist circular logo for an English learning brand named 'POEnglish'. The design should be clean and profe",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]"
+      },
+      "timeFormatted": "12:58:04",
+      "timeSincePrevMs": 1223,
+      "timestamp": 1779429484757,
+      "type": "focus",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div > div[role=\"textbox\"] > p > span",
+        "className": "",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 186,
+          "width": 450,
+          "x": 572,
+          "y": 285
+        },
+        "role": "",
+        "tag": "SPAN",
+        "textContent": "A modern, minimalist circular logo for an English learning brand named 'POEnglish'. The design should be clean and profe",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/p[1]/span[1]"
+      },
+      "mouse": {
+        "clientX": 695,
+        "clientY": 357
+      },
+      "timeFormatted": "12:58:04",
+      "timeSincePrevMs": 39,
+      "timestamp": 1779429484796,
+      "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "Thêm tiêu đề",
+        "bestSelector": "textarea[aria-label=\"Thêm\\ tiêu\\ đề\"]",
+        "className": "xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 xzsf02u xngnso2 x1xlr1w8 x1u7k74 x1a2a7pz x6ikm8r x10wlt62 x18d9i69 xexx8yu xf7dkkf xv54qhq xtt52l0 xh8yej3 x2s2ed0",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "Thêm tiêu đề",
+        "rect": {
+          "height": 38,
+          "width": 500,
+          "x": 556,
+          "y": 231
+        },
+        "role": "",
+        "tag": "TEXTAREA",
+        "textContent": "",
+        "type": "textarea",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
+      },
+      "timeFormatted": "12:58:05",
+      "timeSincePrevMs": 1049,
+      "timestamp": 1779429485845,
+      "type": "focus",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div > div > div > div",
+        "className": "x4k7w5x x1h91t0o x1beo9mf xaigb6o x12ejxvf x3igimt xarpa2k xedcshv x1lytzrv x1t2pt76 x7ja8zs x1n2onr6 x1qrby5j x1jfb8zj",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 80,
+          "width": 500,
+          "x": 556,
+          "y": 216
+        },
+        "role": "",
+        "tag": "DIV",
+        "textContent": "0/85",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]"
+      },
+      "mouse": {
+        "clientX": 701,
+        "clientY": 256
+      },
+      "timeFormatted": "12:58:05",
+      "timeSincePrevMs": 55,
+      "timestamp": 1779429485900,
       "type": "click",
       "url": "https://www.facebook.com/groups/1840850679540577"
     }

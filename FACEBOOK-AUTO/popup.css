@@ -660,3 +660,6 @@ body.dark-theme .alert-danger {
   filter: var(--close-btn-filter, none);
 }
 
+
+/* Preserve newlines for post content */
+.modal-body p, .modal-body div, .modal-body span, .item-card-body p, .item-card-body div, .view-detail-content { white-space: pre-wrap !important; }

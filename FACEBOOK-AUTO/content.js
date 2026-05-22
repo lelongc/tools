@@ -27,18 +27,6 @@ async function d() {
   const triggerPhrases = ["write something", "what's on your mind", "create a public post", "créer une publication", "à quoi pensez-vous", "qué estás pensando", "beitrag erstellen", "bejegyzés", "írj", "创建帖子", "发布", "بم تفكر", "napisz coś", "Escreva algo", "bạn viết gì đi", "bạn viết gì đi...", "bạn viết gì đi…", "bạn viết gì đó", "viết gì đó", "tạo bài viết công khai", "bạn nghĩ gì", "bạn nghĩ gì thế", "viết nội dung", "nêu ý kiến của bạn", "เขียนอะไรสักหน่อย", "Tulis sesuatu", "כאן כותבים…", "Skryf iets", "কিছু লিখুন", "សរសេរអ្វីម្យ៉ាង", "Exprimez-vous", "اكتب شيئًا", "o czym myślisz", "Escribe algo", "ⴰⵔⴰ ⴽⵔⴰ ⵏ ⵜⵖⴰⵡסⴰ", "Magsulat", "Scrie ceva"];
 
   for (let attempt = 0; attempt < 15; attempt++) {
-    // 1. Check known pagelets first (fast path)
-    const pagelets = document.querySelectorAll('[data-pagelet="GroupInlineComposer"], [data-pagelet="FeedComposer"], [data-pagelet="InlineComposer"]');
-    for (const pagelet of pagelets) {
-      const btn = Array.from(pagelet.querySelectorAll('div[role="button"], button')).find(e => {
-        const text = e.textContent.trim();
-        const rect = e.getBoundingClientRect();
-        return text.length > 0 && rect.width > 100 && rect.height > 20 && rect.height < 100;
-      });
-      if (btn) return btn;
-    }
-
-    // 2. Query restricted tags and roles, and check keywords in-memory first (to avoid layout reflow)
     const candidates = Array.from(document.querySelectorAll('div[role="button"], button, div.x1i10hfl')).reverse();
     for (const el of candidates) {
       if (el.closest('[role="article"]')) continue;
@@ -53,13 +41,13 @@ async function d() {
       }
     }
 
-    // 3. Fallback: Avatar check
     try {
       const images = Array.from(document.querySelectorAll("img, svg[role='img']")).filter(img => {
         const w = img.clientWidth || img.getBoundingClientRect().width;
         return w >= 32 && w <= 60;
       });
       for (const img of images) {
+        if (img.closest('[role="article"]')) continue;
         const container = img.closest(".x78zum5");
         if (!container) continue;
         const btn = Array.from(container.querySelectorAll('div[role="button"]')).find(e => !e.contains(img) && !e.querySelector("svg, img, i"));
@@ -135,8 +123,13 @@ async function writeText(element, text) {
       element.focus();
       await y(0.2);
     }
+    
+    // Ensure newlines are preserved
+    const plainText = text.replace(/<br\s*\/?>/gi, '\n');
+    const htmlText = text.replace(/\n/g, '<br>');
+
     if (element.tagName.toLowerCase() === "textarea" || element.tagName.toLowerCase() === "input") {
-      element.value = text;
+      element.value = plainText;
       element.dispatchEvent(new Event("input", {
         bubbles: !0,
         composed: !0
