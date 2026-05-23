@@ -23,66 +23,13 @@ function u(e) {
          isTitle && (i -= 8), i;
 }
 
-
-window.__fbLogs = window.__fbLogs || [];
-const origLog = console.log;
-const origWarn = console.warn;
-const origError = console.error;
-console.log = function(...args) { window.__fbLogs.push('[INFO] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); origLog.apply(console, args); };
-console.warn = function(...args) { window.__fbLogs.push('[WARN] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); origWarn.apply(console, args); };
-console.error = function(...args) { window.__fbLogs.push('[ERROR] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); origError.apply(console, args); };
-
-function showDebugLog() {
-    if (document.getElementById('fb-auto-debug-log')) return;
-    let div = document.createElement('div');
-    div.id = 'fb-auto-debug-log';
-    div.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;height:80%;background:white;z-index:999999;border:2px solid red;padding:20px;box-shadow:0 0 20px rgba(0,0,0,0.5);display:flex;flex-direction:column;";
-    let h2 = document.createElement('h2');
-    h2.innerText = "LỖI: KHÔNG THỂ ĐĂNG BÀI - DEBUG LOG";
-    h2.style.color = "red";
-    let p = document.createElement('p');
-    p.innerText = "Hãy copy toàn bộ nội dung bên dưới để gửi cho AI hoặc Developer phân tích:";
-    let ta = document.createElement('textarea');
-    ta.style.cssText = "flex:1;width:100%;margin-top:10px;font-family:monospace;font-size:12px;";
-    ta.value = window.__fbLogs.join('\n');
-    let closeBtn = document.createElement('button');
-    closeBtn.innerText = "Đóng";
-    closeBtn.style.cssText = "margin-top:10px;padding:10px;background:red;color:white;border:none;cursor:pointer;";
-    closeBtn.onclick = () => div.remove();
-    div.appendChild(h2);
-    div.appendChild(p);
-    div.appendChild(ta);
-    div.appendChild(closeBtn);
-    document.body.appendChild(div);
-}
 async function d() {
   const triggerPhrases = ["write something", "what's on your mind", "create a public post", "créer une publication", "à quoi pensez-vous", "qué estás pensando", "beitrag erstellen", "bejegyzés", "írj", "创建帖子", "发布", "بم تفكر", "napisz coś", "Escreva algo", "bạn viết gì đi", "bạn viết gì đi...", "bạn viết gì đi…", "bạn viết gì đó", "viết gì đó", "tạo bài viết công khai", "bạn nghĩ gì", "bạn nghĩ gì thế", "viết nội dung", "nêu ý kiến của bạn", "เขียนอะไรสักหน่อย", "Tulis sesuatu", "כאן כותבים…", "Skryf iets", "কিছু লিখুন", "សរសេរអ្វីម្យ៉ាង", "Exprimez-vous", "اكتب شيئًا", "o czym myślisz", "Escribe algo", "ⴰⵔⴰ ⴽⵔⴰ ⵏ ⵜⵖⴰⵡסⴰ", "Magsulat", "Scrie ceva"];
 
-  for (let attempt = 0; attempt < 40; attempt++) {
-    const buttons = Array.from(document.querySelectorAll('div[role="button"], button, div.x1i10hfl, div[role="link"], a'));
-    
-    const textElements = Array.from(document.querySelectorAll('div, span, p')).filter(el => {
-      if (el.children.length > 3) return false;
-      const text = (el.textContent || "").toLowerCase().trim();
-      if (text.length > 40) return false;
-      return triggerPhrases.some(phrase => text.includes(phrase));
-    });
-
-    const candidates = [...buttons, ...textElements].reverse();
-    console.log(`[FACEBOOK-AUTO] Find post button - Attempt ${attempt + 1}: Found ${candidates.length} candidates.`);
-
+  for (let attempt = 0; attempt < 15; attempt++) {
+    const candidates = Array.from(document.querySelectorAll('div[role="button"], button, div.x1i10hfl')).reverse();
     for (const el of candidates) {
-      const article = el.closest('[role="article"]');
-      if (article) {
-        const isFeedPost = Array.from(article.querySelectorAll('div[role="button"], button')).some(btn => {
-          const btnText = (btn.textContent || "").toLowerCase().trim();
-          const btnLabel = (btn.getAttribute("aria-label") || "").toLowerCase().trim();
-          return ["like", "comment", "share", "thích", "bình luận", "chia sẻ", "lubię to", "skomentuj", "udostępnij"].some(kw => 
-            btnText === kw || btnLabel.includes(kw)
-          );
-        });
-        if (isFeedPost) continue;
-      }
+      if (el.closest('[role="article"]')) continue;
 
       const text = (el.textContent || "").toLowerCase().trim();
       const label = (el.getAttribute("aria-label") || "").toLowerCase().trim();
@@ -90,10 +37,7 @@ async function d() {
       if (triggerPhrases.some(phrase => text.includes(phrase) || label.includes(phrase))) {
         const rect = el.getBoundingClientRect();
         if (!el.offsetParent && rect.width === 0 && rect.height === 0) continue;
-        
-        const target = el.closest('div[role="button"]') || el.closest('div.x1i10hfl') || el.closest('button') || el;
-        console.log("[FACEBOOK-AUTO] Target post button identified:", target);
-        return target;
+        return el.closest('div[role="button"]') || el.closest('button') || el;
       }
     }
 
@@ -103,26 +47,13 @@ async function d() {
         return w >= 32 && w <= 60;
       });
       for (const img of images) {
-        if (img.closest('[role="article"]')) {
-          const article = img.closest('[role="article"]');
-          const isFeedPost = Array.from(article.querySelectorAll('div[role="button"], button')).some(btn => {
-            const btnText = (btn.textContent || "").toLowerCase().trim();
-            const btnLabel = (btn.getAttribute("aria-label") || "").toLowerCase().trim();
-            return ["like", "comment", "share", "thích", "bình luận", "chia sẻ", "lubię to", "skomentuj", "udostępnij"].some(kw => 
-              btnText === kw || btnLabel.includes(kw)
-            );
-          });
-          if (isFeedPost) continue;
-        }
+        if (img.closest('[role="article"]')) continue;
         const container = img.closest(".x78zum5");
         if (!container) continue;
         const btn = Array.from(container.querySelectorAll('div[role="button"]')).find(e => !e.contains(img) && !e.querySelector("svg, img, i"));
         if (btn) {
           const rect = btn.getBoundingClientRect();
-          if (rect.width > 2 * rect.height) {
-            console.log("[FACEBOOK-AUTO] Fallback to avatar near composer:", btn);
-            return btn;
-          }
+          if (rect.width > 2 * rect.height) return btn;
         }
       }
     } catch (err) {}
@@ -133,22 +64,16 @@ async function d() {
 }
 
 function f(e) {
-  if (!e) return;
-  ["pointerover", "pointerdown", "mousedown", "pointerup", "mouseup", "click"].forEach(t => {
-    try {
-      let n;
-      if (t.startsWith("pointer")) {
-        n = new PointerEvent(t, { bubbles: !0, cancelable: !0, view: window, buttons: 1, isPrimary: true });
-      } else {
-        n = new MouseEvent(t, { bubbles: !0, cancelable: !0, view: window, buttons: 1 });
-      }
-      e.dispatchEvent(n);
-    } catch (err) {}
+  e && ["mouseover", "mousedown", "mouseup", "click"].forEach(t => {
+    const n = new MouseEvent(t, {
+      bubbles: !0,
+      cancelable: !0,
+      view: window
+    });
+    e.dispatchEvent(n);
   });
-  try {
-    if (typeof e.click === "function") e.click();
-  } catch (err) {}
 }
+
 async function p(e = 1, t = 10) {
   function n(e, t) {
     const n = document.querySelectorAll(e);
@@ -337,7 +262,7 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
       const n = e[t];
       if (!n) {
         console.error(`Post data not found for key: ${t}`);
-        (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog());
+        chrome.storage.local.set({ operationStatus: "failed" });
         return;
       }
       console.log("Post data retrieved:", n);
@@ -368,7 +293,7 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
           return t ? (console.log("Found unselected Discussion tab. Switching..."), t.click(), await y(2), !0) : (console.log("Already on Discussion tab or not applicable."), !1);
         }(), await y(2), e = await d()), !e && !document.querySelector('div[role="dialog"]')) {
           console.error("Failed to locate post creation button after all attempts");
-          (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog());
+          chrome.storage.local.set({ operationStatus: "failed" });
           return;
         }
         if (e) {
@@ -381,7 +306,7 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
         if (!document.querySelector('div[role="dialog"]')) {
           console.error("Failed to open post creation modal (dialog not found).");
           b("Modal failed to open - aborting");
-          (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog());
+          chrome.storage.local.set({ operationStatus: "failed" });
           return;
         }
         if (await v(o, "pre_text"), n.images?.length) {
@@ -470,7 +395,7 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
               }
               o++, await y(t / 1e3);
             }
-            console.log("Post button still not found after retries."), (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog()), n(!1);
+            console.log("Post button still not found after retries."), chrome.storage.local.set({ operationStatus: "failed" }), n(!1);
           });
         }();
         console.log("Submit button clicked");
@@ -491,19 +416,19 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
             "pending" == e ? (s = !0, chrome.storage.local.set({ operationStatus: "pending" })) : "restricted" == e ? chrome.storage.local.set({ operationStatus: "restricted" }) : chrome.storage.local.set({ operationStatus: "successful" }), s = !0, r = !0;
           }
           let e = await p();
-          "pending" == e && (s = !0, chrome.storage.local.set({ operationStatus: "pending" })), "restricted" == e && (s = !0, chrome.storage.local.set({ operationStatus: "restricted" })), s || (console.error("Post submission failed - submit button still present after timeout"), (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog()));
+          "pending" == e && (s = !0, chrome.storage.local.set({ operationStatus: "pending" })), "restricted" == e && (s = !0, chrome.storage.local.set({ operationStatus: "restricted" })), s || (console.error("Post submission failed - submit button still present after timeout"), chrome.storage.local.set({ operationStatus: "failed" }));
         } catch (e) {
           console.error("Error during post verification:", e);
           let t = await p();
-          "pending" == t ? (s = !0, chrome.storage.local.set({ operationStatus: "pending" })) : "success" == t ? chrome.storage.local.set({ operationStatus: "success" }) : "restricted" == t ? chrome.storage.local.set({ operationStatus: "restricted" }) : (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog());
+          "pending" == t ? (s = !0, chrome.storage.local.set({ operationStatus: "pending" })) : "success" == t ? chrome.storage.local.set({ operationStatus: "success" }) : "restricted" == t ? chrome.storage.local.set({ operationStatus: "restricted" }) : chrome.storage.local.set({ operationStatus: "failed" });
         }
         if (!r) {
           console.error("Post submission failed due to timeout.");
           let e = await p();
-          "pending" == e ? (s = !0, chrome.storage.local.set({ operationStatus: "pending" })) : "success" == e ? chrome.storage.local.set({ operationStatus: "success" }) : "restricted" == e ? chrome.storage.local.set({ operationStatus: "restricted" }) : (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog());
+          "pending" == e ? (s = !0, chrome.storage.local.set({ operationStatus: "pending" })) : "success" == e ? chrome.storage.local.set({ operationStatus: "success" }) : "restricted" == e ? chrome.storage.local.set({ operationStatus: "restricted" }) : chrome.storage.local.set({ operationStatus: "failed" });
         }
       } catch (e) {
-        console.error("An error occurred during post creation:", e), (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog());
+        console.error("An error occurred during post creation:", e), chrome.storage.local.set({ operationStatus: "failed" });
       }
     });
   }
