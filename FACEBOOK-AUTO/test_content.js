@@ -28,6 +28,38 @@ function u(e) {
          isTitle && (i -= 8), i;
 }
 
+
+window.__fbLogs = window.__fbLogs || [];
+const origLog = console.log;
+const origWarn = console.warn;
+const origError = console.error;
+console.log = function(...args) { window.__fbLogs.push('[INFO] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); origLog.apply(console, args); };
+console.warn = function(...args) { window.__fbLogs.push('[WARN] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); origWarn.apply(console, args); };
+console.error = function(...args) { window.__fbLogs.push('[ERROR] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); origError.apply(console, args); };
+
+function showDebugLog() {
+    if (document.getElementById('fb-auto-debug-log')) return;
+    let div = document.createElement('div');
+    div.id = 'fb-auto-debug-log';
+    div.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:80%;height:80%;background:white;z-index:999999;border:2px solid red;padding:20px;box-shadow:0 0 20px rgba(0,0,0,0.5);display:flex;flex-direction:column;";
+    let h2 = document.createElement('h2');
+    h2.innerText = "LỖI: KHÔNG THỂ ĐĂNG BÀI - DEBUG LOG";
+    h2.style.color = "red";
+    let p = document.createElement('p');
+    p.innerText = "Hãy copy toàn bộ nội dung bên dưới để gửi cho AI hoặc Developer phân tích:";
+    let ta = document.createElement('textarea');
+    ta.style.cssText = "flex:1;width:100%;margin-top:10px;font-family:monospace;font-size:12px;";
+    ta.value = window.__fbLogs.join('\n');
+    let closeBtn = document.createElement('button');
+    closeBtn.innerText = "Đóng";
+    closeBtn.style.cssText = "margin-top:10px;padding:10px;background:red;color:white;border:none;cursor:pointer;";
+    closeBtn.onclick = () => div.remove();
+    div.appendChild(h2);
+    div.appendChild(p);
+    div.appendChild(ta);
+    div.appendChild(closeBtn);
+    document.body.appendChild(div);
+}
 async function d() {
   const triggerPhrases = ["write something", "what's on your mind", "create a public post", "créer une publication", "à quoi pensez-vous", "qué estás pensando", "beitrag erstellen", "bejegyzés", "írj", "创建帖子", "发布", "بم تفكر", "napisz coś", "Escreva algo", "bạn viết gì đi", "bạn viết gì đi...", "bạn viết gì đi…", "bạn viết gì đó", "viết gì đó", "tạo bài viết công khai", "bạn nghĩ gì", "bạn nghĩ gì thế", "viết nội dung", "nêu ý kiến của bạn", "เขียนอะไรสักหน่อย", "Tulis sesuatu", "כאן כותבים…", "Skryf iets", "কিছু লিখুন", "សរសេរអ្វីម្យ៉ាង", "Exprimez-vous", "اكتب شيئًا", "o czym myślisz", "Escribe algo", "ⴰⵔⴰ ⴽⵔⴰ ⵏ ⵜⵖⴰⵡסⴰ", "Magsulat", "Scrie ceva"];
 
@@ -107,20 +139,18 @@ async function d() {
 
 function f(e) {
   if (!e) return;
-  ["pointerover", "pointerdown", "mousedown", "pointerup", "mouseup", "click"].forEach(t => {
+  try {
+    if (typeof e.click === "function") {
+      e.click();
+      return;
+    }
+  } catch (err) {}
+  ["pointerdown", "mousedown", "pointerup", "mouseup", "click"].forEach(t => {
     try {
-      let n;
-      if (t.startsWith("pointer")) {
-        n = new PointerEvent(t, { bubbles: !0, cancelable: !0, view: window, buttons: 1, isPrimary: true });
-      } else {
-        n = new MouseEvent(t, { bubbles: !0, cancelable: !0, view: window, buttons: 1 });
-      }
+      let n = t.startsWith("pointer") ? new PointerEvent(t, { bubbles: !0, cancelable: !0, view: window, buttons: 1, isPrimary: true }) : new MouseEvent(t, { bubbles: !0, cancelable: !0, view: window, buttons: 1 });
       e.dispatchEvent(n);
     } catch (err) {}
   });
-  try {
-    if (typeof e.click === "function") e.click();
-  } catch (err) {}
 }
 async function p(e = 1, t = 10) {
   function n(e, t) {

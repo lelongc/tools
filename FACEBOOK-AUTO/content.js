@@ -134,20 +134,18 @@ async function d() {
 
 function f(e) {
   if (!e) return;
-  ["pointerover", "pointerdown", "mousedown", "pointerup", "mouseup", "click"].forEach(t => {
+  try {
+    if (typeof e.click === "function") {
+      e.click();
+      return;
+    }
+  } catch (err) {}
+  ["pointerdown", "mousedown", "pointerup", "mouseup", "click"].forEach(t => {
     try {
-      let n;
-      if (t.startsWith("pointer")) {
-        n = new PointerEvent(t, { bubbles: !0, cancelable: !0, view: window, buttons: 1, isPrimary: true });
-      } else {
-        n = new MouseEvent(t, { bubbles: !0, cancelable: !0, view: window, buttons: 1 });
-      }
+      let n = t.startsWith("pointer") ? new PointerEvent(t, { bubbles: !0, cancelable: !0, view: window, buttons: 1, isPrimary: true }) : new MouseEvent(t, { bubbles: !0, cancelable: !0, view: window, buttons: 1 });
       e.dispatchEvent(n);
     } catch (err) {}
   });
-  try {
-    if (typeof e.click === "function") e.click();
-  } catch (err) {}
 }
 async function p(e = 1, t = 10) {
   function n(e, t) {
