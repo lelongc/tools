@@ -3,16 +3,16 @@
   "_format_version": "1.0",
   "_instructions_for_ai": "Mỗi event trong mảng 'events' đại diện một thao tác của người dùng. Dùng 'element.bestSelector' làm CSS selector chính khi build bot. 'timeSincePrevMs' cho biết khoảng delay giữa các bước (đơn vị ms). 'element.textContent' chứa nội dung text hiển thị. Với event type='input', field 'value' chứa nội dung người dùng đã gõ vào. Với type='click', field 'mouse' chứa tọa độ click.",
   "meta": {
-    "startTime": "2026-05-23T07:11:06.361Z",
-    "endTime": "2026-05-23T07:11:46.764Z",
-    "duration": "0m40s",
-    "durationMs": 40403,
-    "totalEvents": 22,
+    "startTime": "2026-05-25T11:03:26.334Z",
+    "endTime": "2026-05-25T11:04:25.580Z",
+    "duration": "0m59s",
+    "durationMs": 59246,
+    "totalEvents": 31,
     "eventBreakdown": {
-      "click": 11,
-      "scroll": 6,
-      "focus": 4,
-      "input": 1
+      "click": 15,
+      "scroll": 5,
+      "focus": 6,
+      "input": 5
     },
     "pagesVisited": [
       "https://www.facebook.com/groups/1840850679540577"
@@ -22,74 +22,42 @@
     {
       "element": {
         "ariaLabel": "",
-        "bestSelector": "div > div > div > div",
-        "className": "x6s0dn4 x78zum5 x1l90r2v xv54qhq xf7dkkf xz9dl7a",
+        "bestSelector": "div[role=\"button\"]",
+        "className": "x1i10hfl x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 x1ypdohk x3ct3a4 xdj266r x14z9mp xat24cr x1lziwak x16tdsg8 x1hl2dhg xggy1nq x87ps6o x1lku1pv x1a2a7pz x6s0dn4 xmjc",
         "contentEditable": "inherit",
         "href": "",
         "id": "",
         "name": "",
         "placeholder": "",
         "rect": {
-          "height": 72,
-          "width": 592,
-          "x": 290,
+          "height": 44,
+          "width": 512,
+          "x": 354,
           "y": 470
         },
-        "role": "",
+        "role": "button",
         "tag": "DIV",
         "textContent": "Bạn viết gì đi...",
         "type": "",
-        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]"
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]"
       },
       "mouse": {
-        "clientX": 358,
-        "clientY": 528
+        "clientX": 472,
+        "clientY": 513
       },
-      "timeFormatted": "14:11:09",
-      "timeSincePrevMs": 2814,
-      "timestamp": 1779520269179,
+      "timeFormatted": "18:03:28",
+      "timeSincePrevMs": 2404,
+      "timestamp": 1779707008744,
       "type": "click",
       "url": "https://www.facebook.com/groups/1840850679540577"
     },
     {
-      "element": {
-        "ariaLabel": "",
-        "bestSelector": "div > div[role=\"button\"] > div > span",
-        "className": "x1lliihq x6ikm8r x10wlt62 x1n2onr6",
-        "contentEditable": "inherit",
-        "href": "",
-        "id": "",
-        "name": "",
-        "placeholder": "",
-        "rect": {
-          "height": 28,
-          "width": 488,
-          "x": 366,
-          "y": 490
-        },
-        "role": "",
-        "tag": "SPAN",
-        "textContent": "Bạn viết gì đi...",
-        "type": "",
-        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/span[1]"
-      },
-      "mouse": {
-        "clientX": 443,
-        "clientY": 501
-      },
-      "timeFormatted": "14:11:11",
-      "timeSincePrevMs": 1909,
-      "timestamp": 1779520271088,
-      "type": "click",
-      "url": "https://www.facebook.com/groups/1840850679540577"
-    },
-    {
-      "documentHeight": 837,
+      "documentHeight": 845,
       "scrollLeft": 0,
       "scrollTop": 0,
-      "timeFormatted": "14:11:11",
-      "timeSincePrevMs": 564,
-      "timestamp": 1779520271652,
+      "timeFormatted": "18:03:29",
+      "timeSincePrevMs": 628,
+      "timestamp": 1779707009372,
       "type": "scroll",
       "url": "https://www.facebook.com/groups/1840850679540577",
       "viewportHeight": 782
@@ -116,41 +84,73 @@
         "type": "textarea",
         "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
       },
-      "timeFormatted": "14:11:12",
-      "timeSincePrevMs": 703,
-      "timestamp": 1779520272355,
+      "timeFormatted": "18:03:29",
+      "timeSincePrevMs": 474,
+      "timestamp": 1779707009846,
       "type": "focus",
       "url": "https://www.facebook.com/groups/1840850679540577"
     },
     {
       "element": {
-        "ariaLabel": "Tạo bài viết công khai...",
-        "bestSelector": "textarea[aria-label=\"Tạo\\ bài\\ viết\\ công\\ khai\\.\\.\\.\"]",
-        "className": "xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 xzsf02u xngnso2 x1xlr1w8 x1u7k74 x1a2a7pz x6ikm8r x10wlt62 x18d9i69 xexx8yu xf7dkkf xv54qhq xtt52l0 xh8yej3 x2s2ed0",
+        "ariaLabel": "",
+        "bestSelector": "div > div > div > div",
+        "className": "x4k7w5x x1h91t0o x1beo9mf xaigb6o x12ejxvf x3igimt xarpa2k xedcshv x1lytzrv x1t2pt76 x7ja8zs x1n2onr6 x1qrby5j x1jfb8zj",
         "contentEditable": "inherit",
         "href": "",
         "id": "",
         "name": "",
-        "placeholder": "Tạo bài viết công khai...",
+        "placeholder": "",
         "rect": {
-          "height": 38,
+          "height": 50,
           "width": 500,
           "x": 556,
           "y": 268
         },
         "role": "",
-        "tag": "TEXTAREA",
+        "tag": "DIV",
         "textContent": "",
-        "type": "textarea",
-        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]"
       },
       "mouse": {
-        "clientX": 736,
-        "clientY": 291
+        "clientX": 858,
+        "clientY": 310
       },
-      "timeFormatted": "14:11:13",
-      "timeSincePrevMs": 1609,
-      "timestamp": 1779520273964,
+      "timeFormatted": "18:03:32",
+      "timeSincePrevMs": 3069,
+      "timestamp": 1779707012915,
+      "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div > div > div[role=\"presentation\"] > div",
+        "className": "x9f619 x1iyjqo2 xg7h5cd xv54qhq xf7dkkf x1n2onr6 xh8yej3 x1ja2u2z x1t1ogtf",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 79,
+          "width": 500,
+          "x": 556,
+          "y": 318
+        },
+        "role": "",
+        "tag": "DIV",
+        "textContent": "",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]"
+      },
+      "mouse": {
+        "clientX": 823,
+        "clientY": 362
+      },
+      "timeFormatted": "18:03:34",
+      "timeSincePrevMs": 1635,
+      "timestamp": 1779707014550,
       "type": "click",
       "url": "https://www.facebook.com/groups/1840850679540577"
     },
@@ -165,20 +165,48 @@
         "name": "",
         "placeholder": "",
         "rect": {
-          "height": 533,
+          "height": 27,
           "width": 468,
           "x": 572,
           "y": 322
         },
         "role": "textbox",
         "tag": "DIV",
-        "textContent": "để tôi nói , hiện tại có kênh lelongshit1 để up video khóa học private của người ta để tôi xem phụ đề , không có ý định ",
+        "textContent": "",
         "type": "",
         "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]"
       },
-      "timeFormatted": "14:11:17",
-      "timeSincePrevMs": 3689,
-      "timestamp": 1779520277653,
+      "timeFormatted": "18:03:34",
+      "timeSincePrevMs": 22,
+      "timestamp": 1779707014572,
+      "type": "focus",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div[role=\"textbox\"]",
+        "className": "xzsf02u x1a2a7pz x1n2onr6 x14wi4xw x9f619 x1lliihq x5yr21d xh8yej3 notranslate",
+        "contentEditable": "true",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 27,
+          "width": 468,
+          "x": 572,
+          "y": 322
+        },
+        "role": "textbox",
+        "tag": "DIV",
+        "textContent": "",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]"
+      },
+      "timeFormatted": "18:03:38",
+      "timeSincePrevMs": 4147,
+      "timestamp": 1779707018719,
       "type": "focus",
       "url": "https://www.facebook.com/groups/1840850679540577"
     },
@@ -186,41 +214,12 @@
       "documentHeight": 816,
       "scrollLeft": 0,
       "scrollTop": 0,
-      "timeFormatted": "14:11:18",
-      "timeSincePrevMs": 449,
-      "timestamp": 1779520278102,
+      "timeFormatted": "18:03:46",
+      "timeSincePrevMs": 7435,
+      "timestamp": 1779707026154,
       "type": "scroll",
       "url": "https://www.facebook.com/groups/1840850679540577",
       "viewportHeight": 782
-    },
-    {
-      "element": {
-        "ariaLabel": "Thêm tiêu đề",
-        "bestSelector": "textarea[aria-label=\"Thêm\\ tiêu\\ đề\"]",
-        "className": "xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 xzsf02u xngnso2 x1xlr1w8 x1u7k74 x1a2a7pz x6ikm8r x10wlt62 x18d9i69 xexx8yu xf7dkkf xv54qhq xtt52l0 xh8yej3 x2s2ed0",
-        "contentEditable": "inherit",
-        "href": "",
-        "id": "",
-        "name": "",
-        "placeholder": "Thêm tiêu đề",
-        "rect": {
-          "height": 38,
-          "width": 500,
-          "x": 556,
-          "y": -31
-        },
-        "role": "",
-        "tag": "TEXTAREA",
-        "textContent": "",
-        "type": "textarea",
-        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
-      },
-      "timeFormatted": "14:11:18",
-      "timeSincePrevMs": 77,
-      "timestamp": 1779520278179,
-      "type": "input",
-      "url": "https://www.facebook.com/groups/1840850679540577",
-      "value": "để tôi nói , hiện tại có kênh lelongshit1 để up video khóa học private của người ta để tôi xem phụ đề , không có ý định publc và kiếm tiền . \n\nkênh lelong191001 có 2 kênh tiếng anh ảnh tĩnh với podcast 2 người và phụ đề . nhưng kênh a thì mới tạo nên flop . tôi lấy kênh gốc cũ 2024 ép vô kênh thương hiệu lấy ngày và tạo 1 kênh tựa vậy . \n\n\n\ncòn lelong190110 thì có 1 kênh cũ chuyển lên từ kênh gmail chính qua thương hiệu . up 3 video short dạng lấy video ngắn ghép rồi thêm sfx .kênh này tạo 1 kên"
     },
     {
       "element": {
@@ -233,7 +232,50 @@
         "name": "",
         "placeholder": "",
         "rect": {
-          "height": 662,
+          "height": 848,
+          "width": 16,
+          "x": 1040,
+          "y": 109
+        },
+        "role": "",
+        "tag": "DIV",
+        "textContent": "",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[2]"
+      },
+      "mouse": {
+        "clientX": 1048,
+        "clientY": 356
+      },
+      "timeFormatted": "18:03:48",
+      "timeSincePrevMs": 2370,
+      "timestamp": 1779707028524,
+      "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "documentHeight": 968,
+      "scrollLeft": 0,
+      "scrollTop": 0,
+      "timeFormatted": "18:03:48",
+      "timeSincePrevMs": 269,
+      "timestamp": 1779707028793,
+      "type": "scroll",
+      "url": "https://www.facebook.com/groups/1840850679540577",
+      "viewportHeight": 782
+    },
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div > div > div > div",
+        "className": "x14nfmen x1s85apg x5yr21d xtijo5x xg01cxk x10l6tqk x13vifvy x1wsgiic x19991ni xwji4o3 x1kky2od x1sd63oq",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 848,
           "width": 16,
           "x": 1040,
           "y": 202
@@ -245,22 +287,22 @@
         "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[2]"
       },
       "mouse": {
-        "clientX": 1046,
-        "clientY": 293
+        "clientX": 1048,
+        "clientY": 282
       },
-      "timeFormatted": "14:11:20",
-      "timeSincePrevMs": 2409,
-      "timestamp": 1779520280588,
+      "timeFormatted": "18:03:49",
+      "timeSincePrevMs": 938,
+      "timestamp": 1779707029731,
       "type": "click",
       "url": "https://www.facebook.com/groups/1840850679540577"
     },
     {
-      "documentHeight": 868,
+      "documentHeight": 1052,
       "scrollLeft": 0,
       "scrollTop": 0,
-      "timeFormatted": "14:11:20",
-      "timeSincePrevMs": 72,
-      "timestamp": 1779520280660,
+      "timeFormatted": "18:03:49",
+      "timeSincePrevMs": 27,
+      "timestamp": 1779707029758,
       "type": "scroll",
       "url": "https://www.facebook.com/groups/1840850679540577",
       "viewportHeight": 782
@@ -287,9 +329,9 @@
         "type": "textarea",
         "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
       },
-      "timeFormatted": "14:11:22",
-      "timeSincePrevMs": 1619,
-      "timestamp": 1779520282279,
+      "timeFormatted": "18:03:51",
+      "timeSincePrevMs": 1698,
+      "timestamp": 1779707031456,
       "type": "focus",
       "url": "https://www.facebook.com/groups/1840850679540577"
     },
@@ -316,12 +358,131 @@
         "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
       },
       "mouse": {
-        "clientX": 663,
-        "clientY": 226
+        "clientX": 696,
+        "clientY": 227
       },
-      "timeFormatted": "14:11:22",
-      "timeSincePrevMs": 102,
-      "timestamp": 1779520282381,
+      "timeFormatted": "18:03:51",
+      "timeSincePrevMs": 94,
+      "timestamp": 1779707031550,
+      "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "Thêm tiêu đề",
+        "bestSelector": "textarea[aria-label=\"Thêm\\ tiêu\\ đề\"]",
+        "className": "xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 xzsf02u xngnso2 x1xlr1w8 x1u7k74 x1a2a7pz x6ikm8r x10wlt62 x18d9i69 xexx8yu xf7dkkf xv54qhq xtt52l0 xh8yej3 x2s2ed0",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "Thêm tiêu đề",
+        "rect": {
+          "height": 38,
+          "width": 500,
+          "x": 556,
+          "y": 202
+        },
+        "role": "",
+        "tag": "TEXTAREA",
+        "textContent": "tie",
+        "type": "textarea",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
+      },
+      "timeFormatted": "18:03:54",
+      "timeSincePrevMs": 2833,
+      "timestamp": 1779707034383,
+      "type": "input",
+      "url": "https://www.facebook.com/groups/1840850679540577",
+      "value": "tie"
+    },
+    {
+      "element": {
+        "ariaLabel": "Thêm tiêu đề",
+        "bestSelector": "textarea[aria-label=\"Thêm\\ tiêu\\ đề\"]",
+        "className": "xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 xzsf02u xngnso2 x1xlr1w8 x1u7k74 x1a2a7pz x6ikm8r x10wlt62 x18d9i69 xexx8yu xf7dkkf xv54qhq xtt52l0 xh8yej3 x2s2ed0",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "Thêm tiêu đề",
+        "rect": {
+          "height": 38,
+          "width": 500,
+          "x": 556,
+          "y": 202
+        },
+        "role": "",
+        "tag": "TEXTAREA",
+        "textContent": "tiê",
+        "type": "textarea",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
+      },
+      "timeFormatted": "18:03:55",
+      "timeSincePrevMs": 1399,
+      "timestamp": 1779707035782,
+      "type": "input",
+      "url": "https://www.facebook.com/groups/1840850679540577",
+      "value": "tiê"
+    },
+    {
+      "element": {
+        "ariaLabel": "Thêm tiêu đề",
+        "bestSelector": "textarea[aria-label=\"Thêm\\ tiêu\\ đề\"]",
+        "className": "xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 xzsf02u xngnso2 x1xlr1w8 x1u7k74 x1a2a7pz x6ikm8r x10wlt62 x18d9i69 xexx8yu xf7dkkf xv54qhq xtt52l0 xh8yej3 x2s2ed0",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "Thêm tiêu đề",
+        "rect": {
+          "height": 38,
+          "width": 500,
+          "x": 556,
+          "y": 202
+        },
+        "role": "",
+        "tag": "TEXTAREA",
+        "textContent": "tiêu đề",
+        "type": "textarea",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
+      },
+      "timeFormatted": "18:03:57",
+      "timeSincePrevMs": 1917,
+      "timestamp": 1779707037699,
+      "type": "input",
+      "url": "https://www.facebook.com/groups/1840850679540577",
+      "value": "tiêu đề"
+    },
+    {
+      "element": {
+        "ariaLabel": "Thêm tiêu đề",
+        "bestSelector": "textarea[aria-label=\"Thêm\\ tiêu\\ đề\"]",
+        "className": "xjbqb8w x1ejq31n x18oe1m7 x1sy0etr xstzfhl x972fbf x10w94by x1qhh985 x14e42zd x9f619 xzsf02u xngnso2 x1xlr1w8 x1u7k74 x1a2a7pz x6ikm8r x10wlt62 x18d9i69 xexx8yu xf7dkkf xv54qhq xtt52l0 xh8yej3 x2s2ed0",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "Thêm tiêu đề",
+        "rect": {
+          "height": 38,
+          "width": 500,
+          "x": 556,
+          "y": 202
+        },
+        "role": "",
+        "tag": "TEXTAREA",
+        "textContent": "tiêu đề",
+        "type": "textarea",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/textarea[1]"
+      },
+      "mouse": {
+        "clientX": 676,
+        "clientY": 227
+      },
+      "timeFormatted": "18:03:59",
+      "timeSincePrevMs": 1527,
+      "timestamp": 1779707039226,
       "type": "click",
       "url": "https://www.facebook.com/groups/1840850679540577"
     },
@@ -336,7 +497,7 @@
         "name": "",
         "placeholder": "",
         "rect": {
-          "height": 560,
+          "height": 746,
           "width": 448,
           "x": 572,
           "y": 256
@@ -347,42 +508,224 @@
         "type": "",
         "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]"
       },
-      "timeFormatted": "14:11:23",
-      "timeSincePrevMs": 1043,
-      "timestamp": 1779520283424,
+      "timeFormatted": "18:04:01",
+      "timeSincePrevMs": 2439,
+      "timestamp": 1779707041665,
       "type": "focus",
       "url": "https://www.facebook.com/groups/1840850679540577"
     },
     {
       "element": {
         "ariaLabel": "",
-        "bestSelector": "div > div[role=\"textbox\"] > p > span",
-        "className": "",
+        "bestSelector": "div[role=\"textbox\"]",
+        "className": "xzsf02u x1a2a7pz x1n2onr6 x14wi4xw x9f619 x1lliihq x5yr21d xh8yej3 notranslate",
+        "contentEditable": "true",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 746,
+          "width": 448,
+          "x": 572,
+          "y": 256
+        },
+        "role": "textbox",
+        "tag": "DIV",
+        "textContent": "để tôi nói , hiện tại có kênh lelongshit1 để up video khóa học private của người ta để tôi xem phụ đề , không có ý định ",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]"
+      },
+      "mouse": {
+        "clientX": 705,
+        "clientY": 335
+      },
+      "timeFormatted": "18:04:01",
+      "timeSincePrevMs": 44,
+      "timestamp": 1779707041709,
+      "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div > div > div > div",
+        "className": "x78zum5 xdt5ytf xg6iff7 xippug5 x1n2onr6",
         "contentEditable": "inherit",
         "href": "",
         "id": "",
         "name": "",
         "placeholder": "",
         "rect": {
-          "height": 559,
-          "width": 449,
-          "x": 572,
-          "y": 256
+          "height": 816,
+          "width": 1611,
+          "x": 0,
+          "y": 0
         },
         "role": "",
-        "tag": "SPAN",
-        "textContent": "để tôi nói , hiện tại có kênh lelongshit1 để up video khóa học private của người ta để tôi xem phụ đề , không có ý định ",
+        "tag": "DIV",
+        "textContent": "Tạo bài viết\nLe Long Bds\nNhóm công khai\nThêm nhóm\n\nđể tôi nói , hiện tại có kênh lelongshit1 để up video khóa học privat",
         "type": "",
-        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/p[1]/span[1]"
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]"
       },
       "mouse": {
-        "clientX": 687,
-        "clientY": 293
+        "clientX": 705,
+        "clientY": 335
       },
-      "timeFormatted": "14:11:23",
-      "timeSincePrevMs": 36,
-      "timestamp": 1779520283460,
+      "timeFormatted": "18:04:01",
+      "timeSincePrevMs": 143,
+      "timestamp": 1779707041852,
       "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div[role=\"textbox\"]",
+        "className": "xzsf02u x1a2a7pz x1n2onr6 x14wi4xw x9f619 x1lliihq x5yr21d xh8yej3 notranslate",
+        "contentEditable": "true",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 27,
+          "width": 468,
+          "x": 572,
+          "y": 322
+        },
+        "role": "textbox",
+        "tag": "DIV",
+        "textContent": "nôi​",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]"
+      },
+      "timeFormatted": "18:04:06",
+      "timeSincePrevMs": 4367,
+      "timestamp": 1779707046219,
+      "type": "input",
+      "url": "https://www.facebook.com/groups/1840850679540577",
+      "value": "nôi​"
+    },
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div[role=\"textbox\"]",
+        "className": "xzsf02u x1a2a7pz x1n2onr6 x14wi4xw x9f619 x1lliihq x5yr21d xh8yej3 notranslate",
+        "contentEditable": "true",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 27,
+          "width": 468,
+          "x": 572,
+          "y": 322
+        },
+        "role": "textbox",
+        "tag": "DIV",
+        "textContent": "nội dung",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]"
+      },
+      "timeFormatted": "18:04:08",
+      "timeSincePrevMs": 2317,
+      "timestamp": 1779707048536,
+      "type": "input",
+      "url": "https://www.facebook.com/groups/1840850679540577",
+      "value": "nội dung"
+    },
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div > div > div[role=\"textbox\"] > p",
+        "className": "xdj266r x14z9mp xat24cr x1lziwak x16tdsg8",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 27,
+          "width": 468,
+          "x": 572,
+          "y": 322
+        },
+        "role": "",
+        "tag": "P",
+        "textContent": "nội dung",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/p[1]"
+      },
+      "mouse": {
+        "clientX": 703,
+        "clientY": 337
+      },
+      "timeFormatted": "18:04:09",
+      "timeSincePrevMs": 700,
+      "timestamp": 1779707049236,
+      "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div > div > div[role=\"presentation\"] > div",
+        "className": "x9f619 x1iyjqo2 xg7h5cd xv54qhq xf7dkkf x1n2onr6 xh8yej3 x1ja2u2z x1t1ogtf",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 79,
+          "width": 500,
+          "x": 556,
+          "y": 318
+        },
+        "role": "",
+        "tag": "DIV",
+        "textContent": "nội dung",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]"
+      },
+      "mouse": {
+        "clientX": 750,
+        "clientY": 378
+      },
+      "timeFormatted": "18:04:10",
+      "timeSincePrevMs": 1040,
+      "timestamp": 1779707050276,
+      "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div[role=\"textbox\"]",
+        "className": "xzsf02u x1a2a7pz x1n2onr6 x14wi4xw x9f619 x1lliihq x5yr21d xh8yej3 notranslate",
+        "contentEditable": "true",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 27,
+          "width": 468,
+          "x": 572,
+          "y": 322
+        },
+        "role": "textbox",
+        "tag": "DIV",
+        "textContent": "nội dung",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]"
+      },
+      "timeFormatted": "18:04:10",
+      "timeSincePrevMs": 24,
+      "timestamp": 1779707050300,
+      "type": "focus",
       "url": "https://www.facebook.com/groups/1840850679540577"
     },
     {
@@ -399,7 +742,7 @@
           "height": 18,
           "width": 450,
           "x": 581,
-          "y": 717
+          "y": 618
         },
         "role": "",
         "tag": "DIV",
@@ -408,22 +751,86 @@
         "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[3]/div[3]/div[1]/div[1]/div[1]/div[1]"
       },
       "mouse": {
-        "clientX": 848,
-        "clientY": 718
+        "clientX": 836,
+        "clientY": 623
       },
-      "timeFormatted": "14:11:29",
-      "timeSincePrevMs": 6124,
-      "timestamp": 1779520289584,
+      "timeFormatted": "18:04:16",
+      "timeSincePrevMs": 6514,
+      "timestamp": 1779707056814,
       "type": "click",
       "url": "https://www.facebook.com/groups/1840850679540577"
     },
     {
-      "documentHeight": 4093,
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div > div[role=\"status\"] > div > img",
+        "className": "xz74otr",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 32,
+          "width": 32,
+          "x": 790,
+          "y": 353
+        },
+        "role": "",
+        "tag": "IMG",
+        "textContent": "",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[2]/div[2]/div[1]/img[1]"
+      },
+      "mouse": {
+        "clientX": 807,
+        "clientY": 380
+      },
+      "timeFormatted": "18:04:19",
+      "timeSincePrevMs": 2773,
+      "timestamp": 1779707059587,
+      "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "element": {
+        "ariaLabel": "",
+        "bestSelector": "div > div > div > span",
+        "className": "x193iq5w xeuugli x13faqbe x1vvkbs x1xmvt09 x1lliihq x1s928wv xhkezso x1gmr53x x1cpjm7i x1fgarty x1943h6x xtoi2st x3x7a5m x1603h9y x1u7k74 xo1l8bm xzsf02u",
+        "contentEditable": "inherit",
+        "href": "",
+        "id": "",
+        "name": "",
+        "placeholder": "",
+        "rect": {
+          "height": 30,
+          "width": 122,
+          "x": 744,
+          "y": 391
+        },
+        "role": "",
+        "tag": "SPAN",
+        "textContent": "Đang đăng",
+        "type": "",
+        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/form[1]/div[1]/div[1]/div[2]/div[3]/span[1]"
+      },
+      "mouse": {
+        "clientX": 831,
+        "clientY": 415
+      },
+      "timeFormatted": "18:04:22",
+      "timeSincePrevMs": 2432,
+      "timestamp": 1779707062019,
+      "type": "click",
+      "url": "https://www.facebook.com/groups/1840850679540577"
+    },
+    {
+      "documentHeight": 6232,
       "scrollLeft": 0,
-      "scrollTop": 316,
-      "timeFormatted": "14:11:35",
-      "timeSincePrevMs": 6336,
-      "timestamp": 1779520295920,
+      "scrollTop": 328,
+      "timeFormatted": "18:04:24",
+      "timeSincePrevMs": 2386,
+      "timestamp": 1779707064405,
       "type": "scroll",
       "url": "https://www.facebook.com/groups/1840850679540577",
       "viewportHeight": 782
@@ -431,7 +838,7 @@
     {
       "element": {
         "ariaLabel": "",
-        "bestSelector": "#_r_5h_ > span",
+        "bestSelector": "#_r_j7_ > span",
         "className": "x1lliihq x6ikm8r x10wlt62 x1n2onr6",
         "contentEditable": "inherit",
         "href": "",
@@ -448,135 +855,17 @@
         "tag": "SPAN",
         "textContent": "Cảm ơn bạn đã đăng bài! Hệ thống đã gửi bài viết cho quản trị viên nhóm phê duyệt.",
         "type": "",
-        "xpath": "/html[1]/body[1]/div[10]/ul[1]/li[1]/div[1]/div[1]/div[1]/span[1]/span[1]"
+        "xpath": "/html[1]/body[1]/div[6]/ul[1]/li[1]/div[1]/div[1]/div[1]/span[1]/span[1]"
       },
       "mouse": {
-        "clientX": 200,
-        "clientY": 698
+        "clientX": 212,
+        "clientY": 683
       },
-      "timeFormatted": "14:11:38",
-      "timeSincePrevMs": 2509,
-      "timestamp": 1779520298429,
+      "timeFormatted": "18:04:25",
+      "timeSincePrevMs": 1175,
+      "timestamp": 1779707065580,
       "type": "click",
       "url": "https://www.facebook.com/groups/1840850679540577"
-    },
-    {
-      "element": {
-        "ariaLabel": "Hành động đối với bài viết này của Le Long Bds",
-        "bestSelector": "div[role=\"button\"][aria-label=\"Hành\\ động\\ đối\\ với\\ bài\\ viết\\ này\\ của\\ Le\\ Long\\ Bds\"]",
-        "className": "x1i10hfl x1qjc9v5 xjqpnuy xc5r6h4 xqeqjp1 x1phubyo x9f619 x1ypdohk xdl72j9 x2lah0s x3ct3a4 x2lwn1j xeuugli x16tdsg8 x1hl2dhg xggy1nq x1ja2u2z x1t137rt x1fmog5m xu25z0z x140muxe xo1y3bh x1q0g3np x87ps6",
-        "contentEditable": "inherit",
-        "href": "",
-        "id": "",
-        "name": "",
-        "placeholder": "",
-        "rect": {
-          "height": 20,
-          "width": 20,
-          "x": 843,
-          "y": 615
-        },
-        "role": "button",
-        "tag": "DIV",
-        "textContent": "",
-        "type": "",
-        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[2]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[13]/div[1]/div[1]/div[2]/div[1]/div[3]/div[1]/div[1]"
-      },
-      "mouse": {
-        "clientX": 845,
-        "clientY": 628
-      },
-      "timeFormatted": "14:11:41",
-      "timeSincePrevMs": 3046,
-      "timestamp": 1779520301475,
-      "type": "click",
-      "url": "https://www.facebook.com/groups/1840850679540577"
-    },
-    {
-      "documentHeight": 953,
-      "scrollLeft": 0,
-      "scrollTop": 0,
-      "timeFormatted": "14:11:42",
-      "timeSincePrevMs": 704,
-      "timestamp": 1779520302179,
-      "type": "scroll",
-      "url": "https://www.facebook.com/groups/1840850679540577",
-      "viewportHeight": 782
-    },
-    {
-      "element": {
-        "ariaLabel": "",
-        "bestSelector": "div > div[role=\"none\"] > span > span",
-        "className": "x1lliihq x6ikm8r x10wlt62 x1n2onr6 xlyipyv xuxw1ft",
-        "contentEditable": "inherit",
-        "href": "",
-        "id": "",
-        "name": "",
-        "placeholder": "",
-        "rect": {
-          "height": 27,
-          "width": 50,
-          "x": 974,
-          "y": 432
-        },
-        "role": "",
-        "tag": "SPAN",
-        "textContent": "Đóng",
-        "type": "",
-        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/span[1]/span[1]"
-      },
-      "mouse": {
-        "clientX": 1015,
-        "clientY": 436
-      },
-      "timeFormatted": "14:11:44",
-      "timeSincePrevMs": 2445,
-      "timestamp": 1779520304624,
-      "type": "click",
-      "url": "https://www.facebook.com/groups/1840850679540577"
-    },
-    {
-      "element": {
-        "ariaLabel": "",
-        "bestSelector": "div > div[role=\"none\"] > span > span",
-        "className": "x1lliihq x6ikm8r x10wlt62 x1n2onr6 xlyipyv xuxw1ft",
-        "contentEditable": "inherit",
-        "href": "",
-        "id": "",
-        "name": "",
-        "placeholder": "",
-        "rect": {
-          "height": 27,
-          "width": 50,
-          "x": 974,
-          "y": 432
-        },
-        "role": "",
-        "tag": "SPAN",
-        "textContent": "Đóng",
-        "type": "",
-        "xpath": "/html[1]/body[1]/div[1]/div[1]/div[1]/div[1]/div[4]/div[1]/div[1]/div[1]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[3]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/div[1]/span[1]/span[1]"
-      },
-      "mouse": {
-        "clientX": 1001,
-        "clientY": 450
-      },
-      "timeFormatted": "14:11:46",
-      "timeSincePrevMs": 1681,
-      "timestamp": 1779520306305,
-      "type": "click",
-      "url": "https://www.facebook.com/groups/1840850679540577"
-    },
-    {
-      "documentHeight": 6031,
-      "scrollLeft": 0,
-      "scrollTop": 316,
-      "timeFormatted": "14:11:46",
-      "timeSincePrevMs": 459,
-      "timestamp": 1779520306764,
-      "type": "scroll",
-      "url": "https://www.facebook.com/groups/1840850679540577",
-      "viewportHeight": 782
     }
   ]
 }
