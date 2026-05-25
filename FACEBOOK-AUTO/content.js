@@ -199,9 +199,10 @@ async function writeText(element, text) {
     
     // Ensure newlines are preserved
     const plainText = text.replace(/<br\s*\/?>/gi, '\n');
-    const htmlText = text.replace(/\n/g, '<br>');
+    const tagName = element.tagName.toLowerCase();
+    const isTextInput = tagName === "textarea" || tagName === "input";
 
-    if (element.tagName.toLowerCase() === "textarea" || element.tagName.toLowerCase() === "input") {
+    if (isTextInput) {
       element.value = plainText;
       element.dispatchEvent(new Event("input", {
         bubbles: !0,
@@ -212,8 +213,9 @@ async function writeText(element, text) {
         composed: !0
       }));
     }
+    const beforeValue = isTextInput ? element.value : (element.innerText || element.textContent || "");
     const dt = new DataTransfer();
-    dt.setData("text/plain", text);
+    dt.setData("text/plain", plainText);
     const pasteEvent = new ClipboardEvent("paste", {
       clipboardData: dt,
       bubbles: !0,
@@ -225,6 +227,29 @@ async function writeText(element, text) {
       bubbles: !0,
       composed: !0
     }));
+    const afterValue = isTextInput ? element.value : (element.innerText || element.textContent || "");
+    const isContentEditable = element.isContentEditable || element.getAttribute("contenteditable") === "true";
+    if (!isTextInput && isContentEditable && (!afterValue || afterValue === beforeValue || !afterValue.includes(plainText.trim()))) {
+      element.innerHTML = "";
+      element.focus();
+      let inserted = !1;
+      try {
+        inserted = document.execCommand("insertText", !1, plainText);
+      } catch (err) {}
+      if (!inserted) {
+        element.textContent = plainText;
+      }
+      element.dispatchEvent(new InputEvent("input", {
+        bubbles: !0,
+        composed: !0,
+        data: plainText,
+        inputType: "insertText"
+      }));
+      element.dispatchEvent(new Event("change", {
+        bubbles: !0,
+        composed: !0
+      }));
+    }
     console.log("Text successfully written to element:", element);
   } catch (err) {
     console.error("Error writing text to element:", err);
@@ -293,11 +318,18 @@ async function insertPostText(postText, postTitleText) {
     const bodyRect = bodyElement.getBoundingClientRect();
     for (let attempt = 0; attempt < 10; attempt++) {
       const allEditors = getEditors();
-      const titleCandidates = allEditors.filter(e => {
+      const titleKeywordCandidates = allEditors.filter(e => {
+        if (e === bodyElement || e.contains(bodyElement) || bodyElement.contains(e)) return false;
+        const label = (e.getAttribute("aria-label") || "").toLowerCase();
+        const placeholder = (e.getAttribute("placeholder") || "").toLowerCase();
+        const ariaPlaceholder = (e.getAttribute("aria-placeholder") || "").toLowerCase();
+        return label.includes("title") || label.includes("tiêu đề") || placeholder.includes("title") || placeholder.includes("tiêu đề") || ariaPlaceholder.includes("title") || ariaPlaceholder.includes("tiêu đề");
+      });
+      const titleCandidates = (titleKeywordCandidates.length > 0 ? titleKeywordCandidates : allEditors.filter(e => {
         if (e === bodyElement || e.contains(bodyElement) || bodyElement.contains(e)) return false;
         const rect = e.getBoundingClientRect();
         return rect.top < bodyRect.top - 5;
-      });
+      }));
 
       if (titleCandidates.length > 0) {
         // Prioritize candidate with title keywords or input/textarea tag
