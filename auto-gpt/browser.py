@@ -771,28 +771,66 @@ def fill_profile_info(driver):
         except Exception as de:
             print(f"  [DEBUG birthday] Lỗi liệt kê ô input: {de}")
 
-        # 尝试寻找单一日期/生日输入框
-        single_birthday_input = None
-        single_selectors = [
-            'input[name="birthday"]',
-            'input[name="birthdate"]',
-            'input[placeholder*="YYYY"]',
-            'input[placeholder*="MM"]',
-            'input[placeholder*="DD"]',
-            'input[placeholder*="Date"]',
-            'input[placeholder*="date"]',
-            'input[placeholder*="生日"]',
-            'input[type="date"]'
+        # 尝试寻找 "Tuổi" (Age) 或者是 "Ngày sinh" (Birthday)
+        age_input = None
+        age_selectors = [
+            'input[name="age"]',
+            'input[placeholder*="Age"]',
+            'input[placeholder*="tuổi"]',
+            'input[placeholder*="Tuổi"]',
+            'input[type="number"]'
         ]
-        for selector in single_selectors:
+        for selector in age_selectors:
             try:
                 el = driver.find_element(By.CSS_SELECTOR, selector)
                 if el.is_displayed():
-                    single_birthday_input = el
-                    print(f"  🎯 Phát hiện ô nhập ngày sinh dạng đơn: {selector}")
-                    break
+                    # Tránh nhầm lẫn với các ô nhập khác bằng cách lọc từ khóa
+                    placeholder = (el.get_attribute('placeholder') or "").lower()
+                    name_attr = (el.get_attribute('name') or "").lower()
+                    if 'age' in placeholder or 'tuổi' in placeholder or 'age' in name_attr:
+                        age_input = el
+                        print(f"  🎯 Phát hiện ô nhập Tuổi (Age): {selector}")
+                        break
             except:
                 continue
+
+        if age_input:
+            from datetime import datetime
+            try:
+                age_val = str(datetime.now().year - int(birthday_year))
+            except:
+                age_val = "25"
+            
+            age_input.click()
+            time.sleep(0.3)
+            age_input.send_keys(Keys.CONTROL + "a")
+            single_birthday_input = None # Bỏ qua nhập ngày sinh
+            type_slowly(age_input, age_val, delay=0.1)
+            print(f"  ✅ Đã điền tuổi (Age): {age_val}")
+            time.sleep(1)
+        else:
+            # 尝试寻找单一日期/生日输入框
+            single_birthday_input = None
+            single_selectors = [
+                'input[name="birthday"]',
+                'input[name="birthdate"]',
+                'input[placeholder*="YYYY"]',
+                'input[placeholder*="MM"]',
+                'input[placeholder*="DD"]',
+                'input[placeholder*="Date"]',
+                'input[placeholder*="date"]',
+                'input[placeholder*="生日"]',
+                'input[type="date"]'
+            ]
+            for selector in single_selectors:
+                try:
+                    el = driver.find_element(By.CSS_SELECTOR, selector)
+                    if el.is_displayed():
+                        single_birthday_input = el
+                        print(f"  🎯 Phát hiện ô nhập ngày sinh dạng đơn: {selector}")
+                        break
+                except:
+                    continue
 
         if single_birthday_input:
             placeholder = (single_birthday_input.get_attribute('placeholder') or "").lower()
