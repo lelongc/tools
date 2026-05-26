@@ -658,6 +658,9 @@
     <div id="mainApp" class="main-container">
       <!-- Header -->
       <div class="header-section">
+        <button id="viewDebugLogBtn" class="btn btn-sm btn-outline-danger active-area" style="position: absolute; top: 15px; left: 15px; z-index: 10;" title="Xem Log Lỗi" data-bs-toggle="modal" data-bs-target="#debugLogsModal">
+          <i class="bi bi-bug-fill"></i> View Logs
+        </button>
         <button id="themeToggleBtn" class="btn btn-sm btn-outline-secondary" style="position: absolute; top: 15px; right: 15px; z-index: 10;">
           <i class="bi bi-moon-fill" id="themeIcon"></i>
         </button>
@@ -1088,6 +1091,7 @@
       tabindex="-1"
       aria-labelledby="licenseModalLabel"
       aria-hidden="true"
+      data-bs-backdrop="false"
     >
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -1138,6 +1142,7 @@
       tabindex="-1"
       aria-labelledby="importGroupsModalLabel"
       aria-hidden="true"
+      data-bs-backdrop="false"
     >
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -1176,6 +1181,33 @@
               </div>
             </div>
 
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Debug Logs Modal -->
+    <div
+      class="modal fade active-area"
+      id="debugLogsModal"
+      tabindex="-1"
+      aria-labelledby="debugLogsModalLabel"
+      aria-hidden="true"
+      data-bs-backdrop="false"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="background: var(--container-bg); border: 1px solid var(--border-color); color: var(--text-color);">
+          <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+            <h5 class="modal-title" id="debugLogsModalLabel" style="color: var(--danger-color);"><i class="bi bi-bug-fill"></i> Latest Debug Logs</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--close-btn-filter);"></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted small">Logs of the latest automation attempt. Useful for diagnosing why posting stopped or tab closed.</p>
+            <textarea id="debugLogsTextarea" class="form-control" style="font-family: monospace; font-size: 11px; height: 350px; background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); user-select: text !important; -webkit-user-select: text !important;" readonly placeholder="No log entries found yet. Run an auto post first."></textarea>
+          </div>
+          <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+            <button type="button" class="btn btn-primary-custom" id="copyDebugLogsBtn"><i class="bi bi-clipboard"></i> Copy Logs</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           </div>
         </div>
       </div>

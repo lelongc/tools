@@ -28,11 +28,55 @@ window.__fbLogs = window.__fbLogs || [];
 const origLog = console.log;
 const origWarn = console.warn;
 const origError = console.error;
-console.log = function(...args) { window.__fbLogs.push('[INFO] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); origLog.apply(console, args); };
-console.warn = function(...args) { window.__fbLogs.push('[WARN] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); origWarn.apply(console, args); };
-console.error = function(...args) { window.__fbLogs.push('[ERROR] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); origError.apply(console, args); };
+
+let logSaveTimeout = null;
+function saveLogsToStorage() {
+  if (logSaveTimeout) clearTimeout(logSaveTimeout);
+  logSaveTimeout = setTimeout(() => {
+    try {
+      chrome.storage.local.set({ lastErrorLog: window.__fbLogs.join('\n') });
+    } catch (e) {}
+  }, 500);
+}
+
+console.log = function(...args) { 
+  window.__fbLogs.push('[INFO] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); 
+  origLog.apply(console, args); 
+  saveLogsToStorage();
+};
+console.warn = function(...args) { 
+  window.__fbLogs.push('[WARN] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); 
+  origWarn.apply(console, args); 
+  saveLogsToStorage();
+};
+console.error = function(...args) { 
+  window.__fbLogs.push('[ERROR] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' ')); 
+  origError.apply(console, args); 
+  saveLogsToStorage();
+};
+
+window.addEventListener('error', (event) => {
+  const errorMsg = event.error ? event.error.stack || event.error.message : event.message;
+  window.__fbLogs.push('[CRASH] Uncaught Exception: ' + errorMsg);
+  saveLogsToStorage();
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+  const reason = event.reason ? event.reason.stack || event.reason.message || event.reason : 'Unknown reason';
+  window.__fbLogs.push('[CRASH] Unhandled Promise Rejection: ' + reason);
+  saveLogsToStorage();
+});
+
+window.addEventListener('unload', () => {
+  try {
+    chrome.storage.local.set({ lastErrorLog: window.__fbLogs.join('\n') });
+  } catch(e) {}
+});
 
 function showDebugLog() {
+    try {
+      chrome.storage.local.set({ lastErrorLog: window.__fbLogs.join('\n') });
+    } catch(e) {}
     if (document.getElementById('fb-auto-debug-log')) return;
     let div = document.createElement('div');
     div.id = 'fb-auto-debug-log';
@@ -182,205 +226,219 @@ function h() {
 }
 
 async function writeText(element, text) {
-  if (!element) return;
+  if (!element || !text) return;
   try {
-    element.focus();
-    element.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-      inline: "nearest"
-    });
-    await y(0.3);
-    if (document.activeElement !== element) {
-      console.warn("Element lost focus after scroll. Re-focusing.");
-      element.focus();
-      await y(0.2);
-    }
-    
-    // Ensure newlines are preserved
     const plainText = text.replace(/<br\s*\/?>/gi, '\n');
-    const htmlText = text.replace(/\n/g, '<br>');
     const tagName = element.tagName.toLowerCase();
     const isTextInput = tagName === "textarea" || tagName === "input";
-    const isContentEditable = element.isContentEditable || element.getAttribute("contenteditable") === "true";
+    
+    console.log("[FACEBOOK-AUTO] writeText (paste mode) called. Tag:", tagName, "isTextInput:", isTextInput, "Text length:", plainText.length);
+    
+    // Focus element
+    try { element.focus(); } catch(e) {}
+    await y(0.2);
+
+    // Clear existing content
+    try {
+      if (isTextInput) {
+        element.value = "";
+        element.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+      } else {
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount >= 0) {
+          sel.selectAllChildren(element);
+          sel.deleteFromDocument();
+        } else {
+          element.innerHTML = "";
+        }
+        element.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+      }
+    } catch(e) {
+      console.warn("[FACEBOOK-AUTO] Failed to clear element:", e);
+    }
+    await y(0.2);
+
+    // Dispatch beforeinput (insertFromPaste)
+    const beforeInputEvent = new InputEvent("beforeinput", {
+      inputType: "insertFromPaste",
+      data: plainText,
+      bubbles: true,
+      cancelable: true,
+      composed: true
+    });
+    element.dispatchEvent(beforeInputEvent);
 
     if (isTextInput) {
       element.value = plainText;
-      element.dispatchEvent(new Event("input", {
-        bubbles: !0,
-        composed: !0
-      }));
-      element.dispatchEvent(new Event("change", {
-        bubbles: !0,
-        composed: !0
-      }));
-      console.log("Text written to input element:", element);
-      return;
-    }
-    
-    // For contenteditable (Facebook Lexical editor), use multiple strategies:
-    // Strategy 1: ClipboardEvent with both text/plain and text/html
-    const beforeHTML = element.innerHTML || "";
-    const dt = new DataTransfer();
-    dt.setData("text/plain", plainText);
-    dt.setData("text/html", htmlText);
-    const pasteEvent = new ClipboardEvent("paste", {
-      clipboardData: dt,
-      bubbles: !0,
-      cancelable: !0
-    });
-    element.focus();
-    element.dispatchEvent(pasteEvent);
-    element.dispatchEvent(new Event("input", {
-      bubbles: !0,
-      composed: !0
-    }));
-    await y(0.2);
-    const afterHTML = element.innerHTML || "";
-    
-    // Strategy 2: If paste didn't work or newlines are missing, use execCommand
-    const needsFallback = afterHTML === beforeHTML || !afterHTML.includes(plainText.replace(/\n/g, '').trim());
-    if (needsFallback && isContentEditable) {
-      console.log("Paste strategy failed, using execCommand fallback");
-      element.focus();
-      element.innerHTML = "";
-      let inserted = false;
+      element.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
+      element.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
+    } else {
+      // Contenteditable (Lexical)
+      // Focus selection at end
       try {
-        inserted = document.execCommand("insertHTML", false, htmlText);
-      } catch (err) {
-        console.warn("execCommand insertHTML failed:", err);
+        const sel = window.getSelection();
+        if (sel) {
+          const range = document.createRange();
+          range.selectNodeContents(element);
+          range.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+      } catch(e) {}
+
+      // Dispatch simulated ClipboardEvent paste first
+      try {
+        const dt = new DataTransfer();
+        dt.setData("text/plain", plainText);
+        const pasteEvent = new ClipboardEvent("paste", {
+          clipboardData: dt,
+          bubbles: true,
+          cancelable: true,
+          composed: true
+        });
+        element.dispatchEvent(pasteEvent);
+      } catch(e) {
+        console.warn("[FACEBOOK-AUTO] Failed to dispatch ClipboardEvent paste:", e);
       }
-      if (!inserted) {
-        // Fallback for non-rich editors: insertText then manually add newlines
-        element.textContent = plainText;
+
+      // Try execCommand insertText (native paste simulation)
+      let pasteSuccess = false;
+      try {
+        pasteSuccess = document.execCommand('insertText', false, plainText);
+      } catch(e) {}
+
+      // Fallback: manually update innerText if execCommand fails
+      if (!pasteSuccess) {
+        console.warn("[FACEBOOK-AUTO] execCommand insertText failed, using fallback innerText");
+        element.innerText = plainText;
       }
-      element.dispatchEvent(new InputEvent("input", {
-        bubbles: !0,
-        composed: !0,
+
+      // Dispatch input event (insertFromPaste)
+      const inputEvent = new InputEvent("input", {
+        inputType: "insertFromPaste",
         data: plainText,
-        inputType: "insertText"
-      }));
-      element.dispatchEvent(new Event("change", {
-        bubbles: !0,
-        composed: !0
-      }));
+        bubbles: true,
+        composed: true
+      });
+      element.dispatchEvent(inputEvent);
     }
-    
-    console.log("Text successfully written to element:", element);
+
+    console.log("[FACEBOOK-AUTO] writeText (paste mode) finished successfully.");
   } catch (err) {
-    console.error("Error writing text to element:", err);
+    console.error("[FACEBOOK-AUTO] writeText fatal error:", err);
   }
 }
 
 async function insertPostText(postText, postTitleText) {
-  console.log("insertPostText called with:", { postText, postTitleText });
+  console.log("[FACEBOOK-AUTO] insertPostText called. text length:", postText?.length, "title:", postTitleText);
   await y(0.5);
 
-  const editorSelectors = [
-    "div[data-lexical-editor='true']",
-    "div.notranslate[contenteditable='true']",
-    "div[role='textbox'][contenteditable='true']",
-    "div[aria-multiline='true'][role='textbox']",
-    "textarea",
-    "input"
-  ].join(", ");
-
-  function getEditors() {
-    const dialog = document.querySelector('div[role="dialog"]');
-    const container = dialog || document;
-    return Array.from(container.querySelectorAll(editorSelectors)).filter(e => {
+  const dialog = document.querySelector('div[role="dialog"]');
+  const container = dialog || document;
+  
+  let bodyElement = null;
+  let titleElement = null;
+  
+  for (let attempt = 0; attempt < 20; attempt++) {
+    // Priority 1: Look for contenteditable div (Lexical/modern editor for post body)
+    const editables = Array.from(container.querySelectorAll(
+      "div[data-lexical-editor='true'], div.notranslate[contenteditable='true'], div[role='textbox'][contenteditable='true']"
+    )).filter(e => {
       const rect = e.getBoundingClientRect();
       return rect.width > 20 && rect.height > 10;
     });
-  }
-
-  // 1. Locate Description/Body field
-  let bodyElement = null;
-  for (let attempt = 0; attempt < 20; attempt++) {
-    const allEditors = getEditors();
-    if (allEditors.length > 0) {
-      if (allEditors.length === 1) {
-        bodyElement = allEditors[0];
-      } else {
-        let highestScore = -999;
-        for (const e of allEditors) {
-          const score = u(e);
-          if (score > highestScore) {
-            highestScore = score;
-            bodyElement = e;
-          }
-        }
+    
+    if (editables.length > 0) {
+      bodyElement = editables[0];
+      console.log("[FACEBOOK-AUTO] Body contentEditable found:", bodyElement);
+      
+      // If we have contenteditable body, any visible textarea in the dialog is the Title field
+      const textareas = Array.from(container.querySelectorAll('textarea')).filter(ta => {
+        const rect = ta.getBoundingClientRect();
+        return rect.width > 20 && rect.height > 10;
+      });
+      
+      if (textareas.length > 0) {
+        titleElement = textareas[0];
+        console.log("[FACEBOOK-AUTO] Title textarea found (co-exists with body contentEditable):", titleElement.getAttribute("aria-label") || titleElement.getAttribute("placeholder"));
       }
       break;
     }
+    
+    // Priority 2: Look for visible textarea (fallback for legacy or simplified FB post layout)
+    const textareas = Array.from(container.querySelectorAll('textarea')).filter(ta => {
+      const label = (ta.getAttribute("aria-label") || "").toLowerCase();
+      const placeholder = (ta.getAttribute("placeholder") || "").toLowerCase();
+      // Exclude obvious title textareas if we are using textarea as body fallback
+      if (label.includes("tiêu đề") || label.includes("title") || placeholder.includes("tiêu đề") || placeholder.includes("title")) return false;
+      const rect = ta.getBoundingClientRect();
+      return rect.width > 20 && rect.height > 10;
+    });
+    
+    if (textareas.length > 0) {
+      bodyElement = textareas[0];
+      console.log("[FACEBOOK-AUTO] Body textarea found (fallback):", bodyElement.getAttribute("aria-label") || bodyElement.getAttribute("placeholder"));
+      break;
+    }
+    
+    console.log("[FACEBOOK-AUTO] No body element found yet, attempt", attempt + 1);
     await y(0.5);
   }
 
   if (!bodyElement) {
-    console.error("No editor element found to write body text to.");
+    console.error("[FACEBOOK-AUTO] FATAL: No body element found after 20 attempts");
     return;
   }
 
-  // 2. Paste description text to body
-  console.log("Writing entire text to body element...");
+  // Write body content
+  console.log("[FACEBOOK-AUTO] Writing body text to element:", bodyElement.tagName);
   await writeText(bodyElement, postText);
+  await y(1);
+  
+  // Verify body content
+  const bodyTag = bodyElement.tagName.toLowerCase();
+  const bodyContent = bodyTag === "textarea" || bodyTag === "input" 
+    ? bodyElement.value 
+    : (bodyElement.textContent || bodyElement.innerText || "");
+  console.log("[FACEBOOK-AUTO] Body content after write. Length:", bodyContent.length, "First 50 chars:", bodyContent.substring(0, 50));
 
-  // 3. Paste title text if provided
+  // Write title if title text exists
   if (postTitleText) {
-    console.log("Waiting for title element to appear after pasting description...");
-    await y(1.5);
-
-    let titleElement = null;
-    const bodyRect = bodyElement.getBoundingClientRect();
-    for (let attempt = 0; attempt < 15; attempt++) {
-      // Strategy A: Direct selector for title textarea (most reliable)
-      titleElement = document.querySelector('textarea[aria-label*="tiêu đề"], textarea[placeholder*="tiêu đề"], input[aria-label*="tiêu đề"], input[placeholder*="tiêu đề"]');
-      if (titleElement) {
-        console.log("Title element found via direct selector:", titleElement);
-        break;
-      }
-      
-      // Strategy B: Use getEditors which no longer filters by offsetParent
-      const allEditors = getEditors();
-      
-      // Strategy B1: Find by keyword in aria-label/placeholder
-      const keywordCandidates = allEditors.filter(e => {
-        if (e === bodyElement || e.contains(bodyElement) || bodyElement.contains(e)) return false;
-        const label = (e.getAttribute("aria-label") || "").toLowerCase();
-        const placeholder = (e.getAttribute("placeholder") || "").toLowerCase();
-        const ariaPlaceholder = (e.getAttribute("aria-placeholder") || "").toLowerCase();
-        return label.includes("title") || label.includes("tiêu đề") || placeholder.includes("title") || placeholder.includes("tiêu đề") || ariaPlaceholder.includes("title") || ariaPlaceholder.includes("tiêu đề");
-      });
-      if (keywordCandidates.length > 0) {
-        titleElement = keywordCandidates[0];
-        console.log("Title element found via keywords:", titleElement);
-        break;
-      }
-      
-      // Strategy B2: Find element that's above body (position-based fallback)
-      const positionCandidates = allEditors.filter(e => {
-        if (e === bodyElement || e.contains(bodyElement) || bodyElement.contains(e)) return false;
-        const rect = e.getBoundingClientRect();
-        return rect.top < bodyRect.top;
-      });
-      if (positionCandidates.length > 0) {
-        positionCandidates.sort((a, b) => b.getBoundingClientRect().top - a.getBoundingClientRect().top);
-        titleElement = positionCandidates[0];
-        console.log("Title element found via position:", titleElement);
-        break;
-      }
-      
-      await y(0.5);
+    console.log("[FACEBOOK-AUTO] Writing title text. Title:", postTitleText);
+    
+    // If titleElement was not found yet, try finding it via common attributes
+    if (!titleElement) {
+      titleElement = container.querySelector(
+        'textarea[aria-label*="tiêu đề"], textarea[placeholder*="tiêu đề"], ' +
+        'textarea[aria-label*="Thêm tiêu đề"], textarea[placeholder*="Thêm tiêu đề"], ' +
+        'textarea[aria-label*="title" i], textarea[placeholder*="title" i], ' +
+        'input[aria-label*="tiêu đề"], input[placeholder*="tiêu đề"]'
+      );
     }
-
-    if (titleElement) {
-      console.log("Writing title to title element:", postTitleText);
+    
+    if (titleElement && titleElement !== bodyElement) {
+      console.log("[FACEBOOK-AUTO] Writing title to element:", titleElement.tagName);
       await writeText(titleElement, postTitleText);
+      await y(0.5);
+      
+      const titleTag = titleElement.tagName.toLowerCase();
+      const titleContent = titleTag === "textarea" || titleTag === "input" ? titleElement.value : titleElement.textContent;
+      console.log("[FACEBOOK-AUTO] Title after write. Length:", titleContent?.length);
     } else {
-      console.warn("Title element did not appear after paste.");
+      console.warn("[FACEBOOK-AUTO] Title element not found or same as bodyElement. Skipping title.");
     }
   }
+  
+  console.log("[FACEBOOK-AUTO] insertPostText completed");
 }
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "ping") {
+    sendResponse({status: "alive"});
+    return true;
+  }
+});
+console.log("GroupPosting content script loaded - waiting for user interaction");
 
 chrome.runtime.onMessage.addListener(async function (e, t, n) {
   if ("contentcreateQuickPost" === e?.action) {
@@ -390,7 +448,7 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
       const n = e[t];
       if (!n) {
         console.error(`Post data not found for key: ${t}`);
-        (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog());
+        (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000));
         return;
       }
       console.log("Post data retrieved:", n);
@@ -421,7 +479,7 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
           return t ? (console.log("Found unselected Discussion tab. Switching..."), t.click(), await y(2), !0) : (console.log("Already on Discussion tab or not applicable."), !1);
         }(), await y(2), e = await d()), !e && !document.querySelector('div[role="dialog"]')) {
           console.error("Failed to locate post creation button after all attempts");
-          (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog());
+          (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000));
           return;
         }
         if (e) {
@@ -434,15 +492,15 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
         if (!document.querySelector('div[role="dialog"]')) {
           console.error("Failed to open post creation modal (dialog not found).");
           b("Modal failed to open - aborting");
-          (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog());
+          (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000));
           return;
         }
         if (await v(o, "pre_text"), n.images?.length) {
-          b("Processing media files"), await y(1), console.log("Media upload button clicked.");
+          b("Processing media files"), await y(1), console.log("[FACEBOOK-AUTO] Starting media upload. Image count:", n.images.length);
           for (const e of n.images) await w(e, "post"), console.log("Media file processed:", e), await v(o, "between_media");
         }
         b("Adding text content");
-        console.log(i);
+        console.log("[FACEBOOK-AUTO] About to insert text. Text length:", i.length, "Title:", titleSpinned);
         await insertPostText(i, titleSpinned);
         console.log("Text content inserted successfully.");
         await y(1);
@@ -512,7 +570,7 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
         await v(o, "pre_submit");
         b("Publishing post");
         await y(1);
-        const t = await function (e = 15, t = 1e3) {
+        const t = await function (e = 30, t = 1e3) {
           return new Promise(async n => {
             let o = 0;
             for (; o < e;) {
@@ -523,7 +581,7 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
               }
               o++, await y(t / 1e3);
             }
-            console.log("Post button still not found after retries."), (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog()), n(!1);
+            console.log("Post button still not found after retries."), (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000)), n(!1);
           });
         }();
         console.log("Submit button clicked");
@@ -544,19 +602,19 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
             "pending" == e ? (s = !0, chrome.storage.local.set({ operationStatus: "pending" })) : "restricted" == e ? chrome.storage.local.set({ operationStatus: "restricted" }) : chrome.storage.local.set({ operationStatus: "successful" }), s = !0, r = !0;
           }
           let e = await p();
-          "pending" == e && (s = !0, chrome.storage.local.set({ operationStatus: "pending" })), "restricted" == e && (s = !0, chrome.storage.local.set({ operationStatus: "restricted" })), s || (console.error("Post submission failed - submit button still present after timeout"), (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog()));
+          "pending" == e && (s = !0, chrome.storage.local.set({ operationStatus: "pending" })), "restricted" == e && (s = !0, chrome.storage.local.set({ operationStatus: "restricted" })), s || (console.error("Post submission failed - submit button still present after timeout"), (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000)));
         } catch (e) {
           console.error("Error during post verification:", e);
           let t = await p();
-          "pending" == t ? (s = !0, chrome.storage.local.set({ operationStatus: "pending" })) : "success" == t ? chrome.storage.local.set({ operationStatus: "success" }) : "restricted" == t ? chrome.storage.local.set({ operationStatus: "restricted" }) : (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog());
+          "pending" == t ? (s = !0, chrome.storage.local.set({ operationStatus: "pending" })) : "success" == t ? chrome.storage.local.set({ operationStatus: "success" }) : "restricted" == t ? chrome.storage.local.set({ operationStatus: "restricted" }) : (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000));
         }
         if (!r) {
           console.error("Post submission failed due to timeout.");
           let e = await p();
-          "pending" == e ? (s = !0, chrome.storage.local.set({ operationStatus: "pending" })) : "success" == e ? chrome.storage.local.set({ operationStatus: "success" }) : "restricted" == e ? chrome.storage.local.set({ operationStatus: "restricted" }) : (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog());
+          "pending" == e ? (s = !0, chrome.storage.local.set({ operationStatus: "pending" })) : "success" == e ? chrome.storage.local.set({ operationStatus: "success" }) : "restricted" == e ? chrome.storage.local.set({ operationStatus: "restricted" }) : (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000));
         }
       } catch (e) {
-        console.error("An error occurred during post creation:", e), (chrome.storage.local.set({operationStatus:"failed"}), showDebugLog());
+        console.error("An error occurred during post creation:", e), (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000));
       }
     });
   }
@@ -566,6 +624,7 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
 let g = null;
 
 function m(e) {
+  if (!e || typeof e !== "string") return "";
   const t = /\{([^{}]+)\}/;
   for (; t.test(e);) e = e.replace(t, (e, t) => {
     const n = t.split("|");

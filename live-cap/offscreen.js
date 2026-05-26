@@ -1,11 +1,27 @@
 // offscreen.js — Thu âm tab → Groq Whisper
-// GROQ_KEY được load từ config.js (trước file này)
+// GROQ_KEYS được load từ config.js (trước file này)
 
 const hashParts = location.hash.substring(1).split('&');
 const sid = decodeURIComponent(hashParts[0]);
 let srcLang = hashParts[1] || 'en';
 let tgtLang  = hashParts[2] || '';
 
+let currentKeyIndex = 0;
+
+function getGroqKey() {
+  if (typeof GROQ_KEYS !== 'undefined' && Array.isArray(GROQ_KEYS) && GROQ_KEYS.length > 0) {
+    return GROQ_KEYS[currentKeyIndex];
+  }
+  return typeof GROQ_KEY !== 'undefined' ? GROQ_KEY : '';
+}
+
+function rotateGroqKey() {
+  if (typeof GROQ_KEYS !== 'undefined' && Array.isArray(GROQ_KEYS) && GROQ_KEYS.length > 1) {
+    currentKeyIndex = (currentKeyIndex + 1) % GROQ_KEYS.length;
+    console.log('[LC] Tự động xoay sang Groq API Key #' + (currentKeyIndex + 1));
+    cap(`🔄 Đổi sang Groq API Key #${currentKeyIndex + 1}...`);
+  }
+}
 
 // cap() gửi text về bg.js — luôn có .catch để tránh crash offscreen
 function cap(text) {
@@ -35,6 +51,41 @@ async function go(sid) {
     audioEl.srcObject = stream;
     audioEl.play().catch(e => console.warn('[LC] audio.play() lỗi:', e.message));
 
+    // --- Cài đặt kiểm tra im lặng (Silence Detection) ---
+    let audioCtx;
+    let analyser;
+    let dataArray;
+    let bufferLength;
+    let maxRms = 0;
+    let checkVolumeInterval = null;
+
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const source = audioCtx.createMediaStreamSource(stream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 512;
+      bufferLength = analyser.frequencyBinCount;
+      dataArray = new Uint8Array(bufferLength);
+      source.connect(analyser);
+
+      checkVolumeInterval = setInterval(() => {
+        if (recorder && recorder.state === 'recording') {
+          analyser.getByteTimeDomainData(dataArray);
+          let sumSquares = 0;
+          for (let i = 0; i < bufferLength; i++) {
+            const normalized = (dataArray[i] - 128) / 128; // -1.0 to 1.0
+            sumSquares += normalized * normalized;
+          }
+          const rms = Math.sqrt(sumSquares / bufferLength);
+          if (rms > maxRms) {
+            maxRms = rms;
+          }
+        }
+      }, 100);
+    } catch (err) {
+      console.warn('[LC] Không thể khởi tạo AudioContext cho Silence Detection:', err);
+    }
+
     // --- MediaRecorder ---
     const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
       ? 'audio/webm;codecs=opus'
@@ -61,9 +112,23 @@ async function go(sid) {
       chunks = [];
       console.log('[LC] Blob size:', blob.size);
 
+      // Kiểm tra xem đoạn âm thanh có phải là khoảng lặng không (RMS < 0.008)
+      const currentMaxRms = maxRms;
+      maxRms = 0; // reset cho chunk tiếp theo
+
+      if (audioCtx && currentMaxRms < 0.008) {
+        console.log('[LC] Skip chunk do im lặng (Max RMS:', currentMaxRms.toFixed(4) + ')');
+        if (recorder.state === 'inactive') {
+          recorder.start();
+        }
+        return;
+      }
+
       if (blob.size < 3000) {
         console.log('[LC] Blob quá nhỏ, bỏ qua');
-        recorder.start();
+        if (recorder.state === 'inactive') {
+          recorder.start();
+        }
         return;
       }
 
@@ -78,12 +143,13 @@ async function go(sid) {
     recorder.start();
     console.log('[LC] recorder.state sau start:', recorder.state);
 
+    // Chu kỳ ghi âm đổi thành 6 giây (6000ms) để tối ưu hóa hạn mức API và tăng độ dài câu
     setInterval(() => {
       console.log('[LC] tick — recorder.state:', recorder.state);
       if (recorder.state === 'recording') {
         recorder.stop();
       }
-    }, 3000);
+    }, 6000);
 
   } catch (e) {
     cap('❌ Audio lỗi: ' + e.message);
@@ -102,13 +168,16 @@ async function sendToGroq(blob, mimeType) {
 
     const r = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
       method: 'POST',
-      headers: { Authorization: 'Bearer ' + GROQ_KEY },
+      headers: { Authorization: 'Bearer ' + getGroqKey() },
       body: fd
     });
 
     if (!r.ok) {
       const errText = await r.text();
       cap('⚠ Groq ' + r.status + ': ' + errText.substring(0, 80));
+      if (r.status === 429 || r.status === 401) {
+        rotateGroqKey();
+      }
       return;
     }
 
@@ -135,7 +204,7 @@ async function translate(text, targetLang) {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer ' + GROQ_KEY,
+        'Authorization': 'Bearer ' + getGroqKey(),
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -150,7 +219,12 @@ async function translate(text, targetLang) {
       })
     });
 
-    if (!res.ok) return text; // nếu dịch lỗi thì hiện bản gốc
+    if (!res.ok) {
+      if (res.status === 429 || res.status === 401) {
+        rotateGroqKey();
+      }
+      return text; // nếu dịch lỗi thì hiện bản gốc
+    }
 
     const d = await res.json();
     const translated = d.choices?.[0]?.message?.content?.trim();
