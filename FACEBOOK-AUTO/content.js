@@ -301,15 +301,26 @@ async function writeText(element, text) {
         console.warn("[FACEBOOK-AUTO] Failed to dispatch ClipboardEvent paste:", e);
       }
 
-      // Try execCommand insertText (native paste simulation)
+      // Try execCommand line by line to preserve line breaks
       let pasteSuccess = false;
       try {
-        pasteSuccess = document.execCommand('insertText', false, plainText);
-      } catch(e) {}
+        const lines = plainText.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i]) {
+            document.execCommand('insertText', false, lines[i]);
+          }
+          if (i < lines.length - 1) {
+            document.execCommand('insertLineBreak');
+          }
+        }
+        pasteSuccess = true;
+      } catch(e) {
+        console.warn("[FACEBOOK-AUTO] execCommand insertText/insertLineBreak failed:", e);
+      }
 
       // Fallback: manually update innerText if execCommand fails
       if (!pasteSuccess) {
-        console.warn("[FACEBOOK-AUTO] execCommand insertText failed, using fallback innerText");
+        console.warn("[FACEBOOK-AUTO] execCommand failed, using fallback innerText");
         element.innerText = plainText;
       }
 
@@ -448,7 +459,8 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
       const n = e[t];
       if (!n) {
         console.error(`Post data not found for key: ${t}`);
-        (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000));
+        showDebugLog();
+        chrome.storage.local.set({ operationStatus: 'failed' });
         return;
       }
       console.log("Post data retrieved:", n);
@@ -479,7 +491,8 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
           return t ? (console.log("Found unselected Discussion tab. Switching..."), t.click(), await y(2), !0) : (console.log("Already on Discussion tab or not applicable."), !1);
         }(), await y(2), e = await d()), !e && !document.querySelector('div[role="dialog"]')) {
           console.error("Failed to locate post creation button after all attempts");
-          (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000));
+          showDebugLog();
+          chrome.storage.local.set({ operationStatus: 'failed' });
           return;
         }
         if (e) {
@@ -492,7 +505,8 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
         if (!document.querySelector('div[role="dialog"]')) {
           console.error("Failed to open post creation modal (dialog not found).");
           b("Modal failed to open - aborting");
-          (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000));
+          showDebugLog();
+          chrome.storage.local.set({ operationStatus: 'failed' });
           return;
         }
         if (await v(o, "pre_text"), n.images?.length) {
@@ -570,7 +584,7 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
         await v(o, "pre_submit");
         b("Publishing post");
         await y(1);
-        const t = await function (e = 30, t = 1e3) {
+        const submitButtonVal = await function (e = 30, t = 1e3) {
           return new Promise(async n => {
             let o = 0;
             for (; o < e;) {
@@ -581,9 +595,16 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
               }
               o++, await y(t / 1e3);
             }
-            console.log("Post button still not found after retries."), (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000)), n(!1);
+            console.log("Post button still not found after retries.");
+            showDebugLog();
+            chrome.storage.local.set({ operationStatus: 'failed' });
+            n(!1);
           });
         }();
+        if (!submitButtonVal) {
+          console.error("[FACEBOOK-AUTO] Post button not found or disabled. Aborting.");
+          return;
+        }
         console.log("Submit button clicked");
         let a = await (async function (e = 500, t, n, o = 2e4) {
           return new Promise(t => {
@@ -593,28 +614,44 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
               };
             i();
           });
-        }?.(500, 0, t));
-        let s = !1;
+        }?.(500, 0, submitButtonVal));
         try {
           if (a) {
             console.log("Post submission verified - submit button no longer present"), b("Post published successfully, saving data");
-            let e = await p();
-            "pending" == e ? (s = !0, chrome.storage.local.set({ operationStatus: "pending" })) : "restricted" == e ? chrome.storage.local.set({ operationStatus: "restricted" }) : chrome.storage.local.set({ operationStatus: "successful" }), s = !0, r = !0;
+            let status = await p(1, 4); // Check status with 4 attempts (up to 8 seconds)
+            if (status === "pending") {
+              chrome.storage.local.set({ operationStatus: "pending" });
+            } else if (status === "restricted") {
+              chrome.storage.local.set({ operationStatus: "restricted" });
+            } else {
+              // Wait 3 seconds to let Facebook finish and show the success banner, ensuring the tab isn't closed too fast
+              await y(3);
+              chrome.storage.local.set({ operationStatus: "successful" });
+            }
+          } else {
+            console.error("Post submission failed - submit button still present after timeout");
+            let status = await p(1, 2);
+            if (status === "pending") {
+              chrome.storage.local.set({ operationStatus: "pending" });
+            } else if (status === "restricted") {
+              chrome.storage.local.set({ operationStatus: "restricted" });
+            } else if (status === "success") {
+              await y(3);
+              chrome.storage.local.set({ operationStatus: "successful" });
+            } else {
+              showDebugLog();
+              chrome.storage.local.set({ operationStatus: "failed" });
+            }
           }
-          let e = await p();
-          "pending" == e && (s = !0, chrome.storage.local.set({ operationStatus: "pending" })), "restricted" == e && (s = !0, chrome.storage.local.set({ operationStatus: "restricted" })), s || (console.error("Post submission failed - submit button still present after timeout"), (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000)));
         } catch (e) {
           console.error("Error during post verification:", e);
-          let t = await p();
-          "pending" == t ? (s = !0, chrome.storage.local.set({ operationStatus: "pending" })) : "success" == t ? chrome.storage.local.set({ operationStatus: "success" }) : "restricted" == t ? chrome.storage.local.set({ operationStatus: "restricted" }) : (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000));
-        }
-        if (!r) {
-          console.error("Post submission failed due to timeout.");
-          let e = await p();
-          "pending" == e ? (s = !0, chrome.storage.local.set({ operationStatus: "pending" })) : "success" == e ? chrome.storage.local.set({ operationStatus: "success" }) : "restricted" == e ? chrome.storage.local.set({ operationStatus: "restricted" }) : (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000));
+          showDebugLog();
+          chrome.storage.local.set({ operationStatus: "failed" });
         }
       } catch (e) {
-        console.error("An error occurred during post creation:", e), (showDebugLog(), setTimeout(()=>chrome.storage.local.set({operationStatus:'failed'}), 180000));
+        console.error("An error occurred during post creation:", e);
+        showDebugLog();
+        chrome.storage.local.set({ operationStatus: 'failed' });
       }
     });
   }
