@@ -202,7 +202,6 @@ async function writeText(element, text) {
     const htmlText = text.replace(/\n/g, '<br>');
     const tagName = element.tagName.toLowerCase();
     const isTextInput = tagName === "textarea" || tagName === "input";
-    const isContentEditable = element.isContentEditable || element.getAttribute("contenteditable") === "true";
 
     if (isTextInput) {
       element.value = plainText;
@@ -214,15 +213,13 @@ async function writeText(element, text) {
         bubbles: !0,
         composed: !0
       }));
-      console.log("Text written to input element:", element);
+      console.log("Text written to textarea/input element");
       return;
     }
-    
-    // For contenteditable (Facebook Lexical editor), use multiple strategies:
-    // Strategy 1: ClipboardEvent with both text/plain and text/html
-    const beforeHTML = element.innerHTML || "";
+    const beforeValue = isTextInput ? element.value : (element.innerText || element.textContent || "");
     const dt = new DataTransfer();
     dt.setData("text/plain", plainText);
+    // Also set HTML with <br> tags to preserve newlines for rich editors
     dt.setData("text/html", htmlText);
     const pasteEvent = new ClipboardEvent("paste", {
       clipboardData: dt,
@@ -235,23 +232,21 @@ async function writeText(element, text) {
       bubbles: !0,
       composed: !0
     }));
-    await y(0.2);
-    const afterHTML = element.innerHTML || "";
-    
-    // Strategy 2: If paste didn't work or newlines are missing, use execCommand
-    const needsFallback = afterHTML === beforeHTML || !afterHTML.includes(plainText.replace(/\n/g, '').trim());
-    if (needsFallback && isContentEditable) {
-      console.log("Paste strategy failed, using execCommand fallback");
-      element.focus();
+    const afterValue = isTextInput ? element.value : (element.innerText || element.textContent || "");
+    const isContentEditable = element.isContentEditable || element.getAttribute("contenteditable") === "true";
+    if (!isTextInput && isContentEditable && (!afterValue || afterValue === beforeValue || !afterValue.includes(plainText.trim()))) {
       element.innerHTML = "";
-      let inserted = false;
+      element.focus();
+      let inserted = !1;
       try {
-        inserted = document.execCommand("insertHTML", false, htmlText);
-      } catch (err) {
-        console.warn("execCommand insertHTML failed:", err);
+        inserted = document.execCommand("insertHTML", !1, htmlText);
+      } catch (err) {}
+      if (!inserted) {
+        try {
+          inserted = document.execCommand("insertText", !1, plainText);
+        } catch (err) {}
       }
       if (!inserted) {
-        // Fallback for non-rich editors: insertText then manually add newlines
         element.textContent = plainText;
       }
       element.dispatchEvent(new InputEvent("input", {
@@ -259,6 +254,12 @@ async function writeText(element, text) {
         composed: !0,
         data: plainText,
         inputType: "insertText"
+      }));
+      element.dispatchEvent(new InputEvent("input", {
+        bubbles: !0,
+        composed: !0,
+        data: htmlText,
+        inputType: "insertHTML"
       }));
       element.dispatchEvent(new Event("change", {
         bubbles: !0,

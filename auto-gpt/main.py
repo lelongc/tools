@@ -172,8 +172,8 @@ def register_one_account(monitor_callback=None):
     
     finally:
         if driver:
-            print("🔒 正在关闭浏览器...")
-            driver.quit()
+            print("🔒 [DEBUG] Giữ trình duyệt mở để bạn kiểm tra (không tự động đóng)...")
+            # driver.quit()
     
     return email, password, success
     
