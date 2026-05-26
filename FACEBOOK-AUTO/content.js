@@ -606,7 +606,7 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
           return;
         }
         console.log("Submit button clicked");
-        let a = await (async function (e = 500, t, n, o = 2e4) {
+        let a = await (async function (e = 500, t, n, o = 3e4) {
           return new Promise(t => {
             const r = Date.now(),
               i = () => {
@@ -618,14 +618,20 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
         try {
           if (a) {
             console.log("Post submission verified - submit button no longer present"), b("Post published successfully, saving data");
-            let status = await p(1, 4); // Check status with 4 attempts (up to 8 seconds)
+            let status = await p(1, 15); // Check status with 15 attempts (up to 30 seconds total)
             if (status === "pending") {
+              await y(5); // Wait 5 seconds for pending status
               chrome.storage.local.set({ operationStatus: "pending" });
             } else if (status === "restricted") {
               chrome.storage.local.set({ operationStatus: "restricted" });
+            } else if (status === "success") {
+              console.log("Success banner detected, waiting 10 seconds before closing tab...");
+              await y(10); // Wait 10 seconds for success status, as requested by user
+              chrome.storage.local.set({ operationStatus: "successful" });
             } else {
-              // Wait 3 seconds to let Facebook finish and show the success banner, ensuring the tab isn't closed too fast
-              await y(3);
+              // Unknown status after 30 seconds of checking banners.
+              // Since the submit button disappeared, we treat it as successful and close the tab immediately.
+              console.log("Unknown status after 30 seconds, assuming success and closing tab.");
               chrome.storage.local.set({ operationStatus: "successful" });
             }
           } else {
@@ -636,7 +642,7 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
             } else if (status === "restricted") {
               chrome.storage.local.set({ operationStatus: "restricted" });
             } else if (status === "success") {
-              await y(3);
+              await y(10);
               chrome.storage.local.set({ operationStatus: "successful" });
             } else {
               showDebugLog();
