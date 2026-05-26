@@ -801,7 +801,10 @@ def fill_profile_info(driver):
             except:
                 age_val = "25"
             
-            age_input.click()
+            try:
+                age_input.click()
+            except Exception:
+                driver.execute_script("arguments[0].click();", age_input)
             time.sleep(0.3)
             age_input.send_keys(Keys.CONTROL + "a")
             single_birthday_input = None # Bỏ qua nhập ngày sinh
@@ -837,7 +840,10 @@ def fill_profile_info(driver):
             input_type = (single_birthday_input.get_attribute('type') or "").lower()
             
             # 清理
-            single_birthday_input.click()
+            try:
+                single_birthday_input.click()
+            except Exception:
+                driver.execute_script("arguments[0].click();", single_birthday_input)
             time.sleep(0.3)
             single_birthday_input.send_keys(Keys.CONTROL + "a")
             single_birthday_input.send_keys(Keys.BACKSPACE)
