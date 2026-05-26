@@ -835,85 +835,85 @@ def fill_profile_info(driver):
                 except:
                     continue
 
-        if single_birthday_input:
-            placeholder = (single_birthday_input.get_attribute('placeholder') or "").lower()
-            input_type = (single_birthday_input.get_attribute('type') or "").lower()
-            
-            # 清理
-            try:
-                single_birthday_input.click()
-            except Exception:
-                driver.execute_script("arguments[0].click();", single_birthday_input)
-            time.sleep(0.3)
-            single_birthday_input.send_keys(Keys.CONTROL + "a")
-            single_birthday_input.send_keys(Keys.BACKSPACE)
-            time.sleep(0.3)
-            
-            if input_type == "date":
-                # HTML5 Date Input: YYYY-MM-DD
-                date_val = f"{birthday_year}-{birthday_month}-{birthday_day}"
-                driver.execute_script("arguments[0].value = arguments[1];", single_birthday_input, date_val)
-                print(f"  ✅ [JS] Đã điền định dạng HTML5 Date: {date_val}")
-            elif "dd/mm/yyyy" in placeholder or "dd-mm-yyyy" in placeholder:
-                date_val = f"{birthday_day}/{birthday_month}/{birthday_year}"
-                type_slowly(single_birthday_input, date_val, delay=0.1)
-                print(f"  ✅ Đã điền định dạng DD/MM/YYYY: {date_val}")
-            elif "yyyy/mm/dd" in placeholder or "yyyy-mm-dd" in placeholder:
-                date_val = f"{birthday_year}/{birthday_month}/{birthday_day}"
-                type_slowly(single_birthday_input, date_val, delay=0.1)
-                print(f"  ✅ Đã điền định dạng YYYY/MM/DD: {date_val}")
-            else:
-                # 默认 US 格式 MM/DD/YYYY
-                date_val = f"{birthday_month}/{birthday_day}/{birthday_year}"
-                clean_placeholder = placeholder.replace("/", "").replace("-", "")
-                if "mmddyyyy" in clean_placeholder:
-                    date_val_num = f"{birthday_month}{birthday_day}{birthday_year}"
-                    type_slowly(single_birthday_input, date_val_num, delay=0.1)
-                    print(f"  ✅ Đã điền định dạng MMDDYYYY (không gạch chéo): {date_val_num}")
-                else:
+            if single_birthday_input:
+                placeholder = (single_birthday_input.get_attribute('placeholder') or "").lower()
+                input_type = (single_birthday_input.get_attribute('type') or "").lower()
+                
+                # 清理
+                try:
+                    single_birthday_input.click()
+                except Exception:
+                    driver.execute_script("arguments[0].click();", single_birthday_input)
+                time.sleep(0.3)
+                single_birthday_input.send_keys(Keys.CONTROL + "a")
+                single_birthday_input.send_keys(Keys.BACKSPACE)
+                time.sleep(0.3)
+                
+                if input_type == "date":
+                    # HTML5 Date Input: YYYY-MM-DD
+                    date_val = f"{birthday_year}-{birthday_month}-{birthday_day}"
+                    driver.execute_script("arguments[0].value = arguments[1];", single_birthday_input, date_val)
+                    print(f"  ✅ [JS] Đã điền định dạng HTML5 Date: {date_val}")
+                elif "dd/mm/yyyy" in placeholder or "dd-mm-yyyy" in placeholder:
+                    date_val = f"{birthday_day}/{birthday_month}/{birthday_year}"
                     type_slowly(single_birthday_input, date_val, delay=0.1)
-                    print(f"  ✅ Đã điền định dạng MM/DD/YYYY (mặc định): {date_val}")
-            
-            time.sleep(1)
-        else:
-            # 否则回退到 3-field 模式
-            print("  👉 Không tìm thấy ô nhập đơn, chuyển sang chế độ 3 ô nhập (Năm/Tháng/Ngày)...")
-            # 年份
-            year_input = WebDriverWait(driver, 15).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, '[data-type="year"]'))
-            )
-            driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", year_input)
-            time.sleep(0.5)
-            
-            actions = ActionChains(driver)
-            actions.click(year_input).perform()
-            time.sleep(0.3)
-            year_input.send_keys(Keys.CONTROL + "a")
-            time.sleep(0.1)
-            type_slowly(year_input, birthday_year, delay=0.1)
-            time.sleep(0.5)
-            
-            # 月份
-            month_input = driver.find_element(By.CSS_SELECTOR, '[data-type="month"]')
-            actions = ActionChains(driver)
-            actions.click(month_input).perform()
-            time.sleep(0.3)
-            month_input.send_keys(Keys.CONTROL + "a")
-            time.sleep(0.1)
-            type_slowly(month_input, birthday_month, delay=0.1)
-            time.sleep(0.5)
-            
-            # 日期
-            day_input = driver.find_element(By.CSS_SELECTOR, '[data-type="day"]')
-            actions = ActionChains(driver)
-            actions.click(day_input).perform()
-            time.sleep(0.3)
-            day_input.send_keys(Keys.CONTROL + "a")
-            time.sleep(0.1)
-            type_slowly(day_input, birthday_day, delay=0.1)
-            
-            print(f"✅ Đã điền ngày sinh: {birthday_year}/{birthday_month}/{birthday_day}")
-            time.sleep(1)
+                    print(f"  ✅ Đã điền định dạng DD/MM/YYYY: {date_val}")
+                elif "yyyy/mm/dd" in placeholder or "yyyy-mm-dd" in placeholder:
+                    date_val = f"{birthday_year}/{birthday_month}/{birthday_day}"
+                    type_slowly(single_birthday_input, date_val, delay=0.1)
+                    print(f"  ✅ Đã điền định dạng YYYY/MM/DD: {date_val}")
+                else:
+                    # 默认 US 格式 MM/DD/YYYY
+                    date_val = f"{birthday_month}/{birthday_day}/{birthday_year}"
+                    clean_placeholder = placeholder.replace("/", "").replace("-", "")
+                    if "mmddyyyy" in clean_placeholder:
+                        date_val_num = f"{birthday_month}{birthday_day}{birthday_year}"
+                        type_slowly(single_birthday_input, date_val_num, delay=0.1)
+                        print(f"  ✅ Đã điền định dạng MMDDYYYY (không gạch chéo): {date_val_num}")
+                    else:
+                        type_slowly(single_birthday_input, date_val, delay=0.1)
+                        print(f"  ✅ Đã điền định dạng MM/DD/YYYY (mặc định): {date_val}")
+                
+                time.sleep(1)
+            else:
+                # 否则回退到 3-field 模式
+                print("  👉 Không tìm thấy ô nhập đơn, chuyển sang chế độ 3 ô nhập (Năm/Tháng/Ngày)...")
+                # 年份
+                year_input = WebDriverWait(driver, 15).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, '[data-type="year"]'))
+                )
+                driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", year_input)
+                time.sleep(0.5)
+                
+                actions = ActionChains(driver)
+                actions.click(year_input).perform()
+                time.sleep(0.3)
+                year_input.send_keys(Keys.CONTROL + "a")
+                time.sleep(0.1)
+                type_slowly(year_input, birthday_year, delay=0.1)
+                time.sleep(0.5)
+                
+                # 月份
+                month_input = driver.find_element(By.CSS_SELECTOR, '[data-type="month"]')
+                actions = ActionChains(driver)
+                actions.click(month_input).perform()
+                time.sleep(0.3)
+                month_input.send_keys(Keys.CONTROL + "a")
+                time.sleep(0.1)
+                type_slowly(month_input, birthday_month, delay=0.1)
+                time.sleep(0.5)
+                
+                # 日期
+                day_input = driver.find_element(By.CSS_SELECTOR, '[data-type="day"]')
+                actions = ActionChains(driver)
+                actions.click(day_input).perform()
+                time.sleep(0.3)
+                day_input.send_keys(Keys.CONTROL + "a")
+                time.sleep(0.1)
+                type_slowly(day_input, birthday_day, delay=0.1)
+                
+                print(f"✅ Đã điền ngày sinh: {birthday_year}/{birthday_month}/{birthday_day}")
+                time.sleep(1)
         
         # 3. 点击最后的继续按钮
         print("🔘 点击最终提交按钮...")
