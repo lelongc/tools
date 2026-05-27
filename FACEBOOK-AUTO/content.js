@@ -102,7 +102,7 @@ function showDebugLog() {
 async function d() {
   const triggerPhrases = ["write something", "what's on your mind", "create a public post", "créer une publication", "à quoi pensez-vous", "qué estás pensando", "beitrag erstellen", "bejegyzés", "írj", "创建帖子", "发布", "بم تفكر", "napisz coś", "Escreva algo", "bạn viết gì đi", "bạn viết gì đi...", "bạn viết gì đi…", "bạn viết gì đó", "viết gì đó", "tạo bài viết công khai", "bạn nghĩ gì", "bạn nghĩ gì thế", "viết nội dung", "nêu ý kiến của bạn", "เขียนอะไรสักหน่อย", "Tulis sesuatu", "כאן כותבים…", "Skryf iets", "কিছু লিখুন", "សរសេរអ្វីម្យ៉ាង", "Exprimez-vous", "اكتب شيئًا", "o czym myślisz", "Escribe algo", "ⴰⵔⴰ ⴽⵔⴰ ⵏ ⵜⵖⴰⵡסⴰ", "Magsulat", "Scrie ceva"];
 
-  for (let attempt = 0; attempt < 40; attempt++) {
+  for (let attempt = 0; attempt < 15; attempt++) {
     const buttons = Array.from(document.querySelectorAll('div[role="button"], button, div.x1i10hfl, div[role="link"], a'));
     
     const textElements = Array.from(document.querySelectorAll('div, span, p')).filter(el => {
@@ -178,18 +178,20 @@ async function d() {
 
 function f(e) {
   if (!e) return;
-  try {
-    if (typeof e.click === "function") {
-      e.click();
-      return;
-    }
-  } catch (err) {}
-  ["pointerdown", "mousedown", "pointerup", "mouseup", "click"].forEach(t => {
+  ["pointerover", "pointerdown", "mousedown", "pointerup", "mouseup", "click"].forEach(t => {
     try {
-      let n = t.startsWith("pointer") ? new PointerEvent(t, { bubbles: !0, cancelable: !0, view: window, buttons: 1, isPrimary: true }) : new MouseEvent(t, { bubbles: !0, cancelable: !0, view: window, buttons: 1 });
+      let n;
+      if (t.startsWith("pointer")) {
+        n = new PointerEvent(t, { bubbles: !0, cancelable: !0, view: window, buttons: 1, isPrimary: true });
+      } else {
+        n = new MouseEvent(t, { bubbles: !0, cancelable: !0, view: window, buttons: 1 });
+      }
       e.dispatchEvent(n);
     } catch (err) {}
   });
+  try {
+    if (typeof e.click === "function") e.click();
+  } catch (err) {}
 }
 async function p(e = 1, t = 10) {
   function n(e, t) {
@@ -258,17 +260,19 @@ async function writeText(element, text) {
     }
     await y(0.2);
 
-    // Dispatch beforeinput (insertFromPaste)
-    const beforeInputEvent = new InputEvent("beforeinput", {
-      inputType: "insertFromPaste",
-      data: plainText,
-      bubbles: true,
-      cancelable: true,
-      composed: true
-    });
-    element.dispatchEvent(beforeInputEvent);
-
     if (isTextInput) {
+      // Dispatch beforeinput for inputs
+      try {
+        const beforeInputEvent = new InputEvent("beforeinput", {
+          inputType: "insertFromPaste",
+          data: plainText,
+          bubbles: true,
+          cancelable: true,
+          composed: true
+        });
+        element.dispatchEvent(beforeInputEvent);
+      } catch(e) {}
+
       element.value = plainText;
       element.dispatchEvent(new Event("input", { bubbles: true, composed: true }));
       element.dispatchEvent(new Event("change", { bubbles: true, composed: true }));
@@ -286,10 +290,11 @@ async function writeText(element, text) {
         }
       } catch(e) {}
 
-      // Dispatch simulated ClipboardEvent paste first
+      // Dispatch simulated ClipboardEvent paste
       try {
         const dt = new DataTransfer();
         dt.setData("text/plain", plainText);
+        dt.setData("text/html", plainText.replace(/\n/g, '<br>'));
         const pasteEvent = new ClipboardEvent("paste", {
           clipboardData: dt,
           bubbles: true,
@@ -301,37 +306,44 @@ async function writeText(element, text) {
         console.warn("[FACEBOOK-AUTO] Failed to dispatch ClipboardEvent paste:", e);
       }
 
-      // Try execCommand line by line to preserve line breaks
-      let pasteSuccess = false;
-      try {
-        const lines = plainText.split('\n');
-        for (let i = 0; i < lines.length; i++) {
-          if (lines[i]) {
-            document.execCommand('insertText', false, lines[i]);
+      // Wait a tiny bit and check if content was inserted
+      await y(0.1);
+      const currentContent = element.textContent || element.innerText || "";
+      if (currentContent.length === 0) {
+        console.warn("[FACEBOOK-AUTO] Paste event did not insert text, trying execCommand fallback...");
+        let pasteSuccess = false;
+        try {
+          const lines = plainText.split('\n');
+          for (let i = 0; i < lines.length; i++) {
+            if (lines[i]) {
+              document.execCommand('insertText', false, lines[i]);
+            }
+            if (i < lines.length - 1) {
+              document.execCommand('insertLineBreak');
+            }
           }
-          if (i < lines.length - 1) {
-            document.execCommand('insertLineBreak');
-          }
+          pasteSuccess = true;
+        } catch(e) {
+          console.warn("[FACEBOOK-AUTO] execCommand insertText/insertLineBreak failed:", e);
         }
-        pasteSuccess = true;
-      } catch(e) {
-        console.warn("[FACEBOOK-AUTO] execCommand insertText/insertLineBreak failed:", e);
+
+        // Fallback: manually update innerText if execCommand fails
+        if (!pasteSuccess) {
+          console.warn("[FACEBOOK-AUTO] execCommand failed, using fallback innerText");
+          element.innerText = plainText;
+        }
       }
 
-      // Fallback: manually update innerText if execCommand fails
-      if (!pasteSuccess) {
-        console.warn("[FACEBOOK-AUTO] execCommand failed, using fallback innerText");
-        element.innerText = plainText;
-      }
-
-      // Dispatch input event (insertFromPaste)
-      const inputEvent = new InputEvent("input", {
-        inputType: "insertFromPaste",
-        data: plainText,
-        bubbles: true,
-        composed: true
-      });
-      element.dispatchEvent(inputEvent);
+      // Dispatch input event (insertFromPaste) to trigger updates
+      try {
+        const inputEvent = new InputEvent("input", {
+          inputType: "insertFromPaste",
+          data: plainText,
+          bubbles: true,
+          composed: true
+        });
+        element.dispatchEvent(inputEvent);
+      } catch(e) {}
     }
 
     console.log("[FACEBOOK-AUTO] writeText (paste mode) finished successfully.");
@@ -352,42 +364,42 @@ async function insertPostText(postText, postTitleText) {
   
   for (let attempt = 0; attempt < 20; attempt++) {
     // Priority 1: Look for contenteditable div (Lexical/modern editor for post body)
-    const editables = Array.from(container.querySelectorAll(
+    const editables = Array.from(document.querySelectorAll(
       "div[data-lexical-editor='true'], div.notranslate[contenteditable='true'], div[role='textbox'][contenteditable='true']"
     )).filter(e => {
       const rect = e.getBoundingClientRect();
-      return rect.width > 20 && rect.height > 10;
+      return rect.width > 0 && rect.height > 0 && e.offsetParent !== null;
     });
     
     if (editables.length > 0) {
-      bodyElement = editables[0];
+      bodyElement = editables[editables.length - 1]; // Use last element for topmost modal
       console.log("[FACEBOOK-AUTO] Body contentEditable found:", bodyElement);
       
       // If we have contenteditable body, any visible textarea in the dialog is the Title field
-      const textareas = Array.from(container.querySelectorAll('textarea')).filter(ta => {
+      const textareas = Array.from(document.querySelectorAll('textarea')).filter(ta => {
         const rect = ta.getBoundingClientRect();
-        return rect.width > 20 && rect.height > 10;
+        return rect.width > 20 && rect.height > 10 && ta.offsetParent !== null;
       });
       
       if (textareas.length > 0) {
-        titleElement = textareas[0];
+        titleElement = textareas[textareas.length - 1];
         console.log("[FACEBOOK-AUTO] Title textarea found (co-exists with body contentEditable):", titleElement.getAttribute("aria-label") || titleElement.getAttribute("placeholder"));
       }
       break;
     }
     
     // Priority 2: Look for visible textarea (fallback for legacy or simplified FB post layout)
-    const textareas = Array.from(container.querySelectorAll('textarea')).filter(ta => {
+    const textareas = Array.from(document.querySelectorAll('textarea')).filter(ta => {
       const label = (ta.getAttribute("aria-label") || "").toLowerCase();
       const placeholder = (ta.getAttribute("placeholder") || "").toLowerCase();
       // Exclude obvious title textareas if we are using textarea as body fallback
       if (label.includes("tiêu đề") || label.includes("title") || placeholder.includes("tiêu đề") || placeholder.includes("title")) return false;
       const rect = ta.getBoundingClientRect();
-      return rect.width > 20 && rect.height > 10;
+      return rect.width > 20 && rect.height > 10 && ta.offsetParent !== null;
     });
     
     if (textareas.length > 0) {
-      bodyElement = textareas[0];
+      bodyElement = textareas[textareas.length - 1];
       console.log("[FACEBOOK-AUTO] Body textarea found (fallback):", bodyElement.getAttribute("aria-label") || bodyElement.getAttribute("placeholder"));
       break;
     }
@@ -463,7 +475,7 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
         chrome.storage.local.set({ operationStatus: 'failed' });
         return;
       }
-      console.log("Post data retrieved:", n);
+      console.log("Post data retrieved:", { ...n, images: n.images ? `${n.images.length} images` : "none" });
       const o = n.securityLevel || "2";
       m(n.firstCommentText), await y(1);
       let r = !1;
@@ -511,7 +523,8 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
         }
         if (await v(o, "pre_text"), n.images?.length) {
           b("Processing media files"), await y(1), console.log("[FACEBOOK-AUTO] Starting media upload. Image count:", n.images.length);
-          for (const e of n.images) await w(e, "post"), console.log("Media file processed:", e), await v(o, "between_media");
+          await w(n.images, "post");
+          console.log("[FACEBOOK-AUTO] Media files processed.");
         }
         b("Adding text content");
         console.log("[FACEBOOK-AUTO] About to insert text. Text length:", i.length, "Title:", titleSpinned);
@@ -837,54 +850,82 @@ async function w(e, t = "post") {
     }
     if (!i) return console.error("Could not find photo button inside post dialog"), !1;
     
-    const a = new Set(Array.from(t.querySelectorAll('input[type="file"]')));
-    let s;
-    const l = new Promise((e) => {
-        s = e;
-      }),
-      c = new MutationObserver(() => {
-        const e = Array.from(t.querySelectorAll('input[type="file"]')).filter((e) => !a.has(e));
-        e.length > 0 && (c.disconnect(), s(e));
-      });
-    c.observe(document.body, { childList: !0, subtree: !0 });
-    const u = new Promise((e) =>
-      setTimeout(() => {
-        c.disconnect(), e([]);
-      }, 4000)
-    );
-    const preventFilePicker = (e) => {
-      if ("input" === e.target.tagName.toLowerCase() && "file" === e.target.type) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-    };
-    document.addEventListener("click", preventFilePicker, true);
-    i.click();
-    setTimeout(() => {
-      document.removeEventListener("click", preventFilePicker, true);
-    }, 2000);
-    
-    await y(0.5);
-    let d = await Promise.race([l, u]);
-    let f = d.length > 0 ? d : Array.from(t.querySelectorAll('input[type="file"]'));
+    let f = Array.from(t.querySelectorAll('input[type="file"]'));
     if (0 === f.length) {
-      await y(0.2);
-      f = Array.from(t.querySelectorAll('input[type="file"]'));
+      const a = new Set(f);
+      let s;
+      const l = new Promise((e) => {
+          s = e;
+        }),
+        c = new MutationObserver(() => {
+          const e = Array.from(t.querySelectorAll('input[type="file"]')).filter((e) => !a.has(e));
+          e.length > 0 && (c.disconnect(), s(e));
+        });
+      c.observe(document.body, { childList: !0, subtree: !0 });
+      const u = new Promise((e) =>
+        setTimeout(() => {
+          c.disconnect(), e([]);
+        }, 4000)
+      );
+      const preventFilePicker = (e) => {
+        if ("input" === e.target.tagName.toLowerCase() && "file" === e.target.type) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      };
+      document.addEventListener("click", preventFilePicker, true);
+      i.click();
+      setTimeout(() => {
+        document.removeEventListener("click", preventFilePicker, true);
+      }, 2000);
+      
+      await y(0.5);
+      let d = await Promise.race([l, u]);
+      f = d.length > 0 ? d : Array.from(t.querySelectorAll('input[type="file"]'));
+      if (0 === f.length) {
+        await y(0.2);
+        f = Array.from(t.querySelectorAll('input[type="file"]'));
+      }
     }
-    if (0 === f.length) return console.error("No file input found in post dialog after clicking photo button"), !1;
+    if (0 === f.length) return console.error("No file input found in post dialog"), !1;
     
+    function dataURLtoBlob(dataurl) {
+      try {
+        const parts = dataurl.split(',');
+        if (parts.length < 2) return null;
+        const mimeMatch = parts[0].match(/:(.*?);/);
+        const mime = mimeMatch ? mimeMatch[1] : 'image/jpeg';
+        const bstr = atob(parts[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], { type: mime });
+      } catch (e) {
+        console.error("[FACEBOOK-AUTO] Error converting dataURL to Blob:", e);
+        return null;
+      }
+    }
+
     const p = new DataTransfer();
     try {
-      if (e && e.startsWith("data:")) {
-        const t = await fetch(e);
-        const n = await t.blob();
-        const o = new File([n], `photo_${new Date().getTime()}.jpg`, { type: n.type || "image/jpeg" });
-        p.items.add(o);
-      } else {
-        console.warn("Skipping photo with unexpected URL scheme: " + e);
+      const urls = Array.isArray(e) ? e : [e];
+      for (let idx = 0; idx < urls.length; idx++) {
+        const url = urls[idx];
+        if (url && url.startsWith("data:")) {
+          console.log(`[FACEBOOK-AUTO] Processing image ${idx + 1}/${urls.length}...`);
+          const blob = dataURLtoBlob(url);
+          if (blob) {
+            const o = new File([blob], `photo_${new Date().getTime()}_${idx}.jpg`, { type: blob.type || "image/jpeg" });
+            p.items.add(o);
+          }
+        } else {
+          console.warn("Skipping photo with unexpected URL scheme (base64 log avoided)");
+        }
       }
     } catch (t) {
-      console.error(`Error processing photo ${e}:`, t);
+      console.error(`Error processing photos:`, t);
     }
     if (0 === p.files.length) return console.error("No photos could be processed from storage"), !1;
     
