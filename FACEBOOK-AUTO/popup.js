@@ -118,11 +118,40 @@ function initDebugLogViewer() {
   if (viewBtn) {
     viewBtn.addEventListener('click', () => {
       console.log("[FACEBOOK-AUTO] View logs button clicked, fetching from storage...");
-      chrome.storage.local.get(['lastErrorLog'], (res) => {
-        const logs = res.lastErrorLog || "Không có log lỗi nào được lưu hoặc chưa chạy bài đăng nào.";
-        console.log("[FACEBOOK-AUTO] Fetched logs length:", logs.length);
-        if (modalTextarea) {
-          modalTextarea.value = logs;
+      chrome.storage.local.get(['postsCompleted'], (res) => {
+        if (res.postsCompleted) {
+          const e = res.postsCompleted;
+          const n = e.filter(e => "successful" === e.response).length;
+          const i = e.filter(e => "failed" === e.response).length;
+          document.getElementById('successCount').innerText = n;
+          document.getElementById('failCount').innerText = i;
+          
+          const o = document.getElementById('logsList');
+          if (o) {
+            o.innerHTML = '';
+            e.forEach(e => {
+              let n = "bg-secondary", i = e.link;
+              if ("successful" === e.response) {
+                n = "bg-success";
+                i = `<a href="${e.link}" target="_blank" class="text-white">Xem Bài Đăng</a>`;
+              } else if ("failed" === e.response) {
+                n = "bg-danger";
+              } else if ("restricted" === e.response) {
+                n = "bg-warning text-dark";
+              }
+              const groupName = e.groupName ? e.groupName : "Nhóm không tên";
+              const r = document.createElement("li");
+              r.className = `list-group-item d-flex justify-content-between align-items-center ${n} text-white mb-2 rounded`;
+              r.innerHTML = `
+                <div class="d-flex flex-column">
+                  <span class="fw-bold">${groupName}</span>
+                  <small>${i}</small>
+                </div>
+                <span class="badge bg-light text-dark rounded-pill">${"successful" === e.response ? "Thành công" : "Thất bại"}</span>
+              `;
+              o.appendChild(r);
+            });
+          }
         }
       });
     });
@@ -273,5 +302,95 @@ document.addEventListener('DOMContentLoaded', () => {
     if (tabEl) {
       setTimeout(() => { tabEl.click(); }, 50); 
     }
+  }
+});
+
+// OVERRIDE SEND MESSAGE FOR MACRO AND MICRO DELAYS
+const origSendMessage = chrome.runtime.sendMessage;
+chrome.runtime.sendMessage = function(message, callback) {
+  if (message && message.action === 'startPosting') {
+    const getVal = (id) => { const el = document.getElementById(id); return el ? parseInt(el.value) : null; };
+    const minM = getVal('minDelayInput') || 2;
+    const maxM = getVal('maxDelayInput') || 7;
+    message.minMicro = minM;
+    message.maxMicro = maxM;
+    message.timeInSeconds = getVal('minMacroDelayInput') || 30;
+    message.maxDelay = getVal('maxMacroDelayInput') || 120;
+    
+    // Save micro delays to storage so content.js can use them
+    chrome.storage.local.set({ fbAutoMinMicro: minM, fbAutoMaxMicro: maxM });
+  }
+  return origSendMessage.call(chrome.runtime, message, callback);
+};
+
+
+// OPEN IN FULL TAB LOGIC
+document.addEventListener('DOMContentLoaded', function() {
+  const btn = document.getElementById('open-full-tab');
+  if (btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      chrome.tabs.create({url: 'popup.html'});
+    });
+  }
+});
+
+
+// EXPORT/IMPORT LOGIC
+document.addEventListener('DOMContentLoaded', function() {
+  const dataExportImportBtn = document.getElementById('data-export-import');
+  if (dataExportImportBtn) {
+    dataExportImportBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const modal = new bootstrap.Modal(document.getElementById('dataModal'));
+      modal.show();
+    });
+  }
+
+  const btnExportData = document.getElementById('btnExportData');
+  if (btnExportData) {
+    btnExportData.addEventListener('click', function() {
+      chrome.storage.local.get(null, function(items) {
+        // Strip out license info to be safe
+        delete items.licenseKey;
+        delete items.validationKey;
+        
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(items));
+        const downloadAnchorNode = document.createElement('a');
+        downloadAnchorNode.setAttribute("href",     dataStr);
+        downloadAnchorNode.setAttribute("download", "fb-auto-config.json");
+        document.body.appendChild(downloadAnchorNode);
+        downloadAnchorNode.click();
+        downloadAnchorNode.remove();
+        
+        alert("Đã xuất dữ liệu thành công!");
+      });
+    });
+  }
+
+  const btnImportData = document.getElementById('btnImportData');
+  if (btnImportData) {
+    btnImportData.addEventListener('click', function() {
+      const fileInput = document.getElementById('importDataFile');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert("Vui lòng chọn file JSON để khôi phục.");
+        return;
+      }
+      
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsedData = JSON.parse(e.target.result);
+          chrome.storage.local.set(parsedData, function() {
+            alert("Đã khôi phục dữ liệu thành công! Extension sẽ tự động tải lại.");
+            chrome.runtime.reload(); // Reload extension completely to apply new data
+          });
+        } catch(err) {
+          alert("File không hợp lệ hoặc bị lỗi: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    });
   }
 });

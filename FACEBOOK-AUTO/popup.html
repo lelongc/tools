@@ -1,1240 +1,613 @@
 <!DOCTYPE html>
-<html lang="en" style="height: 100%">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Đăng Bài Nhóm Facebook</title>
+<html lang="vi" style="height: 100%">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng Bài Nhóm Facebook</title>
 
-    <!-- Bootstrap 5 CSS -->
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
-      rel="stylesheet"
-    />
-    <!-- Bootstrap Icons -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
-      rel="stylesheet"
-    />
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-    <!-- Google Fonts -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+  <style>
+    /* Clean, Modern Theme matching Scheduler */
+    :root {
+      --primary-color: #4a6ee0;
+      --secondary-color: #274c79;
+      --success-color: #4caf50;
+      --danger-color: #f44336;
+      --warning-color: #ff9800;
+      --dark-color: #232f3e;
+      --light-bg: #f8f9fa;
+      --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.12);
+      --border-radius: 12px;
+      --body-bg: #eef2f5;
+      --text-color: #333333;
+      --text-muted: #6c757d;
+      --container-bg: #ffffff;
+      --border-color: #e0e0e0;
+      --input-bg: #ffffff;
+    }
 
-    <!-- Custom CSS -->
-    <style>      /* Default Light Theme */
-      :root {
-        --primary-color: #3b82f6;
-        --secondary-color: #6366f1;
-        --success-color: #10b981;
-        --danger-color: #ef4444;
-        --warning-color: #f59e0b;
-        --dark-color: #1e293b;
-        --light-bg: #f8fafc;
-        --card-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), 0 4px 6px rgba(0, 0, 0, 0.03);
-        --border-radius: 16px;
-        --body-bg: #f1f5f9;
-        --text-color: #0f172a;
-        --text-muted: #64748b;
-        --container-bg: rgba(255, 255, 255, 0.85);
-        --border-color: rgba(226, 232, 240, 0.8);
-        --input-bg: #ffffff;
-        --nav-bg: rgba(255, 255, 255, 0.6);
-        --nav-active-bg: #3b82f6;
-        --nav-active-color: #ffffff;
-        --nav-inactive-color: #475569;
-        --accent-glow: 0 8px 20px rgba(59, 130, 246, 0.3);
-        --main-border: 1px solid rgba(255, 255, 255, 0.6);
-        --main-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-        --logo-filter: none;
-        --card-header-bg: rgba(255, 255, 255, 0.5);
-        --dropdown-bg: rgba(255, 255, 255, 0.95);
-        --header-bg: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(241,245,249,0.9));
-        --nav-active-gradient: linear-gradient(135deg, #3b82f6, #6366f1);
-        --nav-active-glow: 0 8px 20px rgba(59, 130, 246, 0.4);
-        --close-btn-filter: none;
-      }
+    body.dark-theme {
+      --primary-color: #5c7ee6;
+      --secondary-color: #366092;
+      --light-bg: #2a2a2a;
+      --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      --body-bg: #121212;
+      --text-color: #ffffff;
+      --text-muted: #aaaaaa;
+      --container-bg: #1e1e1e;
+      --border-color: #333333;
+      --input-bg: #2a2a2a;
+    }
 
-      /* Dark Theme (Neon Glassmorphism) */
-      body.dark-theme {
-        --primary-color: #3b82f6;
-        --secondary-color: #8b5cf6;
-        --dark-color: #ffffff;
-        --light-bg: rgba(15, 23, 42, 0.5);
-        --card-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-        --body-bg: linear-gradient(135deg, #0f172a, #1e1b4b);
-        --text-color: #f8fafc;
-        --text-muted: #94a3b8;
-        --container-bg: rgba(15, 23, 42, 0.6);
-        --border-color: rgba(255, 255, 255, 0.1);
-        --input-bg: rgba(0, 0, 0, 0.3);
-        --nav-bg: rgba(255, 255, 255, 0.05);
-        --nav-active-bg: transparent;
-        --nav-active-color: #ffffff;
-        --nav-inactive-color: rgba(248, 250, 252, 0.7);
-        --accent-glow: 0 0 20px rgba(59, 130, 246, 0.4);
-        --main-border: 1px solid rgba(255, 255, 255, 0.1);
-        --main-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-        --logo-filter: brightness(0) invert(1);
-        --card-header-bg: rgba(0, 0, 0, 0.2);
-        --dropdown-bg: #1e293b;
-        --header-bg: rgba(15, 23, 42, 0.4);
-        --nav-active-gradient: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(139, 92, 246, 0.8));
-        --nav-active-glow: 0 0 25px rgba(59, 130, 246, 0.5);
-        --close-btn-filter: invert(1) grayscale(100%) brightness(200%);
-      }
+    body.dark-theme label,
+    body.dark-theme .form-label,
+    body.dark-theme .form-label.text-muted,
+    body.dark-theme h5, body.dark-theme h6, body.dark-theme h4 {
+      color: #e0e0e0 !important;
+    }
+    
+    body.dark-theme .text-muted {
+      color: #aaaaaa !important;
+    }
 
-      * {
-        font-family: "Outfit", sans-serif;
-      }
-      #groupLinksContainer .form-control {
-        border: 1px solid !important;
-      }
-      .form-floating > .form-control,
-      .form-floating > .form-control-plaintext {
-        padding: 1rem 0.75rem;
-        border: 1px solid !important;
-      }
-      .select2-container .select2-selection--single {
-        height: 40px !important;
-      }
-      .select2-container--default
-        .select2-selection--single
-        .select2-selection__clear {
-        height: 34px !important;
-      }
-      .select2-container--default
-        .select2-selection--single
-        .select2-selection__rendered {
-        line-height: 34px !important;
-      }
-      .select2-container--default
-        .select2-selection--single
-        .select2-selection__arrow {
-        top: 6px !important;
-      }
-      body {
-        background: var(--body-bg);
-        color: var(--text-color);
-        min-height: 100vh;
-        transition: background 0.3s ease, color 0.3s ease;
-      }
-      
-      .text-muted {
-        color: var(--text-muted) !important;
-      }
-      #alertContainer {
-        bottom: 0;
-        position: fixed;
-        left: 0;
-        width: 100%;
-        padding: 15px;
-        z-index: 1000;
-      }
-      .main-container {
-        background: var(--container-bg);
-        border-radius: var(--border-radius);
-        box-shadow: var(--main-shadow);
-        border: var(--main-border);
-        max-width: 900px;
-        margin: 0 auto;
-        overflow: auto;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
-      }
+    * { font-family: "Inter", sans-serif; }
+    
+    body {
+      width: 100%;
+      min-width: 780px;
+      min-height: 580px;
+      margin: 0 auto;
+      background: var(--body-bg);
+      color: var(--text-color);
+      overflow-x: hidden;
+      padding-top: 15px;
+      padding-bottom: 15px;
+    }
 
-      .header-section {
-        background: var(--header-bg);
-        color: var(--text-color);
-        padding: 2rem;
-        text-align: center;
-        border-bottom: 1px solid var(--border-color);
-        position: relative;
-      }
+    .main-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
 
-      .logo {
-        width: 55px;
-        height: auto;
-        margin-bottom: 1rem;
-        filter: var(--logo-filter);
-        transition: filter 0.3s ease;
-      }
+    .app-header {
+      background: var(--container-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-      .nav-pills {
-        background: var(--nav-bg);
-        border-radius: var(--border-radius);
-        padding: 8px;
-        margin-bottom: 2rem;
-        border: 1px solid var(--border-color);
-      }
+    .app-header h4 {
+      margin: 0;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
 
-      .nav-pills .nav-link {
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        color: var(--nav-inactive-color);
-        margin: 6px;
-       border: none !important;
-      }
+    .nav-tabs-custom {
+      background: var(--container-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      padding: 10px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
 
-      .nav-pills .nav-link.active {
-        background: var(--nav-active-gradient);
-        color: #ffffff !important;
-        box-shadow: var(--nav-active-glow);
-        border: 1px solid var(--primary-color);
-      }
-
-      .nav-pills .nav-link:hover:not(.active) {
-        background: rgba(128, 128, 128, 0.1);
-        color: var(--text-color);
-      }
-
-      .content-card:not(.schedulerSection) {
-        background: var(--container-bg);
-        border-radius: var(--border-radius);
-        box-shadow: var(--card-shadow);
-        border: 1px solid var(--border-color);
-        /* padding: 2rem; */
-        margin-bottom: 1.5rem;
-      }
-
-      .form-control, .form-select {
-        background-color: var(--input-bg) !important;
-        border: 1px solid var(--border-color) !important;
-        color: var(--text-color) !important;
-        transition: all 0.3s ease;
-      }
-      .form-control:focus, .form-select:focus {
-        background-color: var(--input-bg) !important;
-        border-color: var(--primary-color) !important;
-        box-shadow: 0 0 0 0.25rem rgba(0, 195, 255, 0.25) !important;
-      }
-
-      .form-floating label {
-        color: var(--text-muted);
-      }
-
-      .btn-primary-custom {
-        background: linear-gradient(
-          135deg,
-          var(--primary-color),
-          var(--secondary-color)
-        );
-        border: none;
-        border-radius: 8px;
-        font-weight: 500;
-        transition: all 0.3s ease;
-            margin-top: 6px;
-        color: #fff !important;
-        color: #fff !important;
-      }
-
-      .btn-primary-custom:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(24, 119, 242, 0.4);
-      }
-
-      .image-preview {
-        position: relative;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-
-      .image-preview img {
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-      }
-
-      .remove-image {
-        position: absolute;
-        top: 0px;
-        right: 0px;
-        background: var(--danger-color);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 24px;
-        height: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-      }
-
-      .remove-image:hover {
-        transform: scale(1.1);
-      }
-
-      .loading-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        text-align: center;
-        color: white;
-      }
-
-      .loading-spinner {
-        width: 60px;
-        height: 60px;
-        border: 4px solid rgba(255, 255, 255, 0.3);
-        border-top: 4px solid white;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-bottom: 1rem;
-      }
-
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-
-      .stats-card {
-        background: linear-gradient(135deg, var(--success-color), #66bb6a);
-        color: white;
-        border-radius: var(--border-radius);
-        padding: 1.5rem;
-        text-align: center;
-        margin-bottom: 1rem;
-      }
-      .card.item-card.h-100 {
-        filter: none !important;
-        backdrop-filter: none !important;
-      }
-      .card.item-card.h-100:hover {
-        filter: none !important;
-        backdrop-filter: none !important;
-      }
-
-      .item-card {
-        border: 1px solid var(--border-color);
-        border-radius: var(--border-radius);
-        box-shadow: var(--card-shadow);
-        transition: all 0.3s ease;
-        overflow: hidden;
-        background: var(--container-bg);
-      }
-
-      .item-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--card-shadow);
-      }
-
-      .item-card-header {
-        background: var(--card-header-bg);
-        border-bottom: 1px solid var(--border-color);
-        font-weight: 600;
-        color: var(--text-color);
-      }
-
-      .badge-custom {
-        background: var(--primary-color);
-        color: white;
-        padding: 0.4rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 500;
-      }
-
-      .activation-modal {
-        position: fixed;
-        top: 150px;
-        left: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 10000;
-      }
-
-      .activation-card {
-        background: var(--container-bg);
-        border: var(--main-border);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        color: var(--text-color);
-        border-radius: var(--border-radius);
-        padding: 3rem;
-
-        width: 90%;
-        text-align: center;
-        box-shadow: var(--main-shadow);
-        margin: 70px auto;
-      }
-
-      .logs-modal {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.9);
-        display: flex;
-        align-items: flex-start;
-        justify-content: center;
-        z-index: 9999;
-      }
-
-      .logs-content {
-        background: var(--container-bg);
-        border: 1px solid var(--border-color);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        color: var(--text-color);
-        border-radius: var(--border-radius);
-        padding: 2rem;
-        max-width: 600px;
-        width: 90%;
-        max-height: 80vh;
-        overflow-y: auto;
-      }
-
-      .form-switch .form-check-input {
-        width: 3rem;
-        height: 1.5rem;
-      }
-
-      .alert-custom {
-        border: none;
-        border-radius: var(--border-radius);
-        box-shadow: var(--card-shadow);
-      }
-
-      .license-modal .modal-content {
-        border-radius: 16px;
-        padding: 20px;
-      }
-      .license-icon {
-        font-size: 32px;
-        color: #4a90e2;
-      }
-      .btn-purple {
-        background: linear-gradient(
-          90deg,
-          var(--primary-color),
-          var(--secondary-color)
-        );
-        color: #fff;
-        border: none;
-      }
-      .btn-purple:hover {
-        opacity: 0.9;
-        color: #fff;
-      }
-      .info-box {
-        background: #f0f6ff;
-        padding: 10px;
-        border-radius: 8px;
-        font-size: 14px;
-      }
-      .trial-box {
-        background: #fff6e5;
-        padding: 10px;
-        border-radius: 8px;
-        font-size: 14px;
-        border: 1px solid #ffe0b3;
-      }
-      /* Blur + disable everything */
-      .blur-overlay {
-        position: relative;
-      }
-
-      /* Blur only via overlay layer */
-      .body-blur::before {
-        content: "";
-        position: absolute;
-        inset: 0; /* full cover */
-        backdrop-filter: blur(6px);
-        background: rgba(255, 255, 255, 0.2); /* optional dim */
-        pointer-events: all; /* block clicks */
-        z-index: 1;
-      }
-
-      /* Allow clicks + no blur for active-area */
-      .active-area {
-        position: relative;
-        z-index: 2; /* above blur overlay */
-        pointer-events: auto;
-      }
-      .btn-upgrade {
-      background: linear-gradient(90deg, #ffb300, #ff7a00);
-      color: #fff;
-      border: none;
-      padding: 8px 18px;
-      font-weight: 600;
+    .nav-tabs-custom .btn {
       border-radius: 8px;
-      box-shadow: 0 3px 8px rgba(255, 122, 0, 0.4);
-      transition: all 0.25s ease;
-      position: absolute;
-      top: 0;
-      right: 0;
-      cursor: pointer;
-      display: none;
+      font-weight: 500;
+      border: 1px solid transparent;
+      color: var(--text-color);
+      background: var(--light-bg);
+    }
+    
+    .nav-tabs-custom .btn.active {
+      background: var(--primary-color);
+      color: white;
+      box-shadow: 0 4px 8px rgba(74, 110, 224, 0.3);
+    }
+
+    .content-card {
+      background: var(--container-bg);
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-control, .form-select {
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      border-radius: 8px;
+      padding: 10px 15px;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.2rem rgba(74, 110, 224, 0.25);
+    }
+
+    .form-label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 14px;
+      color: var(--text-color);
+    }
+
+    .btn-primary-custom {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      color: white;
+      border-radius: 8px;
+      font-weight: 600;
+      padding: 10px 20px;
+    }
+    @media (hover: hover) {
+      .btn-primary-custom:hover {
+        background-color: #385bbb;
+        color: white;
       }
-
-.btn-upgrade:hover {
-  transform: translateY(-1px);
-  background: linear-gradient(90deg, #ffc107, #ff9800);
-  box-shadow: 0 4px 10px rgba(255, 152, 0, 0.5);
-}
-
-.btn-upgrade i {
-  color: #fff8e1;
-}
+      .item-card:hover {
+        transform: translateY(-2px);
+      }
+    }
+    .btn-primary-custom:active {
+      background-color: #274c79 !important;
+    }
+    
+    *:focus, .btn:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+    
+    /* Removed duplicate layout-breaking .item-card styles */
+    
+    /* Overlays */
+    .loading-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7); z-index: 9999; display: flex;
+      flex-direction: column; align-items: center; justify-content: center; color: white;
+    }
+    .loading-spinner {
+      width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.3);
+      border-top: 4px solid white; border-radius: 50%; animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
 
     
-      .d-flex.justify-content-between.align-items-center {
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        white-space: nowrap;
-      }
-      .header-section h2 { font-size: 1.5rem; margin-top: 10px; }
-</style>
-  <link href="popup.css" rel="stylesheet"></head>
-  <body>
-    <!-- Activation Page Modal -->
+    /* Fix Select2 Dropdown Colors */
+    .select2-dropdown {
+      background-color: var(--container-bg) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-color) !important;
+    }
+    .select2-results__option {
+      color: var(--text-color) !important;
+      background-color: var(--container-bg) !important;
+    }
+    .select2-results__option--highlighted, .select2-results__option:hover {
+      background-color: var(--primary-color) !important;
+      color: #ffffff !important;
+    }
     
-    <div id="activationModal" class="activation-modal d-none">
-      <div class="header-section" style="position: fixed; top: 0; width: 100%">
-        <img
-          id="appLogo"
-          src="./assets/icons/icon16.png"
-          alt="Logo"
-          class="logo"
-        />
-        <h2>Đăng Bài Nhóm Facebook</h2>
-        <p class="mb-0">Tự động hoá đăng bài nhóm Facebook</p>
-      </div>
-      <div class="activation-card">
-        <h3 class="mt-3 mb-4">Yêu Cầu Kích Hoạt Bản Quyền</h3>
-        <div
-          class="alert alert-danger alert-custom alert-dismissible fade d-none"
-          
-          id="invalid-licence"
-          role="alert"
-        >
-          <div id="error-licecnce-msg">Khóa bản quyền không hợp lệ. Vui lòng thử lại.</div> 
-          <button
-            type="button"
-            class="btn-close"
-            data-bs-dismiss="alert"
-          ></button>
-        </div>
-        <p class="text-muted mb-4">
-          Please enter your validation key to continue using the extension.
-        </p>
-        <form id="activationForm">
-          <div class="form-floating mb-3">
-            <input
-              type="text"
-              class="form-control"
-              id="licenseKeyInput"
-              placeholder="Khóa Bản Quyền"
-            />
-            <label for="licenseKeyInput">Khóa Bản Quyền</label>
-          </div>
-          <button
-            type="submit"
-            class="btn btn-primary-custom w-100 mb-3"
-            id="activateBtn"
-          >
-            <span class="btn-text">Kích Hoạt</span>
-            <span class="btn-loader d-none">
-              <span
-                class="spinner-border spinner-border-sm me-2"
-                role="status"
-                aria-hidden="true"
-              ></span>
-              Activating...
-            </span>
-          </button>
-        </form>
-        <small class="text-muted">
-          Need a license?
-          <a href="https://goizantools4fb.web.app/pricing" target="_blank"
-            >Nhận tại đây</a
-          >
-        </small>
-      </div>
-    </div>
+    
+    /* Fix dynamically injected item cards */
+    .item-card {
+      border: 1px solid var(--border-color);
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      background: var(--container-bg);
+      margin-bottom: 15px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    .item-card-header {
+      background: var(--light-bg);
+      border-bottom: 1px solid var(--border-color);
+      padding: 12px 15px;
+      font-weight: 600;
+    }
+    .item-card .card-body {
+      padding: 15px;
+    }
+    .item-card .btn-sm {
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 6px;
+    }
+    /* Responsive 2-column cards layout on wider screens (>576px) */
+    @media (min-width: 576px) {
+      #postsContainer .col-lg-4, #groupsContainer .col-lg-4 {
+        flex: 0 0 auto !important;
+        width: 50% !important;
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+      }
+    }
+    @media (max-width: 575.98px) {
+      #postsContainer .col-lg-4, #groupsContainer .col-lg-4 {
+        width: 100% !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
+    }
+    
+    
+    /* Global text color fixes for Dark Mode */
+    .text-muted {
+      color: var(--text-muted) !important;
+    }
+    .form-label, h1, h2, h3, h4, h5, h6, p, span {
+      color: var(--text-color);
+    }
+    body.dark-theme .btn-close {
+      filter: invert(1) grayscale(100%) brightness(200%);
+    }
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay d-none">
-      <div class="loading-spinner"></div>
-      <h4 id="loadingText">Đang bắt đầu quá trình đăng...</h4>
-      <p class="text-muted" id="loadingSubtext">
-        Please wait while we process your request
-      </p>
-      <button
-        type="button"
-        class="btn btn-outline-light mt-3"
-        id="stopPostingBtn"
-      >
-        <i class="bi bi-stop-circle"></i> Stop Posting
-      </button>
-    </div>
+    /* Ensure action buttons don't wrap weirdly */
+    .action-buttons {
+      display: flex;
+      gap: 5px;
+    }
 
-    <!-- Logs Modal -->
-    <div id="logsModal" class="logs-modal d-none">
-      <div class="logs-content">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-          <h5><i class="bi bi-list-check text-success"></i> Kết Quả Đăng</h5>
-          <button type="button" class="btn-close" id="closeLogsBtn"></button>
-        </div>
+    /* Ensure Item Cards have readable text */
+    .item-card h6, .item-card p, .item-card span {
+      color: var(--text-color) !important;
+    }
+    .item-card-old-text-muted {
+      color: var(--text-muted) !important;
+    }
 
-        <div id="postingSummary" class="stats-card mb-4">
-          <h4 id="summaryText">0/0 bài đăng thành công</h4>
-          <p class="mb-0">Hoàn tất đăng bài</p>
-        </div>
+    /* Hide elements */
+    .d-none { display: none !important; }
+    
+    /* Fix Select2 */
+    .select2-container .select2-selection--single {
+      height: 44px !important;
+      border-radius: 8px !important;
+      border: 1px solid var(--border-color) !important;
+      background-color: var(--input-bg) !important;
+    }
+    .select2-selection__rendered { line-height: 42px !important; color: var(--text-color) !important; }
+    .select2-selection__arrow { top: 8px !important; }
+    
+    .action-icons { display: flex; gap: 10px; }
+      /* Select2 Overrides for Light & Dark theme */
+    body.dark-theme .select2-container--default .select2-selection--single .select2-selection__rendered,
+    body.dark-theme .select2-container--default .select2-selection--multiple .select2-selection__choice {
+      color: #e0e0e0 !important;
+      background-color: #2a2a2a !important;
+    }
+    body.dark-theme .select2-selection__choice__remove {
+      color: #ff6b6b !important;
+    }
 
-        <div class="list-group" id="resultsContainer">
-          <!-- Results will be populated here -->
-        </div>
-      </div>
-    </div>
+    .select2-container--default .select2-selection--single,
+    .select2-container--default .select2-selection--multiple {
+      background-color: var(--input-bg) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-color) !important;
+      height: auto !important;
+      min-height: 44px !important;
+      padding: 4px 8px !important;
+    }
+    
+    .select2-container--default .select2-selection--single .select2-selection__rendered,
+    .select2-container--default .select2-selection--multiple .select2-selection__choice {
+      color: var(--text-color) !important;
+      background-color: var(--light-bg) !important;
+      border: 1px solid var(--border-color) !important;
+    }
+    
+    .select2-dropdown {
+      background-color: var(--container-bg) !important;
+      border: 1px solid var(--border-color) !important;
+      color: var(--text-color) !important;
+    }
+    
+    .select2-search__field {
+      background-color: var(--input-bg) !important;
+      color: var(--text-color) !important;
+      border: 1px solid var(--border-color) !important;
+    }
+    
+    .select2-results__option {
+      color: var(--text-color) !important;
+      background-color: var(--container-bg) !important;
+    }
+    
+    .select2-container--default .select2-results__option[aria-selected=true] {
+      background-color: var(--primary-color) !important;
+      color: #fff !important;
+    }
+    
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+      background-color: var(--secondary-color) !important;
+      color: #fff !important;
+    }
 
-    <!-- Hidden License Info Page -->
-    <div id="licenseInfoModal" class="activation-modal d-none">
-      <div class="activation-card">
-        <h4 class="mb-4">License Information</h4>
-        <div class="text-start">
-          <div class="mb-3">
-            <label class="form-label">Trạng Thái:</label>
-            <input
-              type="text"
-              class="form-control"
-              id="licenseStatus"
-              readonly
-            />
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Khóa Bản Quyền:</label>
-            <input
-              type="text"
-              class="form-control"
-              id="licenseKeyDisplay"
-              readonly
-            />
-          </div>
-          <div class="mb-4">
-            <label class="form-label">Ngày Hết Hạn:</label>
-            <input
-              type="text"
-              class="form-control"
-              id="licenseExpiry"
-              readonly
-            />
-          </div>
-          <div class="d-flex gap-2">
-            <button type="button" class="btn btn-danger" id="removeLicenseBtn">
-              Remove License
-            </button>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              id="closeLicenseInfoBtn"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Main Application -->
-    <div id="mainApp" class="main-container">
-      <!-- Header -->
-      <div class="header-section">
-        <button id="viewDebugLogBtn" class="btn btn-sm btn-outline-danger active-area" style="position: absolute; top: 15px; left: 15px; z-index: 10;" title="Xem Log Lỗi" data-bs-toggle="modal" data-bs-target="#debugLogsModal">
-          <i class="bi bi-bug-fill"></i> View Logs
+    .select2-selection__choice__remove {
+      color: var(--text-muted) !important;
+      background: none !important;
+      border: none !important;
+    }
+    .select2-selection__choice__remove:hover {
+      color: var(--danger-color) !important;
+    }
+  </style>
+</head>
+<body>
+  <div id="mainApp" class="main-container">
+    
+    <!-- Header -->
+    <div class="app-header">
+      <h4><i class="bi bi-facebook me-2"></i>Đăng Bài Tự Động</h4>
+      <div>
+        <button id="viewDebugLogBtn" class="btn btn-sm btn-outline-secondary" title="Nhật Ký Đăng Bài" data-bs-toggle="modal" data-bs-target="#logsModal">
+          <i class="bi bi-journal-text"></i>
         </button>
-        
-        <div style="position: absolute; top: 15px; left: 130px; z-index: 10; display: flex; gap: 8px;">
-          <button id="exportConfigBtn" class="btn btn-sm btn-outline-primary active-area" title="Xuất Cấu Hình">
-            <i class="bi bi-download"></i> Xuất
-          </button>
-          <button id="importConfigBtn" class="btn btn-sm btn-outline-success active-area" title="Nhập Cấu Hình">
-            <i class="bi bi-upload"></i> Nhập
-          </button>
-          <input type="file" id="importConfigFile" accept=".json" style="display: none;" />
-        </div>
-
-        <button id="themeToggleBtn" class="btn btn-sm btn-outline-secondary" style="position: absolute; top: 15px; right: 15px; z-index: 10;">
+        <button id="themeToggleBtn" class="btn btn-sm btn-outline-secondary">
           <i class="bi bi-moon-fill" id="themeIcon"></i>
         </button>
-        <!-- <img
-          id="appLogo"
-          src="./assets/icons/icon16.png"
-          alt="Logo"
-          class="logo"
-        /> -->
-        <h2>Đăng Bài Nhóm Facebook</h2>
-        <p class="mb-0">Tự động hoá đăng bài nhóm Facebook</p>
-      </div>
-
-      <!-- Content -->
-
-      <div class="p-4">
-        <!-- Navigation Pills -->
-        <ul class="nav nav-pills justify-content-center" id="mainNavigation">
-          <li class="nav-item">
-            <a class="nav-link active" id="postsTab" href="#" data-tab="posts">
-              <i class="bi bi-file-text"></i> Posts
-            </a>
-          </li>
-          <!-- <li class="nav-item">
-                    <a class="nav-link" id="productsTab" href="#" data-tab="products">
-                        <i class="bi bi-box"></i> Products
-                    </a>
-                </li> -->
-          <li class="nav-item">
-            <a class="nav-link" id="groupsTab" href="#" data-tab="groups">
-              <i class="bi bi-people"></i> Groups
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" id="schedulerTab" href="#" data-tab="scheduler">
-              <i class="bi bi-send-fill"></i> Quick post
-            </a>
-          </li>
-          <small class="text-muted" style="margin: 10px;">
-          <a href="#" id="post-schedular" >Lên Lịch</a>
-          </small>
-        </ul>
-
-
-        <!-- Posts Section -->
-        <div id="postsSection" class="tab-content">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mt-2">Bài Viết Đã Lưu</h4>
-            <button class="btn btn-primary-custom" id="addNewPostBtn">
-              <i class="bi bi-plus-circle"></i> New Post
-            </button>
-          </div>
-          <div id="postsContainer" class="row">
-            <!-- Posts will be populated here -->
-          </div>
-        </div>
-
-        <!-- Products Section -->
-        <div id="productsSection" class="tab-content d-none">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4>Saved Products</h4>
-            <button class="btn btn-primary-custom" id="addNewProductBtn">
-              <i class="bi bi-plus-circle"></i> New Product
-            </button>
-          </div>
-          <div id="productsContainer" class="row">
-            <!-- Products will be populated here -->
-          </div>
-        </div>
-
-        <!-- Groups Section -->
-        <div id="groupsSection" class="tab-content d-none">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mt-2">Nhóm Đã Lưu</h4>
-            <button class="btn btn-primary-custom" id="addNewGroupBtn">
-              <i class="bi bi-plus-circle"></i> New Group
-            </button>
-          </div>
-          <div id="groupsContainer" class="row">
-            <!-- Groups will be populated here -->
-          </div>
-        </div>
-
-        <!-- Scheduler Section -->
-        <div id="schedulerSection" class="tab-content d-none" style="position: relative;">
-          <h4 class="mb-4 mt-2">Lên Lịch Đăng</h4>
-          
-          <div class="content-card schedulerSection">
-            <div class="row">
-              <div class="col-md-6 mb-3">
-                <label for="postSelector" class="form-label"
-                  >Chọn Bài Viết</label
-                >
-                <select
-                  class="form-select"
-                  id="postSelector"
-                  style="width: 100%"
-                >
-                  <option value="">Chọn một bài viết mẫu...</option>
-                </select>
-              </div>
-
-              <!-- <div class="col-md-6 mb-3">
-                            <div class="form-floating">
-                                <select class="form-select" id="productSelector">
-                                    <option value="">Chọn một sản phẩm</option>
-                                </select>
-                                <label for="productSelector">Sản phẩm (Tuỳ chọn)</label>
-                            </div>
-                        </div> -->
-              <div class="col-md-6 mb-3">
-                <label for="groupSelector">Nhóm Mục Tiêu</label>
-                <select
-                  class="form-select"
-                  id="groupSelector"
-                  style="width: 100%"
-                >
-                  <option value="">Chọn các nhóm muốn đăng...</option>
-                </select>
-              </div>
-              <div class="col-md-6 mb-3">
-                <div class="form-floating">
-                  <input
-                    type="number"
-                    class="form-control"
-                    id="delayInput"
-                    placeholder="5"
-                    min="1"
-                  />
-                  <label for="delayInput">Thời gian chờ (giây)</label>
-                </div>
-              </div>
-            </div>
-
-            <!-- <div class="form-check form-switch mb-4">
-                        <input class="form-check-input" type="checkbox" id="nightModeToggle">
-                        <label class="form-check-label" for="nightModeToggle">
-                            Avoid night posting (10 PM - 7 AM)
-                        </label>
-                    </div> -->
-
-            <button
-              type="button"
-              class="btn btn-primary-custom btn-lg w-100"
-              id="startPostingBtn"
-              disabled
-            >
-              <i class="bi bi-play-circle"></i> Start Posting
-            </button>
-            <small class="text-muted" id="licence-button-init">
-            I Have a License?
-            <a href="#" id="have-licence" >click here</a>
-            </small>
-          </div>
-          <!-- <div class="p-1" id="licence-button-init">
-              
-          </div> -->
-        </div>
-
-        <!-- Add/Edit Post Form -->
-        <div id="postFormSection" class="tab-content d-none">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 id="postFormTitle" class="mt-2">Thêm Bài Viết Mới</h4>
-            <div>
-              <button
-                class="btn btn-outline-secondary me-2 mt-2"
-                id="cancelPostFormBtn"
-              >
-                Cancel
-              </button>
-              <button class="btn btn-primary-custom" id="savePostBtn">
-                Lưu Bài Viết
-              </button>
-            </div>
-          </div>
-          <div class="content-card schedulerSection">
-            <div class="mb-4">
-              <div class="form-floating">
-                <input
-                  type="text"
-                  class="form-control"
-                  id="postTitleInput"
-                  placeholder="Tiêu Đề Bài Viết"
-                />
-                <label for="postTitleInput">Tiêu Đề Bài Viết</label>
-              </div>
-            </div>
-            <div class="mb-4">
-              <div class="form-floating">
-                <textarea
-                  class="form-control h-25"
-                  id="postContentInput"
-                  placeholder="Nội Dung Bài Viết"
-                  rows="6"
-                  rowspan="4"
-                ></textarea>
-                <label for="postContentInput">Nội Dung Bài Viết</label>
-              </div>
-            </div>
-            <div class="mb-4">
-              <label class="form-label">Hình Ảnh</label>
-              <div class="d-flex align-items-center gap-3 mb-3">
-                <button
-                  type="button"
-                  class="btn btn-primary-custom"
-                  id="addPostImageBtn"
-                >
-                  <i class="bi bi-plus"></i> Add Image
-                </button>
-                <div id="postImagesContainer" class="d-flex gap-2 flex-wrap">
-                  <!-- Images will be shown here -->
-                </div>
-              </div>
-            </div>
-               <div class="mb-4" style="display: none;">
-          <label class="form-label">Video</label>
-          <div class="d-flex gap-2 mb-2">
-            <button type="button" class="btn btn-outline-success btn-sm" id="addPostVideoBtn">
-              <i class="bi bi-camera-video"></i> Add Videos
-            </button>
-          </div>
-          <div id="postVideosContainer" class="videos-container d-flex gap-2 flex-wrap"></div>
-        </div>
-            <input
-              type="file"
-              class="d-none"
-              id="postImageInput"
-              accept="image/*"
-              multiple
-            />
-            <input type="file" id="postVideoInput" accept="video/*" multiple style="display: none;">
-
-          </div>
-        </div>
-
-        <!-- Add/Edit Product Form -->
-        <div id="productFormSection" class="tab-content d-none">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 id="productFormTitle">Add New Product</h4>
-            <div>
-              <button
-                class="btn btn-outline-secondary me-2"
-                id="cancelProductFormBtn"
-              >
-                Cancel
-              </button>
-              <button class="btn btn-primary-custom" id="saveProductBtn">
-                Save Product
-              </button>
-            </div>
-          </div>
-          <div class="content-card">
-            <div class="row">
-              <div class="col-md-6 mb-4">
-                <div class="form-floating">
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="productTitleInput"
-                    placeholder="Product Title"
-                  />
-                  <label for="productTitleInput">Product Title</label>
-                </div>
-              </div>
-              <div class="col-md-6 mb-4">
-                <div class="form-floating">
-                  <input
-                    type="number"
-                    class="form-control"
-                    id="productPriceInput"
-                    placeholder="0"
-                  />
-                  <label for="productPriceInput">Price</label>
-                </div>
-              </div>
-              <div class="col-md-6 mb-4">
-                <div class="form-floating">
-                  <select class="form-select" id="productConditionInput">
-                    <option value="New">New</option>
-                    <option value="Used - Like New">Used - Like New</option>
-                    <option value="Used - Good">Used - Good</option>
-                    <option value="Used - Fair">Used - Fair</option>
-                  </select>
-                  <label for="productConditionInput">Condition</label>
-                </div>
-              </div>
-              <div class="col-md-6 mb-4">
-                <label class="form-label">Tuỳ chọn Giao Nhận</label>
-                <div class="d-flex gap-3">
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      id="publicMeetupCheck"
-                    />
-                    <label class="form-check-label" for="publicMeetupCheck"
-                      >Public Meetup</label
-                    >
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      id="doorPickupCheck"
-                    />
-                    <label class="form-check-label" for="doorPickupCheck"
-                      >Door Pickup</label
-                    >
-                  </div>
-                  <div class="form-check">
-                    <input
-                      class="form-check-input"
-                      type="checkbox"
-                      id="doorDropoffCheck"
-                    />
-                    <label class="form-check-label" for="doorDropoffCheck"
-                      >Door Dropoff</label
-                    >
-                  </div>
-                </div>
-              </div>
-              <div class="col-12 mb-4">
-                <div class="form-floating">
-                  <textarea
-                    class="form-control"
-                    id="productDescriptionInput"
-                    placeholder="Description"
-                    rows="4"
-                  ></textarea>
-                  <label for="productDescriptionInput">Description</label>
-                </div>
-              </div>
-            </div>
-            <div class="mb-4">
-              <label class="form-label">Hình Ảnh</label>
-              <div class="d-flex align-items-center gap-3 mb-3">
-                <button
-                  type="button"
-                  class="btn btn-outline-primary"
-                  id="addProductImageBtn"
-                >
-                  <i class="bi bi-plus"></i> Add Image
-                </button>
-                <div id="productImagesContainer" class="d-flex gap-2 flex-wrap">
-                  <!-- Images will be shown here -->
-                </div>
-              </div>
-            </div>
-            <input
-              type="file"
-              class="d-none"
-              id="productImageInput"
-              accept="image/*"
-              multiple
-            />
-          </div>
-        </div>
-
-        <!-- Add/Edit Group Form -->
-        <div id="groupFormSection" class="tab-content d-none">
-          <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 id="groupFormTitle">Add New Group</h4>
-            <div>
-              <button
-                class="btn btn-outline-secondary me-2 mt-2"
-                id="cancelGroupFormBtn"
-              >
-                Cancel
-              </button>
-              <button class="btn btn-primary-custom" id="saveGroupBtn">
-                Save Group
-              </button>
-            </div>
-          </div>
-          <div class="content-card schedulerSection">
-            <div class="mb-4">
-              <div class="form-floating">
-                <input
-                  type="text"
-                  class="form-control"
-                  id="groupTitleInput"
-                  placeholder="Group Title"
-                />
-                <label for="groupTitleInput">Group Collection Name</label>
-              </div>
-            </div>
-            <div class="mb-4">
-              <label class="form-label"
-                >Link Nhóm (Để Lên Lịch Đăng Tự Động)</label
-              >
-              <div class="d-flex gap-2 mb-3">
-                <button
-                  type="button"
-                  class="btn btn-outline-primary"
-                  id="addGroupLinkBtn"
-                >
-                  <i class="bi bi-plus"></i> Add Link
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-outline-success"
-                  id="extractGroupsBtn"
-                  data-bs-toggle="modal"
-                  data-bs-target="#importGroupsModal"
-                >
-                  <i class="bi bi-box-arrow-in-down"></i> Import / Auto Extract
-                </button>
-
-              </div>
-              <div id="groupLinksContainer">
-                <!-- Group links will be added here -->
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Error/Warning Messages -->
-        <div id="alertContainer" class="mt-4">
-          <!-- Alerts will be shown here -->
-        </div>
       </div>
     </div>
-    <div
-      class="modal fade license-modal"
-      id="licenseModal"
-      tabindex="-1"
-      aria-labelledby="licenseModalLabel"
-      aria-hidden="true"
-      data-bs-backdrop="false"
-    >
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="text-center">
-            <div class="license-icon mb-2">🔑</div>
-            <h5 class="fw-bold">Activate Your License</h5>
-            <p class="text-muted">Enter your license key to get started</p>
-          </div>
 
-          <div class="info-box mb-3">
-            <i class="bi bi-info-circle"></i> Enter your license key below. You
-            can find this in the email we sent after your purchase.
-          </div>
+    <!-- Navigation -->
+    <div class="nav-tabs-custom" id="mainNavigation">
+      <button class="btn nav-link active" id="postsTab" data-tab="posts"><i class="bi bi-file-text"></i> Bài Viết</button>
+      <button class="btn nav-link" id="groupsTab" data-tab="groups"><i class="bi bi-people"></i> Nhóm</button>
+      <button class="btn nav-link" id="schedulerTab" data-tab="scheduler"><i class="bi bi-lightning-fill"></i> Đăng Nhanh</button>
+      
+      <div style="flex-grow: 1;"></div> <!-- Spacer -->
+      
+      <button class="btn btn-outline-primary" id="post-schedular"><i class="bi bi-calendar-event"></i> Lên Lịch</button>
+      <button class="btn btn-outline-info" id="data-export-import" data-bs-toggle="modal" data-bs-target="#dataModal"><i class="bi bi-database"></i> Dữ Liệu</button>
+      <button class="btn btn-outline-success" id="open-full-tab"><i class="bi bi-arrows-fullscreen"></i></button>
+    </div>
 
-          <div class="mb-3">
-            <input
-              type="text"
-              class="form-control text-center"
-              placeholder="XXXX-XXXX-XXXX-XXXX"
-            />
-          </div>
-
-          <div class="d-grid mb-3">
-            <button class="btn btn-purple btn-lg">Kích Hoạt</button>
-          </div>
-
-          <div class="trial-box mb-3 text-center">
-            Need a license? Start with a free trial or
-            <a href="#">purchase a license</a>
-          </div>
-
-          <div class="d-grid">
-            <button
-              class="btn btn-outline-secondary btn-lg"
-              data-bs-dismiss="modal"
-            >
-              Continue with Free Trial (Close this window)
-            </button>
-          </div>
+    <!-- TAB 1: POSTS -->
+    <div id="postsSection" class="tab-content">
+      <div class="content-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0 fw-bold">Danh Sách Bài Viết</h5>
+          <button class="btn btn-sm btn-primary-custom" id="addNewPostBtn"><i class="bi bi-plus-lg"></i> Thêm Mới</button>
+        </div>
+        <div id="postsContainer" class="row g-3">
+          <!-- Dynamically filled -->
+          <p class="text-muted text-center py-4">Chưa có bài viết nào.</p>
         </div>
       </div>
     </div>
 
-    <!-- Import/Auto Extract Groups Modal -->
-    <div
-      class="modal fade"
-      id="importGroupsModal"
-      tabindex="-1"
-      aria-labelledby="importGroupsModalLabel"
-      aria-hidden="true"
-      data-bs-backdrop="false"
-    >
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="importGroupsModalLabel"><i class="bi bi-box-arrow-in-down"></i> Import Groups</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div id="alertContainerModal" class="mb-3"></div>
-            <!-- Auto Extract Section -->
-            <div class="mb-4">
-              <h6 class="fw-bold"><i class="bi bi-magic"></i> Auto Extract from profile</h6>
-              <p class="text-muted small mb-2">Automatically extract groups you have joined from your current Facebook tab.</p>
-              <button class="btn btn-primary w-100" id="startAutoExtractModalBtn">
-                <i class="bi bi-magic"></i> Start Auto Extract
-                <div class="spinner-border spinner-border-sm ms-2 d-none" id="extractSpinnerModal"></div>
-              </button>
-            </div>
-
-            <hr>
-
-            <!-- CSV Import Section -->
-            <div>
-              <h6 class="fw-bold"><i class="bi bi-file-earmark-spreadsheet"></i> Import via CSV</h6>
-              <p class="text-muted small mb-2">Upload a CSV file containing your group links. Invalid URLs will be automatically ignored.</p>
-              
-              <input class="form-control mb-3" type="file" id="csvFileInput" accept=".csv">
-              
-              <div class="d-flex justify-content-between align-items-center">
-                <button class="btn btn-sm btn-outline-secondary" id="downloadSampleCsvBtn">
-                  <i class="bi bi-download"></i> Sample CSV
-                </button>
-                <button class="btn btn-success" id="importCsvBtn">
-                  <i class="bi bi-upload"></i> Import CSV
-                </button>
-              </div>
-            </div>
-
-          </div>
+    <!-- TAB 2: GROUPS -->
+    <div id="groupsSection" class="tab-content d-none">
+      <div class="content-card">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0 fw-bold">Danh Sách Nhóm</h5>
+          <button class="btn btn-sm btn-primary-custom" id="addNewGroupBtn"><i class="bi bi-plus-lg"></i> Thêm Nhóm</button>
+        </div>
+        <div id="groupsContainer" class="row g-3">
+          <!-- Dynamically filled -->
+          <p class="text-muted text-center py-4">Chưa có nhóm nào được thêm.</p>
         </div>
       </div>
     </div>
 
-    <!-- Debug Logs Modal -->
-    <div
-      class="modal fade active-area"
-      id="debugLogsModal"
-      tabindex="-1"
-      aria-labelledby="debugLogsModalLabel"
-      aria-hidden="true"
-      data-bs-backdrop="false"
-    >
-      <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content" style="background: var(--container-bg); border: 1px solid var(--border-color); color: var(--text-color);">
-          <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
-            <h5 class="modal-title" id="debugLogsModalLabel" style="color: var(--danger-color);"><i class="bi bi-bug-fill"></i> Latest Debug Logs</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--close-btn-filter);"></button>
+    <!-- TAB 3: QUICK POST -->
+    <div id="schedulerSection" class="tab-content d-none">
+      <div class="content-card">
+        <h5 class="mb-3 fw-bold">Cấu Hình Đăng Nhanh</h5>
+        
+        <div class="row mb-3">
+          <div class="col-12 mb-3">
+            <label class="form-label">Chọn Bài Viết</label>
+            <select class="form-select" id="postSelector" style="width: 100%"><option value="">Chọn một bài viết mẫu...</option></select>
           </div>
-          <div class="modal-body">
-            <p class="text-muted small">Nhật ký của lần chạy tự động gần nhất. Hữu ích để chẩn đoán lỗi.</p>
-            <textarea id="debugLogsTextarea" class="form-control" style="font-family: monospace; font-size: 11px; height: 350px; background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); user-select: text !important; -webkit-user-select: text !important;" readonly placeholder="Chưa có nhật ký nào. Hãy chạy tự động đăng trước."></textarea>
+          <div class="col-12 mb-3">
+            <label class="form-label">Nhóm Mục Tiêu</label>
+            <select class="form-select" id="groupSelector" style="width: 100%"><option value="">Chọn các nhóm muốn đăng...</option></select>
           </div>
-          <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
-            <button type="button" class="btn btn-primary-custom" id="copyDebugLogsBtn"><i class="bi bi-clipboard"></i> Copy Logs</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+
+        <h6 class="fw-bold mt-2 mb-3">Cấu Hình Thời Gian Chờ (Giây)</h6>
+        <div class="row g-3 mb-4">
+          <div class="col-6">
+            <label class="form-label text-muted" style="font-size: 13px;">Thao Tác (Tối thiểu)</label>
+            <input type="number" class="form-control" id="minDelayInput" value="2" min="1" />
           </div>
+          <div class="col-6">
+            <label class="form-label text-muted" style="font-size: 13px;">Thao Tác (Tối đa)</label>
+            <input type="number" class="form-control" id="maxDelayInput" value="7" min="1" />
+          </div>
+          <div class="col-6">
+            <label class="form-label text-muted" style="font-size: 13px;">Chuyển Nhóm (Tối thiểu)</label>
+            <input type="number" class="form-control" id="minMacroDelayInput" value="30" min="1" />
+          </div>
+          <div class="col-6">
+            <label class="form-label text-muted" style="font-size: 13px;">Chuyển Nhóm (Tối đa)</label>
+            <input type="number" class="form-control" id="maxMacroDelayInput" value="120" min="1" />
+          </div>
+        </div>
+        
+        <input type="hidden" id="delayInput" value="30" />
+        <div id="licence-button-init" class="d-none"><span id="have-licence"></span></div>
+
+                <div class="d-flex gap-2">
+          <button type="button" class="btn btn-primary-custom flex-grow-1 py-2" id="startPostingBtn" disabled>
+            <i class="bi bi-play-fill fs-5"></i> Bắt Đầu Đăng Ngay
+          </button>
+          <button type="button" class="btn btn-danger flex-grow-1 py-2" id="stopPostingBtn" disabled>
+            <i class="bi bi-stop-fill fs-5"></i> Dừng Đăng
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- Custom JavaScript -->
-  <script defer src="popup.js"></script></body>
+    <!-- POST FORM (Hidden by default) -->
+    <div id="postFormSection" class="tab-content d-none">
+      <div class="content-card">
+        <h5 id="postFormTitle" class="fw-bold mb-3">Thêm Bài Viết Mới</h5>
+        
+        <div class="mb-3">
+          <label class="form-label">Tiêu Đề Bài Viết</label>
+          <input type="text" class="form-control" id="postTitleInput" placeholder="Nhập tiêu đề..." />
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Nội Dung</label>
+          <textarea class="form-control" id="postContentInput" rows="6" placeholder="Nhập nội dung bài viết..."></textarea>
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label d-block">Hình Ảnh</label>
+          <div class="d-flex gap-2 flex-wrap mb-2">
+            <button type="button" class="btn btn-sm btn-outline-primary" id="addPostImageBtn"><i class="bi bi-image"></i> Thêm Ảnh</button>
+            <input type="file" id="postImageInput" accept="image/*" multiple class="d-none">
+          </div>
+          <div id="postImagesContainer" class="d-flex gap-2 flex-wrap mt-2"></div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label d-block">Video</label>
+          <div class="d-flex gap-2 flex-wrap mb-2">
+            <button type="button" class="btn btn-sm btn-outline-primary" id="addPostVideoBtn"><i class="bi bi-camera-video"></i> Thêm Video</button>
+            <input type="file" id="postVideoInput" accept="video/*" multiple class="d-none">
+          </div>
+          <div id="postVideosContainer" class="d-flex gap-2 flex-wrap mt-2"></div>
+        </div>
+        
+        <div class="mb-4">
+          <label class="form-label d-block">Liên Kết đính kèm</label>
+          <div class="d-flex gap-2 flex-wrap mb-2">
+            <button type="button" class="btn btn-sm btn-outline-primary" id="addPostLinkBtn"><i class="bi bi-link-45deg"></i> Thêm Link</button>
+          </div>
+          <div id="postLinksContainer" class="d-flex flex-column gap-2 mt-2"></div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button class="btn btn-light" id="cancelPostFormBtn">Huỷ Bỏ</button>
+          <button class="btn btn-primary-custom" id="savePostBtn">Lưu Bài Viết</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GROUP FORM (Hidden by default) -->
+    <div id="groupFormSection" class="tab-content d-none">
+      <div class="content-card">
+        <h5 class="fw-bold mb-3">Thêm Nhóm Mới</h5>
+        
+        <div class="mb-3">
+          <label class="form-label">Tên Bộ Sưu Tập Nhóm</label>
+          <input type="text" class="form-control" id="groupNameInput" placeholder="VD: Nhóm Bất Động Sản..." />
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Nhập Link Nhóm Tự Động (CSV)</label>
+          <p class="text-muted" style="font-size: 13px;">Tải lên file CSV chứa danh sách link nhóm. Hoặc tự động trích xuất từ FB.</p>
+          <div class="d-flex gap-2 flex-wrap">
+            <button type="button" class="btn btn-sm btn-outline-success" id="importGroupsCsvBtn"><i class="bi bi-filetype-csv"></i> Nhập từ CSV</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="startAutoExtractBtn"><i class="bi bi-magic"></i> Tự Động Quét Nhóm FB</button>
+            <input type="file" id="csvFileInput" accept=".csv" class="d-none">
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label d-block">Danh Sách Link Nhóm (Thủ Công)</label>
+          <div id="groupLinksContainer" class="d-flex flex-column gap-2 mb-2"></div>
+          <button type="button" class="btn btn-sm btn-outline-secondary mt-2" id="addGroupLinkBtn"><i class="bi bi-plus"></i> Thêm 1 Link</button>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button class="btn btn-light" id="cancelGroupFormBtn">Huỷ Bỏ</button>
+          <button class="btn btn-primary-custom" id="saveGroupBtn">Lưu Danh Sách Nhóm</button>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- End Main App -->
+
+  <!-- MODALS -->
+
+  <!-- Logs Modal (Missing) -->
+  <div class="modal fade" id="logsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" style="background: var(--container-bg); color: var(--text-color); border-radius: var(--border-radius);">
+        <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+          <h5 class="modal-title fw-bold">Nhật Ký Đăng Bài</h5>
+          <button type="button" class="btn-close" onclick="document.getElementById('logsModal').classList.add('d-none')"></button>
+        </div>
+        <div class="modal-body">
+          <div class="d-flex justify-content-between mb-3">
+            <span class="text-success fw-bold">Thành công: <span id="successCount">0</span></span>
+            <span class="text-danger fw-bold">Thất bại: <span id="failCount">0</span></span>
+          </div>
+          <div id="logsList" class="list-group"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Data Modal -->
+  <div class="modal fade" id="dataModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content" style="background: var(--container-bg); color: var(--text-color); border-radius: var(--border-radius);">
+        <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+          <h5 class="modal-title fw-bold">Sao Lưu & Khôi Phục</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p class="text-muted">Xuất cấu hình hiện tại (Bài viết, Nhóm, Cài đặt delay) thành file an toàn để chuyển sang máy khác.</p>
+          <button class="btn btn-primary-custom w-100 mb-4" id="btnExportData">
+            <i class="bi bi-download"></i> Xuất Toàn Bộ Dữ Liệu
+          </button>
+          <h6 class="fw-bold">Khôi Phục Dữ Liệu</h6>
+          <p class="text-muted" style="font-size: 13px;">Khôi phục từ file JSON đã lưu (sẽ ghi đè dữ liệu hiện tại).</p>
+          <input type="file" id="importDataFile" accept=".json" class="form-control mb-2" />
+          <button class="btn btn-success w-100" id="btnImportData">
+            <i class="bi bi-upload"></i> Khôi Phục
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Debug Logs Modal -->
+  <div class="modal fade" id="debugLogsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content" style="background: var(--container-bg); color: var(--text-color); border-radius: var(--border-radius);">
+        <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+          <h5 class="modal-title fw-bold">Nhật Ký Lỗi</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div id="debugLogsContent" style="background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 10px; height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px; white-space: pre-wrap;"></div>
+        </div>
+        <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+          <button type="button" class="btn btn-outline-danger" id="clearLogsBtn">Xoá Nhật Ký</button>
+          <button type="button" class="btn btn-primary-custom" id="copyLogsBtn">Copy Nhật Ký</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay d-none">
+    <div class="loading-spinner"></div>
+    <h5 class="mt-3">Đang xử lý...</h5>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.7/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="popup.js"></script>
+</body>
 </html>

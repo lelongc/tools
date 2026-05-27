@@ -197,9 +197,13 @@ async function p(e = 1, t = 10) {
   }
   console.log(`Checking post status... attempt ${e}`);
   const isPending = n("span", "Your post is pending") || n("span", "awaiting admin approval") || n("span", "đang chờ duyệt") || n("span", "chờ phê duyệt") || n("span", "chờ quản trị viên") || n("span", "Cảm ơn bạn đã đăng bài") || n("div", "Cảm ơn bạn đã đăng bài") || n("span", "gửi bài viết cho quản trị viên") || n("div", "gửi bài viết cho quản trị viên") || n("span", "quản trị viên nhóm phê duyệt") || n("div", "quản trị viên nhóm phê duyệt") || n("span", "Hệ thống đã gửi bài viết");
-  const isSuccess = n("span", "Just now") || n("span", "minutes ago") || n("span", "Vừa xong") || n("span", "phút") || n("span", "phút trước") || n("span", "đã được đăng") || n("span", "đã được chia sẻ");
+  
+  // More strict success detection to avoid matching random posts in the feed (removed "phút", "minutes ago")
+  const isSuccess = n("span", "just now") || n("span", "vừa xong") || n("div[role='alert']", "đã được đăng") || n("div[role='alert']", "đã chia sẻ") || n("div[role='alert']", "published") || n("span", "đã được đăng") || n("span", "đã chia sẻ");
+  
   const isRestricted = n("div", "We limit how often you can post") || n("span", "You can try again later") || n("div", "protect the community from spam") || n("span", "thử lại sau") || n("div", "giới hạn") || n("div", "spam");
-  if (isPending) return console.log("✅ Post went to pending approval."), "pending";
+  
+  if (isPending) return console.log("✅ Post went to pending approval (counted as success)."), "success";
   if (isSuccess) return console.log("✅ Post successfully published."), "success";
   if (isRestricted) return console.log("🚫 Facebook posting temporarily limited."), "restricted";
   if (e < t) {
@@ -599,14 +603,23 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
           return new Promise(async n => {
             let o = 0;
             for (; o < e;) {
-              const e = h() || document.querySelector('div[aria-label="Post"][role="button"]') || document.querySelector('div[aria-label="Đăng"][role="button"]') || document.querySelector('div[aria-label="Tiếp"][role="button"]');
-              if (e) {
-                if ("true" !== e.getAttribute("aria-disabled")) return console.log("Post button found and enabled. Clicking..."), g = e, f(e), void n(!0);
-                console.log("Post button found but disabled. Waiting...");
+              const btn = h() || document.querySelector('div[aria-label="Post"][role="button"]') || document.querySelector('div[aria-label="Đăng"][role="button"]') || document.querySelector('div[aria-label="Tiếp"][role="button"]');
+              if (btn) {
+                const isDisabled = btn.getAttribute("aria-disabled") === "true" || btn.disabled || btn.classList.contains("disabled");
+                if (!isDisabled) {
+                  console.log("Post button found and enabled. Clicking...");
+                  g = btn;
+                  f(btn);
+                  // Optionally try native click as fallback
+                  setTimeout(() => { try { btn.click(); } catch(err){} }, 500);
+                  return void n(!0);
+                } else {
+                  console.log("Post button found but disabled. Waiting... (aria-disabled: " + btn.getAttribute("aria-disabled") + ")");
+                }
               }
               o++, await y(t / 1e3);
             }
-            console.log("Post button still not found after retries.");
+            console.log("Post button still not found or remained disabled after retries.");
             showDebugLog();
             chrome.storage.local.set({ operationStatus: 'failed' });
             n(!1);
@@ -616,49 +629,20 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
           console.error("[FACEBOOK-AUTO] Post button not found or disabled. Aborting.");
           return;
         }
-        console.log("Submit button clicked");
-        let a = await (async function (e = 500, t, n, o = 3e4) {
-          return new Promise(t => {
-            const r = Date.now(),
-              i = () => {
-                !document.contains(g) && n ? t(!0) : Date.now() - r > o ? (console.warn("waitForPostCompletion timed out"), t(!1)) : setTimeout(i, e);
-              };
-            i();
-          });
-        }?.(500, 0, submitButtonVal));
+        console.log("Submit button clicked. Immediately checking for success/pending banners...");
         try {
-          if (a) {
-            console.log("Post submission verified - submit button no longer present"), b("Post published successfully, saving data");
-            let status = await p(1, 15); // Check status with 15 attempts (up to 30 seconds total)
-            if (status === "pending") {
-              await y(5); // Wait 5 seconds for pending status
-              chrome.storage.local.set({ operationStatus: "pending" });
-            } else if (status === "restricted") {
-              chrome.storage.local.set({ operationStatus: "restricted" });
-            } else if (status === "success") {
-              console.log("Success banner detected, waiting 10 seconds before closing tab...");
-              await y(10); // Wait 10 seconds for success status, as requested by user
-              chrome.storage.local.set({ operationStatus: "successful" });
-            } else {
-              // Unknown status after 30 seconds of checking banners.
-              // Since the submit button disappeared, we treat it as successful and close the tab immediately.
-              console.log("Unknown status after 30 seconds, assuming success and closing tab.");
-              chrome.storage.local.set({ operationStatus: "successful" });
-            }
+          let status = await p(1, 15); // Check status with 15 attempts (up to 30 seconds total)
+          if (status === "pending" || status === "success") {
+            console.log("Success or Pending banner detected! Waiting 10 seconds before closing tab...");
+            b("Post published successfully, saving data");
+            await y(10); // Wait 10 seconds for success status, as requested by user
+            chrome.storage.local.set({ operationStatus: "successful" });
+          } else if (status === "restricted") {
+            chrome.storage.local.set({ operationStatus: "restricted" });
           } else {
-            console.error("Post submission failed - submit button still present after timeout");
-            let status = await p(1, 2);
-            if (status === "pending") {
-              chrome.storage.local.set({ operationStatus: "pending" });
-            } else if (status === "restricted") {
-              chrome.storage.local.set({ operationStatus: "restricted" });
-            } else if (status === "success") {
-              await y(10);
-              chrome.storage.local.set({ operationStatus: "successful" });
-            } else {
-              showDebugLog();
-              chrome.storage.local.set({ operationStatus: "failed" });
-            }
+            console.log("Unknown status after 30 seconds, assuming failure.");
+            showDebugLog();
+            chrome.storage.local.set({ operationStatus: "failed" });
           }
         } catch (e) {
           console.error("Error during post verification:", e);
@@ -688,7 +672,24 @@ function m(e) {
 }
 
 function y(e) {
-  return new Promise(t => setTimeout(t, 1e3 * e));
+  return new Promise(t => {
+    try {
+      chrome.storage.local.get(['fbAutoMinMicro', 'fbAutoMaxMicro'], function(res) {
+        let minM = res.fbAutoMinMicro || 2;
+        let maxM = res.fbAutoMaxMicro || 7;
+        let randomSec = Math.floor(Math.random() * (maxM - minM + 1)) + minM;
+        // add decimal jitter
+        let finalDelay = randomSec + Math.random();
+        // ensure it's at least as long as the hardcoded delay if the hardcoded delay is larger
+        if (e > finalDelay && e > maxM) {
+           finalDelay = e; 
+        }
+        setTimeout(t, 1e3 * finalDelay);
+      });
+    } catch(err) {
+      setTimeout(t, 1e3 * e);
+    }
+  });
 }
 
 async function v(e, t) {
