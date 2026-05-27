@@ -189,9 +189,6 @@ function f(e) {
       e.dispatchEvent(n);
     } catch (err) {}
   });
-  try {
-    if (typeof e.click === "function") e.click();
-  } catch (err) {}
 }
 async function p(e = 1, t = 10) {
   function n(e, t) {
