@@ -210,7 +210,8 @@ async function p(e = 1, t = 10) {
 }
 
 function h() {
-  const dialog = document.querySelector('div[role="dialog"]');
+  const dialogs = document.querySelectorAll('div[role="dialog"]');
+  const dialog = Array.from(dialogs).find(d => d.offsetParent !== null) || dialogs[dialogs.length - 1];
   const container = dialog || document;
   const e = container.querySelectorAll('div[role="button"], button');
   for (const t of e) {
@@ -598,7 +599,7 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
           return new Promise(async n => {
             let o = 0;
             for (; o < e;) {
-              const e = h() || document.querySelector('div[aria-label="Post"][role="button"]');
+              const e = h() || document.querySelector('div[aria-label="Post"][role="button"]') || document.querySelector('div[aria-label="Đăng"][role="button"]') || document.querySelector('div[aria-label="Tiếp"][role="button"]');
               if (e) {
                 if ("true" !== e.getAttribute("aria-disabled")) return console.log("Post button found and enabled. Clicking..."), g = e, f(e), void n(!0);
                 console.log("Post button found but disabled. Waiting...");

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Đăng Bài Nhóm Facebook</title>
+    <title>Facebook™ Groups Auto Poster</title>
 
     <!-- Bootstrap 5 CSS -->
     <link
@@ -502,20 +502,7 @@
   color: #fff8e1;
 }
 
-    
-      .d-flex.justify-content-between.align-items-center {
-        flex-wrap: wrap;
-        gap: 10px;
-      }
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 5px;
-        white-space: nowrap;
-      }
-      .header-section h2 { font-size: 1.5rem; margin-top: 10px; }
-</style>
+    </style>
   <link href="popup.css" rel="stylesheet"></head>
   <body>
     <!-- Activation Page Modal -->
@@ -528,18 +515,18 @@
           alt="Logo"
           class="logo"
         />
-        <h2>Đăng Bài Nhóm Facebook</h2>
-        <p class="mb-0">Tự động hoá đăng bài nhóm Facebook</p>
+        <h2>Facebook™ Groups Auto Poster</h2>
+        <p class="mb-0">Automate your Facebook group posting</p>
       </div>
       <div class="activation-card">
-        <h3 class="mt-3 mb-4">Yêu Cầu Kích Hoạt Bản Quyền</h3>
+        <h3 class="mt-3 mb-4">License Activation Required</h3>
         <div
           class="alert alert-danger alert-custom alert-dismissible fade d-none"
           
           id="invalid-licence"
           role="alert"
         >
-          <div id="error-licecnce-msg">Khóa bản quyền không hợp lệ. Vui lòng thử lại.</div> 
+          <div id="error-licecnce-msg">Invalid license key. Please try again.</div> 
           <button
             type="button"
             class="btn-close"
@@ -555,16 +542,16 @@
               type="text"
               class="form-control"
               id="licenseKeyInput"
-              placeholder="Khóa Bản Quyền"
+              placeholder="Validation Key"
             />
-            <label for="licenseKeyInput">Khóa Bản Quyền</label>
+            <label for="licenseKeyInput">Validation Key</label>
           </div>
           <button
             type="submit"
             class="btn btn-primary-custom w-100 mb-3"
             id="activateBtn"
           >
-            <span class="btn-text">Kích Hoạt</span>
+            <span class="btn-text">Activate License</span>
             <span class="btn-loader d-none">
               <span
                 class="spinner-border spinner-border-sm me-2"
@@ -578,7 +565,7 @@
         <small class="text-muted">
           Need a license?
           <a href="https://goizantools4fb.web.app/pricing" target="_blank"
-            >Nhận tại đây</a
+            >Get one here</a
           >
         </small>
       </div>
@@ -587,7 +574,7 @@
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay d-none">
       <div class="loading-spinner"></div>
-      <h4 id="loadingText">Đang bắt đầu quá trình đăng...</h4>
+      <h4 id="loadingText">Starting posting process...</h4>
       <p class="text-muted" id="loadingSubtext">
         Please wait while we process your request
       </p>
@@ -604,13 +591,13 @@
     <div id="logsModal" class="logs-modal d-none">
       <div class="logs-content">
         <div class="d-flex justify-content-between align-items-center mb-4">
-          <h5><i class="bi bi-list-check text-success"></i> Kết Quả Đăng</h5>
+          <h5><i class="bi bi-list-check text-success"></i> Posting Results</h5>
           <button type="button" class="btn-close" id="closeLogsBtn"></button>
         </div>
 
         <div id="postingSummary" class="stats-card mb-4">
-          <h4 id="summaryText">0/0 bài đăng thành công</h4>
-          <p class="mb-0">Hoàn tất đăng bài</p>
+          <h4 id="summaryText">0/0 posts successful</h4>
+          <p class="mb-0">Posting completed</p>
         </div>
 
         <div class="list-group" id="resultsContainer">
@@ -625,7 +612,7 @@
         <h4 class="mb-4">License Information</h4>
         <div class="text-start">
           <div class="mb-3">
-            <label class="form-label">Trạng Thái:</label>
+            <label class="form-label">Status:</label>
             <input
               type="text"
               class="form-control"
@@ -634,7 +621,7 @@
             />
           </div>
           <div class="mb-3">
-            <label class="form-label">Khóa Bản Quyền:</label>
+            <label class="form-label">License Key:</label>
             <input
               type="text"
               class="form-control"
@@ -643,7 +630,7 @@
             />
           </div>
           <div class="mb-4">
-            <label class="form-label">Ngày Hết Hạn:</label>
+            <label class="form-label">Expiration Date:</label>
             <input
               type="text"
               class="form-control"
@@ -674,17 +661,6 @@
         <button id="viewDebugLogBtn" class="btn btn-sm btn-outline-danger active-area" style="position: absolute; top: 15px; left: 15px; z-index: 10;" title="Xem Log Lỗi" data-bs-toggle="modal" data-bs-target="#debugLogsModal">
           <i class="bi bi-bug-fill"></i> View Logs
         </button>
-        
-        <div style="position: absolute; top: 15px; left: 130px; z-index: 10; display: flex; gap: 8px;">
-          <button id="exportConfigBtn" class="btn btn-sm btn-outline-primary active-area" title="Xuất Cấu Hình">
-            <i class="bi bi-download"></i> Xuất
-          </button>
-          <button id="importConfigBtn" class="btn btn-sm btn-outline-success active-area" title="Nhập Cấu Hình">
-            <i class="bi bi-upload"></i> Nhập
-          </button>
-          <input type="file" id="importConfigFile" accept=".json" style="display: none;" />
-        </div>
-
         <button id="themeToggleBtn" class="btn btn-sm btn-outline-secondary" style="position: absolute; top: 15px; right: 15px; z-index: 10;">
           <i class="bi bi-moon-fill" id="themeIcon"></i>
         </button>
@@ -694,8 +670,8 @@
           alt="Logo"
           class="logo"
         /> -->
-        <h2>Đăng Bài Nhóm Facebook</h2>
-        <p class="mb-0">Tự động hoá đăng bài nhóm Facebook</p>
+        <h2>Facebook Group Poster</h2>
+        <p class="mb-0">Automate your Facebook group posting</p>
       </div>
 
       <!-- Content -->
@@ -724,7 +700,7 @@
             </a>
           </li>
           <small class="text-muted" style="margin: 10px;">
-          <a href="#" id="post-schedular" >Lên Lịch</a>
+          <a href="#" id="post-schedular" >Scheduler</a>
           </small>
         </ul>
 
@@ -732,7 +708,7 @@
         <!-- Posts Section -->
         <div id="postsSection" class="tab-content">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mt-2">Bài Viết Đã Lưu</h4>
+            <h4 class="mt-2">Saved Posts</h4>
             <button class="btn btn-primary-custom" id="addNewPostBtn">
               <i class="bi bi-plus-circle"></i> New Post
             </button>
@@ -758,7 +734,7 @@
         <!-- Groups Section -->
         <div id="groupsSection" class="tab-content d-none">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="mt-2">Nhóm Đã Lưu</h4>
+            <h4 class="mt-2">Saved Groups</h4>
             <button class="btn btn-primary-custom" id="addNewGroupBtn">
               <i class="bi bi-plus-circle"></i> New Group
             </button>
@@ -770,39 +746,41 @@
 
         <!-- Scheduler Section -->
         <div id="schedulerSection" class="tab-content d-none" style="position: relative;">
-          <h4 class="mb-4 mt-2">Lên Lịch Đăng</h4>
-          
+          <h4 class="mb-4 mt-2">Post Scheduler</h4>
+          <button type="button" class="btn btn-upgrade mt-2">
+          <i class="bi bi-star-fill me-2"></i> Upgrade
+          </button>
           <div class="content-card schedulerSection">
             <div class="row">
               <div class="col-md-6 mb-3">
                 <label for="postSelector" class="form-label"
-                  >Chọn Bài Viết</label
+                  >Post Template</label
                 >
                 <select
                   class="form-select"
                   id="postSelector"
                   style="width: 100%"
                 >
-                  <option value="">Chọn một bài viết mẫu...</option>
+                  <option value="">Select a post template</option>
                 </select>
               </div>
 
               <!-- <div class="col-md-6 mb-3">
                             <div class="form-floating">
                                 <select class="form-select" id="productSelector">
-                                    <option value="">Chọn một sản phẩm</option>
+                                    <option value="">Select a product</option>
                                 </select>
-                                <label for="productSelector">Sản phẩm (Tuỳ chọn)</label>
+                                <label for="productSelector">Product (Optional)</label>
                             </div>
                         </div> -->
               <div class="col-md-6 mb-3">
-                <label for="groupSelector">Nhóm Mục Tiêu</label>
+                <label for="groupSelector">Target Groups</label>
                 <select
                   class="form-select"
                   id="groupSelector"
                   style="width: 100%"
                 >
-                  <option value="">Chọn các nhóm muốn đăng...</option>
+                  <option value="">Select target groups</option>
                 </select>
               </div>
               <div class="col-md-6 mb-3">
@@ -814,7 +792,7 @@
                     placeholder="5"
                     min="1"
                   />
-                  <label for="delayInput">Thời gian chờ (giây)</label>
+                  <label for="delayInput">Delay between posts (seconds)</label>
                 </div>
               </div>
             </div>
@@ -840,14 +818,14 @@
             </small>
           </div>
           <!-- <div class="p-1" id="licence-button-init">
-              
+              <button id="have-licence" class="btn btn-sm btn-outline-warning togglePostDetails  btn-lg w-100">I Have a License</button>
           </div> -->
         </div>
 
         <!-- Add/Edit Post Form -->
         <div id="postFormSection" class="tab-content d-none">
           <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 id="postFormTitle" class="mt-2">Thêm Bài Viết Mới</h4>
+            <h4 id="postFormTitle" class="mt-2">Add New Post</h4>
             <div>
               <button
                 class="btn btn-outline-secondary me-2 mt-2"
@@ -856,7 +834,7 @@
                 Cancel
               </button>
               <button class="btn btn-primary-custom" id="savePostBtn">
-                Lưu Bài Viết
+                Save Post
               </button>
             </div>
           </div>
@@ -867,9 +845,9 @@
                   type="text"
                   class="form-control"
                   id="postTitleInput"
-                  placeholder="Tiêu Đề Bài Viết"
+                  placeholder="Post Title"
                 />
-                <label for="postTitleInput">Tiêu Đề Bài Viết</label>
+                <label for="postTitleInput">Post Title</label>
               </div>
             </div>
             <div class="mb-4">
@@ -877,15 +855,15 @@
                 <textarea
                   class="form-control h-25"
                   id="postContentInput"
-                  placeholder="Nội Dung Bài Viết"
+                  placeholder="Post Content"
                   rows="6"
                   rowspan="4"
                 ></textarea>
-                <label for="postContentInput">Nội Dung Bài Viết</label>
+                <label for="postContentInput">Post Content</label>
               </div>
             </div>
             <div class="mb-4">
-              <label class="form-label">Hình Ảnh</label>
+              <label class="form-label">Images</label>
               <div class="d-flex align-items-center gap-3 mb-3">
                 <button
                   type="button"
@@ -900,7 +878,7 @@
               </div>
             </div>
                <div class="mb-4" style="display: none;">
-          <label class="form-label">Video</label>
+          <label class="form-label">Videos</label>
           <div class="d-flex gap-2 mb-2">
             <button type="button" class="btn btn-outline-success btn-sm" id="addPostVideoBtn">
               <i class="bi bi-camera-video"></i> Add Videos
@@ -972,7 +950,7 @@
                 </div>
               </div>
               <div class="col-md-6 mb-4">
-                <label class="form-label">Tuỳ chọn Giao Nhận</label>
+                <label class="form-label">Pickup Options</label>
                 <div class="d-flex gap-3">
                   <div class="form-check">
                     <input
@@ -1019,7 +997,7 @@
               </div>
             </div>
             <div class="mb-4">
-              <label class="form-label">Hình Ảnh</label>
+              <label class="form-label">Images</label>
               <div class="d-flex align-items-center gap-3 mb-3">
                 <button
                   type="button"
@@ -1073,7 +1051,7 @@
             </div>
             <div class="mb-4">
               <label class="form-label"
-                >Link Nhóm (Để Lên Lịch Đăng Tự Động)</label
+                >Group Links (Links for Scheduled Auto Posts)</label
               >
               <div class="d-flex gap-2 mb-3">
                 <button
@@ -1137,7 +1115,7 @@
           </div>
 
           <div class="d-grid mb-3">
-            <button class="btn btn-purple btn-lg">Kích Hoạt</button>
+            <button class="btn btn-purple btn-lg">Activate License</button>
           </div>
 
           <div class="trial-box mb-3 text-center">
@@ -1224,8 +1202,8 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="filter: var(--close-btn-filter);"></button>
           </div>
           <div class="modal-body">
-            <p class="text-muted small">Nhật ký của lần chạy tự động gần nhất. Hữu ích để chẩn đoán lỗi.</p>
-            <textarea id="debugLogsTextarea" class="form-control" style="font-family: monospace; font-size: 11px; height: 350px; background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); user-select: text !important; -webkit-user-select: text !important;" readonly placeholder="Chưa có nhật ký nào. Hãy chạy tự động đăng trước."></textarea>
+            <p class="text-muted small">Logs of the latest automation attempt. Useful for diagnosing why posting stopped or tab closed.</p>
+            <textarea id="debugLogsTextarea" class="form-control" style="font-family: monospace; font-size: 11px; height: 350px; background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); user-select: text !important; -webkit-user-select: text !important;" readonly placeholder="No log entries found yet. Run an auto post first."></textarea>
           </div>
           <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
             <button type="button" class="btn btn-primary-custom" id="copyDebugLogsBtn"><i class="bi bi-clipboard"></i> Copy Logs</button>

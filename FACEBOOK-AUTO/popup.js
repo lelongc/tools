@@ -191,3 +191,87 @@ if (document.readyState === 'loading') {
 } else {
   initDebugLogViewer();
 }
+
+
+// IMPORT / EXPORT CONFIGURATION LOGIC
+document.addEventListener('DOMContentLoaded', () => {
+  const exportBtn = document.getElementById('exportConfigBtn');
+  const importBtn = document.getElementById('importConfigBtn');
+  const fileInput = document.getElementById('importConfigFile');
+
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => {
+      chrome.storage.local.get(null, (data) => {
+        // Prepare data to export
+        const jsonString = JSON.stringify(data, null, 2);
+        const blob = new Blob([jsonString], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        
+        // Formulate filename with current date
+        const date = new Date();
+        const dateString = date.getFullYear() + '-' + 
+            String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(date.getDate()).padStart(2, '0');
+        a.download = `facebook-auto-poster-config-${dateString}.json`;
+        
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    });
+  }
+
+  if (importBtn && fileInput) {
+    importBtn.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          if (importedData && typeof importedData === 'object') {
+            chrome.storage.local.set(importedData, () => {
+              alert('Nhập cấu hình thành công! Ứng dụng sẽ tự động tải lại.');
+              window.location.reload();
+            });
+          } else {
+            alert('File không hợp lệ hoặc dữ liệu bị lỗi.');
+          }
+        } catch (err) {
+          console.error('Import error:', err);
+          alert('Không thể đọc file JSON. Vui lòng kiểm tra lại.');
+        }
+      };
+      reader.readAsText(file);
+      // Reset input so the same file can be selected again
+      fileInput.value = '';
+    });
+  }
+});
+
+
+// TAB STATE PERSISTENCE LOGIC
+document.addEventListener('DOMContentLoaded', () => {
+  const tabs = document.querySelectorAll('.nav-link[data-tab]');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      localStorage.setItem('facebookAutoActiveTab', e.currentTarget.id);
+    });
+  });
+
+  const activeTabId = localStorage.getItem('facebookAutoActiveTab');
+  if (activeTabId) {
+    const tabEl = document.getElementById(activeTabId);
+    if (tabEl) {
+      setTimeout(() => { tabEl.click(); }, 50); 
+    }
+  }
+});
