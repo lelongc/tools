@@ -199,12 +199,12 @@ async function p(e = 1, t = 10) {
   const isPending = n("span", "Your post is pending") || n("span", "awaiting admin approval") || n("span", "đang chờ duyệt") || n("span", "chờ phê duyệt") || n("span", "chờ quản trị viên") || n("span", "Cảm ơn bạn đã đăng bài") || n("div", "Cảm ơn bạn đã đăng bài") || n("span", "gửi bài viết cho quản trị viên") || n("div", "gửi bài viết cho quản trị viên") || n("span", "quản trị viên nhóm phê duyệt") || n("div", "quản trị viên nhóm phê duyệt") || n("span", "Hệ thống đã gửi bài viết");
   
   // More strict success detection to avoid matching random posts in the feed (removed "phút", "minutes ago")
-  const isSuccess = n("span", "just now") || n("span", "vừa xong") || n("div[role='alert']", "đã được đăng") || n("div[role='alert']", "đã chia sẻ") || n("div[role='alert']", "published") || n("span", "đã được đăng") || n("span", "đã chia sẻ");
+  const isSuccess = n("div[role='alert']", "đã được đăng") || n("div[role='alert']", "đã chia sẻ") || n("div[role='alert']", "published") || n("div[role='dialog']", "đã được đăng") || n("div[role='dialog']", "đã chia sẻ") || n("div[role='dialog']", "published");
   
   const isRestricted = n("div", "We limit how often you can post") || n("span", "You can try again later") || n("div", "protect the community from spam") || n("span", "thử lại sau") || n("div", "giới hạn") || n("div", "spam");
   
-  if (isPending) return console.log("✅ Post went to pending approval (counted as success)."), "success";
-  if (isSuccess) return console.log("✅ Post successfully published."), "success";
+  if (isPending) { console.log("✅ Post went to pending approval (counted as success)."); await y(3); return "success"; }
+  if (isSuccess) { console.log("✅ Post successfully published."); await y(3); return "success"; }
   if (isRestricted) return console.log("🚫 Facebook posting temporarily limited."), "restricted";
   if (e < t) {
     await y(2);
@@ -356,7 +356,7 @@ async function writeText(element, text) {
 
 async function insertPostText(postText, postTitleText) {
   console.log("[FACEBOOK-AUTO] insertPostText called. text length:", postText?.length, "title:", postTitleText);
-  await y(0.5);
+  await y(1.5);
 
   const dialog = document.querySelector('div[role="dialog"]');
   const container = dialog || document;
@@ -418,7 +418,7 @@ async function insertPostText(postText, postTitleText) {
   // Write body content
   console.log("[FACEBOOK-AUTO] Writing body text to element:", bodyElement.tagName);
   await writeText(bodyElement, postText);
-  await y(1);
+  await y(1.5);
   
   // Verify body content
   const bodyTag = bodyElement.tagName.toLowerCase();
@@ -444,7 +444,7 @@ async function insertPostText(postText, postTitleText) {
     if (titleElement && titleElement !== bodyElement) {
       console.log("[FACEBOOK-AUTO] Writing title to element:", titleElement.tagName);
       await writeText(titleElement, postTitleText);
-      await y(0.5);
+      await y(1.5);
       
       const titleTag = titleElement.tagName.toLowerCase();
       const titleContent = titleTag === "textarea" || titleTag === "input" ? titleElement.value : titleElement.textContent;
