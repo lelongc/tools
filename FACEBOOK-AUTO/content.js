@@ -199,7 +199,7 @@ async function p(e = 1, t = 10) {
   const isPending = n("span", "Your post is pending") || n("span", "awaiting admin approval") || n("span", "đang chờ duyệt") || n("span", "chờ phê duyệt") || n("span", "chờ quản trị viên") || n("span", "Cảm ơn bạn đã đăng bài") || n("div", "Cảm ơn bạn đã đăng bài") || n("span", "gửi bài viết cho quản trị viên") || n("div", "gửi bài viết cho quản trị viên") || n("span", "quản trị viên nhóm phê duyệt") || n("div", "quản trị viên nhóm phê duyệt") || n("span", "Hệ thống đã gửi bài viết");
   
   // More strict success detection to avoid matching random posts in the feed (removed "phút", "minutes ago")
-  const isSuccess = n("div[role='alert']", "đã được đăng") || n("div[role='alert']", "đã chia sẻ") || n("div[role='alert']", "published") || n("div[role='dialog']", "đã được đăng") || n("div[role='dialog']", "đã chia sẻ") || n("div[role='dialog']", "published");
+  const isSuccess = n("span", "đã được đăng") || n("span", "đã chia sẻ") || n("span", "published") || n("span", "đã đăng") || n("div", "đã được đăng") || n("div", "đã chia sẻ") || n("div", "đã đăng") || n("div[role='alert']", "published");
   
   const isRestricted = n("div", "We limit how often you can post") || n("span", "You can try again later") || n("div", "protect the community from spam") || n("span", "thử lại sau") || n("div", "giới hạn") || n("div", "spam");
   
@@ -207,7 +207,7 @@ async function p(e = 1, t = 10) {
   if (isSuccess) { console.log("✅ Post successfully published."); await y(3); return "success"; }
   if (isRestricted) return console.log("🚫 Facebook posting temporarily limited."), "restricted";
   if (e < t) {
-    await y(2);
+    await y(0.5);
     return await p(e + 1, t);
   }
   return console.log("⚠️ Could not determine post status."), "unknown";
@@ -631,7 +631,7 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
         }
         console.log("Submit button clicked. Immediately checking for success/pending banners...");
         try {
-          let status = await p(1, 15); // Check status with 15 attempts (up to 30 seconds total)
+          let status = await p(1, 60); // Check status with 15 attempts (up to 30 seconds total)
           if (status === "pending" || status === "success") {
             console.log("Success or Pending banner detected! Waiting 10 seconds before closing tab...");
             b("Post published successfully, saving data");
