@@ -968,3 +968,116 @@ async function w(e, t = "post") {
 }
 
 chrome.runtime.onMessage.addListener((e,t,n)=>{if("startGroupScrape"===e.action)return(async()=>{try{const e=(()=>{try{const e=document.querySelectorAll("script");for(const t of e)if(t.textContent.includes("DTSGInitialData")){const e=t.textContent.match(/"?token"?\s*:\s*"([^"]+)"/);if(e)return e[1]}}catch(e){console.warn("Could not parse fb_dtsg from DOM",e)}try{const e=sessionStorage.getItem("fbGroupTokens");if(e)return JSON.parse(e).fbDtsg}catch(e){}return null})();if(!e)throw new Error("Authentication tokens not found. Make sure you are logged into Facebook.");const t=async(t,n)=>{const o=new URLSearchParams;o.append("fb_dtsg",e),o.append("doc_id",t),o.append("variables",JSON.stringify(n));const r=await fetch("https://www.facebook.com/api/graphql/",{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:o.toString()});if(!r.ok)throw new Error(`API request failed with HTTP status: ${r.status}`);const i=await r.text();if(!i)throw new Error("API returned an empty response.");for(const e of i.split("\n")){if(!e.trim())continue;const t=e.startsWith("for (;;);")?e.substring(9):e;try{const e=JSON.parse(t);if(e.errors&&Array.isArray(e.errors)&&e.errors.length>0){const t=e.errors[0].message||"Unknown Facebook API error.";throw new Error(`Facebook API Error: ${t}`)}if(e.data)return e}catch(e){}}throw new Error("Could not find a valid data object in the API response.")};let n=[];const o="7740459739385247",r={ordering:["viewer_added"],scale:1},i=await t(o,r),a=i.data?.viewer?.groups_tab;if(!a)throw new Error("Could not find `data.viewer.groups_tab` in the API response.");a.pinned_groups?.edges&&n.push(...a.pinned_groups.edges.map(e=>`https://www.facebook.com/groups/${e.node.id}`)),a.tab_groups_list?.edges&&n.push(...a.tab_groups_list.edges.map(e=>`https://www.facebook.com/groups/${e.node.id}`));let s=a.tab_groups_list?.page_info?.has_next_page||!1,l=a.tab_groups_list?.page_info?.end_cursor||null;const c="7218669964900608";for(;s;){await new Promise(e=>setTimeout(e,300));const e={count:10,cursor:l,ordering:["viewer_added"],scale:1},o=await t(c,e),r=o.data?.viewer?.groups_tab?.tab_groups_list;r?.edges&&n.push(...r.edges.map(e=>`https://www.facebook.com/groups/${e.node.id}`)),s=r?.page_info?.has_next_page||!1,l=r?.page_info?.end_cursor||null}n=[...new Set(n)],chrome.storage.local.set({LinksArray:n}),console.log("Group extraction successful, saved to LinksArray:",n)}catch(e){console.error("Group extraction failed:",e),chrome.storage.local.set({ExtractError:e.message})}})(),!0})})()})();
+
+// --- EXTENSION: Keyword Filter Extract Listener ---
+chrome.runtime.onMessage.addListener((e, t, n) => {
+  if ("startKeywordExtract" === e.action) {
+    (async () => {
+      try {
+        const token = (() => {
+          try {
+            const scripts = document.querySelectorAll("script");
+            for (const script of scripts) {
+              if (script.textContent.includes("DTSGInitialData")) {
+                const match = script.textContent.match(/"?token"?\s*:\s*"([^"]+)"/);
+                if (match) return match[1];
+              }
+            }
+          } catch (err) {
+            console.warn("Could not parse fb_dtsg from DOM", err);
+          }
+          try {
+            const sessionData = sessionStorage.getItem("fbGroupTokens");
+            if (sessionData) return JSON.parse(sessionData).fbDtsg;
+          } catch (err) {}
+          return null;
+        })();
+
+        if (!token) throw new Error("Authentication tokens not found. Make sure you are logged into Facebook.");
+
+        const fetchGroups = async (docId, variables) => {
+          const params = new URLSearchParams();
+          params.append("fb_dtsg", token);
+          params.append("doc_id", docId);
+          params.append("variables", JSON.stringify(variables));
+
+          const response = await fetch("https://www.facebook.com/api/graphql/", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: params.toString()
+          });
+
+          if (!response.ok) throw new Error(`API request failed with HTTP status: ${response.status}`);
+          
+          const text = await response.text();
+          if (!text) throw new Error("API returned an empty response.");
+
+          for (const line of text.split("\n")) {
+            if (!line.trim()) continue;
+            const cleanLine = line.startsWith("for (;;);") ? line.substring(9) : line;
+            try {
+              const data = JSON.parse(cleanLine);
+              if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+                const msg = data.errors[0].message || "Unknown Facebook API error.";
+                throw new Error(`Facebook API Error: ${msg}`);
+              }
+              if (data.data) return data;
+            } catch (err) {}
+          }
+          throw new Error("Could not find a valid data object in the API response.");
+        };
+
+        let resultLinks = [];
+        const kw = (e.keyword || "").toLowerCase();
+
+        const docId1 = "7740459739385247";
+        const vars1 = { ordering: ["viewer_added"], scale: 1 };
+        const res1 = await fetchGroups(docId1, vars1);
+        const groupsTab = res1.data?.viewer?.groups_tab;
+
+        if (!groupsTab) throw new Error("Could not find `data.viewer.groups_tab` in the API response.");
+
+        // Helper function to extract and filter edges
+        const extractAndFilter = (edges) => {
+          if (!edges) return;
+          for (const edge of edges) {
+            if (edge && edge.node && edge.node.id) {
+              const name = edge.node.name || "";
+              if (name.toLowerCase().includes(kw)) {
+                resultLinks.push(`https://www.facebook.com/groups/${edge.node.id}`);
+              }
+            }
+          }
+        };
+
+        extractAndFilter(groupsTab.pinned_groups?.edges);
+        extractAndFilter(groupsTab.tab_groups_list?.edges);
+
+        let hasNext = groupsTab.tab_groups_list?.page_info?.has_next_page || false;
+        let cursor = groupsTab.tab_groups_list?.page_info?.end_cursor || null;
+        const docId2 = "7218669964900608";
+
+        while (hasNext) {
+          await new Promise(resolve => setTimeout(resolve, 300));
+          const vars2 = { count: 10, cursor: cursor, ordering: ["viewer_added"], scale: 1 };
+          const res2 = await fetchGroups(docId2, vars2);
+          const list2 = res2.data?.viewer?.groups_tab?.tab_groups_list;
+          
+          extractAndFilter(list2?.edges);
+
+          hasNext = list2?.page_info?.has_next_page || false;
+          cursor = list2?.page_info?.end_cursor || null;
+        }
+
+        resultLinks = [...new Set(resultLinks)];
+        chrome.storage.local.set({ KeywordLinksArray: resultLinks });
+        console.log(`Keyword extraction successful for "${kw}", found ${resultLinks.length} groups.`);
+
+      } catch (err) {
+        console.error("Keyword group extraction failed:", err);
+        chrome.storage.local.set({ KeywordExtractError: err.message });
+      }
+    })();
+    return true;
+  }
+});
