@@ -1,0 +1,34 @@
+ostLinkBtn"><i class="bi bi-link-45deg"></i> Thêm Link</button>
+          </div>
+          <div id="postLinksContainer" class="d-flex flex-column gap-2 mt-2"></div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2">
+          <button class="btn btn-light" id="cancelPostFormBtn">Huỷ Bỏ</button>
+          <button class="btn btn-primary-custom" id="savePostBtn">Lưu Bài Viết</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GROUP FORM (Hidden by default) -->
+    <div id="groupFormSection" class="tab-content d-none">
+      <div class="content-card">
+        <h5 class="fw-bold mb-3">Thêm Nhóm Mới</h5>
+        
+        <div class="mb-3">
+          <label class="form-label">Tên Bộ Sưu Tập Nhóm</label>
+          <input type="text" class="form-control" id="groupNameInput" placeholder="VD: Nhóm Bất Động Sản..." />
+        </div>
+        
+        <div class="mb-3">
+          <label class="form-label">Nhập Link Nhóm Tự Động (CSV)</label>
+          <p class="text-muted" style="font-size: 13px;">Tải lên file CSV chứa danh sách link nhóm. Hoặc tự động trích xuất từ FB.</p>
+          <div class="d-flex gap-2 flex-wrap">
+            <button type="button" class="btn btn-sm btn-outline-success" id="importCsvBtn"><i class="bi bi-filetype-csv"></i> Nhập từ CSV</button>
+            <button type="button" class="btn btn-sm btn-outline-primary" id="startAutoExtractModalBtn"><i class="bi bi-magic"></i> Tự Động Quét Nhóm FB <span class="spinner-border spinner-border-sm ms-1 d-none" id="extractSpinnerModal" role="status" aria-hidden="true"></span></button>
+            <input type="file" id="csvFileInput" accept=".csv" class="d-none">
+          </div>
+          <!-- Alert container for CSV/Auto Extract feedback -->
+          <div id="alertContainerModal" class="mt-2"></div>
+          <!-- Dummy modal element to prevent bootstrap modal errors in popup.js -->
+          <div class="modal fade" id="importGroupsModal" tabindex="-1" style="display: none;" aria-hidden="true"

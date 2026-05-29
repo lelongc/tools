@@ -1,0 +1,21 @@
+ent-card">
+        <h5 class="mb-3 fw-bold">Cấu Hình Đăng Nhanh</h5>
+        
+        <div class="row mb-3">
+          <div class="col-12 mb-3">
+            <label class="form-label">Chọn Bài Viết</label>
+            <select class="form-select" id="postSelector" style="width: 100%"><option value="">Chọn một bài viết mẫu...</option></select>
+          </div>
+          <div class="col-12 mb-3">
+            <label class="form-label">Nhóm Mục Tiêu</label>
+            <select class="form-select" id="groupSelector" style="width: 100%"><option value="">Chọn các nhóm muốn đăng...</option></select>
+          </div>
+        </div>
+
+        <h6 class="fw-bold mt-2 mb-3">Cấu Hình Thời Gian Chờ (Giây)</h6>
+        <div class="row g-3 mb-4">
+          <div class="col-6">
+            <label class="form-label text-muted" style="font-size: 13px;">Thao Tác (Tối thiểu)</label>
+            <input type="number" class="form-control" id="minDelayInput" value="2" min="1" />
+          </div>
+          <div cla
