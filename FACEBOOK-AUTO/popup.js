@@ -284,11 +284,16 @@ chrome.runtime.sendMessage = function(message, callback) {
     const maxM = getVal('maxDelayInput') || 7;
     message.minMicro = minM;
     message.maxMicro = maxM;
-    message.timeInSeconds = getVal('minMacroDelayInput') || 30;
-    message.maxDelay = getVal('maxMacroDelayInput') || 120;
+    message.timeInSeconds = getVal('minMacroDelayInput') || 15;
+    message.maxDelay = getVal('maxMacroDelayInput') || 30;
     
-    // Save micro delays to storage so content.js can use them
-    chrome.storage.local.set({ fbAutoMinMicro: minM, fbAutoMaxMicro: maxM });
+    // Save micro & macro delays to storage so background.js and content.js can use them
+    chrome.storage.local.set({ 
+      fbAutoMinMicro: minM, 
+      fbAutoMaxMicro: maxM,
+      fbAutoMinMacro: getVal('minMacroDelayInput') || 15,
+      fbAutoMaxMacro: getVal('maxMacroDelayInput') || 30
+    });
   }
   return origSendMessage.call(chrome.runtime, message, callback);
 };
