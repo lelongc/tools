@@ -4,9 +4,13 @@ Tự động tạo video YouTube Shorts dạy tiếng Anh viral — từ nhập 
 
 ---
 
-## 🚀 CÁCH DÙNG (3 Bước)
+## 🚀 CÁCH DÙNG
 
-### Bước 1: Chạy Bridge ở local
+Hệ thống hiện tại có 2 phiên bản làm video:
+1. **Bản V1 (`short_maker.ipynb`)**: Kể chuyện tiếng Anh có kèm ảnh chuyển tiếp.
+2. **Bản V2 (`short_maker_v2.ipynb`)**: Học từ vựng với lưới Grid Poster 4x4 (16 ô, highlight từ vựng).
+
+### Bước 1: Chạy Bridge ở local (Bắt buộc cho V2)
 
 Mở terminal tại `d:\folder\tools\short`:
 
@@ -19,29 +23,33 @@ Hệ thống sẽ:
 - In ra **Tunnel URL** (dạng `https://xxx.trycloudflare.com`)
 - Copy URL này
 
-> Nếu muốn dùng ảnh Pexels stock thay vì ảnh AI → **bỏ qua bước này**.
+> **Lưu ý**: Bản V2 bắt buộc dùng Bridge và TurboFlow để tạo ảnh Grid, không dùng Pexels.
 
 ### Bước 2: Mở TurboFlow trên Edge
 
 1. Cài extension TurboFlow (thư mục `flow-image/`)
 2. Mở https://labs.google/fx/tools/flow trên Edge
-3. Extension tự kết nối bridge
+3. Mở extension TurboFlow để kết nối vào Bridge.
 
 ### Bước 3: Chạy Colab
 
-1. Upload `short_maker.ipynb` lên [Google Colab](https://colab.research.google.com)
-2. Chọn **T4 GPU** runtime
-3. Chạy **Cell 1** (cài đặt, 1 lần)
-4. **Cell 2**: Nhập chủ đề + API keys + paste Tunnel URL
-5. **Cell 3**: Nhấn chạy → Tự động:
-   - Sinh kịch bản AI (Groq)
-   - Tạo giọng đọc (Qwen3-TTS)
-   - Tạo phụ đề sync từng từ (Whisper)
-   - Tải file `prompts.txt` xuống máy tính của bạn.
-   - Nhập/paste file này vào extension TurboFlow (Edge), đặt File naming là **prompt** (khuyên dùng, file được lưu theo tên prompt) hoặc **custom prefix** (Prefix là tên slug của dự án), và bấm Start.
-   - Colab tự phát hiện và tải các ảnh hoàn thiện về.
-   - Render video hoàn chỉnh (Playwright + FFmpeg)
-6. **Cell 4**: Tải video `.mp4` về máy
+1. Upload notebook muốn dùng (`short_maker.ipynb` hoặc `short_maker_v2.ipynb`) và file HTML template tương ứng (như `template_grid.html` nếu là V2) lên [Google Colab](https://colab.research.google.com).
+2. Tải thêm file file âm thanh `.wav` (giọng mẫu Voice Clone) lên Colab.
+3. Chọn Runtime → Change runtime type → **T4 GPU**.
+4. Chạy **Cell 1** (cài đặt, chạy 1 lần duy nhất).
+5. **Cell 2**: Nhập thông tin cấu hình:
+   - Chủ đề từ vựng (Topic)
+   - Gemini API Key
+   - Bridge URL (paste từ Bước 1)
+   - Tên file giọng mẫu `.wav`
+6. **Cell 3**: Nhấn chạy → Tự động:
+   - Sinh từ vựng (Gemini)
+   - Tải file `prompts.txt` xuống máy tính. Copy dòng nhắc trong file này, dán vào TurboFlow extension (để **Prefix** mode với tên topic) → bấm Start.
+   - Khi có ảnh, Colab tự bắt tín hiệu, tải về.
+   - Tạo giọng đọc bằng AI (Qwen3-TTS), đối với bản V2, bot sẽ đọc 2 lần một từ sau đó mới đọc câu mô tả.
+   - Tạo phụ đề (Whisper).
+   - Render video có hiệu ứng (Playwright + FFmpeg).
+7. **Cell 4**: Tải video `.mp4` hoàn chỉnh về máy.
 
 ---
 
@@ -49,26 +57,14 @@ Hệ thống sẽ:
 
 | File | Chức năng | Chạy ở đâu |
 |------|-----------|-------------|
-| `short_maker.ipynb` | Notebook all-in-one | Google Colab |
+| `short_maker_v2.ipynb` | Notebook bản V2 (Vocabulary Grid) | Google Colab |
+| `template_grid.html` | Template hiển thị hiệu ứng bản V2 | Upload lên Colab |
+| `short_maker.ipynb` | Notebook bản V1 (Storytelling) | Google Colab |
 | `bridge_local.py` | Cầu nối Colab ↔ TurboFlow | Local (terminal) |
 | `flow-image/` | Extension TurboFlow | Edge browser |
-
-### File tùy chọn (render local):
-
-| File | Chức năng |
-|------|-----------|
-| `render_web.py` | Render video trên máy local |
-| `template_v2.html` | Template hiển thị video |
-| `generate_script.py` | Sinh kịch bản local |
-| `config.py` + `.env` | API keys cho local |
-
----
 
 ## ⚙️ API Keys cần có
 
 | Key | Lấy ở đâu | Bắt buộc |
 |-----|-----------|----------|
-| Groq API | https://console.groq.com/keys | ✅ Có (miễn phí) |
-| Pexels API | https://www.pexels.com/api/ | Nếu không dùng TurboFlow |
-
-> Không cần lưu vào `.env` — nhập trực tiếp trong Colab.
+| Gemini API | https://aistudio.google.com/app/apikey | ✅ Có (miễn phí) |
