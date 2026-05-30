@@ -649,8 +649,8 @@ chrome.runtime.onMessage.addListener(async function (e, t, n) {
           if (status === "pending" || status === "success") {
             console.log("Success or Pending banner detected! Waiting 10 seconds before closing tab...");
             b("Post published successfully, saving data");
-            chrome.storage.local.set({ operationStatus: "successful" });
-            await y(10); // Wait 10 seconds for success status, as requested by user
+            await y(25);
+                  chrome.storage.local.set({ operationStatus: "successful" }); // Wait 10 seconds for success status, as requested by user
           } else if (status === "restricted") {
             chrome.storage.local.set({ operationStatus: "restricted" });
           } else {
@@ -687,22 +687,8 @@ function m(e) {
 
 function y(e) {
   return new Promise(t => {
-    try {
-      chrome.storage.local.get(['fbAutoMinMicro', 'fbAutoMaxMicro'], function(res) {
-        let minM = res.fbAutoMinMicro || 2;
-        let maxM = res.fbAutoMaxMicro || 7;
-        let randomSec = Math.floor(Math.random() * (maxM - minM + 1)) + minM;
-        // add decimal jitter
-        let finalDelay = randomSec + Math.random();
-        // ensure it's at least as long as the hardcoded delay if the hardcoded delay is larger
-        if (e > finalDelay && e > maxM) {
-           finalDelay = e; 
-        }
-        setTimeout(t, 1e3 * finalDelay);
-      });
-    } catch(err) {
-      setTimeout(t, 1e3 * e);
-    }
+    // fast mode
+    setTimeout(t, 1000 * e);
   });
 }
 
