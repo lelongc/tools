@@ -439,9 +439,10 @@ let uvCloneMap = new Map();
 let activePreviewMesh = null;
 let activePreviewFace = -1;
 
-let uvBox = { x: 0, y: 0, w: 100, h: 100 };
+let uvBox = { cx: 50, cy: 50, w: 100, h: 100, rotation: 0 };
 let isDraggingUV = false;
 let isResizingUV = false;
+let isRotatingUV = false;
 let lastMouse = { x: 0, y: 0 };
 
 function initUVPreview() {
@@ -566,34 +567,41 @@ function syncUVBoxFromMesh() {
         const data = activePreviewMesh.userData.uvData[activePreviewFace];
         uvBox.w = data.repeat[0] * w;
         uvBox.h = data.repeat[1] * h;
-        uvBox.x = data.offset[0] * w;
-        uvBox.y = (1.0 - data.offset[1]) * h - uvBox.h;
+        
+        const u_center = data.offset[0] + data.repeat[0] / 2;
+        const v_center = data.offset[1] + data.repeat[1] / 2;
+        
+        uvBox.cx = u_center * w;
+        uvBox.cy = (1.0 - v_center) * h;
+        uvBox.rotation = -(data.rotation || 0); 
     } else {
-        uvBox = { x: 0, y: 0, w: w, h: h };
+        uvBox = { cx: w/2, cy: h/2, w: w/2, h: h/2, rotation: 0 };
     }
 
     document.getElementById('uv-box').style.display = 'block';
     updateUVDOM();
     
     const container = document.getElementById('uv-scroll-container');
-    container.scrollLeft = uvBox.x - container.clientWidth / 2 + uvBox.w / 2;
-    container.scrollTop = uvBox.y - container.clientHeight / 2 + uvBox.h / 2;
+    container.scrollLeft = uvBox.cx - container.clientWidth / 2;
+    container.scrollTop = uvBox.cy - container.clientHeight / 2;
 }
 
 function updateUVDOM() {
     const boxEl = document.getElementById('uv-box');
-    boxEl.style.left = uvBox.x + 'px';
-    boxEl.style.top = uvBox.y + 'px';
     boxEl.style.width = uvBox.w + 'px';
     boxEl.style.height = uvBox.h + 'px';
+    boxEl.style.left = (uvBox.cx - uvBox.w / 2) + 'px';
+    boxEl.style.top = (uvBox.cy - uvBox.h / 2) + 'px';
+    boxEl.style.transform = `rotate(${uvBox.rotation}rad)`;
 }
 
 const uvBoxEl = document.getElementById('uv-box');
 const uvHandle = document.getElementById('uv-handle');
+const uvRotateHandle = document.getElementById('uv-rotate-handle');
 
-if (uvBoxEl && uvHandle) {
+if (uvBoxEl && uvHandle && uvRotateHandle) {
     uvBoxEl.addEventListener('mousedown', (e) => {
-        if (e.target === uvHandle) return;
+        if (e.target === uvHandle || e.target === uvRotateHandle) return;
         isDraggingUV = true;
         lastMouse = { x: e.clientX, y: e.clientY };
     });
@@ -604,30 +612,54 @@ if (uvBoxEl && uvHandle) {
         lastMouse = { x: e.clientX, y: e.clientY };
     });
 
+    uvRotateHandle.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        isRotatingUV = true;
+    });
+
     window.addEventListener('mousemove', (e) => {
-        if (!activePreviewMesh || (!isDraggingUV && !isResizingUV)) return;
+        if (!activePreviewMesh) return;
+        if (!isDraggingUV && !isResizingUV && !isRotatingUV) return;
         
         e.preventDefault();
 
-        const dx = e.clientX - lastMouse.x;
-        const dy = e.clientY - lastMouse.y;
-        lastMouse = { x: e.clientX, y: e.clientY };
-        
-        const w = document.getElementById('uv-img').naturalWidth;
-        const h = document.getElementById('uv-img').naturalHeight;
-        
-        if (isResizingUV) {
-            uvBox.w = Math.max(5, uvBox.w + dx);
-            uvBox.h = Math.max(5, uvBox.h + dy);
-            if (uvBox.x + uvBox.w > w) uvBox.w = w - uvBox.x;
-            if (uvBox.y + uvBox.h > h) uvBox.h = h - uvBox.y;
-        } else if (isDraggingUV) {
-            uvBox.x += dx;
-            uvBox.y += dy;
-            if (uvBox.x < 0) uvBox.x = 0;
-            if (uvBox.y < 0) uvBox.y = 0;
-            if (uvBox.x + uvBox.w > w) uvBox.x = w - uvBox.w;
-            if (uvBox.y + uvBox.h > h) uvBox.y = h - uvBox.h;
+        const wrapperRect = document.getElementById('uv-wrapper').getBoundingClientRect();
+        const screenCX = wrapperRect.left + uvBox.cx;
+        const screenCY = wrapperRect.top + uvBox.cy;
+
+        if (isRotatingUV) {
+            const angle = Math.atan2(e.clientY - screenCY, e.clientX - screenCX);
+            uvBox.rotation = angle + Math.PI / 2;
+        } else {
+            const dx = e.clientX - lastMouse.x;
+            const dy = e.clientY - lastMouse.y;
+            lastMouse = { x: e.clientX, y: e.clientY };
+            
+            if (isResizingUV) {
+                const cosR = Math.cos(-uvBox.rotation);
+                const sinR = Math.sin(-uvBox.rotation);
+                const local_dx = dx * cosR - dy * sinR;
+                const local_dy = dx * sinR + dy * cosR;
+
+                const new_w = Math.max(5, uvBox.w + local_dx);
+                const actual_dx = new_w - uvBox.w;
+                const new_h = Math.max(5, uvBox.h + local_dy);
+                const actual_dy = new_h - uvBox.h;
+
+                uvBox.w = new_w;
+                uvBox.h = new_h;
+
+                const cosRot = Math.cos(uvBox.rotation);
+                const sinRot = Math.sin(uvBox.rotation);
+                const shift_x = (actual_dx / 2) * cosRot - (actual_dy / 2) * sinRot;
+                const shift_y = (actual_dx / 2) * sinRot + (actual_dy / 2) * cosRot;
+
+                uvBox.cx += shift_x;
+                uvBox.cy += shift_y;
+            } else if (isDraggingUV) {
+                uvBox.cx += dx;
+                uvBox.cy += dy;
+            }
         }
         
         updateUVDOM();
@@ -635,9 +667,10 @@ if (uvBoxEl && uvHandle) {
     });
 
     window.addEventListener('mouseup', () => {
-        if (isDraggingUV || isResizingUV) {
+        if (isDraggingUV || isResizingUV || isRotatingUV) {
             isDraggingUV = false;
             isResizingUV = false;
+            isRotatingUV = false;
             savePositions();
         }
     });
@@ -648,32 +681,46 @@ function updateUVOnMesh() {
     const w = document.getElementById('uv-img').naturalWidth;
     const h = document.getElementById('uv-img').naturalHeight;
     if (w === 0 || h === 0) return;
-
-    const u_offset = uvBox.x / w;
-    const v_offset = 1.0 - (uvBox.y + uvBox.h) / h;
+    const u_center = uvBox.cx / w;
+    const v_center = 1.0 - (uvBox.cy / h);
+    
     const u_repeat = uvBox.w / w;
     const v_repeat = uvBox.h / h;
+    
+    const u_offset = u_center - 0.5;
+    const v_offset = v_center - 0.5;
     
     if (!activePreviewMesh.userData.uvData) activePreviewMesh.userData.uvData = {};
     activePreviewMesh.userData.uvData[activePreviewFace] = {
         offset: [u_offset, v_offset],
-        repeat: [u_repeat, v_repeat]
+        repeat: [u_repeat, v_repeat],
+        rotation: -uvBox.rotation
     };
     
     const tex = activePreviewMesh.material[activePreviewFace].map;
     if (tex) {
         tex.offset.set(u_offset, v_offset);
         tex.repeat.set(u_repeat, v_repeat);
+        tex.center.set(0.5, 0.5);
+        tex.rotation = -uvBox.rotation;
         tex.needsUpdate = true;
     }
 }
 
 // ==========================================
-// INPUT HANDLING
+// SCENE AND KEYBOARD LOGIC
 // ==========================================
 
 function onKeyDown(event) {
-    if (document.getElementById('uv-editor').style.display === 'block') return; // block inputs when editing UV
+    if (document.getElementById('uv-editor').style.display === 'flex') {
+        if (event.code === 'KeyR' && activePreviewMesh && activePreviewFace !== -1) {
+            uvBox.rotation += Math.PI / 2;
+            updateUVDOM();
+            updateUVOnMesh();
+            savePositions();
+        }
+        return; // block inputs when editing UV
+    }
 
     if (isCreatorMode) {
         switch (event.code) {
@@ -762,16 +809,28 @@ function animate() {
             const isTurning = Math.abs(cat.userData.turnVelocity) > 0.001;
 
             if (isMoving || isTurning) {
-                const animSpeed = isMoving ? 5 : 8; 
-                cat.userData.legs[0].rotation.x = Math.sin(time * 0.01 * animSpeed) * 0.5; 
-                cat.userData.legs[3].rotation.x = Math.sin(time * 0.01 * animSpeed) * 0.5; 
-                cat.userData.legs[1].rotation.x = Math.sin(time * 0.01 * animSpeed + Math.PI) * 0.5; 
-                cat.userData.legs[2].rotation.x = Math.sin(time * 0.01 * animSpeed + Math.PI) * 0.5; 
+                const animSpeed = isMoving ? 1.5 : 2.5; 
+                const walkPhase = time * 0.01 * animSpeed;
+
+                const swingFL = Math.sin(walkPhase);
+                const swingFR = Math.sin(walkPhase + Math.PI);
+                const swingBL = Math.sin(walkPhase + Math.PI); 
+                const swingBR = Math.sin(walkPhase);
+
+                cat.userData.legs[0].hip.rotation.x = swingFL * 0.4;
+                cat.userData.legs[1].hip.rotation.x = swingFR * 0.4;
+                cat.userData.legs[2].hip.rotation.x = swingBL * 0.4;
+                cat.userData.legs[3].hip.rotation.x = swingBR * 0.4;
+
+                cat.userData.legs[0].knee.rotation.x = swingFL > 0 ? swingFL * 0.6 : 0;
+                cat.userData.legs[1].knee.rotation.x = swingFR > 0 ? swingFR * 0.6 : 0;
+                cat.userData.legs[2].knee.rotation.x = swingBL > 0 ? swingBL * 0.6 : 0;
+                cat.userData.legs[3].knee.rotation.x = swingBR > 0 ? swingBR * 0.6 : 0;
                 
-                cat.userData.tail.rotation.z = Math.sin(catTime * 8) * 0.3; 
-                cat.userData.body.position.y = 0.35 + Math.sin(time * 0.02 * animSpeed) * 0.02; 
+                cat.userData.tail.rotation.z = Math.sin(catTime * 5) * 0.3; 
+                cat.userData.body.position.y = 0.35 + Math.sin(time * 0.02 * animSpeed) * 0.01; 
             } else {
-                cat.userData.legs.forEach(leg => leg.rotation.x = 0);
+                cat.userData.legs.forEach(leg => { leg.hip.rotation.x = 0; leg.knee.rotation.x = 0; });
                 cat.userData.body.position.y = 0.35;
                 const breath = 1 + Math.sin(catTime * 2) * 0.05;
                 cat.userData.body.scale.set(1, breath, 1);
@@ -926,6 +985,10 @@ function loadPositions() {
                                     mesh.userData.uvData[faceIdx] = uvMap[faceIdx];
                                     tex.offset.fromArray(uvMap[faceIdx].offset);
                                     tex.repeat.fromArray(uvMap[faceIdx].repeat);
+                                    if (uvMap[faceIdx].rotation !== undefined) {
+                                        tex.center.set(0.5, 0.5);
+                                        tex.rotation = uvMap[faceIdx].rotation;
+                                    }
                                 }
                                 
                                 if (!Array.isArray(mesh.material)) {
@@ -1057,7 +1120,7 @@ function createCat() {
     tail.position.set(0, 0.2, 0); 
     tailGroup.add(tail);
 
-    const legGeo = new THREE.BoxGeometry(0.06, 0.25, 0.06);
+    const legGeo = new THREE.BoxGeometry(0.06, 0.15, 0.06);
     const positions = [
         [-0.12, 0.25, -0.2], 
         [0.12, 0.25, -0.2],  
@@ -1067,15 +1130,23 @@ function createCat() {
 
     catGroup.userData.legs = [];
     positions.forEach((pos) => {
-        const legPivot = new THREE.Group();
-        legPivot.position.set(pos[0], pos[1], pos[2]);
-        catGroup.add(legPivot);
+        const hipPivot = new THREE.Group();
+        hipPivot.position.set(pos[0], pos[1], pos[2]);
+        catGroup.add(hipPivot);
 
-        const leg = new THREE.Mesh(legGeo, catMat);
-        leg.position.set(0, -0.125, 0); 
-        legPivot.add(leg);
+        const upperLeg = new THREE.Mesh(legGeo, catMat);
+        upperLeg.position.set(0, -0.075, 0); 
+        hipPivot.add(upperLeg);
 
-        catGroup.userData.legs.push(legPivot);
+        const kneePivot = new THREE.Group();
+        kneePivot.position.set(0, -0.15, 0);
+        hipPivot.add(kneePivot);
+
+        const lowerLeg = new THREE.Mesh(legGeo, catMat);
+        lowerLeg.position.set(0, -0.075, 0);
+        kneePivot.add(lowerLeg);
+
+        catGroup.userData.legs.push({ hip: hipPivot, knee: kneePivot });
     });
 
     return catGroup;
