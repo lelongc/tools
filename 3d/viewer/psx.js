@@ -15,6 +15,7 @@ let isSnapEnabled = false;
 let isPointerLocked = false;
 let playerVelocityY = 0;
 let isGrounded = true;
+let isFPSView = false;
 
 // Custom Editor Camera Variables
 let isRightMouseDown = false;
@@ -60,6 +61,8 @@ function init() {
 
     cameraArm.add(camera);
     camera.position.set(0, 0.4, 2); 
+    window.defaultCamPos = new THREE.Vector3(0, 0.4, 2);
+    window.fpsCamPos = new THREE.Vector3(0, 0.15, -0.35); 
 
     const cat = createCat();
     playerGroup.add(cat);
@@ -156,36 +159,107 @@ function init() {
     wall4.rotation.y = -Math.PI / 2;
     group.add(wall4);
 
-    const pillarGeo = new THREE.BoxGeometry(1, roomHeight, 1);
-    for (let i = 0; i < 15; i++) {
+    // === INTERIOR WALLS (Rooms) ===
+    // Living room divider wall (partial, with doorway)
+    const divWallGeo1 = new THREE.BoxGeometry(0.2, roomHeight, 12);
+    const divWall1 = new THREE.Mesh(divWallGeo1, wallMat);
+    divWall1.position.set(0, roomHeight/2, -14);
+    divWall1.userData = { id: 'divwall_1', isFurniture: true };
+    interactables.push(divWall1);
+    group.add(divWall1);
+
+    // Kitchen divider wall
+    const divWallGeo2 = new THREE.BoxGeometry(12, roomHeight, 0.2);
+    const divWall2 = new THREE.Mesh(divWallGeo2, wallMat);
+    divWall2.position.set(-14, roomHeight/2, 0);
+    divWall2.userData = { id: 'divwall_2', isFurniture: true };
+    interactables.push(divWall2);
+    group.add(divWall2);
+
+    // === PILLARS (reduced) ===
+    const pillarGeo = new THREE.BoxGeometry(0.8, roomHeight, 0.8);
+    for (let i = 0; i < 4; i++) {
         const pillar = new THREE.Mesh(pillarGeo, wallMat);
-        pillar.position.x = (Math.random() - 0.5) * (roomSize - 2);
-        pillar.position.z = (Math.random() - 0.5) * (roomSize - 2);
-        pillar.position.y = roomHeight / 2;
+        const px = [-8, 8, -8, 8][i];
+        const pz = [8, 8, -8, -8][i];
+        pillar.position.set(px, roomHeight / 2, pz);
         pillar.userData = { id: `pillar_${i}`, isFurniture: true };
         interactables.push(pillar);
         group.add(pillar);
     }
 
+    // === LIVING ROOM (center-south) ===
     const table = createTable(wallMat);
-    table.position.set(0, 0, -3);
+    table.position.set(3, 0, 8);
     table.userData = { id: 'table_1', isFurniture: true };
     interactables.push(table);
     group.add(table);
 
     const chair1 = createChair(wallMat);
-    chair1.position.set(0, 0, -1.5);
+    chair1.position.set(3, 0, 6.5);
     chair1.userData = { id: 'chair_1', isFurniture: true };
     interactables.push(chair1);
     group.add(chair1);
 
     const chair2 = createChair(wallMat);
-    chair2.position.set(0, 0, -4.5);
+    chair2.position.set(3, 0, 9.5);
     chair2.rotation.y = Math.PI;
     chair2.userData = { id: 'chair_2', isFurniture: true };
     interactables.push(chair2);
     group.add(chair2);
 
+    const sofa1 = createSofa(wallMat);
+    sofa1.position.set(10, 0, 14);
+    sofa1.userData = { id: 'sofa_1', isFurniture: true };
+    interactables.push(sofa1);
+    group.add(sofa1);
+
+    const tv1 = createTV(wallMat);
+    tv1.position.set(10, 0, 18);
+    tv1.userData = { id: 'tv_1', isFurniture: true };
+    interactables.push(tv1);
+    group.add(tv1);
+
+    const lamp1 = createLamp();
+    lamp1.position.set(14, 0, 14);
+    lamp1.userData = { id: 'lamp_1', isFurniture: true };
+    interactables.push(lamp1);
+    group.add(lamp1);
+
+    // === KITCHEN (west) ===
+    const fridge1 = createFridge(wallMat);
+    fridge1.position.set(-18, 0, 5);
+    fridge1.userData = { id: 'fridge_1', isFurniture: true };
+    interactables.push(fridge1);
+    group.add(fridge1);
+
+    const kitchenTable = createTable(wallMat);
+    kitchenTable.position.set(-14, 0, 8);
+    kitchenTable.userData = { id: 'table_2', isFurniture: true };
+    interactables.push(kitchenTable);
+    group.add(kitchenTable);
+
+    const kitchenChair1 = createChair(wallMat);
+    kitchenChair1.position.set(-15.5, 0, 8);
+    kitchenChair1.rotation.y = Math.PI / 2;
+    kitchenChair1.userData = { id: 'chair_3', isFurniture: true };
+    interactables.push(kitchenChair1);
+    group.add(kitchenChair1);
+
+    const kitchenChair2 = createChair(wallMat);
+    kitchenChair2.position.set(-12.5, 0, 8);
+    kitchenChair2.rotation.y = -Math.PI / 2;
+    kitchenChair2.userData = { id: 'chair_4', isFurniture: true };
+    interactables.push(kitchenChair2);
+    group.add(kitchenChair2);
+
+    const cabinet1 = createCabinet(wallMat);
+    cabinet1.position.set(-18, 0, 12);
+    cabinet1.userData = { id: 'cabinet_1', isFurniture: true };
+    interactables.push(cabinet1);
+    group.add(cabinet1);
+
+    // === STAIRS & SECOND FLOOR (Loft) ===
     const floor2Geo = new THREE.BoxGeometry(40, 0.2, 20);
     const floor2 = new THREE.Mesh(floor2Geo, floorMat);
     floor2.position.set(0, 3, -10);
@@ -200,17 +274,36 @@ function init() {
     interactables.push(stairs);
     group.add(stairs);
 
+    // === BEDROOM (upstairs) ===
     const bed = createBed(wallMat);
-    bed.position.set(10, 3.1, -15);
+    bed.position.set(-12, 3.1, -15);
     bed.userData = { id: 'bed_1', isFurniture: true };
     interactables.push(bed);
     group.add(bed);
 
-    const cabinet = createCabinet(wallMat);
-    cabinet.position.set(-15, 0, 15);
-    cabinet.userData = { id: 'cabinet_1', isFurniture: true };
-    interactables.push(cabinet);
-    group.add(cabinet);
+    const cabinet2 = createCabinet(wallMat);
+    cabinet2.position.set(-18, 3.1, -12);
+    cabinet2.userData = { id: 'cabinet_2', isFurniture: true };
+    interactables.push(cabinet2);
+    group.add(cabinet2);
+
+    const bookshelf1 = createBookshelf(wallMat);
+    bookshelf1.position.set(12, 3.1, -18);
+    bookshelf1.userData = { id: 'bookshelf_1', isFurniture: true };
+    interactables.push(bookshelf1);
+    group.add(bookshelf1);
+
+    const lamp2 = createLamp();
+    lamp2.position.set(-10, 3.1, -15);
+    lamp2.userData = { id: 'lamp_2', isFurniture: true };
+    interactables.push(lamp2);
+    group.add(lamp2);
+
+    const tv2 = createTV(wallMat);
+    tv2.position.set(10, 3.1, -15);
+    tv2.userData = { id: 'tv_2', isFurniture: true };
+    interactables.push(tv2);
+    group.add(tv2);
 
     scene.add(group);
     window.sceneGroup = group;
@@ -858,6 +951,16 @@ function onKeyDown(event) {
                     isGrounded = false;
                 }
                 break;
+            case 'KeyV':
+                isFPSView = !isFPSView;
+                if (isFPSView) {
+                    camera.position.copy(window.fpsCamPos);
+                    if (window.psxCat) window.psxCat.visible = false;
+                } else {
+                    camera.position.copy(window.defaultCamPos);
+                    if (window.psxCat) window.psxCat.visible = true;
+                }
+                break;
             case 'KeyF':
                 if (window.psxCat && !window.psxCat.userData.isTogglingLight) {
                     window.psxCat.userData.isTogglingLight = true;
@@ -1045,14 +1148,13 @@ function animate() {
                     if (progress > 0.5 && !cat.userData.toggledThisCycle) {
                         cat.userData.isFlashlightOn = !cat.userData.isFlashlightOn;
                         if (cat.userData.isFlashlightOn) {
-                            cat.userData.flashlight.intensity = 1.5;
                             window.ambientLight.intensity = 1.5;
                             window.ambientLight.color.setHex(0x66ffcc);
                             scene.fog.color.setHex(0x224433);
                             scene.fog.density = 0.08;
                             scene.background.setHex(0x224433);
                         } else {
-                            cat.userData.flashlight.intensity = 0.0;
+
                             window.ambientLight.intensity = 0.1;
                             window.ambientLight.color.setHex(0xffffff);
                             scene.fog.color.setHex(0x020202);
@@ -1475,24 +1577,137 @@ function createCat() {
         catGroup.userData.legs.push({ hip: hipPivot, knee: kneePivot });
     });
 
-    const flashlightGroup = new THREE.Group();
-    const flGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.12, 8);
-    const flMat = new THREE.MeshLambertMaterial({ color: 0x222222 });
-    const flMesh = new THREE.Mesh(flGeo, flMat);
-    flMesh.rotation.x = Math.PI / 2;
-    flashlightGroup.add(flMesh);
-
-    const light = new THREE.SpotLight(0xffeedd, 1.5, 20, Math.PI / 6, 0.5, 1);
-    light.position.set(0, 0, 0);
-    light.target.position.set(0, 0, -1);
-    flashlightGroup.add(light);
-    flashlightGroup.add(light.target);
-
-    flashlightGroup.position.set(0, 0.2, -0.3);
-    body.add(flashlightGroup);
-
-    catGroup.userData.flashlight = light;
+    // Night vision eyes (small glow spheres)
+    const eyeGlowMat = new THREE.MeshBasicMaterial({ color: 0x66ffcc });
+    const eyeGlowGeo = new THREE.BoxGeometry(0.04, 0.04, 0.04);
+    const eyeL = new THREE.Mesh(eyeGlowGeo, eyeGlowMat);
+    eyeL.position.set(0.06, 0.15, -0.23);
+    headGroup.add(eyeL);
+    const eyeR = new THREE.Mesh(eyeGlowGeo, eyeGlowMat);
+    eyeR.position.set(-0.06, 0.15, -0.23);
+    headGroup.add(eyeR);
+    catGroup.userData.eyes = [eyeL, eyeR];
     catGroup.userData.isFlashlightOn = true;
 
     return catGroup;
+}
+
+function createTV(material) {
+    const group = new THREE.Group();
+    // TV stand
+    const standGeo = new THREE.BoxGeometry(1.5, 0.6, 0.5);
+    const stand = new THREE.Mesh(standGeo, material);
+    stand.position.y = 0.3;
+    group.add(stand);
+    // TV screen
+    const screenMat = new THREE.MeshBasicMaterial({ color: 0x111122 });
+    const screenGeo = new THREE.BoxGeometry(2.0, 1.2, 0.1);
+    const screen = new THREE.Mesh(screenGeo, screenMat);
+    screen.position.set(0, 1.2, 0);
+    group.add(screen);
+    // Screen glow border
+    const borderMat = new THREE.MeshBasicMaterial({ color: 0x333355 });
+    const borderGeo = new THREE.BoxGeometry(2.1, 1.3, 0.08);
+    const border = new THREE.Mesh(borderGeo, borderMat);
+    border.position.set(0, 1.2, -0.02);
+    group.add(border);
+    return group;
+}
+
+function createFridge(material) {
+    const group = new THREE.Group();
+    const fridgeMat = new THREE.MeshLambertMaterial({ color: 0xcccccc });
+    // Main body
+    const bodyGeo = new THREE.BoxGeometry(1.0, 2.2, 0.8);
+    const body = new THREE.Mesh(bodyGeo, fridgeMat);
+    body.position.y = 1.1;
+    group.add(body);
+    // Handle
+    const handleMat = new THREE.MeshLambertMaterial({ color: 0x888888 });
+    const handleGeo = new THREE.BoxGeometry(0.05, 0.6, 0.05);
+    const handle = new THREE.Mesh(handleGeo, handleMat);
+    handle.position.set(0.45, 1.4, 0.42);
+    group.add(handle);
+    // Divider line (freezer/fridge)
+    const divGeo = new THREE.BoxGeometry(0.95, 0.02, 0.01);
+    const divMat = new THREE.MeshLambertMaterial({ color: 0x666666 });
+    const div = new THREE.Mesh(divGeo, divMat);
+    div.position.set(0, 1.6, 0.41);
+    group.add(div);
+    return group;
+}
+
+function createSofa(material) {
+    const group = new THREE.Group();
+    const sofaMat = new THREE.MeshLambertMaterial({ color: 0x663322 });
+    // Seat
+    const seatGeo = new THREE.BoxGeometry(3, 0.4, 1.2);
+    const seat = new THREE.Mesh(seatGeo, sofaMat);
+    seat.position.set(0, 0.3, 0);
+    group.add(seat);
+    // Backrest
+    const backGeo = new THREE.BoxGeometry(3, 0.6, 0.3);
+    const back = new THREE.Mesh(backGeo, sofaMat);
+    back.position.set(0, 0.7, -0.45);
+    group.add(back);
+    // Armrest left
+    const armGeo = new THREE.BoxGeometry(0.25, 0.5, 1.2);
+    const armL = new THREE.Mesh(armGeo, sofaMat);
+    armL.position.set(-1.375, 0.45, 0);
+    group.add(armL);
+    // Armrest right
+    const armR = new THREE.Mesh(armGeo, sofaMat);
+    armR.position.set(1.375, 0.45, 0);
+    group.add(armR);
+    return group;
+}
+
+function createBookshelf(material) {
+    const group = new THREE.Group();
+    // Frame
+    const frameGeo = new THREE.BoxGeometry(2, 2.5, 0.5);
+    const frame = new THREE.Mesh(frameGeo, material);
+    frame.position.y = 1.25;
+    group.add(frame);
+    // Shelves
+    const shelfMat = new THREE.MeshLambertMaterial({ color: 0x5a3a1a });
+    for (let i = 0; i < 4; i++) {
+        const shelfGeo = new THREE.BoxGeometry(1.9, 0.05, 0.45);
+        const shelf = new THREE.Mesh(shelfGeo, shelfMat);
+        shelf.position.set(0, 0.5 + i * 0.5, 0);
+        group.add(shelf);
+    }
+    // Books (colorful blocks)
+    const bookColors = [0xcc3333, 0x3333cc, 0x33cc33, 0xcccc33, 0xcc33cc];
+    for (let row = 0; row < 4; row++) {
+        for (let j = 0; j < 4; j++) {
+            const bMat = new THREE.MeshLambertMaterial({ color: bookColors[(row + j) % bookColors.length] });
+            const bGeo = new THREE.BoxGeometry(0.12, 0.35, 0.3);
+            const book = new THREE.Mesh(bGeo, bMat);
+            book.position.set(-0.6 + j * 0.35, 0.7 + row * 0.5, 0);
+            group.add(book);
+        }
+    }
+    return group;
+}
+
+function createLamp() {
+    const group = new THREE.Group();
+    // Pole
+    const poleMat = new THREE.MeshLambertMaterial({ color: 0x888888 });
+    const poleGeo = new THREE.CylinderGeometry(0.04, 0.06, 1.5, 8);
+    const pole = new THREE.Mesh(poleGeo, poleMat);
+    pole.position.y = 0.75;
+    group.add(pole);
+    // Shade
+    const shadeMat = new THREE.MeshLambertMaterial({ color: 0xffeecc, emissive: 0x332200 });
+    const shadeGeo = new THREE.CylinderGeometry(0.15, 0.3, 0.3, 8);
+    const shade = new THREE.Mesh(shadeGeo, shadeMat);
+    shade.position.y = 1.6;
+    group.add(shade);
+    // Light
+    const light = new THREE.PointLight(0xffddaa, 0.8, 8);
+    light.position.set(0, 1.5, 0);
+    group.add(light);
+    return group;
 }
