@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PSX Horror House</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #000; }
+        /* Forces the canvas to use nearest neighbor scaling for that pixelated retro look */
+        canvas { display: block; image-rendering: pixelated; width: 100vw; height: 100vh; }
+        #crosshair {
+            position: absolute; top: 50%; left: 50%;
+            width: 8px; height: 8px; background: rgba(255,255,255,0.3);
+            border-radius: 50%; transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        #info {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: white; font-family: monospace; font-size: 18px;
+            background: rgba(0,0,0,0.8); padding: 20px; border: 1px solid #444;
+            text-align: center; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="crosshair"></div>
+    <div id="info">Click to Enter<br><br><span style="font-size:12px;color:#aaa">W, A, S, D to move<br>Mouse to look around<br>Press E to Export to Unity/Blender</span></div>
+
+    <script async src="https://unpkg.com/es-module-shims@1.8.0/dist/es-module-shims.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="psx.js"></script>
+</body>
+</html>
