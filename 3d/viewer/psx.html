@@ -29,6 +29,49 @@
             border: 1px solid #333;
         }
         .hotkey { color: #ffff00; font-weight: bold; }
+        #uv-editor {
+            display: none;
+            position: fixed;
+            top: 5%;
+            left: 5%;
+            width: 90%;
+            height: 90%;
+            background: rgba(30, 30, 30, 0.95);
+            border: 2px solid #555;
+            z-index: 1000;
+            text-align: center;
+            color: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            border-radius: 8px;
+        }
+        #uv-editor h3 {
+            margin: 10px 0 5px 0;
+            font-size: 18px;
+        }
+        #uv-editor p {
+            margin: 0 0 10px 0;
+            font-size: 12px;
+            color: #aaa;
+        }
+        #uv-close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            background: #d93b3b;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            border-radius: 4px;
+        }
+        #uv-close:hover { background: #ff4c4c; }
+        .uv-dark {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.7);
+            pointer-events: none;
+            z-index: 5;
+        }
     </style>
 </head>
 <body>
@@ -37,8 +80,10 @@
         <span style="font-size:13px;color:white;line-height:1.6;">
             <b>MOUSE CONTROLS:</b><br>
             - <span class="hotkey">Left Click</span>: Select Object<br>
+            - <span class="hotkey">Alt + Click</span>: Cắt UV ảnh đã dán<br>
             - <span class="hotkey">Middle Mouse (Hold)</span>: Look around<br>
-            - <span class="hotkey">Shift+Drag</span>: Pan | <span class="hotkey">Ctrl+Drag</span>: Zoom<br><br>
+            - <span class="hotkey">Shift+Drag</span>: Pan | <span class="hotkey">Ctrl+Drag</span>: Zoom<br>
+            - <span class="hotkey">Drag & Drop Image</span>: Tô màu từng mặt (Texture)<br><br>
             <b>HOTKEYS:</b><br>
             - <span class="hotkey">T</span>: Translate (Move)<br>
             - <span class="hotkey">R</span>: Rotate<br>
@@ -47,6 +92,28 @@
             - <span class="hotkey">C</span>: Back to Play Mode
         </span>
     </div>
+    
+    <!-- UV Editor Modal -->
+    <div id="uv-editor">
+        <h3>UV Editor (Hỗ trợ 4K)</h3>
+        <button id="uv-close" onclick="closeUVEditor()">Đóng [X]</button>
+        <p>Chuột giữa/Lăn chuột để cuộn ảnh. Kéo khung đỏ hoặc góc thu phóng để chọn vùng.</p>
+        <div id="uv-scroll-container" style="overflow: auto; width: 100%; height: calc(100% - 80px); position: relative; background: #111; text-align: left;">
+            <div id="uv-wrapper" style="position: relative; display: inline-block;">
+                <img id="uv-img" src="" style="display: block;" draggable="false">
+                
+                <div id="uv-dark-top" class="uv-dark"></div>
+                <div id="uv-dark-bottom" class="uv-dark"></div>
+                <div id="uv-dark-left" class="uv-dark"></div>
+                <div id="uv-dark-right" class="uv-dark"></div>
+
+                <div id="uv-box" style="position: absolute; border: 2px solid red; box-sizing: border-box; z-index: 10; cursor: move;">
+                    <div id="uv-handle" style="position: absolute; right: -2px; bottom: -2px; width: 14px; height: 14px; background: red; cursor: se-resize; z-index: 11;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="crosshair"></div>
     <div id="info">Click to Enter<br><br><span style="font-size:12px;color:#aaa">W, A, S, D to move<br>Mouse to look around<br>Press E to Export<br>Press C to toggle Creator Mode</span></div>
 

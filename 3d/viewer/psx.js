@@ -13,13 +13,13 @@ let isCreatorMode = false;
 let isSnapEnabled = false;
 let isPointerLocked = false;
 
-// Custom Editor Camera Variables (Creator Mode)
+// Custom Editor Camera Variables
 let isRightMouseDown = false;
 let isZooming = false;
 const euler = new THREE.Euler(0, 0, 0, 'YXZ');
 const PI_2 = Math.PI / 2;
 
-// TPS Player Variables (Play Mode)
+// TPS Player Variables
 let playerGroup, cameraArm;
 
 const raycaster = new THREE.Raycaster();
@@ -47,25 +47,21 @@ function init() {
     // CAMERAS & PLAYER SETUP
     // ==========================================
     
-    // 1. TPS Player (Play Mode)
     playerGroup = new THREE.Group();
-    playerGroup.position.set(0, 0, 2); // Initial spawn pos
+    playerGroup.position.set(0, 0, 2); 
     scene.add(playerGroup);
 
     cameraArm = new THREE.Group();
-    cameraArm.position.set(0, 0.4, 0); // Pivot height
+    cameraArm.position.set(0, 0.4, 0); 
     playerGroup.add(cameraArm);
 
     cameraArm.add(camera);
-    camera.position.set(0, 0.4, 2); // Offset behind the cat
+    camera.position.set(0, 0.4, 2); 
 
-    // Cat Model
     const cat = createCat();
-    // Do not rotate the cat, its natural face is -Z, which perfectly matches camera looking at -Z
     playerGroup.add(cat);
     window.psxCat = cat;
 
-    // 2. Transform Controls (Gizmo)
     transformControl = new TransformControls(camera, renderer.domElement);
     transformControl.addEventListener('dragging-changed', function (event) {
         if (!event.value && transformControl.object) {
@@ -74,13 +70,13 @@ function init() {
     });
     scene.add(transformControl);
 
-    // Prevent default right click menu
     document.addEventListener('contextmenu', e => e.preventDefault());
 
-    // UI Events (Pointer Lock)
     const info = document.getElementById('info');
     info.addEventListener('click', () => {
-        if (!isCreatorMode) document.body.requestPointerLock();
+        if (!isCreatorMode && document.getElementById('uv-editor').style.display !== 'block') {
+            document.body.requestPointerLock();
+        }
     });
 
     document.addEventListener('pointerlockchange', () => {
@@ -97,15 +93,12 @@ function init() {
         }
     });
 
-    // ==========================================
-    // SCENE & ENVIRONMENT
-    // ==========================================
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
     scene.add(ambientLight);
 
     const flashlight = new THREE.PointLight(0xffddaa, 1.5, 12);
     flashlight.position.set(0, 0, 1);
-    cameraArm.add(flashlight); // Flashlight moves with the camera arm
+    cameraArm.add(flashlight); 
 
     const textureLoader = new THREE.TextureLoader();
     const loadPSXTexture = (path, repeatX, repeatY) => {
@@ -218,20 +211,18 @@ function toggleCreatorMode() {
 
     if (isCreatorMode) {
         document.exitPointerLock();
-        
-        // Detach camera from Cat, make it fly freely in world space
         scene.attach(camera); 
         
         creatorLabel.style.display = 'block';
         crosshair.style.display = 'none';
         info.style.display = 'none';
     } else {
+        closeUVEditor();
         transformControl.detach();
         document.body.requestPointerLock();
         
-        // Re-attach camera to Cat (TPS)
         cameraArm.add(camera);
-        camera.position.set(0, 0.4, 2); // reset offset
+        camera.position.set(0, 0.4, 2); 
         camera.rotation.set(0, 0, 0);
         camera.quaternion.identity();
         
@@ -244,8 +235,8 @@ function toggleSnap() {
     isSnapEnabled = !isSnapEnabled;
     const status = document.getElementById('snap-status');
     if (isSnapEnabled) {
-        transformControl.setTranslationSnap(0.5); // Snap to 0.5 meters
-        transformControl.setRotationSnap(THREE.MathUtils.degToRad(45)); // Snap to 45 degrees
+        transformControl.setTranslationSnap(0.5);
+        transformControl.setRotationSnap(THREE.MathUtils.degToRad(45));
         status.innerText = "(ON)";
         status.style.color = "#00ff00";
     } else {
@@ -259,24 +250,35 @@ function toggleSnap() {
 function onMouseDown(event) {
     if (!isCreatorMode) return;
     
-    // Middle click Look around (button 1)
-    if (event.button === 1) {
-        isRightMouseDown = true; // reusing the variable name but it means middle mouse now
-    }
+    if (event.button === 1) isRightMouseDown = true; 
+    if (event.ctrlKey) isZooming = true;
 
-    // Ctrl + Drag to Zoom
-    if (event.ctrlKey) {
-        isZooming = true;
-    }
-
-    // Left click Select
     if (event.button === 0 && !event.ctrlKey && !event.shiftKey) {
         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(interactables, true);
+        
+        const objectsToTest = [...interactables];
+        if (window.psxCat) objectsToTest.push(window.psxCat);
+        
+        const intersects = raycaster.intersectObjects(objectsToTest, true);
 
+        if (event.altKey) {
+            // UV Editor Trigger
+            if (intersects.length > 0) {
+                const hit = intersects[0];
+                const mesh = hit.object;
+                if (!mesh.geometry || mesh.geometry.type !== 'BoxGeometry') return;
+                const materialIndex = Math.floor(hit.faceIndex / 2);
+                if (mesh.userData.faceTextures && mesh.userData.faceTextures[materialIndex]) {
+                    window.openUVEditor(mesh, materialIndex);
+                }
+            }
+            return;
+        }
+
+        // Selection Trigger
         if (intersects.length > 0) {
             const target = getFurnitureParent(intersects[0].object);
             if (target) {
@@ -285,13 +287,19 @@ function onMouseDown(event) {
                 target.traverse((child) => {
                     if (child.isMesh) {
                         if(!child.userData.originalMat) child.userData.originalMat = child.material;
-                        child.material = child.material.clone(); 
-                        child.material.emissive.setHex(0x555555);
+                        child.material = Array.isArray(child.material) ? child.material.map(m => m.clone()) : child.material.clone(); 
+                        if (Array.isArray(child.material)) {
+                            child.material.forEach(m => m.emissive.setHex(0x555555));
+                        } else {
+                            child.material.emissive.setHex(0x555555);
+                        }
                     }
                 });
                 setTimeout(() => {
                     target.traverse((child) => {
-                        if (child.isMesh) child.material.emissive.setHex(0x000000);
+                        if (child.isMesh && child.userData.originalMat) {
+                            child.material = child.userData.originalMat;
+                        }
                     });
                 }, 200);
             }
@@ -311,7 +319,6 @@ function onMouseUp(event) {
 
 function onMouseMove(event) {
     if (isCreatorMode) {
-        // Zooming using Ctrl + Drag
         if (event.ctrlKey && event.buttons > 0) {
             const zoomSpeed = 0.02;
             const delta = (Math.abs(event.movementX) > Math.abs(event.movementY)) ? event.movementX : -event.movementY;
@@ -319,7 +326,6 @@ function onMouseMove(event) {
             return; 
         }
 
-        // Panning using Shift + Drag
         if (event.shiftKey && event.buttons > 0) {
             const panSpeed = 0.02;
             camera.translateX(-event.movementX * panSpeed);
@@ -327,7 +333,6 @@ function onMouseMove(event) {
             return;
         }
 
-        // Look around like Unity Editor
         if (isRightMouseDown) {
             euler.setFromQuaternion(camera.quaternion);
             euler.y -= event.movementX * 0.002;
@@ -336,11 +341,9 @@ function onMouseMove(event) {
             camera.quaternion.setFromEuler(euler);
         }
     } else if (isPointerLocked) {
-        // Play Mode: TPS Camera Rotation
         const turnSpeed = event.movementX * 0.003;
         playerGroup.rotation.y -= turnSpeed;
         cameraArm.rotation.x -= event.movementY * 0.003;
-        // Clamp pitch so camera doesn't flip
         cameraArm.rotation.x = Math.max(-Math.PI / 4, Math.min(Math.PI / 8, cameraArm.rotation.x));
         
         if (window.psxCat) {
@@ -356,10 +359,240 @@ window.addEventListener('wheel', (event) => {
 });
 
 // ==========================================
+// DRAG & DROP TEXTURE PAINTING
+// ==========================================
+
+window.addEventListener('dragover', (e) => {
+    e.preventDefault(); 
+});
+
+window.addEventListener('drop', (e) => {
+    e.preventDefault();
+    if (!isCreatorMode) {
+        alert("Bật Creator Mode (nhấn C) để dán Texture!");
+        return;
+    }
+
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        const file = e.dataTransfer.files[0];
+        if (!file.type.match('image.*')) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const dataUrl = event.target.result;
+            
+            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+
+            const objectsToTest = [...interactables];
+            if (window.psxCat) objectsToTest.push(window.psxCat);
+            const intersects = raycaster.intersectObjects(objectsToTest, true);
+            
+            if (intersects.length > 0) {
+                const hit = intersects[0];
+                const mesh = hit.object;
+                
+                if (!mesh.geometry || mesh.geometry.type !== 'BoxGeometry') return;
+
+                const materialIndex = Math.floor(hit.faceIndex / 2);
+
+                const textureLoader = new THREE.TextureLoader();
+                const tex = textureLoader.load(dataUrl);
+                tex.magFilter = THREE.NearestFilter;
+                tex.minFilter = THREE.NearestFilter;
+                tex.colorSpace = THREE.SRGBColorSpace;
+                
+                if (!Array.isArray(mesh.material)) {
+                    mesh.material = [
+                        mesh.material.clone(), mesh.material.clone(),
+                        mesh.material.clone(), mesh.material.clone(),
+                        mesh.material.clone(), mesh.material.clone()
+                    ];
+                }
+                
+                if (mesh.userData.originalMat) mesh.userData.originalMat = null;
+                
+                mesh.material[materialIndex] = new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff });
+                mesh.userData.originalMat = mesh.material; 
+                
+                if (!mesh.userData.faceTextures) mesh.userData.faceTextures = {};
+                mesh.userData.faceTextures[materialIndex] = dataUrl;
+                
+                // Reset UV data if overwriting with new image
+                if (mesh.userData.uvData && mesh.userData.uvData[materialIndex]) {
+                    delete mesh.userData.uvData[materialIndex];
+                }
+                
+                savePositions();
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// ==========================================
+// UV EDITOR UI
+// ==========================================
+
+let currentUVMesh = null;
+let currentUVFaceIdx = -1;
+let uvBox = { x: 0, y: 0, w: 100, h: 100 };
+let isDraggingUV = false;
+let isResizingUV = false;
+let lastMouse = { x: 0, y: 0 };
+
+window.openUVEditor = function(mesh, faceIdx) {
+    if (!mesh.userData.faceTextures || !mesh.userData.faceTextures[faceIdx]) return;
+    
+    currentUVMesh = mesh;
+    currentUVFaceIdx = faceIdx;
+    
+    const img = document.getElementById('uv-img');
+    img.onload = () => {
+        document.getElementById('uv-editor').style.display = 'block';
+        if(isCreatorMode) transformControl.detach();
+        
+        const w = img.naturalWidth;
+        const h = img.naturalHeight;
+        document.getElementById('uv-wrapper').style.width = w + 'px';
+        document.getElementById('uv-wrapper').style.height = h + 'px';
+        
+        if (mesh.userData.uvData && mesh.userData.uvData[faceIdx]) {
+            const data = mesh.userData.uvData[faceIdx];
+            uvBox.w = data.repeat[0] * w;
+            uvBox.h = data.repeat[1] * h;
+            uvBox.x = data.offset[0] * w;
+            uvBox.y = (1.0 - data.offset[1]) * h - uvBox.h;
+        } else {
+            uvBox = { x: 0, y: 0, w: w, h: h };
+        }
+        
+        updateUVDOM();
+        
+        // Cuộn ảnh sao cho khung uvBox nằm ở giữa màn hình
+        const container = document.getElementById('uv-scroll-container');
+        container.scrollLeft = uvBox.x - container.clientWidth / 2 + uvBox.w / 2;
+        container.scrollTop = uvBox.y - container.clientHeight / 2 + uvBox.h / 2;
+    };
+    img.src = mesh.userData.faceTextures[faceIdx];
+};
+
+window.closeUVEditor = function() {
+    document.getElementById('uv-editor').style.display = 'none';
+    currentUVMesh = null;
+    currentUVFaceIdx = -1;
+};
+
+function updateUVDOM() {
+    const box = document.getElementById('uv-box');
+    box.style.left = uvBox.x + 'px';
+    box.style.top = uvBox.y + 'px';
+    box.style.width = uvBox.w + 'px';
+    box.style.height = uvBox.h + 'px';
+    
+    const dt = document.getElementById('uv-dark-top');
+    const db = document.getElementById('uv-dark-bottom');
+    const dl = document.getElementById('uv-dark-left');
+    const dr = document.getElementById('uv-dark-right');
+    const w = document.getElementById('uv-img').naturalWidth;
+    const h = document.getElementById('uv-img').naturalHeight;
+    
+    dt.style.left = '0'; dt.style.top = '0'; dt.style.width = w + 'px'; dt.style.height = uvBox.y + 'px';
+    db.style.left = '0'; db.style.top = (uvBox.y + uvBox.h) + 'px'; db.style.width = w + 'px'; db.style.height = Math.max(0, h - (uvBox.y + uvBox.h)) + 'px';
+    dl.style.left = '0'; dl.style.top = uvBox.y + 'px'; dl.style.width = uvBox.x + 'px'; dl.style.height = uvBox.h + 'px';
+    dr.style.left = (uvBox.x + uvBox.w) + 'px'; dr.style.top = uvBox.y + 'px'; dr.style.width = Math.max(0, w - (uvBox.x + uvBox.w)) + 'px'; dr.style.height = uvBox.h + 'px';
+}
+
+const uvBoxEl = document.getElementById('uv-box');
+const uvHandle = document.getElementById('uv-handle');
+
+if (uvBoxEl && uvHandle) {
+    uvBoxEl.addEventListener('mousedown', (e) => {
+        if (e.target === uvHandle) return;
+        isDraggingUV = true;
+        lastMouse = { x: e.clientX, y: e.clientY };
+    });
+
+    uvHandle.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        isResizingUV = true;
+        lastMouse = { x: e.clientX, y: e.clientY };
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isDraggingUV && !isResizingUV) return;
+        
+        // Ngăn bôi đen chữ khi kéo
+        e.preventDefault();
+
+        const dx = e.clientX - lastMouse.x;
+        const dy = e.clientY - lastMouse.y;
+        lastMouse = { x: e.clientX, y: e.clientY };
+        
+        const w = document.getElementById('uv-img').naturalWidth;
+        const h = document.getElementById('uv-img').naturalHeight;
+        
+        if (isResizingUV) {
+            uvBox.w = Math.max(5, uvBox.w + dx);
+            uvBox.h = Math.max(5, uvBox.h + dy);
+            if (uvBox.x + uvBox.w > w) uvBox.w = w - uvBox.x;
+            if (uvBox.y + uvBox.h > h) uvBox.h = h - uvBox.y;
+        } else if (isDraggingUV) {
+            uvBox.x += dx;
+            uvBox.y += dy;
+            if (uvBox.x < 0) uvBox.x = 0;
+            if (uvBox.y < 0) uvBox.y = 0;
+            if (uvBox.x + uvBox.w > w) uvBox.x = w - uvBox.w;
+            if (uvBox.y + uvBox.h > h) uvBox.y = h - uvBox.h;
+        }
+        
+        updateUVDOM();
+        updateUVOnMesh();
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (isDraggingUV || isResizingUV) {
+            isDraggingUV = false;
+            isResizingUV = false;
+            savePositions();
+        }
+    });
+}
+
+function updateUVOnMesh() {
+    if (!currentUVMesh || currentUVFaceIdx === -1) return;
+    const w = document.getElementById('uv-img').naturalWidth;
+    const h = document.getElementById('uv-img').naturalHeight;
+    
+    if (w === 0 || h === 0) return;
+
+    const u_offset = uvBox.x / w;
+    const v_offset = 1.0 - (uvBox.y + uvBox.h) / h;
+    const u_repeat = uvBox.w / w;
+    const v_repeat = uvBox.h / h;
+    
+    if (!currentUVMesh.userData.uvData) currentUVMesh.userData.uvData = {};
+    currentUVMesh.userData.uvData[currentUVFaceIdx] = {
+        offset: [u_offset, v_offset],
+        repeat: [u_repeat, v_repeat]
+    };
+    
+    const tex = currentUVMesh.material[currentUVFaceIdx].map;
+    if (tex) {
+        tex.offset.set(u_offset, v_offset);
+        tex.repeat.set(u_repeat, v_repeat);
+        tex.needsUpdate = true;
+    }
+}
+
+// ==========================================
 // INPUT HANDLING
 // ==========================================
 
 function onKeyDown(event) {
+    if (document.getElementById('uv-editor').style.display === 'block') return; // block inputs when editing UV
+
     if (isCreatorMode) {
         switch (event.code) {
             case 'KeyC': toggleCreatorMode(); break;
@@ -367,7 +600,6 @@ function onKeyDown(event) {
             case 'KeyT': transformControl.setMode('translate'); break;
             case 'KeyR': transformControl.setMode('rotate'); break;
             case 'KeyX': toggleSnap(); break;
-            // WASD for flying
             case 'ArrowUp':
             case 'KeyW': moveState.forward = true; break;
             case 'ArrowLeft':
@@ -407,7 +639,7 @@ function onKeyUp(event) {
 }
 
 // ==========================================
-// CORE LOOP & DATA
+// CORE LOOP
 // ==========================================
 
 function onWindowResize() {
@@ -424,7 +656,6 @@ function animate() {
     const delta = (time - prevTime) / 1000;
 
     if (isPointerLocked && !isCreatorMode) {
-        // Play Mode: Walking the Cat (TPS)
         const walkSpeed = 3.0;
         let isMoving = false;
 
@@ -433,34 +664,30 @@ function animate() {
         if (moveState.left) { playerGroup.translateX(-walkSpeed * delta); isMoving = true; }
         if (moveState.right) { playerGroup.translateX(walkSpeed * delta); isMoving = true; }
 
-        // Cat Animation
         if (window.psxCat) {
             const cat = window.psxCat;
             const catTime = time * 0.002;
             
-            // Handle turning velocity decay
             cat.userData.turnVelocity = cat.userData.turnVelocity || 0;
             if (cat.userData.turnTarget) {
                 cat.userData.turnVelocity = THREE.MathUtils.lerp(cat.userData.turnVelocity, cat.userData.turnTarget, 0.5);
-                cat.userData.turnTarget = 0; // reset target
+                cat.userData.turnTarget = 0; 
             } else {
-                cat.userData.turnVelocity *= 0.8; // decay
+                cat.userData.turnVelocity *= 0.8; 
             }
 
             const isTurning = Math.abs(cat.userData.turnVelocity) > 0.001;
 
             if (isMoving || isTurning) {
-                // Walk cycle (runs when moving OR turning)
                 const animSpeed = isMoving ? 5 : 8; 
-                cat.userData.legs[0].rotation.x = Math.sin(time * 0.01 * animSpeed) * 0.5; // FL
-                cat.userData.legs[3].rotation.x = Math.sin(time * 0.01 * animSpeed) * 0.5; // BR
-                cat.userData.legs[1].rotation.x = Math.sin(time * 0.01 * animSpeed + Math.PI) * 0.5; // FR
-                cat.userData.legs[2].rotation.x = Math.sin(time * 0.01 * animSpeed + Math.PI) * 0.5; // BL
+                cat.userData.legs[0].rotation.x = Math.sin(time * 0.01 * animSpeed) * 0.5; 
+                cat.userData.legs[3].rotation.x = Math.sin(time * 0.01 * animSpeed) * 0.5; 
+                cat.userData.legs[1].rotation.x = Math.sin(time * 0.01 * animSpeed + Math.PI) * 0.5; 
+                cat.userData.legs[2].rotation.x = Math.sin(time * 0.01 * animSpeed + Math.PI) * 0.5; 
                 
-                cat.userData.tail.rotation.z = Math.sin(catTime * 8) * 0.3; // Fast wag
-                cat.userData.body.position.y = 0.35 + Math.sin(time * 0.02 * animSpeed) * 0.02; // Bounce
+                cat.userData.tail.rotation.z = Math.sin(catTime * 8) * 0.3; 
+                cat.userData.body.position.y = 0.35 + Math.sin(time * 0.02 * animSpeed) * 0.02; 
             } else {
-                // Idle
                 cat.userData.legs.forEach(leg => leg.rotation.x = 0);
                 cat.userData.body.position.y = 0.35;
                 const breath = 1 + Math.sin(catTime * 2) * 0.05;
@@ -469,13 +696,10 @@ function animate() {
             }
             
             cat.userData.tail.rotation.x = 0.5 + Math.sin(catTime * 1.5) * 0.1;
-            
-            // Head turning based on mouse movement instead of automatic bobbing
             cat.userData.head.rotation.y = THREE.MathUtils.clamp(-cat.userData.turnVelocity * 15.0, -Math.PI/3, Math.PI/3);
         }
 
-    } else if (isCreatorMode) {
-        // Creator Mode: Flying freely (Unity style)
+    } else if (isCreatorMode && document.getElementById('uv-editor').style.display !== 'block') {
         velocity.x -= velocity.x * 10.0 * delta;
         velocity.z -= velocity.z * 10.0 * delta;
 
@@ -487,7 +711,6 @@ function animate() {
         if (moveState.forward || moveState.backward) velocity.z -= direction.z * flySpeed * delta;
         if (moveState.left || moveState.right) velocity.x -= direction.x * flySpeed * delta;
 
-        // Apply local translation directly to camera for flying
         camera.translateX(-velocity.x * delta);
         camera.translateZ(velocity.z * delta);
     }
@@ -497,35 +720,147 @@ function animate() {
 }
 
 // ==========================================
-// HELPERS
+// INDEXEDDB SAVE & HELPERS
 // ==========================================
+
+function idbSave(data) {
+    const request = indexedDB.open('psx_db', 1);
+    request.onupgradeneeded = (e) => {
+        e.target.result.createObjectStore('saves');
+    };
+    request.onsuccess = (e) => {
+        const db = e.target.result;
+        const tx = db.transaction('saves', 'readwrite');
+        tx.objectStore('saves').put(data, 'main_save');
+    };
+}
+
+function idbLoad(callback) {
+    const request = indexedDB.open('psx_db', 1);
+    request.onupgradeneeded = (e) => {
+        e.target.result.createObjectStore('saves');
+    };
+    request.onsuccess = (e) => {
+        const db = e.target.result;
+        const tx = db.transaction('saves', 'readonly');
+        if (!db.objectStoreNames.contains('saves')) return callback(null);
+        const getReq = tx.objectStore('saves').get('main_save');
+        getReq.onsuccess = () => callback(getReq.result);
+        getReq.onerror = () => callback(null);
+    };
+}
+
+function getMeshPath(mesh, root) {
+    if (mesh === root) return "";
+    let path = [];
+    let curr = mesh;
+    while (curr && curr !== root) {
+        let parent = curr.parent;
+        let index = parent.children.indexOf(curr);
+        path.unshift(index);
+        curr = parent;
+    }
+    return path.join('.');
+}
+
+function getMeshByPath(root, pathStr) {
+    if (pathStr === "") return root;
+    let parts = pathStr.split('.');
+    let curr = root;
+    for(let p of parts) {
+        curr = curr.children[parseInt(p)];
+        if(!curr) return null;
+    }
+    return curr;
+}
 
 function savePositions() {
     const data = {};
-    interactables.forEach(obj => {
-        data[obj.userData.id] = {
+    const objs = [...interactables];
+    if (window.psxCat) objs.push(window.psxCat);
+
+    objs.forEach(obj => {
+        const objData = {
             position: obj.position.toArray(),
-            rotation: obj.rotation.toArray().slice(0,3)
+            rotation: obj.rotation.toArray().slice(0,3),
+            textures: {}
         };
+        
+        obj.traverse((child) => {
+            if (child.isMesh && child.userData.faceTextures) {
+                const path = getMeshPath(child, obj);
+                objData.textures[path] = {
+                    faces: child.userData.faceTextures,
+                    uvs: child.userData.uvData || {}
+                };
+            }
+        });
+        
+        data[obj.userData.id] = objData;
     });
-    localStorage.setItem('psx_save', JSON.stringify(data));
+    idbSave(data);
 }
 
 function loadPositions() {
-    const saved = localStorage.getItem('psx_save');
-    if (saved) {
-        const data = JSON.parse(saved);
-        interactables.forEach(obj => {
+    idbLoad((data) => {
+        if (!data) return;
+        const objs = [...interactables];
+        if (window.psxCat) objs.push(window.psxCat);
+
+        objs.forEach(obj => {
             if (data[obj.userData.id]) {
-                obj.position.fromArray(data[obj.userData.id].position);
-                obj.rotation.fromArray(data[obj.userData.id].rotation);
+                const d = data[obj.userData.id];
+                if (d.position && obj.userData.id !== 'cat_1') { 
+                    obj.position.fromArray(d.position);
+                    obj.rotation.fromArray(d.rotation);
+                }
+                
+                if (d.textures) {
+                    for (let pathStr in d.textures) {
+                        const mesh = getMeshByPath(obj, pathStr);
+                        if (mesh) {
+                            if (!mesh.userData.faceTextures) mesh.userData.faceTextures = {};
+                            if (!mesh.userData.uvData) mesh.userData.uvData = {};
+                            
+                            const faceMap = d.textures[pathStr].faces;
+                            const uvMap = d.textures[pathStr].uvs || {};
+                            
+                            for (let faceIdx in faceMap) {
+                                const dataUrl = faceMap[faceIdx];
+                                mesh.userData.faceTextures[faceIdx] = dataUrl;
+
+                                const tex = new THREE.TextureLoader().load(dataUrl);
+                                tex.magFilter = THREE.NearestFilter;
+                                tex.minFilter = THREE.NearestFilter;
+                                tex.colorSpace = THREE.SRGBColorSpace;
+                                
+                                if (uvMap[faceIdx]) {
+                                    mesh.userData.uvData[faceIdx] = uvMap[faceIdx];
+                                    tex.offset.fromArray(uvMap[faceIdx].offset);
+                                    tex.repeat.fromArray(uvMap[faceIdx].repeat);
+                                }
+                                
+                                if (!Array.isArray(mesh.material)) {
+                                    mesh.material = [
+                                        mesh.material.clone(), mesh.material.clone(),
+                                        mesh.material.clone(), mesh.material.clone(),
+                                        mesh.material.clone(), mesh.material.clone()
+                                    ];
+                                }
+                                mesh.userData.originalMat = null;
+                                mesh.material[faceIdx] = new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff });
+                                mesh.userData.originalMat = mesh.material;
+                            }
+                        }
+                    }
+                }
             }
         });
-    }
+    });
 }
 
 function getFurnitureParent(object) {
-    if (object.userData && object.userData.isFurniture) return object;
+    if (object.userData && (object.userData.isFurniture || object.userData.id === 'cat_1')) return object;
     if (object.parent) return getFurnitureParent(object.parent);
     return null;
 }
@@ -595,32 +930,27 @@ function createChair(material) {
 
 function createCat() {
     const catGroup = new THREE.Group();
-    // Use an orange color with basic material for PSX look
     const catMat = new THREE.MeshLambertMaterial({ color: 0xd97c2b });
     const darkMat = new THREE.MeshLambertMaterial({ color: 0x4a280b });
 
-    catGroup.userData = {};
+    catGroup.userData = { id: 'cat_1' };
 
-    // Body
     const bodyGeo = new THREE.BoxGeometry(0.3, 0.25, 0.6);
     const body = new THREE.Mesh(bodyGeo, catMat);
     body.position.set(0, 0.35, 0);
     catGroup.add(body);
     catGroup.userData.body = body;
 
-    // Head Pivot
     const headGroup = new THREE.Group();
-    headGroup.position.set(0, 0.45, -0.35); // Front of the body
+    headGroup.position.set(0, 0.45, -0.35); 
     catGroup.add(headGroup);
     catGroup.userData.head = headGroup;
 
-    // Head Mesh
     const headGeo = new THREE.BoxGeometry(0.25, 0.25, 0.25);
     const head = new THREE.Mesh(headGeo, catMat);
     head.position.set(0, 0.1, -0.1);
     headGroup.add(head);
 
-    // Ears
     const earGeo = new THREE.BoxGeometry(0.08, 0.1, 0.05);
     const earL = new THREE.Mesh(earGeo, darkMat);
     earL.position.set(0.08, 0.25, -0.1);
@@ -629,25 +959,22 @@ function createCat() {
     earR.position.set(-0.08, 0.25, -0.1);
     headGroup.add(earR);
 
-    // Tail Pivot
     const tailGroup = new THREE.Group();
-    tailGroup.position.set(0, 0.45, 0.3); // Back of the body
+    tailGroup.position.set(0, 0.45, 0.3); 
     catGroup.add(tailGroup);
     catGroup.userData.tail = tailGroup;
 
-    // Tail Mesh
     const tailGeo = new THREE.BoxGeometry(0.05, 0.4, 0.05);
     const tail = new THREE.Mesh(tailGeo, darkMat);
-    tail.position.set(0, 0.2, 0); // Offset so it rotates from base
+    tail.position.set(0, 0.2, 0); 
     tailGroup.add(tail);
 
-    // Legs
     const legGeo = new THREE.BoxGeometry(0.06, 0.25, 0.06);
     const positions = [
-        [-0.12, 0.25, -0.2], // Front Right
-        [0.12, 0.25, -0.2],  // Front Left
-        [-0.12, 0.25, 0.2],  // Back Right
-        [0.12, 0.25, 0.2]    // Back Left
+        [-0.12, 0.25, -0.2], 
+        [0.12, 0.25, -0.2],  
+        [-0.12, 0.25, 0.2],  
+        [0.12, 0.25, 0.2]    
     ];
 
     catGroup.userData.legs = [];
@@ -657,7 +984,7 @@ function createCat() {
         catGroup.add(legPivot);
 
         const leg = new THREE.Mesh(legGeo, catMat);
-        leg.position.set(0, -0.125, 0); // Offset to rotate from hip
+        leg.position.set(0, -0.125, 0); 
         legPivot.add(leg);
 
         catGroup.userData.legs.push(legPivot);
