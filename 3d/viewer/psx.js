@@ -17,6 +17,87 @@ let playerVelocityY = 0;
 let isGrounded = true;
 let isFPSView = false;
 
+// Texture Cache for optimization
+const loadedTextureCache = {};
+const textureLoader = new THREE.TextureLoader();
+
+function getOrCreateTexture(url, hasCustomUV) {
+    if (!loadedTextureCache[url]) {
+        const tex = textureLoader.load(url);
+        tex.magFilter = THREE.NearestFilter;
+        tex.minFilter = THREE.NearestFilter;
+        tex.generateMipmaps = false;
+        tex.wrapS = THREE.RepeatWrapping;
+        tex.wrapT = THREE.RepeatWrapping;
+        tex.colorSpace = THREE.SRGBColorSpace;
+        loadedTextureCache[url] = tex;
+    }
+    if (hasCustomUV) {
+        const cloned = loadedTextureCache[url].clone();
+        cloned.userData.isUnique = true;
+        return cloned;
+    }
+    return loadedTextureCache[url];
+}
+
+// Undo system
+const undoStack = [];
+const MAX_UNDO = 30;
+function pushUndo() {
+    const state = [];
+    interactables.forEach(obj => {
+        const meshStates = [];
+        obj.traverse(child => {
+            if (child.isMesh) {
+                const ft = child.userData.faceTextures ? JSON.parse(JSON.stringify(child.userData.faceTextures)) : null;
+                const uv = child.userData.uvData ? JSON.parse(JSON.stringify(child.userData.uvData)) : null;
+                meshStates.push({ uuid: child.uuid, faceTextures: ft, uvData: uv });
+            }
+        });
+        state.push({
+            id: obj.userData.id,
+            pos: obj.position.clone(),
+            rot: obj.rotation.clone(),
+            meshStates
+        });
+    });
+    undoStack.push(state);
+    if (undoStack.length > MAX_UNDO) undoStack.shift();
+}
+function undo() {
+    if (undoStack.length === 0) return;
+    const state = undoStack.pop();
+    state.forEach(saved => {
+        const obj = interactables.find(o => o.userData.id === saved.id);
+        if (!obj) return;
+        obj.position.copy(saved.pos);
+        obj.rotation.copy(saved.rot);
+        saved.meshStates.forEach(ms => {
+            obj.traverse(child => {
+                if (child.isMesh && child.uuid === ms.uuid) {
+                    if (ms.faceTextures) {
+                        child.userData.faceTextures = ms.faceTextures;
+                        const loader = new THREE.TextureLoader();
+                        if (!Array.isArray(child.material)) {
+                            child.material = [child.material.clone(), child.material.clone(), child.material.clone(), child.material.clone(), child.material.clone(), child.material.clone()];
+                        }
+                        Object.keys(ms.faceTextures).forEach(fi => {
+                            const tex = loader.load(ms.faceTextures[fi]);
+                            tex.magFilter = THREE.NearestFilter;
+                            tex.minFilter = THREE.NearestFilter;
+                            tex.colorSpace = THREE.SRGBColorSpace;
+                            child.material[fi] = new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff });
+                        });
+                        child.userData.originalMat = child.material;
+                    }
+                    if (ms.uvData) child.userData.uvData = ms.uvData;
+                }
+            });
+        });
+    });
+    savePositions();
+}
+
 // Custom Editor Camera Variables
 let isRightMouseDown = false;
 let isZooming = false;
@@ -131,62 +212,73 @@ function init() {
     const floorGeo = new THREE.PlaneGeometry(roomSize, roomSize);
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
+    floor.userData = { id: 'floor', isFurniture: true };
+    interactables.push(floor);
     group.add(floor);
 
     const ceil = new THREE.Mesh(floorGeo, ceilMat);
     ceil.rotation.x = Math.PI / 2;
     ceil.position.y = roomHeight;
+    ceil.userData = { id: 'ceil', isFurniture: true };
+    interactables.push(ceil);
     group.add(ceil);
 
     const wallGeo = new THREE.PlaneGeometry(roomSize, roomHeight);
     
     const wall1 = new THREE.Mesh(wallGeo, wallMat);
     wall1.position.set(0, roomHeight/2, -roomSize/2);
+    wall1.userData = { id: 'wall_1', isFurniture: true };
+    interactables.push(wall1);
     group.add(wall1);
 
     const wall2 = new THREE.Mesh(wallGeo, wallMat);
     wall2.position.set(0, roomHeight/2, roomSize/2);
     wall2.rotation.y = Math.PI;
+    wall2.userData = { id: 'wall_2', isFurniture: true };
+    interactables.push(wall2);
     group.add(wall2);
 
     const wall3 = new THREE.Mesh(wallGeo, wallMat);
     wall3.position.set(-roomSize/2, roomHeight/2, 0);
     wall3.rotation.y = Math.PI / 2;
+    wall3.userData = { id: 'wall_3', isFurniture: true };
+    interactables.push(wall3);
     group.add(wall3);
 
     const wall4 = new THREE.Mesh(wallGeo, wallMat);
     wall4.position.set(roomSize/2, roomHeight/2, 0);
     wall4.rotation.y = -Math.PI / 2;
+    wall4.userData = { id: 'wall_4', isFurniture: true };
+    interactables.push(wall4);
     group.add(wall4);
 
     // === INTERIOR WALLS (Rooms) ===
-    // Living room divider wall (partial, with doorway)
-    const divWallGeo1 = new THREE.BoxGeometry(0.2, roomHeight, 12);
-    const divWall1 = new THREE.Mesh(divWallGeo1, wallMat);
-    divWall1.position.set(0, roomHeight/2, -14);
-    divWall1.userData = { id: 'divwall_1', isFurniture: true };
-    interactables.push(divWall1);
-    group.add(divWall1);
+    // Wall A: Horizontal wall dividing North/South, with doorway gap in the middle
+    // Left segment (x: -20 to -2)
+    const wallA1Geo = new THREE.BoxGeometry(16, roomHeight, 0.2);
+    const wallA1 = new THREE.Mesh(wallA1Geo, wallMat);
+    wallA1.position.set(-12, roomHeight/2, 0);
+    wallA1.userData = { id: 'divwall_a1', isFurniture: true };
+    interactables.push(wallA1);
+    group.add(wallA1);
+    // Right segment (x: 2 to 20)
+    const wallA2Geo = new THREE.BoxGeometry(16, roomHeight, 0.2);
+    const wallA2 = new THREE.Mesh(wallA2Geo, wallMat);
+    wallA2.position.set(12, roomHeight/2, 0);
+    wallA2.userData = { id: 'divwall_a2', isFurniture: true };
+    interactables.push(wallA2);
+    group.add(wallA2);
+    // (Gap from x=-4 to x=4 is the doorway)
 
-    // Kitchen divider wall
-    const divWallGeo2 = new THREE.BoxGeometry(12, roomHeight, 0.2);
-    const divWall2 = new THREE.Mesh(divWallGeo2, wallMat);
-    divWall2.position.set(-14, roomHeight/2, 0);
-    divWall2.userData = { id: 'divwall_2', isFurniture: true };
-    interactables.push(divWall2);
-    group.add(divWall2);
-
-    // === PILLARS (reduced) ===
-    const pillarGeo = new THREE.BoxGeometry(0.8, roomHeight, 0.8);
-    for (let i = 0; i < 4; i++) {
-        const pillar = new THREE.Mesh(pillarGeo, wallMat);
-        const px = [-8, 8, -8, 8][i];
-        const pz = [8, 8, -8, -8][i];
-        pillar.position.set(px, roomHeight / 2, pz);
-        pillar.userData = { id: `pillar_${i}`, isFurniture: true };
-        interactables.push(pillar);
-        group.add(pillar);
-    }
+    // Wall B: Vertical wall dividing West/East on the South side, with doorway
+    // South segment (z: 2 to 20)
+    const wallB1Geo = new THREE.BoxGeometry(0.2, roomHeight, 16);
+    const wallB1 = new THREE.Mesh(wallB1Geo, wallMat);
+    wallB1.position.set(-4, roomHeight/2, 12);
+    wallB1.userData = { id: 'divwall_b1', isFurniture: true };
+    interactables.push(wallB1);
+    group.add(wallB1);
+    // (Gap from z=0 to z=4 is the kitchen doorway)
 
     // === LIVING ROOM (center-south) ===
     const table = createTable(wallMat);
@@ -408,8 +500,61 @@ function onMouseDown(event) {
             if (intersects.length > 0) {
                 const hit = intersects[0];
                 const mesh = hit.object;
-                if (!mesh.geometry || mesh.geometry.type !== 'BoxGeometry') return;
-                window.openUVEditor(mesh);
+                if (!mesh.geometry) return;
+                const faceIdx = mesh.geometry.type === 'BoxGeometry' ? Math.floor(hit.faceIndex / 2) : 0;
+                window.openUVEditor(mesh, faceIdx);
+            }
+            return;
+        }
+
+        // Texture Palette: apply selected texture on click
+        if (selectedPaletteTexture && intersects.length > 0) {
+            const hit = intersects[0];
+            let target = getFurnitureParent(hit.object);
+            if (!target) target = hit.object; // Fallback cho mèo hoặc object tự do
+            
+            if (target) {
+                pushUndo();
+                const tex = getOrCreateTexture(selectedPaletteTexture, false);
+                target.traverse((child) => {
+                    if (child.isMesh && child.geometry) {
+                        const isBox = child.geometry.type === 'BoxGeometry';
+                        if (isBox) {
+                            if (!Array.isArray(child.material)) {
+                                child.material = [
+                                    new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff }),
+                                    new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff }),
+                                    new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff }),
+                                    new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff }),
+                                    new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff }),
+                                    new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff })
+                                ];
+                            } else {
+                                for (let i = 0; i < 6; i++) {
+                                    child.material[i] = new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff });
+                                }
+                            }
+                            if (child.userData.originalMat) child.userData.originalMat = null;
+                            if (!child.userData.faceTextures) child.userData.faceTextures = {};
+                            for (let i = 0; i < 6; i++) {
+                                child.userData.faceTextures[i] = selectedPaletteTexture;
+                                if (child.userData.uvData && child.userData.uvData[i]) {
+                                    delete child.userData.uvData[i];
+                                }
+                            }
+                        } else {
+                            child.material = new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff });
+                            if (child.userData.originalMat) child.userData.originalMat = null;
+                            if (!child.userData.faceTextures) child.userData.faceTextures = {};
+                            child.userData.faceTextures[0] = selectedPaletteTexture;
+                            if (child.userData.uvData && child.userData.uvData[0]) {
+                                delete child.userData.uvData[0];
+                            }
+                        }
+                        child.userData.originalMat = child.material;
+                    }
+                });
+                savePositions();
             }
             return;
         }
@@ -454,6 +599,7 @@ function onMouseUp(event) {
 }
 
 function onMouseMove(event) {
+    if (document.getElementById('uv-editor').style.display === 'flex') return;
     if (isCreatorMode) {
         if (event.ctrlKey && event.buttons > 0) {
             const zoomSpeed = 0.02;
@@ -539,42 +685,51 @@ window.addEventListener('drop', (e) => {
                 const objectsToTest = [...interactables];
                 if (window.psxCat) objectsToTest.push(window.psxCat);
                 const intersects = raycaster.intersectObjects(objectsToTest, true);
-                
                 if (intersects.length > 0) {
+                    pushUndo();
                     const hit = intersects[0];
-                    const target = getFurnitureParent(hit.object);
+                    let target = getFurnitureParent(hit.object);
+                    if (!target) target = hit.object;
                     
-                    const textureLoader = new THREE.TextureLoader();
-                    const tex = textureLoader.load(dataUrl);
-                    tex.magFilter = THREE.NearestFilter;
-                    tex.minFilter = THREE.NearestFilter;
-                    tex.colorSpace = THREE.SRGBColorSpace;
-                    
+                    const tex = getOrCreateTexture(dataUrl, false);
                     target.traverse((child) => {
-                        if (child.isMesh && child.geometry && child.geometry.type === 'BoxGeometry') {
-                            if (!Array.isArray(child.material)) {
-                                child.material = [
-                                    child.material.clone(), child.material.clone(),
-                                    child.material.clone(), child.material.clone(),
-                                    child.material.clone(), child.material.clone()
-                                ];
-                            }
-                            
-                            if (child.userData.originalMat) child.userData.originalMat = null;
-                            
-                            for (let i = 0; i < 6; i++) {
-                                const clonedTex = tex.clone();
-                                child.material[i] = new THREE.MeshLambertMaterial({ map: clonedTex, color: 0xffffff });
+                        if (child.isMesh && child.geometry) {
+                            const isBox = child.geometry.type === 'BoxGeometry';
+                            if (isBox) {
+                                if (!Array.isArray(child.material)) {
+                                    child.material = [
+                                        new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff }),
+                                        new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff }),
+                                        new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff }),
+                                        new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff }),
+                                        new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff }),
+                                        new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff })
+                                    ];
+                                } else {
+                                    for (let i = 0; i < 6; i++) {
+                                        child.material[i] = new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff });
+                                    }
+                                }
+                                if (child.userData.originalMat) child.userData.originalMat = null;
                                 if (!child.userData.faceTextures) child.userData.faceTextures = {};
-                                child.userData.faceTextures[i] = dataUrl;
-                                if (child.userData.uvData && child.userData.uvData[i]) {
-                                    delete child.userData.uvData[i];
+                                for (let i = 0; i < 6; i++) {
+                                    child.userData.faceTextures[i] = dataUrl;
+                                    if (child.userData.uvData && child.userData.uvData[i]) {
+                                        delete child.userData.uvData[i];
+                                    }
+                                }
+                            } else {
+                                child.material = new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff });
+                                if (child.userData.originalMat) child.userData.originalMat = null;
+                                if (!child.userData.faceTextures) child.userData.faceTextures = {};
+                                child.userData.faceTextures[0] = dataUrl;
+                                if (child.userData.uvData && child.userData.uvData[0]) {
+                                    delete child.userData.uvData[0];
                                 }
                             }
                             child.userData.originalMat = child.material;
                         }
                     });
-                    
                     savePositions();
                 }
             };
@@ -643,9 +798,10 @@ function onUVPreviewClick(event) {
     if (intersects.length > 0) {
         const hit = intersects[0];
         const cloneMesh = hit.object;
-        if (!cloneMesh.geometry || cloneMesh.geometry.type !== 'BoxGeometry') return;
+        if (!cloneMesh.geometry) return;
 
-        const faceIdx = Math.floor(hit.faceIndex / 2);
+        const isBox = cloneMesh.geometry.type === 'BoxGeometry';
+        const faceIdx = isBox ? Math.floor(hit.faceIndex / 2) : 0;
         activePreviewMesh = uvCloneMap.get(cloneMesh);
         activePreviewCloneMesh = cloneMesh;
         activePreviewFace = faceIdx;
@@ -654,9 +810,16 @@ function onUVPreviewClick(event) {
     }
 }
 
-window.openUVEditor = function(mesh) {
-    const target = getFurnitureParent(mesh);
-    if (!target) return;
+window.openUVEditor = function(mesh, defaultFaceIdx = 0) {
+    let target = getFurnitureParent(mesh);
+    if (!target) {
+        if (window.psxCat) {
+            window.psxCat.traverse(child => {
+                if (child === mesh) target = window.psxCat;
+            });
+        }
+        if (!target) target = mesh;
+    }
 
     let texUrl = null;
     target.traverse(child => {
@@ -664,11 +827,29 @@ window.openUVEditor = function(mesh) {
             texUrl = child.userData.faceTextures[0] || child.userData.faceTextures[4];
         }
     });
-    if (!texUrl) return;
+    if (!texUrl) {
+        alert("Bạn cần dán Texture (Kéo thả hoặc dùng Palette) cho object này trước khi chỉnh UV!");
+        return;
+    }
 
     const img = document.getElementById('uv-img');
     img.onload = () => {
-        document.getElementById('uv-editor').style.display = 'flex';
+        const editorEl = document.getElementById('uv-editor');
+        editorEl.style.display = 'flex';
+        // Block background events from bubbling up for wheel only, let mouse bubble for drag logic
+        editorEl.onwheel = e => {
+            if (!e.ctrlKey) e.stopPropagation();
+        };
+
+        // Allow Ctrl+Scroll to zoom UV Image
+        const uvScroll = document.getElementById('uv-scroll-container');
+        uvScroll.onwheel = (e) => {
+            if (e.ctrlKey) {
+                e.preventDefault();
+                window.zoomUV(e.deltaY > 0 ? -0.1 : 0.1);
+            }
+        };
+
         if(isCreatorMode) transformControl.detach();
 
         initUVPreview();
@@ -681,8 +862,44 @@ window.openUVEditor = function(mesh) {
         // Setup 3D Clone
         if (uvPreviewTarget) uvScene.remove(uvPreviewTarget);
         uvPreviewTarget = target.clone();
-        uvCloneMap.clear();
+        
+        // Ensure clone root is visible
+        uvPreviewTarget.visible = true;
+        const basicMatCache = new Map();
+        uvPreviewTarget.traverse(child => {
+            if (child.isMesh && child.material) {
+                if (Array.isArray(child.material)) {
+                    child.material = child.material.map(mat => {
+                        if (basicMatCache.has(mat)) return basicMatCache.get(mat);
+                        const newMat = new THREE.MeshBasicMaterial({
+                            map: mat.map,
+                            color: mat.color,
+                            transparent: mat.transparent,
+                            opacity: mat.opacity,
+                            side: mat.side
+                        });
+                        basicMatCache.set(mat, newMat);
+                        return newMat;
+                    });
+                } else {
+                    if (basicMatCache.has(child.material)) {
+                        child.material = basicMatCache.get(child.material);
+                    } else {
+                        const newMat = new THREE.MeshBasicMaterial({
+                            map: child.material.map,
+                            color: child.material.color,
+                            transparent: child.material.transparent,
+                            opacity: child.material.opacity,
+                            side: child.material.side
+                        });
+                        basicMatCache.set(child.material, newMat);
+                        child.material = newMat;
+                    }
+                }
+            }
+        });
 
+        uvCloneMap.clear();
         const origMeshes = []; target.traverse(m => origMeshes.push(m));
         const cloneMeshes = []; uvPreviewTarget.traverse(m => cloneMeshes.push(m));
         for(let i=0; i<origMeshes.length; i++) uvCloneMap.set(cloneMeshes[i], origMeshes[i]);
@@ -690,10 +907,13 @@ window.openUVEditor = function(mesh) {
         // Center clone
         const box = new THREE.Box3().setFromObject(uvPreviewTarget);
         const center = box.getCenter(new THREE.Vector3());
+        if (isNaN(center.x) || isNaN(center.y) || isNaN(center.z)) {
+            center.set(0, 0, 0);
+        }
         uvPreviewTarget.position.sub(center);
         uvScene.add(uvPreviewTarget);
 
-        uvCamera.position.set(center.x + 2, center.y + 2, center.z + 2);
+        uvCamera.position.set(2, 2, 2);
         uvControls.target.set(0,0,0);
         
         const container = document.getElementById('uv-3d-preview');
@@ -701,9 +921,23 @@ window.openUVEditor = function(mesh) {
         uvCamera.updateProjectionMatrix();
         uvRenderer.setSize(container.clientWidth, container.clientHeight);
 
-        activePreviewMesh = null;
-        activePreviewFace = -1;
-        document.getElementById('uv-box').style.display = 'none';
+        activePreviewMesh = mesh;
+        activePreviewFace = defaultFaceIdx;
+        
+        let correspondingClone = null;
+        for (let [cloneM, origM] of uvCloneMap.entries()) {
+            if (origM === mesh) {
+                correspondingClone = cloneM;
+                break;
+            }
+        }
+        activePreviewCloneMesh = correspondingClone;
+
+        if (activePreviewMesh) {
+            syncUVBoxFromMesh();
+        } else {
+            document.getElementById('uv-box').style.display = 'none';
+        }
     };
     img.src = texUrl;
 };
@@ -759,6 +993,7 @@ function updateUVDOM() {
     boxEl.style.left = (uvBox.cx - uvBox.w / 2) + 'px';
     boxEl.style.top = (uvBox.cy - uvBox.h / 2) + 'px';
     boxEl.style.transform = `rotate(${uvBox.rotation}rad)`;
+    boxEl.style.background = 'rgba(255, 0, 0, 0.2)'; // Add translucent background to capture clicks
 }
 
 const uvBoxEl = document.getElementById('uv-box');
@@ -797,8 +1032,9 @@ if (uvBoxEl && uvHandle && uvRotateHandle) {
             const angle = Math.atan2(e.clientY - screenCY, e.clientX - screenCX);
             uvBox.rotation = angle + Math.PI / 2;
         } else {
-            const dx = e.clientX - lastMouse.x;
-            const dy = e.clientY - lastMouse.y;
+            const scale = window.uvZoomScale || 1.0;
+            const dx = (e.clientX - lastMouse.x) / scale;
+            const dy = (e.clientY - lastMouse.y) / scale;
             lastMouse = { x: e.clientX, y: e.clientY };
             
             if (isResizingUV) {
@@ -848,15 +1084,42 @@ function updateUVOnMesh() {
     const h = document.getElementById('uv-img').naturalHeight;
     if (w === 0 || h === 0) return;
     
-    if (!Array.isArray(activePreviewMesh.material)) {
-        const matArray = [
-            activePreviewMesh.material.clone(), activePreviewMesh.material.clone(),
-            activePreviewMesh.material.clone(), activePreviewMesh.material.clone(),
-            activePreviewMesh.material.clone(), activePreviewMesh.material.clone()
-        ];
-        activePreviewMesh.material = matArray;
-        if (activePreviewCloneMesh) activePreviewCloneMesh.material = matArray;
-        activePreviewMesh.userData.originalMat = matArray;
+    const isBox = activePreviewMesh.geometry.type === 'BoxGeometry';
+
+    if (isBox) {
+        if (!Array.isArray(activePreviewMesh.material)) {
+            const matArray = [
+                activePreviewMesh.material.clone(), activePreviewMesh.material.clone(),
+                activePreviewMesh.material.clone(), activePreviewMesh.material.clone(),
+                activePreviewMesh.material.clone(), activePreviewMesh.material.clone()
+            ];
+            activePreviewMesh.material = matArray;
+            activePreviewMesh.userData.originalMat = matArray;
+            
+            if (activePreviewCloneMesh) {
+                activePreviewCloneMesh.material = matArray.map(mat => {
+                    return new THREE.MeshBasicMaterial({
+                        map: mat.map,
+                        color: mat.color,
+                        transparent: mat.transparent,
+                        opacity: mat.opacity,
+                        side: mat.side
+                    });
+                });
+            }
+        }
+    } else {
+        // Non-box mesh has a single material. If it's a clone, make sure it is a MeshBasicMaterial
+        if (activePreviewCloneMesh && activePreviewCloneMesh.material && !activePreviewCloneMesh.material.isMeshBasicMaterial) {
+            const origMat = activePreviewMesh.material;
+            activePreviewCloneMesh.material = new THREE.MeshBasicMaterial({
+                map: origMat.map,
+                color: origMat.color,
+                transparent: origMat.transparent,
+                opacity: origMat.opacity,
+                side: origMat.side
+            });
+        }
     }
 
     const u_center = uvBox.cx / w;
@@ -874,20 +1137,61 @@ function updateUVOnMesh() {
         v2: true
     };
     
-    let tex = activePreviewMesh.material[activePreviewFace].map;
-    if (!tex) {
+    let faceMaterial = Array.isArray(activePreviewMesh.material) ? activePreviewMesh.material[activePreviewFace] : activePreviewMesh.material;
+
+    let tex = faceMaterial ? faceMaterial.map : null;
+    if (tex) {
+        if (!tex.userData.isUnique) {
+            tex = tex.clone();
+            tex.userData.isUnique = true;
+            
+            if (Array.isArray(activePreviewMesh.material)) {
+                activePreviewMesh.material[activePreviewFace] = activePreviewMesh.material[activePreviewFace].clone();
+                activePreviewMesh.material[activePreviewFace].map = tex;
+            } else {
+                activePreviewMesh.material = activePreviewMesh.material.clone();
+                activePreviewMesh.material.map = tex;
+            }
+            
+            if (activePreviewCloneMesh) {
+                const sourceMat = Array.isArray(activePreviewMesh.material) ? activePreviewMesh.material[activePreviewFace] : activePreviewMesh.material;
+                const newBasicMat = new THREE.MeshBasicMaterial({
+                    map: tex,
+                    color: sourceMat.color,
+                    transparent: sourceMat.transparent,
+                    opacity: sourceMat.opacity,
+                    side: sourceMat.side
+                });
+                if (Array.isArray(activePreviewCloneMesh.material)) {
+                    activePreviewCloneMesh.material[activePreviewFace] = newBasicMat;
+                } else {
+                    activePreviewCloneMesh.material = newBasicMat;
+                }
+            }
+        }
+    } else {
         const dataUrl = document.getElementById('uv-img').src;
         if (dataUrl && dataUrl.startsWith('data:')) {
             if (!activePreviewMesh.userData.faceTextures) activePreviewMesh.userData.faceTextures = {};
             activePreviewMesh.userData.faceTextures[activePreviewFace] = dataUrl;
             
-            tex = new THREE.TextureLoader().load(dataUrl);
-            tex.magFilter = THREE.NearestFilter;
-            tex.minFilter = THREE.NearestFilter;
-            tex.colorSpace = THREE.SRGBColorSpace;
-            
-            activePreviewMesh.material[activePreviewFace] = new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff });
-            if (activePreviewCloneMesh) activePreviewCloneMesh.material[activePreviewFace] = activePreviewMesh.material[activePreviewFace];
+            tex = getOrCreateTexture(dataUrl, true);
+            const newLambert = new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff });
+            const newBasic = new THREE.MeshBasicMaterial({ map: tex, color: 0xffffff });
+
+            if (Array.isArray(activePreviewMesh.material)) {
+                activePreviewMesh.material[activePreviewFace] = newLambert;
+            } else {
+                activePreviewMesh.material = newLambert;
+            }
+
+            if (activePreviewCloneMesh) {
+                if (Array.isArray(activePreviewCloneMesh.material)) {
+                    activePreviewCloneMesh.material[activePreviewFace] = newBasic;
+                } else {
+                    activePreviewCloneMesh.material = newBasic;
+                }
+            }
         }
     }
 
@@ -905,6 +1209,13 @@ function updateUVOnMesh() {
 // ==========================================
 
 function onKeyDown(event) {
+    // Ctrl+Z Undo
+    if (event.ctrlKey && event.code === 'KeyZ') {
+        event.preventDefault();
+        undo();
+        return;
+    }
+
     if (document.getElementById('uv-editor').style.display === 'flex') {
         if (event.code === 'KeyR' && activePreviewMesh && activePreviewFace !== -1) {
             uvBox.rotation += Math.PI / 2;
@@ -920,6 +1231,7 @@ function onKeyDown(event) {
             case 'KeyC': toggleCreatorMode(); break;
             case 'KeyE': exportScene(); break;
             case 'KeyH': toggleUIVisibility(); break;
+            case 'KeyP': toggleTexturePalette(); break;
             case 'KeyT': transformControl.setMode('translate'); break;
             case 'KeyR': transformControl.setMode('rotate'); break;
             case 'KeyX': toggleSnap(); break;
@@ -1153,13 +1465,14 @@ function animate() {
                             scene.fog.color.setHex(0x224433);
                             scene.fog.density = 0.08;
                             scene.background.setHex(0x224433);
+                            if (cat.userData.eyes) cat.userData.eyes.forEach(e => e.visible = true);
                         } else {
-
                             window.ambientLight.intensity = 0.1;
                             window.ambientLight.color.setHex(0xffffff);
                             scene.fog.color.setHex(0x020202);
                             scene.fog.density = 0.15;
                             scene.background.setHex(0x020202);
+                            if (cat.userData.eyes) cat.userData.eyes.forEach(e => e.visible = false);
                         }
                         cat.userData.toggledThisCycle = true;
                     }
@@ -1356,12 +1669,10 @@ function loadPositions() {
                                 }
                                 mesh.userData.faceTextures[faceIdx] = dataUrl;
 
-                                const tex = new THREE.TextureLoader().load(dataUrl);
-                                tex.magFilter = THREE.NearestFilter;
-                                tex.minFilter = THREE.NearestFilter;
-                                tex.colorSpace = THREE.SRGBColorSpace;
+                                const hasCustomUV = !!uvMap[faceIdx];
+                                const tex = getOrCreateTexture(dataUrl, hasCustomUV);
                                 
-                                if (uvMap[faceIdx]) {
+                                if (hasCustomUV) {
                                     mesh.userData.uvData[faceIdx] = uvMap[faceIdx];
                                     tex.offset.fromArray(uvMap[faceIdx].offset);
                                     tex.repeat.fromArray(uvMap[faceIdx].repeat);
@@ -1582,12 +1893,14 @@ function createCat() {
     const eyeGlowGeo = new THREE.BoxGeometry(0.04, 0.04, 0.04);
     const eyeL = new THREE.Mesh(eyeGlowGeo, eyeGlowMat);
     eyeL.position.set(0.06, 0.15, -0.23);
+    eyeL.visible = false;
     headGroup.add(eyeL);
     const eyeR = new THREE.Mesh(eyeGlowGeo, eyeGlowMat);
     eyeR.position.set(-0.06, 0.15, -0.23);
+    eyeR.visible = false;
     headGroup.add(eyeR);
     catGroup.userData.eyes = [eyeL, eyeR];
-    catGroup.userData.isFlashlightOn = true;
+    catGroup.userData.isFlashlightOn = false;
 
     return catGroup;
 }
@@ -1711,3 +2024,72 @@ function createLamp() {
     group.add(light);
     return group;
 }
+
+// ==========================================
+// TEXTURE PALETTE SYSTEM
+// ==========================================
+
+let texturePaletteOpen = false;
+let selectedPaletteTexture = null;
+
+function toggleTexturePalette() {
+    texturePaletteOpen = !texturePaletteOpen;
+    const panel = document.getElementById('texture-palette');
+    panel.style.display = texturePaletteOpen ? 'block' : 'none';
+    if (texturePaletteOpen) loadTexturePalette();
+}
+
+function loadTexturePalette() {
+    fetch('/list-textures')
+        .then(r => r.json())
+        .then(files => {
+            const grid = document.getElementById('tex-grid');
+            grid.innerHTML = '';
+            files.forEach(path => {
+                const img = document.createElement('img');
+                img.src = path + '?t=' + Date.now();
+                img.className = 'tex-item';
+                img.title = path.split('/').pop();
+                img.addEventListener('click', () => {
+                    document.querySelectorAll('.tex-item').forEach(e => e.classList.remove('selected'));
+                    img.classList.add('selected');
+                    selectedPaletteTexture = path;
+                });
+                grid.appendChild(img);
+            });
+        })
+        .catch(err => console.warn('Cannot load textures:', err));
+}
+
+window.uploadTextures = function(fileList) {
+    Array.from(fileList).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const base64 = e.target.result.split(',')[1];
+            fetch('/upload-texture', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: file.name, data: base64 })
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.status === 'success') {
+                    loadTexturePalette();
+                }
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+};
+
+window.uvZoomScale = 1.0;
+window.zoomUV = function(delta) {
+    window.uvZoomScale = Math.max(0.2, Math.min(5.0, window.uvZoomScale + delta));
+    document.getElementById('uv-wrapper').style.transform = `scale(${window.uvZoomScale})`;
+};
+window.resetZoomUV = function() {
+    window.uvZoomScale = 1.0;
+    document.getElementById('uv-wrapper').style.transform = `scale(1.0)`;
+};
+
+window.toggleTexturePalette = toggleTexturePalette;
