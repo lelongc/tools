@@ -438,6 +438,7 @@ let uvScene, uvCamera, uvRenderer, uvControls;
 let uvPreviewTarget = null;
 let uvCloneMap = new Map();
 let activePreviewMesh = null;
+let activePreviewCloneMesh = null;
 let activePreviewFace = -1;
 
 let uvBox = { cx: 50, cy: 50, w: 100, h: 100, rotation: 0 };
@@ -492,6 +493,7 @@ function onUVPreviewClick(event) {
 
         const faceIdx = Math.floor(hit.faceIndex / 2);
         activePreviewMesh = uvCloneMap.get(cloneMesh);
+        activePreviewCloneMesh = cloneMesh;
         activePreviewFace = faceIdx;
 
         syncUVBoxFromMesh();
@@ -690,12 +692,22 @@ function updateUVOnMesh() {
     const w = document.getElementById('uv-img').naturalWidth;
     const h = document.getElementById('uv-img').naturalHeight;
     if (w === 0 || h === 0) return;
+    
+    if (!Array.isArray(activePreviewMesh.material)) {
+        const matArray = [
+            activePreviewMesh.material.clone(), activePreviewMesh.material.clone(),
+            activePreviewMesh.material.clone(), activePreviewMesh.material.clone(),
+            activePreviewMesh.material.clone(), activePreviewMesh.material.clone()
+        ];
+        activePreviewMesh.material = matArray;
+        if (activePreviewCloneMesh) activePreviewCloneMesh.material = matArray;
+        activePreviewMesh.userData.originalMat = matArray;
+    }
+
     const u_center = uvBox.cx / w;
     const v_center = 1.0 - (uvBox.cy / h);
-    
     const u_repeat = uvBox.w / w;
     const v_repeat = uvBox.h / h;
-    
     const u_offset = u_center - 0.5;
     const v_offset = v_center - 0.5;
     
@@ -707,7 +719,23 @@ function updateUVOnMesh() {
         v2: true
     };
     
-    const tex = activePreviewMesh.material[activePreviewFace].map;
+    let tex = activePreviewMesh.material[activePreviewFace].map;
+    if (!tex) {
+        const dataUrl = document.getElementById('uv-img').src;
+        if (dataUrl && dataUrl.startsWith('data:')) {
+            if (!activePreviewMesh.userData.faceTextures) activePreviewMesh.userData.faceTextures = {};
+            activePreviewMesh.userData.faceTextures[activePreviewFace] = dataUrl;
+            
+            tex = new THREE.TextureLoader().load(dataUrl);
+            tex.magFilter = THREE.NearestFilter;
+            tex.minFilter = THREE.NearestFilter;
+            tex.colorSpace = THREE.SRGBColorSpace;
+            
+            activePreviewMesh.material[activePreviewFace] = new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff });
+            if (activePreviewCloneMesh) activePreviewCloneMesh.material[activePreviewFace] = activePreviewMesh.material[activePreviewFace];
+        }
+    }
+
     if (tex) {
         tex.offset.set(u_offset, v_offset);
         tex.repeat.set(u_repeat, v_repeat);
@@ -819,8 +847,8 @@ function animate() {
             const isTurning = Math.abs(cat.userData.turnVelocity) > 0.001;
 
             if (isMoving || isTurning) {
-                const animSpeed = isMoving ? 1.5 : 2.5; 
-                const walkPhase = time * 0.01 * animSpeed;
+                const animSpeed = isMoving ? 1.0 : 1.5; 
+                const walkPhase = time * 0.005 * animSpeed;
 
                 const swingFL = Math.sin(walkPhase);
                 const swingFR = Math.sin(walkPhase + Math.PI);
@@ -1082,6 +1110,9 @@ function exportScene() {
         {} 
     );
 }
+
+window.savePositions = savePositions;
+window.exportScene = exportScene;
 
 function createTable(material) {
     const tableGroup = new THREE.Group();
