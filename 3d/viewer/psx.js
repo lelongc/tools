@@ -249,6 +249,7 @@ function toggleSnap() {
 }
 
 function onMouseDown(event) {
+    if (document.getElementById('uv-editor').style.display === 'flex') return;
     if (!isCreatorMode) return;
     
     if (event.button === 1) isRightMouseDown = true; 
@@ -568,22 +569,30 @@ function syncUVBoxFromMesh() {
         uvBox.w = data.repeat[0] * w;
         uvBox.h = data.repeat[1] * h;
         
-        const u_center = data.offset[0] + data.repeat[0] / 2;
-        const v_center = data.offset[1] + data.repeat[1] / 2;
+        let u_center, v_center;
+        if (data.v2) {
+            u_center = data.offset[0] + 0.5;
+            v_center = data.offset[1] + 0.5;
+        } else if (data.rotation === undefined) {
+            u_center = data.offset[0] + data.repeat[0] / 2;
+            v_center = data.offset[1] + data.repeat[1] / 2;
+        } else {
+            u_center = data.offset[0] + 0.5;
+            v_center = data.offset[1] + 0.5;
+        }
         
-        uvBox.cx = u_center * w;
-        uvBox.cy = (1.0 - v_center) * h;
-        uvBox.rotation = -(data.rotation || 0); 
+        let raw_cx = u_center * w;
+        let raw_cy = (1.0 - v_center) * h;
+        
+        uvBox.cx = Math.max(uvBox.w/2, Math.min(w - uvBox.w/2, raw_cx));
+        uvBox.cy = Math.max(uvBox.h/2, Math.min(h - uvBox.h/2, raw_cy));
+        uvBox.rotation = data.rotation || 0; 
     } else {
         uvBox = { cx: w/2, cy: h/2, w: w/2, h: h/2, rotation: 0 };
     }
 
     document.getElementById('uv-box').style.display = 'block';
     updateUVDOM();
-    
-    const container = document.getElementById('uv-scroll-container');
-    container.scrollLeft = uvBox.cx - container.clientWidth / 2;
-    container.scrollTop = uvBox.cy - container.clientHeight / 2;
 }
 
 function updateUVDOM() {
@@ -694,7 +703,8 @@ function updateUVOnMesh() {
     activePreviewMesh.userData.uvData[activePreviewFace] = {
         offset: [u_offset, v_offset],
         repeat: [u_repeat, v_repeat],
-        rotation: -uvBox.rotation
+        rotation: uvBox.rotation,
+        v2: true
     };
     
     const tex = activePreviewMesh.material[activePreviewFace].map;
@@ -702,7 +712,7 @@ function updateUVOnMesh() {
         tex.offset.set(u_offset, v_offset);
         tex.repeat.set(u_repeat, v_repeat);
         tex.center.set(0.5, 0.5);
-        tex.rotation = -uvBox.rotation;
+        tex.rotation = uvBox.rotation;
         tex.needsUpdate = true;
     }
 }
@@ -947,6 +957,39 @@ function savePositions() {
     });
     idbSave(data);
 }
+
+window.downloadMap = function() {
+    idbLoad((data) => {
+        if (!data) { alert("Chưa có dữ liệu map để lưu!"); return; }
+        const output = JSON.stringify(data);
+        const blob = new Blob([output], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'psx_map_save.json';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    });
+};
+
+window.uploadMap = function(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            idbSave(data);
+            alert("Đã nhập Map thành công! Hãy tải lại trang (F5) để thấy kết quả.");
+            location.reload();
+        } catch (err) {
+            alert("File map không hợp lệ!");
+        }
+    };
+    reader.readAsText(file);
+};
 
 function loadPositions() {
     idbLoad((data) => {
