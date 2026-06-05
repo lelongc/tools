@@ -1,10 +1,9 @@
 import * as THREE from 'three';
-import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 
 let camera, scene, renderer;
-let pointerControls, transformControl;
+let transformControl;
 const moveState = { forward: false, backward: false, left: false, right: false };
 const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
@@ -12,12 +11,16 @@ let prevTime = performance.now();
 
 let isCreatorMode = false;
 let isSnapEnabled = false;
+let isPointerLocked = false;
 
-// Custom Editor Camera Variables
+// Custom Editor Camera Variables (Creator Mode)
 let isRightMouseDown = false;
 let isZooming = false;
 const euler = new THREE.Euler(0, 0, 0, 'YXZ');
 const PI_2 = Math.PI / 2;
+
+// TPS Player Variables (Play Mode)
+let playerGroup, cameraArm;
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -39,15 +42,28 @@ function init() {
     scene.fog = new THREE.FogExp2(0x020202, 0.15); 
 
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.set(0, 1.6, 5);
 
     // ==========================================
-    // CAMERAS & CONTROLS SETUP
+    // CAMERAS & PLAYER SETUP
     // ==========================================
     
-    // 1. FPS Controls (Play Mode)
-    pointerControls = new PointerLockControls(camera, document.body);
-    scene.add(pointerControls.getObject());
+    // 1. TPS Player (Play Mode)
+    playerGroup = new THREE.Group();
+    playerGroup.position.set(0, 0, 2); // Initial spawn pos
+    scene.add(playerGroup);
+
+    cameraArm = new THREE.Group();
+    cameraArm.position.set(0, 0.4, 0); // Pivot height
+    playerGroup.add(cameraArm);
+
+    cameraArm.add(camera);
+    camera.position.set(0, 0.4, 2); // Offset behind the cat
+
+    // Cat Model
+    const cat = createCat();
+    // Do not rotate the cat, its natural face is -Z, which perfectly matches camera looking at -Z
+    playerGroup.add(cat);
+    window.psxCat = cat;
 
     // 2. Transform Controls (Gizmo)
     transformControl = new TransformControls(camera, renderer.domElement);
@@ -61,21 +77,23 @@ function init() {
     // Prevent default right click menu
     document.addEventListener('contextmenu', e => e.preventDefault());
 
-    // UI Events
+    // UI Events (Pointer Lock)
     const info = document.getElementById('info');
     info.addEventListener('click', () => {
-        if (!isCreatorMode) pointerControls.lock();
+        if (!isCreatorMode) document.body.requestPointerLock();
     });
 
-    pointerControls.addEventListener('lock', () => {
-        info.style.display = 'none';
-        document.getElementById('crosshair').style.display = 'block';
-    });
-
-    pointerControls.addEventListener('unlock', () => {
+    document.addEventListener('pointerlockchange', () => {
+        isPointerLocked = document.pointerLockElement === document.body;
         if (!isCreatorMode) {
-            info.style.display = 'block';
-            document.getElementById('crosshair').style.display = 'none';
+            if (isPointerLocked) {
+                info.style.display = 'none';
+                document.getElementById('crosshair').style.display = 'block';
+            } else {
+                info.style.display = 'block';
+                document.getElementById('crosshair').style.display = 'none';
+                moveState.forward = false; moveState.backward = false; moveState.left = false; moveState.right = false;
+            }
         }
     });
 
@@ -86,8 +104,8 @@ function init() {
     scene.add(ambientLight);
 
     const flashlight = new THREE.PointLight(0xffddaa, 1.5, 12);
-    flashlight.position.set(0, -0.2, 0.5);
-    camera.add(flashlight);
+    flashlight.position.set(0, 0, 1);
+    cameraArm.add(flashlight); // Flashlight moves with the camera arm
 
     const textureLoader = new THREE.TextureLoader();
     const loadPSXTexture = (path, repeatX, repeatY) => {
@@ -199,13 +217,24 @@ function toggleCreatorMode() {
     const info = document.getElementById('info');
 
     if (isCreatorMode) {
-        pointerControls.unlock();
+        document.exitPointerLock();
+        
+        // Detach camera from Cat, make it fly freely in world space
+        scene.attach(camera); 
+        
         creatorLabel.style.display = 'block';
         crosshair.style.display = 'none';
         info.style.display = 'none';
     } else {
         transformControl.detach();
-        pointerControls.lock();
+        document.body.requestPointerLock();
+        
+        // Re-attach camera to Cat (TPS)
+        cameraArm.add(camera);
+        camera.position.set(0, 0.4, 2); // reset offset
+        camera.rotation.set(0, 0, 0);
+        camera.quaternion.identity();
+        
         creatorLabel.style.display = 'none';
         crosshair.style.display = 'block';
     }
@@ -281,31 +310,42 @@ function onMouseUp(event) {
 }
 
 function onMouseMove(event) {
-    if (!isCreatorMode) return;
+    if (isCreatorMode) {
+        // Zooming using Ctrl + Drag
+        if (event.ctrlKey && event.buttons > 0) {
+            const zoomSpeed = 0.02;
+            const delta = (Math.abs(event.movementX) > Math.abs(event.movementY)) ? event.movementX : -event.movementY;
+            camera.translateZ(delta * zoomSpeed);
+            return; 
+        }
 
-    // Zooming using Ctrl + Drag
-    if (event.ctrlKey && event.buttons > 0) {
-        const zoomSpeed = 0.02;
-        const delta = (Math.abs(event.movementX) > Math.abs(event.movementY)) ? event.movementX : -event.movementY;
-        camera.translateZ(delta * zoomSpeed);
-        return; 
-    }
+        // Panning using Shift + Drag
+        if (event.shiftKey && event.buttons > 0) {
+            const panSpeed = 0.02;
+            camera.translateX(-event.movementX * panSpeed);
+            camera.translateY(event.movementY * panSpeed);
+            return;
+        }
 
-    // Panning using Shift + Drag
-    if (event.shiftKey && event.buttons > 0) {
-        const panSpeed = 0.02;
-        camera.translateX(-event.movementX * panSpeed);
-        camera.translateY(event.movementY * panSpeed);
-        return;
-    }
-
-    // Look around like Unity Editor
-    if (isRightMouseDown) {
-        euler.setFromQuaternion(camera.quaternion);
-        euler.y -= event.movementX * 0.002;
-        euler.x -= event.movementY * 0.002;
-        euler.x = Math.max(-PI_2, Math.min(PI_2, euler.x));
-        camera.quaternion.setFromEuler(euler);
+        // Look around like Unity Editor
+        if (isRightMouseDown) {
+            euler.setFromQuaternion(camera.quaternion);
+            euler.y -= event.movementX * 0.002;
+            euler.x -= event.movementY * 0.002;
+            euler.x = Math.max(-PI_2, Math.min(PI_2, euler.x));
+            camera.quaternion.setFromEuler(euler);
+        }
+    } else if (isPointerLocked) {
+        // Play Mode: TPS Camera Rotation
+        const turnSpeed = event.movementX * 0.003;
+        playerGroup.rotation.y -= turnSpeed;
+        cameraArm.rotation.x -= event.movementY * 0.003;
+        // Clamp pitch so camera doesn't flip
+        cameraArm.rotation.x = Math.max(-Math.PI / 4, Math.min(Math.PI / 8, cameraArm.rotation.x));
+        
+        if (window.psxCat) {
+            window.psxCat.userData.turnTarget = turnSpeed;
+        }
     }
 }
 
@@ -383,26 +423,57 @@ function animate() {
     const time = performance.now();
     const delta = (time - prevTime) / 1000;
 
-    if (pointerControls.isLocked === true && !isCreatorMode) {
-        // Play Mode: Walking on ground
-        velocity.x -= velocity.x * 10.0 * delta;
-        velocity.z -= velocity.z * 10.0 * delta;
+    if (isPointerLocked && !isCreatorMode) {
+        // Play Mode: Walking the Cat (TPS)
+        const walkSpeed = 3.0;
+        let isMoving = false;
 
-        direction.z = Number(moveState.forward) - Number(moveState.backward);
-        direction.x = Number(moveState.right) - Number(moveState.left);
-        direction.normalize();
+        if (moveState.forward) { playerGroup.translateZ(-walkSpeed * delta); isMoving = true; }
+        if (moveState.backward) { playerGroup.translateZ(walkSpeed * delta); isMoving = true; }
+        if (moveState.left) { playerGroup.translateX(-walkSpeed * delta); isMoving = true; }
+        if (moveState.right) { playerGroup.translateX(walkSpeed * delta); isMoving = true; }
 
-        const speed = 25.0;
-        if (moveState.forward || moveState.backward) velocity.z -= direction.z * speed * delta;
-        if (moveState.left || moveState.right) velocity.x -= direction.x * speed * delta;
+        // Cat Animation
+        if (window.psxCat) {
+            const cat = window.psxCat;
+            const catTime = time * 0.002;
+            
+            // Handle turning velocity decay
+            cat.userData.turnVelocity = cat.userData.turnVelocity || 0;
+            if (cat.userData.turnTarget) {
+                cat.userData.turnVelocity = THREE.MathUtils.lerp(cat.userData.turnVelocity, cat.userData.turnTarget, 0.5);
+                cat.userData.turnTarget = 0; // reset target
+            } else {
+                cat.userData.turnVelocity *= 0.8; // decay
+            }
 
-        pointerControls.moveRight(-velocity.x * delta);
-        pointerControls.moveForward(-velocity.z * delta);
+            const isTurning = Math.abs(cat.userData.turnVelocity) > 0.001;
 
-        if (moveState.forward || moveState.backward || moveState.left || moveState.right) {
-            // Bobbing effect relative to current height instead of snapping to 1.6
-            camera.position.y += Math.sin(time * 0.015) * 0.005;
+            if (isMoving || isTurning) {
+                // Walk cycle (runs when moving OR turning)
+                const animSpeed = isMoving ? 5 : 8; 
+                cat.userData.legs[0].rotation.x = Math.sin(time * 0.01 * animSpeed) * 0.5; // FL
+                cat.userData.legs[3].rotation.x = Math.sin(time * 0.01 * animSpeed) * 0.5; // BR
+                cat.userData.legs[1].rotation.x = Math.sin(time * 0.01 * animSpeed + Math.PI) * 0.5; // FR
+                cat.userData.legs[2].rotation.x = Math.sin(time * 0.01 * animSpeed + Math.PI) * 0.5; // BL
+                
+                cat.userData.tail.rotation.z = Math.sin(catTime * 8) * 0.3; // Fast wag
+                cat.userData.body.position.y = 0.35 + Math.sin(time * 0.02 * animSpeed) * 0.02; // Bounce
+            } else {
+                // Idle
+                cat.userData.legs.forEach(leg => leg.rotation.x = 0);
+                cat.userData.body.position.y = 0.35;
+                const breath = 1 + Math.sin(catTime * 2) * 0.05;
+                cat.userData.body.scale.set(1, breath, 1);
+                cat.userData.tail.rotation.z = Math.sin(catTime * 3) * 0.2;
+            }
+            
+            cat.userData.tail.rotation.x = 0.5 + Math.sin(catTime * 1.5) * 0.1;
+            
+            // Head turning based on mouse movement instead of automatic bobbing
+            cat.userData.head.rotation.y = THREE.MathUtils.clamp(-cat.userData.turnVelocity * 15.0, -Math.PI/3, Math.PI/3);
         }
+
     } else if (isCreatorMode) {
         // Creator Mode: Flying freely (Unity style)
         velocity.x -= velocity.x * 10.0 * delta;
@@ -520,4 +591,77 @@ function createChair(material) {
     back.position.set(0, 0.85, -0.31);
     chairGroup.add(back);
     return chairGroup;
+}
+
+function createCat() {
+    const catGroup = new THREE.Group();
+    // Use an orange color with basic material for PSX look
+    const catMat = new THREE.MeshLambertMaterial({ color: 0xd97c2b });
+    const darkMat = new THREE.MeshLambertMaterial({ color: 0x4a280b });
+
+    catGroup.userData = {};
+
+    // Body
+    const bodyGeo = new THREE.BoxGeometry(0.3, 0.25, 0.6);
+    const body = new THREE.Mesh(bodyGeo, catMat);
+    body.position.set(0, 0.35, 0);
+    catGroup.add(body);
+    catGroup.userData.body = body;
+
+    // Head Pivot
+    const headGroup = new THREE.Group();
+    headGroup.position.set(0, 0.45, -0.35); // Front of the body
+    catGroup.add(headGroup);
+    catGroup.userData.head = headGroup;
+
+    // Head Mesh
+    const headGeo = new THREE.BoxGeometry(0.25, 0.25, 0.25);
+    const head = new THREE.Mesh(headGeo, catMat);
+    head.position.set(0, 0.1, -0.1);
+    headGroup.add(head);
+
+    // Ears
+    const earGeo = new THREE.BoxGeometry(0.08, 0.1, 0.05);
+    const earL = new THREE.Mesh(earGeo, darkMat);
+    earL.position.set(0.08, 0.25, -0.1);
+    headGroup.add(earL);
+    const earR = new THREE.Mesh(earGeo, darkMat);
+    earR.position.set(-0.08, 0.25, -0.1);
+    headGroup.add(earR);
+
+    // Tail Pivot
+    const tailGroup = new THREE.Group();
+    tailGroup.position.set(0, 0.45, 0.3); // Back of the body
+    catGroup.add(tailGroup);
+    catGroup.userData.tail = tailGroup;
+
+    // Tail Mesh
+    const tailGeo = new THREE.BoxGeometry(0.05, 0.4, 0.05);
+    const tail = new THREE.Mesh(tailGeo, darkMat);
+    tail.position.set(0, 0.2, 0); // Offset so it rotates from base
+    tailGroup.add(tail);
+
+    // Legs
+    const legGeo = new THREE.BoxGeometry(0.06, 0.25, 0.06);
+    const positions = [
+        [-0.12, 0.25, -0.2], // Front Right
+        [0.12, 0.25, -0.2],  // Front Left
+        [-0.12, 0.25, 0.2],  // Back Right
+        [0.12, 0.25, 0.2]    // Back Left
+    ];
+
+    catGroup.userData.legs = [];
+    positions.forEach((pos) => {
+        const legPivot = new THREE.Group();
+        legPivot.position.set(pos[0], pos[1], pos[2]);
+        catGroup.add(legPivot);
+
+        const leg = new THREE.Mesh(legGeo, catMat);
+        leg.position.set(0, -0.125, 0); // Offset to rotate from hip
+        legPivot.add(leg);
+
+        catGroup.userData.legs.push(legPivot);
+    });
+
+    return catGroup;
 }
