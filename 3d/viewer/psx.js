@@ -378,53 +378,70 @@ window.addEventListener('drop', (e) => {
 
         const reader = new FileReader();
         reader.onload = (event) => {
-            const dataUrl = event.target.result;
-            
-            mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-            raycaster.setFromCamera(mouse, camera);
+            const rawDataUrl = event.target.result;
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let w = img.width;
+                let h = img.height;
+                if (w > 256 || h > 256) {
+                    const ratio = Math.min(256 / w, 256 / h);
+                    w = Math.floor(w * ratio);
+                    h = Math.floor(h * ratio);
+                }
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, w, h);
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+                raycaster.setFromCamera(mouse, camera);
 
-            const objectsToTest = [...interactables];
-            if (window.psxCat) objectsToTest.push(window.psxCat);
-            const intersects = raycaster.intersectObjects(objectsToTest, true);
-            
-            if (intersects.length > 0) {
-                const hit = intersects[0];
-                const target = getFurnitureParent(hit.object);
+                const objectsToTest = [...interactables];
+                if (window.psxCat) objectsToTest.push(window.psxCat);
+                const intersects = raycaster.intersectObjects(objectsToTest, true);
                 
-                const textureLoader = new THREE.TextureLoader();
-                const tex = textureLoader.load(dataUrl);
-                tex.magFilter = THREE.NearestFilter;
-                tex.minFilter = THREE.NearestFilter;
-                tex.colorSpace = THREE.SRGBColorSpace;
-                
-                target.traverse((child) => {
-                    if (child.isMesh && child.geometry && child.geometry.type === 'BoxGeometry') {
-                        if (!Array.isArray(child.material)) {
-                            child.material = [
-                                child.material.clone(), child.material.clone(),
-                                child.material.clone(), child.material.clone(),
-                                child.material.clone(), child.material.clone()
-                            ];
-                        }
-                        
-                        if (child.userData.originalMat) child.userData.originalMat = null;
-                        
-                        for (let i = 0; i < 6; i++) {
-                            const clonedTex = tex.clone();
-                            child.material[i] = new THREE.MeshLambertMaterial({ map: clonedTex, color: 0xffffff });
-                            if (!child.userData.faceTextures) child.userData.faceTextures = {};
-                            child.userData.faceTextures[i] = dataUrl;
-                            if (child.userData.uvData && child.userData.uvData[i]) {
-                                delete child.userData.uvData[i];
+                if (intersects.length > 0) {
+                    const hit = intersects[0];
+                    const target = getFurnitureParent(hit.object);
+                    
+                    const textureLoader = new THREE.TextureLoader();
+                    const tex = textureLoader.load(dataUrl);
+                    tex.magFilter = THREE.NearestFilter;
+                    tex.minFilter = THREE.NearestFilter;
+                    tex.colorSpace = THREE.SRGBColorSpace;
+                    
+                    target.traverse((child) => {
+                        if (child.isMesh && child.geometry && child.geometry.type === 'BoxGeometry') {
+                            if (!Array.isArray(child.material)) {
+                                child.material = [
+                                    child.material.clone(), child.material.clone(),
+                                    child.material.clone(), child.material.clone(),
+                                    child.material.clone(), child.material.clone()
+                                ];
                             }
+                            
+                            if (child.userData.originalMat) child.userData.originalMat = null;
+                            
+                            for (let i = 0; i < 6; i++) {
+                                const clonedTex = tex.clone();
+                                child.material[i] = new THREE.MeshLambertMaterial({ map: clonedTex, color: 0xffffff });
+                                if (!child.userData.faceTextures) child.userData.faceTextures = {};
+                                child.userData.faceTextures[i] = dataUrl;
+                                if (child.userData.uvData && child.userData.uvData[i]) {
+                                    delete child.userData.uvData[i];
+                                }
+                            }
+                            child.userData.originalMat = child.material;
                         }
-                        child.userData.originalMat = child.material;
-                    }
-                });
-                
-                savePositions();
-            }
+                    });
+                    
+                    savePositions();
+                }
+            };
+            img.src = rawDataUrl;
         };
         reader.readAsDataURL(file);
     }
@@ -591,6 +608,7 @@ function syncUVBoxFromMesh() {
         uvBox.rotation = data.rotation || 0; 
     } else {
         uvBox = { cx: w/2, cy: h/2, w: w/2, h: h/2, rotation: 0 };
+        setTimeout(() => { updateUVOnMesh(); savePositions(); }, 10);
     }
 
     document.getElementById('uv-box').style.display = 'block';
@@ -908,31 +926,17 @@ function animate() {
 // INDEXEDDB SAVE & HELPERS
 // ==========================================
 
-function idbSave(data) {
-    const request = indexedDB.open('psx_db', 1);
-    request.onupgradeneeded = (e) => {
-        e.target.result.createObjectStore('saves');
-    };
-    request.onsuccess = (e) => {
-        const db = e.target.result;
-        const tx = db.transaction('saves', 'readwrite');
-        tx.objectStore('saves').put(data, 'main_save');
-    };
-}
-
-function idbLoad(callback) {
-    const request = indexedDB.open('psx_db', 1);
-    request.onupgradeneeded = (e) => {
-        e.target.result.createObjectStore('saves');
-    };
-    request.onsuccess = (e) => {
-        const db = e.target.result;
-        const tx = db.transaction('saves', 'readonly');
-        if (!db.objectStoreNames.contains('saves')) return callback(null);
-        const getReq = tx.objectStore('saves').get('main_save');
-        getReq.onsuccess = () => callback(getReq.result);
-        getReq.onerror = () => callback(null);
-    };
+function serverSave(data, callback) {
+    fetch('/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(res => {
+        if (callback) callback();
+    })
+    .catch(err => console.error("Lỗi khi lưu map:", err));
 }
 
 function getMeshPath(mesh, root) {
@@ -959,10 +963,31 @@ function getMeshByPath(root, pathStr) {
     return curr;
 }
 
-function savePositions() {
-    const data = {};
+window.needsSave = false;
+
+setInterval(() => {
+    if (window.needsSave) {
+        window.performServerSave();
+    }
+}, 60000);
+
+window.addEventListener('beforeunload', () => {
+    if (window.needsSave) {
+        window.performServerSave(null, true);
+    }
+});
+
+window.savePositions = function() {
+    window.needsSave = true;
+};
+
+window.performServerSave = function(callback, isSync = false) {
+    const data = { schema_version: 2, texture_dict: {}, objects: {} };
     const objs = [...interactables];
     if (window.psxCat) objs.push(window.psxCat);
+
+    let texCounter = 0;
+    const reverseDict = {};
 
     objs.forEach(obj => {
         const objData = {
@@ -974,60 +999,65 @@ function savePositions() {
         obj.traverse((child) => {
             if (child.isMesh && child.userData.faceTextures) {
                 const path = getMeshPath(child, obj);
-                objData.textures[path] = {
-                    faces: child.userData.faceTextures,
-                    uvs: child.userData.uvData || {}
-                };
+                
+                const newFaces = {};
+                for (let f in child.userData.faceTextures) {
+                    let b64 = child.userData.faceTextures[f];
+                    if (!b64) continue;
+                    
+                    if (reverseDict[b64]) {
+                        newFaces[f] = reverseDict[b64];
+                    } else {
+                        const tex_id = 'tex_' + texCounter++;
+                        reverseDict[b64] = tex_id;
+                        data.texture_dict[tex_id] = b64;
+                        newFaces[f] = tex_id;
+                    }
+                }
+                
+                if (Object.keys(newFaces).length > 0) {
+                    objData.textures[path] = {
+                        faces: newFaces,
+                        uvs: child.userData.uvData || {}
+                    };
+                }
             }
         });
         
-        data[obj.userData.id] = objData;
+        data.objects[obj.userData.id] = objData;
     });
-    idbSave(data);
+    
+    if (isSync) {
+        navigator.sendBeacon('/save', JSON.stringify(data));
+    } else {
+        serverSave(data, callback);
+    }
+    window.needsSave = false;
 }
 
-window.downloadMap = function() {
-    idbLoad((data) => {
-        if (!data) { alert("Chưa có dữ liệu map để lưu!"); return; }
-        const output = JSON.stringify(data);
-        const blob = new Blob([output], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'psx_map_save.json';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    });
-};
-
-window.uploadMap = function(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const data = JSON.parse(e.target.result);
-            idbSave(data);
-            alert("Đã nhập Map thành công! Hãy tải lại trang (F5) để thấy kết quả.");
-            location.reload();
-        } catch (err) {
-            alert("File map không hợp lệ!");
-        }
-    };
-    reader.readAsText(file);
-};
-
 function loadPositions() {
-    idbLoad((data) => {
-        if (!data) return;
-        const objs = [...interactables];
-        if (window.psxCat) objs.push(window.psxCat);
+    fetch('/save.json')
+        .then(res => {
+            if (!res.ok) throw new Error("Chưa có file save.json");
+            return res.json();
+        })
+        .then(data => {
+            if (!data) return;
+            
+            let textureDict = {};
+            let objectsData = data;
+            
+            if (data.schema_version === 2) {
+                textureDict = data.texture_dict || {};
+                objectsData = data.objects || {};
+            }
+            
+            const objs = [...interactables];
+            if (window.psxCat) objs.push(window.psxCat);
 
         objs.forEach(obj => {
-            if (data[obj.userData.id]) {
-                const d = data[obj.userData.id];
+            if (objectsData[obj.userData.id]) {
+                const d = objectsData[obj.userData.id];
                 if (d.position && obj.userData.id !== 'cat_1') { 
                     obj.position.fromArray(d.position);
                     obj.rotation.fromArray(d.rotation);
@@ -1044,7 +1074,10 @@ function loadPositions() {
                             const uvMap = d.textures[pathStr].uvs || {};
                             
                             for (let faceIdx in faceMap) {
-                                const dataUrl = faceMap[faceIdx];
+                                let dataUrl = faceMap[faceIdx];
+                                if (dataUrl.startsWith('tex_')) {
+                                    dataUrl = textureDict[dataUrl];
+                                }
                                 mesh.userData.faceTextures[faceIdx] = dataUrl;
 
                                 const tex = new THREE.TextureLoader().load(dataUrl);
@@ -1078,7 +1111,7 @@ function loadPositions() {
                 }
             }
         });
-    });
+        }).catch(err => console.log("Không tìm thấy save file cũ, dùng map mặc định."));
 }
 
 function getFurnitureParent(object) {

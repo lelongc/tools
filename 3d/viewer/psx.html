@@ -64,11 +64,8 @@
             - <span class="hotkey">R</span>: Rotate<br>
             - <span class="hotkey">X</span>: Toggle Snap <span id="snap-status" style="color:red">(OFF)</span><br>
             <button onclick="exportScene()">Export GLTF</button>
-            <button onclick="downloadMap()">Download Map</button>
-            <button onclick="document.getElementById('import-map').click()">Import Map</button>
-            <input type="file" id="import-map" style="display:none" accept=".json" onchange="uploadMap(event)">
-            <button onclick="savePositions(); alert('Saved!')">Lưu Map (Bộ nhớ tạm)</button>
-            - <span class="hotkey">C</span>: Back to Play Mode
+            <button onclick="performServerSave(() => alert('Đã lưu thành công vào ổ đĩa/Git!'))">Lưu Game (Ghi đĩa)</button>
+            <br>- <span class="hotkey">C</span>: Back to Play Mode
         </span>
     </div>
     
