@@ -98,10 +98,7 @@ function init() {
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
     scene.add(ambientLight);
-
-    const flashlight = new THREE.PointLight(0xffddaa, 1.5, 12);
-    flashlight.position.set(0, 0, 1);
-    cameraArm.add(flashlight); 
+    window.ambientLight = ambientLight;
 
     const textureLoader = new THREE.TextureLoader();
     const loadPSXTexture = (path, repeatX, repeatY) => {
@@ -124,8 +121,8 @@ function init() {
     const floorMat = new THREE.MeshLambertMaterial({ map: floorTex });
     const ceilMat = new THREE.MeshLambertMaterial({ map: ceilTex });
 
-    const roomSize = 20;
-    const roomHeight = 3;
+    const roomSize = 40;
+    const roomHeight = 6;
     const group = new THREE.Group();
 
     const floorGeo = new THREE.PlaneGeometry(roomSize, roomSize);
@@ -189,6 +186,32 @@ function init() {
     interactables.push(chair2);
     group.add(chair2);
 
+    const floor2Geo = new THREE.BoxGeometry(40, 0.2, 20);
+    const floor2 = new THREE.Mesh(floor2Geo, floorMat);
+    floor2.position.set(0, 3, -10);
+    floor2.userData = { id: 'floor2_1', isFurniture: true };
+    interactables.push(floor2);
+    group.add(floor2);
+
+    const stairs = createStairs(wallMat);
+    stairs.position.set(15, 0, -1);
+    stairs.rotation.y = -Math.PI / 2;
+    stairs.userData = { id: 'stairs_1', isFurniture: true };
+    interactables.push(stairs);
+    group.add(stairs);
+
+    const bed = createBed(wallMat);
+    bed.position.set(10, 3.1, -15);
+    bed.userData = { id: 'bed_1', isFurniture: true };
+    interactables.push(bed);
+    group.add(bed);
+
+    const cabinet = createCabinet(wallMat);
+    cabinet.position.set(-15, 0, 15);
+    cabinet.userData = { id: 'cabinet_1', isFurniture: true };
+    interactables.push(cabinet);
+    group.add(cabinet);
+
     scene.add(group);
     window.sceneGroup = group;
 
@@ -205,6 +228,25 @@ function init() {
 // ==========================================
 // CREATOR MODE LOGIC (UNITY STYLE)
 // ==========================================
+
+let isUIHidden = false;
+function toggleUIVisibility() {
+    isUIHidden = !isUIHidden;
+    const info = document.getElementById('info');
+    const creator = document.getElementById('creator-label');
+    
+    if (isUIHidden) {
+        info.style.opacity = '0';
+        creator.style.opacity = '0';
+        info.style.pointerEvents = 'none';
+        creator.style.pointerEvents = 'none';
+    } else {
+        info.style.opacity = '1';
+        creator.style.opacity = '1';
+        info.style.pointerEvents = 'auto';
+        creator.style.pointerEvents = 'auto';
+    }
+}
 
 function toggleCreatorMode() {
     isCreatorMode = !isCreatorMode;
@@ -784,6 +826,7 @@ function onKeyDown(event) {
         switch (event.code) {
             case 'KeyC': toggleCreatorMode(); break;
             case 'KeyE': exportScene(); break;
+            case 'KeyH': toggleUIVisibility(); break;
             case 'KeyT': transformControl.setMode('translate'); break;
             case 'KeyR': transformControl.setMode('rotate'); break;
             case 'KeyX': toggleSnap(); break;
@@ -807,11 +850,18 @@ function onKeyDown(event) {
             case 'ArrowRight':
             case 'KeyD': moveState.right = true; break;
             case 'KeyE': exportScene(); break;
+            case 'KeyH': toggleUIVisibility(); break;
             case 'KeyC': toggleCreatorMode(); break;
             case 'Space':
                 if (isGrounded) {
                     playerVelocityY = 6.0;
                     isGrounded = false;
+                }
+                break;
+            case 'KeyF':
+                if (window.psxCat && !window.psxCat.userData.isTogglingLight) {
+                    window.psxCat.userData.isTogglingLight = true;
+                    window.psxCat.userData.toggleTimer = performance.now();
                 }
                 break;
         }
@@ -843,7 +893,7 @@ function onWindowResize() {
 }
 
 function checkCollision(playerBox) {
-    const limit = 10 - 0.2; 
+    const limit = 20 - 0.2; 
     if (playerBox.min.x < -limit || playerBox.max.x > limit) return true;
     if (playerBox.min.z < -limit || playerBox.max.z > limit) return true;
 
@@ -980,6 +1030,41 @@ function animate() {
                 const breath = 1 + Math.sin(catTime * 2) * 0.05;
                 cat.userData.body.scale.set(1, breath, 1);
                 cat.userData.tail.rotation.z = Math.sin(catTime * 3) * 0.2;
+            }
+
+            if (cat.userData.isTogglingLight) {
+                const elapsed = time - cat.userData.toggleTimer;
+                const duration = 500;
+                if (elapsed < duration) {
+                    const progress = elapsed / duration;
+                    const lift = Math.sin(progress * Math.PI); 
+                    
+                    cat.userData.legs[1].hip.rotation.x = -lift * 1.5;
+                    cat.userData.legs[1].knee.rotation.x = lift * 1.0; 
+                    
+                    if (progress > 0.5 && !cat.userData.toggledThisCycle) {
+                        cat.userData.isFlashlightOn = !cat.userData.isFlashlightOn;
+                        if (cat.userData.isFlashlightOn) {
+                            cat.userData.flashlight.intensity = 1.5;
+                            window.ambientLight.intensity = 1.5;
+                            window.ambientLight.color.setHex(0x66ffcc);
+                            scene.fog.color.setHex(0x224433);
+                            scene.fog.density = 0.08;
+                            scene.background.setHex(0x224433);
+                        } else {
+                            cat.userData.flashlight.intensity = 0.0;
+                            window.ambientLight.intensity = 0.1;
+                            window.ambientLight.color.setHex(0xffffff);
+                            scene.fog.color.setHex(0x020202);
+                            scene.fog.density = 0.15;
+                            scene.background.setHex(0x020202);
+                        }
+                        cat.userData.toggledThisCycle = true;
+                    }
+                } else {
+                    cat.userData.isTogglingLight = false;
+                    cat.userData.toggledThisCycle = false;
+                }
             }
             
             cat.userData.tail.rotation.x = 0.5 + Math.sin(catTime * 1.5) * 0.1;
@@ -1275,6 +1360,51 @@ function createChair(material) {
     return chairGroup;
 }
 
+function createStairs(material) {
+    const group = new THREE.Group();
+    const steps = 15;
+    const height = 3;
+    const depth = 4;
+    const width = 2;
+    const stepHeight = height / steps;
+    const stepDepth = depth / steps;
+    for (let i = 0; i < steps; i++) {
+        const stepGeo = new THREE.BoxGeometry(width, stepHeight, stepDepth);
+        const step = new THREE.Mesh(stepGeo, material);
+        step.position.set(0, (i + 0.5) * stepHeight, (i + 0.5) * stepDepth - depth / 2);
+        group.add(step);
+    }
+    return group;
+}
+
+function createBed(material) {
+    const group = new THREE.Group();
+    const frameGeo = new THREE.BoxGeometry(2, 0.3, 3);
+    const frame = new THREE.Mesh(frameGeo, material);
+    frame.position.y = 0.15;
+    group.add(frame);
+    
+    const matGeo = new THREE.BoxGeometry(1.8, 0.2, 2.8);
+    const mattress = new THREE.Mesh(matGeo, material);
+    mattress.position.y = 0.4;
+    group.add(mattress);
+    
+    const pillowGeo = new THREE.BoxGeometry(1.4, 0.1, 0.5);
+    const pillow = new THREE.Mesh(pillowGeo, material);
+    pillow.position.set(0, 0.55, -1.1);
+    group.add(pillow);
+    return group;
+}
+
+function createCabinet(material) {
+    const group = new THREE.Group();
+    const boxGeo = new THREE.BoxGeometry(2, 2.5, 1);
+    const box = new THREE.Mesh(boxGeo, material);
+    box.position.y = 1.25;
+    group.add(box);
+    return group;
+}
+
 function createCat() {
     const catGroup = new THREE.Group();
     const catMat = new THREE.MeshLambertMaterial({ color: 0xd97c2b });
@@ -1344,6 +1474,25 @@ function createCat() {
 
         catGroup.userData.legs.push({ hip: hipPivot, knee: kneePivot });
     });
+
+    const flashlightGroup = new THREE.Group();
+    const flGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.12, 8);
+    const flMat = new THREE.MeshLambertMaterial({ color: 0x222222 });
+    const flMesh = new THREE.Mesh(flGeo, flMat);
+    flMesh.rotation.x = Math.PI / 2;
+    flashlightGroup.add(flMesh);
+
+    const light = new THREE.SpotLight(0xffeedd, 1.5, 20, Math.PI / 6, 0.5, 1);
+    light.position.set(0, 0, 0);
+    light.target.position.set(0, 0, -1);
+    flashlightGroup.add(light);
+    flashlightGroup.add(light.target);
+
+    flashlightGroup.position.set(0, 0.2, -0.3);
+    body.add(flashlightGroup);
+
+    catGroup.userData.flashlight = light;
+    catGroup.userData.isFlashlightOn = true;
 
     return catGroup;
 }

@@ -238,6 +238,58 @@
       ],
       "textures": {}
     },
+    "floor2_1": {
+      "position": [
+        0,
+        3,
+        -10
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "textures": {}
+    },
+    "stairs_1": {
+      "position": [
+        15,
+        0,
+        1
+      ],
+      "rotation": [
+        0,
+        -1.5707963267948966,
+        0
+      ],
+      "textures": {}
+    },
+    "bed_1": {
+      "position": [
+        10,
+        3.1,
+        -15
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "textures": {}
+    },
+    "cabinet_1": {
+      "position": [
+        -15,
+        0,
+        15
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "textures": {}
+    },
     "cat_1": {
       "position": [
         0,
