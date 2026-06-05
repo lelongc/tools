@@ -29,25 +29,6 @@
             border: 1px solid #333;
         }
         .hotkey { color: #ffff00; font-weight: bold; }
-        #uv-editor {
-            display: none;
-            position: fixed;
-            top: 5%;
-            left: 5%;
-            width: 90%;
-            height: 90%;
-            background: rgba(30, 30, 30, 0.95);
-            border: 2px solid #555;
-            z-index: 1000;
-            text-align: center;
-            color: white;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-            border-radius: 8px;
-        }
-        #uv-editor h3 {
-            margin: 10px 0 5px 0;
-            font-size: 18px;
-        }
         #uv-editor p {
             margin: 0 0 10px 0;
             font-size: 12px;
@@ -66,12 +47,6 @@
             border-radius: 4px;
         }
         #uv-close:hover { background: #ff4c4c; }
-        .uv-dark {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.7);
-            pointer-events: none;
-            z-index: 5;
-        }
     </style>
 </head>
 <body>
@@ -93,24 +68,29 @@
         </span>
     </div>
     
-    <!-- UV Editor Modal -->
-    <div id="uv-editor">
-        <h3>UV Editor (Hỗ trợ 4K)</h3>
-        <button id="uv-close" onclick="closeUVEditor()">Đóng [X]</button>
-        <p>Chuột giữa/Lăn chuột để cuộn ảnh. Kéo khung đỏ hoặc góc thu phóng để chọn vùng.</p>
-        <div id="uv-scroll-container" style="overflow: auto; width: 100%; height: calc(100% - 80px); position: relative; background: #111; text-align: left;">
-            <div id="uv-wrapper" style="position: relative; display: inline-block;">
-                <img id="uv-img" src="" style="display: block;" draggable="false">
-                
-                <div id="uv-dark-top" class="uv-dark"></div>
-                <div id="uv-dark-bottom" class="uv-dark"></div>
-                <div id="uv-dark-left" class="uv-dark"></div>
-                <div id="uv-dark-right" class="uv-dark"></div>
-
-                <div id="uv-box" style="position: absolute; border: 2px solid red; box-sizing: border-box; z-index: 10; cursor: move;">
-                    <div id="uv-handle" style="position: absolute; right: -2px; bottom: -2px; width: 14px; height: 14px; background: red; cursor: se-resize; z-index: 11;"></div>
+    <!-- UV Editor Modal (Split Screen) -->
+    <div id="uv-editor" style="display: none; position: fixed; top: 5%; left: 5%; width: 90%; height: 90%; background: #222; border: 2px solid white; z-index: 1000; flex-direction: column;">
+        <div style="padding: 10px; background: #333; color: white; display: flex; justify-content: space-between; align-items: center; height: 50px; box-sizing: border-box;">
+            <div>
+                <h3 style="margin: 0; font-family: sans-serif;">UV Editor (3D Split Screen)</h3>
+                <p style="margin: 5px 0 0 0; font-size: 14px; color: #ccc;">Xoay mô hình bên phải ➔ Click 1 mặt bất kỳ ➔ Kéo khung đỏ bên trái.</p>
+            </div>
+            <button id="uv-close" onclick="closeUVEditor()">Đóng [X]</button>
+        </div>
+        
+        <div style="display: flex; flex: 1; height: calc(100% - 50px);">
+            <!-- Nửa Trái: 2D Image -->
+            <div id="uv-scroll-container" style="flex: 1; overflow: auto; position: relative; background: #111; border-right: 2px solid #555;">
+                <div id="uv-wrapper" style="position: relative; display: inline-block;">
+                    <img id="uv-img" src="" style="display: block;" draggable="false">
+                    <div id="uv-box" style="position: absolute; border: 2px solid red; box-sizing: border-box; z-index: 10; cursor: move; display: none;">
+                        <div id="uv-handle" style="position: absolute; right: -2px; bottom: -2px; width: 14px; height: 14px; background: red; cursor: se-resize; z-index: 11;"></div>
+                    </div>
                 </div>
             </div>
+            
+            <!-- Nửa Phải: 3D Preview -->
+            <div id="uv-3d-preview" style="width: 400px; background: #000; position: relative; flex-shrink: 0;"></div>
         </div>
     </div>
 

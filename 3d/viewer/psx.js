@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 let camera, scene, renderer;
 let transformControl;
@@ -270,10 +271,7 @@ function onMouseDown(event) {
                 const hit = intersects[0];
                 const mesh = hit.object;
                 if (!mesh.geometry || mesh.geometry.type !== 'BoxGeometry') return;
-                const materialIndex = Math.floor(hit.faceIndex / 2);
-                if (mesh.userData.faceTextures && mesh.userData.faceTextures[materialIndex]) {
-                    window.openUVEditor(mesh, materialIndex);
-                }
+                window.openUVEditor(mesh);
             }
             return;
         }
@@ -391,38 +389,38 @@ window.addEventListener('drop', (e) => {
             
             if (intersects.length > 0) {
                 const hit = intersects[0];
-                const mesh = hit.object;
+                const target = getFurnitureParent(hit.object);
                 
-                if (!mesh.geometry || mesh.geometry.type !== 'BoxGeometry') return;
-
-                const materialIndex = Math.floor(hit.faceIndex / 2);
-
                 const textureLoader = new THREE.TextureLoader();
                 const tex = textureLoader.load(dataUrl);
                 tex.magFilter = THREE.NearestFilter;
                 tex.minFilter = THREE.NearestFilter;
                 tex.colorSpace = THREE.SRGBColorSpace;
                 
-                if (!Array.isArray(mesh.material)) {
-                    mesh.material = [
-                        mesh.material.clone(), mesh.material.clone(),
-                        mesh.material.clone(), mesh.material.clone(),
-                        mesh.material.clone(), mesh.material.clone()
-                    ];
-                }
-                
-                if (mesh.userData.originalMat) mesh.userData.originalMat = null;
-                
-                mesh.material[materialIndex] = new THREE.MeshLambertMaterial({ map: tex, color: 0xffffff });
-                mesh.userData.originalMat = mesh.material; 
-                
-                if (!mesh.userData.faceTextures) mesh.userData.faceTextures = {};
-                mesh.userData.faceTextures[materialIndex] = dataUrl;
-                
-                // Reset UV data if overwriting with new image
-                if (mesh.userData.uvData && mesh.userData.uvData[materialIndex]) {
-                    delete mesh.userData.uvData[materialIndex];
-                }
+                target.traverse((child) => {
+                    if (child.isMesh && child.geometry && child.geometry.type === 'BoxGeometry') {
+                        if (!Array.isArray(child.material)) {
+                            child.material = [
+                                child.material.clone(), child.material.clone(),
+                                child.material.clone(), child.material.clone(),
+                                child.material.clone(), child.material.clone()
+                            ];
+                        }
+                        
+                        if (child.userData.originalMat) child.userData.originalMat = null;
+                        
+                        for (let i = 0; i < 6; i++) {
+                            const clonedTex = tex.clone();
+                            child.material[i] = new THREE.MeshLambertMaterial({ map: clonedTex, color: 0xffffff });
+                            if (!child.userData.faceTextures) child.userData.faceTextures = {};
+                            child.userData.faceTextures[i] = dataUrl;
+                            if (child.userData.uvData && child.userData.uvData[i]) {
+                                delete child.userData.uvData[i];
+                            }
+                        }
+                        child.userData.originalMat = child.material;
+                    }
+                });
                 
                 savePositions();
             }
@@ -432,76 +430,162 @@ window.addEventListener('drop', (e) => {
 });
 
 // ==========================================
-// UV EDITOR UI
+// UV EDITOR UI (SPLIT SCREEN 3D)
 // ==========================================
 
-let currentUVMesh = null;
-let currentUVFaceIdx = -1;
+let uvScene, uvCamera, uvRenderer, uvControls;
+let uvPreviewTarget = null;
+let uvCloneMap = new Map();
+let activePreviewMesh = null;
+let activePreviewFace = -1;
+
 let uvBox = { x: 0, y: 0, w: 100, h: 100 };
 let isDraggingUV = false;
 let isResizingUV = false;
 let lastMouse = { x: 0, y: 0 };
 
-window.openUVEditor = function(mesh, faceIdx) {
-    if (!mesh.userData.faceTextures || !mesh.userData.faceTextures[faceIdx]) return;
-    
-    currentUVMesh = mesh;
-    currentUVFaceIdx = faceIdx;
-    
+function initUVPreview() {
+    const container = document.getElementById('uv-3d-preview');
+    if (uvRenderer) return;
+
+    uvRenderer = new THREE.WebGLRenderer({ antialias: true });
+    uvRenderer.setSize(container.clientWidth, container.clientHeight);
+    container.appendChild(uvRenderer.domElement);
+
+    uvScene = new THREE.Scene();
+    uvScene.background = new THREE.Color(0x333333);
+
+    uvCamera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 100);
+    uvCamera.position.set(2, 2, 2);
+
+    uvControls = new OrbitControls(uvCamera, uvRenderer.domElement);
+    uvControls.enableDamping = true;
+    uvControls.dampingFactor = 0.1;
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    uvScene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(5, 10, 7);
+    uvScene.add(dirLight);
+
+    container.addEventListener('mousedown', onUVPreviewClick);
+}
+
+function onUVPreviewClick(event) {
+    const container = document.getElementById('uv-3d-preview');
+    const rect = container.getBoundingClientRect();
+    const mx = ((event.clientX - rect.left) / container.clientWidth) * 2 - 1;
+    const my = -((event.clientY - rect.top) / container.clientHeight) * 2 + 1;
+
+    const uvRaycaster = new THREE.Raycaster();
+    uvRaycaster.setFromCamera(new THREE.Vector2(mx, my), uvCamera);
+
+    if (!uvPreviewTarget) return;
+
+    const intersects = uvRaycaster.intersectObject(uvPreviewTarget, true);
+    if (intersects.length > 0) {
+        const hit = intersects[0];
+        const cloneMesh = hit.object;
+        if (!cloneMesh.geometry || cloneMesh.geometry.type !== 'BoxGeometry') return;
+
+        const faceIdx = Math.floor(hit.faceIndex / 2);
+        activePreviewMesh = uvCloneMap.get(cloneMesh);
+        activePreviewFace = faceIdx;
+
+        syncUVBoxFromMesh();
+    }
+}
+
+window.openUVEditor = function(mesh) {
+    const target = getFurnitureParent(mesh);
+    if (!target) return;
+
+    let texUrl = null;
+    target.traverse(child => {
+        if (!texUrl && child.userData.faceTextures) {
+            texUrl = child.userData.faceTextures[0] || child.userData.faceTextures[4];
+        }
+    });
+    if (!texUrl) return;
+
     const img = document.getElementById('uv-img');
     img.onload = () => {
-        document.getElementById('uv-editor').style.display = 'block';
+        document.getElementById('uv-editor').style.display = 'flex';
         if(isCreatorMode) transformControl.detach();
-        
+
+        initUVPreview();
+
         const w = img.naturalWidth;
         const h = img.naturalHeight;
         document.getElementById('uv-wrapper').style.width = w + 'px';
         document.getElementById('uv-wrapper').style.height = h + 'px';
+
+        // Setup 3D Clone
+        if (uvPreviewTarget) uvScene.remove(uvPreviewTarget);
+        uvPreviewTarget = target.clone();
+        uvCloneMap.clear();
+
+        const origMeshes = []; target.traverse(m => origMeshes.push(m));
+        const cloneMeshes = []; uvPreviewTarget.traverse(m => cloneMeshes.push(m));
+        for(let i=0; i<origMeshes.length; i++) uvCloneMap.set(cloneMeshes[i], origMeshes[i]);
+
+        // Center clone
+        const box = new THREE.Box3().setFromObject(uvPreviewTarget);
+        const center = box.getCenter(new THREE.Vector3());
+        uvPreviewTarget.position.sub(center);
+        uvScene.add(uvPreviewTarget);
+
+        uvCamera.position.set(center.x + 2, center.y + 2, center.z + 2);
+        uvControls.target.set(0,0,0);
         
-        if (mesh.userData.uvData && mesh.userData.uvData[faceIdx]) {
-            const data = mesh.userData.uvData[faceIdx];
-            uvBox.w = data.repeat[0] * w;
-            uvBox.h = data.repeat[1] * h;
-            uvBox.x = data.offset[0] * w;
-            uvBox.y = (1.0 - data.offset[1]) * h - uvBox.h;
-        } else {
-            uvBox = { x: 0, y: 0, w: w, h: h };
-        }
-        
-        updateUVDOM();
-        
-        // Cuộn ảnh sao cho khung uvBox nằm ở giữa màn hình
-        const container = document.getElementById('uv-scroll-container');
-        container.scrollLeft = uvBox.x - container.clientWidth / 2 + uvBox.w / 2;
-        container.scrollTop = uvBox.y - container.clientHeight / 2 + uvBox.h / 2;
+        const container = document.getElementById('uv-3d-preview');
+        uvCamera.aspect = container.clientWidth / container.clientHeight;
+        uvCamera.updateProjectionMatrix();
+        uvRenderer.setSize(container.clientWidth, container.clientHeight);
+
+        activePreviewMesh = null;
+        activePreviewFace = -1;
+        document.getElementById('uv-box').style.display = 'none';
     };
-    img.src = mesh.userData.faceTextures[faceIdx];
+    img.src = texUrl;
 };
 
 window.closeUVEditor = function() {
     document.getElementById('uv-editor').style.display = 'none';
-    currentUVMesh = null;
-    currentUVFaceIdx = -1;
+    activePreviewMesh = null;
+    activePreviewFace = -1;
 };
 
-function updateUVDOM() {
-    const box = document.getElementById('uv-box');
-    box.style.left = uvBox.x + 'px';
-    box.style.top = uvBox.y + 'px';
-    box.style.width = uvBox.w + 'px';
-    box.style.height = uvBox.h + 'px';
+function syncUVBoxFromMesh() {
+    if (!activePreviewMesh || activePreviewFace === -1) return;
     
-    const dt = document.getElementById('uv-dark-top');
-    const db = document.getElementById('uv-dark-bottom');
-    const dl = document.getElementById('uv-dark-left');
-    const dr = document.getElementById('uv-dark-right');
     const w = document.getElementById('uv-img').naturalWidth;
     const h = document.getElementById('uv-img').naturalHeight;
+
+    if (activePreviewMesh.userData.uvData && activePreviewMesh.userData.uvData[activePreviewFace]) {
+        const data = activePreviewMesh.userData.uvData[activePreviewFace];
+        uvBox.w = data.repeat[0] * w;
+        uvBox.h = data.repeat[1] * h;
+        uvBox.x = data.offset[0] * w;
+        uvBox.y = (1.0 - data.offset[1]) * h - uvBox.h;
+    } else {
+        uvBox = { x: 0, y: 0, w: w, h: h };
+    }
+
+    document.getElementById('uv-box').style.display = 'block';
+    updateUVDOM();
     
-    dt.style.left = '0'; dt.style.top = '0'; dt.style.width = w + 'px'; dt.style.height = uvBox.y + 'px';
-    db.style.left = '0'; db.style.top = (uvBox.y + uvBox.h) + 'px'; db.style.width = w + 'px'; db.style.height = Math.max(0, h - (uvBox.y + uvBox.h)) + 'px';
-    dl.style.left = '0'; dl.style.top = uvBox.y + 'px'; dl.style.width = uvBox.x + 'px'; dl.style.height = uvBox.h + 'px';
-    dr.style.left = (uvBox.x + uvBox.w) + 'px'; dr.style.top = uvBox.y + 'px'; dr.style.width = Math.max(0, w - (uvBox.x + uvBox.w)) + 'px'; dr.style.height = uvBox.h + 'px';
+    const container = document.getElementById('uv-scroll-container');
+    container.scrollLeft = uvBox.x - container.clientWidth / 2 + uvBox.w / 2;
+    container.scrollTop = uvBox.y - container.clientHeight / 2 + uvBox.h / 2;
+}
+
+function updateUVDOM() {
+    const boxEl = document.getElementById('uv-box');
+    boxEl.style.left = uvBox.x + 'px';
+    boxEl.style.top = uvBox.y + 'px';
+    boxEl.style.width = uvBox.w + 'px';
+    boxEl.style.height = uvBox.h + 'px';
 }
 
 const uvBoxEl = document.getElementById('uv-box');
@@ -521,9 +605,8 @@ if (uvBoxEl && uvHandle) {
     });
 
     window.addEventListener('mousemove', (e) => {
-        if (!isDraggingUV && !isResizingUV) return;
+        if (!activePreviewMesh || (!isDraggingUV && !isResizingUV)) return;
         
-        // Ngăn bôi đen chữ khi kéo
         e.preventDefault();
 
         const dx = e.clientX - lastMouse.x;
@@ -561,10 +644,9 @@ if (uvBoxEl && uvHandle) {
 }
 
 function updateUVOnMesh() {
-    if (!currentUVMesh || currentUVFaceIdx === -1) return;
+    if (!activePreviewMesh || activePreviewFace === -1) return;
     const w = document.getElementById('uv-img').naturalWidth;
     const h = document.getElementById('uv-img').naturalHeight;
-    
     if (w === 0 || h === 0) return;
 
     const u_offset = uvBox.x / w;
@@ -572,13 +654,13 @@ function updateUVOnMesh() {
     const u_repeat = uvBox.w / w;
     const v_repeat = uvBox.h / h;
     
-    if (!currentUVMesh.userData.uvData) currentUVMesh.userData.uvData = {};
-    currentUVMesh.userData.uvData[currentUVFaceIdx] = {
+    if (!activePreviewMesh.userData.uvData) activePreviewMesh.userData.uvData = {};
+    activePreviewMesh.userData.uvData[activePreviewFace] = {
         offset: [u_offset, v_offset],
         repeat: [u_repeat, v_repeat]
     };
     
-    const tex = currentUVMesh.material[currentUVFaceIdx].map;
+    const tex = activePreviewMesh.material[activePreviewFace].map;
     if (tex) {
         tex.offset.set(u_offset, v_offset);
         tex.repeat.set(u_repeat, v_repeat);
@@ -656,6 +738,7 @@ function animate() {
     const delta = (time - prevTime) / 1000;
 
     if (isPointerLocked && !isCreatorMode) {
+        // ... (phần di chuyển FPS giữ nguyên)
         const walkSpeed = 3.0;
         let isMoving = false;
 
@@ -699,7 +782,7 @@ function animate() {
             cat.userData.head.rotation.y = THREE.MathUtils.clamp(-cat.userData.turnVelocity * 15.0, -Math.PI/3, Math.PI/3);
         }
 
-    } else if (isCreatorMode && document.getElementById('uv-editor').style.display !== 'block') {
+    } else if (isCreatorMode && document.getElementById('uv-editor').style.display !== 'flex') {
         velocity.x -= velocity.x * 10.0 * delta;
         velocity.z -= velocity.z * 10.0 * delta;
 
@@ -717,6 +800,11 @@ function animate() {
 
     prevTime = time;
     renderer.render(scene, camera);
+    
+    if (document.getElementById('uv-editor').style.display === 'flex' && uvRenderer) {
+        uvControls.update();
+        uvRenderer.render(uvScene, uvCamera);
+    }
 }
 
 // ==========================================
