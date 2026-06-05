@@ -13,6 +13,8 @@ let prevTime = performance.now();
 let isCreatorMode = false;
 let isSnapEnabled = false;
 let isPointerLocked = false;
+let playerVelocityY = 0;
+let isGrounded = true;
 
 // Custom Editor Camera Variables
 let isRightMouseDown = false;
@@ -806,6 +808,12 @@ function onKeyDown(event) {
             case 'KeyD': moveState.right = true; break;
             case 'KeyE': exportScene(); break;
             case 'KeyC': toggleCreatorMode(); break;
+            case 'Space':
+                if (isGrounded) {
+                    playerVelocityY = 6.0;
+                    isGrounded = false;
+                }
+                break;
         }
     }
 }
@@ -834,6 +842,30 @@ function onWindowResize() {
     renderer.setSize(renderWidth, renderWidth * (window.innerHeight / window.innerWidth), false);
 }
 
+function checkCollision(playerBox) {
+    const limit = 10 - 0.2; 
+    if (playerBox.min.x < -limit || playerBox.max.x > limit) return true;
+    if (playerBox.min.z < -limit || playerBox.max.z > limit) return true;
+
+    let collided = false;
+    for (let i = 0; i < interactables.length; i++) {
+        const obj = interactables[i];
+        if (obj === window.psxCat) continue;
+        
+        obj.traverse((child) => {
+            if (child.isMesh && !collided) {
+                const objBox = new THREE.Box3().setFromObject(child);
+                objBox.expandByScalar(-0.02); 
+                if (playerBox.intersectsBox(objBox)) {
+                    collided = true;
+                }
+            }
+        });
+        if (collided) return true;
+    }
+    return false;
+}
+
 function animate() {
     requestAnimationFrame(animate);
 
@@ -841,14 +873,71 @@ function animate() {
     const delta = (time - prevTime) / 1000;
 
     if (isPointerLocked && !isCreatorMode) {
-        // ... (phần di chuyển FPS giữ nguyên)
+        const radius = 0.2;
+        const height = 0.4;
+
+        // Apply Gravity
+        playerVelocityY -= 15.0 * delta;
+        playerGroup.position.y += playerVelocityY * delta;
+
+        // Vertical collision check
+        let pBoxY = new THREE.Box3();
+        pBoxY.min.set(playerGroup.position.x - radius, playerGroup.position.y, playerGroup.position.z - radius);
+        pBoxY.max.set(playerGroup.position.x + radius, playerGroup.position.y + height, playerGroup.position.z + radius);
+        
+        if (checkCollision(pBoxY)) {
+            playerGroup.position.y -= playerVelocityY * delta;
+            if (playerVelocityY < 0) {
+                isGrounded = true;
+            }
+            playerVelocityY = 0;
+        } else {
+            isGrounded = false;
+        }
+
+        // Hard floor check
+        if (playerGroup.position.y <= 0) {
+            playerGroup.position.y = 0;
+            playerVelocityY = 0;
+            isGrounded = true;
+        }
+
         const walkSpeed = 3.0;
         let isMoving = false;
 
-        if (moveState.forward) { playerGroup.translateZ(-walkSpeed * delta); isMoving = true; }
-        if (moveState.backward) { playerGroup.translateZ(walkSpeed * delta); isMoving = true; }
-        if (moveState.left) { playerGroup.translateX(-walkSpeed * delta); isMoving = true; }
-        if (moveState.right) { playerGroup.translateX(walkSpeed * delta); isMoving = true; }
+        let moveX = 0;
+        let moveZ = 0;
+
+        if (moveState.forward) { moveZ -= walkSpeed * delta; }
+        if (moveState.backward) { moveZ += walkSpeed * delta; }
+        if (moveState.left) { moveX -= walkSpeed * delta; }
+        if (moveState.right) { moveX += walkSpeed * delta; }
+
+        if (moveX !== 0 || moveZ !== 0) {
+            const oldPos = playerGroup.position.clone();
+            
+            if (moveX !== 0) {
+                playerGroup.translateX(moveX);
+                pBoxY.min.set(playerGroup.position.x - radius, playerGroup.position.y, playerGroup.position.z - radius);
+                pBoxY.max.set(playerGroup.position.x + radius, playerGroup.position.y + height, playerGroup.position.z + radius);
+                if (checkCollision(pBoxY)) {
+                    playerGroup.position.x = oldPos.x;
+                    playerGroup.position.z = oldPos.z;
+                }
+                oldPos.copy(playerGroup.position);
+            }
+            
+            if (moveZ !== 0) {
+                playerGroup.translateZ(moveZ);
+                pBoxY.min.set(playerGroup.position.x - radius, playerGroup.position.y, playerGroup.position.z - radius);
+                pBoxY.max.set(playerGroup.position.x + radius, playerGroup.position.y + height, playerGroup.position.z + radius);
+                if (checkCollision(pBoxY)) {
+                    playerGroup.position.x = oldPos.x;
+                    playerGroup.position.z = oldPos.z;
+                }
+            }
+            isMoving = true;
+        }
 
         if (window.psxCat) {
             const cat = window.psxCat;
