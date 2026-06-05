@@ -3,13 +3,22 @@ import { PointerLockControls } from 'three/addons/controls/PointerLockControls.j
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
 
-let camera, scene, renderer, controls, transformControl;
+let camera, scene, renderer;
+let pointerControls, transformControl;
 const moveState = { forward: false, backward: false, left: false, right: false };
 const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
 let prevTime = performance.now();
 
 let isCreatorMode = false;
+let isSnapEnabled = false;
+
+// Custom Editor Camera Variables
+let isRightMouseDown = false;
+let isZooming = false;
+const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+const PI_2 = Math.PI / 2;
+
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 const interactables = []; 
@@ -30,42 +39,49 @@ function init() {
     scene.fog = new THREE.FogExp2(0x020202, 0.15); 
 
     camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
-    camera.position.y = 1.6;
+    camera.position.set(0, 1.6, 5);
 
-    controls = new PointerLockControls(camera, document.body);
-    const info = document.getElementById('info');
+    // ==========================================
+    // CAMERAS & CONTROLS SETUP
+    // ==========================================
     
-    info.addEventListener('click', () => {
-        if (!isCreatorMode) {
-            controls.lock();
-        }
-    });
+    // 1. FPS Controls (Play Mode)
+    pointerControls = new PointerLockControls(camera, document.body);
+    scene.add(pointerControls.getObject());
 
-    controls.addEventListener('lock', () => {
-        info.style.display = 'none';
-        document.getElementById('crosshair').style.display = 'block';
-    });
-
-    controls.addEventListener('unlock', () => {
-        if (!isCreatorMode) {
-            info.style.display = 'block';
-            document.getElementById('crosshair').style.display = 'none';
-        }
-    });
-
-    scene.add(controls.getObject());
-
-    // Setup TransformControls for Creator Mode
+    // 2. Transform Controls (Gizmo)
     transformControl = new TransformControls(camera, renderer.domElement);
     transformControl.addEventListener('dragging-changed', function (event) {
-        controls.enabled = !event.value;
         if (!event.value && transformControl.object) {
             savePositions();
         }
     });
     scene.add(transformControl);
 
-    // Lights
+    // Prevent default right click menu
+    document.addEventListener('contextmenu', e => e.preventDefault());
+
+    // UI Events
+    const info = document.getElementById('info');
+    info.addEventListener('click', () => {
+        if (!isCreatorMode) pointerControls.lock();
+    });
+
+    pointerControls.addEventListener('lock', () => {
+        info.style.display = 'none';
+        document.getElementById('crosshair').style.display = 'block';
+    });
+
+    pointerControls.addEventListener('unlock', () => {
+        if (!isCreatorMode) {
+            info.style.display = 'block';
+            document.getElementById('crosshair').style.display = 'none';
+        }
+    });
+
+    // ==========================================
+    // SCENE & ENVIRONMENT
+    // ==========================================
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
     scene.add(ambientLight);
 
@@ -73,7 +89,6 @@ function init() {
     flashlight.position.set(0, -0.2, 0.5);
     camera.add(flashlight);
 
-    // Textures
     const textureLoader = new THREE.TextureLoader();
     const loadPSXTexture = (path, repeatX, repeatY) => {
         const tex = textureLoader.load(path);
@@ -99,7 +114,6 @@ function init() {
     const roomHeight = 3;
     const group = new THREE.Group();
 
-    // Floor & Ceiling
     const floorGeo = new THREE.PlaneGeometry(roomSize, roomSize);
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
@@ -110,7 +124,6 @@ function init() {
     ceil.position.y = roomHeight;
     group.add(ceil);
 
-    // Walls
     const wallGeo = new THREE.PlaneGeometry(roomSize, roomHeight);
     
     const wall1 = new THREE.Mesh(wallGeo, wallMat);
@@ -132,7 +145,6 @@ function init() {
     wall4.rotation.y = -Math.PI / 2;
     group.add(wall4);
 
-    // Pillars (Interactables)
     const pillarGeo = new THREE.BoxGeometry(1, roomHeight, 1);
     for (let i = 0; i < 15; i++) {
         const pillar = new THREE.Mesh(pillarGeo, wallMat);
@@ -144,7 +156,6 @@ function init() {
         group.add(pillar);
     }
 
-    // Add Furniture (Interactables)
     const table = createTable(wallMat);
     table.position.set(0, 0, -3);
     table.userData = { id: 'table_1', isFurniture: true };
@@ -167,14 +178,256 @@ function init() {
     scene.add(group);
     window.sceneGroup = group;
 
-    // Load saved positions
     loadPositions();
 
     document.addEventListener('keydown', onKeyDown);
     document.addEventListener('keyup', onKeyUp);
     window.addEventListener('resize', onWindowResize);
     window.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('mousemove', onMouseMove);
 }
+
+// ==========================================
+// CREATOR MODE LOGIC (UNITY STYLE)
+// ==========================================
+
+function toggleCreatorMode() {
+    isCreatorMode = !isCreatorMode;
+    const creatorLabel = document.getElementById('creator-label');
+    const crosshair = document.getElementById('crosshair');
+    const info = document.getElementById('info');
+
+    if (isCreatorMode) {
+        pointerControls.unlock();
+        creatorLabel.style.display = 'block';
+        crosshair.style.display = 'none';
+        info.style.display = 'none';
+    } else {
+        transformControl.detach();
+        pointerControls.lock();
+        creatorLabel.style.display = 'none';
+        crosshair.style.display = 'block';
+    }
+}
+
+function toggleSnap() {
+    isSnapEnabled = !isSnapEnabled;
+    const status = document.getElementById('snap-status');
+    if (isSnapEnabled) {
+        transformControl.setTranslationSnap(0.5); // Snap to 0.5 meters
+        transformControl.setRotationSnap(THREE.MathUtils.degToRad(45)); // Snap to 45 degrees
+        status.innerText = "(ON)";
+        status.style.color = "#00ff00";
+    } else {
+        transformControl.setTranslationSnap(null);
+        transformControl.setRotationSnap(null);
+        status.innerText = "(OFF)";
+        status.style.color = "red";
+    }
+}
+
+function onMouseDown(event) {
+    if (!isCreatorMode) return;
+    
+    // Middle click Look around (button 1)
+    if (event.button === 1) {
+        isRightMouseDown = true; // reusing the variable name but it means middle mouse now
+    }
+
+    // Ctrl + Drag to Zoom
+    if (event.ctrlKey) {
+        isZooming = true;
+    }
+
+    // Left click Select
+    if (event.button === 0 && !event.ctrlKey && !event.shiftKey) {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(interactables, true);
+
+        if (intersects.length > 0) {
+            const target = getFurnitureParent(intersects[0].object);
+            if (target) {
+                transformControl.attach(target);
+                
+                target.traverse((child) => {
+                    if (child.isMesh) {
+                        if(!child.userData.originalMat) child.userData.originalMat = child.material;
+                        child.material = child.material.clone(); 
+                        child.material.emissive.setHex(0x555555);
+                    }
+                });
+                setTimeout(() => {
+                    target.traverse((child) => {
+                        if (child.isMesh) child.material.emissive.setHex(0x000000);
+                    });
+                }, 200);
+            }
+        } else {
+            const gizmoIntersects = raycaster.intersectObject(transformControl, true);
+            if (gizmoIntersects.length === 0 && !transformControl.dragging) {
+                transformControl.detach();
+            }
+        }
+    }
+}
+
+function onMouseUp(event) {
+    if (event.button === 1) isRightMouseDown = false;
+    isZooming = false;
+}
+
+function onMouseMove(event) {
+    if (!isCreatorMode) return;
+
+    // Zooming using Ctrl + Drag
+    if (event.ctrlKey && event.buttons > 0) {
+        const zoomSpeed = 0.02;
+        const delta = (Math.abs(event.movementX) > Math.abs(event.movementY)) ? event.movementX : -event.movementY;
+        camera.translateZ(delta * zoomSpeed);
+        return; 
+    }
+
+    // Panning using Shift + Drag
+    if (event.shiftKey && event.buttons > 0) {
+        const panSpeed = 0.02;
+        camera.translateX(-event.movementX * panSpeed);
+        camera.translateY(event.movementY * panSpeed);
+        return;
+    }
+
+    // Look around like Unity Editor
+    if (isRightMouseDown) {
+        euler.setFromQuaternion(camera.quaternion);
+        euler.y -= event.movementX * 0.002;
+        euler.x -= event.movementY * 0.002;
+        euler.x = Math.max(-PI_2, Math.min(PI_2, euler.x));
+        camera.quaternion.setFromEuler(euler);
+    }
+}
+
+window.addEventListener('wheel', (event) => {
+    if (isCreatorMode) {
+        camera.translateZ(event.deltaY * 0.01);
+    }
+});
+
+// ==========================================
+// INPUT HANDLING
+// ==========================================
+
+function onKeyDown(event) {
+    if (isCreatorMode) {
+        switch (event.code) {
+            case 'KeyC': toggleCreatorMode(); break;
+            case 'KeyE': exportScene(); break;
+            case 'KeyT': transformControl.setMode('translate'); break;
+            case 'KeyR': transformControl.setMode('rotate'); break;
+            case 'KeyX': toggleSnap(); break;
+            // WASD for flying
+            case 'ArrowUp':
+            case 'KeyW': moveState.forward = true; break;
+            case 'ArrowLeft':
+            case 'KeyA': moveState.left = true; break;
+            case 'ArrowDown':
+            case 'KeyS': moveState.backward = true; break;
+            case 'ArrowRight':
+            case 'KeyD': moveState.right = true; break;
+        }
+    } else {
+        switch (event.code) {
+            case 'ArrowUp':
+            case 'KeyW': moveState.forward = true; break;
+            case 'ArrowLeft':
+            case 'KeyA': moveState.left = true; break;
+            case 'ArrowDown':
+            case 'KeyS': moveState.backward = true; break;
+            case 'ArrowRight':
+            case 'KeyD': moveState.right = true; break;
+            case 'KeyE': exportScene(); break;
+            case 'KeyC': toggleCreatorMode(); break;
+        }
+    }
+}
+
+function onKeyUp(event) {
+    switch (event.code) {
+        case 'ArrowUp':
+        case 'KeyW': moveState.forward = false; break;
+        case 'ArrowLeft':
+        case 'KeyA': moveState.left = false; break;
+        case 'ArrowDown':
+        case 'KeyS': moveState.backward = false; break;
+        case 'ArrowRight':
+        case 'KeyD': moveState.right = false; break;
+    }
+}
+
+// ==========================================
+// CORE LOOP & DATA
+// ==========================================
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    const renderWidth = 320;
+    renderer.setSize(renderWidth, renderWidth * (window.innerHeight / window.innerWidth), false);
+}
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    const time = performance.now();
+    const delta = (time - prevTime) / 1000;
+
+    if (pointerControls.isLocked === true && !isCreatorMode) {
+        // Play Mode: Walking on ground
+        velocity.x -= velocity.x * 10.0 * delta;
+        velocity.z -= velocity.z * 10.0 * delta;
+
+        direction.z = Number(moveState.forward) - Number(moveState.backward);
+        direction.x = Number(moveState.right) - Number(moveState.left);
+        direction.normalize();
+
+        const speed = 25.0;
+        if (moveState.forward || moveState.backward) velocity.z -= direction.z * speed * delta;
+        if (moveState.left || moveState.right) velocity.x -= direction.x * speed * delta;
+
+        pointerControls.moveRight(-velocity.x * delta);
+        pointerControls.moveForward(-velocity.z * delta);
+
+        if (moveState.forward || moveState.backward || moveState.left || moveState.right) {
+            // Bobbing effect relative to current height instead of snapping to 1.6
+            camera.position.y += Math.sin(time * 0.015) * 0.005;
+        }
+    } else if (isCreatorMode) {
+        // Creator Mode: Flying freely (Unity style)
+        velocity.x -= velocity.x * 10.0 * delta;
+        velocity.z -= velocity.z * 10.0 * delta;
+
+        direction.z = Number(moveState.forward) - Number(moveState.backward);
+        direction.x = Number(moveState.right) - Number(moveState.left);
+        direction.normalize();
+
+        const flySpeed = 25.0;
+        if (moveState.forward || moveState.backward) velocity.z -= direction.z * flySpeed * delta;
+        if (moveState.left || moveState.right) velocity.x -= direction.x * flySpeed * delta;
+
+        // Apply local translation directly to camera for flying
+        camera.translateX(-velocity.x * delta);
+        camera.translateZ(velocity.z * delta);
+    }
+
+    prevTime = time;
+    renderer.render(scene, camera);
+}
+
+// ==========================================
+// HELPERS
+// ==========================================
 
 function savePositions() {
     const data = {};
@@ -206,126 +459,8 @@ function getFurnitureParent(object) {
     return null;
 }
 
-function onMouseDown(event) {
-    if (!isCreatorMode) return;
-    
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(interactables, true);
-
-    if (intersects.length > 0) {
-        const target = getFurnitureParent(intersects[0].object);
-        if (target) {
-            transformControl.attach(target);
-            
-            // Highlight effect
-            target.traverse((child) => {
-                if (child.isMesh) {
-                    child.material = child.material.clone(); // Clone material to not affect others
-                    child.material.emissive.setHex(0x555555);
-                }
-            });
-            setTimeout(() => {
-                target.traverse((child) => {
-                    if (child.isMesh) child.material.emissive.setHex(0x000000);
-                });
-            }, 200);
-        }
-    } else {
-        if (!transformControl.dragging) {
-            transformControl.detach();
-        }
-    }
-}
-
-function onKeyDown(event) {
-    switch (event.code) {
-        case 'ArrowUp':
-        case 'KeyW': moveState.forward = true; break;
-        case 'ArrowLeft':
-        case 'KeyA': moveState.left = true; break;
-        case 'ArrowDown':
-        case 'KeyS': moveState.backward = true; break;
-        case 'ArrowRight':
-        case 'KeyD': moveState.right = true; break;
-        case 'KeyE': exportScene(); break;
-        case 'KeyC': toggleCreatorMode(); break;
-    }
-}
-
-function onKeyUp(event) {
-    switch (event.code) {
-        case 'ArrowUp':
-        case 'KeyW': moveState.forward = false; break;
-        case 'ArrowLeft':
-        case 'KeyA': moveState.left = false; break;
-        case 'ArrowDown':
-        case 'KeyS': moveState.backward = false; break;
-        case 'ArrowRight':
-        case 'KeyD': moveState.right = false; break;
-    }
-}
-
-function toggleCreatorMode() {
-    isCreatorMode = !isCreatorMode;
-    const creatorLabel = document.getElementById('creator-label');
-    const crosshair = document.getElementById('crosshair');
-    const info = document.getElementById('info');
-
-    if (isCreatorMode) {
-        controls.unlock();
-        creatorLabel.style.display = 'block';
-        crosshair.style.display = 'none';
-        info.style.display = 'none';
-    } else {
-        transformControl.detach();
-        controls.lock();
-        creatorLabel.style.display = 'none';
-        crosshair.style.display = 'block';
-    }
-}
-
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    const renderWidth = 320;
-    renderer.setSize(renderWidth, renderWidth * (window.innerHeight / window.innerWidth), false);
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-
-    const time = performance.now();
-    if (controls.isLocked === true && !isCreatorMode) {
-        const delta = (time - prevTime) / 1000;
-
-        velocity.x -= velocity.x * 10.0 * delta;
-        velocity.z -= velocity.z * 10.0 * delta;
-
-        direction.z = Number(moveState.forward) - Number(moveState.backward);
-        direction.x = Number(moveState.right) - Number(moveState.left);
-        direction.normalize();
-
-        const speed = 25.0;
-        if (moveState.forward || moveState.backward) velocity.z -= direction.z * speed * delta;
-        if (moveState.left || moveState.right) velocity.x -= direction.x * speed * delta;
-
-        controls.moveRight(-velocity.x * delta);
-        controls.moveForward(-velocity.z * delta);
-
-        if (moveState.forward || moveState.backward || moveState.left || moveState.right) {
-            camera.position.y = 1.6 + Math.sin(time * 0.008) * 0.06;
-        }
-    }
-
-    prevTime = time;
-    renderer.render(scene, camera);
-}
-
 function exportScene() {
-    transformControl.detach(); // detach gizmo before exporting
+    transformControl.detach();
     const exporter = new GLTFExporter();
     exporter.parse(
         window.sceneGroup,
@@ -343,9 +478,7 @@ function exportScene() {
             URL.revokeObjectURL(url);
             alert("Đã tải xuống file psx_house.gltf!");
         },
-        function (error) {
-            console.error('Error exporting:', error);
-        },
+        function (error) { console.error('Error exporting:', error); },
         {} 
     );
 }

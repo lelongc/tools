@@ -22,14 +22,31 @@
         }
         #creator-label {
             position: absolute; top: 10px; right: 10px;
-            color: #00ff00; font-family: monospace; font-size: 20px;
-            font-weight: bold; text-shadow: 2px 2px 0 #000;
+            color: #00ff00; font-family: monospace; font-size: 16px;
+            text-shadow: 2px 2px 0 #000;
             display: none; pointer-events: none; z-index: 10;
+            background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px;
+            border: 1px solid #333;
         }
+        .hotkey { color: #ffff00; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div id="creator-label">CREATOR MODE ON<br><span style="font-size:12px;color:white">Click object to move.<br>Press C to play.</span></div>
+    <div id="creator-label">
+        <h3 style="margin-top:0; color:#00ff00;">CREATOR MODE ON</h3>
+        <span style="font-size:13px;color:white;line-height:1.6;">
+            <b>MOUSE CONTROLS:</b><br>
+            - <span class="hotkey">Left Click</span>: Select Object<br>
+            - <span class="hotkey">Middle Mouse (Hold)</span>: Look around<br>
+            - <span class="hotkey">Shift+Drag</span>: Pan | <span class="hotkey">Ctrl+Drag</span>: Zoom<br><br>
+            <b>HOTKEYS:</b><br>
+            - <span class="hotkey">T</span>: Translate (Move)<br>
+            - <span class="hotkey">R</span>: Rotate<br>
+            - <span class="hotkey">X</span>: Toggle Snap <span id="snap-status" style="color:red">(OFF)</span><br>
+            - <span class="hotkey">E</span>: Export GLTF<br>
+            - <span class="hotkey">C</span>: Back to Play Mode
+        </span>
+    </div>
     <div id="crosshair"></div>
     <div id="info">Click to Enter<br><br><span style="font-size:12px;color:#aaa">W, A, S, D to move<br>Mouse to look around<br>Press E to Export<br>Press C to toggle Creator Mode</span></div>
 
