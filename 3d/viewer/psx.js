@@ -167,12 +167,12 @@ function init() {
     scene.add(playerGroup);
 
     cameraArm = new THREE.Group();
-    cameraArm.position.set(0, 0.4, 0); 
+    cameraArm.position.set(0, 0.1, 0); 
     playerGroup.add(cameraArm);
 
     cameraArm.add(camera);
-    camera.position.set(0, 0.4, 2); 
-    window.defaultCamPos = new THREE.Vector3(0, 0.4, 2);
+    camera.position.set(0, 0.25, 2); 
+    window.defaultCamPos = new THREE.Vector3(0, 0.25, 2);
     window.fpsCamPos = new THREE.Vector3(0, 0.15, -0.35); 
 
     const cat = createCat();
@@ -287,7 +287,7 @@ function init() {
         "Wkkk.....W", // Z = 6
         "Wkkk.....W", // Z = 10
         "Wkkk.....W", // Z = 14
-        "WWWWWWWWWW"  // Z = 18 (Outer Front Wall)
+        "WWWWDWWWWW"  // Z = 18 (Outer Front Wall)
     ];
 
     const createBlockWall = (x, z, mat, id) => {
@@ -320,7 +320,11 @@ function init() {
                 createBlockWall(x, z, rottingWoodMat, `wall_block_${wallCount++}`);
             } else if (char === 'D') {
                 // Place a door!
-                addF(createDoor(rottingWoodMat), x, z);
+                const doorObj = createDoor(rottingWoodMat);
+                if (r > 0 && r < 9 && (blueprint[r-1][c] === 'W' || blueprint[r+1][c] === 'W')) {
+                    doorObj.rotation.y = Math.PI / 2;
+                }
+                addF(doorObj, x, z);
             }
         }
     }
@@ -328,45 +332,55 @@ function init() {
     // === FURNITURE PLACEMENT ===
     
     // Kitchen (left side, z>0)
-    addF(createFridge(rustMetalMat), -14, 14);
-    addF(createKitchenCounter(rottingWoodMat), -10, 14);
-    addF(createKitchenCounter(rottingWoodMat), -6, 14);
-    addF(createStove(rustMetalMat), -14, 10, Math.PI/2);
-    addF(createTable(rottingWoodMat), -10, 6);
-    addF(createChair(rottingWoodMat), -12, 6, Math.PI/2);
-    addF(createChair(rottingWoodMat), -8, 6, -Math.PI/2);
+    addF(createFridge(rustMetalMat), -10.5, 10.5);
+    addF(createKitchenCounter(rottingWoodMat), -7.5, 10.5);
+    addF(createKitchenCounter(rottingWoodMat), -4.5, 10.5);
+    addF(createStove(rustMetalMat), -10.5, 7.5, Math.PI/2);
+    addF(createTable(rottingWoodMat), -7.5, 4.5);
+    addF(createChair(rottingWoodMat), -9, 4.5, Math.PI/2);
+    addF(createChair(rottingWoodMat), -6, 4.5, -Math.PI/2);
+    addF(createTrashCan(rustMetalMat), -10.5, 4.5);
 
     // Living Room (right side, z>0)
-    addF(createSofa(darkFabricMat), 8, 12, -Math.PI/2);
-    addF(createTV(rustMetalMat), 14, 12, Math.PI/2);
-    addF(createTable(rottingWoodMat), 11, 12);
-    addF(createClock(rottingWoodMat), 14, 4, -Math.PI/4);
-    addF(createLamp(), 14, 16);
+    addF(createRug(stainFabricMat, 6, 6), 10, 10);
+    addF(createSofa(darkFabricMat), 6, 9, -Math.PI/2);
+    addF(createTV(rustMetalMat), 10.5, 9, Math.PI/2);
+    addF(createCoffeeTable(rottingWoodMat), 8.25, 9);
+    addF(createClock(rottingWoodMat), 10.5, 3, -Math.PI/4);
+    addF(createLamp(), 10.5, 12);
     const p1 = createPainting(rottingWoodMat); p1.position.y = 2;
-    addF(p1, 15.9, 8, -Math.PI/2); // On the right outer wall
+    addF(p1, 11.925, 6, -Math.PI/2); // On the right outer wall
+    addF(createDeadPlant(rottingWoodMat, rustMetalMat), 14, 15.5);
+    const window2 = createBoardedWindow(rottingWoodMat);
+    window2.position.y = 2.5;
+    addF(window2, 11.925, 7.5, -Math.PI/2);
 
     // Bathroom (left side, z<0)
-    addF(createBathtub(rustMetalMat), -14, -14);
-    addF(createToilet(dirtyTileMat), -14, -6);
-    addF(createSink(dirtyTileMat), -6, -14, -Math.PI/2);
+    addF(createBathtub(rustMetalMat), -10.5, -10.5);
+    addF(createToilet(dirtyTileMat), -10.5, -4.5);
+    addF(createSink(dirtyTileMat), -4.5, -10.5, -Math.PI/2);
+    addF(createMirror(dirtyTileMat), -1.575, -10.5, -Math.PI/2);
+    addF(createTrashCan(rustMetalMat), -7.5, -12);
 
     // Bedroom (right side, z<0)
-    addF(createBed(stainFabricMat), 14, -14, -Math.PI/2);
-    addF(createWardrobe(rottingWoodMat), 6, -14, Math.PI/2);
-    addF(createDresser(rottingWoodMat), 14, -8, -Math.PI/2);
-    addF(createChair(rottingWoodMat), 8, -6, Math.PI);
+    addF(createRug(darkFabricMat, 4.5, 4.5), 10, -10);
+    addF(createBed(stainFabricMat), 10.5, -10.5, -Math.PI/2);
+    addF(createNightstand(rottingWoodMat), 10.5, -7.5, -Math.PI/2);
+    addF(createWardrobe(rottingWoodMat), 4.5, -10.5, Math.PI/2);
+    addF(createDresser(rottingWoodMat), 10.5, -6, -Math.PI/2);
+    addF(createChair(rottingWoodMat), 6, -4.5, Math.PI);
     
     // Add a boarded window in the bedroom
     const window1 = createBoardedWindow(rottingWoodMat);
     window1.position.y = 2.5;
-    addF(window1, 15.9, -10, -Math.PI/2);
+    addF(window1, 11.925, -7.5, -Math.PI/2);
 
     // === CAGE AND OWNER ===
     const cage = createCage(rustMetalMat);
-    addF(cage, 14, -14); // In the corner of the bedroom
+    addF(cage, 10.5, -10.5); // In the corner of the bedroom
 
     const owner = createOwner(stainFabricMat);
-    addF(owner, 14, -14); // Inside the cage
+    addF(owner, 10.5, -10.5); // Inside the cage
 
     // === DUST PARTICLES ===
     const dustCount = 1500;
@@ -443,7 +457,7 @@ function toggleCreatorMode() {
         document.body.requestPointerLock();
         
         cameraArm.add(camera);
-        camera.position.set(0, 0.4, 2); 
+        camera.position.set(0, 0.25, 2); 
         camera.rotation.set(0, 0, 0);
         camera.quaternion.identity();
         
@@ -1327,7 +1341,7 @@ function onWindowResize() {
 }
 
 function checkCollision(playerBox) {
-    const limit = 20 - 0.2; 
+    const limit = 15 - 0.1; 
     if (playerBox.min.x < -limit || playerBox.max.x > limit) return true;
     if (playerBox.min.z < -limit || playerBox.max.z > limit) return true;
 
@@ -1348,6 +1362,27 @@ function checkCollision(playerBox) {
         if (collided) return true;
     }
     return false;
+}
+
+function getCollisionTop(playerBox) {
+    let topY = -Infinity;
+    let collided = false;
+    for (let i = 0; i < interactables.length; i++) {
+        const obj = interactables[i];
+        if (obj === window.psxCat) continue;
+        
+        obj.traverse((child) => {
+            if (child.isMesh) {
+                const objBox = new THREE.Box3().setFromObject(child);
+                objBox.expandByScalar(-0.02); 
+                if (playerBox.intersectsBox(objBox)) {
+                    collided = true;
+                    if (objBox.max.y > topY) topY = objBox.max.y;
+                }
+            }
+        });
+    }
+    return { collided, topY };
 }
 
 function animate() {
@@ -1371,8 +1406,8 @@ function animate() {
     });
 
     if (isPointerLocked && !isCreatorMode) {
-        const radius = 0.2;
-        const height = 0.4;
+        const radius = 0.1;
+        const height = 0.2;
 
         let previousVelocityY = playerVelocityY;
 
@@ -1425,7 +1460,7 @@ function animate() {
             stamina -= 15.0 * delta; // slight stamina drain while charging
             
             // Visual crouch
-            const targetY = isFPSView ? (window.fpsCamPos.y - 0.1) : (window.defaultCamPos.y - 0.2);
+            const targetY = isFPSView ? (window.fpsCamPos.y - 0.05) : (window.defaultCamPos.y - 0.1);
             camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetY, 15 * delta);
             if (window.psxCat) window.psxCat.scale.y = THREE.MathUtils.lerp(window.psxCat.scale.y, 0.6, 15 * delta);
         } else {
@@ -1438,7 +1473,7 @@ function animate() {
                 const animSpeed = (moveState.shift && !isExhausted) ? 2.5 : 1.0; 
                 const walkPhase = time * 0.005 * animSpeed;
                 const limpPhase = Math.sin(walkPhase + Math.PI);
-                const limpDip = limpPhase < 0 ? limpPhase * 0.12 : 0; // Camera dips heavily on injured leg
+                const limpDip = limpPhase < 0 ? limpPhase * 0.05 : 0; // Camera dips heavily on injured leg
                 targetY += limpDip;
             }
 
@@ -1496,14 +1531,28 @@ function animate() {
 
         if (moveX !== 0 || moveZ !== 0) {
             const oldPos = playerGroup.position.clone();
+            const stepH = 0.2;
             
             if (moveX !== 0) {
                 playerGroup.translateX(moveX);
                 pBoxY.min.set(playerGroup.position.x - radius, playerGroup.position.y, playerGroup.position.z - radius);
                 pBoxY.max.set(playerGroup.position.x + radius, playerGroup.position.y + height, playerGroup.position.z + radius);
-                if (checkCollision(pBoxY)) {
-                    playerGroup.position.x = oldPos.x;
-                    playerGroup.position.z = oldPos.z;
+                
+                let colInfo = getCollisionTop(pBoxY);
+                if (colInfo.collided) {
+                    if (colInfo.topY - playerGroup.position.y <= stepH) {
+                        pBoxY.min.y = colInfo.topY + 0.001;
+                        pBoxY.max.y = pBoxY.min.y + height;
+                        if (!checkCollision(pBoxY)) {
+                            playerGroup.position.y = colInfo.topY + 0.001;
+                        } else {
+                            playerGroup.position.x = oldPos.x;
+                            playerGroup.position.z = oldPos.z;
+                        }
+                    } else {
+                        playerGroup.position.x = oldPos.x;
+                        playerGroup.position.z = oldPos.z;
+                    }
                 }
                 oldPos.copy(playerGroup.position);
             }
@@ -1512,9 +1561,22 @@ function animate() {
                 playerGroup.translateZ(moveZ);
                 pBoxY.min.set(playerGroup.position.x - radius, playerGroup.position.y, playerGroup.position.z - radius);
                 pBoxY.max.set(playerGroup.position.x + radius, playerGroup.position.y + height, playerGroup.position.z + radius);
-                if (checkCollision(pBoxY)) {
-                    playerGroup.position.x = oldPos.x;
-                    playerGroup.position.z = oldPos.z;
+                
+                let colInfo = getCollisionTop(pBoxY);
+                if (colInfo.collided) {
+                    if (colInfo.topY - playerGroup.position.y <= stepH) {
+                        pBoxY.min.y = colInfo.topY + 0.001;
+                        pBoxY.max.y = pBoxY.min.y + height;
+                        if (!checkCollision(pBoxY)) {
+                            playerGroup.position.y = colInfo.topY + 0.001;
+                        } else {
+                            playerGroup.position.x = oldPos.x;
+                            playerGroup.position.z = oldPos.z;
+                        }
+                    } else {
+                        playerGroup.position.x = oldPos.x;
+                        playerGroup.position.z = oldPos.z;
+                    }
                 }
             }
             isMoving = true;
@@ -1570,8 +1632,8 @@ function animate() {
                 
                 const limpPhase = Math.sin(walkPhase + Math.PI);
                 const limpDip = limpPhase < 0 ? limpPhase * 0.05 : 0;
-                cat.userData.body.position.y = 0.35 + Math.sin(time * 0.02 * animSpeed) * 0.01 + limpDip + landDip; 
-                cat.userData.head.position.y = 0.45 + Math.sin(time * 0.02 * animSpeed + 1) * 0.005 + limpDip + landDip;
+                cat.userData.body.position.y = 0.175 + Math.sin(time * 0.02 * animSpeed) * 0.005 + limpDip + landDip; 
+                cat.userData.head.position.y = 0.225 + Math.sin(time * 0.02 * animSpeed + 1) * 0.0025 + limpDip + landDip;
 
                 if (landingTimer > 0) {
                     cat.userData.legs[0].hip.rotation.z = landSplay;
@@ -1587,8 +1649,8 @@ function animate() {
                 }
             } else {
                 cat.userData.legs.forEach(leg => { leg.hip.rotation.x = 0; leg.knee.rotation.x = 0; leg.hip.rotation.z = 0; });
-                cat.userData.body.position.y = 0.35 + landDip;
-                cat.userData.head.position.y = 0.45 + landDip;
+                cat.userData.body.position.y = 0.175 + landDip;
+                cat.userData.head.position.y = 0.225 + landDip;
                 
                 if (landingTimer > 0) {
                     cat.userData.legs[0].hip.rotation.z = landSplay;
@@ -1981,26 +2043,26 @@ function createCat() {
 
     catGroup.userData = { id: 'cat_1' };
 
-    const bodyGeo = new THREE.BoxGeometry(0.3, 0.25, 0.6);
+    const bodyGeo = new THREE.BoxGeometry(0.15, 0.125, 0.3);
     const body = new THREE.Mesh(bodyGeo, catMat);
-    body.position.set(0, 0.35, 0);
+    body.position.set(0, 0.175, 0);
     catGroup.add(body);
     catGroup.userData.body = body;
 
     const headGroup = new THREE.Group();
-    headGroup.position.set(0, 0.45, -0.35); 
+    headGroup.position.set(0, 0.225, -0.175); 
     catGroup.add(headGroup);
     catGroup.userData.head = headGroup;
 
-    const headGeo = new THREE.BoxGeometry(0.25, 0.25, 0.25);
+    const headGeo = new THREE.BoxGeometry(0.125, 0.125, 0.125);
     const head = new THREE.Mesh(headGeo, catMat);
-    head.position.set(0, 0.1, -0.1);
+    head.position.set(0, 0.05, -0.05);
     headGroup.add(head);
 
     // Pointy right-triangle cat ears (Modified BoxGeometry for proper UV mapping)
-    const earW = 0.12;
-    const earH = 0.15;
-    const earD = 0.05;
+    const earW = 0.06;
+    const earH = 0.075;
+    const earD = 0.025;
     
     const earGeoL = new THREE.BoxGeometry(earW, earH, earD);
     const posL = earGeoL.attributes.position;
@@ -2023,29 +2085,29 @@ function createCat() {
     earGeoR.computeVertexNormals();
 
     const earL = new THREE.Mesh(earGeoL, darkMat);
-    earL.position.set(0.065, 0.3, -0.1); 
+    earL.position.set(0.0325, 0.15, -0.05); 
     headGroup.add(earL);
 
     const earR = new THREE.Mesh(earGeoR, darkMat);
-    earR.position.set(-0.065, 0.3, -0.1);
+    earR.position.set(-0.0325, 0.15, -0.05);
     headGroup.add(earR);
 
     const tailGroup = new THREE.Group();
-    tailGroup.position.set(0, 0.45, 0.3); 
+    tailGroup.position.set(0, 0.225, 0.15); 
     catGroup.add(tailGroup);
     catGroup.userData.tail = tailGroup;
 
-    const tailGeo = new THREE.BoxGeometry(0.05, 0.4, 0.05);
+    const tailGeo = new THREE.BoxGeometry(0.0125, 0.1, 0.0125);
     const tail = new THREE.Mesh(tailGeo, darkMat);
-    tail.position.set(0, 0.2, 0); 
+    tail.position.set(0, 0.1, 0); 
     tailGroup.add(tail);
 
-    const legGeo = new THREE.BoxGeometry(0.06, 0.15, 0.06);
+    const legGeo = new THREE.BoxGeometry(0.03, 0.075, 0.03);
     const positions = [
-        [-0.12, 0.25, -0.2], 
-        [0.12, 0.25, -0.2],  
-        [-0.12, 0.25, 0.2],  
-        [0.12, 0.25, 0.2]    
+        [-0.06, 0.125, -0.1], 
+        [0.06, 0.125, -0.1],  
+        [-0.06, 0.125, 0.1],  
+        [0.06, 0.125, 0.1]    
     ];
 
     catGroup.userData.legs = [];
@@ -2055,15 +2117,15 @@ function createCat() {
         catGroup.add(hipPivot);
 
         const upperLeg = new THREE.Mesh(legGeo, catMat);
-        upperLeg.position.set(0, -0.075, 0); 
+        upperLeg.position.set(0, -0.0375, 0); 
         hipPivot.add(upperLeg);
 
         const kneePivot = new THREE.Group();
-        kneePivot.position.set(0, -0.15, 0);
+        kneePivot.position.set(0, -0.075, 0);
         hipPivot.add(kneePivot);
 
         const lowerLeg = new THREE.Mesh(legGeo, catMat);
-        lowerLeg.position.set(0, -0.075, 0);
+        lowerLeg.position.set(0, -0.0375, 0);
         kneePivot.add(lowerLeg);
 
         catGroup.userData.legs.push({ hip: hipPivot, knee: kneePivot });
@@ -2163,27 +2225,27 @@ function createDresser(material) {
 
 function createDoor(material) {
     const group = new THREE.Group();
-    const frameGeo = new THREE.BoxGeometry(3.0, 5.0, 0.4);
+    const frameGeo = new THREE.BoxGeometry(3.0, 3.0, 0.4);
     const frame = new THREE.Mesh(frameGeo, material);
-    frame.position.y = 2.5;
+    frame.position.y = 1.5;
     group.add(frame);
     
     // Hole in frame
-    const holeGeo = new THREE.BoxGeometry(2.6, 4.8, 0.42);
+    const holeGeo = new THREE.BoxGeometry(0.9, 2.0, 0.42);
     const holeMat = new THREE.MeshBasicMaterial({ color: 0x050805 });
     const hole = new THREE.Mesh(holeGeo, holeMat);
-    hole.position.y = 2.4;
+    hole.position.y = 1.0;
     group.add(hole);
 
     // The door itself (slightly open)
-    const doorGeo = new THREE.BoxGeometry(2.5, 4.7, 0.2);
+    const doorGeo = new THREE.BoxGeometry(0.9, 2.0, 0.1);
     const door = new THREE.Mesh(doorGeo, material);
-    door.position.set(-1.25, 2.4, 0); 
+    door.position.set(-0.45, 1.0, 0); 
     // Pivot door
     const pivot = new THREE.Group();
-    pivot.position.set(1.2, 0, 0);
-    pivot.rotation.y = Math.PI / 4; // 45 degrees open
+    pivot.position.set(0.45, 0, 0);
     pivot.add(door);
+    pivot.rotation.y = Math.PI / 6; // Open slightly
     group.add(pivot);
 
     return group;
@@ -2445,6 +2507,88 @@ function createOwner(material) {
     const head = new THREE.Mesh(headGeo, headMat);
     head.position.y = 1.75;
     group.add(head);
+
+    return group;
+}
+
+function createRug(material, width, depth) {
+    const group = new THREE.Group();
+    const geo = new THREE.PlaneGeometry(width, depth);
+    const mesh = new THREE.Mesh(geo, material);
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.position.y = 0.02; // slightly above floor
+    group.add(mesh);
+    return group;
+}
+
+function createNightstand(material) {
+    const group = new THREE.Group();
+    const geo = new THREE.BoxGeometry(0.8, 1.0, 0.8);
+    const mesh = new THREE.Mesh(geo, material);
+    mesh.position.y = 0.5;
+    group.add(mesh);
+    return group;
+}
+
+function createMirror(material) {
+    const group = new THREE.Group();
+    const geo = new THREE.PlaneGeometry(1.2, 1.8);
+    const mesh = new THREE.Mesh(geo, material); 
+    mesh.position.set(0, 2.5, 0.05); // Wall offset
+    group.add(mesh);
+    return group;
+}
+
+function createTrashCan(material) {
+    const group = new THREE.Group();
+    const geo = new THREE.CylinderGeometry(0.4, 0.3, 1.0, 8);
+    const mesh = new THREE.Mesh(geo, material);
+    mesh.position.y = 0.5;
+    group.add(mesh);
+    return group;
+}
+
+function createCoffeeTable(material) {
+    const group = new THREE.Group();
+    // Top
+    const topGeo = new THREE.BoxGeometry(2.0, 0.1, 1.2);
+    const top = new THREE.Mesh(topGeo, material);
+    top.position.y = 0.8;
+    group.add(top);
+    // Legs
+    const legGeo = new THREE.BoxGeometry(0.1, 0.8, 0.1);
+    const positions = [
+        [-0.9, -0.5], [0.9, -0.5],
+        [-0.9, 0.5], [0.9, 0.5]
+    ];
+    positions.forEach(pos => {
+        const leg = new THREE.Mesh(legGeo, material);
+        leg.position.set(pos[0], 0.4, pos[1]);
+        group.add(leg);
+    });
+    return group;
+}
+
+function createDeadPlant(woodMat, plantMat) {
+    const group = new THREE.Group();
+    const potGeo = new THREE.CylinderGeometry(0.4, 0.3, 0.8, 8);
+    const pot = new THREE.Mesh(potGeo, woodMat);
+    pot.position.y = 0.4;
+    group.add(pot);
+
+    // Dead branch
+    const branchGeo = new THREE.BoxGeometry(0.1, 2.0, 0.1);
+    const branch = new THREE.Mesh(branchGeo, plantMat);
+    branch.position.y = 1.6;
+    branch.rotation.z = Math.PI / 8;
+    group.add(branch);
+    
+    // Another dead branch
+    const branch2Geo = new THREE.BoxGeometry(0.1, 1.5, 0.1);
+    const branch2 = new THREE.Mesh(branch2Geo, plantMat);
+    branch2.position.set(0.2, 1.4, 0);
+    branch2.rotation.z = -Math.PI / 6;
+    group.add(branch2);
 
     return group;
 }
