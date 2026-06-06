@@ -1,3 +1,35 @@
+
+window.addEventListener('error', function(e) {
+    let errText = 'ERROR: ' + e.message + '\n at ' + e.filename + ':' + e.lineno;
+    if (e.error && e.error.stack) errText += '\n' + e.error.stack;
+    const errDiv = document.createElement('div');
+    errDiv.style.position = 'absolute';
+    errDiv.style.top = '10px';
+    errDiv.style.left = '10px';
+    errDiv.style.color = 'red';
+    errDiv.style.backgroundColor = 'rgba(0,0,0,0.8)';
+    errDiv.style.padding = '10px';
+    errDiv.style.zIndex = '9999';
+    errDiv.style.maxWidth = '80vw';
+    errDiv.style.wordWrap = 'break-word';
+    
+    const pre = document.createElement('pre');
+    pre.textContent = errText;
+    
+    const btn = document.createElement('button');
+    btn.textContent = 'Copy Log';
+    btn.style.marginTop = '10px';
+    btn.onclick = function() {
+        navigator.clipboard.writeText(errText).then(() => {
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = 'Copy Log', 2000);
+        });
+    };
+    
+    errDiv.appendChild(pre);
+    errDiv.appendChild(btn);
+    document.body.appendChild(errDiv);
+});
 import * as THREE from 'three';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
 import { TransformControls } from 'three/addons/controls/TransformControls.js';
@@ -139,7 +171,8 @@ let playerGroup, cameraArm;
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
-const interactables = []; 
+const interactables = [];
+const doors = []; 
 
 init();
 animate();
@@ -163,7 +196,7 @@ function init() {
     // ==========================================
     
     playerGroup = new THREE.Group();
-    playerGroup.position.set(0, 0, 2); 
+    playerGroup.position.set(1.5, 0, 1.5); 
     scene.add(playerGroup);
 
     cameraArm = new THREE.Group();
@@ -273,7 +306,7 @@ function init() {
     group.add(ceil);
 
     // === GRID BLUEPRINT SYSTEM ===
-    const cellSize = 4;
+    const cellSize = 1.0;
     // Map is 10x10. Each character is a 4x4 cell.
     // X goes from left (-20) to right (20)
     // Z goes from front (-20) to back (20)
@@ -332,22 +365,22 @@ function init() {
     // === FURNITURE PLACEMENT ===
     
     // Kitchen (left side, z>0)
-    addF(createFridge(rustMetalMat), -10.5, 10.5);
-    addF(createKitchenCounter(rottingWoodMat), -7.5, 10.5);
-    addF(createKitchenCounter(rottingWoodMat), -4.5, 10.5);
+    addF(createFridge(rustMetalMat), -2.625, 2.625);
+    addF(createKitchenCounter(rottingWoodMat), -1.875, 2.625);
+    addF(createKitchenCounter(rottingWoodMat), -1.125, 2.625);
     addF(createStove(rustMetalMat), -10.5, 7.5, Math.PI/2);
-    addF(createTable(rottingWoodMat), -7.5, 4.5);
+    addF(createTable(rottingWoodMat), -1.875, 1.125);
     addF(createChair(rottingWoodMat), -9, 4.5, Math.PI/2);
     addF(createChair(rottingWoodMat), -6, 4.5, -Math.PI/2);
-    addF(createTrashCan(rustMetalMat), -10.5, 4.5);
+    addF(createTrashCan(rustMetalMat), -2.625, 1.125);
 
     // Living Room (right side, z>0)
     addF(createRug(stainFabricMat, 6, 6), 10, 10);
     addF(createSofa(darkFabricMat), 6, 9, -Math.PI/2);
     addF(createTV(rustMetalMat), 10.5, 9, Math.PI/2);
-    addF(createCoffeeTable(rottingWoodMat), 8.25, 9);
+    addF(createCoffeeTable(rottingWoodMat), 2.0625, 2.25);
     addF(createClock(rottingWoodMat), 10.5, 3, -Math.PI/4);
-    addF(createLamp(), 10.5, 12);
+    addF(createLamp(), 2.625, 3.0);
     const p1 = createPainting(rottingWoodMat); p1.position.y = 2;
     addF(p1, 11.925, 6, -Math.PI/2); // On the right outer wall
     addF(createDeadPlant(rottingWoodMat, rustMetalMat), 14, 15.5);
@@ -356,11 +389,11 @@ function init() {
     addF(window2, 11.925, 7.5, -Math.PI/2);
 
     // Bathroom (left side, z<0)
-    addF(createBathtub(rustMetalMat), -10.5, -10.5);
-    addF(createToilet(dirtyTileMat), -10.5, -4.5);
+    addF(createBathtub(rustMetalMat), -2.625, -2.625);
+    addF(createToilet(dirtyTileMat), -2.625, -1.125);
     addF(createSink(dirtyTileMat), -4.5, -10.5, -Math.PI/2);
     addF(createMirror(dirtyTileMat), -1.575, -10.5, -Math.PI/2);
-    addF(createTrashCan(rustMetalMat), -7.5, -12);
+    addF(createTrashCan(rustMetalMat), -1.875, -3.0);
 
     // Bedroom (right side, z<0)
     addF(createRug(darkFabricMat, 4.5, 4.5), 10, -10);
@@ -377,10 +410,10 @@ function init() {
 
     // === CAGE AND OWNER ===
     const cage = createCage(rustMetalMat);
-    addF(cage, 10.5, -10.5); // In the corner of the bedroom
+    addF(cage, 2.625, -2.625); // In the corner of the bedroom
 
     const owner = createOwner(stainFabricMat);
-    addF(owner, 10.5, -10.5); // Inside the cage
+    addF(owner, 2.625, -2.625); // Inside the cage
 
     // === DUST PARTICLES ===
     const dustCount = 1500;
@@ -1721,6 +1754,20 @@ function animate() {
     }
 
     prevTime = time;
+            // Door interaction logic
+            doors.forEach(door => {
+                const doorWorldPos = new THREE.Vector3();
+                door.getWorldPosition(doorWorldPos);
+                const playerPos = playerGroup.position;
+                
+                const dist = playerPos.distanceTo(doorWorldPos);
+                if (dist < 1.0) {
+                    door.rotation.y = THREE.MathUtils.lerp(door.rotation.y, Math.PI / 2, 5 * delta);
+                } else {
+                    door.rotation.y = THREE.MathUtils.lerp(door.rotation.y, 0, 5 * delta);
+                }
+            });
+
     renderer.render(scene, camera);
     
     if (document.getElementById('uv-editor').style.display === 'flex' && uvRenderer) {
@@ -2225,7 +2272,7 @@ function createDresser(material) {
 
 function createDoor(material) {
     const group = new THREE.Group();
-    const frameGeo = new THREE.BoxGeometry(3.0, 3.0, 0.4);
+    const frameGeo = new THREE.BoxGeometry(1.0, 3.0, 0.4);
     const frame = new THREE.Mesh(frameGeo, material);
     frame.position.y = 1.5;
     group.add(frame);
@@ -2245,8 +2292,8 @@ function createDoor(material) {
     const pivot = new THREE.Group();
     pivot.position.set(0.45, 0, 0);
     pivot.add(door);
-    pivot.rotation.y = Math.PI / 6; // Open slightly
     group.add(pivot);
+    doors.push(pivot);
 
     return group;
 }
