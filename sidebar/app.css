@@ -1,0 +1,209 @@
+:root {
+    --bg-color: #f8f9fa;
+    --surface-color: #ffffff;
+    --text-primary: #202124;
+    --text-secondary: #5f6368;
+    --accent-color: #1a73e8;
+    --accent-hover: #1765cc;
+    --border-color: #dadce0;
+    --hover-bg: #f1f3f4;
+    --active-bg: #e8f0fe;
+    --danger-color: #ea4335;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #202124;
+        --surface-color: #292a2d;
+        --text-primary: #e8eaed;
+        --text-secondary: #9aa0a6;
+        --accent-color: #8ab4f8;
+        --accent-hover: #aecbfa;
+        --border-color: #3c4043;
+        --hover-bg: #3c4043;
+        --active-bg: #3b4351;
+        --danger-color: #f28b82;
+    }
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    overflow: hidden;
+    height: 100vh;
+}
+
+#app-container {
+    display: flex;
+    flex-direction: row-reverse;
+    height: 100%;
+    width: 100%;
+}
+
+/* Icon Strip (Left Sidebar) */
+#icon-strip {
+    width: 48px;
+    min-width: 48px;
+    background-color: var(--surface-color);
+    border-left: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    z-index: 10;
+}
+
+.divider {
+    width: 24px;
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 12px 0;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    background: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.icon-btn {
+    width: 32px;
+    height: 32px;
+    color: var(--text-secondary);
+}
+
+.icon-btn:hover {
+    background-color: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.primary-icon-btn {
+    background-color: var(--accent-color);
+    color: #fff;
+    border-radius: 50%;
+}
+
+.primary-icon-btn:hover {
+    background-color: var(--accent-hover);
+    color: #fff;
+}
+
+.danger-icon:hover {
+    color: var(--danger-color);
+    background-color: rgba(234, 67, 53, 0.1);
+}
+
+/* Links List inside Strip */
+.links-list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 12px;
+}
+
+/* Hide scrollbar for clean app-launcher look */
+.links-list::-webkit-scrollbar {
+    display: none;
+}
+
+.link-item {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background-color: transparent;
+}
+
+.link-item:hover {
+    background-color: var(--hover-bg);
+}
+
+.link-item.active {
+    background-color: var(--active-bg);
+}
+
+.favicon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+/* Main Viewer */
+#viewer-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--surface-color);
+    min-width: 0;
+}
+
+.viewer-hidden {
+    display: none !important;
+}
+
+.viewer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background-color: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+#viewer-title {
+    font-size: 0.9rem;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    margin: 0 12px;
+}
+
+.viewer-actions {
+    display: flex;
+    gap: 4px;
+}
+
+.iframe-wrapper {
+    flex: 1;
+    position: relative;
+    background-color: #fff;
+}
+
+.dynamic-iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    background-color: #fff;
+    display: none;
+}
+
+.dynamic-iframe.active {
+    display: block;
+}

@@ -5,7 +5,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 let camera, scene, renderer;
 let transformControl;
-const moveState = { forward: false, backward: false, left: false, right: false };
+const moveState = { forward: false, backward: false, left: false, right: false, shift: false };
 const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
 let prevTime = performance.now();
@@ -227,6 +227,7 @@ function init() {
     const roomHeight = 6;
     const group = new THREE.Group();
 
+    // Floor and Ceiling for the whole 40x40 area
     const floorGeo = new THREE.PlaneGeometry(roomSize, roomSize);
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
@@ -241,38 +242,26 @@ function init() {
     interactables.push(ceil);
     group.add(ceil);
 
-    const wallGeo = new THREE.PlaneGeometry(roomSize, roomHeight);
-    
-    const wall1 = new THREE.Mesh(wallGeo, wallMat);
-    wall1.position.set(0, roomHeight/2, -roomSize/2);
-    wall1.userData = { id: 'wall_1', isFurniture: true };
-    interactables.push(wall1);
-    group.add(wall1);
+    // === GRID BLUEPRINT SYSTEM ===
+    const cellSize = 4;
+    // Map is 10x10. Each character is a 4x4 cell.
+    // X goes from left (-20) to right (20)
+    // Z goes from front (-20) to back (20)
+    const blueprint = [
+        "WWWWWWWWWW", // Z = -18 (Outer Back Wall)
+        "WbbbbWsssW", // Z = -14 (Bathroom | Bedroom)
+        "WbbbbWsssW", // Z = -10
+        "WbbbbWsssW", // Z = -6
+        "WWWDWWWDWW", // Z = -2 (Dividing Wall with Doors)
+        "Wkkk.....W", // Z = 2  (Kitchen | Living Room)
+        "Wkkk.....W", // Z = 6
+        "Wkkk.....W", // Z = 10
+        "Wkkk.....W", // Z = 14
+        "WWWWWWWWWW"  // Z = 18 (Outer Front Wall)
+    ];
 
-    const wall2 = new THREE.Mesh(wallGeo, wallMat);
-    wall2.position.set(0, roomHeight/2, roomSize/2);
-    wall2.rotation.y = Math.PI;
-    wall2.userData = { id: 'wall_2', isFurniture: true };
-    interactables.push(wall2);
-    group.add(wall2);
-
-    const wall3 = new THREE.Mesh(wallGeo, wallMat);
-    wall3.position.set(-roomSize/2, roomHeight/2, 0);
-    wall3.rotation.y = Math.PI / 2;
-    wall3.userData = { id: 'wall_3', isFurniture: true };
-    interactables.push(wall3);
-    group.add(wall3);
-
-    const wall4 = new THREE.Mesh(wallGeo, wallMat);
-    wall4.position.set(roomSize/2, roomHeight/2, 0);
-    wall4.rotation.y = -Math.PI / 2;
-    wall4.userData = { id: 'wall_4', isFurniture: true };
-    interactables.push(wall4);
-    group.add(wall4);
-
-    // === HAUNTED HOUSE INTERIOR WALLS ===
-    const buildWall = (w, d, x, z, mat, id) => {
-        const geo = new THREE.BoxGeometry(w, roomHeight, d);
+    const createBlockWall = (x, z, mat, id) => {
+        const geo = new THREE.BoxGeometry(cellSize, roomHeight, cellSize);
         const mesh = new THREE.Mesh(geo, mat);
         mesh.position.set(x, roomHeight/2, z);
         mesh.userData = { id: id, isFurniture: true };
@@ -280,135 +269,94 @@ function init() {
         group.add(mesh);
     };
 
-    // Central narrow hallway
-    buildWall(0.2, 30, -4, -5, hallwayWallMat, 'hw_left');
-    buildWall(0.2, 30, 4, -5, hallwayWallMat, 'hw_right');
+    let wallCount = 0;
+    let fCount = 0;
+    const addF = (obj, x, z, rotY = 0) => {
+        obj.position.set(x, 0, z);
+        obj.rotation.y = rotY;
+        if(!obj.userData.id) obj.userData.id = `item_${fCount++}`;
+        obj.userData.isFurniture = true;
+        interactables.push(obj);
+        group.add(obj);
+    };
+
+    for (let r = 0; r < 10; r++) {
+        for (let c = 0; c < 10; c++) {
+            const char = blueprint[r][c];
+            const x = (c - 4.5) * cellSize;
+            const z = (r - 4.5) * cellSize;
+
+            if (char === 'W') {
+                createBlockWall(x, z, rottingWoodMat, `wall_block_${wallCount++}`);
+            } else if (char === 'D') {
+                // Place a door!
+                addF(createDoor(rottingWoodMat), x, z);
+            }
+        }
+    }
+
+    // === FURNITURE PLACEMENT ===
     
-    // A small creepy bathroom
-    buildWall(16, 0.2, -12, 0, dirtyTileMat, 'bath_wall_s');
-    buildWall(16, 0.2, -12, -10, dirtyTileMat, 'bath_wall_n');
+    // Kitchen (left side, z>0)
+    addF(createFridge(rustMetalMat), -14, 14);
+    addF(createKitchenCounter(rottingWoodMat), -10, 14);
+    addF(createKitchenCounter(rottingWoodMat), -6, 14);
+    addF(createStove(rustMetalMat), -14, 10, Math.PI/2);
+    addF(createTable(rottingWoodMat), -10, 6);
+    addF(createChair(rottingWoodMat), -12, 6, Math.PI/2);
+    addF(createChair(rottingWoodMat), -8, 6, -Math.PI/2);
+
+    // Living Room (right side, z>0)
+    addF(createSofa(darkFabricMat), 8, 12, -Math.PI/2);
+    addF(createTV(rustMetalMat), 14, 12, Math.PI/2);
+    addF(createTable(rottingWoodMat), 11, 12);
+    addF(createClock(rottingWoodMat), 14, 4, -Math.PI/4);
+    addF(createLamp(), 14, 16);
+    const p1 = createPainting(rottingWoodMat); p1.position.y = 2;
+    addF(p1, 15.9, 8, -Math.PI/2); // On the right outer wall
+
+    // Bathroom (left side, z<0)
+    addF(createBathtub(rustMetalMat), -14, -14);
+    addF(createToilet(dirtyTileMat), -14, -6);
+    addF(createSink(dirtyTileMat), -6, -14, -Math.PI/2);
+
+    // Bedroom (right side, z<0)
+    addF(createBed(stainFabricMat), 14, -14, -Math.PI/2);
+    addF(createWardrobe(rottingWoodMat), 6, -14, Math.PI/2);
+    addF(createDresser(rottingWoodMat), 14, -8, -Math.PI/2);
+    addF(createChair(rottingWoodMat), 8, -6, Math.PI);
     
-    // A small bedroom
-    buildWall(16, 0.2, 12, 0, stoneWallMat, 'bed_wall_s');
-    buildWall(16, 0.2, 12, -10, stoneWallMat, 'bed_wall_n');
+    // Add a boarded window in the bedroom
+    const window1 = createBoardedWindow(rottingWoodMat);
+    window1.position.y = 2.5;
+    addF(window1, 15.9, -10, -Math.PI/2);
 
-    // === LIVING ROOM (center-south) ===
-    const table = createTable(rottingWoodMat);
-    table.position.set(3, 0, 8);
-    table.userData = { id: 'table_1', isFurniture: true };
-    interactables.push(table);
-    group.add(table);
+    // === CAGE AND OWNER ===
+    const cage = createCage(rustMetalMat);
+    addF(cage, 14, -14); // In the corner of the bedroom
 
-    const chair1 = createChair(rottingWoodMat);
-    chair1.position.set(3, 0, 6.5);
-    chair1.userData = { id: 'chair_1', isFurniture: true };
-    interactables.push(chair1);
-    group.add(chair1);
+    const owner = createOwner(stainFabricMat);
+    addF(owner, 14, -14); // Inside the cage
 
-    const chair2 = createChair(rottingWoodMat);
-    chair2.position.set(3, 0, 9.5);
-    chair2.rotation.y = Math.PI;
-    chair2.userData = { id: 'chair_2', isFurniture: true };
-    interactables.push(chair2);
-    group.add(chair2);
-
-    const sofa1 = createSofa(darkFabricMat);
-    sofa1.position.set(10, 0, 14);
-    sofa1.userData = { id: 'sofa_1', isFurniture: true };
-    interactables.push(sofa1);
-    group.add(sofa1);
-
-    const tv1 = createTV(rustMetalMat);
-    tv1.position.set(10, 0, 18);
-    tv1.userData = { id: 'tv_1', isFurniture: true };
-    interactables.push(tv1);
-    group.add(tv1);
-
-    const lamp1 = createLamp();
-    lamp1.position.set(14, 0, 14);
-    lamp1.userData = { id: 'lamp_1', isFurniture: true };
-    interactables.push(lamp1);
-    group.add(lamp1);
-
-    // === KITCHEN (west) ===
-    const fridge1 = createFridge(rustMetalMat);
-    fridge1.position.set(-18, 0, 5);
-    fridge1.userData = { id: 'fridge_1', isFurniture: true };
-    interactables.push(fridge1);
-    group.add(fridge1);
-
-    const kitchenTable = createTable(rottingWoodMat);
-    kitchenTable.position.set(-14, 0, 8);
-    kitchenTable.userData = { id: 'table_2', isFurniture: true };
-    interactables.push(kitchenTable);
-    group.add(kitchenTable);
-
-    const kitchenChair1 = createChair(rottingWoodMat);
-    kitchenChair1.position.set(-15.5, 0, 8);
-    kitchenChair1.rotation.y = Math.PI / 2;
-    kitchenChair1.userData = { id: 'chair_3', isFurniture: true };
-    interactables.push(kitchenChair1);
-    group.add(kitchenChair1);
-
-    const kitchenChair2 = createChair(rottingWoodMat);
-    kitchenChair2.position.set(-12.5, 0, 8);
-    kitchenChair2.rotation.y = -Math.PI / 2;
-    kitchenChair2.userData = { id: 'chair_4', isFurniture: true };
-    interactables.push(kitchenChair2);
-    group.add(kitchenChair2);
-
-    const cabinet1 = createCabinet(rottingWoodMat);
-    cabinet1.position.set(-18, 0, 12);
-    cabinet1.userData = { id: 'cabinet_1', isFurniture: true };
-    interactables.push(cabinet1);
-    group.add(cabinet1);
-
-    // === STAIRS & SECOND FLOOR (Loft) ===
-    const floor2Geo = new THREE.BoxGeometry(40, 0.2, 20);
-    const floor2 = new THREE.Mesh(floor2Geo, floorMat);
-    floor2.position.set(0, 3, -10);
-    floor2.userData = { id: 'floor2_1', isFurniture: true };
-    interactables.push(floor2);
-    group.add(floor2);
-
-    const stairs = createStairs(wallMat);
-    stairs.position.set(15, 0, -1);
-    stairs.rotation.y = -Math.PI / 2;
-    stairs.userData = { id: 'stairs_1', isFurniture: true };
-    interactables.push(stairs);
-    group.add(stairs);
-
-    // === BEDROOM (upstairs or backroom) ===
-    const bed = createBed(stainFabricMat);
-    bed.position.set(12, 0, -15);
-    bed.userData = { id: 'bed_1', isFurniture: true };
-    interactables.push(bed);
-    group.add(bed);
-
-    const cabinet2 = createCabinet(rottingWoodMat);
-    cabinet2.position.set(6, 0, -18);
-    cabinet2.rotation.y = Math.PI / 2;
-    cabinet2.userData = { id: 'cabinet_2', isFurniture: true };
-    interactables.push(cabinet2);
-    group.add(cabinet2);
-
-    const bookshelf1 = createBookshelf(rottingWoodMat);
-    bookshelf1.position.set(12, 0, -18);
-    bookshelf1.userData = { id: 'bookshelf_1', isFurniture: true };
-    interactables.push(bookshelf1);
-    group.add(bookshelf1);
-
-    const lamp2 = createLamp();
-    lamp2.position.set(-10, 0, -15);
-    lamp2.userData = { id: 'lamp_2', isFurniture: true };
-    interactables.push(lamp2);
-    group.add(lamp2);
-
-    const tv2 = createTV(rustMetalMat);
-    tv2.position.set(10, 0, -15);
-    tv2.userData = { id: 'tv_2', isFurniture: true };
-    interactables.push(tv2);
-    group.add(tv2);
+    // === DUST PARTICLES ===
+    const dustCount = 1500;
+    const dustGeo = new THREE.BufferGeometry();
+    const dustPos = new Float32Array(dustCount * 3);
+    for (let i = 0; i < dustCount * 3; i++) {
+        dustPos[i] = (Math.random() - 0.5) * 40; // Spread across 40x40 area
+    }
+    dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+    const dustMat = new THREE.PointsMaterial({
+        color: 0xaaaaaa,
+        size: 0.05,
+        transparent: true,
+        opacity: 0.6,
+        blending: THREE.AdditiveBlending
+    });
+    const dustParticles = new THREE.Points(dustGeo, dustMat);
+    dustParticles.position.y = 3;
+    group.add(dustParticles);
+    window.dustParticles = dustParticles;
 
     scene.add(group);
     window.sceneGroup = group;
@@ -1268,12 +1216,13 @@ function onKeyDown(event) {
             case 'KeyS': moveState.backward = true; break;
             case 'ArrowRight':
             case 'KeyD': moveState.right = true; break;
+            case 'ShiftLeft': moveState.shift = true; break;
             case 'KeyF': toggleNightVision(); break;
             case 'KeyH': toggleUIVisibility(); break;
             case 'KeyC': toggleCreatorMode(); break;
             case 'Space':
                 if (isGrounded) {
-                    playerVelocityY = 6.0;
+                    playerVelocityY = moveState.shift ? 10.0 : 6.0;
                     isGrounded = false;
                 }
                 break;
@@ -1307,6 +1256,7 @@ function onKeyUp(event) {
         case 'KeyS': moveState.backward = false; break;
         case 'ArrowRight':
         case 'KeyD': moveState.right = false; break;
+        case 'ShiftLeft': moveState.shift = false; break;
     }
 }
 
@@ -1351,6 +1301,20 @@ function animate() {
     const time = performance.now();
     const delta = (time - prevTime) / 1000;
 
+    // === VFX UPDATES ===
+    if (window.dustParticles) {
+        window.dustParticles.rotation.y += 0.05 * delta;
+        window.dustParticles.rotation.x += 0.02 * delta;
+    }
+    
+    scene.traverse((child) => {
+        if (child.isPointLight && child.userData.isFlickering) {
+            // Flicker between 80% and 120% of base intensity
+            const flicker = 0.8 + Math.random() * 0.4;
+            child.intensity = child.userData.baseIntensity * flicker;
+        }
+    });
+
     if (isPointerLocked && !isCreatorMode) {
         const radius = 0.2;
         const height = 0.4;
@@ -1381,7 +1345,7 @@ function animate() {
             isGrounded = true;
         }
 
-        const walkSpeed = 3.0;
+        const walkSpeed = moveState.shift ? 7.0 : 3.0;
         let isMoving = false;
 
         let moveX = 0;
@@ -1951,6 +1915,194 @@ function toggleNightVision() {
     }
 }
 
+function createClock(material) {
+    const group = new THREE.Group();
+    const baseGeo = new THREE.BoxGeometry(1.2, 0.4, 0.8);
+    const base = new THREE.Mesh(baseGeo, material);
+    base.position.y = 0.2;
+    group.add(base);
+
+    const bodyGeo = new THREE.BoxGeometry(1.0, 3.0, 0.6);
+    const body = new THREE.Mesh(bodyGeo, material);
+    body.position.y = 1.9;
+    group.add(body);
+
+    const headGeo = new THREE.BoxGeometry(1.4, 1.0, 0.8);
+    const head = new THREE.Mesh(headGeo, material);
+    head.position.y = 3.9;
+    group.add(head);
+
+    const faceGeo = new THREE.PlaneGeometry(0.8, 0.8);
+    const faceMat = new THREE.MeshBasicMaterial({ color: 0xcccccc });
+    const face = new THREE.Mesh(faceGeo, faceMat);
+    face.position.set(0, 3.9, 0.41);
+    group.add(face);
+
+    return group;
+}
+
+function createPainting(material) {
+    const group = new THREE.Group();
+    const frameGeo = new THREE.BoxGeometry(2.0, 3.0, 0.1);
+    const frame = new THREE.Mesh(frameGeo, material);
+    group.add(frame);
+    
+    const canvasGeo = new THREE.PlaneGeometry(1.6, 2.6);
+    const canvasMat = new THREE.MeshLambertMaterial({ color: 0x331111 }); // Dark creepy red
+    const canvas = new THREE.Mesh(canvasGeo, canvasMat);
+    canvas.position.z = 0.06;
+    group.add(canvas);
+
+    return group;
+}
+
+function createBathtub(material) {
+    const group = new THREE.Group();
+    const tubGeo = new THREE.BoxGeometry(3.0, 1.2, 1.5);
+    const tub = new THREE.Mesh(tubGeo, material);
+    tub.position.y = 0.6;
+    group.add(tub);
+
+    // Inner hole
+    const holeGeo = new THREE.PlaneGeometry(2.6, 1.1);
+    const holeMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+    const hole = new THREE.Mesh(holeGeo, holeMat);
+    hole.rotation.x = -Math.PI / 2;
+    hole.position.y = 1.21;
+    group.add(hole);
+
+    return group;
+}
+
+function createDresser(material) {
+    const group = new THREE.Group();
+    const boxGeo = new THREE.BoxGeometry(2.0, 2.0, 1.0);
+    const box = new THREE.Mesh(boxGeo, material);
+    box.position.y = 1.0;
+    group.add(box);
+    return group;
+}
+
+function createDoor(material) {
+    const group = new THREE.Group();
+    const frameGeo = new THREE.BoxGeometry(3.0, 5.0, 0.4);
+    const frame = new THREE.Mesh(frameGeo, material);
+    frame.position.y = 2.5;
+    group.add(frame);
+    
+    // Hole in frame
+    const holeGeo = new THREE.BoxGeometry(2.6, 4.8, 0.42);
+    const holeMat = new THREE.MeshBasicMaterial({ color: 0x050805 });
+    const hole = new THREE.Mesh(holeGeo, holeMat);
+    hole.position.y = 2.4;
+    group.add(hole);
+
+    // The door itself (slightly open)
+    const doorGeo = new THREE.BoxGeometry(2.5, 4.7, 0.2);
+    const door = new THREE.Mesh(doorGeo, material);
+    door.position.set(-1.25, 2.4, 0); 
+    // Pivot door
+    const pivot = new THREE.Group();
+    pivot.position.set(1.2, 0, 0);
+    pivot.rotation.y = Math.PI / 4; // 45 degrees open
+    pivot.add(door);
+    group.add(pivot);
+
+    return group;
+}
+
+function createToilet(material) {
+    const group = new THREE.Group();
+    const baseGeo = new THREE.BoxGeometry(1.0, 1.0, 1.4);
+    const base = new THREE.Mesh(baseGeo, material);
+    base.position.y = 0.5;
+    group.add(base);
+
+    const tankGeo = new THREE.BoxGeometry(1.2, 1.5, 0.6);
+    const tank = new THREE.Mesh(tankGeo, material);
+    tank.position.set(0, 1.75, -0.4);
+    group.add(tank);
+
+    return group;
+}
+
+function createSink(material) {
+    const group = new THREE.Group();
+    const standGeo = new THREE.BoxGeometry(0.8, 1.8, 0.8);
+    const stand = new THREE.Mesh(standGeo, material);
+    stand.position.y = 0.9;
+    group.add(stand);
+
+    const basinGeo = new THREE.BoxGeometry(1.4, 0.4, 1.2);
+    const basin = new THREE.Mesh(basinGeo, material);
+    basin.position.set(0, 1.9, 0.2);
+    group.add(basin);
+
+    const mirrorGeo = new THREE.PlaneGeometry(1.2, 1.5);
+    const mirrorMat = new THREE.MeshBasicMaterial({ color: 0x223344 }); // broken mirror
+    const mirror = new THREE.Mesh(mirrorGeo, mirrorMat);
+    mirror.position.set(0, 3.2, -0.19);
+    group.add(mirror);
+
+    return group;
+}
+
+function createKitchenCounter(material) {
+    const group = new THREE.Group();
+    const baseGeo = new THREE.BoxGeometry(2.0, 1.8, 1.5);
+    const base = new THREE.Mesh(baseGeo, material);
+    base.position.y = 0.9;
+    group.add(base);
+    return group;
+}
+
+function createStove(material) {
+    const group = new THREE.Group();
+    const baseGeo = new THREE.BoxGeometry(1.8, 1.8, 1.6);
+    const base = new THREE.Mesh(baseGeo, material);
+    base.position.y = 0.9;
+    group.add(base);
+
+    const topGeo = new THREE.PlaneGeometry(1.8, 1.6);
+    const topMat = new THREE.MeshBasicMaterial({ color: 0x111111 });
+    const top = new THREE.Mesh(topGeo, topMat);
+    top.rotation.x = -Math.PI / 2;
+    top.position.y = 1.81;
+    group.add(top);
+
+    return group;
+}
+
+function createWardrobe(material) {
+    const group = new THREE.Group();
+    const boxGeo = new THREE.BoxGeometry(3.0, 4.5, 1.2);
+    const box = new THREE.Mesh(boxGeo, material);
+    box.position.y = 2.25;
+    group.add(box);
+    return group;
+}
+
+function createBoardedWindow(material) {
+    const group = new THREE.Group();
+    const holeGeo = new THREE.PlaneGeometry(2.0, 2.0);
+    const holeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const hole = new THREE.Mesh(holeGeo, holeMat);
+    group.add(hole);
+
+    const boardGeo = new THREE.BoxGeometry(2.4, 0.3, 0.1);
+    const board1 = new THREE.Mesh(boardGeo, material);
+    board1.position.set(0, 0.4, 0.05);
+    board1.rotation.z = 0.1;
+    group.add(board1);
+
+    const board2 = new THREE.Mesh(boardGeo, material);
+    board2.position.set(0, -0.3, 0.06);
+    board2.rotation.z = -0.2;
+    group.add(board2);
+
+    return group;
+}
+
 function createTV(material) {
     const group = new THREE.Group();
     // TV stand
@@ -1970,6 +2122,12 @@ function createTV(material) {
     const border = new THREE.Mesh(borderGeo, borderMat);
     border.position.set(0, 1.2, -0.02);
     group.add(border);
+    // TV Light
+    const light = new THREE.PointLight(0x4444ff, 1.5, 12);
+    light.position.set(0, 1.2, 0.5);
+    light.userData.isFlickering = true;
+    light.userData.baseIntensity = 1.5;
+    group.add(light);
     return group;
 }
 
@@ -2065,9 +2223,51 @@ function createLamp() {
     shade.position.y = 1.6;
     group.add(shade);
     // Light
-    const light = new THREE.PointLight(0xffddaa, 0.8, 8);
+    const light = new THREE.PointLight(0xffaa44, 0.8, 10);
     light.position.set(0, 1.5, 0);
+    light.userData.isFlickering = true;
+    light.userData.baseIntensity = 0.8;
     group.add(light);
+    return group;
+}
+
+function createCage(material) {
+    const group = new THREE.Group();
+    const cageGeo = new THREE.BoxGeometry(4, 5, 4);
+    const cageMat = new THREE.MeshLambertMaterial({ color: 0x222222, wireframe: true });
+    const cage = new THREE.Mesh(cageGeo, cageMat);
+    cage.position.y = 2.5;
+    group.add(cage);
+
+    const baseGeo = new THREE.BoxGeometry(4.2, 0.2, 4.2);
+    const base = new THREE.Mesh(baseGeo, material);
+    base.position.y = 0.1;
+    group.add(base);
+
+    // Glowing circle
+    const circleGeo = new THREE.RingGeometry(1.5, 2.0, 16);
+    const circleMat = new THREE.MeshBasicMaterial({ color: 0xff0000, side: THREE.DoubleSide });
+    const circle = new THREE.Mesh(circleGeo, circleMat);
+    circle.rotation.x = Math.PI / 2;
+    circle.position.y = 0.25;
+    group.add(circle);
+
+    return group;
+}
+
+function createOwner(material) {
+    const group = new THREE.Group();
+    const bodyGeo = new THREE.BoxGeometry(0.8, 1.5, 0.6);
+    const body = new THREE.Mesh(bodyGeo, material);
+    body.position.y = 0.75;
+    group.add(body);
+
+    const headGeo = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+    const headMat = new THREE.MeshLambertMaterial({ color: 0xffccaa });
+    const head = new THREE.Mesh(headGeo, headMat);
+    head.position.y = 1.75;
+    group.add(head);
+
     return group;
 }
 

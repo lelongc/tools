@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidebar Quick Links</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <div id="app-container">
+        <!-- Vertical Icon Strip -->
+        <div id="icon-strip">
+            <button id="add-current-tab-btn" class="icon-btn primary-icon-btn" title="Add Current Tab">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+            </button>
+            <div class="divider"></div>
+            <div id="links-container" class="links-list">
+                <!-- Icons injected by JS -->
+            </div>
+        </div>
+
+        <!-- Main Viewing Area -->
+        <div id="viewer-container" class="viewer-hidden">
+            <div class="viewer-header">
+                <button id="minimize-btn" class="icon-btn" title="Minimize (Keep running)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                </button>
+                <span id="viewer-title">Website</span>
+                <div class="viewer-actions">
+                    <button id="close-iframe-btn" class="icon-btn" title="Close (Stop running)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                    <button id="open-new-tab-btn" class="icon-btn" title="Open in New Tab">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                            <polyline points="15 3 21 3 21 9"></polyline>
+                            <line x1="10" y1="14" x2="21" y2="3"></line>
+                        </svg>
+                    </button>
+                    <button id="remove-btn" class="icon-btn danger-icon" title="Remove Site">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="iframe-wrapper" id="iframe-wrapper">
+                <!-- Iframes injected dynamically by JS to preserve state -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Template for list items -->
+    <template id="link-item-template">
+        <div class="link-item" title="">
+            <img class="favicon" src="" alt="icon">
+        </div>
+    </template>
+
+    <script src="app.js"></script>
+</body>
+</html>
