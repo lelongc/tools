@@ -151,7 +151,9 @@ function init() {
 
     transformControl = new TransformControls(camera, renderer.domElement);
     transformControl.addEventListener('dragging-changed', function (event) {
-        if (!event.value && transformControl.object) {
+        if (event.value) {
+            pushUndo();
+        } else if (!event.value && transformControl.object) {
             savePositions();
         }
     });
@@ -253,32 +255,7 @@ function init() {
     group.add(wall4);
 
     // === INTERIOR WALLS (Rooms) ===
-    // Wall A: Horizontal wall dividing North/South, with doorway gap in the middle
-    // Left segment (x: -20 to -2)
-    const wallA1Geo = new THREE.BoxGeometry(16, roomHeight, 0.2);
-    const wallA1 = new THREE.Mesh(wallA1Geo, wallMat);
-    wallA1.position.set(-12, roomHeight/2, 0);
-    wallA1.userData = { id: 'divwall_a1', isFurniture: true };
-    interactables.push(wallA1);
-    group.add(wallA1);
-    // Right segment (x: 2 to 20)
-    const wallA2Geo = new THREE.BoxGeometry(16, roomHeight, 0.2);
-    const wallA2 = new THREE.Mesh(wallA2Geo, wallMat);
-    wallA2.position.set(12, roomHeight/2, 0);
-    wallA2.userData = { id: 'divwall_a2', isFurniture: true };
-    interactables.push(wallA2);
-    group.add(wallA2);
-    // (Gap from x=-4 to x=4 is the doorway)
-
-    // Wall B: Vertical wall dividing West/East on the South side, with doorway
-    // South segment (z: 2 to 20)
-    const wallB1Geo = new THREE.BoxGeometry(0.2, roomHeight, 16);
-    const wallB1 = new THREE.Mesh(wallB1Geo, wallMat);
-    wallB1.position.set(-4, roomHeight/2, 12);
-    wallB1.userData = { id: 'divwall_b1', isFurniture: true };
-    interactables.push(wallB1);
-    group.add(wallB1);
-    // (Gap from z=0 to z=4 is the kitchen doorway)
+    // Removed interior walls for a big open room
 
     // === LIVING ROOM (center-south) ===
     const table = createTable(wallMat);
@@ -489,6 +466,10 @@ function onMouseDown(event) {
         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
         raycaster.setFromCamera(mouse, camera);
+
+        if (transformControl.dragging || transformControl.axis !== null) {
+            return;
+        }
         
         const objectsToTest = [...interactables];
         if (window.psxCat) objectsToTest.push(window.psxCat);
@@ -585,10 +566,7 @@ function onMouseDown(event) {
                 }, 200);
             }
         } else {
-            const gizmoIntersects = raycaster.intersectObject(transformControl, true);
-            if (gizmoIntersects.length === 0 && !transformControl.dragging) {
-                transformControl.detach();
-            }
+            transformControl.detach();
         }
     }
 }
@@ -1229,7 +1207,6 @@ function onKeyDown(event) {
     if (isCreatorMode) {
         switch (event.code) {
             case 'KeyC': toggleCreatorMode(); break;
-            case 'KeyE': exportScene(); break;
             case 'KeyH': toggleUIVisibility(); break;
             case 'KeyP': toggleTexturePalette(); break;
             case 'KeyT': transformControl.setMode('translate'); break;
@@ -1254,7 +1231,6 @@ function onKeyDown(event) {
             case 'KeyS': moveState.backward = true; break;
             case 'ArrowRight':
             case 'KeyD': moveState.right = true; break;
-            case 'KeyE': exportScene(); break;
             case 'KeyH': toggleUIVisibility(); break;
             case 'KeyC': toggleCreatorMode(); break;
             case 'Space':
@@ -1841,7 +1817,8 @@ function createCat() {
     head.position.set(0, 0.1, -0.1);
     headGroup.add(head);
 
-    const earGeo = new THREE.BoxGeometry(0.08, 0.1, 0.05);
+    // Pointy cat ears using ConeGeometry (tam giác nhọn)
+    const earGeo = new THREE.ConeGeometry(0.06, 0.15, 4);
     const earL = new THREE.Mesh(earGeo, darkMat);
     earL.position.set(0.08, 0.25, -0.1);
     headGroup.add(earL);
@@ -1888,18 +1865,8 @@ function createCat() {
         catGroup.userData.legs.push({ hip: hipPivot, knee: kneePivot });
     });
 
-    // Night vision eyes (small glow spheres)
-    const eyeGlowMat = new THREE.MeshBasicMaterial({ color: 0x66ffcc });
-    const eyeGlowGeo = new THREE.BoxGeometry(0.04, 0.04, 0.04);
-    const eyeL = new THREE.Mesh(eyeGlowGeo, eyeGlowMat);
-    eyeL.position.set(0.06, 0.15, -0.23);
-    eyeL.visible = false;
-    headGroup.add(eyeL);
-    const eyeR = new THREE.Mesh(eyeGlowGeo, eyeGlowMat);
-    eyeR.position.set(-0.06, 0.15, -0.23);
-    eyeR.visible = false;
-    headGroup.add(eyeR);
-    catGroup.userData.eyes = [eyeL, eyeR];
+    // Night vision eyes (removed as requested so they don't protrude)
+    catGroup.userData.eyes = [];
     catGroup.userData.isFlashlightOn = false;
 
     return catGroup;
