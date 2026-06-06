@@ -5,7 +5,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 let camera, scene, renderer;
 let transformControl;
-const moveState = { forward: false, backward: false, left: false, right: false, shift: false };
+const moveState = { forward: false, backward: false, left: false, right: false, shift: false, jump: false };
 const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
 let prevTime = performance.now();
@@ -15,6 +15,33 @@ let isSnapEnabled = false;
 let isPointerLocked = false;
 let playerVelocityY = 0;
 let isGrounded = true;
+let isChargingJump = false;
+let jumpCharge = 0.0;
+let stamina = 100;
+let isExhausted = false;
+const maxStamina = 100;
+
+// Stamina UI
+const staminaContainer = document.createElement('div');
+staminaContainer.style.position = 'absolute';
+staminaContainer.style.bottom = '20px';
+staminaContainer.style.left = '50%';
+staminaContainer.style.transform = 'translateX(-50%)';
+staminaContainer.style.width = '300px';
+staminaContainer.style.height = '15px';
+staminaContainer.style.backgroundColor = 'rgba(0,0,0,0.5)';
+staminaContainer.style.border = '2px solid #fff';
+staminaContainer.style.zIndex = '1000';
+staminaContainer.id = 'staminaContainer';
+document.body.appendChild(staminaContainer);
+
+const staminaBar = document.createElement('div');
+staminaBar.style.width = '100%';
+staminaBar.style.height = '100%';
+staminaBar.style.backgroundColor = '#00ff00';
+staminaBar.style.transition = 'width 0.1s linear, background-color 0.2s';
+staminaBar.id = 'staminaBar';
+staminaContainer.appendChild(staminaBar);
 let isFPSView = false;
 
 // Texture Cache for optimization
@@ -1209,21 +1236,33 @@ function onKeyDown(event) {
     } else {
         switch (event.code) {
             case 'ArrowUp':
-            case 'KeyW': moveState.forward = true; break;
+            case 'KeyW': 
+                moveState.forward = true; 
+                if (isChargingJump) { isChargingJump = false; jumpCharge = 0.0; }
+                break;
             case 'ArrowLeft':
-            case 'KeyA': moveState.left = true; break;
+            case 'KeyA': 
+                moveState.left = true; 
+                if (isChargingJump) { isChargingJump = false; jumpCharge = 0.0; }
+                break;
             case 'ArrowDown':
-            case 'KeyS': moveState.backward = true; break;
+            case 'KeyS': 
+                moveState.backward = true; 
+                if (isChargingJump) { isChargingJump = false; jumpCharge = 0.0; }
+                break;
             case 'ArrowRight':
-            case 'KeyD': moveState.right = true; break;
+            case 'KeyD': 
+                moveState.right = true; 
+                if (isChargingJump) { isChargingJump = false; jumpCharge = 0.0; }
+                break;
             case 'ShiftLeft': moveState.shift = true; break;
             case 'KeyF': toggleNightVision(); break;
             case 'KeyH': toggleUIVisibility(); break;
             case 'KeyC': toggleCreatorMode(); break;
             case 'Space':
-                if (isGrounded) {
-                    playerVelocityY = moveState.shift ? 10.0 : 6.0;
-                    isGrounded = false;
+                if (isGrounded && !isExhausted && !isChargingJump) {
+                    isChargingJump = true;
+                    jumpCharge = 0.0;
                 }
                 break;
             case 'KeyV':
@@ -1257,6 +1296,19 @@ function onKeyUp(event) {
         case 'ArrowRight':
         case 'KeyD': moveState.right = false; break;
         case 'ShiftLeft': moveState.shift = false; break;
+        case 'Space': 
+            if (isChargingJump) {
+                isChargingJump = false;
+                if (isGrounded) {
+                    // Tap = 6.0, Max Charge = 18.0
+                    playerVelocityY = 6.0 + (jumpCharge * 12.0);
+                    stamina -= 10 + (jumpCharge * 15);
+                    if (stamina < 0) stamina = 0;
+                    isGrounded = false;
+                }
+                jumpCharge = 0.0;
+            }
+            break;
     }
 }
 
@@ -1319,8 +1371,25 @@ function animate() {
         const radius = 0.2;
         const height = 0.4;
 
+        // Handle jump charging
+        if (isChargingJump && isGrounded && stamina > 0) {
+            jumpCharge += delta * 2.0; // 0.5s to fully charge
+            if (jumpCharge > 1.0) jumpCharge = 1.0;
+            stamina -= 15.0 * delta; // slight stamina drain while charging
+            
+            // Visual crouch
+            const targetY = isFPSView ? (window.fpsCamPos.y - 0.1) : (window.defaultCamPos.y - 0.2);
+            camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetY, 15 * delta);
+            if (window.psxCat) window.psxCat.scale.y = THREE.MathUtils.lerp(window.psxCat.scale.y, 0.6, 15 * delta);
+        } else {
+            // Restore visual height
+            const targetY = isFPSView ? window.fpsCamPos.y : window.defaultCamPos.y;
+            camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetY, 15 * delta);
+            if (window.psxCat) window.psxCat.scale.y = THREE.MathUtils.lerp(window.psxCat.scale.y, 1.0, 15 * delta);
+        }
+
         // Apply Gravity
-        playerVelocityY -= 15.0 * delta;
+        playerVelocityY -= 25.0 * delta;
         playerGroup.position.y += playerVelocityY * delta;
 
         // Vertical collision check
@@ -1345,16 +1414,51 @@ function animate() {
             isGrounded = true;
         }
 
-        const walkSpeed = moveState.shift ? 7.0 : 3.0;
-        let isMoving = false;
-
         let moveX = 0;
         let moveZ = 0;
+        let isMovingInputs = false;
+        let isMoving = false;
 
-        if (moveState.forward) { moveZ -= walkSpeed * delta; }
-        if (moveState.backward) { moveZ += walkSpeed * delta; }
-        if (moveState.left) { moveX -= walkSpeed * delta; }
-        if (moveState.right) { moveX += walkSpeed * delta; }
+        if (!isChargingJump) {
+            if (moveState.forward) { moveZ -= 1; isMovingInputs = true; }
+            if (moveState.backward) { moveZ += 1; isMovingInputs = true; }
+            if (moveState.left) { moveX -= 1; isMovingInputs = true; }
+            if (moveState.right) { moveX += 1; isMovingInputs = true; }
+        }
+
+        let isSprinting = isMovingInputs && moveState.shift && !isExhausted;
+        const walkSpeed = isSprinting ? 12.0 : 4.0;
+
+        // Stamina logic
+        if (isSprinting && isGrounded) {
+            stamina -= 30 * delta;
+            if (stamina <= 0) {
+                stamina = 0;
+                isExhausted = true;
+            }
+        } else if (isGrounded) {
+            stamina += 15 * delta;
+            if (stamina > maxStamina) stamina = maxStamina;
+            if (stamina > 30) {
+                isExhausted = false; // Recovered enough to sprint/jump again
+            }
+        }
+
+        // Update Stamina UI
+        const sBar = document.getElementById('staminaBar');
+        if (sBar) {
+            sBar.style.width = (stamina / maxStamina * 100) + '%';
+            if (stamina < 20) sBar.style.backgroundColor = '#ff0000';
+            else if (stamina < 50) sBar.style.backgroundColor = '#ffff00';
+            else sBar.style.backgroundColor = '#00ff00';
+        }
+
+        if (isMovingInputs) {
+            // Normalize so diagonal isn't faster
+            const len = Math.sqrt(moveX * moveX + moveZ * moveZ);
+            moveX = (moveX / len) * walkSpeed * delta;
+            moveZ = (moveZ / len) * walkSpeed * delta;
+        }
 
         if (moveX !== 0 || moveZ !== 0) {
             const oldPos = playerGroup.position.clone();
