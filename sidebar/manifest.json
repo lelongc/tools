@@ -1,0 +1,25 @@
+{
+  "name": "Sidebar Quick Links",
+  "version": "1.0.0",
+  "manifest_version": 3,
+  "description": "Save your favorite websites and open them in a convenient sidebar.",
+  "permissions": [
+    "declarativeNetRequest",
+    "sidePanel",
+    "storage",
+    "tabs",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Open Sidebar"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  }
+}

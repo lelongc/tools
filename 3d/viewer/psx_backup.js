@@ -182,16 +182,9 @@ function init() {
         }
     });
 
-    const ambientLight = new THREE.AmbientLight(0x223322, 0.02);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
     scene.add(ambientLight);
     window.ambientLight = ambientLight;
-
-    // Cat Eye Night Vision state
-    window.isNightVisionOn = false;
-    
-    // Dimmer background and fog
-    scene.background = new THREE.Color(0x050805);
-    scene.fog = new THREE.FogExp2(0x050805, 0.12);
 
     const textureLoader = new THREE.TextureLoader();
     const loadPSXTexture = (path, repeatX, repeatY) => {
@@ -206,22 +199,13 @@ function init() {
         return tex;
     };
 
-    const wallTex = loadPSXTexture('assets/wall_creepy.png', 4, 1);
-    const floorTex = loadPSXTexture('assets/floor_creepy.png', 8, 8);
-    const ceilTex = loadPSXTexture('assets/ceil_damaged.png', 8, 8);
+    const wallTex = loadPSXTexture('assets/wall.png', 4, 1);
+    const floorTex = loadPSXTexture('assets/floor.png', 8, 8);
+    const ceilTex = loadPSXTexture('assets/ceiling.png', 8, 8);
 
     const wallMat = new THREE.MeshLambertMaterial({ map: wallTex });
     const floorMat = new THREE.MeshLambertMaterial({ map: floorTex });
     const ceilMat = new THREE.MeshLambertMaterial({ map: ceilTex });
-
-    const stoneWallMat = new THREE.MeshLambertMaterial({ map: loadPSXTexture('assets/wall_stone.png', 4, 1) });
-    const hallwayWallMat = new THREE.MeshLambertMaterial({ map: loadPSXTexture('assets/wall_hallway.png', 4, 1) });
-    const concreteFloorMat = new THREE.MeshLambertMaterial({ map: loadPSXTexture('assets/floor_concrete.png', 8, 8) });
-    const rottingWoodMat = new THREE.MeshLambertMaterial({ map: loadPSXTexture('assets/wood_rotting.png', 2, 2) });
-    const rustMetalMat = new THREE.MeshLambertMaterial({ map: loadPSXTexture('assets/metal_rust.png', 2, 2) });
-    const stainFabricMat = new THREE.MeshLambertMaterial({ map: loadPSXTexture('assets/fabric_stain.png', 2, 2) });
-    const darkFabricMat = new THREE.MeshLambertMaterial({ map: loadPSXTexture('assets/fabric_dark.png', 2, 2) });
-    const dirtyTileMat = new THREE.MeshLambertMaterial({ map: loadPSXTexture('assets/tile_dirty.png', 4, 4) });
 
     const roomSize = 40;
     const roomHeight = 6;
@@ -270,55 +254,36 @@ function init() {
     interactables.push(wall4);
     group.add(wall4);
 
-    // === HAUNTED HOUSE INTERIOR WALLS ===
-    const buildWall = (w, d, x, z, mat, id) => {
-        const geo = new THREE.BoxGeometry(w, roomHeight, d);
-        const mesh = new THREE.Mesh(geo, mat);
-        mesh.position.set(x, roomHeight/2, z);
-        mesh.userData = { id: id, isFurniture: true };
-        interactables.push(mesh);
-        group.add(mesh);
-    };
-
-    // Central narrow hallway
-    buildWall(0.2, 30, -4, -5, hallwayWallMat, 'hw_left');
-    buildWall(0.2, 30, 4, -5, hallwayWallMat, 'hw_right');
-    
-    // A small creepy bathroom
-    buildWall(16, 0.2, -12, 0, dirtyTileMat, 'bath_wall_s');
-    buildWall(16, 0.2, -12, -10, dirtyTileMat, 'bath_wall_n');
-    
-    // A small bedroom
-    buildWall(16, 0.2, 12, 0, stoneWallMat, 'bed_wall_s');
-    buildWall(16, 0.2, 12, -10, stoneWallMat, 'bed_wall_n');
+    // === INTERIOR WALLS (Rooms) ===
+    // Removed interior walls for a big open room
 
     // === LIVING ROOM (center-south) ===
-    const table = createTable(rottingWoodMat);
+    const table = createTable(wallMat);
     table.position.set(3, 0, 8);
     table.userData = { id: 'table_1', isFurniture: true };
     interactables.push(table);
     group.add(table);
 
-    const chair1 = createChair(rottingWoodMat);
+    const chair1 = createChair(wallMat);
     chair1.position.set(3, 0, 6.5);
     chair1.userData = { id: 'chair_1', isFurniture: true };
     interactables.push(chair1);
     group.add(chair1);
 
-    const chair2 = createChair(rottingWoodMat);
+    const chair2 = createChair(wallMat);
     chair2.position.set(3, 0, 9.5);
     chair2.rotation.y = Math.PI;
     chair2.userData = { id: 'chair_2', isFurniture: true };
     interactables.push(chair2);
     group.add(chair2);
 
-    const sofa1 = createSofa(darkFabricMat);
+    const sofa1 = createSofa(wallMat);
     sofa1.position.set(10, 0, 14);
     sofa1.userData = { id: 'sofa_1', isFurniture: true };
     interactables.push(sofa1);
     group.add(sofa1);
 
-    const tv1 = createTV(rustMetalMat);
+    const tv1 = createTV(wallMat);
     tv1.position.set(10, 0, 18);
     tv1.userData = { id: 'tv_1', isFurniture: true };
     interactables.push(tv1);
@@ -331,33 +296,33 @@ function init() {
     group.add(lamp1);
 
     // === KITCHEN (west) ===
-    const fridge1 = createFridge(rustMetalMat);
+    const fridge1 = createFridge(wallMat);
     fridge1.position.set(-18, 0, 5);
     fridge1.userData = { id: 'fridge_1', isFurniture: true };
     interactables.push(fridge1);
     group.add(fridge1);
 
-    const kitchenTable = createTable(rottingWoodMat);
+    const kitchenTable = createTable(wallMat);
     kitchenTable.position.set(-14, 0, 8);
     kitchenTable.userData = { id: 'table_2', isFurniture: true };
     interactables.push(kitchenTable);
     group.add(kitchenTable);
 
-    const kitchenChair1 = createChair(rottingWoodMat);
+    const kitchenChair1 = createChair(wallMat);
     kitchenChair1.position.set(-15.5, 0, 8);
     kitchenChair1.rotation.y = Math.PI / 2;
     kitchenChair1.userData = { id: 'chair_3', isFurniture: true };
     interactables.push(kitchenChair1);
     group.add(kitchenChair1);
 
-    const kitchenChair2 = createChair(rottingWoodMat);
+    const kitchenChair2 = createChair(wallMat);
     kitchenChair2.position.set(-12.5, 0, 8);
     kitchenChair2.rotation.y = -Math.PI / 2;
     kitchenChair2.userData = { id: 'chair_4', isFurniture: true };
     interactables.push(kitchenChair2);
     group.add(kitchenChair2);
 
-    const cabinet1 = createCabinet(rottingWoodMat);
+    const cabinet1 = createCabinet(wallMat);
     cabinet1.position.set(-18, 0, 12);
     cabinet1.userData = { id: 'cabinet_1', isFurniture: true };
     interactables.push(cabinet1);
@@ -378,34 +343,33 @@ function init() {
     interactables.push(stairs);
     group.add(stairs);
 
-    // === BEDROOM (upstairs or backroom) ===
-    const bed = createBed(stainFabricMat);
-    bed.position.set(12, 0, -15);
+    // === BEDROOM (upstairs) ===
+    const bed = createBed(wallMat);
+    bed.position.set(-12, 3.1, -15);
     bed.userData = { id: 'bed_1', isFurniture: true };
     interactables.push(bed);
     group.add(bed);
 
-    const cabinet2 = createCabinet(rottingWoodMat);
-    cabinet2.position.set(6, 0, -18);
-    cabinet2.rotation.y = Math.PI / 2;
+    const cabinet2 = createCabinet(wallMat);
+    cabinet2.position.set(-18, 3.1, -12);
     cabinet2.userData = { id: 'cabinet_2', isFurniture: true };
     interactables.push(cabinet2);
     group.add(cabinet2);
 
-    const bookshelf1 = createBookshelf(rottingWoodMat);
-    bookshelf1.position.set(12, 0, -18);
+    const bookshelf1 = createBookshelf(wallMat);
+    bookshelf1.position.set(12, 3.1, -18);
     bookshelf1.userData = { id: 'bookshelf_1', isFurniture: true };
     interactables.push(bookshelf1);
     group.add(bookshelf1);
 
     const lamp2 = createLamp();
-    lamp2.position.set(-10, 0, -15);
+    lamp2.position.set(-10, 3.1, -15);
     lamp2.userData = { id: 'lamp_2', isFurniture: true };
     interactables.push(lamp2);
     group.add(lamp2);
 
-    const tv2 = createTV(rustMetalMat);
-    tv2.position.set(10, 0, -15);
+    const tv2 = createTV(wallMat);
+    tv2.position.set(10, 3.1, -15);
     tv2.userData = { id: 'tv_2', isFurniture: true };
     interactables.push(tv2);
     group.add(tv2);
@@ -1245,7 +1209,6 @@ function onKeyDown(event) {
             case 'KeyC': toggleCreatorMode(); break;
             case 'KeyH': toggleUIVisibility(); break;
             case 'KeyP': toggleTexturePalette(); break;
-            case 'KeyF': toggleNightVision(); break;
             case 'KeyT': transformControl.setMode('translate'); break;
             case 'KeyR': transformControl.setMode('rotate'); break;
             case 'KeyX': toggleSnap(); break;
@@ -1268,7 +1231,6 @@ function onKeyDown(event) {
             case 'KeyS': moveState.backward = true; break;
             case 'ArrowRight':
             case 'KeyD': moveState.right = true; break;
-            case 'KeyF': toggleNightVision(); break;
             case 'KeyH': toggleUIVisibility(); break;
             case 'KeyC': toggleCreatorMode(); break;
             case 'Space':
@@ -1855,37 +1817,13 @@ function createCat() {
     head.position.set(0, 0.1, -0.1);
     headGroup.add(head);
 
-    // Pointy right-triangle cat ears (Modified BoxGeometry for proper UV mapping)
-    const earW = 0.12;
-    const earH = 0.15;
-    const earD = 0.05;
-    
-    const earGeoL = new THREE.BoxGeometry(earW, earH, earD);
-    const posL = earGeoL.attributes.position;
-    for (let i = 0; i < posL.count; i++) {
-        // Left ear (positive X side): Move inner-top vertices to outer-top
-        if (posL.getX(i) < 0 && posL.getY(i) > 0) {
-            posL.setX(i, earW / 2);
-        }
-    }
-    earGeoL.computeVertexNormals();
-
-    const earGeoR = new THREE.BoxGeometry(earW, earH, earD);
-    const posR = earGeoR.attributes.position;
-    for (let i = 0; i < posR.count; i++) {
-        // Right ear (negative X side): Move inner-top vertices to outer-top
-        if (posR.getX(i) > 0 && posR.getY(i) > 0) {
-            posR.setX(i, -earW / 2);
-        }
-    }
-    earGeoR.computeVertexNormals();
-
-    const earL = new THREE.Mesh(earGeoL, darkMat);
-    earL.position.set(0.065, 0.3, -0.1); 
+    // Pointy cat ears using ConeGeometry (tam giác nhọn)
+    const earGeo = new THREE.ConeGeometry(0.06, 0.15, 4);
+    const earL = new THREE.Mesh(earGeo, darkMat);
+    earL.position.set(0.08, 0.25, -0.1);
     headGroup.add(earL);
-
-    const earR = new THREE.Mesh(earGeoR, darkMat);
-    earR.position.set(-0.065, 0.3, -0.1);
+    const earR = new THREE.Mesh(earGeo, darkMat);
+    earR.position.set(-0.08, 0.25, -0.1);
     headGroup.add(earR);
 
     const tailGroup = new THREE.Group();
@@ -1927,28 +1865,11 @@ function createCat() {
         catGroup.userData.legs.push({ hip: hipPivot, knee: kneePivot });
     });
 
-    // Night vision eyes (removed so they don't protrude)
+    // Night vision eyes (removed as requested so they don't protrude)
     catGroup.userData.eyes = [];
     catGroup.userData.isFlashlightOn = false;
 
     return catGroup;
-}
-
-function toggleNightVision() {
-    window.isNightVisionOn = !window.isNightVisionOn;
-    if (window.isNightVisionOn) {
-        window.ambientLight.intensity = 1.2;
-        window.ambientLight.color.setHex(0x88ffaa);
-        scene.fog.color.setHex(0x113311);
-        scene.fog.density = 0.05;
-        scene.background.setHex(0x113311);
-    } else {
-        window.ambientLight.intensity = 0.02;
-        window.ambientLight.color.setHex(0x223322);
-        scene.fog.color.setHex(0x050805);
-        scene.fog.density = 0.12;
-        scene.background.setHex(0x050805);
-    }
 }
 
 function createTV(material) {
