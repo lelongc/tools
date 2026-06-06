@@ -196,7 +196,7 @@ function init() {
     // ==========================================
     
     playerGroup = new THREE.Group();
-    playerGroup.position.set(1.5, 0, 1.5); 
+    playerGroup.position.set(0, 0, -0.5); // Center of Courtyard
     scene.add(playerGroup);
 
     cameraArm = new THREE.Group();
@@ -307,21 +307,32 @@ function init() {
 
     // === GRID BLUEPRINT SYSTEM ===
     const cellSize = 1.0;
-    // Map is 10x10. Each character is a 4x4 cell.
-    // X goes from left (-20) to right (20)
-    // Z goes from front (-20) to back (20)
     const blueprint = [
-        "WWWWWWWWWW", // Z = -18 (Outer Back Wall)
-        "WbbbbWsssW", // Z = -14 (Bathroom | Bedroom)
-        "WbbbbWsssW", // Z = -10
-        "WbbbbWsssW", // Z = -6
-        "WWWDWWWDWW", // Z = -2 (Dividing Wall with Doors)
-        "Wkkk.....W", // Z = 2  (Kitchen | Living Room)
-        "Wkkk.....W", // Z = 6
-        "Wkkk.....W", // Z = 10
-        "Wkkk.....W", // Z = 14
-        "WWWWDWWWWW"  // Z = 18 (Outer Front Wall)
+        "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW", // 0
+        "W      WW      WW    WW           W", // 1
+        "W      WW      WW    WW           W", // 2
+        "W      WW      D     D            W", // 3
+        "W      D       WW    WW           W", // 4
+        "WWWWW D WWWWWWWWWWWWWWWWWWWWWWWW  W", // 5
+        "W          W                 W    W", // 6
+        "W  WWWWWW  W  WWWWWWWW  W  WWWWWWWW", // 7
+        "W  W    W  W  W      W  W  W      W", // 8
+        "W  W    D     D      W  D  W      W", // 9
+        "W  W    W  W  W      W  W  W      W", // 10
+        "W  WWWWWW  W  WWWWWWWW  W  W      W", // 11
+        "W          W            W  WWWWWWWW", // 12
+        "WWWWWWWWWWWW  WWWWWWWW  W  D      W", // 13
+        "W          W            W  WWWWWWWW", // 14
+        "W          WWWWWWWWWWWWWW  W  W  WW", // 15
+        "W          WW          WW  D  D  DW", // 16
+        "W          WW          WW  W  W  WW", // 17
+        "WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW"  // 18
     ];
+    
+    const mapW = blueprint[0].length;
+    const mapH = blueprint.length;
+    const offsetX = mapW / 2;
+    const offsetZ = mapH / 2;
 
     const createBlockWall = (x, z, mat, id) => {
         const geo = new THREE.BoxGeometry(cellSize, roomHeight, cellSize);
@@ -343,18 +354,23 @@ function init() {
         group.add(obj);
     };
 
-    for (let r = 0; r < 10; r++) {
-        for (let c = 0; c < 10; c++) {
+    const addGrid = (obj, c, r, rotY = 0) => {
+        const x = (c - offsetX) * cellSize;
+        const z = (r - offsetZ) * cellSize;
+        addF(obj, x, z, rotY);
+    };
+
+    for (let r = 0; r < mapH; r++) {
+        for (let c = 0; c < mapW; c++) {
             const char = blueprint[r][c];
-            const x = (c - 4.5) * cellSize;
-            const z = (r - 4.5) * cellSize;
+            const x = (c - offsetX) * cellSize;
+            const z = (r - offsetZ) * cellSize;
 
             if (char === 'W') {
                 createBlockWall(x, z, rottingWoodMat, `wall_block_${wallCount++}`);
             } else if (char === 'D') {
-                // Place a door!
                 const doorObj = createDoor(rottingWoodMat);
-                if (r > 0 && r < 9 && (blueprint[r-1][c] === 'W' || blueprint[r+1][c] === 'W')) {
+                if (r > 0 && r < mapH - 1 && (blueprint[r-1][c] === 'W' || blueprint[r+1][c] === 'W')) {
                     doorObj.rotation.y = Math.PI / 2;
                 }
                 addF(doorObj, x, z);
@@ -362,58 +378,73 @@ function init() {
         }
     }
 
-    // === FURNITURE PLACEMENT ===
+    // === FURNITURE PLACEMENT (ON GRID) ===
     
-    // Kitchen (left side, z>0)
-    addF(createFridge(rustMetalMat), -2.625, 2.625);
-    addF(createKitchenCounter(rottingWoodMat), -1.875, 2.625);
-    addF(createKitchenCounter(rottingWoodMat), -1.125, 2.625);
-    addF(createStove(rustMetalMat), -10.5, 7.5, Math.PI/2);
-    addF(createTable(rottingWoodMat), -1.875, 1.125);
-    addF(createChair(rottingWoodMat), -9, 4.5, Math.PI/2);
-    addF(createChair(rottingWoodMat), -6, 4.5, -Math.PI/2);
-    addF(createTrashCan(rustMetalMat), -2.625, 1.125);
+    // 1. Nursery (Top-Left): c:1-6, r:1-4
+    addGrid(createBed(stainFabricMat), 2, 2, -Math.PI/2);
+    addGrid(createWardrobe(rottingWoodMat), 5, 1);
+    addGrid(createDeadPlant(rottingWoodMat, rustMetalMat), 1, 1);
+    addGrid(createChair(rottingWoodMat), 4, 3, Math.PI/4);
 
-    // Living Room (right side, z>0)
-    addF(createRug(stainFabricMat, 6, 6), 10, 10);
-    addF(createSofa(darkFabricMat), 6, 9, -Math.PI/2);
-    addF(createTV(rustMetalMat), 10.5, 9, Math.PI/2);
-    addF(createCoffeeTable(rottingWoodMat), 2.0625, 2.25);
-    addF(createClock(rottingWoodMat), 10.5, 3, -Math.PI/4);
-    addF(createLamp(), 2.625, 3.0);
-    const p1 = createPainting(rottingWoodMat); p1.position.y = 2;
-    addF(p1, 11.925, 6, -Math.PI/2); // On the right outer wall
-    addF(createDeadPlant(rottingWoodMat, rustMetalMat), 14, 15.5);
-    const window2 = createBoardedWindow(rottingWoodMat);
-    window2.position.y = 2.5;
-    addF(window2, 11.925, 7.5, -Math.PI/2);
+    // 2. Study (Top-Mid-Left): c:9-14, r:1-4
+    addGrid(createTable(rottingWoodMat), 12, 2);
+    addGrid(createChair(rottingWoodMat), 12, 3, Math.PI);
+    addGrid(createWardrobe(rottingWoodMat), 10, 1); // Bookshelf substitute
+    addGrid(createWardrobe(rottingWoodMat), 11, 1); // Bookshelf substitute
+    addGrid(createClock(rottingWoodMat), 14, 1, -Math.PI/4);
+    const studyPainting = createPainting(rottingWoodMat); studyPainting.position.y = 2;
+    addGrid(studyPainting, 9, 2, Math.PI/2);
 
-    // Bathroom (left side, z<0)
-    addF(createBathtub(rustMetalMat), -2.625, -2.625);
-    addF(createToilet(dirtyTileMat), -2.625, -1.125);
-    addF(createSink(dirtyTileMat), -4.5, -10.5, -Math.PI/2);
-    addF(createMirror(dirtyTileMat), -1.575, -10.5, -Math.PI/2);
-    addF(createTrashCan(rustMetalMat), -1.875, -3.0);
+    // 3. Small Bedroom (Top-Mid-Right): c:17-20, r:1-4
+    addGrid(createRug(darkFabricMat, 3, 3), 18, 2.5);
+    addGrid(createBed(stainFabricMat), 18, 2, -Math.PI/2);
+    addGrid(createNightstand(rottingWoodMat), 19, 2, -Math.PI/2);
 
-    // Bedroom (right side, z<0)
-    addF(createRug(darkFabricMat, 4.5, 4.5), 10, -10);
-    addF(createBed(stainFabricMat), 10.5, -10.5, -Math.PI/2);
-    addF(createNightstand(rottingWoodMat), 10.5, -7.5, -Math.PI/2);
-    addF(createWardrobe(rottingWoodMat), 4.5, -10.5, Math.PI/2);
-    addF(createDresser(rottingWoodMat), 10.5, -6, -Math.PI/2);
-    addF(createChair(rottingWoodMat), 6, -4.5, Math.PI);
-    
-    // Add a boarded window in the bedroom
-    const window1 = createBoardedWindow(rottingWoodMat);
-    window1.position.y = 2.5;
-    addF(window1, 11.925, -7.5, -Math.PI/2);
+    // 4. Bathroom & Storage (Top-Right): c:25-33, r:1-4
+    addGrid(createBathtub(rustMetalMat), 25, 2);
+    addGrid(createToilet(dirtyTileMat), 28, 2, -Math.PI/2);
+    addGrid(createSink(dirtyTileMat), 26, 1);
+    addGrid(createMirror(dirtyTileMat), 26, 1);
+    addGrid(createTrashCan(rustMetalMat), 28, 3);
+    // Storage boxes (using dressers as box stacks)
+    addGrid(createDresser(rottingWoodMat), 32, 1, -Math.PI/2);
+    addGrid(createDresser(rottingWoodMat), 32, 2, -Math.PI/2);
+    addGrid(createDresser(rottingWoodMat), 32, 3, -Math.PI/2);
 
-    // === CAGE AND OWNER ===
+    // 5. Living Room (Mid-Left): c:1-6, r:8-10
+    addGrid(createRug(stainFabricMat, 4, 3), 3.5, 9);
+    addGrid(createSofa(darkFabricMat), 4, 9, -Math.PI/2);
+    addGrid(createTV(rustMetalMat), 2, 9, Math.PI/2);
+    addGrid(createCoffeeTable(rottingWoodMat), 3, 9);
+    addGrid(createLamp(), 5, 8);
+
+    // 6. Courtyard (Center): c:15-20, r:8-10
+    addGrid(createDeadPlant(rottingWoodMat, rustMetalMat), 15, 8);
+    addGrid(createDeadPlant(rottingWoodMat, rustMetalMat), 20, 8);
+
+    // 7. Kitchen & Dining (Mid-Right): c:25-33, r:8-10
+    addGrid(createFridge(rustMetalMat), 26, 8);
+    addGrid(createStove(rustMetalMat), 27, 8);
+    addGrid(createKitchenCounter(rottingWoodMat), 28, 8);
+    addGrid(createTable(rottingWoodMat), 29, 9);
+    addGrid(createTable(rottingWoodMat), 30, 9);
+    addGrid(createChair(rottingWoodMat), 29, 8);
+    addGrid(createChair(rottingWoodMat), 30, 8);
+    addGrid(createChair(rottingWoodMat), 29, 10, Math.PI);
+    addGrid(createChair(rottingWoodMat), 30, 10, Math.PI);
+
+    // 8. Owner & Cage (Bottom-Left "Hidden Room"): c:1-9, r:14-17
     const cage = createCage(rustMetalMat);
-    addF(cage, 2.625, -2.625); // In the corner of the bedroom
-
+    addGrid(cage, 5, 15);
     const owner = createOwner(stainFabricMat);
-    addF(owner, 2.625, -2.625); // Inside the cage
+    addGrid(owner, 5, 15);
+    const creepyPainting = createPainting(rottingWoodMat); creepyPainting.position.y = 2;
+    addGrid(creepyPainting, 2, 15, Math.PI/2);
+
+    // 9. Dormitories (Bottom-Right): c:26, 29, 32; r:16-17
+    addGrid(createBed(stainFabricMat), 26, 17, -Math.PI/2);
+    addGrid(createBed(stainFabricMat), 29, 17, -Math.PI/2);
+    addGrid(createBed(stainFabricMat), 32, 17, -Math.PI/2);
 
     // === DUST PARTICLES ===
     const dustCount = 1500;
