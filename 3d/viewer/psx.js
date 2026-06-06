@@ -1382,8 +1382,18 @@ function animate() {
             camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetY, 15 * delta);
             if (window.psxCat) window.psxCat.scale.y = THREE.MathUtils.lerp(window.psxCat.scale.y, 0.6, 15 * delta);
         } else {
-            // Restore visual height
-            const targetY = isFPSView ? window.fpsCamPos.y : window.defaultCamPos.y;
+            // Restore visual height with Limp Bobbing
+            let targetY = isFPSView ? window.fpsCamPos.y : window.defaultCamPos.y;
+            
+            let isMovingNow = (moveState.forward || moveState.backward || moveState.left || moveState.right);
+            if (isMovingNow) {
+                const animSpeed = (moveState.shift && !isExhausted) ? 1.5 : 1.0; 
+                const walkPhase = time * 0.005 * animSpeed;
+                const limpPhase = Math.sin(walkPhase + Math.PI);
+                const limpDip = limpPhase < 0 ? limpPhase * 0.12 : 0; // Camera dips heavily on injured leg
+                targetY += limpDip;
+            }
+
             camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetY, 15 * delta);
             if (window.psxCat) window.psxCat.scale.y = THREE.MathUtils.lerp(window.psxCat.scale.y, 1.0, 15 * delta);
         }
@@ -1427,7 +1437,7 @@ function animate() {
         }
 
         let isSprinting = isMovingInputs && moveState.shift && !isExhausted;
-        const walkSpeed = isSprinting ? 12.0 : 4.0;
+        const walkSpeed = isSprinting ? 9.0 : 3.0; // Slower due to injury
 
         // Stamina logic
         if (isSprinting && isGrounded) {
@@ -1505,7 +1515,7 @@ function animate() {
                 const walkPhase = time * 0.005 * animSpeed;
 
                 const swingFL = Math.sin(walkPhase);
-                const swingFR = Math.sin(walkPhase + Math.PI);
+                const swingFR = Math.sin(walkPhase + Math.PI) * 0.15; // Injured leg dragging
                 const swingBL = Math.sin(walkPhase + Math.PI); 
                 const swingBR = Math.sin(walkPhase);
 
@@ -1520,7 +1530,10 @@ function animate() {
                 cat.userData.legs[3].knee.rotation.x = swingBR > 0 ? swingBR * 0.6 : 0;
                 
                 cat.userData.tail.rotation.z = Math.sin(catTime * 5) * 0.3; 
-                cat.userData.body.position.y = 0.35 + Math.sin(time * 0.02 * animSpeed) * 0.01; 
+                
+                const limpPhase = Math.sin(walkPhase + Math.PI);
+                const limpDip = limpPhase < 0 ? limpPhase * 0.05 : 0;
+                cat.userData.body.position.y = 0.35 + Math.sin(time * 0.02 * animSpeed) * 0.01 + limpDip; 
             } else {
                 cat.userData.legs.forEach(leg => { leg.hip.rotation.x = 0; leg.knee.rotation.x = 0; });
                 cat.userData.body.position.y = 0.35;
