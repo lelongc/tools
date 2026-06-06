@@ -1387,7 +1387,7 @@ function animate() {
             
             let isMovingNow = (moveState.forward || moveState.backward || moveState.left || moveState.right);
             if (isMovingNow) {
-                const animSpeed = (moveState.shift && !isExhausted) ? 1.5 : 1.0; 
+                const animSpeed = (moveState.shift && !isExhausted) ? 2.5 : 1.0; 
                 const walkPhase = time * 0.005 * animSpeed;
                 const limpPhase = Math.sin(walkPhase + Math.PI);
                 const limpDip = limpPhase < 0 ? limpPhase * 0.12 : 0; // Camera dips heavily on injured leg
@@ -1519,15 +1519,16 @@ function animate() {
                 const swingBL = Math.sin(walkPhase + Math.PI); 
                 const swingBR = Math.sin(walkPhase);
 
-                cat.userData.legs[0].hip.rotation.x = swingFL * 0.4;
-                cat.userData.legs[1].hip.rotation.x = swingFR * 0.4;
-                cat.userData.legs[2].hip.rotation.x = swingBL * 0.4;
-                cat.userData.legs[3].hip.rotation.x = swingBR * 0.4;
+                cat.userData.legs[0].hip.rotation.x = swingFL * 0.6;
+                cat.userData.legs[1].hip.rotation.x = swingFR * 0.6;
+                cat.userData.legs[2].hip.rotation.x = swingBL * 0.6;
+                cat.userData.legs[3].hip.rotation.x = swingBR * 0.6;
 
-                cat.userData.legs[0].knee.rotation.x = swingFL > 0 ? swingFL * 0.6 : 0;
-                cat.userData.legs[1].knee.rotation.x = swingFR > 0 ? swingFR * 0.6 : 0;
-                cat.userData.legs[2].knee.rotation.x = swingBL > 0 ? swingBL * 0.6 : 0;
-                cat.userData.legs[3].knee.rotation.x = swingBR > 0 ? swingBR * 0.6 : 0;
+                // Front legs bend backwards (elbows), Back legs bend forwards (knees)
+                cat.userData.legs[0].knee.rotation.x = swingFL > 0 ? -swingFL * 1.0 : 0;
+                cat.userData.legs[1].knee.rotation.x = swingFR > 0 ? -swingFR * 1.0 : 0;
+                cat.userData.legs[2].knee.rotation.x = swingBL > 0 ? swingBL * 1.0 : 0;
+                cat.userData.legs[3].knee.rotation.x = swingBR > 0 ? swingBR * 1.0 : 0;
                 
                 cat.userData.tail.rotation.z = Math.sin(catTime * 5) * 0.3; 
                 
