@@ -19,6 +19,9 @@ let isChargingJump = false;
 let jumpCharge = 0.0;
 let stamina = 100;
 let isExhausted = false;
+let landingTimer = 0;
+let maxLandingTimer = 0.3;
+let landingImpact = 0;
 const maxStamina = 100;
 
 // Stamina UI
@@ -1371,6 +1374,50 @@ function animate() {
         const radius = 0.2;
         const height = 0.4;
 
+        let previousVelocityY = playerVelocityY;
+
+        // Apply Gravity
+        playerVelocityY -= 25.0 * delta;
+        playerGroup.position.y += playerVelocityY * delta;
+
+        // Vertical collision check
+        let pBoxY = new THREE.Box3();
+        pBoxY.min.set(playerGroup.position.x - radius, playerGroup.position.y, playerGroup.position.z - radius);
+        pBoxY.max.set(playerGroup.position.x + radius, playerGroup.position.y + height, playerGroup.position.z + radius);
+        
+        if (checkCollision(pBoxY)) {
+            playerGroup.position.y -= playerVelocityY * delta;
+            if (playerVelocityY < 0) {
+                if (!isGrounded) {
+                    isGrounded = true;
+                    landingImpact = Math.min(1.0, Math.abs(previousVelocityY) / 25.0);
+                    if (landingImpact > 0.1) landingTimer = maxLandingTimer;
+                }
+            }
+            playerVelocityY = 0;
+        } else if (playerGroup.position.y <= 0) {
+            playerGroup.position.y = 0;
+            if (!isGrounded && playerVelocityY < 0) {
+                isGrounded = true;
+                landingImpact = Math.min(1.0, Math.abs(previousVelocityY) / 25.0);
+                if (landingImpact > 0.1) landingTimer = maxLandingTimer;
+            }
+            playerVelocityY = 0;
+        } else {
+            isGrounded = false;
+        }
+
+        let landDip = 0;
+        let landSplay = 0;
+        if (landingTimer > 0) {
+            landingTimer -= delta;
+            if (landingTimer < 0) landingTimer = 0;
+            const progress = landingTimer / maxLandingTimer; 
+            const dipCurve = Math.sin(progress * Math.PI); 
+            landDip = -dipCurve * 0.4 * landingImpact; 
+            landSplay = dipCurve * 0.8 * landingImpact; 
+        }
+
         // Handle jump charging
         if (isChargingJump && isGrounded && stamina > 0) {
             jumpCharge += delta * 2.0; // 0.5s to fully charge
@@ -1382,8 +1429,9 @@ function animate() {
             camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetY, 15 * delta);
             if (window.psxCat) window.psxCat.scale.y = THREE.MathUtils.lerp(window.psxCat.scale.y, 0.6, 15 * delta);
         } else {
-            // Restore visual height with Limp Bobbing
+            // Restore visual height with Limp Bobbing and Landing Dip
             let targetY = isFPSView ? window.fpsCamPos.y : window.defaultCamPos.y;
+            targetY += landDip;
             
             let isMovingNow = (moveState.forward || moveState.backward || moveState.left || moveState.right);
             if (isMovingNow) {
@@ -1398,31 +1446,7 @@ function animate() {
             if (window.psxCat) window.psxCat.scale.y = THREE.MathUtils.lerp(window.psxCat.scale.y, 1.0, 15 * delta);
         }
 
-        // Apply Gravity
-        playerVelocityY -= 25.0 * delta;
-        playerGroup.position.y += playerVelocityY * delta;
 
-        // Vertical collision check
-        let pBoxY = new THREE.Box3();
-        pBoxY.min.set(playerGroup.position.x - radius, playerGroup.position.y, playerGroup.position.z - radius);
-        pBoxY.max.set(playerGroup.position.x + radius, playerGroup.position.y + height, playerGroup.position.z + radius);
-        
-        if (checkCollision(pBoxY)) {
-            playerGroup.position.y -= playerVelocityY * delta;
-            if (playerVelocityY < 0) {
-                isGrounded = true;
-            }
-            playerVelocityY = 0;
-        } else {
-            isGrounded = false;
-        }
-
-        // Hard floor check
-        if (playerGroup.position.y <= 0) {
-            playerGroup.position.y = 0;
-            playerVelocityY = 0;
-            isGrounded = true;
-        }
 
         let moveX = 0;
         let moveZ = 0;
@@ -1514,32 +1538,68 @@ function animate() {
                 const animSpeed = isMoving ? 1.0 : 1.5; 
                 const walkPhase = time * 0.005 * animSpeed;
 
-                const swingFL = Math.sin(walkPhase);
-                const swingFR = Math.sin(walkPhase + Math.PI) * 0.15; // Injured leg dragging
-                const swingBL = Math.sin(walkPhase + Math.PI); 
-                const swingBR = Math.sin(walkPhase);
+                // 4-beat sequence for digitigrade cats
+                const phaseFL = walkPhase - Math.PI / 2;
+                const phaseFR = walkPhase + Math.PI / 2;
+                const phaseBL = walkPhase;
+                const phaseBR = walkPhase + Math.PI;
+
+                const swingFL = Math.sin(phaseFL);
+                const swingFR = Math.sin(phaseFR) * 0.2; // Injured leg dragging
+                const swingBL = Math.sin(phaseBL); 
+                const swingBR = Math.sin(phaseBR);
 
                 cat.userData.legs[0].hip.rotation.x = swingFL * 0.6;
                 cat.userData.legs[1].hip.rotation.x = swingFR * 0.6;
                 cat.userData.legs[2].hip.rotation.x = swingBL * 0.6;
                 cat.userData.legs[3].hip.rotation.x = swingBR * 0.6;
 
+                // Knee bends most when the leg is passing under the body (cos(phase) > 0)
+                const liftFL = Math.max(0, Math.cos(phaseFL));
+                const liftFR = Math.max(0, Math.cos(phaseFR)) * 0.2; // Injured leg barely lifts
+                const liftBL = Math.max(0, Math.cos(phaseBL));
+                const liftBR = Math.max(0, Math.cos(phaseBR));
+
                 // Front legs bend backwards (elbows), Back legs bend forwards (knees)
-                cat.userData.legs[0].knee.rotation.x = swingFL > 0 ? -swingFL * 1.0 : 0;
-                cat.userData.legs[1].knee.rotation.x = swingFR > 0 ? -swingFR * 1.0 : 0;
-                cat.userData.legs[2].knee.rotation.x = swingBL > 0 ? swingBL * 1.0 : 0;
-                cat.userData.legs[3].knee.rotation.x = swingBR > 0 ? swingBR * 1.0 : 0;
+                cat.userData.legs[0].knee.rotation.x = -liftFL * 1.2;
+                cat.userData.legs[1].knee.rotation.x = -liftFR * 1.2;
+                cat.userData.legs[2].knee.rotation.x = liftBL * 1.2;
+                cat.userData.legs[3].knee.rotation.x = liftBR * 1.2;
                 
                 cat.userData.tail.rotation.z = Math.sin(catTime * 5) * 0.3; 
                 
                 const limpPhase = Math.sin(walkPhase + Math.PI);
                 const limpDip = limpPhase < 0 ? limpPhase * 0.05 : 0;
-                cat.userData.body.position.y = 0.35 + Math.sin(time * 0.02 * animSpeed) * 0.01 + limpDip; 
+                cat.userData.body.position.y = 0.35 + Math.sin(time * 0.02 * animSpeed) * 0.01 + limpDip + landDip; 
+                cat.userData.head.position.y = 0.45 + Math.sin(time * 0.02 * animSpeed + 1) * 0.005 + limpDip + landDip;
+
+                if (landingTimer > 0) {
+                    cat.userData.legs[0].hip.rotation.z = landSplay;
+                    cat.userData.legs[1].hip.rotation.z = -landSplay;
+                    cat.userData.legs[2].hip.rotation.z = landSplay;
+                    cat.userData.legs[3].hip.rotation.z = -landSplay;
+                    cat.userData.legs[0].knee.rotation.x -= landSplay * 0.5;
+                    cat.userData.legs[1].knee.rotation.x -= landSplay * 0.5;
+                    cat.userData.legs[2].knee.rotation.x -= landSplay * 0.5;
+                    cat.userData.legs[3].knee.rotation.x -= landSplay * 0.5;
+                } else {
+                    cat.userData.legs.forEach(leg => leg.hip.rotation.z = 0);
+                }
             } else {
-                cat.userData.legs.forEach(leg => { leg.hip.rotation.x = 0; leg.knee.rotation.x = 0; });
-                cat.userData.body.position.y = 0.35;
-                const breath = 1 + Math.sin(catTime * 2) * 0.05;
-                cat.userData.body.scale.set(1, breath, 1);
+                cat.userData.legs.forEach(leg => { leg.hip.rotation.x = 0; leg.knee.rotation.x = 0; leg.hip.rotation.z = 0; });
+                cat.userData.body.position.y = 0.35 + landDip;
+                cat.userData.head.position.y = 0.45 + landDip;
+                
+                if (landingTimer > 0) {
+                    cat.userData.legs[0].hip.rotation.z = landSplay;
+                    cat.userData.legs[1].hip.rotation.z = -landSplay;
+                    cat.userData.legs[2].hip.rotation.z = landSplay;
+                    cat.userData.legs[3].hip.rotation.z = -landSplay;
+                    cat.userData.legs.forEach(leg => leg.knee.rotation.x = -landSplay * 0.5); 
+                } else {
+                    const breath = 1 + Math.sin(catTime * 2) * 0.05;
+                    cat.userData.body.scale.set(1, breath, 1);
+                }
                 cat.userData.tail.rotation.z = Math.sin(catTime * 3) * 0.2;
             }
 
