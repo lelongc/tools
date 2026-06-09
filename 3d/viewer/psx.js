@@ -254,7 +254,7 @@ function init() {
     
     // Dimmer background and fog
     scene.background = new THREE.Color(0x050805);
-    scene.fog = new THREE.FogExp2(0x050805, 0.12);
+    scene.fog = new THREE.FogExp2(0x050805, 0.05);
 
     const textureLoader = new THREE.TextureLoader();
     const loadPSXTexture = (path, repeatX, repeatY) => {
@@ -286,12 +286,13 @@ function init() {
     const darkFabricMat = new THREE.MeshLambertMaterial({ map: loadPSXTexture('assets/fabric_dark.png', 2, 2) });
     const dirtyTileMat = new THREE.MeshLambertMaterial({ map: loadPSXTexture('assets/tile_dirty.png', 4, 4) });
 
-    const roomSize = 40;
-    const roomHeight = 6;
+    const mapWidth = 35;
+    const mapDepth = 19;
+    const roomHeight = 3.0;
     const group = new THREE.Group();
 
-    // Floor and Ceiling for the whole 40x40 area
-    const floorGeo = new THREE.PlaneGeometry(roomSize, roomSize);
+    // Floor and Ceiling for the whole mapped area
+    const floorGeo = new THREE.PlaneGeometry(mapWidth, mapDepth);
     const floor = new THREE.Mesh(floorGeo, floorMat);
     floor.rotation.x = -Math.PI / 2;
     floor.userData = { id: 'floor', isFurniture: true };
@@ -334,8 +335,8 @@ function init() {
     const offsetX = mapW / 2;
     const offsetZ = mapH / 2;
 
-    const createBlockWall = (x, z, mat, id) => {
-        const geo = new THREE.BoxGeometry(cellSize, roomHeight, cellSize);
+    const createThinWall = (x, z, w, d, mat, id) => {
+        const geo = new THREE.BoxGeometry(w, roomHeight, d);
         const mesh = new THREE.Mesh(geo, mat);
         mesh.position.set(x, roomHeight/2, z);
         mesh.userData = { id: id, isFurniture: true };
@@ -367,7 +368,25 @@ function init() {
             const z = (r - offsetZ) * cellSize;
 
             if (char === 'W') {
-                createBlockWall(x, z, rottingWoodMat, `wall_block_${wallCount++}`);
+                // Central pillar
+                createThinWall(x, z, 0.2, 0.2, rottingWoodMat, `wall_block_${wallCount++}`);
+                
+                // Connect Left
+                if (c > 0 && blueprint[r][c-1] === 'W') {
+                    createThinWall(x - 0.25, z, 0.5, 0.2, rottingWoodMat, `wall_block_${wallCount++}`);
+                }
+                // Connect Right
+                if (c < mapW - 1 && blueprint[r][c+1] === 'W') {
+                    createThinWall(x + 0.25, z, 0.5, 0.2, rottingWoodMat, `wall_block_${wallCount++}`);
+                }
+                // Connect Up
+                if (r > 0 && blueprint[r-1][c] === 'W') {
+                    createThinWall(x, z - 0.25, 0.2, 0.5, rottingWoodMat, `wall_block_${wallCount++}`);
+                }
+                // Connect Down
+                if (r < mapH - 1 && blueprint[r+1][c] === 'W') {
+                    createThinWall(x, z + 0.25, 0.2, 0.5, rottingWoodMat, `wall_block_${wallCount++}`);
+                }
             } else if (char === 'D') {
                 const doorObj = createDoor(rottingWoodMat);
                 if (r > 0 && r < mapH - 1 && (blueprint[r-1][c] === 'W' || blueprint[r+1][c] === 'W')) {
