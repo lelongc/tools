@@ -1,4 +1,22 @@
-// background.js
+// Helper function để đảm bảo Offscreen Document tồn tại
+async function setupOffscreenDocument(path) {
+  // Kiểm tra xem offscreen đã tồn tại chưa
+  const existingContexts = await chrome.runtime.getContexts({
+    contextTypes: ['OFFSCREEN_DOCUMENT'],
+    documentUrls: [chrome.runtime.getURL(path)]
+  });
+
+  if (existingContexts.length > 0) {
+    return;
+  }
+
+  // Tạo offscreen document mới
+  await chrome.offscreen.createDocument({
+    url: path,
+    reasons: ['BLOBS'],
+    justification: 'Cần tạo Blob URL để giữ đúng tên file khi tải xuống'
+  });
+}
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "start_process") {
@@ -16,18 +34,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     processCapturedSession(request)
       .then(result => sendResponse({ success: true, result }))
       .catch(err => sendResponse({ error: err.message }));
-    return true;
-  } else if (request.action === "download_blobs") {
-    if (request.downloads && request.downloads.length > 0) {
-      request.downloads.forEach(dl => {
-        chrome.downloads.download({
-          url: dl.url,
-          filename: dl.filename,
-          saveAs: false
-        });
-      });
-    }
-    sendResponse({ success: true });
     return true;
   }
 });
@@ -70,12 +76,23 @@ async function processCapturedSession(sessionData) {
   // 5. Tổng hợp thành Markdown bài viết
   const articleMd = generateArticle(finalTitle, processedArticle, frames ? frames.length : 0);
 
-  // TRẢ DỮ LIỆU VỀ CONTENT SCRIPT ĐỂ TẠO BLOB URL NHẰM BYPASS LỖI CHROME DATA URI
-  return {
-    safeTitle: safeTitle,
-    articleMd: articleMd,
-    frames: frames || []
-  };
+  // 6. Chuyển tiếp dữ liệu qua Offscreen Document để tải xuống
+  try {
+    await setupOffscreenDocument('offscreen/offscreen.html');
+    await chrome.runtime.sendMessage({
+      action: "download_blobs_offscreen",
+      payload: {
+        safeTitle: safeTitle,
+        articleMd: articleMd,
+        frames: frames || []
+      }
+    });
+  } catch (err) {
+    console.error("Lỗi khi gọi offscreen:", err);
+    throw err;
+  }
+
+  return "Done";
 }
 
 async function callGeminiAPI(text, frames, apiKey) {

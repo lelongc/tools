@@ -81,39 +81,12 @@ function injectFloatingUI() {
       url: window.location.href,
       title: cleanTitle,
       transcript: finalTranscript
-    }, async (response) => {
+    }, (response) => {
       if (response && response.success) {
-        const payload = response.result;
-        
-        try {
-          const downloads = [];
-          
-          // 1. Tạo Blob URL cho file Markdown
-          const mdBlob = new Blob([payload.articleMd], { type: 'text/markdown;charset=utf-8' });
-          downloads.push({ 
-            url: URL.createObjectURL(mdBlob), 
-            filename: `learn/${payload.safeTitle}.md` 
-          });
-          
-          // 2. Tạo Blob URL cho các file Ảnh (Fetch Data URI -> Blob)
-          if (payload.frames && payload.frames.length > 0) {
-            for (let i = 0; i < payload.frames.length; i++) {
-              const res = await fetch(payload.frames[i]);
-              const blob = await res.blob();
-              downloads.push({
-                url: URL.createObjectURL(blob),
-                filename: `learn/image/${payload.safeTitle}_anh_${i}.jpg`
-              });
-            }
-          }
-          
-          // 3. Gửi lệnh cho Background thực hiện Download bằng Blob URLs
-          chrome.runtime.sendMessage({ action: "download_blobs", downloads });
-          
-        } catch (e) {
-          console.error("Lỗi khi xử lý tải xuống:", e);
-          alert("Có lỗi khi tạo file tải xuống!");
-        }
+        // Tải xuống đã được background và offscreen xử lý
+        capturedFrames = []; // Reset
+        captureBtn.innerText = `📸 Chụp ảnh (0)`;
+        alert("Đã tạo xong bài viết!");
       } else if (response && response.error) {
         alert("Lỗi từ AI: " + response.error);
       } else {
@@ -123,14 +96,6 @@ function injectFloatingUI() {
       finishBtn.innerText = '✅ Xong & Tạo Bài';
       finishBtn.disabled = false;
       captureBtn.disabled = false;
-
-      if (response && response.success) {
-        capturedFrames = []; // Reset
-        captureBtn.innerText = `📸 Chụp ảnh (0)`;
-        alert("Đã tạo xong bài viết!");
-      } else {
-        alert("Lỗi: " + (response ? response.error : "Không xác định"));
-      }
     });
   };
 
