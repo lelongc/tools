@@ -1,61 +1,39 @@
 // offscreen.js
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "download_blobs_offscreen") {
-    handleDownloads(request.payload)
-      .then(() => sendResponse({ success: true }))
+  if (request.action === "create_blob_urls") {
+    createBlobUrls(request.payload)
+      .then((urls) => sendResponse({ success: true, urls }))
       .catch((err) => sendResponse({ error: err.message }));
     return true; // Báo hiệu async
+  } else if (request.action === "cleanup_and_close") {
+    request.urls.forEach((url) => URL.revokeObjectURL(url));
+    window.close();
   }
 });
 
-async function handleDownloads(payload) {
-  const { safeTitle, articleMd, frames } = payload;
-  const objectUrlsToRevoke = [];
+async function createBlobUrls(payload) {
+  const { articleMd, frames } = payload;
+  const urls = [];
 
   try {
     // 1. Tạo Blob cho Markdown
     const mdBlob = new Blob([articleMd], { type: 'text/markdown;charset=utf-8' });
-    const mdUrl = URL.createObjectURL(mdBlob);
-    objectUrlsToRevoke.push(mdUrl);
-
-    // Tải Markdown
-    await new Promise((resolve) => {
-      chrome.downloads.download({
-        url: mdUrl,
-        filename: `learn/${safeTitle}.md`,
-        saveAs: false
-      }, resolve);
-    });
+    urls.push(URL.createObjectURL(mdBlob));
 
     // 2. Tạo Blob cho Images
     if (frames && frames.length > 0) {
       for (let i = 0; i < frames.length; i++) {
-        // frames[i] là một data URI: 'data:image/jpeg;base64,...'
+        // frames[i] là một data URI
         const res = await fetch(frames[i]);
         const blob = await res.blob();
-        const imgUrl = URL.createObjectURL(blob);
-        objectUrlsToRevoke.push(imgUrl);
-
-        // Tải Ảnh
-        await new Promise((resolve) => {
-          chrome.downloads.download({
-            url: imgUrl,
-            filename: `learn/image/${safeTitle}_anh_${i}.jpg`,
-            saveAs: false
-          }, resolve);
-        });
+        urls.push(URL.createObjectURL(blob));
       }
     }
 
-    // Đóng offscreen document sau khi hoàn tất tải xuống
-    setTimeout(() => {
-      objectUrlsToRevoke.forEach((url) => URL.revokeObjectURL(url));
-      window.close();
-    }, 5000); // Chờ 5s để đảm bảo Chrome bắt đầu tải xong mới dọn rác
-
+    return urls;
   } catch (error) {
-    console.error("Offscreen download error:", error);
+    console.error("Lỗi khi tạo Blob URLs trong Offscreen:", error);
     throw error;
   }
 }

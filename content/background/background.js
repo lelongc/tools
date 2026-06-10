@@ -76,17 +76,48 @@ async function processCapturedSession(sessionData) {
   // 5. Tổng hợp thành Markdown bài viết
   const articleMd = generateArticle(finalTitle, processedArticle, frames ? frames.length : 0);
 
-  // 6. Chuyển tiếp dữ liệu qua Offscreen Document để tải xuống
+  // 6. Chuyển tiếp dữ liệu qua Offscreen Document để tạo Blob URLs
   try {
     await setupOffscreenDocument('offscreen/offscreen.html');
-    await chrome.runtime.sendMessage({
-      action: "download_blobs_offscreen",
+    const response = await chrome.runtime.sendMessage({
+      action: "create_blob_urls",
       payload: {
-        safeTitle: safeTitle,
         articleMd: articleMd,
         frames: frames || []
       }
     });
+
+    if (response && response.success && response.urls) {
+      const urls = response.urls;
+      // urls[0] là Markdown, các urls còn lại là ảnh
+      
+      chrome.downloads.download({
+        url: urls[0],
+        filename: `learn/${safeTitle}.md`,
+        saveAs: false
+      });
+
+      if (frames && frames.length > 0) {
+        for (let i = 0; i < frames.length; i++) {
+          chrome.downloads.download({
+            url: urls[i + 1],
+            filename: `learn/image/${safeTitle}_anh_${i}.jpg`,
+            saveAs: false
+          });
+        }
+      }
+
+      // Đợi 5 giây để Chrome kịp tải, sau đó dọn dẹp offscreen
+      setTimeout(() => {
+        chrome.runtime.sendMessage({
+          action: "cleanup_and_close",
+          urls: urls
+        });
+      }, 5000);
+
+    } else {
+      throw new Error(response.error || "Không thể tạo Blob URL từ Offscreen.");
+    }
   } catch (err) {
     console.error("Lỗi khi gọi offscreen:", err);
     throw err;
