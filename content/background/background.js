@@ -66,8 +66,18 @@ async function processCapturedSession(sessionData) {
     throw new Error("Không lấy được nội dung chữ. Vui lòng kiểm tra lại phụ đề.");
   }
 
-  // 4. Gọi Gemini API để phân tích và chèn ảnh
-  const analysis = await callGeminiAPI(finalTranscript, frames, keys.geminiApiKey);
+  // 4. Chia nhỏ transcript và xử lý chi tiết từng phần
+  const chunks = chunkTranscript(finalTranscript);
+  const draftArticles = await Promise.all(
+    chunks.map((chunk, idx) => 
+      generateDetailedChunk(chunk, idx, chunks.length, keys.geminiApiKey)
+    )
+  );
+  
+  const fullDraft = draftArticles.join('\n\n');
+
+  // 4b. Gọi Gemini API để chèn ảnh và xác định tiêu đề súc tích
+  const analysis = await finalizeArticleWithImages(fullDraft, frames, keys.geminiApiKey);
 
   // Lấy tiêu đề tinh gọn từ AI hoặc dùng tiêu đề web làm dự phòng
   const finalTitle = analysis.lesson_title && analysis.lesson_title.length > 3 ? analysis.lesson_title : title;
@@ -143,34 +153,87 @@ async function processCapturedSession(sessionData) {
   return "Done";
 }
 
-async function callGeminiAPI(text, frames, apiKey) {
-  // Tăng giới hạn đọc text lên 100,000 ký tự để AI có thể đọc sạch toàn bộ phụ đề của video dài
-  const promptText = text.substring(0, 100000);
-  // Chuyển sang gemini-3.1-flash-lite: Đây là model MIỄN PHÍ mạnh nhất hiện tại theo bảng giá mới nhất của Google.
+function chunkTranscript(text, maxLength = 5000) {
+  const chunks = [];
+  let startIndex = 0;
+  
+  while (startIndex < text.length) {
+    if (text.length - startIndex <= maxLength) {
+      chunks.push(text.substring(startIndex));
+      break;
+    }
+    
+    let endIndex = startIndex + maxLength;
+    // Tìm dấu chấm gần nhất hoặc khoảng trắng gần nhất để ngắt câu đẹp
+    let lastDot = text.lastIndexOf('. ', endIndex);
+    if (lastDot > startIndex + maxLength * 0.7) {
+      endIndex = lastDot + 1;
+    } else {
+      let lastSpace = text.lastIndexOf(' ', endIndex);
+      if (lastSpace > startIndex + maxLength * 0.7) {
+        endIndex = lastSpace;
+      }
+    }
+    
+    chunks.push(text.substring(startIndex, endIndex).trim());
+    startIndex = endIndex;
+  }
+  
+  return chunks;
+}
+
+async function generateDetailedChunk(chunkText, index, total, apiKey) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
+  const prompt = `Bạn là một chuyên gia soạn thảo tài liệu học tập. Đây là phần thứ ${index + 1}/${total} của transcript video bài học:
+"${chunkText}"
 
-  const prompt = `Tôi có một đoạn nội dung (transcript/text) của một video học tập sau:
-"${promptText}"
+YÊU CẦU: Hãy chuyển đoạn transcript này thành một phần ghi chú học tập (Study Notes) CỰC KỲ CHI TIẾT và sâu sắc.
+- Trình bày rõ ràng bằng Markdown (dùng headings h3, gạch đầu dòng, in đậm thuật ngữ).
+- Giải thích cặn kẽ mọi khái niệm kỹ thuật, định nghĩa, giao thức, ví dụ hay phân tích được đề cập.
+- KHÔNG ĐƯỢC TÓM TẮT SƠ SÀI. Mục tiêu là viết lại đầy đủ 100% nội dung kiến thức được nói đến trong phần này, giống như một bài viết giải thích chi tiết để người đọc nắm bắt đầy đủ.
+- ĐẶC BIỆT: Ở cuối mỗi khái niệm hoặc kiến thức quan trọng được giải thích, hãy thêm một phần tổng hợp ngắn gọn lấy **ví dụ thực tế trực quan sinh động hoặc ẩn dụ thú vị** (đặt trong hộp Blockquote dạng \`> **💡 Ví dụ nhớ đời:** ...\`) giúp người học ghi nhớ sâu và lâu nhất.
+- Trả về phần ghi chú chi tiết bằng Markdown trực tiếp (không cần chào hỏi, không cần định dạng JSON).`;
 
-Tôi cũng đã cung cấp cho bạn ${frames ? frames.length : 0} bức ảnh (frames) được cắt ra từ video ở các mốc thời gian khác nhau (xếp theo thứ tự thời gian).
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }]
+    })
+  });
 
-YÊU CẦU QUAN TRỌNG: Hãy đóng vai một chuyên gia tận tâm. Viết một bài viết MANG TÍNH CHẤT GHI CHÚ BÀI HỌC (Study Notes) CỰC KỲ CHI TIẾT.
-- Dựa vào nội dung, hãy tự suy ra một Tiêu Đề Bài Học (lesson_title) BẰNG TIẾNG ANH thật ngắn gọn, súc tích (khoảng 3-10 từ) phản ánh chính xác chủ đề đang được giảng dạy. Đừng dùng tên chung chung của cả khóa học.
-- KHÔNG TÓM TẮT QUA LOA. Bắt buộc phải trích xuất và giải thích SÂU mọi khái niệm, thuật ngữ kỹ thuật, giao thức, định nghĩa và ví dụ được nhắc đến trong video.
-- Mục tiêu là người đọc KHÔNG CẦN XEM VIDEO vẫn nắm được 100% kiến thức.
-- Trình bày bài viết thật đẹp bằng Markdown: dùng Heading (h2, h3), In đậm các từ khóa, gạch đầu dòng, và chia đoạn hợp lý. Không cần viết Heading 1 cho tiêu đề bài học vì hệ thống sẽ tự thêm.
-- QUAN TRỌNG NHẤT: Xuyên suốt bài viết, hãy chèn các bức ảnh vào ĐÚNG đoạn văn bản mà bức ảnh đó đang minh họa. 
-Sử dụng cú pháp Markdown với URL giữ chỗ (placeholder) như sau: \`![Hình minh họa]([IMAGE_0])\`, \`![Hình minh họa]([IMAGE_1])\`, ... (ứng với ảnh đầu tiên là IMAGE_0).
+  if (!response.ok) {
+    const errorBody = await response.text();
+    console.error(`Gemini Error on Chunk ${index + 1}:`, errorBody);
+    if (response.status === 403 || response.status === 401) {
+      throw new Error("Lỗi xác thực: API Key của bạn không đúng hoặc đã hết hạn.");
+    }
+    throw new Error(`Lỗi gọi Gemini API khi phân tích phần ${index + 1}: Status ${response.status}`);
+  }
 
-Trả về kết quả BẮT BUỘC ở định dạng JSON chuẩn xác (hãy dùng \\n để xuống dòng trong chuỗi JSON):
+  const data = await response.json();
+  return data.candidates[0].content.parts[0].text;
+}
+
+async function finalizeArticleWithImages(fullDraft, frames, apiKey) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
+  const prompt = `Tôi có một bài ghi chú học tập chi tiết được biên soạn từ video như sau:
+"${fullDraft}"
+
+Tôi cũng cung cấp cho bạn ${frames ? frames.length : 0} bức ảnh (frames) được cắt ra từ video này theo thứ tự thời gian.
+
+YÊU CẦU:
+1. Hãy đọc kỹ bài ghi chú văn bản và tự động chèn các bức ảnh này vào những vị trí thích hợp nhất trong bài viết để minh họa trực quan cho nội dung.
+Sử dụng cú pháp Markdown: \`![Hình minh họa]([IMAGE_0])\`, \`![Hình minh họa]([IMAGE_1])\`, ... (ảnh đầu tiên là IMAGE_0, ảnh thứ hai là IMAGE_1, v.v.). Hãy phân bố ảnh đều và hợp lý xuyên suốt bài viết dựa theo mạch nội dung.
+2. Dựa vào nội dung bài học, hãy đặt một Tiêu Đề Bài Học (lesson_title) bằng tiếng Anh CỰC KỲ NGẮN GỌN và SÚC TÍCH (chỉ khoảng 2-4 từ), tập trung chính xác và duy nhất vào chủ đề cốt lõi của bài học (ví dụ: "Transport Layer", "TCP Handshake", "Routing Basics"). Tuyệt đối không dài dòng, không chứa tên khóa học chung chung.
+
+Trả về kết quả ở định dạng JSON chuẩn xác (hãy dùng \\n để xuống dòng trong chuỗi JSON của key "article"):
 {
-  "lesson_title": "Tiêu đề bài học cốt lõi",
-  "article": "Nội dung bài giải thích bằng Markdown CÓ CHỨA mã chèn ảnh..."
+  "lesson_title": "Tiêu đề cốt lõi cực ngắn",
+  "article": "Nội dung bài viết hoàn chỉnh bằng Markdown đã được chèn các mã ảnh [IMAGE_x]..."
 }`;
 
-  // Chuẩn bị payload (bao gồm text và nhiều hình ảnh multimodal)
   const parts = [{ text: prompt }];
-
   if (frames && frames.length > 0) {
     frames.forEach((frameBase64) => {
       const base64Data = frameBase64.split(',')[1];
@@ -195,21 +258,16 @@ Trả về kết quả BẮT BUỘC ở định dạng JSON chuẩn xác (hãy d
 
   if (!response.ok) {
     const errorBody = await response.text();
-    console.error("Gemini Error:", errorBody);
-    if (response.status === 503) {
-      throw new Error("Lỗi 503: Máy chủ Google Gemini đang bị quá tải tạm thời (Service Unavailable). Vui lòng đợi vài phút rồi thử lại.");
-    } else if (response.status === 403 || response.status === 401) {
+    console.error("Gemini Error on Finalization:", errorBody);
+    if (response.status === 403 || response.status === 401) {
       throw new Error("Lỗi xác thực: API Key của bạn không đúng hoặc đã hết hạn.");
-    } else if (response.status === 404) {
-      throw new Error("Lỗi 404: Model AI không tồn tại. Vui lòng kiểm tra lại tên model trong code.");
     }
-    throw new Error(`Lỗi gọi Gemini API (${response.status}): Vui lòng thử lại sau.`);
+    throw new Error(`Lỗi gọi Gemini API khi chèn ảnh và tạo tiêu đề: Status ${response.status}`);
   }
 
   const data = await response.json();
   const rawResponse = data.candidates[0].content.parts[0].text;
 
-  // Lọc để lấy JSON
   const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
   if (jsonMatch) {
     try {
@@ -218,9 +276,7 @@ Trả về kết quả BẮT BUỘC ở định dạng JSON chuẩn xác (hãy d
       console.error(e);
     }
   }
-
-  // Fallback
-  return { lesson_title: "Bài học Video", article: "Đã có lỗi khi AI phân tích tóm tắt.", keyword: "Illustration" };
+  throw new Error("Không thể phân tích kết quả JSON trả về từ AI.");
 }
 
 
