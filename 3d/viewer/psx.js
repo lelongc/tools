@@ -55,6 +55,71 @@ let landingTimer = 0;
 let maxLandingTimer = 0.3;
 let landingImpact = 0;
 const maxStamina = 100;
+let isUIHidden = false;
+
+const gameplayState = {
+    activeObjectiveId: 'find_key',
+    objectives: [
+        { id: 'find_key', text: 'Tim chiec chia khoa gi tren ban trong phong khach.', done: false },
+        { id: 'unlock_door', text: 'Mo canh cua bi khoa o hanh lang phia bac.', done: false },
+        { id: 'escape', text: 'Roi khoi can nha.', done: false }
+    ],
+    inventory: [],
+    collectedObjects: {},
+    lockedDoors: {},
+    currentPrompt: ''
+};
+
+const gameplayPickupRegistry = {};
+const gameplayDoorRegistry = {};
+
+const gameplayHud = document.createElement('div');
+gameplayHud.id = 'gameplay-hud';
+gameplayHud.style.position = 'absolute';
+gameplayHud.style.left = '12px';
+gameplayHud.style.top = '12px';
+gameplayHud.style.zIndex = '1200';
+gameplayHud.style.width = '320px';
+gameplayHud.style.fontFamily = 'monospace';
+gameplayHud.style.pointerEvents = 'none';
+gameplayHud.style.display = 'none';
+
+const gameplayObjectiveEl = document.createElement('div');
+gameplayObjectiveEl.style.background = 'rgba(0, 0, 0, 0.68)';
+gameplayObjectiveEl.style.border = '1px solid rgba(255, 255, 255, 0.22)';
+gameplayObjectiveEl.style.padding = '10px 12px';
+gameplayObjectiveEl.style.color = '#fff';
+gameplayObjectiveEl.style.marginBottom = '8px';
+gameplayObjectiveEl.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.25)';
+
+const gameplayInventoryEl = document.createElement('div');
+gameplayInventoryEl.style.background = 'rgba(0, 0, 0, 0.55)';
+gameplayInventoryEl.style.border = '1px solid rgba(255, 255, 255, 0.18)';
+gameplayInventoryEl.style.padding = '10px 12px';
+gameplayInventoryEl.style.color = '#ddd';
+gameplayInventoryEl.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.2)';
+
+gameplayHud.appendChild(gameplayObjectiveEl);
+gameplayHud.appendChild(gameplayInventoryEl);
+document.body.appendChild(gameplayHud);
+
+const gameplayPromptEl = document.createElement('div');
+gameplayPromptEl.style.position = 'absolute';
+gameplayPromptEl.style.left = '50%';
+gameplayPromptEl.style.bottom = '46px';
+gameplayPromptEl.style.transform = 'translateX(-50%)';
+gameplayPromptEl.style.zIndex = '1200';
+gameplayPromptEl.style.padding = '10px 14px';
+gameplayPromptEl.style.background = 'rgba(0, 0, 0, 0.72)';
+gameplayPromptEl.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+gameplayPromptEl.style.color = '#fff';
+gameplayPromptEl.style.fontFamily = 'monospace';
+gameplayPromptEl.style.fontSize = '13px';
+gameplayPromptEl.style.pointerEvents = 'none';
+gameplayPromptEl.style.display = 'none';
+gameplayPromptEl.style.maxWidth = '70vw';
+gameplayPromptEl.style.textAlign = 'center';
+document.body.appendChild(gameplayPromptEl);
 
 // Stamina UI
 const staminaContainer = document.createElement('div');
@@ -173,6 +238,263 @@ const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 const interactables = [];
 const doors = []; 
+
+function getObjectiveById(id) {
+    return gameplayState.objectives.find(objective => objective.id === id) || null;
+}
+
+function updateGameplayHUD() {
+    const objective = getObjectiveById(gameplayState.activeObjectiveId) || gameplayState.objectives.find(item => !item.done) || null;
+    const canShowGameplay = !isCreatorMode && !isUIHidden && isPointerLocked;
+
+    gameplayHud.style.display = canShowGameplay ? 'block' : 'none';
+    gameplayPromptEl.style.display = canShowGameplay && gameplayState.currentPrompt ? 'block' : 'none';
+    staminaContainer.style.display = canShowGameplay ? 'block' : 'none';
+
+    if (objective) {
+        gameplayObjectiveEl.innerHTML = '<div style="opacity:0.6;text-transform:uppercase;font-size:11px;letter-spacing:1px;margin-bottom:4px;">Objective</div>' +
+            '<div style="font-size:15px;line-height:1.35;">' + objective.text + '</div>';
+    } else {
+        gameplayObjectiveEl.innerHTML = '<div style="opacity:0.6;text-transform:uppercase;font-size:11px;letter-spacing:1px;margin-bottom:4px;">Objective</div>' +
+            '<div style="font-size:15px;line-height:1.35;">Da hoan thanh</div>';
+    }
+
+    const inventoryText = gameplayState.inventory.length > 0
+        ? gameplayState.inventory.map(item => item.name).join(' • ')
+        : 'Empty';
+    gameplayInventoryEl.innerHTML = '<div style="opacity:0.6;text-transform:uppercase;font-size:11px;letter-spacing:1px;margin-bottom:4px;">Inventory</div>' +
+        '<div style="font-size:13px;line-height:1.35;">' + inventoryText + '</div>';
+    gameplayPromptEl.textContent = gameplayState.currentPrompt;
+}
+
+function setGameplayPrompt(text) {
+    gameplayState.currentPrompt = text || '';
+    updateGameplayHUD();
+}
+
+function clearGameplayPrompt() {
+    setGameplayPrompt('');
+}
+
+function activateObjective(id) {
+    gameplayState.activeObjectiveId = id || null;
+    updateGameplayHUD();
+}
+
+function completeObjective(id) {
+    const objective = getObjectiveById(id);
+    if (!objective) return;
+
+    objective.done = true;
+    const currentIndex = gameplayState.objectives.findIndex(item => item.id === id);
+    const nextObjective = gameplayState.objectives[currentIndex + 1] || null;
+    gameplayState.activeObjectiveId = nextObjective ? nextObjective.id : null;
+    updateGameplayHUD();
+}
+
+function hasInventoryItem(id) {
+    return gameplayState.inventory.some(item => item.id === id);
+}
+
+function addInventoryItem(item) {
+    if (hasInventoryItem(item.id)) return false;
+    gameplayState.inventory.push({ id: item.id, name: item.name });
+    updateGameplayHUD();
+    return true;
+}
+
+function registerPickupTarget(target, config) {
+    if (!target.userData) target.userData = {};
+    if (!target.userData.id) target.userData.id = config.id;
+    target.userData.isGameplayPickup = true;
+    target.userData.noCollision = true;
+    target.userData.collected = false;
+    target.userData.interaction = {
+        kind: 'pickup',
+        label: config.label,
+        range: config.range || 2.2,
+        enabled: true,
+        onInteract: () => {
+            if (target.userData.collected) return;
+            const added = addInventoryItem({ id: config.id, name: config.name });
+            if (!added) return;
+            target.userData.collected = true;
+            target.visible = false;
+            gameplayState.collectedObjects[config.id] = true;
+            clearGameplayPrompt();
+            if (config.completeObjectiveId) completeObjective(config.completeObjectiveId);
+            if (typeof config.onPickup === 'function') config.onPickup();
+            updateGameplayHUD();
+        }
+    };
+    gameplayPickupRegistry[config.id] = target;
+}
+
+function registerDoorTarget(doorGroup, config) {
+    if (!doorGroup.userData) doorGroup.userData = {};
+    doorGroup.userData.id = config.id;
+    doorGroup.userData.isQuestDoor = true;
+    doorGroup.userData.locked = !!config.locked;
+    doorGroup.userData.interaction = {
+        kind: 'door',
+        label: config.label,
+        range: config.range || 2.5,
+        enabled: true,
+        onInteract: () => {
+            if (doorGroup.userData.locked) {
+                if (hasInventoryItem(config.requiredItem)) {
+                    unlockQuestDoor(doorGroup, config.completeObjectiveId);
+                } else {
+                    setGameplayPrompt('Can ' + config.requiredItemLabel + ' de mo cua nay.');
+                }
+                return;
+            }
+            if (typeof config.onInteract === 'function') config.onInteract();
+        }
+    };
+    gameplayDoorRegistry[config.id] = doorGroup;
+}
+
+function unlockQuestDoor(doorGroup, nextObjectiveId) {
+    if (!doorGroup) return;
+    doorGroup.userData.locked = false;
+    gameplayState.lockedDoors[doorGroup.userData.id] = false;
+    if (doorGroup.userData.doorPivot && doorGroup.userData.doorPivot.userData) {
+        doorGroup.userData.doorPivot.userData.locked = false;
+    }
+    if (nextObjectiveId) completeObjective(nextObjectiveId);
+    clearGameplayPrompt();
+    updateGameplayHUD();
+}
+
+function getInteractiveRoot(object) {
+    const parent = getFurnitureParent(object);
+    if (parent && parent.userData && parent.userData.interaction) return parent;
+    if (object && object.userData && object.userData.interaction) return object;
+    return parent || object || null;
+}
+
+function findFocusedInteraction() {
+    if (!isPointerLocked || isCreatorMode || !playerGroup) return null;
+
+    const cameraTarget = new THREE.Vector2(0, 0);
+    raycaster.setFromCamera(cameraTarget, camera);
+
+    const objectsToTest = [...interactables];
+    if (window.psxCat) objectsToTest.push(window.psxCat);
+
+    const intersects = raycaster.intersectObjects(objectsToTest, true);
+    for (let i = 0; i < intersects.length; i++) {
+        const hit = intersects[i];
+        const target = getInteractiveRoot(hit.object);
+        if (!target || !target.userData || !target.userData.interaction) continue;
+        if (!target.visible || target.userData.collected) continue;
+
+        const interaction = target.userData.interaction;
+        if (interaction.enabled === false) continue;
+
+        target.getWorldPosition(tempVector3);
+        const distance = playerGroup.position.distanceTo(tempVector3);
+        if (interaction.range && distance > interaction.range) continue;
+
+        return { target, interaction };
+    }
+    return null;
+}
+
+function interactFocusedTarget() {
+    const focused = findFocusedInteraction();
+    if (!focused) {
+        setGameplayPrompt('');
+        return false;
+    }
+
+    focused.interaction.onInteract(focused.target);
+    return true;
+}
+
+function serializeGameplayState() {
+    return {
+        activeObjectiveId: gameplayState.activeObjectiveId,
+        objectives: gameplayState.objectives.map(objective => ({ id: objective.id, done: !!objective.done })),
+        inventory: gameplayState.inventory.map(item => ({ id: item.id, name: item.name })),
+        collectedObjects: { ...gameplayState.collectedObjects },
+        lockedDoors: { ...gameplayState.lockedDoors }
+    };
+}
+
+function applyGameplayState(savedState) {
+    if (!savedState) return;
+
+    if (savedState.activeObjectiveId) {
+        gameplayState.activeObjectiveId = savedState.activeObjectiveId;
+    }
+
+    if (Array.isArray(savedState.objectives)) {
+        savedState.objectives.forEach(savedObjective => {
+            const localObjective = getObjectiveById(savedObjective.id);
+            if (localObjective) localObjective.done = !!savedObjective.done;
+        });
+    }
+
+    gameplayState.inventory = Array.isArray(savedState.inventory)
+        ? savedState.inventory.map(item => ({ id: item.id, name: item.name }))
+        : [];
+    gameplayState.collectedObjects = savedState.collectedObjects ? { ...savedState.collectedObjects } : {};
+    gameplayState.lockedDoors = savedState.lockedDoors ? { ...savedState.lockedDoors } : {};
+
+    Object.keys(gameplayPickupRegistry).forEach(id => {
+        const pickup = gameplayPickupRegistry[id];
+        if (!pickup) return;
+        const isCollected = !!gameplayState.collectedObjects[id];
+        pickup.visible = !isCollected;
+        pickup.userData.collected = isCollected;
+        if (pickup.userData.interaction) pickup.userData.interaction.enabled = !isCollected;
+    });
+
+    Object.keys(gameplayDoorRegistry).forEach(id => {
+        const doorGroup = gameplayDoorRegistry[id];
+        if (!doorGroup) return;
+        const isLocked = !!gameplayState.lockedDoors[id];
+        doorGroup.userData.locked = isLocked;
+        if (doorGroup.userData.doorPivot && doorGroup.userData.doorPivot.userData) {
+            doorGroup.userData.doorPivot.userData.locked = isLocked;
+        }
+    });
+
+    updateGameplayHUD();
+}
+
+function initializeChapterOne() {
+    activateObjective('find_key');
+    gameplayState.objectives.forEach(objective => {
+        objective.done = false;
+    });
+    gameplayState.inventory = [];
+    gameplayState.collectedObjects = {};
+    gameplayState.lockedDoors = {};
+    gameplayState.currentPrompt = '';
+
+    const questDoor = gameplayDoorRegistry.quest_door_1;
+    if (questDoor) {
+        questDoor.userData.locked = true;
+        gameplayState.lockedDoors.quest_door_1 = true;
+        if (questDoor.userData.doorPivot && questDoor.userData.doorPivot.userData) {
+            questDoor.userData.doorPivot.userData.locked = true;
+        }
+    }
+
+    const rustyKey = gameplayPickupRegistry.quest_key_1;
+    if (rustyKey) {
+        rustyKey.visible = true;
+        rustyKey.userData.collected = false;
+        if (rustyKey.userData.interaction) rustyKey.userData.interaction.enabled = true;
+    }
+
+    updateGameplayHUD();
+}
+
+const tempVector3 = new THREE.Vector3();
 
 init();
 animate();
@@ -407,6 +729,14 @@ function init() {
 
     // 2. Study (Top-Mid-Left): c:9-14, r:1-4
     addGrid(createTable(rottingWoodMat), 12, 2);
+    const tornNote = createTornNote();
+    addGrid(tornNote, 12, 2);
+    tornNote.position.y = 1.02;
+    registerPickupTarget(tornNote, {
+        id: 'note_1',
+        name: 'Torn Note',
+        label: 'Read Torn Note'
+    });
     addGrid(createChair(rottingWoodMat), 12, 3, Math.PI);
     addGrid(createWardrobe(rottingWoodMat), 10, 1); // Bookshelf substitute
     addGrid(createWardrobe(rottingWoodMat), 11, 1); // Bookshelf substitute
@@ -435,6 +765,15 @@ function init() {
     addGrid(createSofa(darkFabricMat), 4, 9, -Math.PI/2);
     addGrid(createTV(rustMetalMat), 2, 9, Math.PI/2);
     addGrid(createCoffeeTable(rottingWoodMat), 3, 9);
+    const rustyKey = createRustyKey();
+    addGrid(rustyKey, 3, 9);
+    rustyKey.position.y = 0.93;
+    registerPickupTarget(rustyKey, {
+        id: 'quest_key_1',
+        name: 'Rusty Key',
+        label: 'Pick up Rusty Key',
+        completeObjectiveId: 'find_key'
+    });
     addGrid(createLamp(), 5, 8);
 
     // 6. Courtyard (Center): c:15-20, r:8-10
@@ -488,6 +827,22 @@ function init() {
     scene.add(group);
     window.sceneGroup = group;
 
+    if (doors.length > 0) {
+        const questDoorPivot = doors[0];
+        const questDoorGroup = questDoorPivot.userData ? questDoorPivot.userData.doorGroup : null;
+        if (questDoorGroup) {
+            registerDoorTarget(questDoorGroup, {
+                id: 'quest_door_1',
+                label: 'Locked Door (Need Rusty Key)',
+                locked: true,
+                requiredItem: 'quest_key_1',
+                requiredItemLabel: 'Rusty Key',
+                completeObjectiveId: 'unlock_door'
+            });
+            gameplayState.lockedDoors.quest_door_1 = true;
+        }
+    }
+
     loadPositions();
 
     document.addEventListener('keydown', onKeyDown);
@@ -502,7 +857,6 @@ function init() {
 // CREATOR MODE LOGIC (UNITY STYLE)
 // ==========================================
 
-let isUIHidden = false;
 function toggleUIVisibility() {
     isUIHidden = !isUIHidden;
     const info = document.getElementById('info');
@@ -519,6 +873,8 @@ function toggleUIVisibility() {
         info.style.pointerEvents = 'auto';
         creator.style.pointerEvents = 'auto';
     }
+
+    updateGameplayHUD();
 }
 
 function toggleCreatorMode() {
@@ -547,6 +903,8 @@ function toggleCreatorMode() {
         creatorLabel.style.display = 'none';
         crosshair.style.display = 'block';
     }
+
+    updateGameplayHUD();
 }
 
 function toggleSnap() {
@@ -1335,6 +1693,11 @@ function onKeyDown(event) {
         }
     } else {
         switch (event.code) {
+            case 'KeyE':
+                if (isPointerLocked) {
+                    interactFocusedTarget();
+                }
+                break;
             case 'ArrowUp':
             case 'KeyW': 
                 moveState.forward = true; 
@@ -1431,10 +1794,10 @@ function checkCollision(playerBox) {
     let collided = false;
     for (let i = 0; i < interactables.length; i++) {
         const obj = interactables[i];
-        if (obj === window.psxCat) continue;
+        if (obj === window.psxCat || (obj.userData && obj.userData.noCollision)) continue;
         
         obj.traverse((child) => {
-            if (child.isMesh && !collided) {
+            if (child.isMesh && !collided && !(child.userData && child.userData.noCollision)) {
                 const objBox = new THREE.Box3().setFromObject(child);
                 objBox.expandByScalar(-0.02); 
                 if (playerBox.intersectsBox(objBox)) {
@@ -1452,10 +1815,10 @@ function getCollisionTop(playerBox) {
     let collided = false;
     for (let i = 0; i < interactables.length; i++) {
         const obj = interactables[i];
-        if (obj === window.psxCat) continue;
+        if (obj === window.psxCat || (obj.userData && obj.userData.noCollision)) continue;
         
         obj.traverse((child) => {
-            if (child.isMesh) {
+            if (child.isMesh && !(child.userData && child.userData.noCollision)) {
                 const objBox = new THREE.Box3().setFromObject(child);
                 objBox.expandByScalar(-0.02); 
                 if (playerBox.intersectsBox(objBox)) {
@@ -1787,6 +2150,13 @@ function animate() {
             cat.userData.head.rotation.y = THREE.MathUtils.clamp(-cat.userData.turnVelocity * 15.0, -Math.PI/3, Math.PI/3);
         }
 
+        const focusedInteraction = findFocusedInteraction();
+        if (focusedInteraction) {
+            setGameplayPrompt('E - ' + focusedInteraction.interaction.label);
+        } else if (gameplayState.currentPrompt) {
+            clearGameplayPrompt();
+        }
+
     } else if (isCreatorMode && document.getElementById('uv-editor').style.display !== 'flex') {
         velocity.x -= velocity.x * 10.0 * delta;
         velocity.z -= velocity.z * 10.0 * delta;
@@ -1804,19 +2174,26 @@ function animate() {
     }
 
     prevTime = time;
-            // Door interaction logic
-            doors.forEach(door => {
-                const doorWorldPos = new THREE.Vector3();
-                door.getWorldPosition(doorWorldPos);
-                const playerPos = playerGroup.position;
-                
-                const dist = playerPos.distanceTo(doorWorldPos);
-                if (dist < 1.0) {
-                    door.rotation.y = THREE.MathUtils.lerp(door.rotation.y, Math.PI / 2, 5 * delta);
-                } else {
-                    door.rotation.y = THREE.MathUtils.lerp(door.rotation.y, 0, 5 * delta);
-                }
-            });
+    // Door interaction logic
+    doors.forEach(door => {
+        const doorGroup = door.userData ? door.userData.doorGroup : null;
+        const locked = !!(doorGroup && doorGroup.userData && doorGroup.userData.locked);
+        const doorWorldPos = new THREE.Vector3();
+        door.getWorldPosition(doorWorldPos);
+        const playerPos = playerGroup.position;
+
+        const dist = playerPos.distanceTo(doorWorldPos);
+        if (locked) {
+            door.rotation.y = THREE.MathUtils.lerp(door.rotation.y, 0, 5 * delta);
+            return;
+        }
+
+        if (dist < 1.0) {
+            door.rotation.y = THREE.MathUtils.lerp(door.rotation.y, Math.PI / 2, 5 * delta);
+        } else {
+            door.rotation.y = THREE.MathUtils.lerp(door.rotation.y, 0, 5 * delta);
+        }
+    });
 
     renderer.render(scene, camera);
     
@@ -1886,7 +2263,7 @@ window.savePositions = function() {
 };
 
 window.performServerSave = function(callback, isSync = false) {
-    const data = { schema_version: 2, texture_dict: {}, objects: {} };
+    const data = { schema_version: 2, texture_dict: {}, objects: {}, gameplay: serializeGameplayState() };
     const objs = [...interactables];
     if (window.psxCat) objs.push(window.psxCat);
 
@@ -2013,11 +2390,17 @@ function loadPositions() {
                 }
             }
         });
+
+            if (data.gameplay) {
+                applyGameplayState(data.gameplay);
+            } else {
+                initializeChapterOne();
+            }
         }).catch(err => console.log("Không tìm thấy save file cũ, dùng map mặc định."));
 }
 
 function getFurnitureParent(object) {
-    if (object.userData && (object.userData.isFurniture || object.userData.id === 'cat_1')) return object;
+    if (object.userData && (object.userData.isFurniture || object.userData.id === 'cat_1' || object.userData.interaction)) return object;
     if (object.parent) return getFurnitureParent(object.parent);
     return null;
 }
@@ -2322,6 +2705,7 @@ function createDresser(material) {
 
 function createDoor(material) {
     const group = new THREE.Group();
+    group.userData = { isFurniture: true, isQuestDoor: false, locked: false };
     const frameGeo = new THREE.BoxGeometry(1.0, 3.0, 0.4);
     const frame = new THREE.Mesh(frameGeo, material);
     frame.position.y = 1.5;
@@ -2341,9 +2725,49 @@ function createDoor(material) {
     // Pivot door
     const pivot = new THREE.Group();
     pivot.position.set(0.45, 0, 0);
+    pivot.userData = { locked: false, doorGroup: group };
     pivot.add(door);
     group.add(pivot);
+    group.userData.doorPivot = pivot;
     doors.push(pivot);
+
+    return group;
+}
+
+function createRustyKey() {
+    const group = new THREE.Group();
+    const metalMat = new THREE.MeshLambertMaterial({ color: 0xb08d57, emissive: 0x221600 });
+
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(0.08, 0.02, 6, 12), metalMat);
+    ring.rotation.y = Math.PI / 2;
+    group.add(ring);
+
+    const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.03, 0.03), metalMat);
+    shaft.position.x = 0.18;
+    group.add(shaft);
+
+    const tooth1 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.08, 0.03), metalMat);
+    tooth1.position.set(0.29, -0.03, 0);
+    group.add(tooth1);
+
+    const tooth2 = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.06, 0.03), metalMat);
+    tooth2.position.set(0.22, -0.03, 0);
+    group.add(tooth2);
+
+    return group;
+}
+
+function createTornNote() {
+    const group = new THREE.Group();
+    const noteMat = new THREE.MeshLambertMaterial({ color: 0xe7d9b6, emissive: 0x221900 });
+    const paper = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.02, 0.22), noteMat);
+    paper.position.y = 0.01;
+    group.add(paper);
+
+    const scribbleMat = new THREE.MeshBasicMaterial({ color: 0x553322 });
+    const scribble = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.005, 0.02), scribbleMat);
+    scribble.position.set(-0.03, 0.022, 0.02);
+    group.add(scribble);
 
     return group;
 }

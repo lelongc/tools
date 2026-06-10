@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Auto Video Illustrator",
+  "version": "1.0",
+  "description": "Extracts video content and automatically inserts illustrations from Google and video frames.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting",
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://*.youtube.com/*",
+    "https://*.udemy.com/*",
+    "https://*.google.com/*",
+    "https://*.googleapis.com/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background/background.js"
+  },
+  "action": {
+    "default_popup": "popup/popup.html"
+  },
+  "options_page": "options/options.html"
+}
