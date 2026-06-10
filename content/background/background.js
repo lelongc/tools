@@ -1,3 +1,17 @@
+// Map lưu trữ ánh xạ giữa Blob URL và tên tệp tin mong muốn
+const blobUrlToFilename = new Map();
+
+// Bắt sự kiện xác định tên tệp để định hướng lưu vào thư mục learn/
+chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
+  if (blobUrlToFilename.has(item.url)) {
+    const filename = blobUrlToFilename.get(item.url);
+    suggest({ filename: filename, conflictAction: 'overwrite' });
+    blobUrlToFilename.delete(item.url);
+  } else {
+    suggest();
+  }
+});
+
 // Helper function để đảm bảo Offscreen Document tồn tại
 async function setupOffscreenDocument(path) {
   // Kiểm tra xem offscreen đã tồn tại chưa
@@ -91,29 +105,32 @@ async function processCapturedSession(sessionData) {
       const urls = response.urls;
       // urls[0] là Markdown, các urls còn lại là ảnh
       
+      const mdFilename = `learn/${safeTitle}.md`;
+      blobUrlToFilename.set(urls[0], mdFilename);
       chrome.downloads.download({
         url: urls[0],
-        filename: `learn/${safeTitle}.md`,
         saveAs: false
       });
 
       if (frames && frames.length > 0) {
         for (let i = 0; i < frames.length; i++) {
+          const imgFilename = `learn/image/${safeTitle}_anh_${i}.jpg`;
+          blobUrlToFilename.set(urls[i + 1], imgFilename);
           chrome.downloads.download({
             url: urls[i + 1],
-            filename: `learn/image/${safeTitle}_anh_${i}.jpg`,
             saveAs: false
           });
         }
       }
 
-      // Đợi 5 giây để Chrome kịp tải, sau đó dọn dẹp offscreen
+      // Đợi 10 giây để Chrome kịp tải, sau đó dọn dẹp offscreen và Map
       setTimeout(() => {
         chrome.runtime.sendMessage({
           action: "cleanup_and_close",
           urls: urls
         });
-      }, 5000);
+        urls.forEach(url => blobUrlToFilename.delete(url));
+      }, 10000);
 
     } else {
       throw new Error(response.error || "Không thể tạo Blob URL từ Offscreen.");

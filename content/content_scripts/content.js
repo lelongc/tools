@@ -86,7 +86,6 @@ function injectFloatingUI() {
         // Tải xuống đã được background và offscreen xử lý
         capturedFrames = []; // Reset
         captureBtn.innerText = `📸 Chụp ảnh (0)`;
-        alert("Đã tạo xong bài viết!");
       } else if (response && response.error) {
         alert("Lỗi từ AI: " + response.error);
       } else {
