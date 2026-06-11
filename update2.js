@@ -1,58 +1,8 @@
-// Map lưu trữ ánh xạ giữa Blob URL và tên tệp tin mong muốn
-const blobUrlToFilename = new Map();
+const fs = require('fs');
+const path = 'd:/folder/tools/content/background/background.js';
+let code = fs.readFileSync(path, 'utf8');
 
-// Bắt sự kiện xác định tên tệp để định hướng lưu vào thư mục learn/
-chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
-  if (blobUrlToFilename.has(item.url)) {
-    const filename = blobUrlToFilename.get(item.url);
-    suggest({ filename: filename, conflictAction: 'overwrite' });
-    blobUrlToFilename.delete(item.url);
-  } else {
-    suggest();
-  }
-});
-
-// Helper function để đảm bảo Offscreen Document tồn tại
-async function setupOffscreenDocument(path) {
-  // Kiểm tra xem offscreen đã tồn tại chưa
-  const existingContexts = await chrome.runtime.getContexts({
-    contextTypes: ['OFFSCREEN_DOCUMENT'],
-    documentUrls: [chrome.runtime.getURL(path)]
-  });
-
-  if (existingContexts.length > 0) {
-    return;
-  }
-
-  // Tạo offscreen document mới
-  await chrome.offscreen.createDocument({
-    url: path,
-    reasons: ['BLOBS'],
-    justification: 'Cần tạo Blob URL để giữ đúng tên file khi tải xuống'
-  });
-}
-
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === "start_process") {
-    // Không dùng nữa, chuyển sang inject_ui
-  } else if (request.action === "inject_ui") {
-    chrome.scripting.executeScript({
-      target: { tabId: request.tabId },
-      files: ['content_scripts/content.js']
-    }).then(() => {
-      chrome.tabs.sendMessage(request.tabId, { action: "inject_ui" });
-      sendResponse({ success: true });
-    }).catch(err => sendResponse({ error: err.message }));
-    return true;
-  } else if (request.action === "process_captured_session") {
-    processCapturedSession(request)
-      .then(result => sendResponse({ success: true, result }))
-      .catch(err => sendResponse({ error: err.message }));
-    return true;
-  }
-});
-
-async function processCapturedSession(sessionData) {
+const newLogic = `async function processCapturedSession(sessionData) {
   const { frames, url, title, transcript } = sessionData;
 
   // 1. Lấy API Keys
@@ -75,7 +25,7 @@ async function processCapturedSession(sessionData) {
   // Đổi tên file sang chuẩn tiếng Anh
   const safeTitle = finalTitle
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\\u0300-\\u036f]/g, '')
     .replace(/đ/gi, 'd')
     .replace(/[^a-zA-Z0-9]+/g, '_')
     .replace(/^_|_$/g, '')
@@ -90,16 +40,16 @@ async function processCapturedSession(sessionData) {
     draftArticles.push(chunkDraft);
   }
 
-  let processedArticle = draftArticles.join('\n\n');
+  let processedArticle = draftArticles.join('\\n\\n');
 
   // 4. Phân phối hình ảnh thông minh
   // AI đã được dặn đặt thẻ [CHÈN_ẢNH_MINH_HỌA] vào chỗ cần thiết
   if (frames && frames.length > 0) {
     let frameIndex = 0;
     // Thay thế từng chữ [CHÈN_ẢNH_MINH_HỌA] bằng ảnh thực tế cho đến khi hết ảnh
-    processedArticle = processedArticle.replace(/\[CHÈN_ẢNH_MINH_HỌA\]/g, () => {
+    processedArticle = processedArticle.replace(/\\[CHÈN_ẢNH_MINH_HỌA\\]/g, () => {
       if (frameIndex < frames.length) {
-        const imgPath = `![Hình minh họa](./image/${safeTitle}_anh_${frameIndex}.jpg)`;
+        const imgPath = \`![Hình minh họa](./image/\${safeTitle}_anh_\${frameIndex}.jpg)\`;
         frameIndex++;
         return imgPath;
       }
@@ -108,14 +58,14 @@ async function processCapturedSession(sessionData) {
 
     // Nếu thay xong mà vẫn còn dư ảnh, chèn nốt ảnh thừa vào cuối bài
     if (frameIndex < frames.length) {
-      processedArticle += '\n\n### Hình ảnh minh họa thêm:\n';
+      processedArticle += '\\n\\n### Hình ảnh minh họa thêm:\\n';
       for (; frameIndex < frames.length; frameIndex++) {
-        processedArticle += `\n![Hình minh họa](./image/${safeTitle}_anh_${frameIndex}.jpg)`;
+        processedArticle += \`\\n![Hình minh họa](./image/\${safeTitle}_anh_\${frameIndex}.jpg)\`;
       }
     }
   } else {
     // Xóa hết các tag nếu người dùng không chụp ảnh nào
-    processedArticle = processedArticle.replace(/\[CHÈN_ẢNH_MINH_HỌA\]/g, '');
+    processedArticle = processedArticle.replace(/\\[CHÈN_ẢNH_MINH_HỌA\\]/g, '');
   }
 
   // 5. Tổng hợp thành Markdown bài viết
@@ -136,7 +86,7 @@ async function processCapturedSession(sessionData) {
       const urls = response.urls;
       // urls[0] là Markdown, các urls còn lại là ảnh
       
-      const mdFilename = `learn/${safeTitle}.md`;
+      const mdFilename = \`learn/\${safeTitle}.md\`;
       blobUrlToFilename.set(urls[0], mdFilename);
       chrome.downloads.download({
         url: urls[0],
@@ -145,7 +95,7 @@ async function processCapturedSession(sessionData) {
 
       if (frames && frames.length > 0) {
         for (let i = 0; i < frames.length; i++) {
-          const imgFilename = `learn/image/${safeTitle}_anh_${i}.jpg`;
+          const imgFilename = \`learn/image/\${safeTitle}_anh_\${i}.jpg\`;
           blobUrlToFilename.set(urls[i + 1], imgFilename);
           chrome.downloads.download({
             url: urls[i + 1],
@@ -203,9 +153,9 @@ function chunkTranscript(text, maxLength = 2500) {
 }
 
 async function generateTitle(textSample, defaultTitle, apiKey) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
-  const prompt = `Dựa vào đoạn nội dung bài học sau: "${textSample.substring(0, 1000)}"
-Hãy đặt một Tiêu Đề Bài Học bằng tiếng Anh CỰC KỲ NGẮN GỌN (2-4 từ), tập trung chính xác vào chủ đề cốt lõi. Trả về đúng tiêu đề, không giải thích gì thêm.`;
+  const url = \`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=\${apiKey}\`;
+  const prompt = \`Dựa vào đoạn nội dung bài học sau: "\${textSample.substring(0, 1000)}"
+Hãy đặt một Tiêu Đề Bài Học bằng tiếng Anh CỰC KỲ NGẮN GỌN (2-4 từ), tập trung chính xác vào chủ đề cốt lõi. Trả về đúng tiêu đề, không giải thích gì thêm.\`;
   
   try {
     const response = await fetch(url, {
@@ -223,17 +173,17 @@ Hãy đặt một Tiêu Đề Bài Học bằng tiếng Anh CỰC KỲ NGẮN G�
 }
 
 async function generateDeepChunk(chunkText, index, total, apiKey) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
-  const prompt = `Bạn là một chuyên gia phân tích và giải thích chi tiết.
-Đây là phần thứ ${index + 1}/${total} của một đoạn transcript bài học:
-"${chunkText}"
+  const url = \`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=\${apiKey}\`;
+  const prompt = \`Bạn là một chuyên gia phân tích và giải thích chi tiết.
+Đây là phần thứ \${index + 1}/\${total} của một đoạn transcript bài học:
+"\${chunkText}"
 
 YÊU CẦU BẮT BUỘC ĐỂ KHÔNG BỊ PHẠT:
 1. ĐỪNG VIẾT CÂU MỞ BÀI HAY KẾT LUẬN (vì đây chỉ là một mảnh ghép).
 2. KÍNH LÚP PHÂN TÍCH: Hãy bám sát từng câu, từng ý trong đoạn transcript trên và biến nó thành một bài giảng giải thích cặn kẽ mọi khái niệm. Viết thật dài và thật sâu sắc. Không được bỏ sót ý nào.
-3. CHÈN ẢNH: Nếu bạn thấy đoạn transcript đang mô tả một giao diện, một sơ đồ, hoặc một khái niệm trực quan cần hình ảnh minh họa, hãy chèn ĐÚNG chuỗi \`[CHÈN_ẢNH_MINH_HỌA]\` vào vị trí đó. (Ví dụ: "Như bạn thấy trên màn hình [CHÈN_ẢNH_MINH_HỌA], chúng ta click vào..."). Đừng chèn bừa bãi nếu không thực sự cần.
-4. VÍ DỤ NHỚ ĐỜI: Nếu đoạn này chứa một khái niệm quan trọng, hãy rắc vào một "Ví dụ nhớ đời" (ẩn dụ thực tế) bọc trong hộp quote: \`> **💡 Ví dụ nhớ đời:** ...\`
-5. Trả về kết quả trực tiếp bằng Markdown thuần túy, KHÔNG tạo XML, JSON hay bất kỳ gì thừa thãi.`;
+3. CHÈN ẢNH: Nếu bạn thấy đoạn transcript đang mô tả một giao diện, một sơ đồ, hoặc một khái niệm trực quan cần hình ảnh minh họa, hãy chèn ĐÚNG chuỗi \\\`[CHÈN_ẢNH_MINH_HỌA]\\\` vào vị trí đó. (Ví dụ: "Như bạn thấy trên màn hình [CHÈN_ẢNH_MINH_HỌA], chúng ta click vào..."). Đừng chèn bừa bãi nếu không thực sự cần.
+4. VÍ DỤ NHỚ ĐỜI: Nếu đoạn này chứa một khái niệm quan trọng, hãy rắc vào một "Ví dụ nhớ đời" (ẩn dụ thực tế) bọc trong hộp quote: \\\`> **💡 Ví dụ nhớ đời:** ...\\\`
+5. Trả về kết quả trực tiếp bằng Markdown thuần túy, KHÔNG tạo XML, JSON hay bất kỳ gì thừa thãi.\`;
 
   const response = await fetch(url, {
     method: 'POST',
@@ -245,22 +195,29 @@ YÊU CẦU BẮT BUỘC ĐỂ KHÔNG BỊ PHẠT:
     if (response.status === 403 || response.status === 401) {
       throw new Error("Lỗi xác thực: API Key của bạn không đúng hoặc đã hết hạn.");
     }
-    throw new Error(`Lỗi gọi Gemini API ở phần ${index + 1}: Status ${response.status}`);
+    throw new Error(\`Lỗi gọi Gemini API ở phần \${index + 1}: Status \${response.status}\`);
   }
 
   const data = await response.json();
   let article = data.candidates[0].content.parts[0].text;
-  article = article.replace(/^\s*```markdown\s*/i, '').replace(/\s*```\s*$/i, '');
+  article = article.replace(/^\\s*\`\`\`markdown\\s*/i, '').replace(/\\s*\`\`\`\\s*$/i, '');
   return article.trim();
 }
 
 function generateArticle(title, articleContent, numFrames) {
-  let md = `# ${title}\n\n`;
-  md += `${articleContent}\n\n`;
+  let md = \`# \${title}\\n\\n\`;
+  md += \`\${articleContent}\\n\\n\`;
 
   if (numFrames > 0) {
-    md += `\n---\n*Ghi chú: ${numFrames} hình ảnh minh họa (.jpg) đã được tải về và lưu tự động vào thư mục con \`image/\` cùng cấp với file này. Để ảnh hiển thị tự động, hãy đảm bảo bạn sao chép cả thư mục \`image/\` nếu bạn muốn di chuyển file markdown sang nơi khác!*\n`;
+    md += \`\\n---\\n*Ghi chú: \${numFrames} hình ảnh minh họa (.jpg) đã được tải về và lưu tự động vào thư mục con \\\`image/\\\` cùng cấp với file này. Để ảnh hiển thị tự động, hãy đảm bảo bạn sao chép cả thư mục \\\`image/\\\` nếu bạn muốn di chuyển file markdown sang nơi khác!*\\n\`;
   }
 
   return md;
 }
+`;
+
+const re = /async function processCapturedSession\(sessionData\) \{[\s\S]*$/;
+code = code.replace(re, newLogic);
+
+fs.writeFileSync(path, code);
+console.log("Update success!");
