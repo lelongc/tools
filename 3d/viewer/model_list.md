@@ -29,15 +29,15 @@ assets/models/
 
 | # | Tên Model | File Name | Thay thế function | Ghi chú |
 |---|-----------|-----------|-------------------|---------|
-| 1 | Bàn gỗ cũ | `table_old.glb` | `createTable()` | Bàn gỗ mục nát, có thể có ngăn kéo |
-| 2 | Ghế gỗ | `chair_wooden.glb` | `createChair()` | Ghế có lưng tựa, kiểu cổ |
-| 3 | Giường đơn | `bed_single.glb` | `createBed()` | Giường sắt cũ, nệm bẩn |
-| 4 | Giường đôi | `bed_double.glb` | (mới) | Giường lớn cho phòng chính |
-| 5 | Sofa cũ | `sofa_old.glb` | `createSofa()` | Sofa vải rách, đổi màu |
-| 6 | Tủ quần áo | `wardrobe.glb` | `createWardrobe()` | Tủ gỗ lớn, cửa có thể mở |
+| 1 | Bàn gỗ cũ ✅ | `table_old.glb` | `createTable()` | Bàn gỗ mục nát, có thể có ngăn kéo |
+| 2 | Ghế gỗ ✅ | `chair_wooden.glb` | `createChair()` | Ghế có lưng tựa, kiểu cổ |
+| 3 | Giường đơn ✅ | `bed_single.glb` | `createBed()` | Giường sắt cũ, nệm bẩn |
+| 4 | Giường đôi ✅ | `bed_double.glb` | (mới) | Giường lớn cho phòng chính |
+| 5 | Sofa cũ ✅ | `sofa_old.glb` | `createSofa()` | Sofa vải rách, đổi màu |
+| 6 | Tủ quần áo ✅ | `wardrobe.glb` | `createWardrobe()` | Tủ gỗ lớn, cửa có thể mở |
 | 7 | Tủ đầu giường | `nightstand.glb` | `createNightstand()` | Có ngăn kéo |
-| 8 | Tủ ngăn kéo | `dresser.glb` | `createDresser()` | 3-4 ngăn, gỗ cũ |
-| 9 | Kệ sách | `bookshelf.glb` | `createBookshelf()` | Sách bụi bặm, vài quyển rơi |
+| 8 | Tủ ngăn kéo ✅ | `dresser.glb` | `createDresser()` | 3-4 ngăn, gỗ cũ |
+| 9 | Kệ sách ✅ | `bookshelf.glb` | `createBookshelf()` | Sách bụi bặm, vài quyển rơi |
 | 10 | Bàn cà phê | `coffee_table.glb` | `createCoffeeTable()` | Bàn thấp phòng khách |
 | 11 | Ghế bành | `armchair.glb` | (mới) | Ghế bành cũ kỹ, vải rách |
 | 12 | Ghế rocking | `rocking_chair.glb` | (mới - scare event) | Tự đung đưa! |
@@ -48,11 +48,11 @@ assets/models/
 
 | # | Tên Model | File Name | Thay thế function | Ghi chú |
 |---|-----------|-----------|-------------------|---------|
-| 15 | Tủ lạnh | `fridge.glb` | `createFridge()` | Tủ lạnh cũ, gỉ sét, cửa hở |
-| 16 | Bếp gas/lò nướng | `stove.glb` | `createStove()` | Bếp cũ, có vết cháy |
-| 17 | Bồn rửa bếp | `kitchen_sink.glb` | (mới) | Bồn inox gỉ, nước nhỏ giọt |
+| 15 | Tủ lạnh ✅ | `fridge.glb` | `createFridge()` | Tủ lạnh cũ, gỉ sét, cửa hở |
+| 16 | Bếp gas/lò nướng ✅ | `stove.glb` | `createStove()` | Bếp cũ, có vết cháy |
+| 17 | Bồn rửa bếp ✅ | `kitchen_sink.glb` | (mới) | Bồn inox gỉ, nước nhỏ giọt |
 | 18 | Quầy bếp | `kitchen_counter.glb` | `createKitchenCounter()` | Mặt bàn bếp dài |
-| 19 | Lò vi sóng | `microwave.glb` | (mới) | Cũ kỹ, cửa hở |
+| 19 | Lò vi sóng ✅ | `microwave.glb` | (mới) | Cũ kỹ, cửa hở |
 | 20 | Nồi/chảo | `pots_pans.glb` | (mới) | Treo tường hoặc trên bếp |
 | 21 | Bát đĩa | `dishes.glb` | (mới) | Bẩn, chồng chất |
 | 22 | Thùng rác | `trash_can_kitchen.glb` | `createTrashCan()` | Rác tràn ra ngoài |
@@ -61,9 +61,9 @@ assets/models/
 
 | # | Tên Model | File Name | Thay thế function | Ghi chú |
 |---|-----------|-----------|-------------------|---------|
-| 23 | Bồn tắm | `bathtub.glb` | `createBathtub()` | Bồn tắm sắt cũ, vết gỉ/máu |
-| 24 | Toilet | `toilet.glb` | `createToilet()` | Bồn cầu bẩn |
-| 25 | Bồn rửa mặt | `sink.glb` | `createSink()` | Gương vỡ phía trên |
+| 23 | Bồn tắm ✅ | `bathtub.glb` | `createBathtub()` | Bồn tắm sắt cũ, vết gỉ/máu |
+| 24 | Toilet ✅ | `toilet.glb` | `createToilet()` | Bồn cầu bẩn |
+| 25 | Bồn rửa mặt ✅ | `sink.glb` | `createSink()` | Gương vỡ phía trên |
 | 26 | Gương | `mirror.glb` | `createMirror()` | Gương nứt, phản chiếu kỳ lạ |
 | 27 | Tủ thuốc | `medicine_cabinet.glb` | (mới) | Treo tường, cửa kính vỡ |
 | 28 | Vòi sen | `shower_head.glb` | (mới) | Nước nhỏ giọt |
@@ -97,7 +97,7 @@ assets/models/
 |---|-----------|-----------|-------------------|---------|
 | 42 | Đèn trần | `ceiling_light.glb` | (mới) | Bóng đèn trần cũ, flicker |
 | 43 | Đèn bàn | `table_lamp.glb` | `createLamp()` | Đèn bàn vải, ánh sáng ấm |
-| 44 | Đèn sàn | `floor_lamp.glb` | (mới) | Đèn đứng sàn nhà |
+| 44 | Đèn sàn ✅ | `floor_lamp.glb` | (mới) | Đèn đứng sàn nhà |
 | 45 | Nến + đế nến | `candle.glb` | (mới) | Nến tan chảy, ánh sáng nhấp nháy |
 | 46 | Chandelier | `chandelier.glb` | (mới) | Đèn trần lớn, kiểu cổ |
 | 47 | Đèn tường | `wall_sconce.glb` | (mới) | Đèn gắn tường, gỉ sét |
@@ -109,7 +109,7 @@ assets/models/
 |---|-----------|-----------|---------|
 | 49 | Đồng hồ quả lắc | `grandfather_clock.glb` | Thay `createClock()`, tiếng tick-tock |
 | 50 | Tranh treo tường | `painting_frame.glb` | Thay `createPainting()`, nhiều kích cỡ |
-| 51 | TV cũ (CRT) | `tv_crt.glb` | Thay `createTV()`, static noise |
+| 51 | TV cũ (CRT) ✅ | `tv_crt.glb` | Thay `createTV()`, static noise |
 | 52 | Radio cũ | `radio_old.glb` | Phát tiếng lạ khi tương tác |
 | 53 | Điện thoại bàn | `telephone.glb` | Rung/kêu khi trigger |
 | 54 | Máy đánh chữ | `typewriter.glb` | Tự gõ chữ — scare event |
@@ -149,7 +149,7 @@ assets/models/
 
 | # | Tên Model | File Name | Thay thế function | Ghi chú |
 |---|-----------|-----------|-------------------|---------|
-| 81 | Con mèo (player) | `cat_player.glb` | `createCat()` | Mèo low-poly với animations: idle, walk, run, jump, sit |
+| 81 | Con mèo (player) ✅ | `cat_player.glb` | `createCat()` | Mèo low-poly với animations: idle, walk, run, jump, sit |
 | 82 | Ghost/Bóng ma | `ghost_entity.glb` | (mới) | Hình người mờ đục, hover trên mặt đất |
 | 83 | Owner (ông chủ nhà) | `owner_npc.glb` | `createOwner()` | Người già ngồi/đứng, biểu cảm rùng rợn |
 | 84 | Shadow figure | `shadow_figure.glb` | (mới) | Bóng đen hình người, không chi tiết, chỉ silhouette |
