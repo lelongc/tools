@@ -92,30 +92,58 @@ async function processCapturedSession(sessionData) {
 
   let processedArticle = draftArticles.join('\n\n');
 
-  // 4. Phân phối hình ảnh thông minh
-  // AI đã được dặn đặt thẻ [CHÈN_ẢNH_MINH_HỌA] vào chỗ cần thiết
-  if (frames && frames.length > 0) {
-    let frameIndex = 0;
-    // Thay thế từng chữ [CHÈN_ẢNH_MINH_HỌA] bằng ảnh thực tế cho đến khi hết ảnh
-    processedArticle = processedArticle.replace(/\[CHÈN_ẢNH_MINH_HỌA\]/g, () => {
-      if (frameIndex < frames.length) {
-        const imgPath = `![Hình minh họa](./image/${safeTitle}_anh_${frameIndex}.jpg)`;
-        frameIndex++;
-        return imgPath;
-      }
-      return ''; // Xóa đi nếu đã hết ảnh
-    });
+  // --- TẠO BÍ KÍP ÔN THI ĐỂ NHỚ CÔ ĐỌNG ---
+  try {
+    const examCheatSheet = await generateExamCheatSheet(finalTranscript, keys.geminiApiKey);
+    if (examCheatSheet) {
+      processedArticle += '\n\n---\n\n' + examCheatSheet;
+    }
+  } catch(err) {
+    console.error("Lỗi khi tạo Cheat Sheet", err);
+  }
 
-    // Nếu thay xong mà vẫn còn dư ảnh, chèn nốt ảnh thừa vào cuối bài
-    if (frameIndex < frames.length) {
-      processedArticle += '\n\n### Hình ảnh minh họa thêm:\n';
-      for (; frameIndex < frames.length; frameIndex++) {
-        processedArticle += `\n![Hình minh họa](./image/${safeTitle}_anh_${frameIndex}.jpg)`;
+  // 4. Phân phối hình ảnh cực chuẩn bằng AI Chỉ Điểm
+  if (frames && frames.length > 0) {
+    // Đánh số dòng bài viết
+    const lines = processedArticle.split('\n');
+    const numberedArticle = lines.map((l, i) => `[${i}] ${l}`).join('\n');
+    
+    try {
+      const placements = await generateImagePlacements(numberedArticle, frames, keys.geminiApiKey);
+      
+      // Sắp xếp placement theo thứ tự giảm dần của lineNumber để chèn không làm lệch index
+      placements.sort((a, b) => b.lineNumber - a.lineNumber);
+      
+      const placedImages = new Set();
+      for (const p of placements) {
+        const lineIdx = p.lineNumber;
+        const imgIdx = p.imageIndex;
+        if (lineIdx >= 0 && lineIdx < lines.length && imgIdx >= 0 && imgIdx < frames.length) {
+          const imgStr = `\n![Hình minh họa](./image/${safeTitle}_anh_${imgIdx}.jpg)\n`;
+          lines.splice(lineIdx + 1, 0, imgStr);
+          placedImages.add(imgIdx);
+        }
+      }
+
+      // Xây dựng lại văn bản
+      processedArticle = lines.join('\n');
+
+      // Chèn các ảnh còn thừa xuống cuối bài
+      if (placedImages.size < frames.length) {
+        processedArticle += '\n\n### Hình ảnh minh họa thêm:\n';
+        for (let i = 0; i < frames.length; i++) {
+          if (!placedImages.has(i)) {
+            processedArticle += `\n![Hình minh họa](./image/${safeTitle}_anh_${i}.jpg)`;
+          }
+        }
+      }
+    } catch(err) {
+      console.error("Lỗi khi định vị ảnh, dùng phương pháp chèn dồn xuống cuối", err);
+      processedArticle += '\n\n### Hình ảnh minh họa:\n';
+      for (let i = 0; i < frames.length; i++) {
+        processedArticle += `\n![Hình minh họa](./image/${safeTitle}_anh_${i}.jpg)`;
       }
     }
-  } else {
-    // Xóa hết các tag nếu người dùng không chụp ảnh nào
-    processedArticle = processedArticle.replace(/\[CHÈN_ẢNH_MINH_HỌA\]/g, '');
   }
 
   // 5. Tổng hợp thành Markdown bài viết
@@ -222,7 +250,7 @@ Hãy đặt một Tiêu Đề Bài Học bằng tiếng Anh CỰC KỲ NGẮN G�
   }
 }
 
-async function generateDeepChunk(chunkText, index, total, apiKey) {
+async function generateDeepChunk(chunkText, index, total, previousChunkText, apiKey) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
   const prompt = `Bạn là một chuyên gia phân tích và giải thích chi tiết.
 Đây là phần thứ ${index + 1}/${total} của một đoạn transcript bài học:
@@ -231,7 +259,7 @@ async function generateDeepChunk(chunkText, index, total, apiKey) {
 YÊU CẦU BẮT BUỘC ĐỂ KHÔNG BỊ PHẠT:
 1. ĐỪNG VIẾT CÂU MỞ BÀI HAY KẾT LUẬN (vì đây chỉ là một mảnh ghép).
 2. KÍNH LÚP PHÂN TÍCH: Hãy bám sát từng câu, từng ý trong đoạn transcript trên và biến nó thành một bài giảng giải thích cặn kẽ mọi khái niệm. Viết thật dài và thật sâu sắc. Không được bỏ sót ý nào.
-3. CHÈN ẢNH: Nếu bạn thấy đoạn transcript đang mô tả một giao diện, một sơ đồ, hoặc một khái niệm trực quan cần hình ảnh minh họa, hãy chèn ĐÚNG chuỗi \`[CHÈN_ẢNH_MINH_HỌA]\` vào vị trí đó. (Ví dụ: "Như bạn thấy trên màn hình [CHÈN_ẢNH_MINH_HỌA], chúng ta click vào..."). Đừng chèn bừa bãi nếu không thực sự cần.
+3. BỎ QUA HÌNH ẢNH: Bạn KHÔNG CẦN chèn hình ảnh, hệ thống sẽ tự động ghép ảnh ở bước sau.
 4. VÍ DỤ NHỚ ĐỜI: Nếu đoạn này chứa một khái niệm quan trọng, hãy rắc vào một "Ví dụ nhớ đời" (ẩn dụ thực tế) bọc trong hộp quote: \`> **💡 Ví dụ nhớ đời:** ...\`
 5. Trả về kết quả trực tiếp bằng Markdown thuần túy, KHÔNG tạo XML, JSON hay bất kỳ gì thừa thãi.`;
 
@@ -263,4 +291,71 @@ function generateArticle(title, articleContent, numFrames) {
   }
 
   return md;
+}
+
+async function generateExamCheatSheet(transcript, apiKey) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
+  const prompt = `Bạn là một chuyên gia ôn thi đại học. Dựa vào toàn bộ transcript bài giảng sau, hãy tạo ra một phần TỔNG KẾT ÔN THI (Cheat Sheet) cực kỳ cô đọng, dễ nhớ, nhằm giúp người học có thể lướt nhanh để thi.
+
+Transcript:
+"${transcript}"
+
+YÊU CẦU:
+- Bắt đầu bằng Heading: "## 🎯 Bí Kíp Ôn Thi Tốc Độ"
+- Trình bày dạng gạch đầu dòng ngắn gọn, in đậm các từ khóa, khái niệm cốt lõi.
+- Tuyệt đối không viết giải thích dài dòng. Chỉ đúc kết tinh hoa, công thức, mẹo ghi nhớ.
+- Trả về Markdown thuần, không bọc JSON.`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    if (!response.ok) return '';
+    const data = await response.json();
+    let text = data.candidates[0].content.parts[0].text;
+    text = text.replace(/^\s*```markdown\s*/i, '').replace(/\s*```\s*$/i, '');
+    return text.trim();
+  } catch(e) {
+    return '';
+  }
+}
+
+async function generateImagePlacements(numberedArticle, frames, apiKey) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
+  const prompt = `Tôi có một bài viết giải thích chi tiết (đã được đánh số dòng) và ${frames.length} bức ảnh được cung cấp đính kèm theo thứ tự.
+Nhiệm vụ của bạn là làm "Người chỉ điểm": Hãy đọc văn bản và quan sát kỹ các bức ảnh. Chọn một dòng thích hợp nhất để chèn bức ảnh đó vào ngay bên dưới dòng đó. Mỗi bức ảnh chỉ nên gắn với 1 vị trí dòng duy nhất để minh họa tốt nhất cho nội dung.
+
+Dưới đây là bài viết đã đánh số dòng:
+${numberedArticle}
+
+YÊU CẦU:
+Trích xuất ĐÚNG định dạng JSON sau (không viết thêm lời chào hỏi, định dạng MẢNG CÁC OBJECT):
+[
+  {"imageIndex": 0, "lineNumber": 25},
+  {"imageIndex": 1, "lineNumber": 45}
+]`;
+
+  const parts = [{ text: prompt }];
+  frames.forEach((frameBase64) => {
+    const base64Data = frameBase64.split(',')[1];
+    if (base64Data) {
+      parts.push({
+        inlineData: { mimeType: "image/jpeg", data: base64Data }
+      });
+    }
+  });
+
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts: parts }] })
+  });
+
+  if (!response.ok) throw new Error("API Lỗi: " + response.status);
+  const data = await response.json();
+  let text = data.candidates[0].content.parts[0].text;
+  text = text.replace(/^\s*```json\s*/i, '').replace(/\s*```\s*$/i, '');
+  return JSON.parse(text);
 }
