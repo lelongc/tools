@@ -36,3 +36,5 @@ short/projects/**/frames/
 .eslintcach
 
 veoup_video
+3d/all/**
+3d/texture-pack/**
