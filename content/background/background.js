@@ -73,11 +73,13 @@ async function processCapturedSession(sessionData) {
 
   // 3. Phân tích từng đoạn siêu sâu (chạy tuần tự để tránh Rate Limit của free API)
   let draftArticles = [];
+  let previousChunkText = "";
   for (let i = 0; i < chunks.length; i++) {
     // Thêm một chút delay nhẹ giữa các request để an toàn
     if (i > 0) await new Promise(r => setTimeout(r, 1000));
-    const chunkDraft = await generateDeepChunk(chunks[i], i, chunks.length, keys.geminiApiKey);
+    const chunkDraft = await generateDeepChunk(chunks[i], i, chunks.length, previousChunkText, keys.geminiApiKey);
     draftArticles.push(chunkDraft);
+    previousChunkText = chunks[i];
   }
 
   let processedArticle = draftArticles.join('\n\n');
@@ -256,6 +258,8 @@ async function generateDeepChunk(chunkText, index, total, previousChunkText, api
 Đây là phần thứ ${index + 1}/${total} của một đoạn transcript bài học:
 "${chunkText}"
 
+${previousChunkText ? `NGỮ CẢNH: Đoạn transcript của PHẦN NGAY TRƯỚC ĐÓ là: "${previousChunkText}"\nLƯU Ý CỰC KỲ QUAN TRỌNG: Các khái niệm xuất hiện trong PHẦN NGAY TRƯỚC ĐÓ đã được giải thích rất kỹ rồi. TUYỆT ĐỐI KHÔNG giải thích lại định nghĩa cơ bản của chúng nữa. Chỉ tập trung giải thích những kiến thức MỚI hoặc diễn biến mới trong phần hiện tại này để tránh lặp ý.` : ''}
+
 YÊU CẦU BẮT BUỘC ĐỂ KHÔNG BỊ PHẠT:
 1. ĐỪNG VIẾT CÂU MỞ BÀI HAY KẾT LUẬN (vì đây chỉ là một mảnh ghép).
 2. KÍNH LÚP PHÂN TÍCH: Hãy bám sát từng câu, từng ý trong đoạn transcript trên và biến nó thành một bài giảng giải thích cặn kẽ mọi khái niệm. Viết thật dài và thật sâu sắc. Không được bỏ sót ý nào.
@@ -263,11 +267,31 @@ YÊU CẦU BẮT BUỘC ĐỂ KHÔNG BỊ PHẠT:
 4. VÍ DỤ NHỚ ĐỜI: Nếu đoạn này chứa một khái niệm quan trọng, hãy rắc vào một "Ví dụ nhớ đời" (ẩn dụ thực tế) bọc trong hộp quote: \`> **💡 Ví dụ nhớ đời:** ...\`
 5. Trả về kết quả trực tiếp bằng Markdown thuần túy, KHÔNG tạo XML, JSON hay bất kỳ gì thừa thãi.`;
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-  });
+  const payload = JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] });
+  
+  let response;
+  let retries = 3;
+  let delay = 2000;
+  
+  for (let r = 0; r <= retries; r++) {
+    response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: payload
+    });
+    
+    if (response.ok) break;
+    
+    if (response.status === 403 || response.status === 401 || response.status === 400) {
+      break; // Không retry cho lỗi xác thực hoặc bad request
+    }
+    
+    if (r < retries) {
+      console.warn(`Lỗi API ở phần ${index + 1} (Status ${response.status}). Thử lại lần ${r + 1} sau ${delay}ms...`);
+      await new Promise(res => setTimeout(res, delay));
+      delay *= 2;
+    }
+  }
 
   if (!response.ok) {
     if (response.status === 403 || response.status === 401) {
