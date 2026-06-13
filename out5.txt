@@ -1,0 +1,1 @@
+function Lt(e,t){return new Promise((a,r)=>{re.set(e,t);chrome.downloads.download({url:e,filename:t,saveAs:!1,conflictAction:"uniquify"},id=>{chrome.runtime.lastError?r(new Error(chrome.runtime.lastError.message)):a(id)})

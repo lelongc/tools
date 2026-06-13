@@ -1,0 +1,1 @@
+ge:`🎬 #${o} generated — downloading`,stats:{...T}}),Vt("LOG",{message:`📥 Queue now has ${W.length} items, worker running: ${Z}`,type:"info"}),Z||Bt()}function Lt(e,t){return new Promise((a,r)=>{re.set(e,t);chrome.downloads.download({url:e,filename:t,saveAs:!1,conflictAction:"uniquify"},id=>{chrome.runtime.last

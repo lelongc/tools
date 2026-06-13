@@ -1,16 +1,6 @@
 // Map lưu trữ ánh xạ giữa Blob URL và tên tệp tin mong muốn
 const blobUrlToFilename = new Map();
 
-// Bắt sự kiện xác định tên tệp để định hướng lưu vào thư mục learn/
-chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
-  if (blobUrlToFilename.has(item.url)) {
-    const filename = blobUrlToFilename.get(item.url);
-    suggest({ filename: filename, conflictAction: 'overwrite' });
-    blobUrlToFilename.delete(item.url);
-  } else {
-    suggest();
-  }
-});
 
 // Helper function để đảm bảo Offscreen Document tồn tại
 async function setupOffscreenDocument(path) {
@@ -164,6 +154,15 @@ async function processCapturedSession(sessionData) {
       const urls = response.urls;
       // urls[0] là Markdown, các urls còn lại là ảnh
       
+      const dynamicListener = (item, suggest) => {
+        if (blobUrlToFilename.has(item.url)) {
+          const filename = blobUrlToFilename.get(item.url);
+          suggest({ filename: filename, conflictAction: 'overwrite' });
+          blobUrlToFilename.delete(item.url);
+        }
+      };
+      chrome.downloads.onDeterminingFilename.addListener(dynamicListener);
+
       const mdFilename = `learn/${safeTitle}.md`;
       blobUrlToFilename.set(urls[0], mdFilename);
       chrome.downloads.download({
@@ -184,6 +183,7 @@ async function processCapturedSession(sessionData) {
 
       // Đợi 10 giây để Chrome kịp tải, sau đó dọn dẹp offscreen và Map
       setTimeout(() => {
+        chrome.downloads.onDeterminingFilename.removeListener(dynamicListener);
         chrome.runtime.sendMessage({
           action: "cleanup_and_close",
           urls: urls
