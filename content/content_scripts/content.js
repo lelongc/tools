@@ -44,21 +44,78 @@ function injectFloatingUI() {
   closeBtn.style.cssText = 'padding: 4px; background: transparent; color: #aaa; border: none; cursor: pointer; font-size: 12px; margin-top: 5px;';
 
   captureBtn.onclick = () => {
-    const video = document.querySelector('video');
-    if (video) {
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-      capturedFrames.push(canvas.toDataURL('image/jpeg', 0.5));
-      captureBtn.innerText = `📸 Chụp ảnh (${capturedFrames.length})`;
-
-      // Hiệu ứng chớp nháy nhẹ để biết đã chụp
-      panel.style.boxShadow = '0 0 15px #4CAF50';
-      setTimeout(() => panel.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)', 200);
-    } else {
-      alert("Không tìm thấy video!");
+    // 1. Tìm thẻ video to nhất
+    const videos = Array.from(document.querySelectorAll('video'));
+    let bestVideo = null;
+    let maxArea = 0;
+    
+    for (const v of videos) {
+      const rect = v.getBoundingClientRect();
+      const area = rect.width * rect.height;
+      if (area > maxArea) {
+        maxArea = area;
+        bestVideo = v;
+      }
     }
+
+    if (!bestVideo) {
+      alert("Không tìm thấy video nào đang hiển thị!");
+      return;
+    }
+
+    captureBtn.innerText = '📸 Đang chụp...';
+    captureBtn.disabled = true;
+
+    // 2. Lấy tọa độ hiển thị thực tế của Video trên màn hình
+    const rect = bestVideo.getBoundingClientRect();
+
+    // 3. Ra lệnh cho Camera của Chrome chụp lại *Toàn bộ Tab* (vượt qua lỗi CORS của canvas video)
+    chrome.runtime.sendMessage({ action: "capture_tab" }, (response) => {
+      if (response && response.dataUrl) {
+        const img = new Image();
+        img.onload = () => {
+          // Tính toán tỷ lệ sai số giữa ảnh chụp và khung hình thực tế (trường hợp user Zoom màn hình)
+          const viewportWidth = document.documentElement.clientWidth;
+          const viewportHeight = document.documentElement.clientHeight;
+          
+          const scaleX = img.width / viewportWidth;
+          const scaleY = img.height / viewportHeight;
+
+          // Tính toán vùng tọa độ chính xác của Video trong bức ảnh to
+          const cropX = rect.left * scaleX;
+          const cropY = rect.top * scaleY;
+          const cropW = rect.width * scaleX;
+          const cropH = rect.height * scaleY;
+
+          // Cắt (Crop) đúng khung video
+          const canvas = document.createElement('canvas');
+          canvas.width = rect.width;
+          canvas.height = rect.height;
+          const ctx = canvas.getContext('2d');
+          
+          // Hàm drawImage (Image, Nguồn_X, Nguồn_Y, Nguồn_W, Nguồn_H, Đích_X, Đích_Y, Đích_W, Đích_H)
+          ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
+          
+          const finalDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+
+          if (finalDataUrl.length < 5000) { 
+            alert("❌ Video vẫn đen xì! Chắc chắn trang web này (như Udemy/Netflix) có chuẩn DRM ẩn siêu việt.\nHoặc bạn chưa Restart lại Chrome sau khi chỉnh Setting.\nTuy nhiên, công cụ đã cố gắng hết sức.");
+          } else {
+            capturedFrames.push(finalDataUrl);
+            panel.style.boxShadow = '0 0 15px #4CAF50';
+            setTimeout(() => panel.style.boxShadow = '0 4px 6px rgba(0,0,0,0.3)', 200);
+          }
+
+          captureBtn.innerText = `📸 Chụp ảnh (${capturedFrames.length})`;
+          captureBtn.disabled = false;
+        };
+        img.src = response.dataUrl;
+      } else {
+        alert("Lỗi máy ảnh Chrome. Hãy đảm bảo Extension có đủ quyền hoạt động.");
+        captureBtn.innerText = `📸 Chụp ảnh (${capturedFrames.length})`;
+        captureBtn.disabled = false;
+      }
+    });
   };
 
   finishBtn.onclick = () => {

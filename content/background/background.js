@@ -34,6 +34,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       sendResponse({ success: true });
     }).catch(err => sendResponse({ error: err.message }));
     return true;
+  } else if (request.action === "capture_tab") {
+    chrome.tabs.captureVisibleTab(null, {format: "jpeg", quality: 50}, (dataUrl) => {
+      sendResponse({ dataUrl: dataUrl });
+    });
+    return true;
   } else if (request.action === "process_captured_session") {
     processCapturedSession(request)
       .then(result => sendResponse({ success: true, result }))
@@ -61,7 +66,7 @@ async function processCapturedSession(sessionData) {
 
   // 2. Lấy tiêu đề từ chunk đầu
   const finalTitle = await generateTitle(chunks[0], title, keys.geminiApiKey);
-  
+
   // Đổi tên file sang chuẩn tiếng Anh
   const safeTitle = finalTitle
     .normalize('NFD')
@@ -90,7 +95,7 @@ async function processCapturedSession(sessionData) {
     if (examCheatSheet) {
       processedArticle += '\n\n---\n\n' + examCheatSheet;
     }
-  } catch(err) {
+  } catch (err) {
     console.error("Lỗi khi tạo Cheat Sheet", err);
   }
 
@@ -99,13 +104,13 @@ async function processCapturedSession(sessionData) {
     // Đánh số dòng bài viết
     const lines = processedArticle.split('\n');
     const numberedArticle = lines.map((l, i) => `[${i}] ${l}`).join('\n');
-    
+
     try {
       const placements = await generateImagePlacements(numberedArticle, frames, keys.geminiApiKey);
-      
+
       // Sắp xếp placement theo thứ tự giảm dần của lineNumber để chèn không làm lệch index
       placements.sort((a, b) => b.lineNumber - a.lineNumber);
-      
+
       const placedImages = new Set();
       for (const p of placements) {
         const lineIdx = p.lineNumber;
@@ -129,7 +134,7 @@ async function processCapturedSession(sessionData) {
           }
         }
       }
-    } catch(err) {
+    } catch (err) {
       console.error("Lỗi khi định vị ảnh, dùng phương pháp chèn dồn xuống cuối", err);
       processedArticle += '\n\n### Hình ảnh minh họa:\n';
       for (let i = 0; i < frames.length; i++) {
@@ -155,7 +160,7 @@ async function processCapturedSession(sessionData) {
     if (response && response.success && response.urls) {
       const urls = response.urls;
       // urls[0] là Markdown, các urls còn lại là ảnh
-      
+
       const dynamicListener = (item, suggest) => {
         if (blobUrlToFilename.has(item.url)) {
           const filename = blobUrlToFilename.get(item.url);
@@ -207,13 +212,13 @@ async function processCapturedSession(sessionData) {
 function chunkTranscript(text, maxLength = 2500) {
   const chunks = [];
   let startIndex = 0;
-  
+
   while (startIndex < text.length) {
     if (text.length - startIndex <= maxLength) {
       chunks.push(text.substring(startIndex));
       break;
     }
-    
+
     let endIndex = startIndex + maxLength;
     let lastDot = text.lastIndexOf('. ', endIndex);
     if (lastDot > startIndex + maxLength * 0.7) {
@@ -224,11 +229,11 @@ function chunkTranscript(text, maxLength = 2500) {
         endIndex = lastSpace;
       }
     }
-    
+
     chunks.push(text.substring(startIndex, endIndex).trim());
     startIndex = endIndex;
   }
-  
+
   return chunks;
 }
 
@@ -236,7 +241,7 @@ async function generateTitle(textSample, defaultTitle, apiKey) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${apiKey}`;
   const prompt = `Dựa vào đoạn nội dung bài học sau: "${textSample.substring(0, 1000)}"
 Hãy đặt một Tiêu Đề Bài Học bằng tiếng Anh CỰC KỲ NGẮN GỌN (2-4 từ), tập trung chính xác vào chủ đề cốt lõi. Trả về đúng tiêu đề, không giải thích gì thêm.`;
-  
+
   try {
     const response = await fetch(url, {
       method: 'POST',
@@ -247,7 +252,7 @@ Hãy đặt một Tiêu Đề Bài Học bằng tiếng Anh CỰC KỲ NGẮN G�
     const data = await response.json();
     const title = data.candidates[0].content.parts[0].text.trim().replace(/["'*]/g, '');
     return title.length > 3 ? title : defaultTitle;
-  } catch(e) {
+  } catch (e) {
     return defaultTitle;
   }
 }
@@ -268,24 +273,24 @@ YÊU CẦU BẮT BUỘC ĐỂ KHÔNG BỊ PHẠT:
 5. Trả về kết quả trực tiếp bằng Markdown thuần túy, KHÔNG tạo XML, JSON hay bất kỳ gì thừa thãi.`;
 
   const payload = JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] });
-  
+
   let response;
   let retries = 3;
   let delay = 2000;
-  
+
   for (let r = 0; r <= retries; r++) {
     response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: payload
     });
-    
+
     if (response.ok) break;
-    
+
     if (response.status === 403 || response.status === 401 || response.status === 400) {
       break; // Không retry cho lỗi xác thực hoặc bad request
     }
-    
+
     if (r < retries) {
       console.warn(`Lỗi API ở phần ${index + 1} (Status ${response.status}). Thử lại lần ${r + 1} sau ${delay}ms...`);
       await new Promise(res => setTimeout(res, delay));
@@ -341,7 +346,7 @@ YÊU CẦU:
     let text = data.candidates[0].content.parts[0].text;
     text = text.replace(/^\s*```markdown\s*/i, '').replace(/\s*```\s*$/i, '');
     return text.trim();
-  } catch(e) {
+  } catch (e) {
     return '';
   }
 }
