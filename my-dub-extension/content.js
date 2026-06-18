@@ -1,7 +1,7 @@
-let subtitleContainer = null;
-let fadeTimeout = null;
+var subtitleContainer = null;
+var fadeTimeout = null;
 
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(function(msg, sender, sendResponse) {
   if (msg.type === "subtitle") {
     showSubtitle(msg.text);
   } else if (msg.type === "stop") {
@@ -42,8 +42,7 @@ function showSubtitle(text) {
 
   if (fadeTimeout) clearTimeout(fadeTimeout);
   
-  // Ẩn phụ đề sau 5 giây nếu không có câu mới
-  fadeTimeout = setTimeout(() => {
+  fadeTimeout = setTimeout(function() {
     if (subtitleContainer) {
       subtitleContainer.style.opacity = '0';
     }

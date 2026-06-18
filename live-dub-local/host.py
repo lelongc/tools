@@ -19,23 +19,27 @@ def read_message():
     return message
 
 # Khởi chạy server.py
-# Lưu ý: Cần tắt output stdout/stderr của server để không làm hỏng luồng Native Messaging của Chrome
 script_path = os.path.join(os.path.dirname(__file__), "server.py")
+err_log = open("d:\\folder\\tools\\live-dub-local\\server_error.log", "a", encoding="utf-8")
+out_log = open("d:\\folder\\tools\\live-dub-local\\server_output.log", "a", encoding="utf-8")
 proc = subprocess.Popen(
     [sys.executable, "-u", script_path], 
-    stdout=subprocess.DEVNULL, 
-    stderr=subprocess.DEVNULL
+    stdout=out_log, 
+    stderr=err_log
 )
 
 try:
     while True:
         msg = read_message()
         if msg is None:
-            # Chrome đã đóng stdin -> Ngắt kết nối
+            with open("d:\\folder\\tools\\live-dub-local\\host_debug.log", "a", encoding="utf-8") as f:
+                f.write("Chrome closed stdin (msg is None)\n")
             break
-except Exception:
-    pass
+except Exception as e:
+    with open("d:\\folder\\tools\\live-dub-local\\host_debug.log", "a", encoding="utf-8") as f:
+        f.write(f"Exception in read loop: {e}\n")
 
-# Khi Chrome ngắt kết nối, giết cái server
 proc.terminate()
+with open("d:\\folder\\tools\\live-dub-local\\host_debug.log", "a", encoding="utf-8") as f:
+    f.write("host.py exiting normally\n")
 sys.exit(0)

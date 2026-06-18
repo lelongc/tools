@@ -9,7 +9,8 @@
     "tabCapture",
     "scripting",
     "offscreen",
-    "nativeMessaging"
+    "nativeMessaging",
+    "storage"
   ],
   "host_permissions": [
     "<all_urls>"

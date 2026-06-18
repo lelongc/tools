@@ -7,7 +7,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse({ isRecording });
   } else if (message.type === "startCapture") {
     activeTabId = message.tabId;
-    startCapture(activeTabId);
+    startCapture(activeTabId, message.sourceLang);
   } else if (message.type === "stopCapture") {
     stopCapture();
   } else if (message.type === "subtitle") {
@@ -19,7 +19,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
-async function startCapture(tabId) {
+async function startCapture(tabId, sourceLang) {
   if (isRecording) return;
   isRecording = true;
   
@@ -54,7 +54,8 @@ async function startCapture(tabId) {
     chrome.runtime.sendMessage({
       type: "start-recording",
       target: "offscreen",
-      streamId: streamId
+      streamId: streamId,
+      sourceLang: sourceLang || "en"
     });
   });
 }

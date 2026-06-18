@@ -36,6 +36,7 @@ audio_play_queue = queue.Queue()
 
 # Dùng dictionary để lưu các websocket connections đang active
 active_connections = set()
+CURRENT_LANG = "en"
 
 # --- STT THREAD ---
 def stt_thread():
@@ -50,23 +51,23 @@ def stt_thread():
             continue
             
         try:
-            segments, _ = model.transcribe(chunk, beam_size=1, language="en")
+            segments, _ = model.transcribe(chunk, beam_size=1, language=CURRENT_LANG)
             text = " ".join([seg.text for seg in segments]).strip()
             if text:
-                print(f"[ENG] {text}")
+                print(f"[{CURRENT_LANG.upper()}] {text}")
                 text_queue.put(text)
         except Exception as e:
             print(f"[!] Lỗi Whisper: {e}")
 
 # --- TRANSLATE & TTS THREAD ---
 def process_text_thread():
-    translator = GoogleTranslator(source='en', target='vi')
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     
     while True:
         text = text_queue.get()
         try:
+            translator = GoogleTranslator(source=CURRENT_LANG, target='vi')
             vi_text = translator.translate(text)
             print(f"[VIE] {vi_text}")
             
@@ -128,7 +129,10 @@ async def handle_client(websocket):
             else:
                 try:
                     data = json.loads(message)
-                    print("Nhận từ client:", data)
+                    if data.get("type") == "config":
+                        global CURRENT_LANG
+                        CURRENT_LANG = data.get("sourceLang", "en")
+                        print(f"[*] Cấu hình ngôn ngữ gốc: {CURRENT_LANG}")
                 except:
                     pass
     except websockets.exceptions.ConnectionClosed:
