@@ -1,0 +1,39 @@
+{
+   "action": {
+      "default_icon": "/imgs/icon128.png",
+      "default_popup": "popup.html",
+      "default_title": "__MSG_appName__"
+   },
+   "author": "DubTab",
+   "background": {
+      "service_worker": "background.js"
+   },
+   "commands": {
+      "toggle-capture": {
+         "description": "Toggle Start/Stop Capture",
+         "suggested_key": {
+            "default": "Alt+Shift+S",
+            "mac": "Alt+Shift+S"
+         }
+      }
+   },
+   "default_locale": "en",
+   "description": "__MSG_appDesc__",
+   "host_permissions": [ "https://*.cloudfunctions.net/*", "https://*.soniccaption.com/*", "https://*.posthog.com/*", "https://*.firebaseapp.com/*", "https://*.dubtab.com/*", "https://*.r2.dev/*" ],
+   "icons": {
+      "128": "/imgs/icon128.png",
+      "16": "/imgs/icon128.png",
+      "32": "/imgs/icon128.png",
+      "48": "/imgs/icon128.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvLWts00xtWnVE6FjWvlXdlkN5WzzNf8AqQheFip5UX3tc7DbKgL+85QM6YMoeqDmPE+XhzPaHRJcyEyFVl+iShhg0K8XawXMcQaUnCtJ3y04cFmFnELhGZQOVDWr0fcOS0JTfDpWSI8lMUaC91iAtfGlyAbcnh4lUrV4oy2+fHdH7jH19elwSU4A3xCac9oJKS+qkM2fO9RCli0Dri6CEnQA5dXjBOF9UA/ET48AYDB8YQ2wP/45MOj8Ad3yt071ybU6FGwEAbvAz5QXukVMYAaNeujLof0uqjCKYojbSk4oVuz+YlKeLilJzmJ3bMJXz9Jd/NlGcO0D4wi2jd1EwwIDAQAB",
+   "manifest_version": 3,
+   "name": "__MSG_appName__",
+   "permissions": [ "identity", "identity.email", "tabs", "activeTab", "storage", "downloads", "tabCapture", "offscreen", "scripting" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.1.5",
+   "web_accessible_resources": [ {
+      "matches": [ "https://*/*" ],
+      "resources": [ "imgs/*" ]
+   } ]
+}

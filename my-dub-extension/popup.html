@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>MyDub</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      width: 250px;
+      margin: 0;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #fff;
+      text-align: center;
+    }
+    h1 {
+      margin-top: 0;
+      font-size: 24px;
+      color: #e94560;
+    }
+    .btn {
+      background: #e94560;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 15px;
+      transition: background 0.3s;
+    }
+    .btn:hover {
+      background: #d63d56;
+    }
+    .btn.stop {
+      background: #533483;
+    }
+    .btn.stop:hover {
+      background: #412a68;
+    }
+    #status {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #a0a0a0;
+    }
+  </style>
+</head>
+<body>
+  <h1>MyDub</h1>
+  <p>Local AI Translator</p>
+  <button id="startBtn" class="btn">Bật Dịch & Lồng Tiếng</button>
+  <div id="status">Sẵn sàng</div>
+  <script src="popup.js"></script>
+</body>
+</html>

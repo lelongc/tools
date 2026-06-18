@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "MyDub",
+  "version": "1.0",
+  "description": "Real-time Live Stream Translator and Dubber using Local AI",
+  "permissions": [
+    "activeTab",
+    "tabCapture",
+    "scripting",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}
