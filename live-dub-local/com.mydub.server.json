@@ -1,0 +1,9 @@
+{
+  "name": "com.mydub.server",
+  "description": "MyDub Local AI Server",
+  "path": "d:\\folder\\tools\\live-dub-local\\host.bat",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://egcholfgemkfpojcjnoicghlojbijiel/"
+  ]
+}

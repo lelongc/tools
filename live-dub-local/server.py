@@ -7,6 +7,15 @@ import queue
 import time
 import io
 import os
+import sys
+
+# Fix Unicode print errors on Windows
+sys.stdout.reconfigure(encoding='utf-8')
+import threading
+import queue
+import time
+import io
+import os
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"

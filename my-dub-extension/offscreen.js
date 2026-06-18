@@ -31,6 +31,14 @@ async function startRecording(streamId) {
 
     ws = new WebSocket('ws://localhost:8765');
     ws.binaryType = "arraybuffer";
+    
+    ws.onerror = (err) => {
+      chrome.runtime.sendMessage({ type: "subtitle", text: "Lỗi kết nối tới Server. Hãy chắc chắn bạn đang chạy cửa sổ đen python server.py!" });
+    };
+
+    ws.onclose = () => {
+      chrome.runtime.sendMessage({ type: "subtitle", text: "Kết nối tới Server bị đóng." });
+    };
 
     ws.onmessage = (event) => {
       // Nhận phụ đề từ server, gửi lại background
@@ -52,14 +60,11 @@ async function startRecording(streamId) {
     };
 
     source.connect(processor);
-    // Lưu ý: Không connect processor ra destination để tránh bị vọng âm 2 lần, 
-    // vì tab audio tự nó vẫn đang phát ra loa (trừ khi mình connect để route lại).
-    // Tab Capture đã tự động lấy tiếng rồi. Nhưng source.connect(processor) vẫn xử lý âm thanh.
-    // Thực tế với tabCapture, nếu không nối ra destination thì có thể tiếng gốc bị tắt.
-    // Để giữ tiếng gốc, ta nối thêm:
     source.connect(audioCtx.destination);
     
+    chrome.runtime.sendMessage({ type: "subtitle", text: "Kết nối thành công! Vui lòng chờ vài giây để AI bắt đầu dịch..." });
   } catch (err) {
+    chrome.runtime.sendMessage({ type: "subtitle", text: "Lỗi Offscreen: " + err.message });
     console.error("Lỗi:", err);
   }
 }

@@ -1,5 +1,6 @@
 let isRecording = false;
 let activeTabId = null;
+let nativePort = null;
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === "getState") {
@@ -33,8 +34,22 @@ async function startCapture(tabId) {
   chrome.tabCapture.getMediaStreamId({ targetTabId: tabId }, async (streamId) => {
     if (!streamId) {
       isRecording = false;
+      chrome.tabs.sendMessage(tabId, { type: "subtitle", text: "Lỗi: Không lấy được luồng âm thanh từ Tab này!" }).catch(() => {});
       return;
     }
+    
+    try {
+      nativePort = chrome.runtime.connectNative('com.mydub.server');
+      nativePort.onDisconnect.addListener(() => {
+        nativePort = null;
+        let errMsg = chrome.runtime.lastError ? chrome.runtime.lastError.message : "Native port disconnected";
+        chrome.tabs.sendMessage(tabId, { type: "subtitle", text: "Lỗi Native Messaging: " + errMsg }).catch(() => {});
+      });
+    } catch(e) {
+      chrome.tabs.sendMessage(tabId, { type: "subtitle", text: "Lỗi: Không thể khởi chạy Server tự động." }).catch(() => {});
+    }
+
+    chrome.tabs.sendMessage(tabId, { type: "subtitle", text: "Đã lấy luồng âm thanh, đang khởi động hệ thống..." }).catch(() => {});
     await setupOffscreenDocument('offscreen.html');
     chrome.runtime.sendMessage({
       type: "start-recording",
@@ -46,6 +61,10 @@ async function startCapture(tabId) {
 
 async function stopCapture() {
   isRecording = false;
+  if (nativePort) {
+    nativePort.disconnect();
+    nativePort = null;
+  }
   chrome.runtime.sendMessage({
     type: "stop-recording",
     target: "offscreen"

@@ -2,12 +2,14 @@
   "manifest_version": 3,
   "name": "MyDub",
   "version": "1.0",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtSPe742hP9V1E6eMohjWaAZmst5Fag/PgpPr0Qv+AUK80T827Cv8pSwMVSu+nUdZPGFHdf5NtDtb41pxRj73gYkrNE3jdmXWttcQAKYljfW5ej2tdaY5YjkFXl69FnUS4iQluhK+GOdBpisaQvNIvo3+5VHwXe2KKstIsGAcI0MHDcDcLiFkpNpIyQTWBcmFUvCNi+j+a1o5v7Cfts3FBOQxiieLlN9GdlXqU+T+JthEbX/sROeUIYT8K8i1b9bld7Sus/UbC2JoYJ31lXATNIfHPSqHfBxFSn5IBjU8U2oSTWrKRKqBy6ETLdh2fHo7LY1hJVufYpdeXqnbOixsRwIDAQAB",
   "description": "Real-time Live Stream Translator and Dubber using Local AI",
   "permissions": [
     "activeTab",
     "tabCapture",
     "scripting",
-    "offscreen"
+    "offscreen",
+    "nativeMessaging"
   ],
   "host_permissions": [
     "<all_urls>"

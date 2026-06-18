@@ -3,6 +3,10 @@ import sys
 import time
 import queue
 import threading
+
+# Fix Unicode print errors on Windows
+sys.stdout.reconfigure(encoding='utf-8')
+import threading
 import asyncio
 import io
 import numpy as np
