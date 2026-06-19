@@ -2,7 +2,7 @@ let audioCtx;
 let ws;
 let mediaStream;
 let reconnectAttempts = 0;
-const MAX_RECONNECT_ATTEMPTS = 15;
+const MAX_RECONNECT_ATTEMPTS = 45;
 
 let sourceLanguage = "en";
 
@@ -16,7 +16,7 @@ function connectWebSocket(processor) {
     chrome.runtime.sendMessage({ type: "subtitle", text: "Đang chờ Server AI khởi động..." });
   }
 
-  ws = new WebSocket('ws://localhost:8765');
+  ws = new WebSocket('ws://127.0.0.1:8765');
   ws.binaryType = "arraybuffer";
   
   ws.onopen = () => {

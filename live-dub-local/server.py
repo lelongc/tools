@@ -11,6 +11,12 @@ import sys
 
 # Fix Unicode print errors on Windows
 sys.stdout.reconfigure(encoding='utf-8')
+
+def log(msg):
+    with open("d:\\folder\\tools\\live-dub-local\\server_debug.log", "a", encoding="utf-8") as f:
+        f.write(msg + "\n")
+    print(msg, flush=True)
+
 import threading
 import queue
 import time
@@ -40,9 +46,9 @@ CURRENT_LANG = "en"
 
 # --- STT THREAD ---
 def stt_thread():
-    print("[*] Đang tải mô hình Whisper...")
+    log("[*] Đang tải mô hình Whisper...")
     model = WhisperModel("tiny", device="cpu", compute_type="int8")
-    print("[*] Tải xong mô hình Whisper.")
+    log("[*] Tải xong mô hình Whisper.")
     
     while True:
         chunk = audio_queue.get()
@@ -54,10 +60,10 @@ def stt_thread():
             segments, _ = model.transcribe(chunk, beam_size=1, language=CURRENT_LANG)
             text = " ".join([seg.text for seg in segments]).strip()
             if text:
-                print(f"[{CURRENT_LANG.upper()}] {text}")
+                log(f"[{CURRENT_LANG.upper()}] {text}")
                 text_queue.put(text)
         except Exception as e:
-            print(f"[!] Lỗi Whisper: {e}")
+            log(f"[!] Lỗi Whisper: {e}")
 
 # --- TRANSLATE & TTS THREAD ---
 def process_text_thread():
@@ -69,7 +75,7 @@ def process_text_thread():
         try:
             translator = GoogleTranslator(source=CURRENT_LANG, target='vi')
             vi_text = translator.translate(text)
-            print(f"[VIE] {vi_text}")
+            log(f"[VIE] {vi_text}")
             
             # Gửi phụ đề về cho tất cả extension clients
             msg = json.dumps({"type": "subtitle", "text": vi_text})
@@ -80,7 +86,7 @@ def process_text_thread():
             loop.run_until_complete(generate_tts(vi_text))
             
         except Exception as e:
-            print(f"[!] Lỗi Dịch/TTS: {e}")
+            log(f"[!] Lỗi Dịch/TTS: {e}")
 
 async def generate_tts(text):
     communicate = edge_tts.Communicate(text, "vi-VN-HoaiMyNeural")
@@ -104,11 +110,11 @@ def playback_thread():
             while pygame.mixer.music.get_busy():
                 pygame.time.Clock().tick(10)
         except Exception as e:
-            print(f"[!] Lỗi Playback: {e}")
+            log(f"[!] Lỗi Playback: {e}")
 
 # --- WEBSOCKET SERVER ---
 async def handle_client(websocket):
-    print(f"[*] Có Client mới kết nối!")
+    log(f"[*] Có Client mới kết nối!")
     active_connections.add(websocket)
     websocket.loop = asyncio.get_running_loop()
     
@@ -132,18 +138,22 @@ async def handle_client(websocket):
                     if data.get("type") == "config":
                         global CURRENT_LANG
                         CURRENT_LANG = data.get("sourceLang", "en")
-                        print(f"[*] Cấu hình ngôn ngữ gốc: {CURRENT_LANG}")
+                        log(f"[*] Cấu hình ngôn ngữ gốc: {CURRENT_LANG}")
                 except:
                     pass
     except websockets.exceptions.ConnectionClosed:
-        print("[*] Client đã đóng kết nối.")
+        log("[*] Client đã đóng kết nối.")
     finally:
         active_connections.remove(websocket)
 
 async def main():
-    print("[*] Khởi động Local AI Server (ws://localhost:8765)...")
-    async with websockets.serve(handle_client, "localhost", 8765):
-        await asyncio.Future()  # run forever
+    try:
+        log("[*] Khởi động Local AI Server (ws://127.0.0.1:8765)...")
+        async with websockets.serve(handle_client, "127.0.0.1", 8765):
+            log("[*] WebSocket server started listening.")
+            await asyncio.Future()  # run forever
+    except Exception as e:
+        log(f"[!] WebSocket server error: {e}")
 
 if __name__ == "__main__":
     threading.Thread(target=stt_thread, daemon=True).start()
@@ -151,6 +161,9 @@ if __name__ == "__main__":
     threading.Thread(target=playback_thread, daemon=True).start()
     
     try:
+        log("[*] Main thread starting asyncio run...")
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\n[*] Tắt Server.")
+        log("\n[*] Tắt Server.")
+    except Exception as e:
+        log(f"[!] Main thread error: {e}")

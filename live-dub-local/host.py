@@ -4,7 +4,7 @@ import subprocess
 import struct
 
 with open("d:\\folder\\tools\\live-dub-local\\host_debug.log", "a", encoding="utf-8") as f:
-    f.write("host.py started\n")
+    f.write(f"host.py started. sys.executable: {sys.executable}\n")
 
 # Fix Unicode print errors on Windows
 sys.stdout.reconfigure(encoding='utf-8')
@@ -22,11 +22,21 @@ def read_message():
 script_path = os.path.join(os.path.dirname(__file__), "server.py")
 err_log = open("d:\\folder\\tools\\live-dub-local\\server_error.log", "a", encoding="utf-8")
 out_log = open("d:\\folder\\tools\\live-dub-local\\server_output.log", "a", encoding="utf-8")
-proc = subprocess.Popen(
-    [sys.executable, "-u", script_path], 
-    stdout=out_log, 
-    stderr=err_log
-)
+
+try:
+    proc = subprocess.Popen(
+        [sys.executable, "-u", script_path], 
+        stdin=subprocess.DEVNULL,
+        stdout=out_log, 
+        stderr=err_log,
+        cwd=os.path.dirname(__file__),
+        creationflags=subprocess.CREATE_NO_WINDOW
+    )
+    with open("d:\\folder\\tools\\live-dub-local\\host_debug.log", "a", encoding="utf-8") as f:
+        f.write(f"Server process started with PID: {proc.pid}\n")
+except Exception as e:
+    with open("d:\\folder\\tools\\live-dub-local\\host_debug.log", "a", encoding="utf-8") as f:
+        f.write(f"Failed to start server process: {e}\n")
 
 try:
     while True:
