@@ -113,7 +113,7 @@
         offX = dx; offY = dy;
         host.style.transform = `translate(${offX}px, ${offY}px)`;
         
-        // Real-time panel positioning adjust as bubble moves
+        // Panel tracks smart quadrant alignment in real-time
         if (panel.classList.contains('open')) {
             updatePanelPlacement();
         }
@@ -387,10 +387,10 @@
         actions.appendChild(copyBtn);
 
         if (item.type === 'image') {
-            const ocrBtn = el('button', 'action-btn'); ocrBtn.innerHTML = ICONS.ocr + ' Aa';
-            ocrBtn.title = "Extract Text";
-            ocrBtn.addEventListener('click', () => runOCR(item, ocrBtn));
-            actions.appendChild(ocrBtn);
+            const lensBtn = el('button', 'action-btn'); lensBtn.innerHTML = ICONS.ocr + ' Lens';
+            lensBtn.title = "Open in Google Lens";
+            lensBtn.addEventListener('click', () => openInGoogleLens(item.content));
+            actions.appendChild(lensBtn);
         }
 
         if (!inCollection) {
@@ -467,6 +467,16 @@
                 } catch {}
             }
             navigator.clipboard.writeText(text).then(() => flashBtn(btn, 'Copied!'));
+        }
+    }
+
+    // ---- Open In Google Lens (100% Free client-side upload) ----
+    async function openInGoogleLens(b64Data) {
+        try {
+            await chrome.storage.local.set({ lensImage: b64Data });
+            chrome.runtime.sendMessage({ action: 'openLens' });
+        } catch (e) {
+            showToast('Failed to open Google Lens', true);
         }
     }
 
@@ -550,8 +560,6 @@
             // Handle Drag/Pan on Container
             container.addEventListener('mousedown', (e) => {
                 if (scale <= 1.0) return;
-                // Allow selecting text spans instead of dragging
-                if (e.target.classList.contains('lens-word')) return;
                 
                 isMouseDown = true;
                 startX = e.clientX - panX;
@@ -583,8 +591,8 @@
                 window.removeEventListener('mouseup', onMouseUp);
             }, { once: true });
 
-            const lensBtn = el('button', 'action-btn btn-primary'); lensBtn.innerHTML = ICONS.ocr + ' Live Text';
-            lensBtn.addEventListener('click', () => runLensOCR(item, lensBtn, img, overlay));
+            const lensBtn = el('button', 'action-btn btn-primary'); lensBtn.innerHTML = ICONS.ocr + ' Google Lens';
+            lensBtn.addEventListener('click', () => openInGoogleLens(item.content));
             vFoot.appendChild(lensBtn);
         } else {
             const txt = el('div', 'view-text'); txt.textContent = item.content;
@@ -596,112 +604,6 @@
         vFoot.appendChild(cp);
 
         panel.classList.add('view-mode');
-    }
-
-    // ---- Live Text OCR ----
-    async function runLensOCR(item, btn, imgEl, overlayEl) {
-        const orig = btn.innerHTML;
-        btn.innerHTML = 'Scanning...';
-        try {
-            const formData = new FormData();
-            formData.append("base64Image", item.content);
-            formData.append("language", "eng"); // eng covers most latin scripts
-            formData.append("isOverlayRequired", "true");
-            formData.append("OCREngine", "2");
-
-            const res = await fetch("https://api.ocr.space/parse/image", {
-                method: "POST",
-                headers: { "apikey": "helloworld" },
-                body: formData
-            });
-            const json = await res.json();
-
-            if (json.IsErroredOnProcessing || !json.ParsedResults || json.ParsedResults.length === 0) {
-                btn.innerHTML = orig;
-                showToast('No text detected', true);
-                return;
-            }
-
-            const overlayData = json.ParsedResults[0].TextOverlay;
-            if (!overlayData || !overlayData.Lines) {
-                showToast('No overlay data', true);
-                btn.innerHTML = orig;
-                return;
-            }
-
-            overlayEl.innerHTML = '';
-            overlayEl.classList.add('active');
-            
-            const natW = imgEl.naturalWidth;
-            const natH = imgEl.naturalHeight;
-
-            overlayData.Lines.forEach(line => {
-                line.Words.forEach(word => {
-                    const span = document.createElement('span');
-                    span.className = 'lens-word';
-                    span.textContent = word.WordText;
-                    
-                    const left = (word.Left / natW) * 100;
-                    const top = (word.Top / natH) * 100;
-                    const width = (word.Width / natW) * 100;
-                    const height = (word.Height / natH) * 100;
-
-                    span.style.left = left + '%';
-                    span.style.top = top + '%';
-                    span.style.width = width + '%';
-                    span.style.height = height + '%';
-                    
-                    overlayEl.appendChild(span);
-                });
-            });
-
-            btn.innerHTML = ICONS.check + ' Selectable';
-            showToast('Highlight text on the image to copy!');
-        } catch(e) {
-            btn.innerHTML = orig;
-            showToast('Lens failed', true);
-        }
-    }
-
-    // ---- OCR Cloud API ----
-    async function runOCR(item, btn) {
-        const orig = btn.innerHTML;
-        btn.innerHTML = '...';
-        try {
-            const formData = new FormData();
-            formData.append("base64Image", item.content);
-            formData.append("language", "eng");
-
-            const res = await fetch("https://api.ocr.space/parse/image", {
-                method: "POST",
-                headers: { "apikey": "helloworld" }, // free tier OCR space
-                body: formData
-            });
-            const json = await res.json();
-
-            if (json.IsErroredOnProcessing || !json.ParsedResults || json.ParsedResults.length === 0) {
-                btn.innerHTML = orig;
-                showToast('No text detected', true);
-                return;
-            }
-
-            const text = json.ParsedResults[0].ParsedText;
-
-            if (text && text.trim()) {
-                navigator.clipboard.writeText(text.trim());
-                chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'text', content: text.trim() } }, () => {
-                    if (currentTab === 'recent') loadRecent();
-                });
-                flashBtn(btn, 'Done');
-                showToast('Text copied to clipboard');
-            } else {
-                btn.innerHTML = orig;
-                showToast('No text detected', true);
-            }
-        } catch (err) {
-            btn.innerHTML = orig;
-            showToast('OCR failed (check connection)', true);
-        }
     }
 
     // ---- OS Clipboard Sync ----

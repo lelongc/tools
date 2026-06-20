@@ -13,6 +13,10 @@ chrome.runtime.onMessage.addListener((req, sender, respond) => {
 
 async function handleMessage(req, sender) {
     switch (req.action) {
+        case 'openLens':
+            chrome.tabs.create({ url: chrome.runtime.getURL('lens/lens.html') });
+            return { ok: true };
+
         case 'saveItem':
             const result = await saveItem(req.item);
             if (result.isNew && sender && sender.tab) {
