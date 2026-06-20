@@ -423,6 +423,19 @@
             <label class="form-label">Nhóm Mục Tiêu</label>
             <select class="form-select" id="groupSelector" style="width: 100%"><option value="">Chọn các nhóm muốn đăng...</option></select>
           </div>
+          <div class="row mb-3" id="groupRangeContainer">
+            <div class="col-6">
+              <label class="form-label text-muted" style="font-size: 13px;">Từ nhóm số</label>
+              <input type="number" class="form-control" id="startGroupIndex" value="1" min="1" />
+            </div>
+            <div class="col-6">
+              <label class="form-label text-muted" style="font-size: 13px;">Đến nhóm số</label>
+              <input type="number" class="form-control" id="endGroupIndex" value="" min="1" placeholder="Tất cả" />
+            </div>
+            <div class="col-12 mt-1">
+              <small class="text-muted" id="groupRangeInfo"></small>
+            </div>
+          </div>
         </div>
 
         <h6 class="fw-bold mt-2 mb-3">Cấu Hình Thời Gian Chờ (Giây)</h6>

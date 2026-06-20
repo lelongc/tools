@@ -484,6 +484,19 @@
             <select class="form-select" id="groupSelect">
               <option value="">Chọn các nhóm mục tiêu</option>
             </select>
+            <div class="row mt-2" id="groupRangeContainer">
+              <div class="col-6">
+                <label class="form-label text-muted" style="font-size: 13px;">Từ nhóm số</label>
+                <input type="number" class="form-control form-control-sm" id="startGroupIndex" value="1" min="1" />
+              </div>
+              <div class="col-6">
+                <label class="form-label text-muted" style="font-size: 13px;">Đến nhóm số</label>
+                <input type="number" class="form-control form-control-sm" id="endGroupIndex" value="" min="1" placeholder="Tất cả" />
+              </div>
+              <div class="col-12 mt-1">
+                <small class="text-muted" id="groupRangeInfo"></small>
+              </div>
+            </div>
           </div>
         </div>
       </div>
