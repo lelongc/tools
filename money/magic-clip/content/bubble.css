@@ -297,6 +297,7 @@
     margin-bottom: 10px;
     transition: all 0.25s var(--mc-ease);
     position: relative;
+    cursor: pointer;
 }
 .card:hover {
     border-color: var(--mc-border-hover);

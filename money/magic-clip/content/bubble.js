@@ -406,8 +406,16 @@
         actions.appendChild(viewBtn);
 
         const copyBtn = el('button', 'action-btn btn-primary'); copyBtn.innerHTML = ICONS.copy + ' Copy';
-        copyBtn.addEventListener('click', () => copyItem(item, copyBtn));
+        copyBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            copyItem(item, copyBtn, false);
+        });
         actions.appendChild(copyBtn);
+
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('.card-actions')) return;
+            copyItem(item, copyBtn, true);
+        });
 
         if (item.type === 'image') {
             const lensBtn = el('button', 'action-btn btn-lens'); lensBtn.innerHTML = ICONS.lens + ' Lens';
@@ -473,14 +481,14 @@
     });
 
     // ---- Copy logic ----
-    function copyItem(item, btnElement) {
+    function copyItem(item, btnElement, shouldPaste = false) {
         const originalText = btnElement.innerHTML;
-        btnElement.innerHTML = ICONS.check + ' Copied';
+        btnElement.innerHTML = ICONS.check + (shouldPaste ? ' Pasted' : ' Copied');
         btnElement.style.color = 'var(--mc-green)';
         btnElement.style.borderColor = 'rgba(16,185,129,0.3)';
 
         const doPaste = () => {
-            if (lastActiveElement && (
+            if (shouldPaste && lastActiveElement && (
                 lastActiveElement.tagName === 'INPUT' || 
                 lastActiveElement.tagName === 'TEXTAREA' || 
                 lastActiveElement.isContentEditable
