@@ -2,7 +2,12 @@
   "manifest_version": 3,
   "name": "NeoClip",
   "version": "3.0.0",
-  "description": "Zero-knowledge clipboard manager with Cloud OCR, collections, and smart paste.",
+  "description": "Smart clipboard manager with collections, search, and Google Lens integration.",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "48": "icons/icon-48.png",
+    "128": "icons/icon-128.png"
+  },
   "permissions": [
     "storage",
     "clipboardRead",
@@ -23,14 +28,20 @@
     {
       "resources": [
         "content/bubble.css",
-        "libs/*"
+        "libs/*",
+        "icons/*"
       ],
       "matches": ["<all_urls>"]
     }
   ],
   "action": {
     "default_popup": "popup/index.html",
-    "default_title": "NeoClip"
+    "default_title": "NeoClip",
+    "default_icon": {
+      "16": "icons/icon-16.png",
+      "48": "icons/icon-48.png"
+    }
   },
   "host_permissions": ["<all_urls>"]
 }
+

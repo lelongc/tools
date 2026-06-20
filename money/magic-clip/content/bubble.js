@@ -23,7 +23,9 @@
         image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
         zoomIn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',
         zoomOut: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',
-        reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>'
+        reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>',
+        lens: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><circle cx="11" cy="11" r="3"/><path d="M11 8v6M8 11h6"/></svg>',
+        logo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="4" y="4" width="16" height="18" rx="2"/><path d="M9 12h6M9 16h4"/></svg>'
     };
 
     // ---- Host & Shadow DOM ----
@@ -43,7 +45,7 @@
     // ---- Bubble ----
     const bubble = document.createElement('div');
     bubble.id = 'mc-bubble';
-    bubble.innerHTML = ICONS.clipboard;
+    bubble.innerHTML = ICONS.logo;
 
     // ---- Panel Shell ----
     const panel = document.createElement('div');
@@ -387,7 +389,7 @@
         actions.appendChild(copyBtn);
 
         if (item.type === 'image') {
-            const lensBtn = el('button', 'action-btn'); lensBtn.innerHTML = ICONS.ocr + ' Lens';
+            const lensBtn = el('button', 'action-btn btn-lens'); lensBtn.innerHTML = ICONS.lens + ' Lens';
             lensBtn.title = "Open in Google Lens";
             lensBtn.addEventListener('click', () => openInGoogleLens(item.content));
             actions.appendChild(lensBtn);
@@ -591,7 +593,7 @@
                 window.removeEventListener('mouseup', onMouseUp);
             }, { once: true });
 
-            const lensBtn = el('button', 'action-btn btn-primary'); lensBtn.innerHTML = ICONS.ocr + ' Google Lens';
+            const lensBtn = el('button', 'action-btn btn-lens'); lensBtn.innerHTML = ICONS.lens + ' Google Lens';
             lensBtn.addEventListener('click', () => openInGoogleLens(item.content));
             vFoot.appendChild(lensBtn);
         } else {
@@ -638,7 +640,11 @@
 
     function triggerBubbleBounce() {
         bubble.classList.add('mc-bounce');
-        setTimeout(() => bubble.classList.remove('mc-bounce'), 300);
+        bubble.classList.add('mc-pulse');
+        setTimeout(() => {
+            bubble.classList.remove('mc-bounce');
+            bubble.classList.remove('mc-pulse');
+        }, 800);
     }
 
     // ---- Copy Event (Robust delayed reader) ----
