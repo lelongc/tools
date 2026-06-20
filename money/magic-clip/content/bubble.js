@@ -116,6 +116,17 @@
     // ---- Toggle Panel ----
     bubble.addEventListener('click', async () => {
         if (dragMoved) return;
+        
+        // Smart Panel Placement
+        const rect = host.getBoundingClientRect();
+        const isLeft = rect.left < window.innerWidth / 2;
+        const isTop = rect.top < window.innerHeight / 2;
+        
+        panel.style.top = isTop ? '60px' : 'auto';
+        panel.style.bottom = isTop ? 'auto' : '60px';
+        panel.style.left = isLeft ? '0' : 'auto';
+        panel.style.right = isLeft ? 'auto' : '0';
+
         const open = panel.classList.toggle('open');
         if (open) {
             await syncClipboard();
@@ -443,22 +454,123 @@
         vBody.innerHTML = ''; vFoot.innerHTML = '';
 
         if (item.type === 'image') {
+            const container = el('div', 'lens-container');
             const img = document.createElement('img');
             img.src = item.content; img.className = 'view-img';
-            img.title = "Click to zoom";
-            img.addEventListener('click', function() { this.classList.toggle('zoomed'); });
-            vBody.appendChild(img);
+            
+            const overlay = el('div', 'lens-overlay');
+            container.append(img, overlay);
+            vBody.appendChild(container);
+
+            // Zoom & Pan Logic
+            let zoomed = false;
+            let panX = 0, panY = 0;
+            let isPanning = false, startX, startY;
+
+            img.addEventListener('click', (e) => {
+                if(isPanning) return;
+                zoomed = !zoomed;
+                if(zoomed) {
+                    container.classList.add('zoomed');
+                } else {
+                    container.classList.remove('zoomed');
+                    panX = 0; panY = 0;
+                    container.style.transform = `translate(0px, 0px) scale(1)`;
+                }
+            });
+
+            container.addEventListener('mousedown', (e) => {
+                if(!zoomed) return;
+                isPanning = false;
+                startX = e.clientX - panX;
+                startY = e.clientY - panY;
+            });
+            container.addEventListener('mousemove', (e) => {
+                if(!zoomed || e.buttons !== 1) return;
+                isPanning = true;
+                panX = e.clientX - startX;
+                panY = e.clientY - startY;
+                container.style.transform = `translate(${panX}px, ${panY}px) scale(2)`;
+            });
+
+            const lensBtn = el('button', 'action-btn btn-primary'); lensBtn.innerHTML = ICONS.ocr + ' Live Text';
+            lensBtn.addEventListener('click', () => runLensOCR(item, lensBtn, img, overlay));
+            vFoot.appendChild(lensBtn);
         } else {
             const txt = el('div', 'view-text'); txt.textContent = item.content;
             vBody.appendChild(txt);
         }
 
-        const cp = el('button', 'action-btn btn-primary'); cp.innerHTML = ICONS.copy + ' Copy';
+        const cp = el('button', 'action-btn'); cp.innerHTML = ICONS.copy + ' Copy';
         cp.addEventListener('click', () => copyItem(item, cp));
         vFoot.appendChild(cp);
 
-        // Slide over
         panel.classList.add('view-mode');
+    }
+
+    // ---- Live Text OCR ----
+    async function runLensOCR(item, btn, imgEl, overlayEl) {
+        const orig = btn.innerHTML;
+        btn.innerHTML = 'Scanning...';
+        try {
+            const formData = new FormData();
+            formData.append("base64Image", item.content);
+            formData.append("language", "eng"); // eng covers most latin scripts
+            formData.append("isOverlayRequired", "true");
+            formData.append("OCREngine", "2");
+
+            const res = await fetch("https://api.ocr.space/parse/image", {
+                method: "POST",
+                headers: { "apikey": "helloworld" },
+                body: formData
+            });
+            const json = await res.json();
+
+            if (json.IsErroredOnProcessing || !json.ParsedResults || json.ParsedResults.length === 0) {
+                btn.innerHTML = orig;
+                showToast('No text detected', true);
+                return;
+            }
+
+            const overlayData = json.ParsedResults[0].TextOverlay;
+            if (!overlayData || !overlayData.Lines) {
+                showToast('No overlay data', true);
+                btn.innerHTML = orig;
+                return;
+            }
+
+            overlayEl.innerHTML = '';
+            overlayEl.classList.add('active');
+            
+            const natW = imgEl.naturalWidth;
+            const natH = imgEl.naturalHeight;
+
+            overlayData.Lines.forEach(line => {
+                line.Words.forEach(word => {
+                    const span = document.createElement('span');
+                    span.className = 'lens-word';
+                    span.textContent = word.WordText;
+                    
+                    const left = (word.Left / natW) * 100;
+                    const top = (word.Top / natH) * 100;
+                    const width = (word.Width / natW) * 100;
+                    const height = (word.Height / natH) * 100;
+
+                    span.style.left = left + '%';
+                    span.style.top = top + '%';
+                    span.style.width = width + '%';
+                    span.style.height = height + '%';
+                    
+                    overlayEl.appendChild(span);
+                });
+            });
+
+            btn.innerHTML = ICONS.check + ' Selectable';
+            showToast('Highlight text on the image to copy!');
+        } catch(e) {
+            btn.innerHTML = orig;
+            showToast('Lens failed', true);
+        }
     }
 
     // ---- OCR Cloud API ----
