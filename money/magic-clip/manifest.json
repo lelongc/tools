@@ -45,8 +45,8 @@
   "commands": {
     "toggle-panel": {
       "suggested_key": {
-        "default": "Ctrl+Shift+V",
-        "mac": "MacCtrl+Shift+V"
+        "default": "Alt+V",
+        "mac": "Alt+V"
       },
       "description": "Open NeoClip Clipboard History"
     }
