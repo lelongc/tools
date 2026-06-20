@@ -1,1 +1,0 @@
-Changed.addListener(e=>{if(e.state&&("complete"===e.state.current||"interrupted"===e.state.current)){const t=oe.get(e.id);t&&(oe.delete(e.id),t())}}),chrome.downloads.onDeterminingFilename.addListener((e,t)=>{const a=re.get(e.id);t(a?{filename:a,conflictAction:"uniquify"}:{filename:e.filename||"download",conflictAction:"uniquify"})}),ch
