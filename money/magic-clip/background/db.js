@@ -45,9 +45,9 @@ async function getRecent(limit = 50, search = '') {
     let items;
     if (search) {
         const lower = search.toLowerCase();
-        // Since Dexie handles nulls poorly in queries, we filter manually for search
+        // SEARCH FIX: Scan everything, including items inside collections
         items = await db.history.orderBy('timestamp').reverse().toArray();
-        items = items.filter(i => (!i.collectionId || i.collectionId === 0) && i.type !== 'image' && i.content.toLowerCase().includes(lower));
+        items = items.filter(i => i.type !== 'image' && i.content.toLowerCase().includes(lower));
         return items.slice(0, limit);
     }
     items = await db.history.orderBy('timestamp').reverse().toArray();

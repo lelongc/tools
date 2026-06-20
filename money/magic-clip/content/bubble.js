@@ -59,7 +59,7 @@
     panel.innerHTML = `
         <div id="screen-main" class="screen">
             <div class="p-header">
-                <span class="p-title">${ICONS.clipboard} Magic Clip</span>
+                <span class="p-title">${ICONS.clipboard} NeoClip</span>
                 <button class="btn-icon" id="btn-close">${ICONS.close}</button>
             </div>
             <div class="p-search">
@@ -445,6 +445,8 @@
         if (item.type === 'image') {
             const img = document.createElement('img');
             img.src = item.content; img.className = 'view-img';
+            img.title = "Click to zoom";
+            img.addEventListener('click', function() { this.classList.toggle('zoomed'); });
             vBody.appendChild(img);
         } else {
             const txt = el('div', 'view-text'); txt.textContent = item.content;
@@ -459,36 +461,29 @@
         panel.classList.add('view-mode');
     }
 
-    // ---- OCR ----
-    let tesseractLoaded = false;
-    function loadTesseract() {
-        return new Promise((res, rej) => {
-            if (tesseractLoaded || typeof window.Tesseract !== 'undefined') { tesseractLoaded = true; return res(); }
-            const s = document.createElement('script');
-            s.src = chrome.runtime.getURL('libs/tesseract.min.js');
-            s.onload = () => { tesseractLoaded = true; res(); };
-            s.onerror = rej;
-            document.head.appendChild(s);
-        });
-    }
-
+    // ---- OCR Cloud API ----
     async function runOCR(item, btn) {
         const orig = btn.innerHTML;
         btn.innerHTML = '...';
         try {
-            await loadTesseract();
-            const worker = await Tesseract.createWorker({
-                workerPath: chrome.runtime.getURL('libs/worker.min.js'),
-                corePath: chrome.runtime.getURL('libs/tesseract-core.wasm.js'),
-                langPath: chrome.runtime.getURL('libs'),
-                logger: m => { if (m.status === 'recognizing text') btn.textContent = Math.round(m.progress*100)+'%'; }
+            const formData = new FormData();
+            formData.append("base64Image", item.content);
+            formData.append("language", "eng");
+
+            const res = await fetch("https://api.ocr.space/parse/image", {
+                method: "POST",
+                headers: { "apikey": "helloworld" }, // free tier OCR space
+                body: formData
             });
-            await worker.loadLanguage('eng+vie');
-            await worker.initialize('eng+vie');
-            const resp = await fetch(item.content);
-            const blob = await resp.blob();
-            const { data: { text } } = await worker.recognize(blob);
-            await worker.terminate();
+            const json = await res.json();
+
+            if (json.IsErroredOnProcessing || !json.ParsedResults || json.ParsedResults.length === 0) {
+                btn.innerHTML = orig;
+                showToast('No text detected', true);
+                return;
+            }
+
+            const text = json.ParsedResults[0].ParsedText;
 
             if (text && text.trim()) {
                 navigator.clipboard.writeText(text.trim());
@@ -503,7 +498,7 @@
             }
         } catch (err) {
             btn.innerHTML = orig;
-            showToast('OCR failed', true);
+            showToast('OCR failed (check connection)', true);
         }
     }
 

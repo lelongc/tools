@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Magic Clip",
-  "version": "2.0.0",
-  "description": "Zero-knowledge clipboard manager with OCR, collections, and smart paste.",
+  "name": "NeoClip",
+  "version": "3.0.0",
+  "description": "Zero-knowledge clipboard manager with Cloud OCR, collections, and smart paste.",
   "permissions": [
     "storage",
     "clipboardRead",
@@ -30,7 +30,7 @@
   ],
   "action": {
     "default_popup": "popup/index.html",
-    "default_title": "Magic Clip"
+    "default_title": "NeoClip"
   },
   "host_permissions": ["<all_urls>"]
 }

@@ -262,6 +262,10 @@
 }
 .view-img {
     max-width: 100%; border-radius: 8px; border: 1px solid var(--mc-border);
+    cursor: zoom-in; transition: transform 0.2s; transform-origin: top left;
+}
+.view-img.zoomed {
+    transform: scale(2); cursor: zoom-out; z-index: 100;
 }
 .view-footer {
     padding: 12px 16px; border-top: 1px solid var(--mc-border); display: flex; gap: 8px;
