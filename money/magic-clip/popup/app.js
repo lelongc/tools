@@ -61,4 +61,13 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         });
     });
+
+    // Handle Setting: Toggle Bubble
+    const toggleBubble = document.getElementById('toggle-bubble');
+    chrome.storage.local.get(['hideBubble'], (res) => {
+        toggleBubble.checked = !res.hideBubble;
+    });
+    toggleBubble.addEventListener('change', (e) => {
+        chrome.storage.local.set({ hideBubble: !e.target.checked });
+    });
 });

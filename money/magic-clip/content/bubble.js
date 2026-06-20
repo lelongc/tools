@@ -47,6 +47,16 @@
     bubble.id = 'mc-bubble';
     bubble.innerHTML = ICONS.logo;
 
+    // Load hideBubble setting
+    chrome.storage.local.get(['hideBubble'], res => {
+        if (res.hideBubble) bubble.style.display = 'none';
+    });
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local' && changes.hideBubble) {
+            bubble.style.display = changes.hideBubble.newValue ? 'none' : 'flex';
+        }
+    });
+
     // ---- Panel Shell ----
     const panel = document.createElement('div');
     panel.id = 'mc-panel';
@@ -99,28 +109,65 @@
     let currentTab = 'recent';
     let currentCollectionId = null;
     let collectionsCache = [];
+    let pollInterval = null;
+    let dragMoved = false;
+    let lastActiveElement = null; // for direct paste
 
-    // ---- Drag ----
-    let dragging = false, dragMoved = false;
-    let startX, startY, offX = 0, offY = 0;
-
+    // Drag Bubble
+    let isDown = false, startX, startY, initX, initY;
     bubble.addEventListener('mousedown', e => {
-        startX = e.clientX - offX; startY = e.clientY - offY;
-        dragging = true; dragMoved = false;
+        isDown = true; dragMoved = false;
+        startX = e.clientX; startY = e.clientY;
+        const rect = host.getBoundingClientRect();
+        initX = rect.left; initY = rect.top;
+        host.style.right = 'auto'; host.style.bottom = 'auto';
+        host.style.left = initX + 'px'; host.style.top = initY + 'px';
     });
-    document.addEventListener('mousemove', e => {
-        if (!dragging) return;
-        const dx = e.clientX - startX; const dy = e.clientY - startY;
-        if (Math.abs(dx - offX) > 3 || Math.abs(dy - offY) > 3) dragMoved = true;
-        offX = dx; offY = dy;
-        host.style.transform = `translate(${offX}px, ${offY}px)`;
-        
-        // Panel tracks smart quadrant alignment in real-time
-        if (panel.classList.contains('open')) {
-            updatePanelPlacement();
+    window.addEventListener('mousemove', e => {
+        if (!isDown) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragMoved = true;
+        if (dragMoved) {
+            host.style.left = (initX + dx) + 'px';
+            host.style.top = (initY + dy) + 'px';
         }
     });
-    document.addEventListener('mouseup', () => { dragging = false; });
+    window.addEventListener('mouseup', () => isDown = false);
+
+    // Toggle Panel
+    async function togglePanel() {
+        if (dragMoved) return;
+        
+        updatePanelPlacement();
+        const open = panel.classList.toggle('open');
+        if (open) {
+            shadow.getElementById('search-input').value = ''; // Reset search on open
+            await syncClipboard();
+            showTab(currentTab);
+            // Pre-fetch collections for dropdowns
+            chrome.runtime.sendMessage({ action: 'getCollections' }, res => {
+                if (res && res.collections) collectionsCache = res.collections;
+            });
+            // Poll clipboard for real-time copy updates when panel is open
+            pollInterval = setInterval(async () => {
+                const updated = await syncClipboard();
+                if (updated && currentTab === 'recent') {
+                    loadRecent(shadow.getElementById('search-input').value, true);
+                }
+            }, 1000);
+        } else {
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+        }
+    }
+
+    bubble.addEventListener('click', () => {
+        lastActiveElement = document.activeElement;
+        togglePanel();
+    });
 
     function updatePanelPlacement() {
         const rect = host.getBoundingClientRect();
@@ -133,36 +180,7 @@
         panel.style.right = isLeft ? 'auto' : '0';
     }
 
-    // ---- Toggle Panel ----
-    let pollInterval = null;
-
-    bubble.addEventListener('click', async () => {
-        if (dragMoved) return;
-        
-        updatePanelPlacement();
-        const open = panel.classList.toggle('open');
-        if (open) {
-            await syncClipboard();
-            showTab(currentTab);
-            // Pre-fetch collections for dropdowns
-            chrome.runtime.sendMessage({ action: 'getCollections' }, res => {
-                if (res && res.collections) collectionsCache = res.collections;
-            });
-            // Poll clipboard for real-time copy updates when panel is open
-            pollInterval = setInterval(async () => {
-                const updated = await syncClipboard();
-                if (updated && currentTab === 'recent') {
-                    loadRecent(shadow.getElementById('search-input').value);
-                }
-            }, 1000);
-        } else {
-            if (pollInterval) {
-                clearInterval(pollInterval);
-                pollInterval = null;
-            }
-        }
-    });
-
+    // ---- Panel Close ----
     shadow.getElementById('btn-close').addEventListener('click', () => {
         panel.classList.remove('open');
         if (pollInterval) {
@@ -209,9 +227,11 @@
     }
 
     // ---- Render Recent ----
-    function loadRecent(search = '') {
+    function loadRecent(search = '', isRefresh = false) {
         const body = shadow.getElementById('main-body');
-        body.innerHTML = '<div class="p-empty">Loading...</div>';
+        const scrollPos = body.scrollTop;
+        if (!isRefresh) body.innerHTML = '<div class="p-empty">Loading...</div>';
+        
         chrome.runtime.sendMessage({ action: 'getRecent', limit: 50, search }, res => {
             body.innerHTML = '';
             if (!res || !res.items || res.items.length === 0) {
@@ -219,6 +239,7 @@
                 return;
             }
             res.items.forEach(item => body.appendChild(buildCard(item, false)));
+            if (isRefresh) body.scrollTop = scrollPos;
         });
     }
 
@@ -452,24 +473,37 @@
     });
 
     // ---- Copy logic ----
-    function copyItem(item, btn) {
-        if (item.type === 'image') {
-            fetch(item.content)
-                .then(r => r.blob())
-                .then(blob => navigator.clipboard.write([new ClipboardItem({ [item.mime || 'image/png']: blob })]))
-                .then(() => flashBtn(btn, 'Copied!'))
-                .catch(() => showToast('Failed to copy image', true));
-        } else {
-            let text = item.content;
-            if (item.type === 'link') {
-                try {
-                    const u = new URL(text.trim());
-                    ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid','gclid','ref','affiliate'].forEach(k => u.searchParams.delete(k));
-                    text = u.toString();
-                } catch {}
+    function copyItem(item, btnElement) {
+        const originalText = btnElement.innerHTML;
+        btnElement.innerHTML = ICONS.check + ' Copied';
+        btnElement.style.color = 'var(--mc-green)';
+        btnElement.style.borderColor = 'rgba(16,185,129,0.3)';
+
+        const doPaste = () => {
+            if (lastActiveElement && (
+                lastActiveElement.tagName === 'INPUT' || 
+                lastActiveElement.tagName === 'TEXTAREA' || 
+                lastActiveElement.isContentEditable
+            )) {
+                lastActiveElement.focus();
+                document.execCommand('insertText', false, item.content);
             }
-            navigator.clipboard.writeText(text).then(() => flashBtn(btn, 'Copied!'));
+        };
+
+        if (item.type === 'text' || item.type === 'link') {
+            navigator.clipboard.writeText(item.content).then(doPaste).catch(()=>{});
+        } else if (item.type === 'image') {
+            fetch(item.content).then(r => r.blob()).then(blob => {
+                navigator.clipboard.write([
+                    new ClipboardItem({ [item.mime || 'image/png']: blob })
+                ]).then(doPaste).catch(()=>{});
+            });
         }
+        setTimeout(() => {
+            btnElement.innerHTML = originalText;
+            btnElement.style.color = '';
+            btnElement.style.borderColor = '';
+        }, 1500);
     }
 
     // ---- Open In Google Lens (100% Free client-side upload) ----
@@ -480,12 +514,6 @@
         } catch (e) {
             showToast('Failed to open Google Lens', true);
         }
-    }
-
-    function flashBtn(btn, text) {
-        const orig = btn.innerHTML;
-        btn.innerHTML = ICONS.check + ' ' + text;
-        setTimeout(() => { btn.innerHTML = orig; }, 1000);
     }
 
     // ---- Inline Preview ----
@@ -685,11 +713,17 @@
     });
 
     // ---- Real-time listeners ----
-    chrome.runtime.onMessage.addListener((msg) => {
-        if (msg.action === 'clipboardUpdated') {
-            if (panel.classList.contains('open') && currentTab === 'recent') {
-                loadRecent(shadow.getElementById('search-input').value);
+    chrome.runtime.onMessage.addListener((req) => {
+        if (req.action === 'clipboardUpdated') {
+            if (!panel.classList.contains('open')) {
+                triggerBubbleBounce();
+            } else if (currentTab === 'recent') {
+                loadRecent(shadow.getElementById('search-input').value, true);
             }
+        }
+        if (req.action === 'togglePanel') {
+            lastActiveElement = document.activeElement;
+            togglePanel();
         }
     });
 

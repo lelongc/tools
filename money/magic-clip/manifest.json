@@ -42,6 +42,15 @@
       "48": "icons/icon-48.png"
     }
   },
+  "commands": {
+    "toggle-panel": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+V",
+        "mac": "MacCtrl+Shift+V"
+      },
+      "description": "Open NeoClip Clipboard History"
+    }
+  },
   "host_permissions": ["<all_urls>"]
 }
 
