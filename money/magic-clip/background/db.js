@@ -22,7 +22,7 @@ async function saveItem(item) {
     // Deduplicate: skip if identical to most recent
     const latest = await db.history.orderBy('timestamp').reverse().first();
     if (latest && latest.content === item.content && latest.type === item.type) {
-        return latest.id;
+        return { id: latest.id, isNew: false };
     }
     item.timestamp = Date.now();
     item.collectionId = item.collectionId || 0; // use 0 for null to make indexing easier
@@ -38,7 +38,8 @@ async function saveItem(item) {
         const oldest = await db.history.orderBy('timestamp').first();
         if (oldest) await db.history.delete(oldest.id);
     }
-    return await db.history.add(item);
+    const newId = await db.history.add(item);
+    return { id: newId, isNew: true };
 }
 
 async function getRecent(limit = 50, search = '') {

@@ -1,5 +1,5 @@
 /* ============================================
-   MAGIC CLIP - PREMIUM UI LOGIC
+   NEOCLIP - PREMIUM UI LOGIC
    No popups, inline elements, smooth transitions
    ============================================ */
 
@@ -110,14 +110,15 @@
         if (Math.abs(dx - offX) > 3 || Math.abs(dy - offY) > 3) dragMoved = true;
         offX = dx; offY = dy;
         host.style.transform = `translate(${offX}px, ${offY}px)`;
+        
+        // Real-time panel positioning adjust as bubble moves
+        if (panel.classList.contains('open')) {
+            updatePanelPlacement();
+        }
     });
     document.addEventListener('mouseup', () => { dragging = false; });
 
-    // ---- Toggle Panel ----
-    bubble.addEventListener('click', async () => {
-        if (dragMoved) return;
-        
-        // Smart Panel Placement
+    function updatePanelPlacement() {
         const rect = host.getBoundingClientRect();
         const isLeft = rect.left < window.innerWidth / 2;
         const isTop = rect.top < window.innerHeight / 2;
@@ -126,7 +127,15 @@
         panel.style.bottom = isTop ? 'auto' : '60px';
         panel.style.left = isLeft ? '0' : 'auto';
         panel.style.right = isLeft ? 'auto' : '0';
+    }
 
+    // ---- Toggle Panel ----
+    let pollInterval = null;
+
+    bubble.addEventListener('click', async () => {
+        if (dragMoved) return;
+        
+        updatePanelPlacement();
         const open = panel.classList.toggle('open');
         if (open) {
             await syncClipboard();
@@ -135,10 +144,28 @@
             chrome.runtime.sendMessage({ action: 'getCollections' }, res => {
                 if (res && res.collections) collectionsCache = res.collections;
             });
+            // Poll clipboard for real-time copy updates when panel is open
+            pollInterval = setInterval(async () => {
+                const updated = await syncClipboard();
+                if (updated && currentTab === 'recent') {
+                    loadRecent(shadow.getElementById('search-input').value);
+                }
+            }, 1000);
+        } else {
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
         }
     });
 
-    shadow.getElementById('btn-close').addEventListener('click', () => panel.classList.remove('open'));
+    shadow.getElementById('btn-close').addEventListener('click', () => {
+        panel.classList.remove('open');
+        if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
+        }
+    });
 
     // ---- View Back ----
     shadow.getElementById('btn-view-back').addEventListener('click', () => {
@@ -470,6 +497,8 @@
             let isPanning = false, startX, startY;
             let isMouseDown = false;
 
+            let dragStartX = 0, dragStartY = 0;
+
             img.addEventListener('click', (e) => {
                 if(isPanning) return;
                 zoomed = !zoomed;
@@ -488,22 +517,32 @@
                 if(!zoomed) return;
                 isMouseDown = true;
                 isPanning = false;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
                 startX = e.clientX - panX;
                 startY = e.clientY - panY;
             });
 
             const onMouseMove = (e) => {
                 if(!isMouseDown || !zoomed) return;
-                isPanning = true;
-                panX = e.clientX - startX;
-                panY = e.clientY - startY;
                 
-                // Limit pan to prevent pulling it too far out
-                const maxPan = 400;
-                panX = Math.max(-maxPan, Math.min(maxPan, panX));
-                panY = Math.max(-maxPan, Math.min(maxPan, panY));
+                const dx = e.clientX - dragStartX;
+                const dy = e.clientY - dragStartY;
+                if (Math.sqrt(dx*dx + dy*dy) > 5) {
+                    isPanning = true;
+                }
                 
-                wrapper.style.transform = `translate(${panX}px, ${panY}px) scale(2.5)`;
+                if (isPanning) {
+                    panX = e.clientX - startX;
+                    panY = e.clientY - startY;
+                    
+                    // Limit pan to prevent pulling it too far out
+                    const maxPan = 400;
+                    panX = Math.max(-maxPan, Math.min(maxPan, panX));
+                    panY = Math.max(-maxPan, Math.min(maxPan, panY));
+                    
+                    wrapper.style.transform = `translate(${panX}px, ${panY}px) scale(2.5)`;
+                }
             };
 
             const onMouseUp = () => {
@@ -652,45 +691,68 @@
                 if (imgType) {
                     const blob = await ci.getType(imgType);
                     const b64 = await new Promise(r => { const rd = new FileReader(); rd.onloadend=()=>r(rd.result); rd.readAsDataURL(blob); });
-                    chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: imgType } });
-                    return;
+                    const res = await new Promise(r => {
+                        chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: imgType } }, r);
+                    });
+                    return res && res.isNew; // returns true if new item was saved
                 }
                 const txtType = ci.types.find(t => t === 'text/plain');
                 if (txtType) {
                     const blob = await ci.getType(txtType);
                     const txt = await blob.text();
-                    if(txt.trim()) chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'text', content: txt.trim() } });
-                    return;
+                    if(txt.trim()) {
+                        const res = await new Promise(r => {
+                            chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'text', content: txt.trim() } }, r);
+                        });
+                        return res && res.isNew;
+                    }
                 }
             }
         } catch {}
+        return false;
     }
 
-    // ---- Copy Event ----
-    document.addEventListener('copy', () => {
-        setTimeout(() => {
-            const text = document.getSelection()?.toString();
-            if (text && text.trim()) {
-                chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'text', content: text.trim() } });
-                bubble.classList.add('mc-bounce');
-                setTimeout(() => bubble.classList.remove('mc-bounce'), 300);
-            }
-        }, 50);
-    });
+    function triggerBubbleBounce() {
+        bubble.classList.add('mc-bounce');
+        setTimeout(() => bubble.classList.remove('mc-bounce'), 300);
+    }
 
-    document.addEventListener('copy', async () => {
-        try {
-            const items = await navigator.clipboard.read();
-            for(const ci of items){
-                const imgType = ci.types.find(t=>t.startsWith('image/'));
-                if(imgType){
-                    const blob = await ci.getType(imgType);
-                    const b64 = await new Promise(r => { const rd = new FileReader(); rd.onloadend=()=>r(rd.result); rd.readAsDataURL(blob); });
-                    chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: imgType } });
+    // ---- Copy Event (Robust delayed reader) ----
+    document.addEventListener('copy', () => {
+        setTimeout(async () => {
+            try {
+                // Try reading clipboard items (for images & formatted text)
+                const items = await navigator.clipboard.read();
+                for (const ci of items) {
+                    const imgType = ci.types.find(t => t.startsWith('image/'));
+                    if (imgType) {
+                        const blob = await ci.getType(imgType);
+                        const b64 = await new Promise(r => { 
+                            const rd = new FileReader(); 
+                            rd.onloadend = () => r(rd.result); 
+                            rd.readAsDataURL(blob); 
+                        });
+                        chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: imgType } });
+                        triggerBubbleBounce();
+                        return;
+                    }
+                }
+                // Fallback to text selection
+                const text = document.getSelection()?.toString();
+                if (text && text.trim()) {
+                    chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'text', content: text.trim() } });
+                    triggerBubbleBounce();
+                }
+            } catch (e) {
+                // Fallback for text selection if clipboard read is blocked
+                const text = document.getSelection()?.toString();
+                if (text && text.trim()) {
+                    chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'text', content: text.trim() } });
+                    triggerBubbleBounce();
                 }
             }
-        }catch{}
-    }, 200);
+        }, 150); // 150ms delay for system to populate clipboard
+    });
 
     // ---- Real-time listeners ----
     chrome.runtime.onMessage.addListener((msg) => {

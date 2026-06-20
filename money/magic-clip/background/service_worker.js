@@ -14,11 +14,11 @@ chrome.runtime.onMessage.addListener((req, sender, respond) => {
 async function handleMessage(req, sender) {
     switch (req.action) {
         case 'saveItem':
-            const id = await saveItem(req.item);
-            if (sender && sender.tab) {
+            const result = await saveItem(req.item);
+            if (result.isNew && sender && sender.tab) {
                 chrome.tabs.sendMessage(sender.tab.id, { action: 'clipboardUpdated' }).catch(() => {});
             }
-            return { ok: true, id };
+            return { ok: true, id: result.id, isNew: result.isNew };
 
         case 'getRecent':
             return { items: await getRecent(req.limit || 50, req.search || '') };
