@@ -112,6 +112,7 @@
     let pollInterval = null;
     let dragMoved = false;
     let lastActiveElement = null; // for direct paste
+    let ignoreSyncUntil = 0; // prevent self-copy from triggering refresh
 
     // Drag Bubble
     let isDown = false, startX, startY, initX, initY;
@@ -482,6 +483,8 @@
 
     // ---- Copy logic ----
     function copyItem(item, btnElement, shouldPaste = false) {
+        ignoreSyncUntil = Date.now() + 1500; // Ignore clipboard changes caused by us
+
         const originalText = btnElement.innerHTML;
         btnElement.innerHTML = ICONS.check + (shouldPaste ? ' Pasted' : ' Copied');
         btnElement.style.color = 'var(--mc-green)';
@@ -646,6 +649,8 @@
 
     // ---- OS Clipboard Sync ----
     async function syncClipboard() {
+        if (Date.now() < ignoreSyncUntil) return false;
+        
         try {
             const items = await navigator.clipboard.read();
             for (const ci of items) {
