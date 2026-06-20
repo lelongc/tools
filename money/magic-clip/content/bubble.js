@@ -20,7 +20,10 @@
         check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
         clipboard: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
         link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
-        image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
+        image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>',
+        zoomIn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',
+        zoomOut: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',
+        reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>'
     };
 
     // ---- Host & Shadow DOM ----
@@ -41,22 +44,13 @@
     const bubble = document.createElement('div');
     bubble.id = 'mc-bubble';
     bubble.innerHTML = ICONS.clipboard;
-    
-    // ---- Toast Notification ----
-    const toast = document.createElement('div');
-    toast.id = 'mc-toast';
-    
-    function showToast(msg, isError = false) {
-        toast.textContent = msg;
-        toast.className = isError ? 'error show' : 'show';
-        setTimeout(() => toast.classList.remove('show'), 2000);
-    }
 
     // ---- Panel Shell ----
     const panel = document.createElement('div');
     panel.id = 'mc-panel';
 
     panel.innerHTML = `
+        <div id="mc-toast"></div>
         <div id="screen-main" class="screen">
             <div class="p-header">
                 <span class="p-title">${ICONS.clipboard} NeoClip</span>
@@ -86,10 +80,18 @@
         </div>
     `;
 
-    shadow.appendChild(toast);
     shadow.appendChild(panel);
     shadow.appendChild(bubble);
     document.body.appendChild(host);
+
+    // ---- Toast Notification ----
+    const toast = shadow.getElementById('mc-toast');
+    
+    function showToast(msg, isError = false) {
+        toast.textContent = msg;
+        toast.className = isError ? 'error show' : 'show';
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    }
 
     // ---- State ----
     let currentTab = 'recent';
@@ -489,68 +491,88 @@
             const overlay = el('div', 'lens-overlay');
             wrapper.append(img, overlay);
             container.appendChild(wrapper);
+
+            // Floating Zoom controls
+            const zCtrl = el('div', 'zoom-controls');
+            const zIn = el('button', 'zoom-btn'); zIn.innerHTML = ICONS.zoomIn; zIn.title = "Zoom In";
+            const zOut = el('button', 'zoom-btn'); zOut.innerHTML = ICONS.zoomOut; zOut.title = "Zoom Out";
+            const zRst = el('button', 'zoom-btn'); zRst.innerHTML = ICONS.reset; zRst.title = "Reset";
+            zCtrl.append(zIn, zOut, zRst);
+            container.appendChild(zCtrl);
+            
             vBody.appendChild(container);
 
-            // Zoom & Pan Logic
-            let zoomed = false;
+            // Zoom & Pan State
+            let scale = 1.0;
             let panX = 0, panY = 0;
-            let isPanning = false, startX, startY;
             let isMouseDown = false;
+            let startX, startY;
 
-            let dragStartX = 0, dragStartY = 0;
+            // Accurate Aspect Ratio display calculation
+            img.onload = () => {
+                const natW = img.naturalWidth;
+                const natH = img.naturalHeight;
+                const containerW = container.clientWidth || 320;
+                const containerH = 320;
 
-            img.addEventListener('click', (e) => {
-                if(isPanning) return;
-                zoomed = !zoomed;
-                if(zoomed) {
+                const ratio = natW / natH;
+                let displayW, displayH;
+                if (containerW / containerH > ratio) {
+                    displayH = containerH;
+                    displayW = containerH * ratio;
+                } else {
+                    displayW = containerW;
+                    displayH = containerW / ratio;
+                }
+
+                // Explicitly lock wrapper to exact rendered image size
+                wrapper.style.width = displayW + 'px';
+                wrapper.style.height = displayH + 'px';
+                img.style.width = '100%';
+                img.style.height = '100%';
+            };
+
+            const updateTransform = () => {
+                wrapper.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+                if (scale > 1.0) {
                     container.classList.add('zoomed');
-                    wrapper.style.transform = `scale(2.5)`;
                 } else {
                     container.classList.remove('zoomed');
                     panX = 0; panY = 0;
-                    isMouseDown = false;
                     wrapper.style.transform = `translate(0px, 0px) scale(1)`;
                 }
-            });
+            };
 
+            zIn.addEventListener('click', (e) => { e.stopPropagation(); scale = Math.min(3.5, scale + 0.5); updateTransform(); });
+            zOut.addEventListener('click', (e) => { e.stopPropagation(); scale = Math.max(1.0, scale - 0.5); updateTransform(); });
+            zRst.addEventListener('click', (e) => { e.stopPropagation(); scale = 1.0; updateTransform(); });
+
+            // Handle Drag/Pan on Container
             container.addEventListener('mousedown', (e) => {
-                if(!zoomed) return;
+                if (scale <= 1.0) return;
+                // Allow selecting text spans instead of dragging
+                if (e.target.classList.contains('lens-word')) return;
+                
                 isMouseDown = true;
-                isPanning = false;
-                dragStartX = e.clientX;
-                dragStartY = e.clientY;
                 startX = e.clientX - panX;
                 startY = e.clientY - panY;
+                e.preventDefault(); // prevent selection while panning
             });
 
             const onMouseMove = (e) => {
-                if(!isMouseDown || !zoomed) return;
-                
-                const dx = e.clientX - dragStartX;
-                const dy = e.clientY - dragStartY;
-                if (Math.sqrt(dx*dx + dy*dy) > 5) {
-                    isPanning = true;
-                }
-                
-                if (isPanning) {
-                    panX = e.clientX - startX;
-                    panY = e.clientY - startY;
-                    
-                    // Limit pan to prevent pulling it too far out
-                    const maxPan = 400;
-                    panX = Math.max(-maxPan, Math.min(maxPan, panX));
-                    panY = Math.max(-maxPan, Math.min(maxPan, panY));
-                    
-                    wrapper.style.transform = `translate(${panX}px, ${panY}px) scale(2.5)`;
-                }
+                if (!isMouseDown || scale <= 1.0) return;
+                panX = e.clientX - startX;
+                panY = e.clientY - startY;
+
+                // Restrict pan boundary to prevent pulling image off screen
+                const maxPan = 400;
+                panX = Math.max(-maxPan, Math.min(maxPan, panX));
+                panY = Math.max(-maxPan, Math.min(maxPan, panY));
+
+                wrapper.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
             };
 
-            const onMouseUp = () => {
-                if (isMouseDown) {
-                    isMouseDown = false;
-                    setTimeout(() => { isPanning = false; }, 50);
-                }
-            };
+            const onMouseUp = () => { isMouseDown = false; };
 
             window.addEventListener('mousemove', onMouseMove);
             window.addEventListener('mouseup', onMouseUp);
