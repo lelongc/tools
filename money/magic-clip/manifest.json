@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "Magic Clip",
+  "version": "2.0.0",
+  "description": "Zero-knowledge clipboard manager with OCR, collections, and smart paste.",
+  "permissions": [
+    "storage",
+    "clipboardRead",
+    "clipboardWrite",
+    "activeTab"
+  ],
+  "background": {
+    "service_worker": "background/service_worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/bubble.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "content/bubble.css",
+        "libs/*"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup/index.html",
+    "default_title": "Magic Clip"
+  },
+  "host_permissions": ["<all_urls>"]
+}
