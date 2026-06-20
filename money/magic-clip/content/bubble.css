@@ -33,9 +33,7 @@
     color: var(--mc-text);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     user-select: none;
-    position: absolute;
-    bottom: 0;
-    right: 0;
+    position: relative;
 }
 #mc-bubble:hover {
     box-shadow: 0 6px 16px rgba(0,0,0,0.12);
@@ -261,15 +259,21 @@
     font-size: 14px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; color: var(--mc-text);
 }
 .lens-container {
-    position: relative; display: inline-block; max-width: 100%;
-    cursor: grab; transition: transform 0.1s ease-out; transform-origin: center center;
+    position: relative; width: 100%; height: 320px;
+    overflow: hidden; border-radius: 8px; border: 1px solid var(--mc-border);
+    background: #0f172a; display: flex; align-items: center; justify-content: center;
 }
-.lens-container:active { cursor: grabbing; }
-.lens-container.zoomed { transform: scale(2); z-index: 100; }
+.lens-wrapper {
+    position: relative; max-width: 100%; max-height: 100%;
+    display: inline-block; transition: transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform-origin: center center;
+}
+.lens-container.zoomed { cursor: grab; }
+.lens-container.zoomed:active { cursor: grabbing; }
 
 .view-img {
-    display: block; width: 100%; height: auto;
-    border-radius: 8px; border: 1px solid var(--mc-border);
+    display: block; width: 100%; height: auto; max-height: 320px;
+    object-fit: contain; border-radius: 8px; border: 1px solid var(--mc-border);
 }
 
 .lens-overlay {

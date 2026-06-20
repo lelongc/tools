@@ -455,43 +455,72 @@
 
         if (item.type === 'image') {
             const container = el('div', 'lens-container');
+            const wrapper = el('div', 'lens-wrapper');
             const img = document.createElement('img');
             img.src = item.content; img.className = 'view-img';
             
             const overlay = el('div', 'lens-overlay');
-            container.append(img, overlay);
+            wrapper.append(img, overlay);
+            container.appendChild(wrapper);
             vBody.appendChild(container);
 
             // Zoom & Pan Logic
             let zoomed = false;
             let panX = 0, panY = 0;
             let isPanning = false, startX, startY;
+            let isMouseDown = false;
 
             img.addEventListener('click', (e) => {
                 if(isPanning) return;
                 zoomed = !zoomed;
                 if(zoomed) {
                     container.classList.add('zoomed');
+                    wrapper.style.transform = `scale(2.5)`;
                 } else {
                     container.classList.remove('zoomed');
                     panX = 0; panY = 0;
-                    container.style.transform = `translate(0px, 0px) scale(1)`;
+                    isMouseDown = false;
+                    wrapper.style.transform = `translate(0px, 0px) scale(1)`;
                 }
             });
 
             container.addEventListener('mousedown', (e) => {
                 if(!zoomed) return;
+                isMouseDown = true;
                 isPanning = false;
                 startX = e.clientX - panX;
                 startY = e.clientY - panY;
             });
-            container.addEventListener('mousemove', (e) => {
-                if(!zoomed || e.buttons !== 1) return;
+
+            const onMouseMove = (e) => {
+                if(!isMouseDown || !zoomed) return;
                 isPanning = true;
                 panX = e.clientX - startX;
                 panY = e.clientY - startY;
-                container.style.transform = `translate(${panX}px, ${panY}px) scale(2)`;
-            });
+                
+                // Limit pan to prevent pulling it too far out
+                const maxPan = 400;
+                panX = Math.max(-maxPan, Math.min(maxPan, panX));
+                panY = Math.max(-maxPan, Math.min(maxPan, panY));
+                
+                wrapper.style.transform = `translate(${panX}px, ${panY}px) scale(2.5)`;
+            };
+
+            const onMouseUp = () => {
+                if (isMouseDown) {
+                    isMouseDown = false;
+                    setTimeout(() => { isPanning = false; }, 50);
+                }
+            };
+
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+
+            // Clean up window listeners when view closes
+            shadow.getElementById('btn-view-back').addEventListener('click', () => {
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('mouseup', onMouseUp);
+            }, { once: true });
 
             const lensBtn = el('button', 'action-btn btn-primary'); lensBtn.innerHTML = ICONS.ocr + ' Live Text';
             lensBtn.addEventListener('click', () => runLensOCR(item, lensBtn, img, overlay));
@@ -662,6 +691,24 @@
             }
         }catch{}
     }, 200);
+
+    // ---- Real-time listeners ----
+    chrome.runtime.onMessage.addListener((msg) => {
+        if (msg.action === 'clipboardUpdated') {
+            if (panel.classList.contains('open') && currentTab === 'recent') {
+                loadRecent(shadow.getElementById('search-input').value);
+            }
+        }
+    });
+
+    window.addEventListener('focus', async () => {
+        if (panel.classList.contains('open')) {
+            await syncClipboard();
+            if (currentTab === 'recent') {
+                loadRecent(shadow.getElementById('search-input').value);
+            }
+        }
+    });
 
     // Helpers
     function el(tag, cls, text) { const e = document.createElement(tag); if(cls) e.className=cls; if(text!==undefined) e.textContent=text; return e; }

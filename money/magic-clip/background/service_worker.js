@@ -4,17 +4,20 @@ importScripts('db.js');
 console.log('Magic Clip service worker running.');
 
 chrome.runtime.onMessage.addListener((req, sender, respond) => {
-    handleMessage(req).then(respond).catch(err => {
+    handleMessage(req, sender).then(respond).catch(err => {
         console.error('SW error:', err);
         respond({ error: err.toString() });
     });
     return true; // async
 });
 
-async function handleMessage(req) {
+async function handleMessage(req, sender) {
     switch (req.action) {
         case 'saveItem':
             const id = await saveItem(req.item);
+            if (sender && sender.tab) {
+                chrome.tabs.sendMessage(sender.tab.id, { action: 'clipboardUpdated' }).catch(() => {});
+            }
             return { ok: true, id };
 
         case 'getRecent':
