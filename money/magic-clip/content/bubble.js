@@ -56,9 +56,22 @@
         if (res.hideBubble) bubble.style.display = 'none';
     });
     chrome.storage.onChanged.addListener((changes, area) => {
-        if (area === 'local' && changes.hideBubble) {
-            isBubbleHidden = !!changes.hideBubble.newValue;
-            bubble.style.display = changes.hideBubble.newValue ? 'none' : 'flex';
+        if (area === 'local') {
+            if (changes.hideBubble) {
+                isBubbleHidden = !!changes.hideBubble.newValue;
+                bubble.style.display = changes.hideBubble.newValue ? 'none' : 'flex';
+                if (!isBubbleHidden) {
+                    // Restore position when turned back on instead of resetting to corner
+                    host.style.left = savedBubbleLeft;
+                    host.style.top = savedBubbleTop;
+                    host.style.right = savedBubbleRight;
+                    host.style.bottom = savedBubbleBottom;
+                    updatePanelPlacement();
+                }
+            }
+            if (changes.theme) {
+                applyTheme(changes.theme.newValue === 'dark');
+            }
         }
     });
 
@@ -67,7 +80,6 @@
     panel.id = 'mc-panel';
 
     panel.innerHTML = `
-        <div id="mc-toast"></div>
         <div id="screen-main" class="screen">
             <div class="p-header">
                 <span class="p-title">${ICONS.clipboard} NeoClip</span>
@@ -137,20 +149,26 @@
     }
 
     // ---- Toast Notification ----
-    const toast = shadow.getElementById('mc-toast');
+    const toast = document.createElement('div');
+    toast.id = 'mc-toast';
+    shadow.appendChild(toast);
     
     function showToast(msg, isError = false) {
         toast.textContent = msg;
         toast.className = isError ? 'error show' : 'show';
-        setTimeout(() => toast.classList.remove('show'), 2000);
+        setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
     // ---- State ----
     let currentTab = 'recent';
-    let currentCollectionId = null;
     let collectionsCache = [];
+    let currentCollectionId = null;
     let pollInterval = null;
-    let dragMoved = false;
+    let isDragging = false;
+    let savedBubbleLeft = 'auto';
+    let savedBubbleTop = 'auto';
+    let savedBubbleRight = '24px';
+    let savedBubbleBottom = '24px';
     let lastActiveElement = null; // for direct paste
     let ignoreSyncUntil = 0; // prevent self-copy from triggering refresh
 
@@ -167,29 +185,63 @@
     });
 
     // Drag Bubble
-    let isDown = false, startX, startY, initX, initY;
+    let isDown = false, startX, startY, startMouseX, startMouseY;
     bubble.addEventListener('mousedown', e => {
-        isDown = true; dragMoved = false;
-        startX = e.clientX; startY = e.clientY;
-        const rect = host.getBoundingClientRect();
-        initX = rect.left; initY = rect.top;
-        host.style.right = 'auto'; host.style.bottom = 'auto';
-        host.style.left = initX + 'px'; host.style.top = initY + 'px';
+        if (e.button !== 0) return; // Only left click
+        isDown = true; isDragging = false;
+        startMouseX = e.clientX;
+        startMouseY = e.clientY;
+        startX = e.clientX - host.offsetLeft;
+        startY = e.clientY - host.offsetTop;
         
-        // Prevent active element from losing focus when clicking the bubble
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
         e.preventDefault();
     });
-    window.addEventListener('mousemove', e => {
-        if (!isDown) return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragMoved = true;
-        if (dragMoved) {
-            host.style.left = (initX + dx) + 'px';
-            host.style.top = (initY + dy) + 'px';
+
+    function onMouseMove(e) {
+        if (!isDragging) {
+            const dx = e.clientX - startMouseX;
+            const dy = e.clientY - startMouseY;
+            if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+                isDragging = true;
+            } else {
+                return; // Ignore micro movements during click
+            }
         }
-    });
-    window.addEventListener('mouseup', () => isDown = false);
+        let newX = e.clientX - startX;
+        let newY = e.clientY - startY;
+
+        // clamp to window
+        newX = Math.max(0, Math.min(newX, window.innerWidth - 50));
+        newY = Math.max(0, Math.min(newY, window.innerHeight - 50));
+
+        host.style.left = newX + 'px';
+        host.style.top = newY + 'px';
+        host.style.right = 'auto';
+        host.style.bottom = 'auto';
+
+        // Real-time panel adjustment during drag
+        if (panel.classList.contains('open')) {
+            updatePanelPlacement();
+        }
+    }
+
+    function onMouseUp() {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+        isDown = false;
+        if (!isDragging) {
+            lastActiveElement = document.activeElement;
+            togglePanel();
+        } else {
+            // Save custom position for restoration
+            savedBubbleLeft = host.style.left;
+            savedBubbleTop = host.style.top;
+            savedBubbleRight = host.style.right;
+            savedBubbleBottom = host.style.bottom;
+        }
+    }
 
     // Prevent active element from losing focus when clicking non-input elements inside panel
     panel.addEventListener('mousedown', e => {
@@ -200,8 +252,10 @@
     });
 
     // Toggle Panel
+    let isToggling = false;
     async function togglePanel() {
-        if (dragMoved) return;
+        if (isToggling) return;
+        isToggling = true;
         
         updatePanelPlacement();
         const open = panel.classList.toggle('open');
@@ -226,12 +280,12 @@
                 pollInterval = null;
             }
         }
-    }
 
-    bubble.addEventListener('click', () => {
-        lastActiveElement = document.activeElement;
-        togglePanel();
-    });
+        // Prevent rapid toggling (debounce)
+        setTimeout(() => isToggling = false, 350);
+    }
+    // bubble click listener removed to prevent native click firing after a drag
+
 
     function updatePanelPlacement() {
         if (isBubbleHidden && lastActiveElement && typeof lastActiveElement.getBoundingClientRect === 'function') {
@@ -474,16 +528,19 @@
     // ---- Build Card ----
     function buildCard(item, inCollection) {
         const card = el('div', 'card');
+        const cardBody = el('div', 'card-body');
 
         // Text / Image
         if (item.type === 'image') {
             const img = document.createElement('img');
             img.src = item.content; img.className = 'card-img';
-            card.appendChild(img);
+            cardBody.appendChild(img);
         } else {
             const txt = el('div', 'card-text', esc(item.content));
-            card.appendChild(txt);
+            cardBody.appendChild(txt);
         }
+        
+        card.appendChild(cardBody);
 
         // Bottom section containing Meta and Actions
         const bottom = el('div', 'card-bottom');
@@ -505,7 +562,7 @@
         // Actions
         const actions = el('div', 'card-actions');
 
-        const viewBtn = el('button', 'action-btn'); 
+        const viewBtn = el('button', 'action-btn icon-only'); 
         viewBtn.innerHTML = ICONS.view;
         viewBtn.title = "View details";
         viewBtn.addEventListener('click', (e) => {
@@ -515,7 +572,7 @@
         actions.appendChild(viewBtn);
 
         const copyBtn = el('button', 'action-btn btn-primary'); 
-        copyBtn.innerHTML = ICONS.copy;
+        copyBtn.innerHTML = ICONS.copy + ' Copy';
         copyBtn.title = "Copy to clipboard";
         copyBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -524,7 +581,7 @@
         actions.appendChild(copyBtn);
 
         if (item.type === 'image') {
-            const lensBtn = el('button', 'action-btn btn-lens'); 
+            const lensBtn = el('button', 'action-btn icon-only btn-lens'); 
             lensBtn.innerHTML = ICONS.lens;
             lensBtn.title = "Open in Google Lens";
             lensBtn.addEventListener('click', (e) => {
@@ -537,7 +594,7 @@
         if (!inCollection) {
             // Dropdown wrap
             const dropWrap = el('div', 'dropdown-wrap');
-            const saveBtn = el('button', 'action-btn'); 
+            const saveBtn = el('button', 'action-btn icon-only'); 
             saveBtn.innerHTML = ICONS.folder;
             saveBtn.title = "Save to collection";
             
@@ -560,7 +617,7 @@
                             dropMenu.classList.remove('show');
                             chrome.runtime.sendMessage({ action: 'moveToCollection', itemId: item.id, collectionId: c.id }, () => {
                                 showToast('Saved to ' + c.name);
-                                loadRecent(shadow.getElementById('search-input').value);
+                                loadRecent(shadow.getElementById('search-input').value, true);
                             });
                         });
                         dropMenu.appendChild(b);
@@ -573,7 +630,7 @@
         }
 
         if (inCollection) {
-            const delBtn = el('button', 'action-btn btn-danger'); 
+            const delBtn = el('button', 'action-btn icon-only btn-danger'); 
             delBtn.innerHTML = ICONS.del;
             delBtn.title = "Delete item";
             delBtn.addEventListener('click', (e) => {
@@ -586,18 +643,24 @@
         bottom.appendChild(actions);
         card.appendChild(bottom);
 
-        card.addEventListener('click', (e) => {
-            if (e.target.closest('.card-actions')) return;
+        // Explicitly only bind paste to the card body (avoids common ancestor click bugs when hand shakes)
+        cardBody.addEventListener('click', (e) => {
             copyItem(item, copyBtn, true);
         });
 
         return card;
     }
 
-    // Hide dropdowns on outside click
-    document.addEventListener('click', () => {
-        if(shadow.querySelectorAll) {
+    // Hide dropdowns on outside click and close panel if clicked outside
+    document.addEventListener('mousedown', (e) => {
+        const path = e.composedPath();
+        const isInsideWrap = path.some(el => el.classList && el.classList.contains('dropdown-wrap'));
+        
+        if (!isInsideWrap && shadow.querySelectorAll) {
             shadow.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+        }
+        if (panel.classList.contains('open') && !e.composedPath().includes(host)) {
+            closePanel();
         }
     });
 
@@ -606,56 +669,69 @@
         ignoreSyncUntil = Date.now() + 1500; // Ignore clipboard changes caused by us
 
         const originalText = btnElement.innerHTML;
-        btnElement.innerHTML = ICONS.check;
+        const isIconOnly = btnElement.classList.contains('icon-only');
+        btnElement.innerHTML = isIconOnly ? ICONS.check : ICONS.check + ' Copied';
+        btnElement.style.background = 'rgba(16,185,129,0.1)';
         btnElement.style.color = 'var(--mc-green)';
         btnElement.style.borderColor = 'rgba(16,185,129,0.3)';
 
-        const doPaste = () => {
-            if (shouldPaste && lastActiveElement) {
-                lastActiveElement.focus();
-                if (item.type === 'text' || item.type === 'link') {
-                    if (
-                        lastActiveElement.tagName === 'INPUT' || 
-                        lastActiveElement.tagName === 'TEXTAREA' || 
-                        lastActiveElement.isContentEditable
-                    ) {
-                        document.execCommand('insertText', false, item.content);
-                    }
-                } else if (item.type === 'image') {
-                    if (lastActiveElement.isContentEditable) {
-                        document.execCommand('insertImage', false, item.content);
-                    }
-                    // Dispatch synthetic paste event with the image file
-                    fetch(item.content).then(r => r.blob()).then(blob => {
-                        const file = new File([blob], "image.png", { type: item.mime || 'image/png' });
-                        const dataTransfer = new DataTransfer();
-                        dataTransfer.items.add(file);
-                        const pasteEvent = new ClipboardEvent('paste', {
-                            clipboardData: dataTransfer,
-                            bubbles: true,
-                            cancelable: true
-                        });
-                        lastActiveElement.dispatchEvent(pasteEvent);
-                    }).catch(()=>{});
+        let directPasted = false;
+        if (shouldPaste && lastActiveElement) {
+            lastActiveElement.focus();
+            if (item.type === 'text' || item.type === 'link') {
+                if (
+                    lastActiveElement.tagName === 'INPUT' || 
+                    lastActiveElement.tagName === 'TEXTAREA' || 
+                    lastActiveElement.isContentEditable
+                ) {
+                    // Synchronous execution for insertText (critical for browser security)
+                    document.execCommand('insertText', false, item.content);
+                    directPasted = true;
                 }
+            } else if (item.type === 'image') {
+                if (lastActiveElement.isContentEditable) {
+                    document.execCommand('insertImage', false, item.content);
+                    directPasted = true;
+                }
+                fetch(item.content).then(r => r.blob()).then(blob => {
+                    const file = new File([blob], "image.png", { type: item.mime || 'image/png' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    const pasteEvent = new ClipboardEvent('paste', {
+                        clipboardData: dataTransfer,
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    lastActiveElement.dispatchEvent(pasteEvent);
+                }).catch(()=>{});
+                directPasted = true;
             }
-            if (shouldPaste) {
-                closePanel();
-            }
-        };
+        }
 
+        if (shouldPaste) {
+            closePanel();
+            if (!directPasted) {
+                // User expects auto-paste, but focus is lost or on Omnibox
+                const isMac = navigator.userAgent.toLowerCase().includes('mac');
+                showToast(`Copied! Press ${isMac ? 'Cmd' : 'Ctrl'}+V to paste`);
+            }
+        }
+
+        // Write to system clipboard (async is fine here)
         if (item.type === 'text' || item.type === 'link') {
-            navigator.clipboard.writeText(item.content).then(doPaste).catch(()=>{});
+            navigator.clipboard.writeText(item.content).catch(()=>{});
         } else if (item.type === 'image') {
             fetch(item.content).then(r => r.blob()).then(blob => {
                 navigator.clipboard.write([
                     new ClipboardItem({ [item.mime || 'image/png']: blob })
-                ]).then(doPaste).catch(()=>{});
+                ]).catch(()=>{});
             });
         }
+
         setTimeout(() => {
             btnElement.innerHTML = originalText;
             btnElement.style.color = '';
+            btnElement.style.background = '';
             btnElement.style.borderColor = '';
         }, 1500);
     }
