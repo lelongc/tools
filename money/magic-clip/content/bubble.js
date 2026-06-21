@@ -50,11 +50,14 @@
     bubble.innerHTML = ICONS.logo;
 
     // Load hideBubble setting
+    let isBubbleHidden = false;
     chrome.storage.local.get(['hideBubble'], res => {
+        isBubbleHidden = !!res.hideBubble;
         if (res.hideBubble) bubble.style.display = 'none';
     });
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area === 'local' && changes.hideBubble) {
+            isBubbleHidden = !!changes.hideBubble.newValue;
             bubble.style.display = changes.hideBubble.newValue ? 'none' : 'flex';
         }
     });
@@ -208,14 +211,47 @@
     });
 
     function updatePanelPlacement() {
-        const rect = host.getBoundingClientRect();
-        const isLeft = rect.left < window.innerWidth / 2;
-        const isTop = rect.top < window.innerHeight / 2;
-        
-        panel.style.top = isTop ? '60px' : 'auto';
-        panel.style.bottom = isTop ? 'auto' : '60px';
-        panel.style.left = isLeft ? '0' : 'auto';
-        panel.style.right = isLeft ? 'auto' : '0';
+        if (isBubbleHidden && lastActiveElement && typeof lastActiveElement.getBoundingClientRect === 'function') {
+            const rect = lastActiveElement.getBoundingClientRect();
+            const panelWidth = 370;
+            const panelHeight = 520;
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
+            host.style.right = 'auto';
+            host.style.bottom = 'auto';
+
+            // Calculate vertical position (prefer below element, otherwise above)
+            let topPos = rect.bottom + 8;
+            if (rect.bottom + panelHeight + 20 > viewportHeight) {
+                topPos = rect.top - panelHeight - 8;
+            }
+            topPos = Math.max(8, Math.min(topPos, viewportHeight - panelHeight - 8));
+
+            // Calculate horizontal position (align to left, fallback align to right)
+            let leftPos = rect.left;
+            if (leftPos + panelWidth > viewportWidth) {
+                leftPos = rect.right - panelWidth;
+            }
+            leftPos = Math.max(8, Math.min(leftPos, viewportWidth - panelWidth - 8));
+
+            host.style.top = topPos + 'px';
+            host.style.left = leftPos + 'px';
+
+            panel.style.top = '0';
+            panel.style.bottom = 'auto';
+            panel.style.left = '0';
+            panel.style.right = 'auto';
+        } else {
+            const rect = host.getBoundingClientRect();
+            const isLeft = rect.left < window.innerWidth / 2;
+            const isTop = rect.top < window.innerHeight / 2;
+            
+            panel.style.top = isTop ? '60px' : 'auto';
+            panel.style.bottom = isTop ? 'auto' : '60px';
+            panel.style.left = isLeft ? '0' : 'auto';
+            panel.style.right = isLeft ? 'auto' : '0';
+        }
     }
 
     // ---- Panel Close ----
