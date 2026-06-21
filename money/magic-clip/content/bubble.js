@@ -182,12 +182,16 @@
     }
 
     // ---- Panel Close ----
-    shadow.getElementById('btn-close').addEventListener('click', () => {
+    function closePanel() {
         panel.classList.remove('open');
         if (pollInterval) {
             clearInterval(pollInterval);
             pollInterval = null;
         }
+    }
+
+    shadow.getElementById('btn-close').addEventListener('click', () => {
+        closePanel();
     });
 
     // ---- View Back ----
@@ -491,13 +495,25 @@
         btnElement.style.borderColor = 'rgba(16,185,129,0.3)';
 
         const doPaste = () => {
-            if (shouldPaste && lastActiveElement && (
-                lastActiveElement.tagName === 'INPUT' || 
-                lastActiveElement.tagName === 'TEXTAREA' || 
-                lastActiveElement.isContentEditable
-            )) {
-                lastActiveElement.focus();
-                document.execCommand('insertText', false, item.content);
+            if (shouldPaste && lastActiveElement) {
+                if (item.type === 'text' || item.type === 'link') {
+                    if (
+                        lastActiveElement.tagName === 'INPUT' || 
+                        lastActiveElement.tagName === 'TEXTAREA' || 
+                        lastActiveElement.isContentEditable
+                    ) {
+                        lastActiveElement.focus();
+                        document.execCommand('insertText', false, item.content);
+                    }
+                } else if (item.type === 'image') {
+                    if (lastActiveElement.isContentEditable) {
+                        lastActiveElement.focus();
+                        document.execCommand('insertImage', false, item.content);
+                    }
+                }
+            }
+            if (shouldPaste) {
+                closePanel();
             }
         };
 
