@@ -496,20 +496,31 @@
 
         const doPaste = () => {
             if (shouldPaste && lastActiveElement) {
+                lastActiveElement.focus();
                 if (item.type === 'text' || item.type === 'link') {
                     if (
                         lastActiveElement.tagName === 'INPUT' || 
                         lastActiveElement.tagName === 'TEXTAREA' || 
                         lastActiveElement.isContentEditable
                     ) {
-                        lastActiveElement.focus();
                         document.execCommand('insertText', false, item.content);
                     }
                 } else if (item.type === 'image') {
                     if (lastActiveElement.isContentEditable) {
-                        lastActiveElement.focus();
                         document.execCommand('insertImage', false, item.content);
                     }
+                    // Dispatch synthetic paste event with the image file
+                    fetch(item.content).then(r => r.blob()).then(blob => {
+                        const file = new File([blob], "image.png", { type: item.mime || 'image/png' });
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        const pasteEvent = new ClipboardEvent('paste', {
+                            clipboardData: dataTransfer,
+                            bubbles: true,
+                            cancelable: true
+                        });
+                        lastActiveElement.dispatchEvent(pasteEvent);
+                    }).catch(()=>{});
                 }
             }
             if (shouldPaste) {
