@@ -57,15 +57,15 @@
 
 /* ---- Dark Theme Variables ---- */
 #mc-panel.dark {
-    --mc-bg: #0b0f19;
-    --mc-bg-pure: #111827;
-    --mc-card: #1f2937;
-    --mc-card-hover: #2d3748;
-    --mc-border: #1f2937;
-    --mc-border-hover: #374151;
-    --mc-text: #f9fafb;
-    --mc-text-secondary: #d1d5db;
-    --mc-text-light: #6b7280;
+    --mc-bg: #0f172a;
+    --mc-bg-pure: #1e293b;
+    --mc-card: #1e293b;
+    --mc-card-hover: #334155;
+    --mc-border: #334155;
+    --mc-border-hover: #475569;
+    --mc-text: #f8fafc;
+    --mc-text-secondary: #cbd5e1;
+    --mc-text-light: #64748b;
 }
 
 /* ---- Bubble ---- */
@@ -329,7 +329,13 @@
     border: 1px solid var(--mc-border);
 }
 
-.card-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.card-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+}
+.card-meta { display: flex; align-items: center; gap: 8px; }
 .card-time { font-size: 11px; color: var(--mc-text-light); }
 .card-badge {
     font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600;
@@ -348,11 +354,11 @@
 
 /* Actions */
 .card-actions {
-    display: flex; gap: 6px; border-top: 1px solid var(--mc-border); padding-top: 10px;
+    display: flex; gap: 6px; align-items: center;
 }
 .action-btn {
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-    flex: 1; padding: 7px 4px; font-size: 11px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
     border: 1px solid var(--mc-border); border-radius: var(--mc-radius-sm);
     background: var(--mc-bg-pure); cursor: pointer; color: var(--mc-text-secondary);
     transition: all 0.2s var(--mc-ease);
@@ -394,9 +400,9 @@
 .btn-danger:hover { background: #fef2f2; border-color: #fca5a5; color: var(--mc-red); }
 
 /* Dropdown */
-.dropdown-wrap { position: relative; flex: 1; }
+.dropdown-wrap { position: relative; }
 .dropdown-menu {
-    position: absolute; bottom: 110%; left: 0; width: 160px;
+    position: absolute; bottom: 110%; right: 0; width: 160px;
     background: var(--mc-bg-pure); border: 1px solid var(--mc-border);
     border-radius: var(--mc-radius-md); box-shadow: var(--mc-shadow-lg);
     display: none; flex-direction: column; z-index: 20; padding: 4px;

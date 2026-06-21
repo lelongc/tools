@@ -154,6 +154,18 @@
     let lastActiveElement = null; // for direct paste
     let ignoreSyncUntil = 0; // prevent self-copy from triggering refresh
 
+    // Global listener to track the last active input element on the page
+    document.addEventListener('focusin', (e) => {
+        const target = e.target;
+        if (target && target !== host && (
+            target.tagName === 'INPUT' || 
+            target.tagName === 'TEXTAREA' || 
+            target.isContentEditable
+        )) {
+            lastActiveElement = target;
+        }
+    });
+
     // Drag Bubble
     let isDown = false, startX, startY, initX, initY;
     bubble.addEventListener('mousedown', e => {
@@ -163,6 +175,9 @@
         initX = rect.left; initY = rect.top;
         host.style.right = 'auto'; host.style.bottom = 'auto';
         host.style.left = initX + 'px'; host.style.top = initY + 'px';
+        
+        // Prevent active element from losing focus when clicking the bubble
+        e.preventDefault();
     });
     window.addEventListener('mousemove', e => {
         if (!isDown) return;
@@ -175,6 +190,14 @@
         }
     });
     window.addEventListener('mouseup', () => isDown = false);
+
+    // Prevent active element from losing focus when clicking non-input elements inside panel
+    panel.addEventListener('mousedown', e => {
+        const target = e.composedPath()[0];
+        if (target && target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+            e.preventDefault();
+        }
+    });
 
     // Toggle Panel
     async function togglePanel() {
@@ -462,6 +485,9 @@
             card.appendChild(txt);
         }
 
+        // Bottom section containing Meta and Actions
+        const bottom = el('div', 'card-bottom');
+
         // Meta
         const meta = el('div', 'card-meta');
         meta.appendChild(el('span', 'card-time', timeAgo(item.timestamp)));
@@ -474,39 +500,46 @@
             badge.innerHTML = `<span class="badge-badge">${ICONS.image}</span> Image`;
             meta.appendChild(badge);
         }
-        card.appendChild(meta);
+        bottom.appendChild(meta);
 
         // Actions
         const actions = el('div', 'card-actions');
 
-        const viewBtn = el('button', 'action-btn'); viewBtn.innerHTML = ICONS.view + ' View';
-        viewBtn.addEventListener('click', () => showPreview(item, inCollection));
+        const viewBtn = el('button', 'action-btn'); 
+        viewBtn.innerHTML = ICONS.view;
+        viewBtn.title = "View details";
+        viewBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showPreview(item, inCollection);
+        });
         actions.appendChild(viewBtn);
 
-        const copyBtn = el('button', 'action-btn btn-primary'); copyBtn.innerHTML = ICONS.copy + ' Copy';
+        const copyBtn = el('button', 'action-btn btn-primary'); 
+        copyBtn.innerHTML = ICONS.copy;
+        copyBtn.title = "Copy to clipboard";
         copyBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             copyItem(item, copyBtn, false);
         });
         actions.appendChild(copyBtn);
 
-        card.addEventListener('click', (e) => {
-            if (e.target.closest('.card-actions')) return;
-            copyItem(item, copyBtn, true);
-        });
-
         if (item.type === 'image') {
-            const lensBtn = el('button', 'action-btn btn-lens'); lensBtn.innerHTML = ICONS.lens + ' Lens';
+            const lensBtn = el('button', 'action-btn btn-lens'); 
+            lensBtn.innerHTML = ICONS.lens;
             lensBtn.title = "Open in Google Lens";
-            lensBtn.addEventListener('click', () => openInGoogleLens(item.content));
+            lensBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                openInGoogleLens(item.content);
+            });
             actions.appendChild(lensBtn);
         }
 
         if (!inCollection) {
             // Dropdown wrap
             const dropWrap = el('div', 'dropdown-wrap');
-            const saveBtn = el('button', 'action-btn'); saveBtn.innerHTML = ICONS.folder + ' Save';
-            saveBtn.style.width = '100%';
+            const saveBtn = el('button', 'action-btn'); 
+            saveBtn.innerHTML = ICONS.folder;
+            saveBtn.title = "Save to collection";
             
             const dropMenu = el('div', 'dropdown-menu');
             saveBtn.addEventListener('click', (e) => {
@@ -540,14 +573,24 @@
         }
 
         if (inCollection) {
-            const delBtn = el('button', 'action-btn btn-danger'); delBtn.innerHTML = ICONS.del + ' Del';
-            delBtn.addEventListener('click', () => {
+            const delBtn = el('button', 'action-btn btn-danger'); 
+            delBtn.innerHTML = ICONS.del;
+            delBtn.title = "Delete item";
+            delBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 chrome.runtime.sendMessage({ action: 'deleteItem', itemId: item.id }, () => card.remove());
             });
             actions.appendChild(delBtn);
         }
 
-        card.appendChild(actions);
+        bottom.appendChild(actions);
+        card.appendChild(bottom);
+
+        card.addEventListener('click', (e) => {
+            if (e.target.closest('.card-actions')) return;
+            copyItem(item, copyBtn, true);
+        });
+
         return card;
     }
 
@@ -563,7 +606,7 @@
         ignoreSyncUntil = Date.now() + 1500; // Ignore clipboard changes caused by us
 
         const originalText = btnElement.innerHTML;
-        btnElement.innerHTML = ICONS.check + (shouldPaste ? ' Pasted' : ' Copied');
+        btnElement.innerHTML = ICONS.check;
         btnElement.style.color = 'var(--mc-green)';
         btnElement.style.borderColor = 'rgba(16,185,129,0.3)';
 

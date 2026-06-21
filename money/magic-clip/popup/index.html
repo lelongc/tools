@@ -18,25 +18,25 @@
         }
         @media (prefers-color-scheme: dark) {
             :root {
-                --bg: #0b0f19;
-                --text: #f9fafb;
+                --bg: #0f172a;
+                --text: #f8fafc;
                 --text-secondary: #cbd5e1;
                 --text-light: #64748b;
-                --card-bg: #1f2937;
-                --card-border: #1f2937;
-                --card-border-hover: #374151;
+                --card-bg: #1e293b;
+                --card-border: #334155;
+                --card-border-hover: #475569;
                 --card-shadow-hover: rgba(99,102,241,0.15);
                 --toggle-bg: #4b5563;
             }
         }
         body.dark {
-            --bg: #0b0f19;
-            --text: #f9fafb;
+            --bg: #0f172a;
+            --text: #f8fafc;
             --text-secondary: #cbd5e1;
             --text-light: #64748b;
-            --card-bg: #1f2937;
-            --card-border: #1f2937;
-            --card-border-hover: #374151;
+            --card-bg: #1e293b;
+            --card-border: #334155;
+            --card-border-hover: #475569;
             --card-shadow-hover: rgba(99,102,241,0.15);
             --toggle-bg: #4b5563;
         }
@@ -287,6 +287,16 @@
             </div>
             <label class="toggle">
                 <input type="checkbox" id="toggle-bubble" checked>
+                <span class="slider"></span>
+            </label>
+        </div>
+        <div class="setting-row" style="margin-top: 10px;">
+            <div>
+                <div class="setting-label">Dark Mode</div>
+                <div class="setting-desc">Toggle dark theme style</div>
+            </div>
+            <label class="toggle">
+                <input type="checkbox" id="toggle-theme">
                 <span class="slider"></span>
             </label>
         </div>

@@ -71,16 +71,46 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.storage.local.set({ hideBubble: !e.target.checked });
     });
 
-    // Set theme class on body
+    // Handle Setting: Toggle Dark Mode
+    const toggleTheme = document.getElementById('toggle-theme');
     chrome.storage.local.get(['theme'], (res) => {
         let isDark = res.theme === 'dark';
         if (res.theme === undefined) {
             isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
         }
+        toggleTheme.checked = isDark;
         if (isDark) {
             document.body.classList.add('dark');
         } else {
             document.body.classList.remove('dark');
+        }
+    });
+
+    toggleTheme.addEventListener('change', (e) => {
+        const nextDark = e.target.checked;
+        chrome.storage.local.set({ theme: nextDark ? 'dark' : 'light' });
+        if (nextDark) {
+            document.body.classList.add('dark');
+        } else {
+            document.body.classList.remove('dark');
+        }
+    });
+
+    // Listen for storage changes to sync checkboxes and body themes dynamically
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local') {
+            if (changes.theme) {
+                const isDark = changes.theme.newValue === 'dark';
+                toggleTheme.checked = isDark;
+                if (isDark) {
+                    document.body.classList.add('dark');
+                } else {
+                    document.body.classList.remove('dark');
+                }
+            }
+            if (changes.hideBubble) {
+                toggleBubble.checked = !changes.hideBubble.newValue;
+            }
         }
     });
 });
