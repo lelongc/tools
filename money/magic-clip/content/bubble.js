@@ -25,7 +25,9 @@
         zoomOut: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',
         reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>',
         lens: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><circle cx="11" cy="11" r="3"/><path d="M11 8v6M8 11h6"/></svg>',
-        logo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="4" y="4" width="16" height="18" rx="2"/><path d="M9 12h6M9 16h4"/></svg>'
+        logo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="4" y="4" width="16" height="18" rx="2"/><path d="M9 12h6M9 16h4"/></svg>',
+        sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
+        moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'
     };
 
     // ---- Host & Shadow DOM ----
@@ -66,7 +68,10 @@
         <div id="screen-main" class="screen">
             <div class="p-header">
                 <span class="p-title">${ICONS.clipboard} NeoClip</span>
-                <button class="btn-icon" id="btn-close">${ICONS.close}</button>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <button class="btn-icon" id="btn-theme" title="Toggle Theme"></button>
+                    <button class="btn-icon" id="btn-close">${ICONS.close}</button>
+                </div>
             </div>
             <div class="p-search">
                 <div class="search-box">
@@ -95,6 +100,38 @@
     shadow.appendChild(panel);
     shadow.appendChild(bubble);
     document.body.appendChild(host);
+
+    // ---- Theme Toggle (Light/Dark Mode) ----
+    let darkTheme = false;
+    const btnTheme = shadow.getElementById('btn-theme');
+    
+    function applyTheme(isDark) {
+        darkTheme = isDark;
+        if (isDark) {
+            panel.classList.add('dark');
+            if (btnTheme) btnTheme.innerHTML = ICONS.sun;
+        } else {
+            panel.classList.remove('dark');
+            if (btnTheme) btnTheme.innerHTML = ICONS.moon;
+        }
+    }
+
+    // Load persisted or system default theme
+    chrome.storage.local.get(['theme'], res => {
+        let isDark = res.theme === 'dark';
+        if (res.theme === undefined) {
+            isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+        applyTheme(isDark);
+    });
+
+    if (btnTheme) {
+        btnTheme.addEventListener('click', () => {
+            const nextDark = !darkTheme;
+            applyTheme(nextDark);
+            chrome.storage.local.set({ theme: nextDark ? 'dark' : 'light' });
+        });
+    }
 
     // ---- Toast Notification ----
     const toast = shadow.getElementById('mc-toast');

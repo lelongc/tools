@@ -55,6 +55,19 @@
     --mc-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* ---- Dark Theme Variables ---- */
+#mc-panel.dark {
+    --mc-bg: #0b0f19;
+    --mc-bg-pure: #111827;
+    --mc-card: #1f2937;
+    --mc-card-hover: #2d3748;
+    --mc-border: #1f2937;
+    --mc-border-hover: #374151;
+    --mc-text: #f9fafb;
+    --mc-text-secondary: #d1d5db;
+    --mc-text-light: #6b7280;
+}
+
 /* ---- Bubble ---- */
 #mc-bubble {
     width: 50px;

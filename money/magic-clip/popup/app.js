@@ -70,4 +70,17 @@ document.addEventListener('DOMContentLoaded', () => {
     toggleBubble.addEventListener('change', (e) => {
         chrome.storage.local.set({ hideBubble: !e.target.checked });
     });
+
+    // Set theme class on body
+    chrome.storage.local.get(['theme'], (res) => {
+        let isDark = res.theme === 'dark';
+        if (res.theme === undefined) {
+            isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+        if (isDark) {
+            document.body.classList.add('dark');
+        } else {
+            document.body.classList.remove('dark');
+        }
+    });
 });
