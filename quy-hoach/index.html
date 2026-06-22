@@ -330,9 +330,14 @@
         </ul>
     </div>
 
-    <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-weight: bold; cursor: pointer; color: #1e40af;">
-        <input type="checkbox" id="toggleLabels" checked onchange="toggleDistanceLabels()"> Hiển thị số đo chiều dài các cạnh
-    </label>
+    <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; background: #f8fafc; padding: 10px 15px; border-radius: 6px; border: 1px solid var(--border);">
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: bold; cursor: pointer; color: #b45309;">
+            <input type="checkbox" id="togglePolygon" checked onchange="togglePolygonVisibility()"> Hiển thị viền đỏ khu đất
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; font-weight: bold; cursor: pointer; color: #1e40af;">
+            <input type="checkbox" id="toggleLabels" checked onchange="toggleDistanceLabels()"> Hiển thị số đo chiều dài các cạnh
+        </label>
+    </div>
 
     <textarea id="coordsInput" style="display: none;"></textarea>
     
@@ -390,9 +395,9 @@
                             </div>
                             
                             <div style="display: flex; gap: 8px;">
-                                <button onclick="navigator.clipboard.writeText('${copyText.replace(/'/g, "\\'")}').then(()=>alert('Đã sao chép địa chỉ & tọa độ!'))" style="flex: 1; padding: 6px 10px; font-size: 13px; font-weight: bold; background: #1e40af; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 0;">📋 Copy</button>
+                                <button onclick="navigator.clipboard.writeText('${copyText.replace(/'/g, "\\'")}').then(()=>{alert('Đã sao chép địa chỉ & tọa độ!'); map.closePopup();})" style="flex: 1; padding: 6px 10px; font-size: 13px; font-weight: bold; background: #1e40af; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 0;">📋 Copy</button>
                                 
-                                <a href="${gmapLink}" target="_blank" style="flex: 1; padding: 6px 10px; font-size: 13px; font-weight: bold; background: #047857; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; text-align: center; display: inline-block;">🗺️ Mở Google Map</a>
+                                <a href="${gmapLink}" target="_blank" onclick="map.closePopup();" style="flex: 1; padding: 6px 10px; font-size: 13px; font-weight: bold; background: #047857; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; text-align: center; display: inline-block;">🗺️ Mở Google Map</a>
                             </div>
                         </div>
                     `);
@@ -404,13 +409,23 @@
                             <b style="color: #b45309;">📍 Vị trí:</b> ${lat.toFixed(6)}, ${lon.toFixed(6)}<br>
                             <i style="font-size: 13px; color: #666;">(Không thể tải địa chỉ lúc này)</i>
                             <div style="margin-top: 10px;">
-                                <a href="${gmapLink}" target="_blank" style="display: block; padding: 6px 10px; font-size: 13px; font-weight: bold; background: #047857; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; text-align: center;">🗺️ Xem trên Google Map</a>
+                                <a href="${gmapLink}" target="_blank" onclick="map.closePopup();" style="display: block; padding: 6px 10px; font-size: 13px; font-weight: bold; background: #047857; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; text-align: center;">🗺️ Xem trên Google Map</a>
                             </div>
                         </div>
                     `);
                 });
         });
     });
+
+    function togglePolygonVisibility() {
+        if (!polygonLayer) return;
+        let isChecked = document.getElementById('togglePolygon').checked;
+        if (isChecked) {
+            polygonLayer.setStyle({ opacity: 1, fillOpacity: 0.1 });
+        } else {
+            polygonLayer.setStyle({ opacity: 0, fillOpacity: 0 });
+        }
+    }
 
     function toggleDistanceLabels() {
         updateLabelsVisibility();
