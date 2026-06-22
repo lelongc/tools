@@ -436,6 +436,21 @@
         const file = event.target.files[0];
         if (!file) return;
 
+        // Kiểm tra dung lượng file trước khi xử lý (Cảnh báo nếu > 20MB để tránh đơ trình duyệt)
+        const maxSizeBytes = 20 * 1024 * 1024; // 20 MB
+        if (file.size > maxSizeBytes) {
+            const confirmProcess = confirm(
+                `⚠️ Cảnh báo: File bản vẽ này có dung lượng rất lớn (${(file.size / 1024 / 1024).toFixed(1)} MB).\n\n` +
+                `Việc xử lý file lớn trực tiếp trên trình duyệt web có thể làm đơ máy, đứng trang hoặc vượt quá bộ nhớ của trình duyệt (gây crash).\n\n` +
+                `👉 Khuyên dùng: Anh/chị nên mở bản vẽ trong AutoCAD/FastView, quét chọn vùng xung quanh thửa đất của mình rồi dùng lệnh WBLOCK để xuất riêng khu vực đó thành file DXF nhỏ hơn (dưới 5MB) để chạy mượt mà nhất.\n\n` +
+                `Anh/chị có muốn tiếp tục cố gắng tải file này lên không?`
+            );
+            if (!confirmProcess) {
+                document.getElementById('dxfUpload').value = "";
+                return;
+            }
+        }
+
         // Lấy thông số hệ tọa độ
         const kinhTuyenTruc = document.getElementById('provinceSelect').value;
         if (!kinhTuyenTruc || kinhTuyenTruc === "") {
