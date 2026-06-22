@@ -559,8 +559,12 @@
     function updateDxfStyle() {
         const fillOpacityVal = parseFloat(document.getElementById('dxfFillOpacity').value);
         dxfLayerGroup.eachLayer(layer => {
-            if (layer.setStyle && layer.options && layer.options.fillColor) {
-                layer.setStyle({ fillOpacity: fillOpacityVal });
+            if (layer.setOpacity) {
+                layer.setOpacity(fillOpacityVal);
+            } else if (layer.setStyle) {
+                if (layer.options && layer.options.fillColor && layer.options.fillColor !== 'transparent') {
+                    layer.setStyle({ fillOpacity: fillOpacityVal });
+                }
             }
         });
     }
@@ -607,7 +611,7 @@
                     if (type === "POLYLINE") {
                         if (v === "VERTEX") {
                             idx += 2;
-                            let vx = 0, vy = 0;
+                            let vx = null, vy = null;
                             while (idx < numLines) {
                                 let vg = lines[idx].trim();
                                 let vv = lines[idx + 1] ? lines[idx + 1].trim() : "";
@@ -616,7 +620,7 @@
                                 if (vg === "20") vy = parseFloat(vv);
                                 idx += 2;
                             }
-                            entity.vertices.push({ x: vx, y: vy });
+                            if (vx !== null && vy !== null) entity.vertices.push({ x: vx, y: vy });
                             continue;
                         } else if (v === "SEQEND") {
                             idx += 2;
@@ -634,9 +638,7 @@
                 if (g === "8") entity.layer = v;
                 else if (g === "62") entity.colorIndex = parseInt(v);
                 else if (g === "70") {
-                    if (type === "LWPOLYLINE" || type === "POLYLINE") {
-                        entity.shape = (parseInt(v) & 1) === 1;
-                    }
+                    // Do not set shape=true for LWPOLYLINE/POLYLINE. They are just outlines.
                 }
                 else if (g === "92" && type === "HATCH") {
                     if (currentLoop) {
@@ -686,29 +688,29 @@
                 }
                 else if (g === "10") {
                     if (type === "LINE") {
-                        if (!entity.vertices[0]) entity.vertices[0] = { x: 0, y: 0 };
+                        if (!entity.vertices[0]) entity.vertices[0] = { x: null, y: null };
                         entity.vertices[0].x = valNum;
                     }
                     else if (type === "ARC" || type === "CIRCLE") {
-                        if (!entity.center) entity.center = {};
+                        if (!entity.center) entity.center = { x: null, y: null };
                         entity.center.x = valNum;
                         if (type === "CIRCLE") entity.shape = true;
                     }
                     else if (type === "INSERT") {
-                        if (!entity.position) entity.position = {};
+                        if (!entity.position) entity.position = { x: null, y: null };
                         entity.position.x = valNum;
                     }
                     else if (type === "LWPOLYLINE") {
-                        entity.vertices.push({ x: valNum, y: 0 });
+                        entity.vertices.push({ x: valNum, y: null });
                     }
                     else if (type === "SOLID") {
-                        if (!entity.vertices[0]) entity.vertices[0] = { x: 0, y: 0 };
+                        if (!entity.vertices[0]) entity.vertices[0] = { x: null, y: null };
                         entity.vertices[0].x = valNum;
                         entity.shape = true;
                     }
                     else if (type === "HATCH") {
                         if (entity.isPolylineLoop && currentLoop) {
-                            currentLoop.push({ x: valNum, y: 0 });
+                            currentLoop.push({ x: valNum, y: null });
                         } else if (currentEdge) {
                             currentEdge.x1 = valNum;
                             currentEdge.cx = valNum;
@@ -717,15 +719,15 @@
                 }
                 else if (g === "20") {
                     if (type === "LINE") {
-                        if (!entity.vertices[0]) entity.vertices[0] = { x: 0, y: 0 };
+                        if (!entity.vertices[0]) entity.vertices[0] = { x: null, y: null };
                         entity.vertices[0].y = valNum;
                     }
                     else if (type === "ARC" || type === "CIRCLE") {
-                        if (!entity.center) entity.center = {};
+                        if (!entity.center) entity.center = { x: null, y: null };
                         entity.center.y = valNum;
                     }
                     else if (type === "INSERT") {
-                        if (!entity.position) entity.position = {};
+                        if (!entity.position) entity.position = { x: null, y: null };
                         entity.position.y = valNum;
                     }
                     else if (type === "LWPOLYLINE") {
@@ -734,7 +736,7 @@
                         }
                     }
                     else if (type === "SOLID") {
-                        if (!entity.vertices[0]) entity.vertices[0] = { x: 0, y: 0 };
+                        if (!entity.vertices[0]) entity.vertices[0] = { x: null, y: null };
                         entity.vertices[0].y = valNum;
                     }
                     else if (type === "HATCH") {
@@ -748,11 +750,11 @@
                 }
                 else if (g === "11") {
                     if (type === "LINE") {
-                        if (!entity.vertices[1]) entity.vertices[1] = { x: 0, y: 0 };
+                        if (!entity.vertices[1]) entity.vertices[1] = { x: null, y: null };
                         entity.vertices[1].x = valNum;
                     }
                     else if (type === "SOLID") {
-                        if (!entity.vertices[1]) entity.vertices[1] = { x: 0, y: 0 };
+                        if (!entity.vertices[1]) entity.vertices[1] = { x: null, y: null };
                         entity.vertices[1].x = valNum;
                     }
                     else if (type === "HATCH" && currentEdge) {
@@ -761,11 +763,11 @@
                 }
                 else if (g === "21") {
                     if (type === "LINE") {
-                        if (!entity.vertices[1]) entity.vertices[1] = { x: 0, y: 0 };
+                        if (!entity.vertices[1]) entity.vertices[1] = { x: null, y: null };
                         entity.vertices[1].y = valNum;
                     }
                     else if (type === "SOLID") {
-                        if (!entity.vertices[1]) entity.vertices[1] = { x: 0, y: 0 };
+                        if (!entity.vertices[1]) entity.vertices[1] = { x: null, y: null };
                         entity.vertices[1].y = valNum;
                     }
                     else if (type === "HATCH" && currentEdge) {
@@ -773,19 +775,19 @@
                     }
                 }
                 else if (g === "12" && type === "SOLID") {
-                    if (!entity.vertices[2]) entity.vertices[2] = { x: 0, y: 0 };
+                    if (!entity.vertices[2]) entity.vertices[2] = { x: null, y: null };
                     entity.vertices[2].x = valNum;
                 }
                 else if (g === "22" && type === "SOLID") {
-                    if (!entity.vertices[2]) entity.vertices[2] = { x: 0, y: 0 };
+                    if (!entity.vertices[2]) entity.vertices[2] = { x: null, y: null };
                     entity.vertices[2].y = valNum;
                 }
                 else if (g === "13" && type === "SOLID") {
-                    if (!entity.vertices[3]) entity.vertices[3] = { x: 0, y: 0 };
+                    if (!entity.vertices[3]) entity.vertices[3] = { x: null, y: null };
                     entity.vertices[3].x = valNum;
                 }
                 else if (g === "23" && type === "SOLID") {
-                    if (!entity.vertices[3]) entity.vertices[3] = { x: 0, y: 0 };
+                    if (!entity.vertices[3]) entity.vertices[3] = { x: null, y: null };
                     entity.vertices[3].y = valNum;
                 }
                 else if (g === "40") {
@@ -1027,13 +1029,8 @@
 
         const center = getLandCenterVN2000();
         
-        // Nếu file lớn hơn 5MB mà chưa nhập tọa độ lô đất ở Bước 1/2, yêu cầu người dùng nhập trước để tránh đơ/hỏng tab trình duyệt
-        if (file.size > 5 * 1024 * 1024 && !center) {
-            alert(
-                `⚠️ Bản vẽ quy hoạch này có dung lượng lớn (${(file.size / 1024 / 1024).toFixed(1)} MB).\n\n` +
-                `Hệ thống cần biết vị trí thửa đất của anh/chị trước để tự động CẮT NHỎ và lọc nét vẽ xung quanh khu vực đó (tránh đơ trình duyệt).\n\n` +
-                `👉 Vui lòng hoàn thành Bước 1 & Bước 2 (Dán tọa độ sổ đỏ và nhấn Thực hiện quy đổi trước), sau đó thử tải lại file bản vẽ này nhé!`
-            );
+        if (!center) {
+            alert("⚠️ Vui lòng hoàn thành Bước 1 và Bước 2 (Nhập tọa độ sổ đỏ và nhấn Thực hiện quy đổi) TRƯỚC KHI tải lên bản vẽ quy hoạch.\n\nHệ thống bắt buộc phải biết vị trí thửa đất của bạn để cắt vùng bản vẽ và tạo lớp ảnh nền đè lên chuẩn xác nhất xung quanh bán kính lô đất.");
             document.getElementById('dxfUpload').value = "";
             return;
         }
@@ -1111,6 +1108,91 @@
         dxfLayerGroup.clearLayers(); // Xóa lớp DXF cũ nếu có
         let lineCount = 0;
 
+        // Sutherland-Hodgman Polygon Clipping
+        function clipPolygon(pts, xMin, xMax, yMin, yMax) {
+            let outputList = pts;
+            outputList = clipEdge(outputList, p => p.x >= xMin, (p1, p2) => {
+                let t = (xMin - p1.x) / (p2.x - p1.x);
+                return { x: xMin, y: p1.y + t * (p2.y - p1.y) };
+            });
+            outputList = clipEdge(outputList, p => p.x <= xMax, (p1, p2) => {
+                let t = (xMax - p1.x) / (p2.x - p1.x);
+                return { x: xMax, y: p1.y + t * (p2.y - p1.y) };
+            });
+            outputList = clipEdge(outputList, p => p.y >= yMin, (p1, p2) => {
+                let t = (yMin - p1.y) / (p2.y - p1.y);
+                return { x: p1.x + t * (p2.x - p1.x), y: yMin };
+            });
+            outputList = clipEdge(outputList, p => p.y <= yMax, (p1, p2) => {
+                let t = (yMax - p1.y) / (p2.y - p1.y);
+                return { x: p1.x + t * (p2.x - p1.x), y: yMax };
+            });
+            return outputList;
+        }
+
+        function clipEdge(inputList, insideFn, intersectFn) {
+            let outputList = [];
+            if (inputList.length === 0) return outputList;
+            let s = inputList[inputList.length - 1];
+            for (let p of inputList) {
+                if (insideFn(p)) {
+                    if (!insideFn(s)) {
+                        outputList.push(intersectFn(s, p));
+                    }
+                    outputList.push(p);
+                } else if (insideFn(s)) {
+                    outputList.push(intersectFn(s, p));
+                }
+                s = p;
+            }
+            return outputList;
+        }
+
+        // Liang-Barsky Line Segment Clipping
+        function clipSegment(p1, p2, xMin, xMax, yMin, yMax) {
+            let t0 = 0, t1 = 1;
+            let dx = p2.x - p1.x;
+            let dy = p2.y - p1.y;
+            
+            function clipTest(p, q) {
+                if (p === 0) {
+                    if (q < 0) return false;
+                } else {
+                    let t = q / p;
+                    if (p < 0) {
+                        if (t > t1) return false;
+                        if (t > t0) t0 = t;
+                    } else {
+                        if (t < t0) return false;
+                        if (t < t1) t1 = t;
+                    }
+                }
+                return true;
+            }
+            
+            if (clipTest(-dx, p1.x - xMin) &&
+                clipTest(dx, xMax - p1.x) &&
+                clipTest(-dy, p1.y - yMin) &&
+                clipTest(dy, yMax - p1.y)) {
+                return {
+                    p1: { x: p1.x + t0 * dx, y: p1.y + t0 * dy },
+                    p2: { x: p1.x + t1 * dx, y: p1.y + t1 * dy }
+                };
+            }
+            return null;
+        }
+
+        function clipPolyline(pts, xMin, xMax, yMin, yMax) {
+            let clippedSegments = [];
+            for (let i = 0; i < pts.length - 1; i++) {
+                let res = clipSegment(pts[i], pts[i+1], xMin, xMax, yMin, yMax);
+                if (res) {
+                    clippedSegments.push([res.p1, res.p2]);
+                }
+            }
+            return clippedSegments;
+        }
+
         // Hàm đệ quy để lấy tất cả các đường nét (hỗ trợ cả Block/Insert, Tỷ lệ Scale, Góc xoay Rotation)
         function extractGeometries(entities, offsetX = 0, offsetY = 0, scaleX = 1, scaleY = 1, rotationDeg = 0) {
             let geometries = [];
@@ -1138,27 +1220,22 @@
                         };
                     }
 
-                    let isClosedShape = entity.shape || false;
+                    function isValidNumber(n) {
+                        return typeof n === 'number' && !isNaN(n);
+                    }
 
                     if (entity.type === 'LINE' || entity.type === 'LWPOLYLINE' || entity.type === 'POLYLINE') {
                         if (entity.vertices && Array.isArray(entity.vertices)) {
                             let pts = entity.vertices
-                                .filter(v => v && typeof v.x === 'number' && typeof v.y === 'number')
-                                .map(v => transform(v.x, v.y));
+                                .filter(v => v && isValidNumber(v.x) && isValidNumber(v.y))
+                                .map(v => transform(v.x, v.y))
+                                .filter(p => p.x > 1000 && p.y > 1000);
                             if (pts.length > 0) {
-                                // Kiểm tra nếu là đa giác khép kín thực tế (điểm đầu trùng điểm cuối)
-                                if (pts.length > 2) {
-                                    let first = pts[0];
-                                    let last = pts[pts.length - 1];
-                                    if (Math.abs(first.x - last.x) < 0.01 && Math.abs(first.y - last.y) < 0.01) {
-                                        isClosedShape = true;
-                                    }
-                                }
-                                geometries.push({ pts, color, shape: isClosedShape });
+                                geometries.push({ pts, color, shape: false }); // Do not fill polylines
                             }
                         }
                     } else if (entity.type === 'ARC' || entity.type === 'CIRCLE') {
-                        if (entity.center && typeof entity.center.x === 'number' && typeof entity.center.y === 'number' && typeof entity.radius === 'number') {
+                        if (entity.center && isValidNumber(entity.center.x) && isValidNumber(entity.center.y) && isValidNumber(entity.radius)) {
                             let pts = [];
                             let startA = entity.startAngle || 0;
                             let endA = entity.endAngle || (2 * Math.PI);
@@ -1175,18 +1252,28 @@
                         }
                     } else if (entity.type === 'SOLID') {
                         if (entity.vertices && entity.vertices.length >= 3) {
-                            let pts = entity.vertices.map(v => transform(v.x, v.y));
-                            geometries.push({ pts, color, shape: true });
+                            let pts = entity.vertices
+                                .filter(v => v && isValidNumber(v.x) && isValidNumber(v.y))
+                                .map(v => transform(v.x, v.y))
+                                .filter(p => p.x > 1000 && p.y > 1000);
+                            if (pts.length >= 3) {
+                                geometries.push({ pts, color, shape: true });
+                            }
                         }
                     } else if (entity.type === 'HATCH') {
                         if (entity.boundaryLoops && Array.isArray(entity.boundaryLoops)) {
+                            let hatchPaths = [];
                             for (const loop of entity.boundaryLoops) {
                                 let pts = loop
-                                    .filter(v => v && typeof v.x === 'number' && typeof v.y === 'number')
-                                    .map(v => transform(v.x, v.y));
-                                if (pts.length > 0) {
-                                    geometries.push({ pts, color, shape: true });
+                                    .filter(v => v && isValidNumber(v.x) && isValidNumber(v.y))
+                                    .map(v => transform(v.x, v.y))
+                                    .filter(p => p.x > 1000 && p.y > 1000);
+                                if (pts.length > 2) {
+                                    hatchPaths.push(pts);
                                 }
+                            }
+                            if (hatchPaths.length > 0) {
+                                geometries.push({ multiPts: hatchPaths, color, shape: true });
                             }
                         }
                     } else if (entity.type === 'INSERT' && dxf.blocks && dxf.blocks[entity.name]) {
@@ -1208,39 +1295,152 @@
             return geometries;
         }
 
+        const center = getLandCenterVN2000();
+        const radius = center ? parseInt(document.getElementById('dxfRadiusSelect').value) : null;
+        
+        let xMin, xMax, yMin, yMax;
+        if (center && radius) {
+            xMin = center.x - radius;
+            xMax = center.x + radius;
+            yMin = center.y - radius;
+            yMax = center.y + radius;
+        }
+
         let allGeoms = extractGeometries(dxf.entities);
         let fillOpacityVal = parseFloat(document.getElementById('dxfFillOpacity').value);
 
-        for (const geom of allGeoms) {
-            let latlngs = [];
-            for (const v of geom.pts) {
-                try {
-                    let result = proj4(projString, 'WGS84', [v.x, v.y]);
-                    latlngs.push([result[1], result[0]]); // [lat, lon]
-                } catch (e) {}
+        if (center && radius) {
+            // Vẽ lên Canvas độ phân giải cao (3000x3000px)
+            const canvas = document.createElement('canvas');
+            canvas.width = 3000;
+            canvas.height = 3000;
+            const ctx = canvas.getContext('2d');
+
+            // Xóa Canvas sạch nền
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Hàm chuyển đổi tọa độ VN-2000 sang hệ trục tọa độ Canvas (Y của Canvas hướng xuống)
+            function toCanvas(pt) {
+                let px = ((pt.x - xMin) / (2 * radius)) * canvas.width;
+                let py = (1 - (pt.y - yMin) / (2 * radius)) * canvas.height;
+                return { x: px, y: py };
             }
-            if (latlngs.length > 1) {
+
+            // Giới hạn vùng vẽ strictly trong Canvas để an toàn tuyệt đối
+            ctx.beginPath();
+            ctx.rect(0, 0, canvas.width, canvas.height);
+            ctx.clip();
+
+            // 1. Vẽ tất cả các vùng phủ màu (Filled Shapes / Hatches) trước để làm nền bên dưới
+            for (const geom of allGeoms) {
                 if (geom.shape) {
-                    let polygon = L.polygon(latlngs, {
-                        color: geom.color, 
-                        weight: 1.5, 
-                        opacity: 0.8,
-                        fillColor: geom.color,
-                        fillOpacity: fillOpacityVal
-                    });
-                    dxfLayerGroup.addLayer(polygon);
-                } else {
-                    let polyline = L.polyline(latlngs, {
-                        color: geom.color, 
-                        weight: 2, 
-                        opacity: 0.8
-                    });
-                    dxfLayerGroup.addLayer(polyline);
+                    ctx.beginPath();
+                    let hasPath = false;
+                    
+                    let paths = geom.multiPts ? geom.multiPts : [geom.pts];
+                    
+                    for (const pts of paths) {
+                        let clippedPts = clipPolygon(pts, xMin, xMax, yMin, yMax);
+                        if (clippedPts.length > 2) {
+                            hasPath = true;
+                            let start = toCanvas(clippedPts[0]);
+                            ctx.moveTo(start.x, start.y);
+                            for (let i = 1; i < clippedPts.length; i++) {
+                                let pt = toCanvas(clippedPts[i]);
+                                ctx.lineTo(pt.x, pt.y);
+                            }
+                            ctx.closePath();
+                        }
+                    }
+                    
+                    if (hasPath) {
+                        ctx.fillStyle = geom.color;
+                        ctx.fill('evenodd');
+
+                        // Viền mảnh của đa giác
+                        ctx.strokeStyle = geom.color;
+                        ctx.lineWidth = 1.0;
+                        ctx.stroke();
+                        lineCount++;
+                    }
                 }
-                lineCount++;
+            }
+
+            // 2. Vẽ tất cả các đường nét (Lines, Polylines) đè lên trên để hiển thị rõ ràng
+            for (const geom of allGeoms) {
+                if (!geom.shape) {
+                    let clippedLines = clipPolyline(geom.pts, xMin, xMax, yMin, yMax);
+                    for (const seg of clippedLines) {
+                        ctx.beginPath();
+                        let start = toCanvas(seg[0]);
+                        ctx.moveTo(start.x, start.y);
+                        let end = toCanvas(seg[1]);
+                        ctx.lineTo(end.x, end.y);
+                        ctx.strokeStyle = geom.color;
+                        ctx.lineWidth = 3.5;
+                        ctx.stroke();
+                        lineCount++;
+                    }
+                }
+            }
+
+            // Đưa Canvas làm lớp ảnh nền mờ nhạt (L.imageOverlay) lên bản đồ Leaflet
+            try {
+                let p_min_min = proj4(projString, 'WGS84', [xMin, yMin]);
+                let p_max_max = proj4(projString, 'WGS84', [xMax, yMax]);
+                let imageBounds = [[p_min_min[1], p_min_min[0]], [p_max_max[1], p_max_max[0]]];
+                
+                let imageOverlay = L.imageOverlay(canvas.toDataURL(), imageBounds, {
+                    opacity: fillOpacityVal,
+                    interactive: false
+                });
+                dxfLayerGroup.addLayer(imageOverlay);
+
+                // Khung viền đứt nét màu trắng bao quanh hình vuông quy hoạch
+                let boundaryRect = L.rectangle(imageBounds, {
+                    color: '#ffffff',
+                    weight: 2.5,
+                    dashArray: '6, 6',
+                    fillColor: 'transparent',
+                    interactive: false
+                });
+                dxfLayerGroup.addLayer(boundaryRect);
+            } catch (e) {
+                console.error("Lỗi khi chuyển đổi và vẽ ảnh nền quy hoạch:", e);
+            }
+        } else {
+            // Vẽ không cắt lọc (dành cho file nhỏ không có tọa độ tâm) - Fallback
+            for (const geom of allGeoms) {
+                let latlngs = [];
+                for (const v of geom.pts) {
+                    try {
+                        let result = proj4(projString, 'WGS84', [v.x, v.y]);
+                        latlngs.push([result[1], result[0]]); // [lat, lon]
+                    } catch (e) {}
+                }
+                if (latlngs.length > 1) {
+                    if (geom.shape) {
+                        let polygon = L.polygon(latlngs, {
+                            color: geom.color, 
+                            weight: 1.5, 
+                            opacity: 0.8,
+                            fillColor: geom.color,
+                            fillOpacity: fillOpacityVal
+                        });
+                        dxfLayerGroup.addLayer(polygon);
+                    } else {
+                        let polyline = L.polyline(latlngs, {
+                            color: geom.color, 
+                            weight: 2, 
+                            opacity: 0.8
+                        });
+                        dxfLayerGroup.addLayer(polyline);
+                    }
+                    lineCount++;
+                }
             }
         }
-        
+
         if (lineCount === 0) {
             alert("⚠️ Không tìm thấy đường nét nào hợp lệ. Vui lòng mở file bằng AutoCAD (hoặc FastView), nhấn 'X' (Explode) để phá khối toàn bộ bản vẽ, sau đó Save As DXF phiên bản 2013 hoặc cũ hơn rồi thử lại nhé!");
             return;
