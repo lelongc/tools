@@ -330,15 +330,32 @@
     <label class="field-label">Kết quả tọa độ Vĩ độ, Kinh độ:</label>
     <textarea id="coordsInput" placeholder="Danh sách Vĩ độ, Kinh độ sẽ hiển thị ở đây..."></textarea>
     
-    <div class="radio-group">
-        <label><input type="radio" name="shapeType" value="Polygon" checked> Vẽ ranh giới đất (Hình khép kín, tô nền đỏ)</label>
-        <label><input type="radio" name="shapeType" value="LineString"> Vẽ đường thẳng (Chỉ có viền đỏ bao quanh)</label>
+    <!-- Removed the radio group for LineString -->
+    <div style="margin-bottom: 15px; font-weight: bold; color: #1e40af;">
+        ✓ Bản đồ sẽ hiển thị ranh giới đất khép kín và tự động đo chiều dài các cạnh.
     </div>
     
     <button class="btn-primary" style="background-color: var(--accent);" onclick="generateKML()">Tải Tệp Bản Đồ Về Máy (ranh_dat.kml)</button>
 </div>
 
 <script>
+    function deg2rad(deg) {
+        return deg * (Math.PI/180);
+    }
+
+    function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
+        var R = 6371000; // Radius of the earth in m
+        var dLat = deg2rad(lat2-lat1);  
+        var dLon = deg2rad(lon2-lon1); 
+        var a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2); 
+        var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        var d = R * c; 
+        return d;
+    }
+
     function processLensText() {
         const text = document.getElementById('lensInput').value;
         if (!text.trim()) {
@@ -350,7 +367,6 @@
         let outputLines = [];
 
         for (let line of lines) {
-            // Lọc trường hợp người dùng copy từ lệnh LIST của phần mềm AutoCAD
             const cadMatch = line.match(/X\s*=\s*([\d.,]+).*?Y\s*=\s*([\d.,]+)/i);
             if (cadMatch) {
                 let cadX = cadMatch[1].replace(',', '.'); 
@@ -359,7 +375,6 @@
                 continue;
             }
 
-            // Lọc text từ ảnh chụp Sổ Đỏ
             const matches = line.match(/\d+[.,]\d+/g);
             if (matches && matches.length >= 2) {
                 let num1 = parseFloat(matches[matches.length - 1].replace(',', '.'));
@@ -370,7 +385,6 @@
                     num2 = parseFloat(matches[matches.length - 3].replace(',', '.'));
                 }
 
-                // Luôn bảo đảm số Bắc (X) lớn hơn số Đông (Y)
                 if (num1 > num2) {
                     let temp = num2;
                     num2 = num1;
@@ -401,7 +415,7 @@
         const btn = event.currentTarget;
         const originalText = btn.innerHTML;
         btn.innerHTML = "Đã sao chép thành công!";
-        btn.style.backgroundColor = "#059669"; // Màu xanh lá báo thành công
+        btn.style.backgroundColor = "#059669"; 
         setTimeout(() => {
             btn.innerHTML = originalText;
             btn.style.backgroundColor = "";
@@ -469,6 +483,7 @@
 
         const lines = text.split('\n');
         let coordsArray = [];
+        let points = [];
 
         for (let line of lines) {
             line = line.trim();
@@ -480,6 +495,7 @@
                 let lon = parseFloat(parts[1]);
                 if (!isNaN(lat) && !isNaN(lon)) {
                     coordsArray.push(`${lon},${lat},0`);
+                    points.push({lat: lat, lon: lon});
                 }
             }
         }
@@ -489,40 +505,41 @@
             return;
         }
 
-        const shapeType = document.querySelector('input[name="shapeType"]:checked').value;
-        
-        if (shapeType === 'Polygon') {
-            if (coordsArray[0] !== coordsArray[coordsArray.length - 1]) {
-                coordsArray.push(coordsArray[0]);
-            }
+        // Tự động nối điểm cuối về điểm đầu để tạo đa giác khép kín
+        if (coordsArray[0] !== coordsArray[coordsArray.length - 1]) {
+            coordsArray.push(coordsArray[0]);
+            points.push(points[0]);
         }
         
         const coordinatesStr = coordsArray.join('\n              ');
 
-        let placemarkContent = '';
-        if (shapeType === 'Polygon') {
-            placemarkContent = `
-        <Polygon>
-          <extrude>1</extrude>
-          <altitudeMode>clampToGround</altitudeMode>
-          <outerBoundaryIs>
-            <LinearRing>
-              <coordinates>
-              ${coordinatesStr}
-              </coordinates>
-            </LinearRing>
-          </outerBoundaryIs>
-        </Polygon>`;
-        } else {
-            placemarkContent = `
-        <LineString>
-          <extrude>1</extrude>
-          <tessellate>1</tessellate>
-          <altitudeMode>clampToGround</altitudeMode>
-          <coordinates>
-              ${coordinatesStr}
-          </coordinates>
-        </LineString>`;
+        // Tạo nhãn hiển thị khoảng cách cho từng cạnh
+        let edgeLabels = '';
+        for (let i = 0; i < points.length - 1; i++) {
+            let p1 = points[i];
+            let p2 = points[i+1];
+            let dist = getDistanceFromLatLonInM(p1.lat, p1.lon, p2.lat, p2.lon);
+            
+            // Tính trung điểm để đặt nhãn
+            let midLat = (p1.lat + p2.lat) / 2;
+            let midLon = (p1.lon + p2.lon) / 2;
+
+            edgeLabels += `
+    <Placemark>
+      <name>${dist.toFixed(2)}m</name>
+      <Style>
+        <LabelStyle>
+          <color>ff00ffff</color> <!-- Màu vàng chữ hiển thị -->
+          <scale>1.0</scale>
+        </LabelStyle>
+        <IconStyle>
+          <Icon><href></href></Icon> <!-- Không hiển thị icon ghim -->
+        </IconStyle>
+      </Style>
+      <Point>
+        <coordinates>${midLon},${midLat},0</coordinates>
+      </Point>
+    </Placemark>`;
         }
 
         const kmlContent = `<?xml version="1.0" encoding="UTF-8"?>
@@ -532,17 +549,32 @@
     <Style id="redStyle">
       <LineStyle>
         <color>ff0000ff</color>
-        <width>3</width>
+        <width>4</width> <!-- Làm dày viền lên chút -->
       </LineStyle>
       <PolyStyle>
         <color>400000ff</color>
       </PolyStyle>
     </Style>
+    
+    <!-- Lớp phủ đa giác ranh đất -->
     <Placemark>
       <name>Khu Đất Cần Xem</name>
       <styleUrl>#redStyle</styleUrl>
-${placemarkContent}
+      <Polygon>
+        <extrude>1</extrude>
+        <altitudeMode>clampToGround</altitudeMode>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>
+            ${coordinatesStr}
+            </coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
     </Placemark>
+
+    <!-- Các nhãn chiều dài cạnh -->
+    ${edgeLabels}
   </Document>
 </kml>`;
 
