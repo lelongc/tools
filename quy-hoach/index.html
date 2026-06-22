@@ -652,6 +652,20 @@
                     <!-- Settings and Options -->
                     <div class="control-row">
                         <div class="control-info">
+                            <span class="control-title">Loại bản đồ nền</span>
+                            <span class="control-desc">Google Map / Vệ tinh / OSM</span>
+                        </div>
+                        <select id="baseMapSelect" onchange="changeBaseMap()" style="width: 140px; padding: 6px 30px 6px 10px; font-size: 13px;">
+                            <option value="google-hybrid" selected>Google Vệ tinh</option>
+                            <option value="google-roadmap">Google Đường đi</option>
+                            <option value="google-satellite">Google Vệ tinh thô</option>
+                            <option value="google-terrain">Google Địa hình</option>
+                            <option value="osm">OpenStreetMap</option>
+                        </select>
+                    </div>
+
+                    <div class="control-row">
+                        <div class="control-info">
                             <span class="control-title">Viền đỏ khu đất</span>
                             <span class="control-desc">Ẩn/hiện ranh giới thửa đất</span>
                         </div>
@@ -743,13 +757,36 @@
     let labelLayers = [];
     let dxfLayerGroup = L.layerGroup(); // Nhóm chứa các nét vẽ từ file DXF
     let currentDxfFileText = ""; // Lưu trữ nội dung file DXF đang mở để tái xử lý khi đổi bán kính lọc
+    let currentTileLayer;
+
+    function changeBaseMap() {
+        const val = document.getElementById('baseMapSelect').value;
+        if (currentTileLayer) {
+            map.removeLayer(currentTileLayer);
+        }
+        
+        let url = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'; // Default Google Hybrid
+        if (val === 'google-roadmap') {
+            url = 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}';
+        } else if (val === 'google-satellite') {
+            url = 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}';
+        } else if (val === 'google-terrain') {
+            url = 'https://mt1.google.com/vt/lyrs=p&x={x}&y={y}&z={z}';
+        } else if (val === 'osm') {
+            url = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        }
+        
+        currentTileLayer = L.tileLayer(url, {
+            maxZoom: 20
+        }).addTo(map);
+    }
 
     // Chờ giao diện tải xong rồi mới nạp bản đồ
     document.addEventListener("DOMContentLoaded", function() {
         map = L.map('map', { attributionControl: false }).setView([16.0, 106.0], 5); // Nhìn bao quát Việt Nam
         
         // Thêm lớp bản đồ vệ tinh Google (Hybrid - Có tên đường)
-        L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        currentTileLayer = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
             attribution: 'Dữ liệu vệ tinh: Google',
             maxZoom: 20
         }).addTo(map);
