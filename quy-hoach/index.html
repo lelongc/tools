@@ -261,13 +261,13 @@
     
     <div class="grid-2">
         <div>
-            <label class="field-label">📥 Dán văn bản từ Google Lens vào đây:</label>
-            <textarea id="lensInput" placeholder="Ví dụ text quét được:&#10;1 1212479.97 597406.72&#10;2 1212480.00 597410.00"></textarea>
+            <label class="field-label">📥 1. Dán mớ hỗn độn (Từ Lens Sổ Hồng hoặc AutoCAD LIST):</label>
+            <textarea id="lensInput" placeholder="Ví dụ text quét được:&#10;1 1212479.97 597406.72&#10;&#10;Hoặc text từ lệnh LIST AutoCAD:&#10;X= 597406.72  Y= 1212479.97"></textarea>
             <button class="btn-primary" onclick="processLensText()">⚙️ Lọc số & Đảo Tọa Độ (Thành Y,X)</button>
         </div>
         <div>
-            <label class="field-label">📤 Kết quả chuẩn (Y,X) dùng cho AutoCAD:</label>
-            <textarea id="cadOutput" placeholder="Tọa độ đã bóc tách sẽ hiển thị ở đây..." readonly></textarea>
+            <label class="field-label">📤 2. Tọa độ chuẩn (Y, X) - CÓ THỂ TỰ NHẬP/CHỈNH SỬA:</label>
+            <textarea id="cadOutput" placeholder="Bạn có thể tự gõ tọa độ chuẩn (Y, X) vào đây...&#10;Ví dụ:&#10;597406.72, 1212479.97"></textarea>
             <button class="btn-success" onclick="copyCadOutput()">📋 Copy để dán vào CAD</button>
         </div>
     </div>
@@ -284,9 +284,10 @@
         <strong>🌍 Đưa tọa độ lên bản đồ số (Trực tiếp tại đây!):</strong>
         <ul>
             <li>Giờ đây bạn không cần ra web ngoài nữa! Chỉ cần chọn đúng <b>Tỉnh/Thành phố</b> ghi trên Sổ Hồng (Mục hệ tọa độ VN-2000).</li>
-            <li>Bấm nút <b>Chuyển đổi</b>, hệ thống sẽ tự lấy danh sách AutoCAD ở Bước 1 và dịch ra Tọa độ Vĩ độ, Kinh độ (Lat/Long) để đổ thẳng xuống Bước 3.</li>
+            <li>Bấm nút <b>Chuyển đổi</b>, hệ thống sẽ tự lấy danh sách Tọa độ (Y, X) ở trên và dịch ra Tọa độ Vĩ độ, Kinh độ (Lat/Long) để đổ thẳng xuống Bước 3.</li>
         </ul>
     </div>
+    <!-- ... (Select Province) ... -->
 
     <label class="field-label">📍 Chọn Kinh tuyến trục (Tỉnh / Thành phố):</label>
     <select id="provinceSelect">
