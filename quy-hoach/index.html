@@ -775,6 +775,40 @@
         }).addTo(map);
     }
 
+    function checkStreetView(lat, lon, callback) {
+        // Tạo tên callback ngẫu nhiên để tránh đụng độ
+        const callbackName = 'sv_cb_' + Math.random().toString(36).substring(2, 15);
+        
+        // Tạo phần tử script để gọi JSONP
+        const script = document.createElement('script');
+        script.id = callbackName;
+        
+        window[callbackName] = function(data) {
+            // Dọn dẹp script và hàm sau khi gọi xong
+            const el = document.getElementById(callbackName);
+            if (el) el.remove();
+            delete window[callbackName];
+            
+            // Nếu Google trả về dữ liệu vị trí và có panoId hợp lệ
+            if (data && data.Location && data.Location.panoId) {
+                callback(true);
+            } else {
+                callback(false);
+            }
+        };
+        
+        script.onerror = function() {
+            const el = document.getElementById(callbackName);
+            if (el) el.remove();
+            delete window[callbackName];
+            callback(false);
+        };
+        
+        // API nội bộ của Google Maps để kiểm tra nhanh Street View tại tọa độ (bán kính ngầm định ~50m)
+        script.src = `https://cbk0.google.com/cbk?output=json&ll=${lat},${lon}&callback=${callbackName}`;
+        document.body.appendChild(script);
+    }
+
     // Chờ giao diện tải xong rồi mới nạp bản đồ
     document.addEventListener("DOMContentLoaded", function() {
         map = L.map('map', { attributionControl: false }).setView([16.0, 106.0], 5); // Nhìn bao quát Việt Nam
@@ -801,50 +835,78 @@
                 .setContent(`<i>Đang tìm địa chỉ...</i>`)
                 .openOn(map);
 
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=vi`)
-                .then(res => res.json())
-                .then(data => {
-                    let address = data.display_name || "Khu vực này chưa có địa chỉ chính xác trên hệ thống.";
-                    let gmapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
-                    let copyText = `${address} (Tọa độ: ${lat.toFixed(6)}, ${lon.toFixed(6)})`;
-                    
-                    let streetViewLink = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lon}`;
-                    
-                    popup.setContent(`
-                        <div style="font-size: 14.5px; line-height: 1.5; min-width: 250px; font-family: 'Outfit', sans-serif;">
-                            <b style="color: var(--accent); display: block; margin-bottom: 5px;">📍 Địa chỉ tham khảo:</b>
-                            <div style="margin-bottom: 8px;">${address}</div>
-                            
-                            <div style="background: #0f172a; padding: 6px; border-radius: 4px; border: 1px solid #1e293b; font-size: 13px; font-family: monospace; color: #94a3b8; margin-bottom: 12px; text-align: center;">
-                                ${lat.toFixed(6)}, ${lon.toFixed(6)}
-                            </div>
-                            
-                            <div style="display: flex; gap: 8px;">
-                                <button onclick="navigator.clipboard.writeText('${copyText.replace(/'/g, "\\'")}').then(()=>{alert('Đã sao chép địa chỉ & tọa độ!'); map.closePopup();})" style="flex: 1; padding: 6px 10px; font-size: 13px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 0;">📋 Copy</button>
-                                
-                                <a href="${gmapLink}" target="_blank" onclick="map.closePopup();" style="flex: 1; padding: 6px 10px; font-size: 13px; font-weight: bold; background: var(--secondary); color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; text-align: center; display: inline-block;">🗺️ Bản đồ</a>
-                            </div>
-                            
+            let addressText = "Đang tải...";
+            let hasStreetView = false;
+            let isAddressDone = false;
+            let isSVDone = false;
+
+            function renderPopup() {
+                let gmapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+                let streetViewLink = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lon}`;
+                let copyText = `${addressText} (Tọa độ: ${lat.toFixed(6)}, ${lon.toFixed(6)})`;
+                
+                let svButtonHtml = ``;
+                if (isSVDone) {
+                    if (hasStreetView) {
+                        svButtonHtml = `
                             <div style="margin-top: 8px;">
                                 <a href="${streetViewLink}" target="_blank" onclick="map.closePopup();" style="display: block; width: 100%; padding: 7px 10px; font-size: 13px; font-weight: bold; background: #ea4335; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; text-align: center; box-sizing: border-box;">📷 Xem Street View (Nhìn đường phố)</a>
                             </div>
+                        `;
+                    } else {
+                        svButtonHtml = `
+                            <div style="margin-top: 8px; text-align: center; font-size: 12px; color: var(--text-muted); background: #1e293b; padding: 6px; border-radius: 4px; border: 1px dashed var(--border);">
+                                🚫 Không có ảnh đường phố (Street View) tại đây
+                            </div>
+                        `;
+                    }
+                } else {
+                    svButtonHtml = `
+                        <div style="margin-top: 8px; text-align: center; font-size: 12px; color: #f59e0b; background: #1e293b; padding: 6px; border-radius: 4px; border: 1px dashed var(--border);">
+                            ⏳ Đang kiểm tra Street View...
                         </div>
-                    `);
+                    `;
+                }
+
+                popup.setContent(`
+                    <div style="font-size: 14.5px; line-height: 1.5; min-width: 250px; font-family: 'Outfit', sans-serif;">
+                        <b style="color: var(--accent); display: block; margin-bottom: 5px;">📍 Địa chỉ tham khảo:</b>
+                        <div style="margin-bottom: 8px;">${addressText}</div>
+                        
+                        <div style="background: #0f172a; padding: 6px; border-radius: 4px; border: 1px solid #1e293b; font-size: 13px; font-family: monospace; color: #94a3b8; margin-bottom: 12px; text-align: center;">
+                            ${lat.toFixed(6)}, ${lon.toFixed(6)}
+                        </div>
+                        
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="navigator.clipboard.writeText('${copyText.replace(/'/g, "\\'")}').then(()=>{alert('Đã sao chép địa chỉ & tọa độ!'); map.closePopup();})" style="flex: 1; padding: 6px 10px; font-size: 13px; font-weight: bold; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 0;">📋 Copy</button>
+                            
+                            <a href="${gmapLink}" target="_blank" onclick="map.closePopup();" style="flex: 1; padding: 6px 10px; font-size: 13px; font-weight: bold; background: var(--secondary); color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; text-align: center; display: inline-block;">🗺️ Bản đồ</a>
+                        </div>
+                        ${svButtonHtml}
+                    </div>
+                `);
+            }
+
+            // Gọi API lấy địa chỉ
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=vi`)
+                .then(res => res.json())
+                .then(data => {
+                    addressText = data.display_name || "Khu vực này chưa có địa chỉ chính xác trên hệ thống.";
+                    isAddressDone = true;
+                    renderPopup();
                 })
                 .catch(err => {
-                    let gmapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
-                    let streetViewLink = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lon}`;
-                    popup.setContent(`
-                        <div style="font-family: 'Outfit', sans-serif; min-width: 250px;">
-                            <b style="color: var(--accent);">📍 Vị trí:</b> ${lat.toFixed(6)}, ${lon.toFixed(6)}<br>
-                            <i style="font-size: 13px; color: var(--text-muted); display: block; margin-bottom: 8px;">(Không thể tải địa chỉ lúc này)</i>
-                            <div style="display: flex; gap: 8px;">
-                                <a href="${gmapLink}" target="_blank" onclick="map.closePopup();" style="flex: 1; padding: 6px 10px; font-size: 13px; font-weight: bold; background: var(--secondary); color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; text-align: center;">🗺️ Bản đồ</a>
-                                <a href="${streetViewLink}" target="_blank" onclick="map.closePopup();" style="flex: 1; padding: 6px 10px; font-size: 13px; font-weight: bold; background: #ea4335; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; text-align: center;">📷 Street View</a>
-                            </div>
-                        </div>
-                    `);
+                    addressText = "Không thể tải địa chỉ lúc này.";
+                    isAddressDone = true;
+                    renderPopup();
                 });
+
+            // Gọi hàm kiểm tra Street View
+            checkStreetView(lat, lon, function(hasSV) {
+                hasStreetView = hasSV;
+                isSVDone = true;
+                renderPopup();
+            });
         });
     });
 
