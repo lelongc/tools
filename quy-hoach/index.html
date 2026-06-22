@@ -3,86 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quy Hoạch Tool - Tự Động Hóa Tọa Độ Sổ Hồng</title>
+    <title>Công Cụ Hỗ Trợ Đọc Tọa Độ Sổ Đỏ</title>
     <!-- Thư viện Proj4js dùng để chuyển đổi tọa độ -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
     <style>
         :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --secondary: #10b981;
-            --secondary-hover: #059669;
-            --accent: #f59e0b;
-            --bg-body: #f8fafc;
+            --primary: #1e40af; /* Xanh đậm sang trọng */
+            --primary-hover: #1e3a8a;
+            --secondary: #047857; /* Xanh lá trầm */
+            --secondary-hover: #065f46;
+            --accent: #b45309; /* Cam đất/nâu */
+            --bg-body: #f1f5f9;
             --bg-card: #ffffff;
-            --text-main: #1e293b;
-            --text-muted: #475569;
-            --border: #e2e8f0;
+            --text-main: #334155;
+            --border: #cbd5e1;
         }
 
         body { 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             padding: 30px 20px; 
             max-width: 960px; 
             margin: auto; 
             background-color: var(--bg-body); 
             color: var(--text-main); 
-            line-height: 1.6;
+            line-height: 1.7;
+            font-size: 16px;
         }
 
         .header-title {
             text-align: center;
-            font-size: 28px;
-            font-weight: 800;
+            font-size: 26px;
+            font-weight: bold;
             color: #0f172a;
             margin-bottom: 30px;
+            text-transform: uppercase;
         }
 
         .step-card { 
             background: var(--bg-card); 
             padding: 30px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); 
-            margin-bottom: 30px; 
-            border-left: 5px solid var(--primary);
+            border-radius: 10px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); 
+            margin-bottom: 25px; 
+            border-top: 5px solid var(--primary);
         }
 
         .step-header { 
             display: flex; 
             align-items: center; 
             margin-bottom: 20px; 
-            border-bottom: 2px solid var(--border);
+            border-bottom: 1px solid var(--border);
             padding-bottom: 15px;
         }
 
         .step-number {
             background-color: var(--primary);
             color: white;
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 20px;
             font-weight: bold;
-            border-radius: 50%;
+            border-radius: 5px;
             margin-right: 15px;
         }
 
         .step-title {
             font-size: 20px;
-            font-weight: 700;
+            font-weight: bold;
             color: #0f172a;
             margin: 0;
         }
 
         .instruction-box { 
-            background: #eff6ff; 
+            background: #f8fafc; 
             padding: 20px; 
-            border-radius: 8px; 
-            color: #1e3a8a;
+            border-radius: 6px; 
+            color: #334155;
             margin-bottom: 20px;
-            border: 1px solid #bfdbfe;
+            border: 1px solid #e2e8f0;
+            font-size: 15.5px;
         }
 
         .instruction-box ul {
@@ -91,38 +93,39 @@
         }
         
         .instruction-box li {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         textarea { 
             width: 100%; 
-            height: 150px; 
+            height: 140px; 
             padding: 15px; 
-            font-family: 'Consolas', 'Courier New', monospace; 
+            font-family: inherit; 
             border: 1px solid var(--border); 
-            border-radius: 8px; 
+            border-radius: 6px; 
             box-sizing: border-box; 
             resize: vertical; 
-            font-size: 14px;
-            background-color: #f1f5f9;
+            font-size: 15px;
+            background-color: #f8fafc;
         }
 
         textarea:focus, select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 0 0 2px rgba(30, 64, 175, 0.2);
             background-color: #ffffff;
         }
 
         select {
             width: 100%;
             padding: 12px;
-            border-radius: 8px;
+            border-radius: 6px;
             border: 1px solid var(--border);
-            font-size: 15px;
-            background-color: #f1f5f9;
+            font-size: 16px;
+            background-color: #ffffff;
             margin-bottom: 15px;
             font-family: inherit;
+            cursor: pointer;
         }
 
         .grid-2 { 
@@ -137,42 +140,36 @@
 
         .field-label {
             display: block;
-            font-weight: 600;
+            font-weight: bold;
             margin-bottom: 8px;
-            color: var(--text-main);
+            color: #1e293b;
+            font-size: 16px;
         }
 
         button { 
-            padding: 12px 24px; 
+            padding: 14px 20px; 
             border: none; 
-            border-radius: 8px; 
+            border-radius: 6px; 
             cursor: pointer; 
             font-size: 16px; 
-            font-weight: 600; 
+            font-weight: bold; 
             transition: all 0.2s; 
             width: 100%; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
             margin-top: 10px;
         }
 
         .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        .btn-primary:hover { background-color: var(--primary-hover); }
         
         .btn-success { background-color: var(--secondary); color: white; }
-        .btn-success:hover { background-color: var(--secondary-hover); transform: translateY(-1px); }
+        .btn-success:hover { background-color: var(--secondary-hover); }
 
-        .btn-warning { background-color: var(--accent); color: white; }
-        .btn-warning:hover { background-color: #d97706; transform: translateY(-1px); }
-
-        .btn-purple { background-color: #8e44ad; color: white; }
-        .btn-purple:hover { background-color: #732d91; transform: translateY(-1px); }
+        .btn-action { background-color: #475569; color: white; }
+        .btn-action:hover { background-color: #334155; }
 
         .link-highlight {
             color: var(--primary);
-            font-weight: 600;
+            font-weight: bold;
             text-decoration: none;
         }
         
@@ -184,7 +181,7 @@
             margin: 15px 0;
             background: #f8fafc;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 6px;
             border: 1px solid var(--border);
         }
 
@@ -193,103 +190,59 @@
             align-items: center;
             gap: 8px;
             cursor: pointer;
-            font-weight: 500;
-        }
-
-        .guide-section {
-            background: #ffffff;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        details summary {
-            padding: 20px;
-            background: #f8fafc;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            list-style: none;
-            display: flex;
-            align-items: center;
-            color: #334155;
-        }
-
-        details summary::-webkit-details-marker { display: none; }
-        details summary::before {
-            content: '📘 ';
-            margin-right: 10px;
-        }
-
-        .guide-content {
-            padding: 20px;
-            border-top: 1px solid var(--border);
-            font-size: 15px;
-        }
-
-        .guide-content ul { padding-left: 20px; }
-        .guide-content code {
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: monospace;
-            color: #db2777;
-            font-weight: 600;
+            font-size: 15.5px;
         }
     </style>
 </head>
 <body>
 
-<div class="header-title">Bộ Công Cụ Xử Lý Tọa Độ Sổ Hồng (VN-2000)</div>
+<div class="header-title">Phần Mềm Hỗ Trợ Chuyển Đổi Tọa Độ Sổ Đỏ (VN-2000)</div>
 
 <!-- BƯỚC 1 -->
 <div class="step-card">
     <div class="step-header">
         <div class="step-number">1</div>
-        <h2 class="step-title">Quét Sổ Hồng & Định Dạng Tọa Độ Cho AutoCAD</h2>
+        <h2 class="step-title">Trích Xuất Tọa Độ Tự Động</h2>
     </div>
     
     <div class="instruction-box">
-        <strong>📸 Cách lấy dữ liệu từ Sổ Hồng:</strong>
+        <strong>Hướng dẫn:</strong> 
         <ul>
-            <li>Mở ứng dụng <b>Google Lens</b> (hoặc tính năng dịch/quét chữ của Zalo/iPhone) và chụp lại bảng tọa độ trên Sổ Hồng.</li>
-            <li>Bôi đen để <b>Copy (Sao chép)</b> toàn bộ các con số lộn xộn vừa quét được.</li>
-            <li>Dán toàn bộ vào ô bên trái dưới đây. Hệ thống sẽ tự lọc số, đảo vị trí <b>(Đổi X, Y thành Y, X)</b> thành chuẩn để vẽ trong AutoCAD.</li>
+            <li>Quý vị dùng điện thoại (ứng dụng Google Lens hoặc Zalo) chụp và <b>sao chép (copy) bảng tọa độ</b> trên Sổ Đỏ.</li>
+            <li>Dán đoạn văn bản vừa sao chép vào <b>Ô số 1</b> bên dưới. Bấm nút xử lý để phần mềm tự động nhặt ra các con số và sắp xếp đúng chuẩn.</li>
+            <li><i>Lưu ý: Nếu quý vị đã có sẵn tọa độ ghi rõ Y (Đông) và X (Bắc), quý vị có thể bỏ qua Ô số 1 và gõ trực tiếp vào <b>Ô số 2</b>.</i></li>
         </ul>
     </div>
     
     <div class="grid-2">
         <div>
-            <label class="field-label">📥 1. Dán mớ hỗn độn (Từ Lens Sổ Hồng hoặc AutoCAD LIST):</label>
-            <textarea id="lensInput" placeholder="Ví dụ text quét được:&#10;1 1212479.97 597406.72&#10;&#10;Hoặc text từ lệnh LIST AutoCAD:&#10;X= 597406.72  Y= 1212479.97"></textarea>
-            <button class="btn-primary" onclick="processLensText()">⚙️ Lọc số & Đảo Tọa Độ (Thành Y,X)</button>
+            <label class="field-label">Ô số 1: Dán văn bản vừa chụp vào đây</label>
+            <textarea id="lensInput" placeholder="Vui lòng dán văn bản sao chép từ sổ đỏ hoặc phần mềm AutoCAD vào ô này..."></textarea>
+            <button class="btn-action" onclick="processLensText()">Tự Động Trích Xuất Tọa Độ</button>
         </div>
         <div>
-            <label class="field-label">📤 2. Tọa độ chuẩn (Y, X) - CÓ THỂ TỰ NHẬP/CHỈNH SỬA:</label>
-            <textarea id="cadOutput" placeholder="Bạn có thể tự gõ tọa độ chuẩn (Y, X) vào đây...&#10;Ví dụ:&#10;597406.72, 1212479.97"></textarea>
-            <button class="btn-success" onclick="copyCadOutput()">📋 Copy để dán vào CAD</button>
+            <label class="field-label">Ô số 2: Danh sách tọa độ chuẩn (Y, X)</label>
+            <textarea id="cadOutput" placeholder="Phần mềm sẽ tự điền kết quả vào đây.&#10;Quý vị cũng có thể tự gõ tay (Y phẩy X) như mẫu:&#10;597406.72, 1212479.97"></textarea>
+            <button class="btn-success" onclick="copyCadOutput()">Sao chép tọa độ (Để dán vào AutoCAD)</button>
         </div>
     </div>
 </div>
 
 <!-- BƯỚC 2 -->
-<div class="step-card">
+<div class="step-card" style="border-top-color: var(--secondary);">
     <div class="step-header">
-        <div class="step-number" style="background-color: #8e44ad;">2</div>
-        <h2 class="step-title">Chuyển Đổi Sang Tọa Độ Bản Đồ (Vĩ độ, Kinh độ)</h2>
+        <div class="step-number" style="background-color: var(--secondary);">2</div>
+        <h2 class="step-title">Quy Đổi Sang Bản Đồ Vệ Tinh (Google Maps)</h2>
     </div>
     
-    <div class="instruction-box" style="background: #fdf4ff; border-color: #fbcfe8; color: #831843;">
-        <strong>🌍 Đưa tọa độ lên bản đồ số (Trực tiếp tại đây!):</strong>
+    <div class="instruction-box">
         <ul>
-            <li>Giờ đây bạn không cần ra web ngoài nữa! Chỉ cần chọn đúng <b>Tỉnh/Thành phố</b> ghi trên Sổ Hồng (Mục hệ tọa độ VN-2000).</li>
-            <li>Bấm nút <b>Chuyển đổi</b>, hệ thống sẽ tự lấy danh sách Tọa độ (Y, X) ở trên và dịch ra Tọa độ Vĩ độ, Kinh độ (Lat/Long) để đổ thẳng xuống Bước 3.</li>
+            <li>Để định vị khu đất trên điện thoại hoặc máy tính, cần chuyển đổi hệ tọa độ VN-2000 (của Việt Nam) sang hệ thống quốc tế.</li>
+            <li>Quý vị vui lòng xem ở mép ngoài cùng của cuốn Sổ Đỏ để biết Tỉnh/Thành phố. Sau đó chọn đúng tên Tỉnh ở danh sách bên dưới và bấm nút <b>Thực Hiện Quy Đổi</b>.</li>
         </ul>
     </div>
-    <!-- ... (Select Province) ... -->
 
-    <label class="field-label">📍 Chọn Kinh tuyến trục (Tỉnh / Thành phố):</label>
+    <label class="field-label">Chọn Tỉnh / Thành phố tương ứng trên Sổ Đỏ:</label>
     <select id="provinceSelect">
         <option value="104.75">An Giang (104°45')</option>
         <option value="107.75">Bà Rịa - Vũng Tàu (107°45')</option>
@@ -348,7 +301,7 @@
         <option value="105.00">Thanh Hóa (105°00')</option>
         <option value="107.50">Thừa Thiên Huế (107°30')</option>
         <option value="105.75">Tiền Giang (105°45')</option>
-        <option value="105.75" selected>TP Hồ Chí Minh (105°45')</option>
+        <option value="105.75" selected>TP. Hồ Chí Minh (105°45')</option>
         <option value="105.50">Trà Vinh (105°30')</option>
         <option value="105.00">Tuyên Quang (105°00')</option>
         <option value="105.50">Vĩnh Long (105°30')</option>
@@ -356,72 +309,40 @@
         <option value="104.75">Yên Bái (104°45')</option>
     </select>
     
-    <button class="btn-purple" onclick="convertToLatLong()">⚡ Chuyển Đổi Sang Tọa Độ Google Maps (Lat, Long)</button>
+    <button class="btn-success" onclick="convertToLatLong()">Thực Hiện Quy Đổi</button>
 </div>
 
 <!-- BƯỚC 3 -->
-<div class="step-card">
+<div class="step-card" style="border-top-color: var(--accent);">
     <div class="step-header">
-        <div class="step-number" style="background-color: #f59e0b;">3</div>
-        <h2 class="step-title">Tạo File KML & Xem Ranh Đất Trên Google Earth</h2>
+        <div class="step-number" style="background-color: var(--accent);">3</div>
+        <h2 class="step-title">Tạo Tệp Bản Đồ Khu Đất</h2>
     </div>
     
-    <div class="instruction-box" style="background: #fffbeb; border-color: #fde68a; color: #92400e;">
-        <strong>🗺️ Lưu file bản đồ:</strong>
+    <div class="instruction-box">
+        <strong>Hướng dẫn xem trên Google Earth:</strong>
         <ul>
-            <li>Danh sách Vĩ độ, Kinh độ đã được điền tự động từ Bước 2.</li>
-            <li>Hãy chọn nét vẽ đa giác và bấm tải file KML. Mở <a class="link-highlight" href="https://earth.google.com/web/" target="_blank">Google Earth</a> và kéo-thả file tải xuống vào để xem vị trí!</li>
+            <li>Kết quả tọa độ thế giới đã được tự động điền vào ô bên dưới.</li>
+            <li>Quý vị bấm nút tải tệp về. Sau đó truy cập trang web <a class="link-highlight" href="https://earth.google.com/web/" target="_blank">Google Earth</a> và dùng chuột kéo thả tệp vừa tải vào màn hình để xem khu đất.</li>
         </ul>
     </div>
 
-    <label class="field-label">📍 Tọa độ Vĩ độ, Kinh độ (Lat, Long):</label>
-    <textarea id="coordsInput" placeholder="Ví dụ:&#10;10.943727, 106.635009&#10;10.943692, 106.635234"></textarea>
+    <label class="field-label">Kết quả tọa độ Vĩ độ, Kinh độ:</label>
+    <textarea id="coordsInput" placeholder="Danh sách Vĩ độ, Kinh độ sẽ hiển thị ở đây..."></textarea>
     
     <div class="radio-group">
-        <label><input type="radio" name="shapeType" value="Polygon" checked> 🟥 Vẽ Đa Giác (Khép kín ranh, tô nền đỏ)</label>
-        <label><input type="radio" name="shapeType" value="LineString"> 📏 Vẽ Dạng Đường Kẻ (Line)</label>
+        <label><input type="radio" name="shapeType" value="Polygon" checked> Vẽ ranh giới đất (Hình khép kín, tô nền đỏ)</label>
+        <label><input type="radio" name="shapeType" value="LineString"> Vẽ đường thẳng (Chỉ có viền đỏ bao quanh)</label>
     </div>
     
-    <button class="btn-warning" onclick="generateKML()">⬇️ Tải xuống file quy_hoach.kml</button>
-</div>
-
-<!-- CẨM NANG -->
-<div class="guide-section">
-    <details>
-        <summary>Cẩm nang AutoCAD: Các lệnh vẽ & đo đạc cần nhớ</summary>
-        <div class="guide-content">
-            <p><strong>✍️ Vẽ ranh đất từ bảng tọa độ:</strong></p>
-            <ul>
-                <li>Mở AutoCAD, gõ lệnh <code>PLINE</code> rồi nhấn phím Space.</li>
-                <li>Dán (Paste) danh sách kết quả bạn vừa copy từ <b>Bước 1</b> thẳng vào AutoCAD.</li>
-                <li>Nhấn <code>Enter</code> để kết thúc, khung ranh đất sẽ được tự động vẽ ra chính xác.</li>
-            </ul>
-
-            <p><strong>📍 Tìm và Zoom đến khu đất vừa vẽ:</strong></p>
-            <ul>
-                <li>Đôi khi vẽ xong đất nằm ở tít xa màn hình. Hãy gõ lệnh <code>Z</code> (Zoom) ➔ Space ➔ Chọn <code>C</code> (Center) ➔ Dán 1 tọa độ bất kỳ của lô đất vào ➔ Nhập <code>500</code>. Bản vẽ sẽ phóng to ngay khu đất đó.</li>
-            </ul>
-            
-            <p><strong>📋 Xem Diện tích & Chiều dài thần tốc:</strong></p>
-            <ul>
-                <li>Đừng dùng nhiều lệnh lắt nhắt. Gõ lệnh <code>LIST</code> (hoặc <code>LI</code>) ➔ Click chọn lô đất vừa vẽ ➔ Nhấn <code>Space</code>.</li>
-                <li>Cửa sổ thông tin F2 sẽ hiện ra: <b>Area</b> là Diện tích, <b>Perimeter</b> là Chu vi, và tọa độ tất cả các góc cũng nằm trong đó.</li>
-            </ul>
-            
-            <p><strong>⚠ Ghi chú về Đơn vị (Scale):</strong></p>
-            <ul>
-                <li>Để đo kích thước chuẩn theo mét, bạn nên gõ <code>UNITS</code> ➔ Cài Insertion Scale thành <b>Meters</b>.</li>
-                <li>Nếu bản vẽ đang ở Milimeters, hãy <code>SCALE</code> lô đất với hệ số <code>0.001</code> để về đúng chuẩn mét.</li>
-            </ul>
-        </div>
-    </details>
+    <button class="btn-primary" style="background-color: var(--accent);" onclick="generateKML()">Tải Tệp Bản Đồ Về Máy (quy_hoach.kml)</button>
 </div>
 
 <script>
     function processLensText() {
         const text = document.getElementById('lensInput').value;
         if (!text.trim()) {
-            alert("Vui lòng dán văn bản quét từ Google Lens hoặc AutoCAD LIST vào!");
+            alert("Vui lòng dán văn bản từ phần mềm chụp ảnh Sổ Đỏ vào Ô số 1.");
             return;
         }
 
@@ -429,43 +350,39 @@
         let outputLines = [];
 
         for (let line of lines) {
-            // Trường hợp 1: Text copy từ lệnh LIST của AutoCAD (VD: X= 597406.72 Y= 1212479.97 Z= 0.00)
+            // Lọc trường hợp người dùng copy từ lệnh LIST của phần mềm AutoCAD
             const cadMatch = line.match(/X\s*=\s*([\d.,]+).*?Y\s*=\s*([\d.,]+)/i);
             if (cadMatch) {
-                let cadX = cadMatch[1].replace(',', '.'); // Easting
-                let cadY = cadMatch[2].replace(',', '.'); // Northing
+                let cadX = cadMatch[1].replace(',', '.'); 
+                let cadY = cadMatch[2].replace(',', '.'); 
                 outputLines.push(`${cadX},${cadY}`);
                 continue;
             }
 
-            // Trường hợp 2: Text quét từ Google Lens Sổ Hồng (VD: 1 1212479.97 597406.72)
+            // Lọc text từ ảnh chụp Sổ Đỏ
             const matches = line.match(/\d+[.,]\d+/g);
             if (matches && matches.length >= 2) {
-                // Ta tìm 2 số lớn (bỏ qua số Z=0.00 nếu rớt xuống đây)
                 let num1 = parseFloat(matches[matches.length - 1].replace(',', '.'));
                 let num2 = parseFloat(matches[matches.length - 2].replace(',', '.'));
                 
-                // Nếu một trong 2 số quá nhỏ (như Z=0), ta lùi lại 1 index để lấy đúng cặp X,Y
                 if (num1 === 0 && matches.length >= 3) {
                     num1 = parseFloat(matches[matches.length - 2].replace(',', '.'));
                     num2 = parseFloat(matches[matches.length - 3].replace(',', '.'));
                 }
 
-                // Ở VN-2000, X (Bắc) thường lớn hơn Y (Đông). X ~ 1.000.000+, Y ~ 500.000+
+                // Luôn bảo đảm số Bắc (X) lớn hơn số Đông (Y)
                 if (num1 > num2) {
                     let temp = num2;
                     num2 = num1;
                     num1 = temp;
                 }
 
-                // Định dạng (Y,X) cho AutoCAD (Easting, Northing)
-                // num1 đang là số bé (Y - Easting), num2 là số lớn (X - Northing)
                 outputLines.push(`${num1},${num2}`);
             }
         }
 
         if (outputLines.length === 0) {
-            alert("Không tìm thấy số tọa độ hợp lệ. Xin kiểm tra lại văn bản!");
+            alert("Hệ thống không tìm thấy con số nào hợp lệ. Quý vị vui lòng chụp ảnh rõ nét hơn hoặc tự gõ tay vào Ô số 2.");
         } else {
             document.getElementById('cadOutput').value = outputLines.join('\n');
             document.getElementById('cadOutput').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -475,7 +392,7 @@
     function copyCadOutput() {
         const out = document.getElementById('cadOutput');
         if (!out.value) {
-            alert("Chưa có dữ liệu. Vui lòng bấm 'Lọc số & Đảo Tọa Độ' trước!");
+            alert("Chưa có kết quả tọa độ để sao chép.");
             return;
         }
         out.select();
@@ -483,8 +400,8 @@
         
         const btn = event.currentTarget;
         const originalText = btn.innerHTML;
-        btn.innerHTML = "✅ Đã Copy Thành Công!";
-        btn.style.backgroundColor = "#059669";
+        btn.innerHTML = "Đã sao chép thành công!";
+        btn.style.backgroundColor = "#059669"; // Màu xanh lá báo thành công
         setTimeout(() => {
             btn.innerHTML = originalText;
             btn.style.backgroundColor = "";
@@ -494,13 +411,11 @@
     function convertToLatLong() {
         const cadText = document.getElementById('cadOutput').value.trim();
         if (!cadText) {
-            alert("Trống dữ liệu! Vui lòng làm Bước 1 trước để có danh sách tọa độ (Y,X).");
+            alert("Xin vui lòng hoàn thành Bước 1 để lấy tọa độ chuẩn trước khi quy đổi.");
             return;
         }
 
         const kinhTuyenTruc = document.getElementById('provinceSelect').value;
-        
-        // Cấu hình tham số chiếu VN-2000 Múi 3 độ dựa trên QĐ 05/2007/QĐ-BTNMT
         const vn2000_proj4 = `+proj=tmerc +lat_0=0 +lon_0=${kinhTuyenTruc} +k=0.9999 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=-191.90441429,-39.30318279,-111.45032835,0.00928836,-0.01975479,0.00427372,0.252906278 +units=m +no_defs`;
         
         const lines = cadText.split('\n');
@@ -516,13 +431,11 @@
                     let y_easting = parseFloat(parts[0]);
                     let x_northing = parseFloat(parts[1]);
                     
-                    // proj4js converts from [easting, northing] to [longitude, latitude]
                     let result = proj4(vn2000_proj4, 'WGS84', [y_easting, x_northing]);
                     
                     let lon = result[0].toFixed(6);
                     let lat = result[1].toFixed(6);
                     
-                    // Đầu ra yêu cầu của Bước 3 là Vĩ độ (Lat), Kinh độ (Lon) 
                     latlongList.push(`${lat}, ${lon}`);
                 }
             }
@@ -531,8 +444,8 @@
             
             const btn = event.currentTarget;
             const originalText = btn.innerHTML;
-            btn.innerHTML = "✅ Chuyển Đổi Thành Công!";
-            btn.style.backgroundColor = "#27ae60";
+            btn.innerHTML = "Đã quy đổi thành công!";
+            btn.style.backgroundColor = "#1e40af"; 
             
             document.getElementById('coordsInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
             
@@ -543,14 +456,14 @@
 
         } catch (err) {
             console.error(err);
-            alert("Có lỗi trong quá trình chuyển đổi tọa độ. Đảm bảo dữ liệu ở Bước 1 đúng định dạng Y,X!");
+            alert("Có lỗi xảy ra. Quý vị vui lòng kiểm tra lại cấu trúc danh sách tọa độ ở Ô số 2 (cần có dấu phẩy giữa hai số).");
         }
     }
 
     function generateKML() {
         const text = document.getElementById('coordsInput').value.trim();
         if (!text) {
-            alert("Vui lòng dán tọa độ Vĩ độ, Kinh độ vào Bước 3!");
+            alert("Danh sách Vĩ độ, Kinh độ đang trống.");
             return;
         }
 
@@ -572,7 +485,7 @@
         }
 
         if (coordsArray.length < 2) {
-            alert("Cần ít nhất 2 tọa độ hợp lệ để tạo bản đồ!");
+            alert("Cần tối thiểu 2 điểm tọa độ để có thể vẽ bản đồ.");
             return;
         }
 
@@ -626,7 +539,7 @@
       </PolyStyle>
     </Style>
     <Placemark>
-      <name>Ranh Đất Quy Hoạch</name>
+      <name>Khu Đất Cần Xem</name>
       <styleUrl>#redStyle</styleUrl>
 ${placemarkContent}
     </Placemark>
@@ -637,7 +550,7 @@ ${placemarkContent}
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'ranh_dat_quy_hoach.kml';
+        a.download = 'ban_do_khu_dat.kml';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
