@@ -377,17 +377,37 @@
                 .then(res => res.json())
                 .then(data => {
                     let address = data.display_name || "Khu vực này chưa có địa chỉ chính xác trên hệ thống.";
+                    let gmapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+                    let copyText = `${address} (Tọa độ: ${lat.toFixed(6)}, ${lon.toFixed(6)})`;
+                    
                     popup.setContent(`
-                        <div style="font-size: 14px; line-height: 1.5; max-width: 250px;">
-                            <b style="color: #b45309;">📍 Địa chỉ tham khảo:</b><br>
-                            ${address}<br>
-                            <hr style="margin: 8px 0; border: 0; border-top: 1px solid #ccc;">
-                            <span style="color: #475569; font-size: 12px;">Vĩ độ: ${lat.toFixed(6)}<br>Kinh độ: ${lon.toFixed(6)}</span>
+                        <div style="font-size: 14.5px; line-height: 1.5; min-width: 250px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                            <b style="color: #b45309; display: block; margin-bottom: 5px;">📍 Địa chỉ tham khảo:</b>
+                            <div style="margin-bottom: 8px;">${address}</div>
+                            
+                            <div style="background: #f8fafc; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0; font-size: 13px; font-family: monospace; color: #475569; margin-bottom: 12px; text-align: center;">
+                                ${lat.toFixed(6)}, ${lon.toFixed(6)}
+                            </div>
+                            
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="navigator.clipboard.writeText('${copyText.replace(/'/g, "\\'")}').then(()=>alert('Đã sao chép địa chỉ & tọa độ!'))" style="flex: 1; padding: 6px 10px; font-size: 13px; font-weight: bold; background: #1e40af; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 0;">📋 Copy</button>
+                                
+                                <a href="${gmapLink}" target="_blank" style="flex: 1; padding: 6px 10px; font-size: 13px; font-weight: bold; background: #047857; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; text-align: center; display: inline-block;">🗺️ Mở Google Map</a>
+                            </div>
                         </div>
                     `);
                 })
                 .catch(err => {
-                    popup.setContent(`<b>📍 Vị trí:</b> ${lat.toFixed(6)}, ${lon.toFixed(6)}<br><i>(Không thể tải địa chỉ lúc này)</i>`);
+                    let gmapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
+                    popup.setContent(`
+                        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                            <b style="color: #b45309;">📍 Vị trí:</b> ${lat.toFixed(6)}, ${lon.toFixed(6)}<br>
+                            <i style="font-size: 13px; color: #666;">(Không thể tải địa chỉ lúc này)</i>
+                            <div style="margin-top: 10px;">
+                                <a href="${gmapLink}" target="_blank" style="display: block; padding: 6px 10px; font-size: 13px; font-weight: bold; background: #047857; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; text-align: center;">🗺️ Xem trên Google Map</a>
+                            </div>
+                        </div>
+                    `);
                 });
         });
     });
