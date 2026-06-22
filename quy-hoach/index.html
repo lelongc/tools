@@ -390,7 +390,7 @@
                 continue;
             }
 
-            const matches = line.match(/\d+[.,]\d+/g);
+            const matches = line.match(/\d+(?:[.,]\d+)?/g);
             if (matches && matches.length >= 2) {
                 let num1 = parseFloat(matches[matches.length - 1].replace(',', '.'));
                 let num2 = parseFloat(matches[matches.length - 2].replace(',', '.'));
