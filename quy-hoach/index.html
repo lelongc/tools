@@ -432,24 +432,271 @@
     });
 
     // --- Các hàm xử lý file DXF Quy hoạch ---
+    function getLandCenterVN2000() {
+        const cadText = document.getElementById('cadOutput').value.trim();
+        if (!cadText) return null;
+        
+        let sumX = 0, sumY = 0, count = 0;
+        const lines = cadText.split('\n');
+        for (let line of lines) {
+            let parts = line.split(',');
+            if (parts.length >= 2) {
+                let y_easting = parseFloat(parts[0]);
+                let x_northing = parseFloat(parts[1]);
+                if (!isNaN(y_easting) && !isNaN(x_northing)) {
+                    sumX += y_easting;
+                    sumY += x_northing;
+                    count++;
+                }
+            }
+        }
+        if (count === 0) return null;
+        return { x: sumX / count, y: sumY / count };
+    }
+
+    function parseDxfLightweight(text, center, filterRadius) {
+        const xMin = center.x - filterRadius;
+        const xMax = center.x + filterRadius;
+        const yMin = center.y - filterRadius;
+        const yMax = center.y + filterRadius;
+
+        const lines = text.split(/\r?\n/);
+        const numLines = lines.length;
+
+        const blocks = {}; // Tên block -> { entities: [] }
+        const entities = [];
+        
+        let currentSection = "";
+        let inBlocks = false;
+        let inEntities = false;
+        
+        let idxLoop = 0;
+        
+        function readEntity(startIndex) {
+            let idx = startIndex;
+            let type = lines[idx + 1] ? lines[idx + 1].trim() : "";
+            idx += 2;
+            
+            let entity = { type: type, vertices: [] };
+            
+            while (idx < numLines) {
+                let g = lines[idx].trim();
+                let v = lines[idx + 1] ? lines[idx + 1].trim() : "";
+                
+                if (g === "0") {
+                    if (type === "POLYLINE") {
+                        if (v === "VERTEX") {
+                            idx += 2;
+                            let vx = 0, vy = 0;
+                            while (idx < numLines) {
+                                let vg = lines[idx].trim();
+                                let vv = lines[idx + 1] ? lines[idx + 1].trim() : "";
+                                if (vg === "0") break;
+                                if (vg === "10") vx = parseFloat(vv);
+                                if (vg === "20") vy = parseFloat(vv);
+                                idx += 2;
+                            }
+                            entity.vertices.push({ x: vx, y: vy });
+                            continue;
+                        } else if (v === "SEQEND") {
+                            idx += 2;
+                            break;
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+                
+                let valNum = parseFloat(v);
+                
+                if (g === "8") entity.layer = v;
+                else if (g === "62") entity.colorIndex = parseInt(v);
+                else if (g === "10") {
+                    if (type === "LINE") {
+                        if (!entity.vertices[0]) entity.vertices[0] = { x: 0, y: 0 };
+                        entity.vertices[0].x = valNum;
+                    }
+                    else if (type === "ARC" || type === "CIRCLE") {
+                        if (!entity.center) entity.center = {};
+                        entity.center.x = valNum;
+                    }
+                    else if (type === "INSERT") {
+                        if (!entity.position) entity.position = {};
+                        entity.position.x = valNum;
+                    }
+                    else if (type === "LWPOLYLINE") {
+                        entity.vertices.push({ x: valNum, y: 0 });
+                    }
+                }
+                else if (g === "20") {
+                    if (type === "LINE") {
+                        if (!entity.vertices[0]) entity.vertices[0] = { x: 0, y: 0 };
+                        entity.vertices[0].y = valNum;
+                    }
+                    else if (type === "ARC" || type === "CIRCLE") {
+                        if (!entity.center) entity.center = {};
+                        entity.center.y = valNum;
+                    }
+                    else if (type === "INSERT") {
+                        if (!entity.position) entity.position = {};
+                        entity.position.y = valNum;
+                    }
+                    else if (type === "LWPOLYLINE") {
+                        if (entity.vertices.length > 0) {
+                            entity.vertices[entity.vertices.length - 1].y = valNum;
+                        }
+                    }
+                }
+                else if (g === "11" && type === "LINE") {
+                    if (!entity.vertices[1]) entity.vertices[1] = { x: 0, y: 0 };
+                    entity.vertices[1].x = valNum;
+                }
+                else if (g === "21" && type === "LINE") {
+                    if (!entity.vertices[1]) entity.vertices[1] = { x: 0, y: 0 };
+                    entity.vertices[1].y = valNum;
+                }
+                else if (g === "40") {
+                    if (type === "ARC" || type === "CIRCLE") entity.radius = valNum;
+                }
+                else if (g === "50") {
+                    if (type === "ARC") entity.startAngle = valNum * Math.PI / 180;
+                    else if (type === "INSERT") entity.rotation = valNum;
+                }
+                else if (g === "51") {
+                    if (type === "ARC") entity.endAngle = valNum * Math.PI / 180;
+                }
+                else if (g === "41") {
+                    if (type === "INSERT") {
+                        if (!entity.scale) entity.scale = {};
+                        entity.scale.x = valNum;
+                    }
+                }
+                else if (g === "42") {
+                    if (type === "INSERT") {
+                        if (!entity.scale) entity.scale = {};
+                        entity.scale.y = valNum;
+                    }
+                }
+                else if (g === "2") {
+                    if (type === "INSERT" || type === "BLOCK") entity.name = v;
+                }
+                
+                idx += 2;
+            }
+            
+            return { entity, nextIndex: idx };
+        }
+
+        while (idxLoop < numLines - 1) {
+            let g = lines[idxLoop].trim();
+            let v = lines[idxLoop + 1] ? lines[idxLoop + 1].trim() : "";
+            
+            if (g === "0" && v === "SECTION") {
+                let nextG = lines[idxLoop + 2] ? lines[idxLoop + 2].trim() : "";
+                let nextV = lines[idxLoop + 3] ? lines[idxLoop + 3].trim() : "";
+                if (nextG === "2") {
+                    currentSection = nextV;
+                    if (currentSection === "BLOCKS") inBlocks = true;
+                    else if (currentSection === "ENTITIES") inEntities = true;
+                }
+                idxLoop += 4;
+                continue;
+            }
+            
+            if (g === "0" && v === "ENDSEC") {
+                inBlocks = false;
+                inEntities = false;
+                currentSection = "";
+                idxLoop += 2;
+                continue;
+            }
+
+            if (inBlocks && g === "0" && v === "BLOCK") {
+                let blockName = "";
+                let blockEntities = [];
+                idxLoop += 2;
+                while (idxLoop < numLines - 1) {
+                    let bg = lines[idxLoop].trim();
+                    let bv = lines[idxLoop + 1] ? lines[idxLoop + 1].trim() : "";
+                    if (bg === "0" && bv === "ENDBLK") {
+                        idxLoop += 2;
+                        break;
+                    }
+                    if (bg === "0" && bv === "BLOCK") {
+                        break;
+                    }
+                    
+                    if (bg === "2" && !blockName) {
+                        blockName = bv;
+                        idxLoop += 2;
+                        continue;
+                    }
+                    
+                    if (bg === "0") {
+                        let result = readEntity(idxLoop);
+                        blockEntities.push(result.entity);
+                        idxLoop = result.nextIndex;
+                    } else {
+                        idxLoop += 2;
+                    }
+                }
+                if (blockName) {
+                    blocks[blockName] = { entities: blockEntities };
+                }
+                continue;
+            }
+
+            if (inEntities && g === "0") {
+                let result = readEntity(idxLoop);
+                let entity = result.entity;
+                idxLoop = result.nextIndex;
+                
+                let keep = false;
+                if (entity.type === "LINE" || entity.type === "LWPOLYLINE" || entity.type === "POLYLINE") {
+                    if (entity.vertices && entity.vertices.length > 0) {
+                        for (let pt of entity.vertices) {
+                            if (pt.x >= xMin && pt.x <= xMax && pt.y >= yMin && pt.y <= yMax) {
+                                keep = true;
+                                break;
+                            }
+                        }
+                    }
+                } else if (entity.type === "ARC" || entity.type === "CIRCLE") {
+                    if (entity.center) {
+                        let cx = entity.center.x;
+                        let cy = entity.center.y;
+                        let r = entity.radius || 0;
+                        if (cx >= xMin - r && cx <= xMax + r && cy >= yMin - r && cy <= yMax + r) {
+                            keep = true;
+                        }
+                    }
+                } else if (entity.type === "INSERT") {
+                    if (entity.position) {
+                        let px = entity.position.x;
+                        let py = entity.position.y;
+                        if (px >= xMin - 500 && px <= xMax + 500 && py >= yMin - 500 && py <= yMax + 500) {
+                            keep = true;
+                        }
+                    }
+                }
+                
+                if (keep) {
+                    entities.push(entity);
+                }
+                continue;
+            }
+            
+            idxLoop += 2;
+        }
+        
+        return { blocks, entities };
+    }
+
     function handleDxfUpload(event) {
         const file = event.target.files[0];
         if (!file) return;
-
-        // Kiểm tra dung lượng file trước khi xử lý (Cảnh báo nếu > 20MB để tránh đơ trình duyệt)
-        const maxSizeBytes = 20 * 1024 * 1024; // 20 MB
-        if (file.size > maxSizeBytes) {
-            const confirmProcess = confirm(
-                `⚠️ Cảnh báo: File bản vẽ này có dung lượng rất lớn (${(file.size / 1024 / 1024).toFixed(1)} MB).\n\n` +
-                `Việc xử lý file lớn trực tiếp trên trình duyệt web có thể làm đơ máy, đứng trang hoặc vượt quá bộ nhớ của trình duyệt (gây crash).\n\n` +
-                `👉 Khuyên dùng: Anh/chị nên mở bản vẽ trong AutoCAD/FastView, quét chọn vùng xung quanh thửa đất của mình rồi dùng lệnh WBLOCK để xuất riêng khu vực đó thành file DXF nhỏ hơn (dưới 5MB) để chạy mượt mà nhất.\n\n` +
-                `Anh/chị có muốn tiếp tục cố gắng tải file này lên không?`
-            );
-            if (!confirmProcess) {
-                document.getElementById('dxfUpload').value = "";
-                return;
-            }
-        }
 
         // Lấy thông số hệ tọa độ
         const kinhTuyenTruc = document.getElementById('provinceSelect').value;
@@ -459,10 +706,33 @@
             return;
         }
 
+        const center = getLandCenterVN2000();
+        
+        // Nếu file lớn hơn 5MB mà chưa nhập tọa độ lô đất ở Bước 1/2, yêu cầu người dùng nhập trước
+        if (file.size > 5 * 1024 * 1024 && !center) {
+            alert(
+                `⚠️ Bản vẽ quy hoạch này có dung lượng lớn (${(file.size / 1024 / 1024).toFixed(1)} MB).\n\n` +
+                `Hệ thống cần biết vị trí thửa đất của anh/chị trước để tự động CẮT NHỎ và lọc nét vẽ xung quanh khu vực đó (tránh đơ trình duyệt).\n\n` +
+                `👉 Vui lòng hoàn thành Bước 1 & Bước 2 (Dán tọa độ sổ đỏ và nhấn Thực hiện quy đổi trước), sau đó thử tải lại file bản vẽ này nhé!`
+            );
+            document.getElementById('dxfUpload').value = "";
+            return;
+        }
+
         // Tạo chuỗi PROJ4 hoàn chỉnh để chuyển đổi tọa độ VN-2000 của Tỉnh đã chọn sang WGS84
         const vn2000_proj4 = `+proj=tmerc +lat_0=0 +lon_0=${kinhTuyenTruc} +k=0.9999 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=-191.90441429,-39.30318279,-111.45032835,0.00928836,-0.01975479,0.00427372,0.252906278 +units=m +no_defs`;
 
         document.getElementById('dxfUpload').disabled = true;
+
+        // Hiển thị trạng thái đang xử lý
+        const fileInput = document.getElementById('dxfUpload');
+        const statusLabel = document.createElement("span");
+        statusLabel.id = "dxfStatusLabel";
+        statusLabel.style.color = "#d97706";
+        statusLabel.style.fontWeight = "bold";
+        statusLabel.style.marginLeft = "10px";
+        statusLabel.innerText = "⏳ Đang phân tích và cắt lọc bản vẽ (khoảng 3 - 10 giây)...";
+        fileInput.parentNode.insertBefore(statusLabel, fileInput.nextSibling);
         
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -477,24 +747,46 @@
                       "💡 Cách khắc phục:\n" +
                       "1. Hãy đảm bảo bạn lưu file với đuôi .dxf (chứ không phải .dwg hay .dwf).\n" +
                       "2. Trong AutoCAD hoặc FastView, chọn Save As (Lưu dưới dạng) -> chọn dòng AutoCAD 2007/2010/2013 DXF (*.dxf) bản chữ (ASCII), tránh chọn bản Binary (nhị phân).");
-                document.getElementById('dxfUpload').disabled = false;
-                document.getElementById('dxfUpload').value = "";
+                cleanupStatus();
                 return;
             }
 
-            try {
-                const parser = new window.DxfParser();
-                const dxf = parser.parseSync(fileText);
-                drawDxfToMap(dxf, vn2000_proj4);
-            } catch (err) {
-                console.error(err);
-                alert("❌ Không thể đọc file DXF.\n\n" +
-                      "Đảm bảo file được lưu ở chuẩn ASCII DXF (Save As -> DXF trong AutoCAD).\n\n" +
-                      "Chi tiết lỗi: " + err.message);
-            } finally {
-                document.getElementById('dxfUpload').disabled = false;
-            }
+            // Dùng setTimeout để giao diện kịp vẽ/cập nhật thông tin "Đang xử lý" trước khi luồng JS bị chặn bởi tính toán nặng
+            setTimeout(() => {
+                try {
+                    let dxf;
+                    if (center) {
+                        // Tự động cắt lọc bản vẽ trong bán kính 1.5km xung quanh lô đất
+                        dxf = parseDxfLightweight(fileText, center, 1500);
+                        drawDxfToMap(dxf, vn2000_proj4);
+                        
+                        const geomCount = dxf.entities.length;
+                        alert(`✅ Thành công! Đã tự động cắt bản vẽ lớn, lọc và hiển thị ${geomCount} đường nét quy hoạch gần lô đất của anh/chị lên bản đồ vệ tinh!`);
+                    } else {
+                        // Đối với file nhỏ (< 5MB) chưa có tọa độ, dùng thư viện dxf-parser mặc định để đọc toàn bộ
+                        const parser = new window.DxfParser();
+                        dxf = parser.parseSync(fileText);
+                        drawDxfToMap(dxf, vn2000_proj4);
+                        alert(`✅ Thành công! Đã tải và vẽ toàn bộ bản vẽ quy hoạch lên bản đồ vệ tinh!`);
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("❌ Không thể đọc file DXF.\n\n" +
+                          "Đảm bảo file được lưu ở chuẩn ASCII DXF (Save As -> DXF trong AutoCAD).\n\n" +
+                          "Chi tiết lỗi: " + err.message);
+                } finally {
+                    cleanupStatus();
+                }
+            }, 100);
         };
+        
+        function cleanupStatus() {
+            document.getElementById('dxfUpload').disabled = false;
+            document.getElementById('dxfUpload').value = ""; // Reset file input để có thể chọn lại
+            const lbl = document.getElementById("dxfStatusLabel");
+            if (lbl) lbl.remove();
+        }
+
         reader.readAsText(file);
     }
 
