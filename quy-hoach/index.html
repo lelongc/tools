@@ -343,9 +343,27 @@
         <hr style="margin: 5px 0; border: 0; border-top: 1px solid #cbd5e1;">
         <label style="font-weight: bold; color: #0f172a; margin-top: 5px;">Mở Lớp Bản Đồ Quy Hoạch (Tải lên file DXF):</label>
         <input type="file" id="dxfUpload" accept=".dxf" onchange="handleDxfUpload(event)" style="margin-bottom: 5px; font-size: 14px;">
-        <label style="display: flex; align-items: center; gap: 8px; font-weight: bold; cursor: pointer; color: #047857;">
-            <input type="checkbox" id="toggleDxf" checked onchange="toggleDxfVisibility()"> Hiển thị nét vẽ quy hoạch (DXF)
-        </label>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; margin-top: 5px; margin-bottom: 5px;">
+            <label style="display: flex; align-items: center; gap: 8px; font-weight: bold; cursor: pointer; color: #047857; margin-bottom: 0;">
+                <input type="checkbox" id="toggleDxf" checked onchange="toggleDxfVisibility()"> Hiển thị nét vẽ quy hoạch (DXF)
+            </label>
+            
+            <label style="font-weight: bold; color: #1e293b; display: flex; align-items: center; gap: 5px; margin-bottom: 0;">
+                <span>Bán kính cắt lọc:</span>
+                <select id="dxfRadiusSelect" onchange="handleRadiusOrOpacityChange()" style="width: auto; padding: 4px 8px; font-size: 13.5px; border-radius: 4px; border: 1px solid var(--border); cursor: pointer; margin-bottom: 0;">
+                    <option value="400">400 mét (Rất nhanh)</option>
+                    <option value="800" selected>800 mét (Khuyên dùng)</option>
+                    <option value="1200">1.2 km (Rộng hơn)</option>
+                    <option value="2000">2.0 km (Cần máy khỏe)</option>
+                </select>
+            </label>
+
+            <label style="font-weight: bold; color: #1e293b; display: flex; align-items: center; gap: 5px; margin-bottom: 0;">
+                <span>Tô màu nền (Độ đậm):</span>
+                <input type="range" id="dxfFillOpacity" min="0" max="0.8" step="0.05" value="0.25" oninput="updateDxfStyle()" style="width: 100px; cursor: pointer; margin-bottom: 0; padding: 0;">
+            </label>
+        </div>
     </div>
 
     <div style="background-color: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px 15px; margin-bottom: 15px; font-size: 14.5px; color: #1e40af; border-radius: 4px;">
@@ -365,6 +383,7 @@
     let polygonLayer;
     let labelLayers = [];
     let dxfLayerGroup = L.layerGroup(); // Nhóm chứa các nét vẽ từ file DXF
+    let currentDxfFileText = ""; // Lưu trữ nội dung file DXF đang mở để tái xử lý khi đổi bán kính lọc
 
     // Chờ giao diện tải xong rồi mới nạp bản đồ
     document.addEventListener("DOMContentLoaded", function() {
@@ -432,26 +451,118 @@
     });
 
     // --- Các hàm xử lý file DXF Quy hoạch ---
+    // Bảng mã màu ACI chuẩn AutoCAD
+    const AUTO_CAD_COLOR_INDEX = [
+        0, 16711680, 16776960, 65280, 65535, 255, 16711935, 16777215, 8421504, 12632256,
+        16711680, 16744319, 13369344, 13395558, 10027008, 10046540, 8323072, 8339263, 4980736, 4990502,
+        16727808, 16752511, 13382400, 13401958, 10036736, 10051404, 8331008, 8343359, 4985600, 4992806,
+        16744192, 16760703, 13395456, 13408614, 10046464, 10056268, 8339200, 8347455, 4990464, 4995366,
+        16760576, 16768895, 13408512, 13415014, 10056192, 10061132, 8347392, 8351551, 4995328, 4997670,
+        16776960, 16777087, 13421568, 13421670, 10000384, 10000460, 8355584, 8355647, 5000192, 5000230,
+        12582656, 14679935, 10079232, 11717734, 7510016, 8755276, 6258432, 7307071, 3755008, 4344870,
+        8388352, 12582783, 6736896, 10079334, 5019648, 7510092, 4161280, 6258495, 2509824, 3755046,
+        4194048, 10485631, 3394560, 8375398, 2529280, 6264908, 2064128, 5209919, 1264640, 3099686,
+        65280, 8388479, 52224, 6736998, 38912, 5019724, 32512, 4161343, 19456, 2509862,
+        65343, 8388511, 52275, 6737023, 38950, 5019743, 32543, 4161359, 19475, 2509871,
+        65407, 8388543, 52326, 6737049, 38988, 5019762, 32575, 4161375, 19494, 2509881,
+        65471, 8388575, 52377, 6737074, 39026, 5019781, 32607, 4161391, 19513, 2509890,
+        65535, 8388607, 52428, 6737100, 39064, 5019800, 32639, 4161407, 19532, 2509900,
+        49151, 8380415, 39372, 6730444, 29336, 5014936, 24447, 4157311, 14668, 2507340,
+        32767, 8372223, 26316, 6724044, 19608, 5010072, 16255, 4153215, 9804, 2505036,
+        16383, 8364031, 13260, 6717388, 9880, 5005208, 8063, 4149119, 4940, 2502476,
+        255, 8355839, 204, 6710988, 152, 5000344, 127, 4145023, 76, 2500172,
+        4129023, 10452991, 3342540, 8349388, 2490520, 6245528, 2031743, 5193599, 1245260, 3089996,
+        8323327, 12550143, 6684876, 10053324, 4980888, 7490712, 4128895, 6242175, 2490444, 3745356,
+        12517631, 14647295, 10027212, 11691724, 7471256, 8735896, 6226047, 7290751, 3735628, 4335180,
+        16711935, 16744447, 13369548, 13395660, 9961624, 9981080, 8323199, 8339327, 4980812, 4990540,
+        16711871, 16744415, 13369497, 13395634, 9961586, 9981061, 8323167, 8339311, 4980793, 4990530,
+        16711807, 16744383, 13369446, 13395609, 9961548, 9981042, 8323135, 8339295, 4980774, 4990521,
+        16711743, 16744351, 13369395, 13395583, 9961510, 9981023, 8323103, 8339279, 4980755, 4990511,
+        3355443, 5987163, 8684676, 11382189, 14079702, 16777215
+    ];
+
+    function getDxfColor(colorIndex) {
+        if (colorIndex === undefined || colorIndex === null || colorIndex < 0 || colorIndex >= 256) {
+            return '#3b82f6'; 
+        }
+        if (colorIndex === 7) {
+            return '#ffffff'; // Màu trắng dễ nhìn hơn trên nền map vệ tinh tối màu
+        }
+        const val = AUTO_CAD_COLOR_INDEX[colorIndex];
+        let hex = val.toString(16);
+        while (hex.length < 6) {
+            hex = '0' + hex;
+        }
+        return '#' + hex;
+    }
+
+    function handleRadiusOrOpacityChange() {
+        if (!currentDxfFileText) return;
+        const center = getLandCenterVN2000();
+        const kinhTuyenTruc = document.getElementById('provinceSelect').value;
+        const vn2000_proj4 = `+proj=tmerc +lat_0=0 +lon_0=${kinhTuyenTruc} +k=0.9999 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=-191.90441429,-39.30318279,-111.45032835,0.00928836,-0.01975479,0.00427372,0.252906278 +units=m +no_defs`;
+        const radius = parseInt(document.getElementById('dxfRadiusSelect').value);
+        
+        // Hiện thông báo đang xử lý
+        const fileInput = document.getElementById('dxfUpload');
+        const statusLabel = document.createElement("span");
+        statusLabel.id = "dxfStatusLabel";
+        statusLabel.style.color = "#d97706";
+        statusLabel.style.fontWeight = "bold";
+        statusLabel.style.marginLeft = "10px";
+        statusLabel.innerText = "⏳ Đang cắt lọc lại bản vẽ theo bán kính mới...";
+        fileInput.parentNode.insertBefore(statusLabel, fileInput.nextSibling);
+
+        setTimeout(() => {
+            try {
+                let dxf;
+                if (center) {
+                    dxf = parseDxfLightweight(currentDxfFileText, center, radius);
+                    drawDxfToMap(dxf, vn2000_proj4);
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                const lbl = document.getElementById("dxfStatusLabel");
+                if (lbl) lbl.remove();
+            }
+        }, 100);
+    }
+
     function getLandCenterVN2000() {
         const cadText = document.getElementById('cadOutput').value.trim();
         if (!cadText) return null;
-        
-        let sumX = 0, sumY = 0, count = 0;
         const lines = cadText.split('\n');
+        let count = 0;
+        let sumX = 0;
+        let sumY = 0;
         for (let line of lines) {
+            line = line.trim();
+            if (!line) continue;
             let parts = line.split(',');
             if (parts.length >= 2) {
                 let y_easting = parseFloat(parts[0]);
                 let x_northing = parseFloat(parts[1]);
                 if (!isNaN(y_easting) && !isNaN(x_northing)) {
-                    sumX += y_easting;
-                    sumY += x_northing;
+                    sumY += y_easting;
+                    sumX += x_northing;
                     count++;
                 }
             }
         }
-        if (count === 0) return null;
-        return { x: sumX / count, y: sumY / count };
+        if (count > 0) {
+            return { x: sumY / count, y: sumX / count };
+        }
+        return null;
+    }
+
+    function updateDxfStyle() {
+        const fillOpacityVal = parseFloat(document.getElementById('dxfFillOpacity').value);
+        dxfLayerGroup.eachLayer(layer => {
+            if (layer.setStyle && layer.options && layer.options.fillColor) {
+                layer.setStyle({ fillOpacity: fillOpacityVal });
+            }
+        });
     }
 
     function parseDxfLightweight(text, center, filterRadius) {
@@ -465,10 +576,12 @@
 
         const blocks = {}; // Tên block -> { entities: [] }
         const entities = [];
+        const layerColors = {}; // Lưu màu của Layer (ByLayer)
         
         let currentSection = "";
         let inBlocks = false;
         let inEntities = false;
+        let inTables = false;
         
         let idxLoop = 0;
         
@@ -513,6 +626,11 @@
                 
                 if (g === "8") entity.layer = v;
                 else if (g === "62") entity.colorIndex = parseInt(v);
+                else if (g === "70") {
+                    if (type === "LWPOLYLINE" || type === "POLYLINE") {
+                        entity.shape = (parseInt(v) & 1) === 1;
+                    }
+                }
                 else if (g === "10") {
                     if (type === "LINE") {
                         if (!entity.vertices[0]) entity.vertices[0] = { x: 0, y: 0 };
@@ -521,6 +639,7 @@
                     else if (type === "ARC" || type === "CIRCLE") {
                         if (!entity.center) entity.center = {};
                         entity.center.x = valNum;
+                        if (type === "CIRCLE") entity.shape = true;
                     }
                     else if (type === "INSERT") {
                         if (!entity.position) entity.position = {};
@@ -528,6 +647,11 @@
                     }
                     else if (type === "LWPOLYLINE") {
                         entity.vertices.push({ x: valNum, y: 0 });
+                    }
+                    else if (type === "SOLID") {
+                        if (!entity.vertices[0]) entity.vertices[0] = { x: 0, y: 0 };
+                        entity.vertices[0].x = valNum;
+                        entity.shape = true;
                     }
                 }
                 else if (g === "20") {
@@ -548,14 +672,46 @@
                             entity.vertices[entity.vertices.length - 1].y = valNum;
                         }
                     }
+                    else if (type === "SOLID") {
+                        if (!entity.vertices[0]) entity.vertices[0] = { x: 0, y: 0 };
+                        entity.vertices[0].y = valNum;
+                    }
                 }
-                else if (g === "11" && type === "LINE") {
-                    if (!entity.vertices[1]) entity.vertices[1] = { x: 0, y: 0 };
-                    entity.vertices[1].x = valNum;
+                else if (g === "11") {
+                    if (type === "LINE") {
+                        if (!entity.vertices[1]) entity.vertices[1] = { x: 0, y: 0 };
+                        entity.vertices[1].x = valNum;
+                    }
+                    else if (type === "SOLID") {
+                        if (!entity.vertices[1]) entity.vertices[1] = { x: 0, y: 0 };
+                        entity.vertices[1].x = valNum;
+                    }
                 }
-                else if (g === "21" && type === "LINE") {
-                    if (!entity.vertices[1]) entity.vertices[1] = { x: 0, y: 0 };
-                    entity.vertices[1].y = valNum;
+                else if (g === "21") {
+                    if (type === "LINE") {
+                        if (!entity.vertices[1]) entity.vertices[1] = { x: 0, y: 0 };
+                        entity.vertices[1].y = valNum;
+                    }
+                    else if (type === "SOLID") {
+                        if (!entity.vertices[1]) entity.vertices[1] = { x: 0, y: 0 };
+                        entity.vertices[1].y = valNum;
+                    }
+                }
+                else if (g === "12" && type === "SOLID") {
+                    if (!entity.vertices[2]) entity.vertices[2] = { x: 0, y: 0 };
+                    entity.vertices[2].x = valNum;
+                }
+                else if (g === "22" && type === "SOLID") {
+                    if (!entity.vertices[2]) entity.vertices[2] = { x: 0, y: 0 };
+                    entity.vertices[2].y = valNum;
+                }
+                else if (g === "13" && type === "SOLID") {
+                    if (!entity.vertices[3]) entity.vertices[3] = { x: 0, y: 0 };
+                    entity.vertices[3].x = valNum;
+                }
+                else if (g === "23" && type === "SOLID") {
+                    if (!entity.vertices[3]) entity.vertices[3] = { x: 0, y: 0 };
+                    entity.vertices[3].y = valNum;
                 }
                 else if (g === "40") {
                     if (type === "ARC" || type === "CIRCLE") entity.radius = valNum;
@@ -600,6 +756,7 @@
                     currentSection = nextV;
                     if (currentSection === "BLOCKS") inBlocks = true;
                     else if (currentSection === "ENTITIES") inEntities = true;
+                    else if (currentSection === "TABLES") inTables = true;
                 }
                 idxLoop += 4;
                 continue;
@@ -608,8 +765,27 @@
             if (g === "0" && v === "ENDSEC") {
                 inBlocks = false;
                 inEntities = false;
+                inTables = false;
                 currentSection = "";
                 idxLoop += 2;
+                continue;
+            }
+
+            if (inTables && g === "0" && v === "LAYER") {
+                let layerName = "";
+                let layerColor = 7; 
+                idxLoop += 2;
+                while (idxLoop < numLines - 1) {
+                    let tg = lines[idxLoop].trim();
+                    let tv = lines[idxLoop + 1] ? lines[idxLoop + 1].trim() : "";
+                    if (tg === "0") break;
+                    if (tg === "2") layerName = tv;
+                    if (tg === "62") layerColor = Math.abs(parseInt(tv));
+                    idxLoop += 2;
+                }
+                if (layerName) {
+                    layerColors[layerName] = layerColor;
+                }
                 continue;
             }
 
@@ -653,8 +829,13 @@
                 let entity = result.entity;
                 idxLoop = result.nextIndex;
                 
+                // Giải quyết màu thừa kế từ Layer (ByLayer)
+                if (entity.colorIndex === undefined && entity.layer && layerColors[entity.layer] !== undefined) {
+                    entity.colorIndex = layerColors[entity.layer];
+                }
+                
                 let keep = false;
-                if (entity.type === "LINE" || entity.type === "LWPOLYLINE" || entity.type === "POLYLINE") {
+                if (entity.type === "LINE" || entity.type === "LWPOLYLINE" || entity.type === "POLYLINE" || entity.type === "SOLID") {
                     if (entity.vertices && entity.vertices.length > 0) {
                         for (let pt of entity.vertices) {
                             if (pt.x >= xMin && pt.x <= xMax && pt.y >= yMin && pt.y <= yMax) {
@@ -698,33 +879,18 @@
         const file = event.target.files[0];
         if (!file) return;
 
-        // Lấy thông số hệ tọa độ
         const kinhTuyenTruc = document.getElementById('provinceSelect').value;
         if (!kinhTuyenTruc || kinhTuyenTruc === "") {
             alert("⚠️ Bạn chưa chọn Tỉnh/Thành phố ở Bước 2. Hãy chọn hệ tọa độ VN-2000 trước khi tải file lên nhé!");
-            document.getElementById('dxfUpload').value = ""; // Xóa lựa chọn file
+            document.getElementById('dxfUpload').value = ""; 
             return;
         }
 
         const center = getLandCenterVN2000();
-        
-        // Nếu file lớn hơn 5MB mà chưa nhập tọa độ lô đất ở Bước 1/2, yêu cầu người dùng nhập trước
-        if (file.size > 5 * 1024 * 1024 && !center) {
-            alert(
-                `⚠️ Bản vẽ quy hoạch này có dung lượng lớn (${(file.size / 1024 / 1024).toFixed(1)} MB).\n\n` +
-                `Hệ thống cần biết vị trí thửa đất của anh/chị trước để tự động CẮT NHỎ và lọc nét vẽ xung quanh khu vực đó (tránh đơ trình duyệt).\n\n` +
-                `👉 Vui lòng hoàn thành Bước 1 & Bước 2 (Dán tọa độ sổ đỏ và nhấn Thực hiện quy đổi trước), sau đó thử tải lại file bản vẽ này nhé!`
-            );
-            document.getElementById('dxfUpload').value = "";
-            return;
-        }
-
-        // Tạo chuỗi PROJ4 hoàn chỉnh để chuyển đổi tọa độ VN-2000 của Tỉnh đã chọn sang WGS84
         const vn2000_proj4 = `+proj=tmerc +lat_0=0 +lon_0=${kinhTuyenTruc} +k=0.9999 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=-191.90441429,-39.30318279,-111.45032835,0.00928836,-0.01975479,0.00427372,0.252906278 +units=m +no_defs`;
 
         document.getElementById('dxfUpload').disabled = true;
 
-        // Hiển thị trạng thái đang xử lý
         const fileInput = document.getElementById('dxfUpload');
         const statusLabel = document.createElement("span");
         statusLabel.id = "dxfStatusLabel";
@@ -738,7 +904,6 @@
         reader.onload = function(e) {
             const fileText = e.target.result;
             
-            // Kiểm tra sơ bộ định dạng file (DWG, DWF hoặc Binary DXF) dựa trên tên file và nội dung đầu tiên
             const prefix = fileText.substring(0, 1000);
             const fileNameLower = file.name.toLowerCase();
             if (prefix.startsWith("AC10") || prefix.includes("\x00") || prefix.includes("PK\x03\x04") || fileNameLower.endsWith('.dwf') || fileNameLower.endsWith('.dwg')) {
@@ -751,13 +916,14 @@
                 return;
             }
 
-            // Dùng setTimeout để giao diện kịp vẽ/cập nhật thông tin "Đang xử lý" trước khi luồng JS bị chặn bởi tính toán nặng
+            currentDxfFileText = fileText;
+
             setTimeout(() => {
                 try {
                     let dxf;
+                    const radius = parseInt(document.getElementById('dxfRadiusSelect').value);
                     if (center) {
-                        // Tự động cắt lọc bản vẽ trong bán kính 1.5km xung quanh lô đất
-                        dxf = parseDxfLightweight(fileText, center, 1500);
+                        dxf = parseDxfLightweight(fileText, center, radius);
                         drawDxfToMap(dxf, vn2000_proj4);
                         
                         const geomCount = dxf.entities.length;
@@ -807,13 +973,7 @@
                 if (!entity) continue;
 
                 try {
-                    let color = '#3b82f6'; // Xanh dương mặc định
-                    if (entity.colorIndex === 1) color = '#ef4444';
-                    else if (entity.colorIndex === 2) color = '#eab308';
-                    else if (entity.colorIndex === 3) color = '#22c55e';
-                    else if (entity.colorIndex === 4) color = '#06b6d4';
-                    else if (entity.colorIndex === 6) color = '#a855f7';
-                    else if (entity.colorIndex === 7) color = '#ffffff';
+                    let color = getDxfColor(entity.colorIndex);
 
                     // Hàm chuyển đổi điểm từ hệ tọa độ của Block sang hệ tọa độ toàn cục (Global)
                     function transform(x, y) {
@@ -827,13 +987,23 @@
                         };
                     }
 
+                    let isClosedShape = entity.shape || false;
+
                     if (entity.type === 'LINE' || entity.type === 'LWPOLYLINE' || entity.type === 'POLYLINE') {
                         if (entity.vertices && Array.isArray(entity.vertices)) {
                             let pts = entity.vertices
                                 .filter(v => v && typeof v.x === 'number' && typeof v.y === 'number')
                                 .map(v => transform(v.x, v.y));
                             if (pts.length > 0) {
-                                geometries.push({ pts, color });
+                                // Kiểm tra nếu là đa giác khép kín thực tế (điểm đầu trùng điểm cuối)
+                                if (pts.length > 2) {
+                                    let first = pts[0];
+                                    let last = pts[pts.length - 1];
+                                    if (Math.abs(first.x - last.x) < 0.01 && Math.abs(first.y - last.y) < 0.01) {
+                                        isClosedShape = true;
+                                    }
+                                }
+                                geometries.push({ pts, color, shape: isClosedShape });
                             }
                         }
                     } else if (entity.type === 'ARC' || entity.type === 'CIRCLE') {
@@ -850,7 +1020,12 @@
                                 let py = entity.center.y + entity.radius * Math.sin(a);
                                 pts.push(transform(px, py));
                             }
-                            geometries.push({ pts, color });
+                            geometries.push({ pts, color, shape: entity.type === 'CIRCLE' });
+                        }
+                    } else if (entity.type === 'SOLID') {
+                        if (entity.vertices && entity.vertices.length >= 3) {
+                            let pts = entity.vertices.map(v => transform(v.x, v.y));
+                            geometries.push({ pts, color, shape: true });
                         }
                     } else if (entity.type === 'INSERT' && dxf.blocks && dxf.blocks[entity.name]) {
                         let block = dxf.blocks[entity.name];
@@ -872,6 +1047,7 @@
         }
 
         let allGeoms = extractGeometries(dxf.entities);
+        let fillOpacityVal = parseFloat(document.getElementById('dxfFillOpacity').value);
 
         for (const geom of allGeoms) {
             let latlngs = [];
@@ -882,12 +1058,23 @@
                 } catch (e) {}
             }
             if (latlngs.length > 1) {
-                let polyline = L.polyline(latlngs, {
-                    color: geom.color, 
-                    weight: 2, 
-                    opacity: 0.8
-                });
-                dxfLayerGroup.addLayer(polyline);
+                if (geom.shape) {
+                    let polygon = L.polygon(latlngs, {
+                        color: geom.color, 
+                        weight: 1.5, 
+                        opacity: 0.8,
+                        fillColor: geom.color,
+                        fillOpacity: fillOpacityVal
+                    });
+                    dxfLayerGroup.addLayer(polygon);
+                } else {
+                    let polyline = L.polyline(latlngs, {
+                        color: geom.color, 
+                        weight: 2, 
+                        opacity: 0.8
+                    });
+                    dxfLayerGroup.addLayer(polyline);
+                }
                 lineCount++;
             }
         }
