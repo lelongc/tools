@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công cụ tạo KML từ Tọa độ</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            padding: 20px; 
+            max-width: 650px; 
+            margin: auto; 
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h2 { margin-top: 0; color: #2c3e50; }
+        textarea { 
+            width: 100%; 
+            height: 200px; 
+            padding: 12px; 
+            font-family: 'Courier New', Courier, monospace; 
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            resize: vertical;
+        }
+        button { 
+            padding: 12px 24px; 
+            background-color: #e74c3c; 
+            color: white; 
+            border: none; 
+            border-radius: 6px;
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: bold;
+            margin-top: 15px; 
+            transition: background 0.3s;
+            width: 100%;
+        }
+        button:hover { background-color: #c0392b; }
+        .instructions { 
+            margin-bottom: 15px; 
+            color: #555; 
+            font-size: 14px;
+            background: #eef2f5;
+            padding: 10px;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+        }
+        .options {
+            margin-top: 15px;
+        }
+        label { margin-right: 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Tạo file KML (Viền Đỏ)</h2>
+    <div class="instructions">
+        <strong>Hướng dẫn:</strong> Nhập danh sách tọa độ. Mỗi dòng là một cặp <b>Vĩ độ, Kinh độ</b> (Latitude, Longitude).<br><br>
+        <i>Ví dụ:</i><br>
+        5.360632,112.148450<br>
+        5.360638,112.148448<br>
+        ...
+    </div>
+    
+    <textarea id="coordsInput" placeholder="Dán các dòng Vĩ độ, Kinh độ vào đây..."></textarea>
+    
+    <div class="options">
+        <label>
+            <input type="radio" name="shapeType" value="Polygon" checked> Dạng Đa giác (Nối khép kín)
+        </label>
+        <label>
+            <input type="radio" name="shapeType" value="LineString"> Dạng Đường (Line)
+        </label>
+    </div>
+    
+    <button onclick="generateKML()">Tải xuống file .kml</button>
+</div>
+
+<script>
+    function generateKML() {
+        const text = document.getElementById('coordsInput').value.trim();
+        if (!text) {
+            alert("Vui lòng nhập tọa độ!");
+            return;
+        }
+
+        const lines = text.split('\n');
+        let coordsArray = [];
+
+        for (let line of lines) {
+            line = line.trim();
+            if (!line) continue;
+            
+            // Xử lý dấu phân cách là phẩy, khoảng trắng hoặc tab
+            let parts = line.split(/[,\s\t]+/);
+            if (parts.length >= 2) {
+                let lat = parseFloat(parts[0]);
+                let lon = parseFloat(parts[1]);
+                if (!isNaN(lat) && !isNaN(lon)) {
+                    // KML yêu cầu thứ tự: kinh_độ,vĩ_độ,độ_cao (lon,lat,alt)
+                    coordsArray.push(`${lon},${lat},0`);
+                }
+            }
+        }
+
+        if (coordsArray.length < 2) {
+            alert("Cần ít nhất 2 tọa độ hợp lệ để tạo file!");
+            return;
+        }
+
+        const shapeType = document.querySelector('input[name="shapeType"]:checked').value;
+        
+        // Khép kín Polygon nếu điểm cuối không trùng điểm đầu
+        if (shapeType === 'Polygon') {
+            if (coordsArray[0] !== coordsArray[coordsArray.length - 1]) {
+                coordsArray.push(coordsArray[0]);
+            }
+        }
+        
+        const coordinatesStr = coordsArray.join('\n              ');
+
+        let placemarkContent = '';
+        if (shapeType === 'Polygon') {
+            placemarkContent = `
+        <Polygon>
+          <extrude>1</extrude>
+          <altitudeMode>clampToGround</altitudeMode>
+          <outerBoundaryIs>
+            <LinearRing>
+              <coordinates>
+              ${coordinatesStr}
+              </coordinates>
+            </LinearRing>
+          </outerBoundaryIs>
+        </Polygon>`;
+        } else {
+            placemarkContent = `
+        <LineString>
+          <extrude>1</extrude>
+          <tessellate>1</tessellate>
+          <altitudeMode>clampToGround</altitudeMode>
+          <coordinates>
+              ${coordinatesStr}
+          </coordinates>
+        </LineString>`;
+        }
+
+        const kmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Quy Hoach Shape</name>
+    <Style id="redStyle">
+      <LineStyle>
+        <color>ff0000ff</color> <!-- KML Color format AABBGGRR: ff0000ff is Solid Red -->
+        <width>3</width>      <!-- Viền đậm dễ nhìn -->
+      </LineStyle>
+      <PolyStyle>
+        <color>400000ff</color> <!-- Tô nền màu đỏ nhạt (độ trong suốt 40 hex ~ 25%) -->
+      </PolyStyle>
+    </Style>
+    <Placemark>
+      <name>Khu vực Quy hoạch</name>
+      <styleUrl>#redStyle</styleUrl>
+${placemarkContent}
+    </Placemark>
+  </Document>
+</kml>`;
+
+        // Tạo link tải
+        const blob = new Blob([kmlContent], { type: 'application/vnd.google-earth.kml+xml' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'quy_hoach_vien_do.kml';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+</script>
+</body>
+</html>
