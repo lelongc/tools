@@ -420,7 +420,7 @@
     function processLensText() {
         const text = document.getElementById('lensInput').value;
         if (!text.trim()) {
-            alert("Vui lòng dán văn bản quét từ Google Lens vào!");
+            alert("Vui lòng dán văn bản quét từ Google Lens hoặc AutoCAD LIST vào!");
             return;
         }
 
@@ -428,26 +428,45 @@
         let outputLines = [];
 
         for (let line of lines) {
+            // Trường hợp 1: Text copy từ lệnh LIST của AutoCAD (VD: X= 597406.72 Y= 1212479.97 Z= 0.00)
+            const cadMatch = line.match(/X\s*=\s*([\d.,]+).*?Y\s*=\s*([\d.,]+)/i);
+            if (cadMatch) {
+                let cadX = cadMatch[1].replace(',', '.'); // Easting
+                let cadY = cadMatch[2].replace(',', '.'); // Northing
+                outputLines.push(`${cadX},${cadY}`);
+                continue;
+            }
+
+            // Trường hợp 2: Text quét từ Google Lens Sổ Hồng (VD: 1 1212479.97 597406.72)
             const matches = line.match(/\d+[.,]\d+/g);
             if (matches && matches.length >= 2) {
-                let y_val = matches[matches.length - 1].replace(',', '.'); 
-                let x_val = matches[matches.length - 2].replace(',', '.'); 
+                // Ta tìm 2 số lớn (bỏ qua số Z=0.00 nếu rớt xuống đây)
+                let num1 = parseFloat(matches[matches.length - 1].replace(',', '.'));
+                let num2 = parseFloat(matches[matches.length - 2].replace(',', '.'));
                 
-                if (parseFloat(y_val) > parseFloat(x_val)) {
-                    let temp = x_val;
-                    x_val = y_val;
-                    y_val = temp;
+                // Nếu một trong 2 số quá nhỏ (như Z=0), ta lùi lại 1 index để lấy đúng cặp X,Y
+                if (num1 === 0 && matches.length >= 3) {
+                    num1 = parseFloat(matches[matches.length - 2].replace(',', '.'));
+                    num2 = parseFloat(matches[matches.length - 3].replace(',', '.'));
                 }
 
-                outputLines.push(`${y_val},${x_val}`);
+                // Ở VN-2000, X (Bắc) thường lớn hơn Y (Đông). X ~ 1.000.000+, Y ~ 500.000+
+                if (num1 > num2) {
+                    let temp = num2;
+                    num2 = num1;
+                    num1 = temp;
+                }
+
+                // Định dạng (Y,X) cho AutoCAD (Easting, Northing)
+                // num1 đang là số bé (Y - Easting), num2 là số lớn (X - Northing)
+                outputLines.push(`${num1},${num2}`);
             }
         }
 
         if (outputLines.length === 0) {
-            alert("Không tìm thấy số tọa độ hợp lệ. Xin kiểm tra lại ảnh chụp hoặc text đã copy!");
+            alert("Không tìm thấy số tọa độ hợp lệ. Xin kiểm tra lại văn bản!");
         } else {
             document.getElementById('cadOutput').value = outputLines.join('\n');
-            // Croll down slightly to show result
             document.getElementById('cadOutput').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
     }
