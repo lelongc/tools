@@ -664,6 +664,17 @@
 
                     <div class="control-row">
                         <div class="control-info">
+                            <span class="control-title">Đường Street View (Xanh)</span>
+                            <span class="control-desc">Hiện vùng có ảnh đường phố</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="toggleSVCoverage" onchange="toggleStreetViewCoverage()">
+                            <span class="slider-switch"></span>
+                        </label>
+                    </div>
+
+                    <div class="control-row">
+                        <div class="control-info">
                             <span class="control-title">Viền đỏ khu đất</span>
                             <span class="control-desc">Ẩn/hiện ranh giới thửa đất</span>
                         </div>
@@ -756,6 +767,7 @@
     let dxfLayerGroup = L.layerGroup(); // Nhóm chứa các nét vẽ từ file DXF
     let currentDxfFileText = ""; // Lưu trữ nội dung file DXF đang mở để tái xử lý khi đổi bán kính lọc
     let currentTileLayer;
+    let svCoverageLayer; // Lớp phủ đường xanh Street View
 
     function changeBaseMap() {
         const val = document.getElementById('baseMapSelect').value;
@@ -775,38 +787,21 @@
         }).addTo(map);
     }
 
-    function checkStreetView(lat, lon, callback) {
-        // Tạo tên callback ngẫu nhiên để tránh đụng độ
-        const callbackName = 'sv_cb_' + Math.random().toString(36).substring(2, 15);
-        
-        // Tạo phần tử script để gọi JSONP
-        const script = document.createElement('script');
-        script.id = callbackName;
-        
-        window[callbackName] = function(data) {
-            // Dọn dẹp script và hàm sau khi gọi xong
-            const el = document.getElementById(callbackName);
-            if (el) el.remove();
-            delete window[callbackName];
-            
-            // Nếu Google trả về dữ liệu vị trí và có panoId hợp lệ
-            if (data && data.Location && data.Location.panoId) {
-                callback(true);
-            } else {
-                callback(false);
+    function toggleStreetViewCoverage() {
+        const isChecked = document.getElementById('toggleSVCoverage').checked;
+        if (isChecked) {
+            if (!svCoverageLayer) {
+                // Sử dụng layer lyrs=svv của Google để lấy các đường nét xanh biểu thị vùng có Street View
+                svCoverageLayer = L.tileLayer('https://mts1.google.com/vt/lyrs=svv&x={x}&y={y}&z={z}', {
+                    maxZoom: 20
+                });
             }
-        };
-        
-        script.onerror = function() {
-            const el = document.getElementById(callbackName);
-            if (el) el.remove();
-            delete window[callbackName];
-            callback(false);
-        };
-        
-        // API nội bộ của Google Maps để kiểm tra nhanh Street View tại tọa độ (bán kính ngầm định ~50m)
-        script.src = `https://cbk0.google.com/cbk?output=json&ll=${lat},${lon}&callback=${callbackName}`;
-        document.body.appendChild(script);
+            svCoverageLayer.addTo(map);
+        } else {
+            if (svCoverageLayer) {
+                map.removeLayer(svCoverageLayer);
+            }
+        }
     }
 
     // Chờ giao diện tải xong rồi mới nạp bản đồ
@@ -836,38 +831,12 @@
                 .openOn(map);
 
             let addressText = "Đang tải...";
-            let hasStreetView = false;
-            let isAddressDone = false;
-            let isSVDone = false;
 
             function renderPopup() {
                 let gmapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lon}`;
                 let streetViewLink = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${lat},${lon}`;
                 let copyText = `${addressText} (Tọa độ: ${lat.toFixed(6)}, ${lon.toFixed(6)})`;
                 
-                let svButtonHtml = ``;
-                if (isSVDone) {
-                    if (hasStreetView) {
-                        svButtonHtml = `
-                            <div style="margin-top: 8px;">
-                                <a href="${streetViewLink}" target="_blank" onclick="map.closePopup();" style="display: block; width: 100%; padding: 7px 10px; font-size: 13px; font-weight: bold; background: #ea4335; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; text-align: center; box-sizing: border-box;">📷 Xem Street View (Nhìn đường phố)</a>
-                            </div>
-                        `;
-                    } else {
-                        svButtonHtml = `
-                            <div style="margin-top: 8px; text-align: center; font-size: 12px; color: var(--text-muted); background: #1e293b; padding: 6px; border-radius: 4px; border: 1px dashed var(--border);">
-                                🚫 Không có ảnh đường phố (Street View) tại đây
-                            </div>
-                        `;
-                    }
-                } else {
-                    svButtonHtml = `
-                        <div style="margin-top: 8px; text-align: center; font-size: 12px; color: #f59e0b; background: #1e293b; padding: 6px; border-radius: 4px; border: 1px dashed var(--border);">
-                            ⏳ Đang kiểm tra Street View...
-                        </div>
-                    `;
-                }
-
                 popup.setContent(`
                     <div style="font-size: 14.5px; line-height: 1.5; min-width: 250px; font-family: 'Outfit', sans-serif;">
                         <b style="color: var(--accent); display: block; margin-bottom: 5px;">📍 Địa chỉ tham khảo:</b>
@@ -882,7 +851,14 @@
                             
                             <a href="${gmapLink}" target="_blank" onclick="map.closePopup();" style="flex: 1; padding: 6px 10px; font-size: 13px; font-weight: bold; background: var(--secondary); color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; text-align: center; display: inline-block;">🗺️ Bản đồ</a>
                         </div>
-                        ${svButtonHtml}
+                        
+                        <div style="margin-top: 8px;">
+                            <a href="${streetViewLink}" target="_blank" onclick="map.closePopup();" style="display: block; width: 100%; padding: 7px 10px; font-size: 13px; font-weight: bold; background: #ea4335; color: white; border: none; border-radius: 4px; cursor: pointer; text-decoration: none; text-align: center; box-sizing: border-box;">📷 Xem Street View (Nhìn đường phố)</a>
+                        </div>
+                        
+                        <div style="margin-top: 8px; font-size: 11px; color: var(--text-muted); line-height: 1.4; border-top: 1px solid var(--border); padding-top: 6px;">
+                            💡 <b>Mẹo:</b> Nên bật lớp <i>'Đường Street View (Xanh)'</i> ở thanh bên trái. Chỉ click vào những đường kẻ màu xanh trên bản đồ mới có ảnh đường phố nhé!
+                        </div>
                     </div>
                 `);
             }
@@ -892,21 +868,12 @@
                 .then(res => res.json())
                 .then(data => {
                     addressText = data.display_name || "Khu vực này chưa có địa chỉ chính xác trên hệ thống.";
-                    isAddressDone = true;
                     renderPopup();
                 })
                 .catch(err => {
                     addressText = "Không thể tải địa chỉ lúc này.";
-                    isAddressDone = true;
                     renderPopup();
                 });
-
-            // Gọi hàm kiểm tra Street View
-            checkStreetView(lat, lon, function(hasSV) {
-                hasStreetView = hasSV;
-                isSVDone = true;
-                renderPopup();
-            });
         });
     });
 
