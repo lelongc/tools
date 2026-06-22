@@ -53,6 +53,10 @@ async function handleMessage(req, sender) {
             await deleteItem(req.itemId);
             return { ok: true };
 
+        case 'clearStorage':
+            await clearStorage();
+            return { ok: true };
+
         case 'cleanUrl':
             return { cleaned: cleanUrl(req.url) };
 

@@ -96,6 +96,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Handle Setting: Clear Storage
+    const clearStorageBtn = document.getElementById('clear-storage');
+    if (clearStorageBtn) {
+        clearStorageBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to delete ALL clipboard history and collections? This cannot be undone.')) {
+                chrome.runtime.sendMessage({ action: 'clearStorage' }, () => {
+                    // Update UI stats to 0
+                    const statValues = document.querySelectorAll('.stat-value');
+                    statValues.forEach(el => el.textContent = '0');
+                    alert('Storage cleared successfully!');
+                });
+            }
+        });
+    }
+
     // Listen for storage changes to sync checkboxes and body themes dynamically
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area === 'local') {

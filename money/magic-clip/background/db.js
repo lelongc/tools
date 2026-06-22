@@ -52,7 +52,7 @@ async function getRecent(limit = 50, search = '') {
         return items.slice(0, limit);
     }
     items = await db.history.orderBy('timestamp').reverse().toArray();
-    items = items.filter(i => !i.collectionId || i.collectionId === 0);
+    // Do not filter out items saved to collections, let them stay in Recent timeline
     return items.slice(0, limit);
 }
 
@@ -90,6 +90,11 @@ async function deleteCollection(id) {
     // Also remove all items in this collection
     await db.history.where('collectionId').equals(id).delete();
     return await db.collections.delete(id);
+}
+
+async function clearStorage() {
+    await db.history.clear();
+    await db.collections.clear();
 }
 
 // --- Helpers ---
