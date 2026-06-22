@@ -437,25 +437,45 @@
         if (!file) return;
 
         // Lấy thông số hệ tọa độ
-        const projString = document.getElementById('provinceSelect').value;
-        if (!projString || projString === "") {
+        const kinhTuyenTruc = document.getElementById('provinceSelect').value;
+        if (!kinhTuyenTruc || kinhTuyenTruc === "") {
             alert("⚠️ Bạn chưa chọn Tỉnh/Thành phố ở Bước 2. Hãy chọn hệ tọa độ VN-2000 trước khi tải file lên nhé!");
             document.getElementById('dxfUpload').value = ""; // Xóa lựa chọn file
             return;
         }
+
+        // Tạo chuỗi PROJ4 hoàn chỉnh để chuyển đổi tọa độ VN-2000 của Tỉnh đã chọn sang WGS84
+        const vn2000_proj4 = `+proj=tmerc +lat_0=0 +lon_0=${kinhTuyenTruc} +k=0.9999 +x_0=500000 +y_0=0 +ellps=WGS84 +towgs84=-191.90441429,-39.30318279,-111.45032835,0.00928836,-0.01975479,0.00427372,0.252906278 +units=m +no_defs`;
 
         document.getElementById('dxfUpload').disabled = true;
         
         const reader = new FileReader();
         reader.onload = function(e) {
             const fileText = e.target.result;
+            
+            // Kiểm tra sơ bộ định dạng file (DWG, DWF hoặc Binary DXF) dựa trên tên file và nội dung đầu tiên
+            const prefix = fileText.substring(0, 1000);
+            const fileNameLower = file.name.toLowerCase();
+            if (prefix.startsWith("AC10") || prefix.includes("\x00") || prefix.includes("PK\x03\x04") || fileNameLower.endsWith('.dwf') || fileNameLower.endsWith('.dwg')) {
+                alert("❌ Lỗi: Bản vẽ tải lên KHÔNG phải là file DXF dạng chữ (ASCII DXF).\n\n" +
+                      "⚠️ Phát hiện file có thể là định dạng DWG, DWF hoặc DXF nhị phân (Binary).\n\n" +
+                      "💡 Cách khắc phục:\n" +
+                      "1. Hãy đảm bảo bạn lưu file với đuôi .dxf (chứ không phải .dwg hay .dwf).\n" +
+                      "2. Trong AutoCAD hoặc FastView, chọn Save As (Lưu dưới dạng) -> chọn dòng AutoCAD 2007/2010/2013 DXF (*.dxf) bản chữ (ASCII), tránh chọn bản Binary (nhị phân).");
+                document.getElementById('dxfUpload').disabled = false;
+                document.getElementById('dxfUpload').value = "";
+                return;
+            }
+
             try {
                 const parser = new window.DxfParser();
                 const dxf = parser.parseSync(fileText);
-                drawDxfToMap(dxf, projString);
+                drawDxfToMap(dxf, vn2000_proj4);
             } catch (err) {
                 console.error(err);
-                alert("❌ Không thể đọc file DXF. Đảm bảo file được lưu ở chuẩn ASCII DXF (Save As -> DXF trong AutoCAD).");
+                alert("❌ Không thể đọc file DXF.\n\n" +
+                      "Đảm bảo file được lưu ở chuẩn ASCII DXF (Save As -> DXF trong AutoCAD).\n\n" +
+                      "Chi tiết lỗi: " + err.message);
             } finally {
                 document.getElementById('dxfUpload').disabled = false;
             }
@@ -470,59 +490,75 @@
         // Hàm đệ quy để lấy tất cả các đường nét (hỗ trợ cả Block/Insert, Tỷ lệ Scale, Góc xoay Rotation)
         function extractGeometries(entities, offsetX = 0, offsetY = 0, scaleX = 1, scaleY = 1, rotationDeg = 0) {
             let geometries = [];
+            if (!entities) return geometries;
+
             let rotRad = rotationDeg * Math.PI / 180;
             let cos = Math.cos(rotRad);
             let sin = Math.sin(rotRad);
 
             for (const entity of entities) {
-                let color = '#3b82f6'; // Xanh dương mặc định
-                if (entity.colorIndex === 1) color = '#ef4444';
-                else if (entity.colorIndex === 2) color = '#eab308';
-                else if (entity.colorIndex === 3) color = '#22c55e';
-                else if (entity.colorIndex === 4) color = '#06b6d4';
-                else if (entity.colorIndex === 6) color = '#a855f7';
-                else if (entity.colorIndex === 7) color = '#ffffff';
+                if (!entity) continue;
 
-                // Hàm chuyển đổi điểm từ hệ tọa độ của Block sang hệ tọa độ toàn cục (Global)
-                function transform(x, y) {
-                    let sx = x * scaleX;
-                    let sy = y * scaleY;
-                    let rx = sx * cos - sy * sin;
-                    let ry = sx * sin + sy * cos;
-                    return {
-                        x: rx + offsetX,
-                        y: ry + offsetY
-                    };
-                }
+                try {
+                    let color = '#3b82f6'; // Xanh dương mặc định
+                    if (entity.colorIndex === 1) color = '#ef4444';
+                    else if (entity.colorIndex === 2) color = '#eab308';
+                    else if (entity.colorIndex === 3) color = '#22c55e';
+                    else if (entity.colorIndex === 4) color = '#06b6d4';
+                    else if (entity.colorIndex === 6) color = '#a855f7';
+                    else if (entity.colorIndex === 7) color = '#ffffff';
 
-                if (entity.type === 'LINE' || entity.type === 'LWPOLYLINE' || entity.type === 'POLYLINE') {
-                    if (entity.vertices) {
-                        let pts = entity.vertices.map(v => transform(v.x, v.y));
-                        geometries.push({ pts, color });
+                    // Hàm chuyển đổi điểm từ hệ tọa độ của Block sang hệ tọa độ toàn cục (Global)
+                    function transform(x, y) {
+                        let sx = (typeof x === 'number' ? x : 0) * scaleX;
+                        let sy = (typeof y === 'number' ? y : 0) * scaleY;
+                        let rx = sx * cos - sy * sin;
+                        let ry = sx * sin + sy * cos;
+                        return {
+                            x: rx + offsetX,
+                            y: ry + offsetY
+                        };
                     }
-                } else if (entity.type === 'ARC' || entity.type === 'CIRCLE') {
-                    let pts = [];
-                    let startA = entity.startAngle || 0;
-                    let endA = entity.endAngle || (2 * Math.PI);
-                    if (endA < startA) endA += 2 * Math.PI;
-                    
-                    let segments = 32;
-                    for (let i = 0; i <= segments; i++) {
-                        let a = startA + ((endA - startA) * i / segments);
-                        let px = entity.center.x + entity.radius * Math.cos(a);
-                        let py = entity.center.y + entity.radius * Math.sin(a);
-                        pts.push(transform(px, py));
+
+                    if (entity.type === 'LINE' || entity.type === 'LWPOLYLINE' || entity.type === 'POLYLINE') {
+                        if (entity.vertices && Array.isArray(entity.vertices)) {
+                            let pts = entity.vertices
+                                .filter(v => v && typeof v.x === 'number' && typeof v.y === 'number')
+                                .map(v => transform(v.x, v.y));
+                            if (pts.length > 0) {
+                                geometries.push({ pts, color });
+                            }
+                        }
+                    } else if (entity.type === 'ARC' || entity.type === 'CIRCLE') {
+                        if (entity.center && typeof entity.center.x === 'number' && typeof entity.center.y === 'number' && typeof entity.radius === 'number') {
+                            let pts = [];
+                            let startA = entity.startAngle || 0;
+                            let endA = entity.endAngle || (2 * Math.PI);
+                            if (endA < startA) endA += 2 * Math.PI;
+                            
+                            let segments = 32;
+                            for (let i = 0; i <= segments; i++) {
+                                let a = startA + ((endA - startA) * i / segments);
+                                let px = entity.center.x + entity.radius * Math.cos(a);
+                                let py = entity.center.y + entity.radius * Math.sin(a);
+                                pts.push(transform(px, py));
+                            }
+                            geometries.push({ pts, color });
+                        }
+                    } else if (entity.type === 'INSERT' && dxf.blocks && dxf.blocks[entity.name]) {
+                        let block = dxf.blocks[entity.name];
+                        if (block && block.entities && entity.position && typeof entity.position.x === 'number' && typeof entity.position.y === 'number') {
+                            let insPos = transform(entity.position.x, entity.position.y);
+                            let insScaleX = scaleX * (entity.scale && typeof entity.scale.x === 'number' ? entity.scale.x : 1);
+                            let insScaleY = scaleY * (entity.scale && typeof entity.scale.y === 'number' ? entity.scale.y : 1);
+                            let insRot = rotationDeg + (entity.rotation || 0);
+                            
+                            let subGeoms = extractGeometries(block.entities, insPos.x, insPos.y, insScaleX, insScaleY, insRot);
+                            geometries.push(...subGeoms);
+                        }
                     }
-                    geometries.push({ pts, color });
-                } else if (entity.type === 'INSERT' && dxf.blocks && dxf.blocks[entity.name]) {
-                    let block = dxf.blocks[entity.name];
-                    let insPos = transform(entity.position.x, entity.position.y);
-                    let insScaleX = scaleX * (entity.scale ? entity.scale.x : 1);
-                    let insScaleY = scaleY * (entity.scale ? entity.scale.y : 1);
-                    let insRot = rotationDeg + (entity.rotation || 0);
-                    
-                    let subGeoms = extractGeometries(block.entities, insPos.x, insPos.y, insScaleX, insScaleY, insRot);
-                    geometries.push(...subGeoms);
+                } catch (e) {
+                    console.warn("Lỗi khi đọc thực thể DXF: ", entity, e);
                 }
             }
             return geometries;
