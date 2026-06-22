@@ -467,50 +467,90 @@
         dxfLayerGroup.clearLayers(); // Xóa lớp DXF cũ nếu có
         let lineCount = 0;
 
-        for (const entity of dxf.entities) {
-            if (entity.type === 'LINE' || entity.type === 'LWPOLYLINE' || entity.type === 'POLYLINE') {
-                let latlngs = [];
-                if (entity.vertices) {
-                    for (const v of entity.vertices) {
-                        // Trong AutoCAD, X thường là Easting (Trục Y của VN2000), Y là Northing (Trục X của VN2000)
-                        let easting = v.x;
-                        let northing = v.y;
-                        
-                        try {
-                            // Chuyển đổi tọa độ từ VN-2000 sang WGS84
-                            let result = proj4(projString, 'WGS84', [easting, northing]);
-                            let lon = result[0];
-                            let lat = result[1];
-                            latlngs.push([lat, lon]);
-                        } catch (e) {
-                            // Bỏ qua nếu lỗi tọa độ
-                        }
+        // Hàm đệ quy để lấy tất cả các đường nét (hỗ trợ cả Block/Insert, Tỷ lệ Scale, Góc xoay Rotation)
+        function extractGeometries(entities, offsetX = 0, offsetY = 0, scaleX = 1, scaleY = 1, rotationDeg = 0) {
+            let geometries = [];
+            let rotRad = rotationDeg * Math.PI / 180;
+            let cos = Math.cos(rotRad);
+            let sin = Math.sin(rotRad);
+
+            for (const entity of entities) {
+                let color = '#3b82f6'; // Xanh dương mặc định
+                if (entity.colorIndex === 1) color = '#ef4444';
+                else if (entity.colorIndex === 2) color = '#eab308';
+                else if (entity.colorIndex === 3) color = '#22c55e';
+                else if (entity.colorIndex === 4) color = '#06b6d4';
+                else if (entity.colorIndex === 6) color = '#a855f7';
+                else if (entity.colorIndex === 7) color = '#ffffff';
+
+                // Hàm chuyển đổi điểm từ hệ tọa độ của Block sang hệ tọa độ toàn cục (Global)
+                function transform(x, y) {
+                    let sx = x * scaleX;
+                    let sy = y * scaleY;
+                    let rx = sx * cos - sy * sin;
+                    let ry = sx * sin + sy * cos;
+                    return {
+                        x: rx + offsetX,
+                        y: ry + offsetY
+                    };
+                }
+
+                if (entity.type === 'LINE' || entity.type === 'LWPOLYLINE' || entity.type === 'POLYLINE') {
+                    if (entity.vertices) {
+                        let pts = entity.vertices.map(v => transform(v.x, v.y));
+                        geometries.push({ pts, color });
                     }
-                }
-                
-                if (latlngs.length > 1) {
-                    let color = '#3b82f6'; // Xanh dương mặc định
-                    if (entity.colorIndex === 1) color = '#ef4444'; // Đỏ
-                    else if (entity.colorIndex === 2) color = '#eab308'; // Vàng
-                    else if (entity.colorIndex === 3) color = '#22c55e'; // Xanh lá
-                    else if (entity.colorIndex === 4) color = '#06b6d4'; // Cyan
-                    else if (entity.colorIndex === 5) color = '#3b82f6'; // Xanh dương
-                    else if (entity.colorIndex === 6) color = '#a855f7'; // Tím
-                    else if (entity.colorIndex === 7) color = '#ffffff'; // Trắng
+                } else if (entity.type === 'ARC' || entity.type === 'CIRCLE') {
+                    let pts = [];
+                    let startA = entity.startAngle || 0;
+                    let endA = entity.endAngle || (2 * Math.PI);
+                    if (endA < startA) endA += 2 * Math.PI;
                     
-                    let polyline = L.polyline(latlngs, {
-                        color: color, 
-                        weight: 2, 
-                        opacity: 0.8
-                    });
-                    dxfLayerGroup.addLayer(polyline);
-                    lineCount++;
+                    let segments = 32;
+                    for (let i = 0; i <= segments; i++) {
+                        let a = startA + ((endA - startA) * i / segments);
+                        let px = entity.center.x + entity.radius * Math.cos(a);
+                        let py = entity.center.y + entity.radius * Math.sin(a);
+                        pts.push(transform(px, py));
+                    }
+                    geometries.push({ pts, color });
+                } else if (entity.type === 'INSERT' && dxf.blocks && dxf.blocks[entity.name]) {
+                    let block = dxf.blocks[entity.name];
+                    let insPos = transform(entity.position.x, entity.position.y);
+                    let insScaleX = scaleX * (entity.scale ? entity.scale.x : 1);
+                    let insScaleY = scaleY * (entity.scale ? entity.scale.y : 1);
+                    let insRot = rotationDeg + (entity.rotation || 0);
+                    
+                    let subGeoms = extractGeometries(block.entities, insPos.x, insPos.y, insScaleX, insScaleY, insRot);
+                    geometries.push(...subGeoms);
                 }
+            }
+            return geometries;
+        }
+
+        let allGeoms = extractGeometries(dxf.entities);
+
+        for (const geom of allGeoms) {
+            let latlngs = [];
+            for (const v of geom.pts) {
+                try {
+                    let result = proj4(projString, 'WGS84', [v.x, v.y]);
+                    latlngs.push([result[1], result[0]]); // [lat, lon]
+                } catch (e) {}
+            }
+            if (latlngs.length > 1) {
+                let polyline = L.polyline(latlngs, {
+                    color: geom.color, 
+                    weight: 2, 
+                    opacity: 0.8
+                });
+                dxfLayerGroup.addLayer(polyline);
+                lineCount++;
             }
         }
         
         if (lineCount === 0) {
-            alert("⚠️ Không tìm thấy đường nét nào (LINE/POLYLINE) trong file DXF. Đảm bảo bản vẽ có chứa các đường nét quy hoạch.");
+            alert("⚠️ Không tìm thấy đường nét nào hợp lệ. Vui lòng mở file bằng AutoCAD (hoặc FastView), nhấn 'X' (Explode) để phá khối toàn bộ bản vẽ, sau đó Save As DXF phiên bản 2013 hoặc cũ hơn rồi thử lại nhé!");
             return;
         }
 
