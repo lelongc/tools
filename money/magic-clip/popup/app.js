@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     btnLogin.textContent = 'Login to Google';
                     btnLogin.disabled = false;
-                    setSyncStatus('Login failed. Ensure API Key is configured.', true);
+                    setSyncStatus('Lỗi: ' + (res.error || 'Unknown error'), true);
                 }
             });
         });

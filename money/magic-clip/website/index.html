@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoClip - The Ultimate Clipboard Manager for Chrome</title>
+    <meta name="description" content="Secure, fast, and feature-rich clipboard manager with Google Drive sync and OCR.">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="logo-icon"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="4" y="4" width="16" height="18" rx="2"/><path d="M9 12h6M9 16h4"/></svg>
+                <span>NeoClip</span>
+            </div>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#security">Security</a>
+                <a href="#pricing">Pricing</a>
+                <a href="#" class="btn-primary-small">Add to Chrome</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content reveal">
+            <div class="badge">🚀 The #1 Developer Clipboard Tool</div>
+            <h1 class="hero-title">Your clipboard, <br><span class="gradient-text">supercharged.</span></h1>
+            <p class="hero-subtitle">
+                Never lose a copied snippet again. NeoClip saves your history securely, extracts text from images with OCR, and syncs across all your devices using your private Google Drive.
+            </p>
+            <div class="hero-cta">
+                <a href="#" class="btn-primary">Add to Chrome - It's Free</a>
+                <a href="#demo" class="btn-secondary">See how it works</a>
+            </div>
+        </div>
+        <div class="hero-visual reveal delay-1">
+            <div class="mockup-window">
+                <div class="mockup-header">
+                    <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+                </div>
+                <div class="mockup-body">
+                    <div class="mockup-item">
+                        <div class="mockup-icon" style="color: #6366f1;">{ }</div>
+                        <div class="mockup-text">const apiKey = "GOCSPX-V4JW...";</div>
+                        <div class="mockup-badge">Text</div>
+                    </div>
+                    <div class="mockup-item">
+                        <div class="mockup-icon" style="color: #10b981;">#</div>
+                        <div class="mockup-text">https://github.com/lelongc/tools</div>
+                        <div class="mockup-badge" style="background: rgba(16,185,129,0.1); color: #10b981;">Link</div>
+                    </div>
+                    <div class="mockup-item">
+                        <div class="mockup-icon" style="color: #06b6d4;">🖼️</div>
+                        <div class="mockup-text">Screenshot_1024.png</div>
+                        <div class="mockup-badge" style="background: rgba(6,182,212,0.1); color: #06b6d4;">Image</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section id="features" class="section">
+        <div class="section-header reveal">
+            <h2>Everything you need, <span class="gradient-text">in one place.</span></h2>
+            <p>Designed for power users, developers, and researchers.</p>
+        </div>
+        <div class="grid">
+            <div class="card reveal">
+                <div class="card-icon">🔍</div>
+                <h3>Smart Filters</h3>
+                <p>Instantly find what you copied days ago. Filter by text, links, or images with blazing fast IndexedDB search.</p>
+            </div>
+            <div class="card reveal delay-1">
+                <div class="card-icon">🖼️</div>
+                <h3>Google Lens & OCR</h3>
+                <p>Copied an image with text? NeoClip automatically extracts the text using WebAssembly OCR, entirely offline.</p>
+            </div>
+            <div class="card reveal delay-2">
+                <div class="card-icon">📁</div>
+                <h3>Collections</h3>
+                <p>Organize your snippets into custom folders. Great for saving code templates, email drafts, or research links.</p>
+            </div>
+            <div class="card reveal delay-3">
+                <div class="card-icon">🌐</div>
+                <h3>Cross-Browser</h3>
+                <p>Works seamlessly on Google Chrome, Microsoft Edge, Brave, Cốc Cốc, and any Chromium-based browser.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="security" class="section security-section">
+        <div class="security-content reveal">
+            <div class="badge badge-security">🔒 Zero-Knowledge Architecture</div>
+            <h2>Your data is <span class="gradient-text-green">strictly yours.</span></h2>
+            <p>Unlike other clipboard managers that send your sensitive passwords and API keys to third-party servers, NeoClip guarantees 100% privacy.</p>
+            <ul class="feature-list">
+                <li><span class="check">✓</span> <strong>Local-First:</strong> Data is encrypted and stored locally in your browser.</li>
+                <li><span class="check">✓</span> <strong>Hidden AppData Sync:</strong> When syncing, we use a hidden folder in <em>your own</em> Google Drive.</li>
+                <li><span class="check">✓</span> <strong>No External Servers:</strong> We literally do not own a database. We cannot see your data.</li>
+            </ul>
+        </div>
+        <div class="security-visual reveal delay-1">
+            <div class="shield-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            </div>
+            <div class="glow"></div>
+        </div>
+    </section>
+
+    <section id="pricing" class="section">
+        <div class="section-header reveal">
+            <h2>Simple, transparent <span class="gradient-text">pricing.</span></h2>
+            <p>Start for free, upgrade when you need superpowers.</p>
+        </div>
+        <div class="pricing-grid">
+            <div class="pricing-card reveal">
+                <h3>Basic</h3>
+                <div class="price">Free</div>
+                <p class="price-desc">Perfect for everyday copying.</p>
+                <ul class="pricing-features">
+                    <li><span class="check">✓</span> 500 Clipboard History Limit</li>
+                    <li><span class="check">✓</span> Basic Search</li>
+                    <li><span class="check">✓</span> 3 Collections</li>
+                    <li><span class="check">✓</span> Offline OCR</li>
+                </ul>
+                <a href="#" class="btn-secondary w-full">Install Free</a>
+            </div>
+            <div class="pricing-card pro reveal delay-1">
+                <div class="popular-badge">Most Popular</div>
+                <h3>Pro</h3>
+                <div class="price">$1<span class="period">/mo</span></div>
+                <p class="price-desc">For power users and professionals.</p>
+                <ul class="pricing-features">
+                    <li><span class="check">✓</span> <strong>Unlimited</strong> History</li>
+                    <li><span class="check">✓</span> <strong>Smart Filters</strong> (Links/Images)</li>
+                    <li><span class="check">✓</span> <strong>Unlimited</strong> Collections</li>
+                    <li><span class="check">✓</span> <strong>Google Drive Cloud Sync</strong></li>
+                    <li><span class="check">✓</span> Cross-device Backup & Restore</li>
+                </ul>
+                <a href="#" class="btn-primary w-full">Upgrade to Pro</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="logo-icon" style="width:24px;height:24px;"><rect x="8" y="2" width="8" height="4" rx="1"/><rect x="4" y="4" width="16" height="18" rx="2"/><path d="M9 12h6M9 16h4"/></svg>
+                <span>NeoClip</span>
+            </div>
+            <p>© 2026 NeoClip. All rights reserved.</p>
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Service</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -262,32 +262,33 @@
     box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
 }
 
-.p-hint-bar {
-    margin: 8px 16px 0;
-    padding: 8px 12px;
-    background: rgba(99,102,241,0.06);
-    border: 1px dashed rgba(99,102,241,0.3);
-    border-radius: var(--mc-radius-sm);
-    font-size: 11.5px;
-    color: var(--mc-primary);
-    text-align: center;
+.p-filters {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 0 2px;
+}
+.p-filter-chip {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--mc-text-secondary);
+    background: var(--mc-bg);
+    border: 1px solid var(--mc-border);
     cursor: pointer;
     transition: all 0.2s var(--mc-ease);
 }
-.p-hint-bar:hover {
-    background: rgba(99,102,241,0.1);
-    border-style: solid;
+.p-filter-chip:hover {
+    color: var(--mc-primary);
+    border-color: var(--mc-border-hover);
+    background: rgba(99,102,241,0.05);
 }
-.p-hint-bar kbd {
-    font-family: inherit;
-    font-weight: 600;
-    background: var(--mc-bg-pure);
-    padding: 2px 5px;
-    border-radius: 4px;
-    border: 1px solid var(--mc-border);
-    color: var(--mc-text-secondary);
-    font-size: 11px;
-    box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+.p-filter-chip.active {
+    color: white;
+    background: var(--mc-gradient);
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(99,102,241,0.25);
 }
 
 .p-tabs {

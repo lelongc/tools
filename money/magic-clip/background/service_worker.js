@@ -26,8 +26,7 @@ async function handleMessage(req, sender) {
             return { ok: true, id: result.id, isNew: result.isNew };
 
         case 'syncClipboard':
-            const isNew = await syncClipboardInBackground();
-            return { ok: true, isNew };
+            return { ok: true, isNew: false };
 
         case 'getRecent':
             return { items: await getRecent(req.limit || 50, req.search || '', req.typeFilter || 'all') };
@@ -71,7 +70,7 @@ async function handleMessage(req, sender) {
             return { cleaned: cleanUrl(req.url) };
 
         case 'googleLogin':
-            return { ok: await loginToGoogle() };
+            return await loginToGoogle();
 
         case 'backupToDrive':
             return { ok: await backupToDrive() };

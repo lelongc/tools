@@ -1,23 +1,69 @@
-// Google Drive Sync Engine
-// Uses the drive.appdata scope to save a hidden JSON file
+// Google Drive Sync Engine (Universal Web Auth Flow)
+// Supports Edge, Chrome, Coccoc, Brave, etc.
+
 const FILE_NAME = 'neoclip_backup.json';
+// TODO: User must provide the NEW Web Application Client ID
+const CLIENT_ID = '637586583741-204un9j40rq8bm9e8517evmdiaoak933.apps.googleusercontent.com'; 
+const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
+
+let cachedToken = null;
+let tokenExpiresAt = 0;
 
 async function getAccessToken(interactive = false) {
+    if (cachedToken && Date.now() < tokenExpiresAt) {
+        return { token: cachedToken };
+    }
+
+    if (CLIENT_ID === 'YOUR_NEW_WEB_CLIENT_ID_HERE') {
+        const redirectUri = chrome.identity.getRedirectURL();
+        return { error: `[BƯỚC 1]: Hãy lên Google Cloud tạo Web Application Client ID mới.\n[BƯỚC 2]: Dán link này vào mục "Authorized redirect URIs": ${redirectUri}` };
+    }
+
+    const redirectUri = chrome.identity.getRedirectURL();
+    const authUrl = new URL('https://accounts.google.com/o/oauth2/auth');
+    authUrl.searchParams.set('client_id', CLIENT_ID);
+    authUrl.searchParams.set('response_type', 'token');
+    authUrl.searchParams.set('redirect_uri', redirectUri);
+    authUrl.searchParams.set('scope', SCOPES);
+
     return new Promise((resolve) => {
-        chrome.identity.getAuthToken({ interactive }, function(token) {
-            if (chrome.runtime.lastError || !token) {
-                console.error('Google Auth Error:', chrome.runtime.lastError);
-                resolve(null);
+        chrome.identity.launchWebAuthFlow({
+            url: authUrl.href,
+            interactive: interactive
+        }, (redirectUrl) => {
+            if (chrome.runtime.lastError || !redirectUrl) {
+                const errMsg = chrome.runtime.lastError ? chrome.runtime.lastError.message : 'Login cancelled or failed.';
+                console.error('Google Universal Auth Error:', errMsg);
+                
+                let displayError = errMsg;
+                if (errMsg.includes('OAuth2 request failed') || errMsg.includes('Authorization page could not be loaded')) {
+                    displayError = `Vui lòng thêm link này vào ô "Authorized redirect URIs" trên Google Cloud: ${redirectUri}`;
+                }
+                resolve({ error: displayError, redirectUri: redirectUri });
             } else {
-                resolve(token);
+                const hash = new URL(redirectUrl).hash.substring(1);
+                const params = new URLSearchParams(hash);
+                const token = params.get('access_token');
+                const expiresIn = parseInt(params.get('expires_in'), 10) || 3600;
+
+                if (token) {
+                    cachedToken = token;
+                    tokenExpiresAt = Date.now() + (expiresIn * 1000) - 60000;
+                    resolve({ token: token, redirectUri: redirectUri });
+                } else {
+                    resolve({ error: 'Failed to extract token from Google.', redirectUri: redirectUri });
+                }
             }
         });
     });
 }
 
 async function loginToGoogle() {
-    const token = await getAccessToken(true);
-    return !!token;
+    const res = await getAccessToken(true);
+    if (res.error) {
+        return { ok: false, error: res.error };
+    }
+    return { ok: true };
 }
 
 async function getSyncFileId(token) {
@@ -32,16 +78,15 @@ async function getSyncFileId(token) {
 }
 
 async function backupToDrive() {
-    const token = await getAccessToken(true);
-    if (!token) return false;
+    const authRes = await getAccessToken(true);
+    if (authRes.error) return false;
+    const token = authRes.token;
 
     try {
-        // 1. Gather Data
         const history = await db.history.toArray();
         const collections = await db.collections.toArray();
         const backupData = JSON.stringify({ history, collections, timestamp: Date.now() });
 
-        // 2. Prepare Upload
         const fileId = await getSyncFileId(token);
         
         const metadata = {
@@ -53,7 +98,6 @@ async function backupToDrive() {
         form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
         form.append('file', new Blob([backupData], { type: 'application/json' }));
 
-        // 3. Upload (POST if new, PATCH if exists)
         let url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
         let method = 'POST';
 
@@ -78,8 +122,9 @@ async function backupToDrive() {
 }
 
 async function restoreFromDrive() {
-    const token = await getAccessToken(true);
-    if (!token) return false;
+    const authRes = await getAccessToken(true);
+    if (authRes.error) return false;
+    const token = authRes.token;
 
     try {
         const fileId = await getSyncFileId(token);
@@ -96,7 +141,6 @@ async function restoreFromDrive() {
         
         const data = await res.json();
         
-        // Restore to DB
         await db.transaction('rw', db.history, db.collections, async () => {
             await db.history.clear();
             await db.collections.clear();
@@ -109,7 +153,6 @@ async function restoreFromDrive() {
             }
         });
         
-        // Notify tabs
         chrome.tabs.query({}, (tabs) => {
             for (const tab of tabs) {
                 chrome.tabs.sendMessage(tab.id, { action: 'storageCleared' }).catch(() => {});

@@ -15,12 +15,6 @@
     "activeTab",
     "identity"
   ],
-  "oauth2": {
-    "client_id": "637586583741-1gdimj6mbv3a64d3djqb8v5bn17m7504.apps.googleusercontent.com",
-    "scopes": [
-      "https://www.googleapis.com/auth/drive.appdata"
-    ]
-  },
   "background": {
     "service_worker": "background/service_worker.js"
   },

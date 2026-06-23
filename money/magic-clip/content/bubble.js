@@ -117,9 +117,6 @@
                     <div class="p-filter-chip" data-filter="images">Images</div>
                 </div>
             </div>
-            <div class="p-hint-bar" id="win-v-hint" title="Windows blocks extensions from reading background clipboards. Use Win+V as a workaround!">
-                💡 Missing a copied image? Press <kbd>Win</kbd> + <kbd>V</kbd> and <b>click it</b> to bring it here! ✨
-            </div>
             <div class="p-tabs">
                 <div class="segment-control">
                     <button class="p-tab active" data-tab="recent">Recent</button>
@@ -388,8 +385,15 @@
     searchInput.addEventListener('input', e => {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
-            if (currentTab === 'recent') loadRecent(e.target.value);
+            if (currentTab === 'recent') loadRecent(e.target.value, true);
         }, 200);
+    });
+    searchInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            clearTimeout(searchTimeout);
+            if (currentTab === 'recent') loadRecent(searchInput.value, true);
+        }
     });
 
     shadow.querySelectorAll('.p-filter-chip').forEach(chip => {
@@ -935,17 +939,27 @@
                 resolve({ imgBlob, txt });
             };
             
-            const prevActive = document.activeElement;
+            let prevActive = document.activeElement;
+            // Traverse into shadow DOM to find the real focused element (like our search input)
+            if (prevActive && prevActive.id === 'mc-host' && prevActive.shadowRoot) {
+                const innerActive = prevActive.shadowRoot.activeElement;
+                if (innerActive) prevActive = innerActive;
+            }
+            
             const input = document.createElement('div');
             input.id = 'mc-legacy-paste-target';
             input.contentEditable = true;
             input.style.position = 'fixed';
             input.style.opacity = '0';
-            input.style.left = '-9999px';
+            input.style.top = '0';
+            input.style.left = '0';
+            input.style.width = '1px';
+            input.style.height = '1px';
+            input.style.overflow = 'hidden';
             
             input.addEventListener('paste', handler, { once: true });
             document.body.appendChild(input); // Append to main document body!
-            input.focus();
+            input.focus({ preventScroll: true });
             
             try {
                 const success = document.execCommand('paste');
@@ -962,7 +976,7 @@
             } finally {
                 input.remove();
                 if (prevActive && typeof prevActive.focus === 'function') {
-                    prevActive.focus();
+                    prevActive.focus({ preventScroll: true });
                 }
             }
         });
@@ -971,66 +985,10 @@
     async function syncClipboardDirect() {
         console.log('NeoClip [Direct]: Starting syncClipboardDirect...');
         try {
-            // 1. Try modern Async Clipboard API first (works on focused contexts with permission, supports images)
-            if (navigator.clipboard && typeof navigator.clipboard.read === 'function') {
-                console.log('NeoClip [Direct]: Trying Async Clipboard API...');
-                try {
-                    if (!document.hasFocus()) {
-                        console.log('NeoClip [Direct]: Document not focused. Waiting 150ms for focus transition...');
-                        await new Promise(r => setTimeout(r, 150));
-                    }
-                    const items = await navigator.clipboard.read();
-                    console.log(`NeoClip [Direct]: Async Clipboard read success. Items count: ${items ? items.length : 0}`);
-                    for (const ci of items) {
-                        console.log(`NeoClip [Direct]: Async item types:`, ci.types);
-                        const imgType = ci.types.find(t => t.startsWith('image/'));
-                        if (imgType) {
-                            console.log(`NeoClip [Direct]: Found image type: ${imgType}`);
-                            const blob = await ci.getType(imgType);
-                            
-                            // Check cache
-                            if (lastSyncedImageSize === blob.size) {
-                                console.log('NeoClip [Direct]: Image size matches cache, skipping sync.');
-                                return null;
-                            }
-                            lastSyncedImageSize = blob.size;
-                            lastSyncedText = null;
+            // Disabled navigator.clipboard.read() in content script to prevent annoying browser permission prompts.
+            // The extension will now rely on the background Offscreen Document (which has silent permission) to read images and text.
 
-                            const b64 = await compressImage(blob);
-                            console.log('NeoClip [Direct]: Async image compressed successfully.');
-                            return { type: 'image', content: b64, mime: 'image/jpeg' };
-                        }
-                    }
-                    for (const ci of items) {
-                        const txtType = ci.types.find(t => t === 'text/plain');
-                        if (txtType) {
-                            console.log(`NeoClip [Direct]: Found text type: ${txtType}`);
-                            const blob = await ci.getType(txtType);
-                            const txt = await blob.text();
-                            if (txt && txt.trim()) {
-                                const trimmed = txt.trim();
-                                
-                                // Check cache
-                                if (lastSyncedText === trimmed) {
-                                    console.log('NeoClip [Direct]: Text matches cache, skipping sync.');
-                                    return null;
-                                }
-                                lastSyncedText = trimmed;
-                                lastSyncedImageSize = null;
-
-                                console.log(`NeoClip [Direct]: Async text read successfully: "${trimmed.substring(0, 30)}"`);
-                                return { type: 'text', content: trimmed };
-                            }
-                        }
-                    }
-                } catch(e) {
-                    console.warn('NeoClip [Direct]: Async clipboard read threw error:', e);
-                }
-            } else {
-                console.log('NeoClip [Direct]: navigator.clipboard.read is not available.');
-            }
-
-            // 2. Fallback to legacy paste inside content script
+            // Fallback to legacy paste inside content script (only reads text, no prompt)
             console.log('NeoClip [Direct]: Falling back to legacy paste...');
             const legacy = await readClipboardLegacy();
             console.log('NeoClip [Direct]: readClipboardLegacy returned:', legacy);
