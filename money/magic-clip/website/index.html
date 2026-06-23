@@ -75,8 +75,8 @@
             </div>
             <div class="card reveal delay-1">
                 <div class="card-icon">🖼️</div>
-                <h3>Google Lens & OCR</h3>
-                <p>Copied an image with text? NeoClip automatically extracts the text using WebAssembly OCR, entirely offline.</p>
+                <h3>Google Lens Integration</h3>
+                <p>Copied an image? NeoClip integrates directly with Google Lens, allowing you to instantly search, extract text, and find sources.</p>
             </div>
             <div class="card reveal delay-2">
                 <div class="card-icon">📁</div>
@@ -110,6 +110,30 @@
         </div>
     </section>
 
+    <section id="faq" class="section">
+        <div class="section-header reveal">
+            <h2>Frequently Asked <span class="gradient-text">Questions.</span></h2>
+            <p>Everything you need to know about how NeoClip works.</p>
+        </div>
+        <div class="grid">
+            <div class="card reveal">
+                <div class="card-icon">🤔</div>
+                <h3>Why did it miss a copied item?</h3>
+                <p>Chrome's strict security sandbox prevents extensions from secretly spying on your clipboard in the background. If you copy multiple items outside the browser (like in Word), NeoClip can only catch the last one when you switch back. <br><br><strong>Pro Tip:</strong> Copy directly inside Chrome, or use <code>Win + V</code> to manually paste older items into NeoClip!</p>
+            </div>
+            <div class="card reveal delay-1">
+                <div class="card-icon">☁️</div>
+                <h3>Where is my data stored?</h3>
+                <p>We literally do not own a database. Your clipboard history stays locally on your computer. If you enable Cloud Sync, it is securely stored in a hidden folder inside <strong>your own Google Drive</strong>.</p>
+            </div>
+            <div class="card reveal delay-2">
+                <div class="card-icon">🔍</div>
+                <h3>How does image text extraction work?</h3>
+                <p>NeoClip opens your copied images in a lightweight Google Lens panel. This allows you to leverage Google's world-class AI to extract text, translate, or find similar images instantly.</p>
+            </div>
+        </div>
+    </section>
+
     <section id="pricing" class="section">
         <div class="section-header reveal">
             <h2>Simple, transparent <span class="gradient-text">pricing.</span></h2>
@@ -124,7 +148,7 @@
                     <li><span class="check">✓</span> 500 Clipboard History Limit</li>
                     <li><span class="check">✓</span> Basic Search</li>
                     <li><span class="check">✓</span> 3 Collections</li>
-                    <li><span class="check">✓</span> Offline OCR</li>
+                    <li><span class="check">✓</span> Google Lens Integration</li>
                 </ul>
                 <a href="#" class="btn-secondary w-full">Install Free</a>
             </div>
