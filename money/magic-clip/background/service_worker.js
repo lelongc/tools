@@ -19,10 +19,14 @@ async function handleMessage(req, sender) {
 
         case 'saveItem':
             const result = await saveItem(req.item);
-            if (result.isNew && sender && sender.tab) {
-                chrome.tabs.sendMessage(sender.tab.id, { action: 'clipboardUpdated' }).catch(() => {});
+            if (result.isNew) {
+                broadcastClipboardUpdated();
             }
             return { ok: true, id: result.id, isNew: result.isNew };
+
+        case 'syncClipboard':
+            const isNew = await syncClipboardInBackground();
+            return { ok: true, isNew };
 
         case 'getRecent':
             return { items: await getRecent(req.limit || 50, req.search || '') };
@@ -79,5 +83,84 @@ chrome.commands.onCommand.addListener((command) => {
             }
         });
     }
+});
+
+// ---- Offscreen Document & Background Clipboard Sync ----
+let creatingOffscreen = null;
+async function createOffscreenIfNeeded() {
+    const existingContexts = await chrome.runtime.getContexts({
+        contextTypes: ['OFFSCREEN_DOCUMENT']
+    });
+    if (existingContexts.length > 0) return;
+
+    if (creatingOffscreen) {
+        await creatingOffscreen;
+        return;
+    }
+
+    creatingOffscreen = chrome.offscreen.createDocument({
+        url: 'offscreen/offscreen.html',
+        reasons: ['CLIPBOARD'],
+        justification: 'Read clipboard images safely and robustly in background'
+    });
+    await creatingOffscreen;
+    creatingOffscreen = null;
+    // Wait for the script to load completely and register onMessage listener
+    await new Promise(resolve => setTimeout(resolve, 250));
+}
+
+let syncPromise = null;
+async function syncClipboardInBackground() {
+    if (syncPromise) return syncPromise;
+
+    syncPromise = (async () => {
+        try {
+            await createOffscreenIfNeeded();
+            const result = await chrome.runtime.sendMessage({
+                target: 'offscreen',
+                action: 'readClipboard'
+            });
+            if (result && result.content) {
+                const saveRes = await saveItem(result);
+                if (saveRes.isNew) {
+                    broadcastClipboardUpdated();
+                }
+                return saveRes.isNew;
+            }
+        } catch (e) {
+            console.error('Background sync failed:', e);
+        }
+        return false;
+    })();
+
+    const isNew = await syncPromise;
+    syncPromise = null;
+    return isNew;
+}
+
+function broadcastClipboardUpdated() {
+    chrome.tabs.query({ active: true }, (tabs) => {
+        for (const tab of tabs) {
+            chrome.tabs.sendMessage(tab.id, { action: 'clipboardUpdated' }).catch(() => {});
+        }
+    });
+}
+
+// Listen for browser/window activity events
+chrome.windows.onFocusChanged.addListener((windowId) => {
+    if (windowId !== chrome.windows.WINDOW_ID_NONE) {
+        // Wait 300ms for external app to completely write to clipboard and release lock
+        setTimeout(() => {
+            syncClipboardInBackground();
+        }, 300);
+    }
+});
+
+chrome.tabs.onActivated.addListener(() => {
+    syncClipboardInBackground();
+});
+
+chrome.runtime.onStartup.addListener(() => {
+    syncClipboardInBackground();
 });
 

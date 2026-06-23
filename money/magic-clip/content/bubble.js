@@ -6,6 +6,19 @@
 (function () {
     if (document.getElementById('mc-host')) return;
 
+    // Guard against extension context invalidation (after reload)
+    if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
+        const originalSendMessage = chrome.runtime.sendMessage;
+        chrome.runtime.sendMessage = function (...args) {
+            try {
+                if (!chrome.runtime || !chrome.runtime.id) return;
+                originalSendMessage.apply(chrome.runtime, args);
+            } catch (e) {
+                console.warn('NeoClip: Extension context invalidated. Please refresh the page (F5) to reload the script.');
+            }
+        };
+    }
+
     // ---- Icons ----
     const ICONS = {
         copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
@@ -175,7 +188,7 @@
     // Global listener to track the last active input element on the page
     document.addEventListener('focusin', (e) => {
         const target = e.composedPath()[0] || e.target;
-        if (target && !e.composedPath().includes(host) && (
+        if (target && target.id !== 'mc-legacy-paste-target' && !e.composedPath().includes(host) && (
             target.tagName === 'INPUT' || 
             target.tagName === 'TEXTAREA' || 
             target.isContentEditable
@@ -267,18 +280,6 @@
             chrome.runtime.sendMessage({ action: 'getCollections' }, res => {
                 if (res && res.collections) collectionsCache = res.collections;
             });
-            // Poll clipboard for real-time copy updates when panel is open
-            pollInterval = setInterval(async () => {
-                const updated = await syncClipboard();
-                if (updated && currentTab === 'recent') {
-                    loadRecent(shadow.getElementById('search-input').value, true);
-                }
-            }, 1000);
-        } else {
-            if (pollInterval) {
-                clearInterval(pollInterval);
-                pollInterval = null;
-            }
         }
 
         // Prevent rapid toggling (debounce)
@@ -334,10 +335,6 @@
     // ---- Panel Close ----
     function closePanel() {
         panel.classList.remove('open');
-        if (pollInterval) {
-            clearInterval(pollInterval);
-            pollInterval = null;
-        }
     }
 
     shadow.getElementById('btn-close').addEventListener('click', () => {
@@ -867,6 +864,100 @@
     }
 
     // ---- OS Clipboard Sync ----
+    async function readClipboardLegacy() {
+        return new Promise(resolve => {
+            let handlerCalled = false;
+            const handler = (e) => {
+                handlerCalled = true;
+                e.preventDefault();
+                e.stopPropagation();
+                let imgBlob = null;
+                let txt = null;
+                const items = e.clipboardData.items;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.startsWith('image/')) {
+                        imgBlob = items[i].getAsFile();
+                    } else if (items[i].type === 'text/plain') {
+                        txt = e.clipboardData.getData('text/plain');
+                    }
+                }
+                resolve({ imgBlob, txt });
+            };
+            
+            const prevActive = document.activeElement;
+            const input = document.createElement('div');
+            input.id = 'mc-legacy-paste-target';
+            input.contentEditable = true;
+            input.style.position = 'fixed';
+            input.style.opacity = '0';
+            input.style.left = '-9999px';
+            
+            input.addEventListener('paste', handler, { once: true });
+            document.body.appendChild(input); // Append to main document body!
+            input.focus();
+            
+            try {
+                const success = document.execCommand('paste');
+                if (!success || !handlerCalled) {
+                    input.removeEventListener('paste', handler);
+                    resolve(null);
+                }
+            } catch(e) {
+                input.removeEventListener('paste', handler);
+                resolve(null);
+            } finally {
+                input.remove();
+                if (prevActive && typeof prevActive.focus === 'function') {
+                    prevActive.focus();
+                }
+            }
+        });
+    }
+
+    async function syncClipboardDirect() {
+        try {
+            // 1. Try legacy paste inside content script first (preserves user gesture activation)
+            const legacy = await readClipboardLegacy();
+            if (legacy) {
+                if (legacy.imgBlob) {
+                    const b64 = await compressImage(legacy.imgBlob);
+                    return { type: 'image', content: b64, mime: 'image/jpeg' };
+                } else if (legacy.txt && legacy.txt.trim()) {
+                    return { type: 'text', content: legacy.txt.trim() };
+                }
+            }
+
+            // 2. Fallback to modern Async Clipboard API
+            let items = [];
+            try {
+                items = await navigator.clipboard.read();
+                for (const ci of items) {
+                    const imgType = ci.types.find(t => t.startsWith('image/'));
+                    if (imgType) {
+                        const blob = await ci.getType(imgType);
+                        const b64 = await compressImage(blob);
+                        return { type: 'image', content: b64, mime: 'image/jpeg' };
+                    }
+                }
+                for (const ci of items) {
+                    const txtType = ci.types.find(t => t === 'text/plain');
+                    if (txtType) {
+                        const blob = await ci.getType(txtType);
+                        const txt = await blob.text();
+                        if (txt && txt.trim()) {
+                            return { type: 'text', content: txt.trim() };
+                        }
+                    }
+                }
+            } catch(e) {
+                // Async clipboard read failed or permission denied
+            }
+        } catch (err) {
+            // Safe to ignore clipboard errors in direct reading
+        }
+        return null;
+    }
+
     let syncPromise = null;
     function syncClipboard() {
         if (Date.now() < ignoreSyncUntil) return Promise.resolve(false);
@@ -874,39 +965,28 @@
 
         syncPromise = (async () => {
             try {
-                let items = [];
-                try {
-                    items = await navigator.clipboard.read();
-                } catch(e) {
-                    return false;
-                }
-                
-                for (const ci of items) {
-                    const imgType = ci.types.find(t => t.startsWith('image/'));
-                    if (imgType) {
-                        const blob = await ci.getType(imgType);
-                        const b64 = await compressImage(blob);
-                        const res = await new Promise(r => {
-                            try { chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: 'image/jpeg' } }, r); } catch (e) { r(null); }
-                        });
-                        return res && res.isNew;
-                    }
+                // 1. Try direct read (works if webpage has focus and user activation)
+                const direct = await syncClipboardDirect();
+                if (direct) {
+                    const res = await new Promise(r => {
+                        try {
+                            chrome.runtime.sendMessage({ action: 'saveItem', item: direct }, r);
+                        } catch (e) {
+                            r(null);
+                        }
+                    });
+                    return res && res.isNew;
                 }
 
-                for (const ci of items) {
-                    const txtType = ci.types.find(t => t === 'text/plain');
-                    if (txtType) {
-                        const blob = await ci.getType(txtType);
-                        const txt = await blob.text();
-                        if (txt.trim()) {
-                            const res = await new Promise(r => {
-                                try { chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'text', content: txt.trim() } }, r); } catch (e) { r(null); }
-                            });
-                            return res && res.isNew;
-                        }
+                // 2. Fallback to background offscreen sync (supports text fallback when page is not focused)
+                const res = await new Promise(r => {
+                    try {
+                        chrome.runtime.sendMessage({ action: 'syncClipboard' }, r);
+                    } catch (e) {
+                        r(null);
                     }
-                }
-                return false;
+                });
+                return res && res.isNew;
             } catch (err) {
                 return false;
             }
@@ -929,36 +1009,11 @@
     // ---- Copy Event (Robust delayed reader) ----
     document.addEventListener('copy', () => {
         setTimeout(async () => {
-            try {
-                // Try reading clipboard items (for images & formatted text)
-                const items = await navigator.clipboard.read();
-                for (const ci of items) {
-                    const imgType = ci.types.find(t => t.startsWith('image/'));
-                    if (imgType) {
-                        const blob = await ci.getType(imgType);
-                        const b64 = await compressImage(blob);
-                        try {
-                            chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: 'image/jpeg' } });
-                        } catch (e) {}
-                        triggerBubbleBounce();
-                        return;
-                    }
-                }
-                // Fallback to text selection
-                const text = document.getSelection()?.toString();
-                if (text && text.trim()) {
-                    chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'text', content: text.trim() } });
-                    triggerBubbleBounce();
-                }
-            } catch (e) {
-                // Fallback for text selection if clipboard read is blocked
-                const text = document.getSelection()?.toString();
-                if (text && text.trim()) {
-                    chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'text', content: text.trim() } });
-                    triggerBubbleBounce();
-                }
+            const isNew = await syncClipboard();
+            if (isNew) {
+                triggerBubbleBounce();
             }
-        }, 150); // 150ms delay for system to populate clipboard
+        }, 150);
     });
 
     // ---- Real-time listeners ----

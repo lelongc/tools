@@ -12,7 +12,8 @@
     "storage",
     "clipboardRead",
     "clipboardWrite",
-    "activeTab"
+    "activeTab",
+    "offscreen"
   ],
   "background": {
     "service_worker": "background/service_worker.js"
