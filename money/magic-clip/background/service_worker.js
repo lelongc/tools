@@ -111,24 +111,32 @@ async function createOffscreenIfNeeded() {
 
 let syncPromise = null;
 async function syncClipboardInBackground() {
-    if (syncPromise) return syncPromise;
+    console.log('NeoClip [Background]: Initiating background clipboard sync...');
+    if (syncPromise) {
+        console.log('NeoClip [Background]: Active syncPromise exists, reusing it.');
+        return syncPromise;
+    }
 
     syncPromise = (async () => {
         try {
+            console.log('NeoClip [Background]: Ensuring offscreen document exists...');
             await createOffscreenIfNeeded();
+            console.log('NeoClip [Background]: Requesting readClipboard from offscreen...');
             const result = await chrome.runtime.sendMessage({
                 target: 'offscreen',
                 action: 'readClipboard'
             });
+            console.log('NeoClip [Background]: Received result from offscreen:', result);
             if (result && result.content) {
                 const saveRes = await saveItem(result);
+                console.log('NeoClip [Background]: saveItem result:', saveRes);
                 if (saveRes.isNew) {
                     broadcastClipboardUpdated();
                 }
                 return saveRes.isNew;
             }
         } catch (e) {
-            console.error('Background sync failed:', e);
+            console.error('NeoClip [Background]: Background sync failed:', e);
         }
         return false;
     })();

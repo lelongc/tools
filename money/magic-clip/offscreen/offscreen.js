@@ -6,51 +6,69 @@ chrome.runtime.onMessage.addListener((req, sender, respond) => {
 });
 
 async function readClipboard() {
+    console.log('NeoClip [Offscreen]: readClipboard invoked.');
     try {
         // FIRST TRY: Async Clipboard API (standard, supports images)
+        console.log('NeoClip [Offscreen]: Trying navigator.clipboard.read()...');
         const items = await navigator.clipboard.read();
+        console.log(`NeoClip [Offscreen]: Async Clipboard read success. Items count: ${items ? items.length : 0}`);
         for (const item of items) {
+            console.log('NeoClip [Offscreen]: Async item types:', item.types);
             const imgType = item.types.find(t => t.startsWith('image/'));
             if (imgType) {
+                console.log(`NeoClip [Offscreen]: Found image type: ${imgType}`);
                 const blob = await item.getType(imgType);
                 const b64 = await compressImage(blob);
+                console.log('NeoClip [Offscreen]: Async image compressed successfully.');
                 return { type: 'image', content: b64, mime: 'image/jpeg' };
             }
         }
         for (const item of items) {
             const txtType = item.types.find(t => t === 'text/plain');
             if (txtType) {
+                console.log(`NeoClip [Offscreen]: Found text type: ${txtType}`);
                 const blob = await item.getType(txtType);
                 const txt = await blob.text();
                 if (txt && txt.trim()) {
+                    console.log(`NeoClip [Offscreen]: Async text read successfully: "${txt.substring(0, 30)}"`);
                     return { type: 'text', content: txt.trim() };
                 }
             }
         }
     } catch (e) {
-        console.warn('Async clipboard read failed in offscreen, trying fallback:', e);
+        console.warn('NeoClip [Offscreen]: Async clipboard read failed, trying fallback:', e);
     }
 
     // SECOND TRY: Fallback paste event handler via contenteditable focus
+    console.log('NeoClip [Offscreen]: Trying fallback execCommand paste...');
     return new Promise(resolve => {
         const target = document.getElementById('paste-target');
         if (!target) {
+            console.error('NeoClip [Offscreen]: paste-target element not found!');
             resolve(null);
             return;
         }
         target.innerHTML = '';
         
+        let handlerCalled = false;
         const handler = (e) => {
+            handlerCalled = true;
             e.preventDefault();
             e.stopPropagation();
             let imgBlob = null;
             let txt = null;
             const items = e.clipboardData.items;
-            for (let i = 0; i < items.length; i++) {
-                if (items[i].type.startsWith('image/')) {
-                    imgBlob = items[i].getAsFile();
-                } else if (items[i].type === 'text/plain') {
-                    txt = e.clipboardData.getData('text/plain');
+            console.log(`NeoClip [Offscreen]: Fallback paste event fired. Items count: ${items ? items.length : 0}`);
+            if (items) {
+                for (let i = 0; i < items.length; i++) {
+                    console.log(`NeoClip [Offscreen]: Item ${i} type: ${items[i].type}, kind: ${items[i].kind}`);
+                    if (items[i].type.startsWith('image/')) {
+                        imgBlob = items[i].getAsFile();
+                        console.log(`NeoClip [Offscreen]: Found image:`, imgBlob);
+                    } else if (items[i].type === 'text/plain') {
+                        txt = e.clipboardData.getData('text/plain');
+                        console.log(`NeoClip [Offscreen]: Found text: "${txt ? txt.substring(0, 30) : ''}"`);
+                    }
                 }
             }
             
@@ -70,11 +88,14 @@ async function readClipboard() {
         
         try {
             const success = document.execCommand('paste');
-            if (!success) {
+            console.log(`NeoClip [Offscreen]: execCommand('paste') success: ${success}`);
+            if (!success || !handlerCalled) {
+                console.log(`NeoClip [Offscreen]: execCommand failed or handler not called.`);
                 document.removeEventListener('paste', handler);
                 resolve(null);
             }
         } catch (e) {
+            console.error('NeoClip [Offscreen]: execCommand error:', e);
             document.removeEventListener('paste', handler);
             resolve(null);
         }

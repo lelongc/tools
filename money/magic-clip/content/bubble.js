@@ -865,6 +865,7 @@
 
     // ---- OS Clipboard Sync ----
     async function readClipboardLegacy() {
+        console.log('NeoClip [Legacy]: Initiating legacy paste...');
         return new Promise(resolve => {
             let handlerCalled = false;
             const handler = (e) => {
@@ -874,11 +875,17 @@
                 let imgBlob = null;
                 let txt = null;
                 const items = e.clipboardData.items;
-                for (let i = 0; i < items.length; i++) {
-                    if (items[i].type.startsWith('image/')) {
-                        imgBlob = items[i].getAsFile();
-                    } else if (items[i].type === 'text/plain') {
-                        txt = e.clipboardData.getData('text/plain');
+                console.log(`NeoClip [Legacy]: Paste event handler fired. Clipboard items count: ${items ? items.length : 0}`);
+                if (items) {
+                    for (let i = 0; i < items.length; i++) {
+                        console.log(`NeoClip [Legacy]: Item ${i} type: ${items[i].type}, kind: ${items[i].kind}`);
+                        if (items[i].type.startsWith('image/')) {
+                            imgBlob = items[i].getAsFile();
+                            console.log(`NeoClip [Legacy]: Found image file:`, imgBlob);
+                        } else if (items[i].type === 'text/plain') {
+                            txt = e.clipboardData.getData('text/plain');
+                            console.log(`NeoClip [Legacy]: Found text content: "${txt ? txt.substring(0, 30) : ''}"`);
+                        }
                     }
                 }
                 resolve({ imgBlob, txt });
@@ -898,11 +905,14 @@
             
             try {
                 const success = document.execCommand('paste');
+                console.log(`NeoClip [Legacy]: execCommand('paste') result: ${success}`);
                 if (!success || !handlerCalled) {
+                    console.log(`NeoClip [Legacy]: execCommand failed or handler not called (success: ${success}, handlerCalled: ${handlerCalled})`);
                     input.removeEventListener('paste', handler);
                     resolve(null);
                 }
             } catch(e) {
+                console.error('NeoClip [Legacy]: execCommand error:', e);
                 input.removeEventListener('paste', handler);
                 resolve(null);
             } finally {
@@ -915,58 +925,88 @@
     }
 
     async function syncClipboardDirect() {
+        console.log('NeoClip [Direct]: Starting syncClipboardDirect...');
         try {
             // 1. Try legacy paste inside content script first (preserves user gesture activation)
             const legacy = await readClipboardLegacy();
+            console.log('NeoClip [Direct]: readClipboardLegacy returned:', legacy);
             if (legacy) {
                 if (legacy.imgBlob) {
+                    console.log('NeoClip [Direct]: Compressing legacy image blob...');
                     const b64 = await compressImage(legacy.imgBlob);
+                    console.log('NeoClip [Direct]: Legacy image compressed successfully.');
                     return { type: 'image', content: b64, mime: 'image/jpeg' };
                 } else if (legacy.txt && legacy.txt.trim()) {
+                    console.log('NeoClip [Direct]: Legacy text read successfully.');
                     return { type: 'text', content: legacy.txt.trim() };
+                } else {
+                    console.log('NeoClip [Direct]: Legacy paste resolved but both image and text were empty.');
                 }
             }
 
             // 2. Fallback to modern Async Clipboard API
+            console.log('NeoClip [Direct]: Falling back to Async Clipboard API...');
             let items = [];
             try {
                 items = await navigator.clipboard.read();
+                console.log(`NeoClip [Direct]: Async Clipboard read success. Items count: ${items ? items.length : 0}`);
                 for (const ci of items) {
+                    console.log(`NeoClip [Direct]: Async item types:`, ci.types);
                     const imgType = ci.types.find(t => t.startsWith('image/'));
                     if (imgType) {
+                        console.log(`NeoClip [Direct]: Found image type: ${imgType}`);
                         const blob = await ci.getType(imgType);
                         const b64 = await compressImage(blob);
+                        console.log('NeoClip [Direct]: Async image compressed successfully.');
                         return { type: 'image', content: b64, mime: 'image/jpeg' };
                     }
                 }
                 for (const ci of items) {
                     const txtType = ci.types.find(t => t === 'text/plain');
                     if (txtType) {
+                        console.log(`NeoClip [Direct]: Found text type: ${txtType}`);
                         const blob = await ci.getType(txtType);
                         const txt = await blob.text();
                         if (txt && txt.trim()) {
+                            console.log(`NeoClip [Direct]: Async text read successfully: "${txt.substring(0, 30)}"`);
                             return { type: 'text', content: txt.trim() };
                         }
                     }
                 }
             } catch(e) {
-                // Async clipboard read failed or permission denied
+                console.warn('NeoClip [Direct]: Async clipboard read threw error:', e);
             }
         } catch (err) {
-            // Safe to ignore clipboard errors in direct reading
+            console.error('NeoClip [Direct]: General syncClipboardDirect error:', err);
         }
         return null;
     }
 
     let syncPromise = null;
+    let syncPromiseHasGesture = false;
     function syncClipboard() {
-        if (Date.now() < ignoreSyncUntil) return Promise.resolve(false);
-        if (syncPromise) return syncPromise;
+        if (Date.now() < ignoreSyncUntil) {
+            console.log('NeoClip [Sync]: Sync ignored (triggered by own copy).');
+            return Promise.resolve(false);
+        }
+        
+        const currentHasGesture = !!(navigator.userActivation && navigator.userActivation.isActive);
+        console.log(`NeoClip [Sync]: syncClipboard called. userActivation.isActive: ${currentHasGesture}`);
+        if (syncPromise) {
+            console.log(`NeoClip [Sync]: Active syncPromise exists. hasGesture: ${syncPromiseHasGesture}, currentHasGesture: ${currentHasGesture}`);
+            if (syncPromiseHasGesture || !currentHasGesture) {
+                console.log('NeoClip [Sync]: Reusing active syncPromise.');
+                return syncPromise;
+            }
+            console.log('NeoClip [Sync]: Escalating sync to gesture-enabled run. Preempting active promise.');
+        }
 
+        syncPromiseHasGesture = currentHasGesture;
         syncPromise = (async () => {
             try {
                 // 1. Try direct read (works if webpage has focus and user activation)
                 const direct = await syncClipboardDirect();
+                console.log('NeoClip [Sync]: syncClipboardDirect result:', direct);
                 if (direct) {
                     const res = await new Promise(r => {
                         try {
@@ -975,10 +1015,12 @@
                             r(null);
                         }
                     });
+                    console.log('NeoClip [Sync]: Direct saveItem result:', res);
                     return res && res.isNew;
                 }
 
                 // 2. Fallback to background offscreen sync (supports text fallback when page is not focused)
+                console.log('NeoClip [Sync]: Direct sync returned nothing. Falling back to background offscreen sync...');
                 const res = await new Promise(r => {
                     try {
                         chrome.runtime.sendMessage({ action: 'syncClipboard' }, r);
@@ -986,12 +1028,15 @@
                         r(null);
                     }
                 });
+                console.log('NeoClip [Sync]: Background sync result:', res);
                 return res && res.isNew;
             } catch (err) {
+                console.error('NeoClip [Sync]: syncPromise error:', err);
                 return false;
             }
         })().finally(() => {
             syncPromise = null;
+            syncPromiseHasGesture = false;
         });
 
         return syncPromise;
@@ -1059,8 +1104,8 @@
             }
         }
     };
-    document.addEventListener('click', firstInteractionSync, { once: true });
-    document.addEventListener('keydown', firstInteractionSync, { once: true });
+    document.addEventListener('click', firstInteractionSync, { once: true, capture: true });
+    document.addEventListener('keydown', firstInteractionSync, { once: true, capture: true });
 
     // ULTIMATE FALLBACK: Catch physical pastes to bypass Chrome's cold-start clipboard bug
     document.addEventListener('paste', async (e) => {
