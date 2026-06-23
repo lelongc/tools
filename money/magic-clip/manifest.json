@@ -45,12 +45,11 @@
   "commands": {
     "toggle-panel": {
       "suggested_key": {
-        "default": "Alt+V",
-        "mac": "Alt+V"
+        "default": "Alt+C",
+        "mac": "Alt+C"
       },
-      "description": "Open NeoClip Clipboard History"
+      "description": "Toggle Magic Clip Panel"
     }
   },
   "host_permissions": ["<all_urls>"]
 }
-

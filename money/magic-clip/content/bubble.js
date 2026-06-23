@@ -174,8 +174,8 @@
 
     // Global listener to track the last active input element on the page
     document.addEventListener('focusin', (e) => {
-        const target = e.target;
-        if (target && target !== host && (
+        const target = e.composedPath()[0] || e.target;
+        if (target && !e.composedPath().includes(host) && (
             target.tagName === 'INPUT' || 
             target.tagName === 'TEXTAREA' || 
             target.isContentEditable
@@ -867,40 +867,54 @@
     }
 
     // ---- OS Clipboard Sync ----
-    let isSyncing = false;
-    async function syncClipboard() {
-        if (Date.now() < ignoreSyncUntil || isSyncing) return false;
-        isSyncing = true;
-        
-        try {
-            const items = await navigator.clipboard.read();
-            for (const ci of items) {
-                const imgType = ci.types.find(t => t.startsWith('image/'));
-                if (imgType) {
-                    const blob = await ci.getType(imgType);
-                    const b64 = await compressImage(blob);
-                    const res = await new Promise(r => {
-                        chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: 'image/jpeg' } }, r);
-                    });
-                    return res && res.isNew; // returns true if new item was saved
+    let syncPromise = null;
+    function syncClipboard() {
+        if (Date.now() < ignoreSyncUntil) return Promise.resolve(false);
+        if (syncPromise) return syncPromise;
+
+        syncPromise = (async () => {
+            try {
+                let items = [];
+                try {
+                    items = await navigator.clipboard.read();
+                } catch(e) {
+                    return false;
                 }
-                const txtType = ci.types.find(t => t === 'text/plain');
-                if (txtType) {
-                    const blob = await ci.getType(txtType);
-                    const txt = await blob.text();
-                    if(txt.trim()) {
+                
+                for (const ci of items) {
+                    const imgType = ci.types.find(t => t.startsWith('image/'));
+                    if (imgType) {
+                        const blob = await ci.getType(imgType);
+                        const b64 = await compressImage(blob);
                         const res = await new Promise(r => {
-                            chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'text', content: txt.trim() } }, r);
+                            try { chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: 'image/jpeg' } }, r); } catch (e) { r(null); }
                         });
                         return res && res.isNew;
                     }
                 }
+
+                for (const ci of items) {
+                    const txtType = ci.types.find(t => t === 'text/plain');
+                    if (txtType) {
+                        const blob = await ci.getType(txtType);
+                        const txt = await blob.text();
+                        if (txt.trim()) {
+                            const res = await new Promise(r => {
+                                try { chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'text', content: txt.trim() } }, r); } catch (e) { r(null); }
+                            });
+                            return res && res.isNew;
+                        }
+                    }
+                }
+                return false;
+            } catch (err) {
+                return false;
             }
-        } catch {}
-        finally {
-            isSyncing = false;
-        }
-        return false;
+        })().finally(() => {
+            syncPromise = null;
+        });
+
+        return syncPromise;
     }
 
     function triggerBubbleBounce() {
@@ -923,7 +937,9 @@
                     if (imgType) {
                         const blob = await ci.getType(imgType);
                         const b64 = await compressImage(blob);
-                        chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: 'image/jpeg' } });
+                        try {
+                            chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: 'image/jpeg' } });
+                        } catch (e) {}
                         triggerBubbleBounce();
                         return;
                     }
@@ -977,6 +993,54 @@
         }, 300);
     });
 
+    // Auto-sync on first user interaction with the page (fixes missing clipboard when no focus event fires on new tabs)
+    const firstInteractionSync = async () => {
+        const isNew = await syncClipboard();
+        if (isNew) {
+            if (!panel.classList.contains('open')) {
+                triggerBubbleBounce();
+            } else if (currentTab === 'recent') {
+                loadRecent(shadow.getElementById('search-input').value, true);
+            }
+        }
+    };
+    document.addEventListener('click', firstInteractionSync, { once: true });
+    document.addEventListener('keydown', firstInteractionSync, { once: true });
+
+    // ULTIMATE FALLBACK: Catch physical pastes to bypass Chrome's cold-start clipboard bug
+    document.addEventListener('paste', async (e) => {
+        if (Date.now() < ignoreSyncUntil) return;
+        if (e.composedPath().includes(host)) return;
+        if (!e.clipboardData || !e.clipboardData.items) return;
+        let hasNew = false;
+        for (let i = 0; i < e.clipboardData.items.length; i++) {
+            const item = e.clipboardData.items[i];
+            if (item.type.startsWith('image/')) {
+                const blob = item.getAsFile();
+                if (blob) {
+                    const b64 = await compressImage(blob);
+                    const res = await new Promise(r => {
+                        try { chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: 'image/jpeg' } }, r); } catch (ex) { r(null); }
+                    });
+                    if (res && res.isNew) hasNew = true;
+                }
+            } else if (item.type === 'text/plain') {
+                const txt = e.clipboardData.getData('text/plain');
+                if (txt && txt.trim()) {
+                    const res = await new Promise(r => {
+                        try { chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'text', content: txt.trim() } }, r); } catch (ex) { r(null); }
+                    });
+                    if (res && res.isNew) hasNew = true;
+                }
+            }
+        }
+        if (hasNew && !panel.classList.contains('open')) {
+            triggerBubbleBounce();
+        } else if (hasNew && panel.classList.contains('open') && currentTab === 'recent') {
+            setTimeout(() => loadRecent(shadow.getElementById('search-input').value, true), 300);
+        }
+    });
+
     // Helpers
     function el(tag, cls, text) { const e = document.createElement(tag); if(cls) e.className=cls; if(text!==undefined) e.textContent=text; return e; }
     function esc(s) { return s?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):''; }
@@ -988,37 +1052,35 @@
     }
 
     async function compressImage(blob) {
-        return new Promise((resolve) => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
-                const MAX_SIZE = 1600;
-                if (width > MAX_SIZE || height > MAX_SIZE) {
-                    if (width > height) {
-                        height = Math.round((height * MAX_SIZE) / width);
-                        width = MAX_SIZE;
-                    } else {
-                        width = Math.round((width * MAX_SIZE) / height);
-                        height = MAX_SIZE;
-                    }
+        try {
+            const bitmap = await createImageBitmap(blob);
+            let width = bitmap.width;
+            let height = bitmap.height;
+            const MAX_SIZE = 1600;
+            if (width > MAX_SIZE || height > MAX_SIZE) {
+                if (width > height) {
+                    height = Math.round((height * MAX_SIZE) / width);
+                    width = MAX_SIZE;
+                } else {
+                    width = Math.round((width * MAX_SIZE) / height);
+                    height = MAX_SIZE;
                 }
-                canvas.width = width;
-                canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.fillStyle = '#fff'; // Fallback for transparency
-                ctx.fillRect(0, 0, width, height);
-                ctx.drawImage(img, 0, 0, width, height);
-                resolve(canvas.toDataURL('image/jpeg', 0.85));
-            };
-            img.onerror = () => {
-                // Fallback to FileReader if compression fails
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, width, height);
+            ctx.drawImage(bitmap, 0, 0, width, height);
+            return canvas.toDataURL('image/jpeg', 0.85);
+        } catch (e) {
+            // Fallback to uncompressed if bitmap fails
+            return new Promise((resolve) => {
                 const rd = new FileReader();
                 rd.onloadend = () => resolve(rd.result);
                 rd.readAsDataURL(blob);
-            };
-            img.src = URL.createObjectURL(blob);
-        });
+            });
+        }
     }
 })();
