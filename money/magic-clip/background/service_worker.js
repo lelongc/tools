@@ -20,7 +20,7 @@ async function handleMessage(req, sender) {
         case 'saveItem':
             const result = await saveItem(req.item);
             if (result.isNew) {
-                broadcastClipboardUpdated();
+                broadcastClipboardUpdated(req.item);
             }
             return { ok: true, id: result.id, isNew: result.isNew };
 
@@ -131,7 +131,7 @@ async function syncClipboardInBackground() {
                 const saveRes = await saveItem(result);
                 console.log('NeoClip [Background]: saveItem result:', saveRes);
                 if (saveRes.isNew) {
-                    broadcastClipboardUpdated();
+                    broadcastClipboardUpdated(result);
                 }
                 return saveRes.isNew;
             }
@@ -146,17 +146,24 @@ async function syncClipboardInBackground() {
     return isNew;
 }
 
-function broadcastClipboardUpdated() {
-    chrome.tabs.query({ active: true }, (tabs) => {
+function broadcastClipboardUpdated(item) {
+    chrome.tabs.query({}, (tabs) => {
         for (const tab of tabs) {
-            chrome.tabs.sendMessage(tab.id, { action: 'clipboardUpdated' }).catch(() => {});
+            chrome.tabs.sendMessage(tab.id, { action: 'clipboardUpdated', item }).catch(() => {});
         }
     });
 }
 
 // Listen for browser/window activity events
 chrome.windows.onFocusChanged.addListener((windowId) => {
-    if (windowId !== chrome.windows.WINDOW_ID_NONE) {
+    if (windowId === chrome.windows.WINDOW_ID_NONE) {
+        // Chrome lost focus, start polling to catch intermediate clipboards
+        createOffscreenIfNeeded().then(() => {
+            chrome.runtime.sendMessage({ target: 'offscreen', action: 'startPolling' }).catch(() => {});
+        });
+    } else {
+        // Chrome gained focus, stop polling and do one final sync
+        chrome.runtime.sendMessage({ target: 'offscreen', action: 'stopPolling' }).catch(() => {});
         // Wait 300ms for external app to completely write to clipboard and release lock
         setTimeout(() => {
             syncClipboardInBackground();

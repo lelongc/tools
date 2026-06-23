@@ -57,6 +57,10 @@
     link.href = chrome.runtime.getURL('content/bubble.css');
     shadow.appendChild(link);
 
+    // ---- Clipboard Cache ----
+    let lastSyncedText = null;
+    let lastSyncedImageSize = null;
+
     // ---- Bubble ----
     const bubble = document.createElement('div');
     bubble.id = 'mc-bubble';
@@ -665,6 +669,15 @@
     function copyItem(item, btnElement, shouldPaste = false) {
         ignoreSyncUntil = Date.now() + 1500; // Ignore clipboard changes caused by us
 
+        if (item.type === 'text' || item.type === 'link') {
+            lastSyncedText = item.content.trim();
+            lastSyncedImageSize = null;
+        } else if (item.type === 'image') {
+            lastSyncedText = null;
+            const b64Data = item.content.split(',')[1] || item.content;
+            lastSyncedImageSize = Math.round((b64Data.length * 3) / 4);
+        }
+
         const originalText = btnElement.innerHTML;
         const isIconOnly = btnElement.classList.contains('icon-only');
         btnElement.innerHTML = isIconOnly ? ICONS.check : ICONS.check + ' Copied';
@@ -927,54 +940,99 @@
     async function syncClipboardDirect() {
         console.log('NeoClip [Direct]: Starting syncClipboardDirect...');
         try {
-            // 1. Try legacy paste inside content script first (preserves user gesture activation)
+            // 1. Try modern Async Clipboard API first (works on focused contexts with permission, supports images)
+            if (navigator.clipboard && typeof navigator.clipboard.read === 'function') {
+                console.log('NeoClip [Direct]: Trying Async Clipboard API...');
+                try {
+                    if (!document.hasFocus()) {
+                        console.log('NeoClip [Direct]: Document not focused. Waiting 150ms for focus transition...');
+                        await new Promise(r => setTimeout(r, 150));
+                    }
+                    const items = await navigator.clipboard.read();
+                    console.log(`NeoClip [Direct]: Async Clipboard read success. Items count: ${items ? items.length : 0}`);
+                    for (const ci of items) {
+                        console.log(`NeoClip [Direct]: Async item types:`, ci.types);
+                        const imgType = ci.types.find(t => t.startsWith('image/'));
+                        if (imgType) {
+                            console.log(`NeoClip [Direct]: Found image type: ${imgType}`);
+                            const blob = await ci.getType(imgType);
+                            
+                            // Check cache
+                            if (lastSyncedImageSize === blob.size) {
+                                console.log('NeoClip [Direct]: Image size matches cache, skipping sync.');
+                                return null;
+                            }
+                            lastSyncedImageSize = blob.size;
+                            lastSyncedText = null;
+
+                            const b64 = await compressImage(blob);
+                            console.log('NeoClip [Direct]: Async image compressed successfully.');
+                            return { type: 'image', content: b64, mime: 'image/jpeg' };
+                        }
+                    }
+                    for (const ci of items) {
+                        const txtType = ci.types.find(t => t === 'text/plain');
+                        if (txtType) {
+                            console.log(`NeoClip [Direct]: Found text type: ${txtType}`);
+                            const blob = await ci.getType(txtType);
+                            const txt = await blob.text();
+                            if (txt && txt.trim()) {
+                                const trimmed = txt.trim();
+                                
+                                // Check cache
+                                if (lastSyncedText === trimmed) {
+                                    console.log('NeoClip [Direct]: Text matches cache, skipping sync.');
+                                    return null;
+                                }
+                                lastSyncedText = trimmed;
+                                lastSyncedImageSize = null;
+
+                                console.log(`NeoClip [Direct]: Async text read successfully: "${trimmed.substring(0, 30)}"`);
+                                return { type: 'text', content: trimmed };
+                            }
+                        }
+                    }
+                } catch(e) {
+                    console.warn('NeoClip [Direct]: Async clipboard read threw error:', e);
+                }
+            } else {
+                console.log('NeoClip [Direct]: navigator.clipboard.read is not available.');
+            }
+
+            // 2. Fallback to legacy paste inside content script
+            console.log('NeoClip [Direct]: Falling back to legacy paste...');
             const legacy = await readClipboardLegacy();
             console.log('NeoClip [Direct]: readClipboardLegacy returned:', legacy);
             if (legacy) {
                 if (legacy.imgBlob) {
+                    // Check cache
+                    if (lastSyncedImageSize === legacy.imgBlob.size) {
+                        console.log('NeoClip [Direct]: Legacy image size matches cache, skipping sync.');
+                        return null;
+                    }
+                    lastSyncedImageSize = legacy.imgBlob.size;
+                    lastSyncedText = null;
+
                     console.log('NeoClip [Direct]: Compressing legacy image blob...');
                     const b64 = await compressImage(legacy.imgBlob);
                     console.log('NeoClip [Direct]: Legacy image compressed successfully.');
                     return { type: 'image', content: b64, mime: 'image/jpeg' };
                 } else if (legacy.txt && legacy.txt.trim()) {
+                    const trimmed = legacy.txt.trim();
+                    
+                    // Check cache
+                    if (lastSyncedText === trimmed) {
+                        console.log('NeoClip [Direct]: Legacy text matches cache, skipping sync.');
+                        return null;
+                    }
+                    lastSyncedText = trimmed;
+                    lastSyncedImageSize = null;
+
                     console.log('NeoClip [Direct]: Legacy text read successfully.');
-                    return { type: 'text', content: legacy.txt.trim() };
+                    return { type: 'text', content: trimmed };
                 } else {
                     console.log('NeoClip [Direct]: Legacy paste resolved but both image and text were empty.');
                 }
-            }
-
-            // 2. Fallback to modern Async Clipboard API
-            console.log('NeoClip [Direct]: Falling back to Async Clipboard API...');
-            let items = [];
-            try {
-                items = await navigator.clipboard.read();
-                console.log(`NeoClip [Direct]: Async Clipboard read success. Items count: ${items ? items.length : 0}`);
-                for (const ci of items) {
-                    console.log(`NeoClip [Direct]: Async item types:`, ci.types);
-                    const imgType = ci.types.find(t => t.startsWith('image/'));
-                    if (imgType) {
-                        console.log(`NeoClip [Direct]: Found image type: ${imgType}`);
-                        const blob = await ci.getType(imgType);
-                        const b64 = await compressImage(blob);
-                        console.log('NeoClip [Direct]: Async image compressed successfully.');
-                        return { type: 'image', content: b64, mime: 'image/jpeg' };
-                    }
-                }
-                for (const ci of items) {
-                    const txtType = ci.types.find(t => t === 'text/plain');
-                    if (txtType) {
-                        console.log(`NeoClip [Direct]: Found text type: ${txtType}`);
-                        const blob = await ci.getType(txtType);
-                        const txt = await blob.text();
-                        if (txt && txt.trim()) {
-                            console.log(`NeoClip [Direct]: Async text read successfully: "${txt.substring(0, 30)}"`);
-                            return { type: 'text', content: txt.trim() };
-                        }
-                    }
-                }
-            } catch(e) {
-                console.warn('NeoClip [Direct]: Async clipboard read threw error:', e);
             }
         } catch (err) {
             console.error('NeoClip [Direct]: General syncClipboardDirect error:', err);
@@ -1064,6 +1122,16 @@
     // ---- Real-time listeners ----
     chrome.runtime.onMessage.addListener((req) => {
         if (req.action === 'clipboardUpdated') {
+            if (req.item) {
+                if (req.item.type === 'image') {
+                    const b64Data = req.item.content.split(',')[1] || req.item.content;
+                    lastSyncedImageSize = Math.round((b64Data.length * 3) / 4);
+                    lastSyncedText = null;
+                } else {
+                    lastSyncedText = req.item.content.trim();
+                    lastSyncedImageSize = null;
+                }
+            }
             if (!panel.classList.contains('open')) {
                 triggerBubbleBounce();
             } else if (currentTab === 'recent') {
@@ -1183,4 +1251,22 @@
             });
         }
     }
+
+    // ---- Active Tab Focus Polling ----
+    setInterval(async () => {
+        try {
+            if (document.hasFocus() && Date.now() >= ignoreSyncUntil) {
+                const isNew = await syncClipboard();
+                if (isNew) {
+                    if (!panel.classList.contains('open')) {
+                        triggerBubbleBounce();
+                    } else if (currentTab === 'recent') {
+                        loadRecent(shadow.getElementById('search-input').value, true);
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('NeoClip: Focus polling error:', e);
+        }
+    }, 1500);
 })();

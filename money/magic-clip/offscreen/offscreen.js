@@ -1,9 +1,46 @@
 chrome.runtime.onMessage.addListener((req, sender, respond) => {
-    if (req.target === 'offscreen' && req.action === 'readClipboard') {
-        readClipboard().then(respond);
-        return true; // async
+    if (req.target === 'offscreen') {
+        if (req.action === 'readClipboard') {
+            readClipboard().then(respond);
+            return true; // async
+        } else if (req.action === 'startPolling') {
+            startPolling();
+            respond({ ok: true });
+        } else if (req.action === 'stopPolling') {
+            stopPolling();
+            respond({ ok: true });
+        }
     }
 });
+
+let pollingInterval = null;
+
+function startPolling() {
+    if (pollingInterval) return;
+    console.log('NeoClip [Offscreen]: Started clipboard polling...');
+    pollingInterval = setInterval(async () => {
+        try {
+            const item = await readClipboard();
+            if (item) {
+                chrome.runtime.sendMessage({ action: 'saveItem', item });
+            }
+        } catch (e) {
+            console.error('NeoClip [Offscreen]: Polling error:', e);
+        }
+    }, 1500);
+}
+
+function stopPolling() {
+    if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
+        console.log('NeoClip [Offscreen]: Stopped clipboard polling.');
+    }
+}
+
+let lastReadText = null;
+let lastReadImageSize = null;
+
 
 async function readClipboard() {
     console.log('NeoClip [Offscreen]: readClipboard invoked.');
@@ -18,6 +55,9 @@ async function readClipboard() {
             if (imgType) {
                 console.log(`NeoClip [Offscreen]: Found image type: ${imgType}`);
                 const blob = await item.getType(imgType);
+                if (lastReadImageSize === blob.size) return null; // unchanged
+                lastReadImageSize = blob.size;
+                lastReadText = null;
                 const b64 = await compressImage(blob);
                 console.log('NeoClip [Offscreen]: Async image compressed successfully.');
                 return { type: 'image', content: b64, mime: 'image/jpeg' };
@@ -30,6 +70,9 @@ async function readClipboard() {
                 const blob = await item.getType(txtType);
                 const txt = await blob.text();
                 if (txt && txt.trim()) {
+                    if (lastReadText === txt.trim()) return null; // unchanged
+                    lastReadText = txt.trim();
+                    lastReadImageSize = null;
                     console.log(`NeoClip [Offscreen]: Async text read successfully: "${txt.substring(0, 30)}"`);
                     return { type: 'text', content: txt.trim() };
                 }
@@ -73,10 +116,22 @@ async function readClipboard() {
             }
             
             if (imgBlob) {
+                if (lastReadImageSize === imgBlob.size) {
+                    resolve(null);
+                    return;
+                }
+                lastReadImageSize = imgBlob.size;
+                lastReadText = null;
                 compressImage(imgBlob).then(b64 => {
                     resolve({ type: 'image', content: b64, mime: 'image/jpeg' });
                 }).catch(() => resolve(null));
             } else if (txt && txt.trim()) {
+                if (lastReadText === txt.trim()) {
+                    resolve(null);
+                    return;
+                }
+                lastReadText = txt.trim();
+                lastReadImageSize = null;
                 resolve({ type: 'text', content: txt.trim() });
             } else {
                 resolve(null);
