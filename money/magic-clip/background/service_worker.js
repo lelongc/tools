@@ -55,6 +55,11 @@ async function handleMessage(req, sender) {
 
         case 'clearStorage':
             await clearStorage();
+            chrome.tabs.query({}, tabs => {
+                for (const tab of tabs) {
+                    chrome.tabs.sendMessage(tab.id, { action: 'storageCleared' }).catch(() => {});
+                }
+            });
             return { ok: true };
 
         case 'cleanUrl':

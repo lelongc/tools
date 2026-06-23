@@ -18,19 +18,28 @@ db.version(2).stores({
 db.open().catch(err => console.error('DB open failed:', err));
 
 // --- History ---
+let lastSavedContent = null;
+let lastSavedType = null;
+
 async function saveItem(item) {
+    // Auto-detect links first so type comparisons match the final saved item
+    if (item.type === 'text' && isUrl(item.content)) {
+        item.type = 'link';
+    }
+
+    if (lastSavedContent === item.content && lastSavedType === item.type) {
+        return { id: null, isNew: false };
+    }
+
     // Deduplicate: skip if identical to most recent
     const latest = await db.history.orderBy('timestamp').reverse().first();
     if (latest && latest.content === item.content && latest.type === item.type) {
+        lastSavedContent = item.content;
+        lastSavedType = item.type;
         return { id: latest.id, isNew: false };
     }
     item.timestamp = Date.now();
     item.collectionId = item.collectionId || 0; // use 0 for null to make indexing easier
-
-    // Auto-detect links
-    if (item.type === 'text' && isUrl(item.content)) {
-        item.type = 'link';
-    }
 
     // Cap at 500 items
     const count = await db.history.count();
@@ -39,6 +48,8 @@ async function saveItem(item) {
         if (oldest) await db.history.delete(oldest.id);
     }
     const newId = await db.history.add(item);
+    lastSavedContent = item.content;
+    lastSavedType = item.type;
     return { id: newId, isNew: true };
 }
 

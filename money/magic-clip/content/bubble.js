@@ -867,8 +867,10 @@
     }
 
     // ---- OS Clipboard Sync ----
+    let isSyncing = false;
     async function syncClipboard() {
-        if (Date.now() < ignoreSyncUntil) return false;
+        if (Date.now() < ignoreSyncUntil || isSyncing) return false;
+        isSyncing = true;
         
         try {
             const items = await navigator.clipboard.read();
@@ -876,9 +878,9 @@
                 const imgType = ci.types.find(t => t.startsWith('image/'));
                 if (imgType) {
                     const blob = await ci.getType(imgType);
-                    const b64 = await new Promise(r => { const rd = new FileReader(); rd.onloadend=()=>r(rd.result); rd.readAsDataURL(blob); });
+                    const b64 = await compressImage(blob);
                     const res = await new Promise(r => {
-                        chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: imgType } }, r);
+                        chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: 'image/jpeg' } }, r);
                     });
                     return res && res.isNew; // returns true if new item was saved
                 }
@@ -895,6 +897,9 @@
                 }
             }
         } catch {}
+        finally {
+            isSyncing = false;
+        }
         return false;
     }
 
@@ -917,12 +922,8 @@
                     const imgType = ci.types.find(t => t.startsWith('image/'));
                     if (imgType) {
                         const blob = await ci.getType(imgType);
-                        const b64 = await new Promise(r => { 
-                            const rd = new FileReader(); 
-                            rd.onloadend = () => r(rd.result); 
-                            rd.readAsDataURL(blob); 
-                        });
-                        chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: imgType } });
+                        const b64 = await compressImage(blob);
+                        chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: 'image/jpeg' } });
                         triggerBubbleBounce();
                         return;
                     }
@@ -957,15 +958,23 @@
             lastActiveElement = document.activeElement;
             togglePanel();
         }
-    });
-
-    window.addEventListener('focus', async () => {
-        if (panel.classList.contains('open')) {
-            await syncClipboard();
-            if (currentTab === 'recent') {
-                loadRecent(shadow.getElementById('search-input').value);
+        if (req.action === 'storageCleared') {
+            if (panel.classList.contains('open')) {
+                showTab('recent'); // Forces a fresh reload of empty data
             }
         }
+    });
+
+    window.addEventListener('focus', () => {
+        // Delay to allow external apps (like Snipping Tool) to finish writing and release OS clipboard lock
+        setTimeout(async () => {
+            const isNew = await syncClipboard();
+            if (isNew && !panel.classList.contains('open')) {
+                triggerBubbleBounce();
+            } else if (panel.classList.contains('open') && currentTab === 'recent') {
+                loadRecent(shadow.getElementById('search-input').value, true);
+            }
+        }, 300);
     });
 
     // Helpers
@@ -976,5 +985,40 @@
         if(s<60) return 'just now'; const m=Math.floor(s/60);
         if(m<60) return `${m}m ago`; const h=Math.floor(m/60);
         if(h<24) return `${h}h ago`; return `${Math.floor(h/24)}d ago`;
+    }
+
+    async function compressImage(blob) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const MAX_SIZE = 1600;
+                if (width > MAX_SIZE || height > MAX_SIZE) {
+                    if (width > height) {
+                        height = Math.round((height * MAX_SIZE) / width);
+                        width = MAX_SIZE;
+                    } else {
+                        width = Math.round((width * MAX_SIZE) / height);
+                        height = MAX_SIZE;
+                    }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#fff'; // Fallback for transparency
+                ctx.fillRect(0, 0, width, height);
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', 0.85));
+            };
+            img.onerror = () => {
+                // Fallback to FileReader if compression fails
+                const rd = new FileReader();
+                rd.onloadend = () => resolve(rd.result);
+                rd.readAsDataURL(blob);
+            };
+            img.src = URL.createObjectURL(blob);
+        });
     }
 })();
