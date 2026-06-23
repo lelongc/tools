@@ -26,6 +26,17 @@ async function handleMessage(req, sender) {
             return { ok: true, id: result.id, isNew: result.isNew };
 
         case 'syncClipboard':
+            try {
+                await setupOffscreenDocument();
+                const data = await chrome.runtime.sendMessage({ action: 'offscreenSyncClipboard' });
+                if (data) {
+                    const result = await saveItem(data);
+                    if (result.isNew) broadcastClipboardUpdated(data);
+                    return { ok: true, isNew: result.isNew };
+                }
+            } catch (e) {
+                console.error('Offscreen sync failed:', e);
+            }
             return { ok: true, isNew: false };
 
         case 'getRecent':
@@ -116,3 +127,18 @@ chrome.runtime.onStartup.addListener(() => {
     // Nothing needed on startup, the content script handles sync when loaded
 });
 
+let creatingOffscreen;
+async function setupOffscreenDocument() {
+    if (await chrome.offscreen.hasDocument()) return;
+    if (creatingOffscreen) {
+        await creatingOffscreen;
+        return;
+    }
+    creatingOffscreen = chrome.offscreen.createDocument({
+        url: 'offscreen.html',
+        reasons: ['CLIPBOARD'],
+        justification: 'Read clipboard in background without stealing focus'
+    });
+    await creatingOffscreen;
+    creatingOffscreen = null;
+}
