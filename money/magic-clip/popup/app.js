@@ -96,6 +96,59 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Handle Setting: Google Drive Sync
+    const btnLogin = document.getElementById('btn-sync-login');
+    const btnBackup = document.getElementById('btn-sync-now');
+    const btnRestore = document.getElementById('btn-sync-restore');
+    const syncStatus = document.getElementById('sync-status');
+
+    function setSyncStatus(msg, isError = false) {
+        syncStatus.style.display = 'block';
+        syncStatus.textContent = msg;
+        syncStatus.style.color = isError ? '#ef4444' : '#10b981';
+    }
+
+    if (btnLogin) {
+        btnLogin.addEventListener('click', () => {
+            btnLogin.textContent = 'Logging in...';
+            btnLogin.disabled = true;
+            chrome.runtime.sendMessage({ action: 'googleLogin' }, res => {
+                if (res && res.ok) {
+                    btnLogin.style.display = 'none';
+                    btnBackup.style.display = 'block';
+                    btnRestore.style.display = 'block';
+                    setSyncStatus('Logged in successfully!');
+                } else {
+                    btnLogin.textContent = 'Login to Google';
+                    btnLogin.disabled = false;
+                    setSyncStatus('Login failed. Ensure API Key is configured.', true);
+                }
+            });
+        });
+    }
+
+    if (btnBackup) {
+        btnBackup.addEventListener('click', () => {
+            btnBackup.disabled = true;
+            setSyncStatus('Backing up...');
+            chrome.runtime.sendMessage({ action: 'backupToDrive' }, res => {
+                btnBackup.disabled = false;
+                setSyncStatus('Backup complete!');
+            });
+        });
+    }
+
+    if (btnRestore) {
+        btnRestore.addEventListener('click', () => {
+            btnRestore.disabled = true;
+            setSyncStatus('Restoring...');
+            chrome.runtime.sendMessage({ action: 'restoreFromDrive' }, res => {
+                btnRestore.disabled = false;
+                setSyncStatus('Restore complete!');
+            });
+        });
+    }
+
     // Handle Setting: Clear Storage
     const clearStorageBtn = document.getElementById('clear-storage');
     if (clearStorageBtn) {

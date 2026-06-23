@@ -1,209 +1,88 @@
-# Magic Clip - Complete Feature Design Document
+# NeoClip - Premium SaaS Product Design Document
 
-## Product Vision
-A clean, minimal clipboard manager extension for Chrome/Edge. No gimmicks, no bloat. It does one thing extremely well: manage everything you copy, with image OCR as a bonus.
+## Product Vision & Monetization Strategy
+NeoClip is a **Premium Web Browser Research Assistant & Smart Clipboard Manager**. 
+It is designed from the ground up to be a **$1/month SaaS product**, targeting **2,000+ active paying subscribers** ($2,000 MRR). 
 
----
+To convince users to pay $1/month, NeoClip cannot just be a "basic clipboard history". It must feel **Premium, Indispensable, and Aesthetically Stunning**. The product focuses on solving the chaos of browser research (copying text, saving images, extracting text from images, organizing links) without forcing the user to leave their current tab.
 
-## UI Layout (Floating Panel)
-
-When user clicks the floating bubble, a panel opens with this structure:
-
-```
-┌─────────────────────────────────┐
-│  Magic Clip              [X]   │  ← Header with close button
-├─────────────────────────────────┤
-│  [ Search... 🔍 ]              │  ← Search bar
-├─────────────────────────────────┤
-│  [Recent]  [Collections]       │  ← Two tabs
-├─────────────────────────────────┤
-│                                 │
-│  ┌───────────────────────────┐  │
-│  │ Some copied text here...  │  │  ← Clipboard item card
-│  │ 2 min ago                 │  │
-│  │ [👁 View] [📋 Copy] [📷] │  │  ← Action buttons
-│  └───────────────────────────┘  │
-│                                 │
-│  ┌───────────────────────────┐  │
-│  │ [Image Thumbnail]         │  │  ← Image item
-│  │ 5 min ago                 │  │
-│  │ [👁 View] [📋 Copy] [Aa] │  │  ← [Aa] = Extract text (OCR)
-│  └───────────────────────────┘  │
-│                                 │
-│  ┌───────────────────────────┐  │
-│  │ https://shopee.vn/item... │  │  ← Link (auto-detected)
-│  │ 8 min ago    🔗 Link      │  │
-│  │ [👁 View] [📋 Copy]      │  │
-│  └───────────────────────────┘  │
-│                                 │
-└─────────────────────────────────┘
-```
-
-### "Collections" Tab
-```
-┌─────────────────────────────────┐
-│  [Recent]  [Collections]       │
-├─────────────────────────────────┤
-│  [+ New Collection]            │  ← Button to create
-│                                 │
-│  ┌───────────────────────────┐  │
-│  │ 📁 Work Notes        [⋮] │  │  ← Collection with menu
-│  │    3 items                │  │     Menu: Rename, Delete
-│  └───────────────────────────┘  │
-│                                 │
-│  ┌───────────────────────────┐  │
-│  │ 📁 Shopping Links    [⋮] │  │
-│  │    7 items                │  │
-│  └───────────────────────────┘  │
-└─────────────────────────────────┘
-```
-
-### Inside a Collection
-```
-┌─────────────────────────────────┐
-│  ← Back     Work Notes   [⋮]  │  ← Back button + collection name
-├─────────────────────────────────┤
-│                                 │
-│  ┌───────────────────────────┐  │
-│  │ Meeting notes text...     │  │
-│  │ [👁 View] [📋 Copy] [🗑] │  │  ← Delete button visible here
-│  └───────────────────────────┘  │
-│                                 │
-└─────────────────────────────────┘
-```
-
-### Preview Modal (Full Content View)
-When user clicks [👁 View]:
-```
-┌─────────────────────────────────┐
-│  Preview               [X]    │
-├─────────────────────────────────┤
-│                                 │
-│  Full text content displayed    │
-│  here without truncation.       │
-│  All lines visible.             │
-│  Images shown at full size.     │
-│                                 │
-├─────────────────────────────────┤
-│  [📋 Copy]  [Save to Collection]│
-└─────────────────────────────────┘
-```
+### The Freemium Model (Proposed)
+- **Free Tier:** Basic clipboard history (up to 50 items), no collections, standard search.
+- **Pro Tier ($1/month):** 
+  - Unlimited History (up to browser storage limits).
+  - Smart Collections (Unlimited folders).
+  - Google Lens Integration (Reverse image search directly from clipboard).
+  - Local OCR (Extract text from copied images instantly).
+  - "Smart Clean" for URLs (Removes tracking tags automatically).
 
 ---
 
-## Feature Specifications
+## UI / UX Aesthetic (The "Premium" Feel)
+To justify a subscription, the UI must wow the user immediately.
+- **Color System:** Indigo-Cyan Gradient (`linear-gradient(135deg, #6366f1, #06b6d4)`).
+- **Surfaces:** Modern glassmorphism, soft drop shadows (`rgba(99,102,241,0.12)`), rounded corners (`16px`-`20px`).
+- **Typography:** `Inter` font, high contrast, clean hierarchy.
+- **Animations:** Fluid, Apple-like spring physics (`cubic-bezier(0.34, 1.56, 0.64, 1)`), subtle micro-animations on hover (glow effects, translating elements).
+- **Themes:** First-class Dark Mode support.
+- **Workflow:** Inline floating bubble & panel. **No disruptive popups**.
 
-### 1. Clipboard Capture
-- **Text**: Captured on every `Ctrl+C` / right-click Copy inside the browser.
-- **Images**: Captured via `navigator.clipboard.read()` when panel opens. This catches:
-  - Right-click → Copy Image on any webpage
-  - Screenshots from Snipping Tool / Print Screen
-  - Images copied from other apps (Word, Paint, etc.)
-- **Links**: Auto-detected from text content. Tagged as "Link" type.
-- **Deduplication**: If the same content is copied twice in a row, skip the duplicate.
+---
 
-### 2. Item Cards
-Each clipboard item is displayed as a card with:
-- **Content preview**: Truncated to 3 lines for text, thumbnail for images.
-- **Timestamp**: Relative time (e.g., "2 min ago", "Yesterday").
-- **Type badge**: Shows 🔗 for links, 📷 for images, 📝 for text.
-- **Action buttons** (always visible, small icons at bottom of card):
-  - `👁 View` — Opens preview modal with full content
-  - `📋 Copy` — Copies to OS clipboard, shows "Copied!" feedback, auto-closes panel
-  - `📷 Aa` (images only) — Runs OCR to extract text
-  - `🗑 Delete` (only inside Collections) — Removes item from collection
-  - `📁 Save` (only in Recent tab) — Opens dropdown to pick a collection
+## Core Workflows & Features
 
-### 3. Collections (renamed from "Folders")
-- User can create, rename, and delete collections.
-- Each collection has a name (editable) and a list of saved items.
-- Creating: Click [+ New Collection], type a name, press Enter.
-- Renaming: Click the [⋮] menu on a collection → Rename.
-- Deleting: Click the [⋮] menu → Delete (with confirmation).
-- Items can be saved to a collection from the "Recent" tab via the [📁 Save] button.
-- Items inside a collection have a [🗑 Delete] button to remove them.
+### 1. The Win+V "Pure Web" Architecture
+Chrome extensions cannot securely read background OS clipboards without focus. Instead of forcing users to install sketchy `.bat`/`.exe` Native Apps, NeoClip uses a **Smart UX Workflow**:
+- It perfectly captures everything copied *inside* Chrome.
+- **The Win+V Bridge:** For items copied outside Chrome, the UI provides a beautiful "Hint Bar". Users simply press `Win+V` while on any webpage and click the image they missed. NeoClip instantly catches the physical `paste` event and saves it. 100% secure, no external installs required.
 
-### 4. OCR (Image to Text)
-- Only shown on image items as an [Aa] button.
-- Uses Tesseract.js loaded locally (eng + vie language packs).
-- Runs in a Web Worker to avoid freezing the page.
-- Progress shown on the button itself: "Scanning 45%..."
-- Result: Extracted text is saved as a NEW text item in Recent, AND copied to clipboard.
-- Error handling: If no text found, show message "No text detected in this image."
+### 2. Smart Clipboard Engine
+- **Images:** Auto-compressed and resized to max 1600px to save storage.
+- **Text:** Deduplicated automatically.
+- **Links:** Auto-detects URLs. Strips tracking parameters (`utm_source`, `fbclid`, etc.) and tags them as 🔗 Links.
 
-### 5. Smart Paste (Auto Clean Links)
-- When copying a URL, automatically strip tracking parameters:
-  - `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`
-  - `fbclid`, `gclid`, `ref`, `affiliate`
-- Show a small "🧹 Cleaned" badge when a link has been cleaned.
+### 3. Action Hub
+Every item card has powerful action buttons:
+- `👁 Detail View`: Full preview of text or image.
+- `📋 Copy`: Instant copy to clipboard.
+- `🔍 Lens` (Images only): One-click reverse search via Google Lens.
+- `📷 Aa` (Images only): Offline OCR using Tesseract.js to extract text.
+- `📁 Save`: Move items into organized Collections.
 
-### 6. Search
-- Simple text search across all Recent items.
-- Filters items in real-time as user types.
+### 4. Smart Collections
+Users can create folders for "Design Inspiration", "Shopping", "Research Notes", etc., moving items from the raw Recent history into permanent structured collections.
 
 ---
 
 ## Technical Architecture
 
+NeoClip is built as a **Manifest V3 Pure Web Extension**.
+
 ### Storage: IndexedDB via Dexie.js
-```
-Database: MagicClipDB
-
-Tables:
-  history:
-    id (auto-increment)
-    type: "text" | "image" | "link"
-    content: string (text/URL) or base64 (image)
-    timestamp: number
-    collectionId: number | null
-
-  collections:
-    id (auto-increment)
-    name: string
-    createdAt: number
-```
+- **100% Offline & Private:** A massive selling point for Pro users handling sensitive research.
+- **Schema (v2):**
+  - `history`: `++id, type, timestamp, collectionId`
+  - `collections`: `++id, name, createdAt`
+- **Performance:** History queries are strictly limited (`.limit(50)`) to prevent RAM bloat, automatically cleaning up old uncollected items to keep the extension lightning fast.
 
 ### File Structure
-```
+```text
 magic-clip/
-├── manifest.json
+├── manifest.json            ← MV3 Config (Zero unnecessary permissions)
 ├── background/
-│   ├── service_worker.js    ← Message handler + DB operations
-│   └── db.js                ← Dexie database setup
+│   ├── service_worker.js    ← Lightweight message router
+│   └── db.js                ← Dexie DB logic & storage limits
 ├── content/
-│   ├── bubble.js            ← Injects bubble + panel (Shadow DOM)
-│   └── bubble.css           ← All panel styling
+│   ├── bubble.js            ← Core UI injection, active-tab clipboard polling, paste listener
+│   └── bubble.css           ← Premium CSS variables & animations
 ├── libs/
-│   ├── dexie.min.js
-│   ├── tesseract.min.js
-│   ├── worker.min.js
-│   ├── tesseract-core.wasm.js
-│   ├── eng.traineddata.gz
-│   └── vie.traineddata.gz
-└── popup/
-    ├── index.html           ← Settings page (popup)
-    └── app.js
+│   └── dexie.min.js         ← Local database
+├── popup/
+│   ├── index.html           ← Settings menu & Win+V instructions
+│   └── app.js
+└── icons/                   ← High-res branding
 ```
 
-### Message Protocol (content ↔ background)
-| Action | Direction | Data |
-|---|---|---|
-| `saveItem` | content → bg | `{type, content, collectionId?}` |
-| `getRecent` | content → bg | `{limit, search?}` |
-| `getCollections` | content → bg | — |
-| `getCollectionItems` | content → bg | `{collectionId}` |
-| `createCollection` | content → bg | `{name}` |
-| `renameCollection` | content → bg | `{id, name}` |
-| `deleteCollection` | content → bg | `{id}` |
-| `moveToCollection` | content → bg | `{itemId, collectionId}` |
-| `deleteItem` | content → bg | `{itemId}` |
-
----
-
-## Design Guidelines
-- **No emoji overload.** Use simple SVG icons or minimal Unicode symbols.
-- **Neutral colors.** White/light gray cards, subtle borders. No bright gradients.
-- **Readable fonts.** System font stack (-apple-system, Segoe UI, etc.)
-- **Small footprint.** Panel width: 340px. Max height: 460px.
-- **Smooth but subtle animations.** Fade in/out, no bouncing or sliding.
-- **Dark text on light background.** High contrast for readability.
+### Security & Privacy (Store Compliance)
+- No `offscreen` permission (Removed to speed up Chrome Web Store review).
+- No external server calls (except user-initiated Google Lens searches).
+- Easy to pass automated and manual Google reviews.

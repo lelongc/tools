@@ -110,6 +110,12 @@
                     ${ICONS.search}
                     <input type="text" id="search-input" placeholder="Search clipboard..." />
                 </div>
+                <div class="p-filters" id="search-filters">
+                    <div class="p-filter-chip active" data-filter="all">All</div>
+                    <div class="p-filter-chip" data-filter="text">Text</div>
+                    <div class="p-filter-chip" data-filter="links">Links</div>
+                    <div class="p-filter-chip" data-filter="images">Images</div>
+                </div>
             </div>
             <div class="p-hint-bar" id="win-v-hint" title="Windows blocks extensions from reading background clipboards. Use Win+V as a workaround!">
                 💡 Missing a copied image? Press <kbd>Win</kbd> + <kbd>V</kbd> and <b>click it</b> to bring it here! ✨
@@ -181,9 +187,9 @@
 
     // ---- State ----
     let currentTab = 'recent';
-    let collectionsCache = [];
     let currentCollectionId = null;
-    let pollInterval = null;
+    let collectionsCache = [];
+    let currentFilter = 'all';
     let isDragging = false;
     let savedBubbleLeft = 'auto';
     let savedBubbleTop = 'auto';
@@ -376,13 +382,23 @@
         });
     });
 
-    // ---- Search ----
+    // ---- Search & Filters ----
     let searchTimeout;
-    shadow.getElementById('search-input').addEventListener('input', e => {
+    const searchInput = shadow.getElementById('search-input');
+    searchInput.addEventListener('input', e => {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
             if (currentTab === 'recent') loadRecent(e.target.value);
         }, 200);
+    });
+
+    shadow.querySelectorAll('.p-filter-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            shadow.querySelectorAll('.p-filter-chip').forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            currentFilter = chip.dataset.filter;
+            if (currentTab === 'recent') loadRecent(searchInput.value);
+        });
     });
 
     function showTab(tab) {
@@ -403,7 +419,7 @@
         const scrollPos = body.scrollTop;
         if (!isRefresh) body.innerHTML = '<div class="p-empty">Loading...</div>';
         
-        chrome.runtime.sendMessage({ action: 'getRecent', limit: 50, search }, res => {
+        chrome.runtime.sendMessage({ action: 'getRecent', limit: 50, search, typeFilter: currentFilter }, res => {
             body.innerHTML = '';
             if (!res || !res.items || res.items.length === 0) {
                 body.innerHTML = '<div class="p-empty">Clipboard is empty.</div>';

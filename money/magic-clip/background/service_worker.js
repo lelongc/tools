@@ -1,5 +1,6 @@
 importScripts('../libs/dexie.min.js');
 importScripts('db.js');
+importScripts('sync.js');
 
 console.log('Magic Clip service worker running.');
 
@@ -29,7 +30,7 @@ async function handleMessage(req, sender) {
             return { ok: true, isNew };
 
         case 'getRecent':
-            return { items: await getRecent(req.limit || 50, req.search || '') };
+            return { items: await getRecent(req.limit || 50, req.search || '', req.typeFilter || 'all') };
 
         case 'getCollections':
             return { collections: await getCollections() };
@@ -69,6 +70,15 @@ async function handleMessage(req, sender) {
         case 'cleanUrl':
             return { cleaned: cleanUrl(req.url) };
 
+        case 'googleLogin':
+            return { ok: await loginToGoogle() };
+
+        case 'backupToDrive':
+            return { ok: await backupToDrive() };
+
+        case 'restoreFromDrive':
+            return { ok: await restoreFromDrive() };
+
         default:
             return { error: 'Unknown action' };
     }
@@ -85,67 +95,6 @@ chrome.commands.onCommand.addListener((command) => {
     }
 });
 
-// ---- Offscreen Document & Background Clipboard Sync ----
-let creatingOffscreen = null;
-async function createOffscreenIfNeeded() {
-    const existingContexts = await chrome.runtime.getContexts({
-        contextTypes: ['OFFSCREEN_DOCUMENT']
-    });
-    if (existingContexts.length > 0) return;
-
-    if (creatingOffscreen) {
-        await creatingOffscreen;
-        return;
-    }
-
-    creatingOffscreen = chrome.offscreen.createDocument({
-        url: 'offscreen/offscreen.html',
-        reasons: ['CLIPBOARD'],
-        justification: 'Read clipboard images safely and robustly in background'
-    });
-    await creatingOffscreen;
-    creatingOffscreen = null;
-    // Wait for the script to load completely and register onMessage listener
-    await new Promise(resolve => setTimeout(resolve, 250));
-}
-
-let syncPromise = null;
-async function syncClipboardInBackground() {
-    console.log('NeoClip [Background]: Initiating background clipboard sync...');
-    if (syncPromise) {
-        console.log('NeoClip [Background]: Active syncPromise exists, reusing it.');
-        return syncPromise;
-    }
-
-    syncPromise = (async () => {
-        try {
-            console.log('NeoClip [Background]: Ensuring offscreen document exists...');
-            await createOffscreenIfNeeded();
-            console.log('NeoClip [Background]: Requesting readClipboard from offscreen...');
-            const result = await chrome.runtime.sendMessage({
-                target: 'offscreen',
-                action: 'readClipboard'
-            });
-            console.log('NeoClip [Background]: Received result from offscreen:', result);
-            if (result && result.content) {
-                const saveRes = await saveItem(result);
-                console.log('NeoClip [Background]: saveItem result:', saveRes);
-                if (saveRes.isNew) {
-                    broadcastClipboardUpdated(result);
-                }
-                return saveRes.isNew;
-            }
-        } catch (e) {
-            console.error('NeoClip [Background]: Background sync failed:', e);
-        }
-        return false;
-    })();
-
-    const isNew = await syncPromise;
-    syncPromise = null;
-    return isNew;
-}
-
 function broadcastClipboardUpdated(item) {
     chrome.tabs.query({}, (tabs) => {
         for (const tab of tabs) {
@@ -155,27 +104,16 @@ function broadcastClipboardUpdated(item) {
 }
 
 // Listen for browser/window activity events
-chrome.windows.onFocusChanged.addListener((windowId) => {
-    if (windowId === chrome.windows.WINDOW_ID_NONE) {
-        // Chrome lost focus, start polling to catch intermediate clipboards
-        createOffscreenIfNeeded().then(() => {
-            chrome.runtime.sendMessage({ target: 'offscreen', action: 'startPolling' }).catch(() => {});
-        });
-    } else {
-        // Chrome gained focus, stop polling and do one final sync
-        chrome.runtime.sendMessage({ target: 'offscreen', action: 'stopPolling' }).catch(() => {});
-        // Wait 300ms for external app to completely write to clipboard and release lock
-        setTimeout(() => {
-            syncClipboardInBackground();
-        }, 300);
-    }
-});
-
 chrome.tabs.onActivated.addListener(() => {
-    syncClipboardInBackground();
+    // Notify active tab to sync
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]) {
+            chrome.tabs.sendMessage(tabs[0].id, { action: 'triggerSync' }).catch(() => {});
+        }
+    });
 });
 
 chrome.runtime.onStartup.addListener(() => {
-    syncClipboardInBackground();
+    // Nothing needed on startup, the content script handles sync when loaded
 });
 

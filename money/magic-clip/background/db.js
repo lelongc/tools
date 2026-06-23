@@ -53,18 +53,33 @@ async function saveItem(item) {
     return { id: newId, isNew: true };
 }
 
-async function getRecent(limit = 50, search = '') {
+async function getRecent(limit = 50, search = '', typeFilter = 'all') {
     let items;
-    if (search) {
+    if (search || typeFilter !== 'all') {
         const lower = search.toLowerCase();
-        // SEARCH FIX: Scan everything, including items inside collections
+        // SEARCH FIX: Scan everything to find text matches and apply type filters
         items = await db.history.orderBy('timestamp').reverse().toArray();
-        items = items.filter(i => i.type !== 'image' && i.content.toLowerCase().includes(lower));
+        
+        items = items.filter(i => {
+            // Apply type filter
+            if (typeFilter !== 'all') {
+                if (typeFilter === 'links' && i.type !== 'link') return false;
+                if (typeFilter === 'images' && i.type !== 'image') return false;
+                if (typeFilter === 'text' && i.type !== 'text') return false;
+            }
+            // Apply search filter
+            if (search) {
+                if (i.type === 'image') return false;
+                if (!i.content || typeof i.content !== 'string') return false;
+                if (!i.content.toLowerCase().includes(lower)) return false;
+            }
+            return true;
+        });
         return items.slice(0, limit);
     }
-    items = await db.history.orderBy('timestamp').reverse().toArray();
-    // Do not filter out items saved to collections, let them stay in Recent timeline
-    return items.slice(0, limit);
+    // High Performance: Only load the exact number of items needed into RAM
+    items = await db.history.orderBy('timestamp').reverse().limit(limit).toArray();
+    return items;
 }
 
 async function getCollectionItems(collectionId) {
