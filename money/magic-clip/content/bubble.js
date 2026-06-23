@@ -111,6 +111,9 @@
                     <input type="text" id="search-input" placeholder="Search clipboard..." />
                 </div>
             </div>
+            <div class="p-hint-bar" id="win-v-hint" title="Windows blocks extensions from reading background clipboards. Use Win+V as a workaround!">
+                💡 Missing a copied image? Press <kbd>Win</kbd> + <kbd>V</kbd> and <b>click it</b> to bring it here! ✨
+            </div>
             <div class="p-tabs">
                 <div class="segment-control">
                     <button class="p-tab active" data-tab="recent">Recent</button>
@@ -248,19 +251,31 @@
         document.removeEventListener('mousemove', onMouseMove);
         document.removeEventListener('mouseup', onMouseUp);
         isDown = false;
-        if (!isDragging) {
-            lastActiveElement = document.activeElement;
-            togglePanel();
-        } else {
-            // Save custom position for restoration
+        
+        // Prevent click if we dragged
+        if (isDragging) {
+            setTimeout(() => isDragging = false, 50);
+            
+            // Save position
             savedBubbleLeft = host.style.left;
             savedBubbleTop = host.style.top;
-            savedBubbleRight = host.style.right;
-            savedBubbleBottom = host.style.bottom;
+            savedBubbleRight = 'auto';
+            savedBubbleBottom = 'auto';
+        } else {
+            lastActiveElement = document.activeElement;
+            togglePanel();
         }
     }
 
-    // Prevent active element from losing focus when clicking non-input elements inside panel
+    // Hint bar listener
+    const hintBar = shadow.getElementById('win-v-hint');
+    if (hintBar) {
+        hintBar.addEventListener('click', () => {
+            showToast('Press Win + V on your keyboard and click your image to instantly save it to NeoClip! 🚀', false);
+        });
+    }
+
+    // Panel Toggle/ Prevent active element from losing focus when clicking non-input elements inside panel
     panel.addEventListener('mousedown', e => {
         const target = e.composedPath()[0];
         if (target && target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
