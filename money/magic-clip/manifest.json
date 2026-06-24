@@ -13,7 +13,8 @@
     "clipboardRead",
     "clipboardWrite",
     "activeTab",
-    "identity"
+    "identity",
+    "offscreen"
   ],
   "background": {
     "service_worker": "background/service_worker.js"

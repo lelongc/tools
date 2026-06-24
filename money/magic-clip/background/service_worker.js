@@ -135,7 +135,7 @@ async function setupOffscreenDocument() {
         return;
     }
     creatingOffscreen = chrome.offscreen.createDocument({
-        url: 'offscreen.html',
+        url: 'background/offscreen.html',
         reasons: ['CLIPBOARD'],
         justification: 'Read clipboard in background without stealing focus'
     });
