@@ -1,11 +1,11 @@
 :root {
-    --bg-dark: #050505;
-    --bg-card: rgba(255, 255, 255, 0.03);
-    --border-color: rgba(255, 255, 255, 0.08);
-    --text-primary: #ffffff;
-    --text-secondary: #9ca3af;
-    --accent-cyan: #06b6d4;
-    --accent-purple: #6366f1;
+    --bg-dark: #f8fafc;
+    --bg-card: #ffffff;
+    --border-color: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --accent-cyan: #3b82f6; /* Used as primary blue now */
+    --accent-purple: #2563eb;
     --accent-green: #10b981;
 }
 
@@ -21,22 +21,14 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
-    background-image: 
-        radial-gradient(circle at 15% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 85% 30%, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
-    background-attachment: fixed;
 }
 
 /* Typography */
 .gradient-text {
-    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--accent-cyan);
 }
 .gradient-text-green {
-    background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--accent-green);
 }
 
 /* Navbar */
@@ -44,7 +36,7 @@ body {
     position: fixed;
     top: 0;
     width: 100%;
-    background: rgba(5, 5, 5, 0.8);
+    background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border-color);
     z-index: 100;
@@ -97,15 +89,15 @@ body {
     cursor: pointer;
 }
 .btn-primary {
-    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    background: var(--accent-cyan);
     color: white;
     padding: 1rem 2rem;
     font-size: 1.1rem;
-    box-shadow: 0 4px 20px rgba(6, 182, 212, 0.3);
+    border: none;
 }
 .btn-primary:hover {
+    background: var(--accent-purple);
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
 }
 .btn-primary-small {
     background: white;
@@ -125,7 +117,7 @@ body {
     font-size: 1.1rem;
 }
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--bg-dark);
 }
 .w-full {
     width: 100%;
@@ -145,12 +137,11 @@ body {
     display: inline-block;
     padding: 0.5rem 1rem;
     border-radius: 20px;
-    background: rgba(6, 182, 212, 0.1);
+    background: rgba(59, 130, 246, 0.1);
     color: var(--accent-cyan);
     font-size: 0.85rem;
     font-weight: 600;
     margin-bottom: 1.5rem;
-    border: 1px solid rgba(6, 182, 212, 0.2);
 }
 .hero-title {
     font-size: 4.5rem;
@@ -172,11 +163,11 @@ body {
 
 /* Mockup UI */
 .mockup-window {
-    background: #111;
+    background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
     transform: perspective(1000px) rotateY(-5deg) rotateX(5deg);
     transition: transform 0.5s ease;
 }
@@ -184,7 +175,7 @@ body {
     transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
 }
 .mockup-header {
-    background: #1a1a1a;
+    background: #f8fafc;
     padding: 12px;
     display: flex;
     gap: 6px;
@@ -201,21 +192,21 @@ body {
     gap: 0.75rem;
 }
 .mockup-item {
-    background: rgba(255,255,255,0.05);
+    background: var(--bg-dark);
     padding: 1rem;
     border-radius: 8px;
     display: flex;
     align-items: center;
     gap: 1rem;
-    border: 1px solid transparent;
+    border: 1px solid var(--border-color);
     transition: border-color 0.2s;
 }
 .mockup-item:hover {
-    border-color: rgba(255,255,255,0.15);
+    border-color: var(--accent-cyan);
 }
 .mockup-icon { font-size: 1.25rem; font-family: monospace; font-weight: bold; width: 24px; text-align: center; }
-.mockup-text { flex: 1; font-family: monospace; font-size: 0.9rem; color: #e5e7eb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mockup-badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; background: rgba(99,102,241,0.1); color: #6366f1; font-weight: 600; }
+.mockup-text { flex: 1; font-family: monospace; font-size: 0.9rem; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mockup-badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 12px; background: rgba(59,130,246,0.1); color: var(--accent-cyan); font-weight: 600; }
 
 /* General Sections */
 .section {
@@ -249,12 +240,11 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 2.5rem;
-    backdrop-filter: blur(10px);
-    transition: transform 0.3s, border-color 0.3s;
+    transition: transform 0.2s;
 }
 .card:hover {
     transform: translateY(-5px);
-    border-color: rgba(6, 182, 212, 0.4);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 .card-icon {
     font-size: 2.5rem;
@@ -284,7 +274,7 @@ body {
 .feature-list .check { color: var(--accent-green); font-weight: bold; }
 .security-visual { position: relative; display: flex; justify-content: center; align-items: center; height: 400px; }
 .shield-icon { width: 120px; height: 120px; color: var(--accent-green); position: relative; z-index: 2; }
-.glow { position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%); z-index: 1; }
+.glow { position: absolute; width: 300px; height: 300px; background: rgba(16, 185, 129, 0.1); z-index: 1; }
 
 /* Pricing */
 .pricing-grid {
@@ -303,14 +293,16 @@ body {
     overflow: hidden;
 }
 .pricing-card.pro {
-    border-color: var(--accent-purple);
-    background: linear-gradient(180deg, rgba(99, 102, 241, 0.05) 0%, rgba(0,0,0,0) 100%);
+    border: 2px solid var(--accent-cyan);
+    transform: scale(1.05);
+    background: var(--bg-card);
 }
 .popular-badge {
     position: absolute;
     top: 1rem;
     right: 1rem;
-    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
+    background: var(--accent-cyan);
+    color: white;
     font-size: 0.75rem;
     font-weight: bold;
     padding: 4px 12px;

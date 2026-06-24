@@ -90,12 +90,7 @@
                 applyTheme(changes.theme.newValue === 'dark');
             }
         } else if (area === 'sync') {
-            if (changes.isPro && changes.isPro.newValue === true) {
-                // If Pro is activated on another machine via sync, auto-refresh settings if open
-                if (panel.classList.contains('open') && currentTab === 'settings') {
-                    loadSettings();
-                }
-            }
+            // Settings UI has been moved to popup.
         }
     });
 
@@ -116,6 +111,7 @@
                 <div class="search-box">
                     ${ICONS.search}
                     <input type="text" id="search-input" placeholder="Search clipboard..." />
+                    <button id="btn-search" style="position: absolute; right: 4px; background: var(--mc-primary); color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-weight: 500;">Search</button>
                 </div>
                 <div class="p-filters" id="search-filters">
                     <div class="p-filter-chip active" data-filter="all">All</div>
@@ -128,7 +124,6 @@
                 <div class="segment-control">
                     <button class="p-tab active" data-tab="recent">Recent</button>
                     <button class="p-tab" data-tab="collections">Collections</button>
-                    <button class="p-tab" data-tab="settings">Settings</button>
                 </div>
             </div>
             <div class="p-body" id="main-body"></div>
@@ -154,10 +149,10 @@
     function applyTheme(isDark) {
         darkTheme = isDark;
         if (isDark) {
-            panel.classList.add('dark');
+            host.classList.add('dark');
             if (btnTheme) btnTheme.innerHTML = ICONS.sun;
         } else {
-            panel.classList.remove('dark');
+            host.classList.remove('dark');
             if (btnTheme) btnTheme.innerHTML = ICONS.moon;
         }
     }
@@ -408,19 +403,30 @@
     searchInput.addEventListener('keydown', e => {
         if (e.key === 'Enter') {
             e.preventDefault();
-            clearTimeout(searchTimeout);
-            const term = searchInput.value;
-            if (currentTab === 'recent') {
-                loadRecent(term, true);
-            } else if (currentTab === 'collections') {
-                if (currentCollectionId) {
-                    loadCollectionItems(currentCollectionId, term, true);
-                } else {
-                    loadCollections(term);
-                }
-            }
+            performSearch();
         }
     });
+    
+    const btnSearch = shadow.getElementById('btn-search');
+    if (btnSearch) {
+        btnSearch.addEventListener('click', () => {
+            performSearch();
+        });
+    }
+
+    function performSearch() {
+        clearTimeout(searchTimeout);
+        const term = searchInput.value;
+        if (currentTab === 'recent') {
+            loadRecent(term, true);
+        } else if (currentTab === 'collections') {
+            if (currentCollectionId) {
+                loadCollectionItems(currentCollectionId, term, true);
+            } else {
+                loadCollections(term);
+            }
+        }
+    }
 
     shadow.querySelectorAll('.p-filter-chip').forEach(chip => {
         chip.addEventListener('click', () => {
@@ -441,9 +447,6 @@
             searchInput.value = ''; // Reset search input
             if (currentCollectionId) loadCollectionItems(currentCollectionId);
             else loadCollections(searchInput.value);
-        } else if (tab === 'settings') {
-            searchBox.style.display = 'none';
-            loadSettings();
         }
     }
 
@@ -462,83 +465,6 @@
             res.items.forEach(item => body.appendChild(buildCard(item, false)));
             if (isRefresh) body.scrollTop = scrollPos;
         });
-    }
-
-    // ---- Render Settings ----
-    function loadSettings() {
-        const body = shadow.getElementById('main-body');
-        body.innerHTML = `
-            <div style="padding: 16px;">
-                <h3 style="margin-top:0; font-size: 14px; color: var(--mc-text);">NeoClip Pro</h3>
-                <p style="font-size: 13px; color: var(--mc-text-light); margin-bottom: 12px;">Unlock unlimited history, collections, and Google Drive Sync.</p>
-                <div id="license-area">Loading...</div>
-                
-                <h3 style="margin-top:24px; font-size: 14px; color: var(--mc-text);">Cloud Sync</h3>
-                <p style="font-size: 13px; color: var(--mc-text-light); margin-bottom: 12px;">Backup your clipboard history to your own Google Drive (Pro Only).</p>
-                <button id="btn-sync-drive" class="btn-secondary" style="width: 100%; border-radius: 8px; padding: 10px;">Sync with Google Drive</button>
-            </div>
-        `;
-        
-        const licenseArea = shadow.getElementById('license-area');
-        
-        chrome.runtime.sendMessage({ action: 'getProStatus' }, res => {
-            if (res && res.isPro) {
-                licenseArea.innerHTML = `
-                    <div style="padding: 12px; background: var(--mc-green); color: white; border-radius: 8px; text-align: center; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        ${ICONS.check} PRO Activated
-                    </div>
-                `;
-            } else {
-                licenseArea.innerHTML = `
-                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                        <input type="text" id="license-input" class="inline-input" placeholder="Enter License Key..." style="flex:1;">
-                        <button id="btn-verify-license" class="inline-btn">Verify</button>
-                    </div>
-                    <a href="https://neoclip.vercel.app/#pricing" target="_blank" style="font-size: 12px; color: var(--mc-blue); text-decoration: none;">Get a License Key</a>
-                `;
-                
-                const btnVerify = shadow.getElementById('btn-verify-license');
-                if (btnVerify) {
-                    btnVerify.addEventListener('click', () => {
-                        const key = shadow.getElementById('license-input').value.trim();
-                        if (!key) return;
-                        
-                        btnVerify.textContent = '...';
-                        btnVerify.disabled = true;
-                        
-                        chrome.runtime.sendMessage({ action: 'verifyLicense', key }, (resp) => {
-                            if (resp && resp.ok) {
-                                showToast('Pro activated successfully!');
-                                loadSettings();
-                            } else {
-                                showToast(resp.error || 'Invalid license key', true);
-                                btnVerify.textContent = 'Verify';
-                                btnVerify.disabled = false;
-                            }
-                        });
-                    });
-                }
-            }
-        });
-        
-        const btnSync = shadow.getElementById('btn-sync-drive');
-        if (btnSync) {
-            btnSync.addEventListener('click', () => {
-                btnSync.textContent = 'Syncing...';
-                btnSync.disabled = true;
-                chrome.runtime.sendMessage({ action: 'backupToDrive' }, (resp) => {
-                    btnSync.textContent = 'Sync with Google Drive';
-                    btnSync.disabled = false;
-                    if (resp && resp.error) {
-                        showToast(resp.error, true);
-                    } else if (resp && resp.ok) {
-                        showToast('Synced successfully!');
-                    } else {
-                        showToast('Sync failed', true);
-                    }
-                });
-            });
-        }
     }
 
     // ---- Render Collections ----

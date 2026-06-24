@@ -26,10 +26,10 @@
 
     <header class="hero">
         <div class="hero-content reveal">
-            <div class="badge">🚀 The #1 Developer Clipboard Tool</div>
-            <h1 class="hero-title">Your clipboard, <br><span class="gradient-text">supercharged.</span></h1>
+            <div class="badge">Smart Clipboard Manager</div>
+            <h1 class="hero-title">Your clipboard, <br>beautifully organized.</h1>
             <p class="hero-subtitle">
-                Never lose a copied snippet again. NeoClip saves your history securely, extracts text from images with OCR, and syncs across all your devices using your private Google Drive.
+                Never lose a copied snippet again. NeoClip saves your history securely, extracts text from images, and syncs across all your devices using your private Google Drive.
             </p>
             <div class="hero-cta">
                 <a href="#" class="btn-primary">Add to Chrome - It's Free</a>
@@ -139,53 +139,49 @@
             <h2>Simple, Transparent Pricing</h2>
             <p>Start for free, upgrade when you need more power.</p>
         </div>
-        <div class="pricing-grid">
-            <div class="pricing-card">
+        <div class="pricing-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+            <div class="pricing-card reveal">
                 <h3>Free</h3>
                 <div class="price">$0<span>/forever</span></div>
                 <ul class="pricing-features">
-                    <li><span class="check">✓</span> Up to 500 clipboard history items</li>
-                    <li><span class="check">✓</span> Up to 3 collections</li>
-                    <li><span class="check">✓</span> Google Lens Integration</li>
+                    <li><span class="check">✓</span> 500 history items</li>
+                    <li><span class="check">✓</span> 3 collections</li>
                     <li><span class="check">✓</span> Fast IndexedDB search</li>
                 </ul>
-                <a href="#download" class="btn-secondary w-full">Install Free</a>
+                <a href="#" class="btn-secondary w-full">Install Free</a>
             </div>
-            <div class="pricing-card pro reveal delay-1">
+            <div class="pricing-card reveal delay-1">
                 <h3>Pro Monthly</h3>
-                <div class="price">$2.99<span class="period">/mo</span></div>
-                <p class="price-desc">For power users and professionals.</p>
+                <div class="price">$2.99<span class="period">/month</span></div>
+                <p class="price-desc">Flexible month-to-month plan.</p>
                 <ul class="pricing-features">
                     <li><span class="check">✓</span> <strong>Unlimited</strong> history items</li>
                     <li><span class="check">✓</span> <strong>Unlimited</strong> collections</li>
                     <li><span class="check">✓</span> <strong>Google Drive Cloud Sync</strong></li>
-                    <li><span class="check">✓</span> Use on up to 3 devices</li>
                 </ul>
-                <a href="#" class="btn-primary w-full">Upgrade to Pro</a>
+                <a href="#" id="buy-monthly-btn" class="btn-secondary w-full">Get Monthly</a>
             </div>
-            <div class="pricing-card reveal delay-2">
+            <div class="pricing-card pro reveal delay-2">
                 <h3>Pro Yearly</h3>
                 <div class="price">$19.99<span class="period">/year</span></div>
                 <p class="price-desc">Best value for long-term users.</p>
                 <ul class="pricing-features">
-                    <li><span class="check">✓</span> All Pro Monthly features</li>
+                    <li><span class="check">✓</span> <strong>Unlimited</strong> everything</li>
+                    <li><span class="check">✓</span> <strong>Google Drive Cloud Sync</strong></li>
                     <li><span class="check">✓</span> Save 44% annually</li>
-                    <li><span class="check">✓</span> Use on up to 3 devices</li>
-                    <li><span class="check">✓</span> Priority support</li>
                 </ul>
-                <a href="#" class="btn-secondary w-full">Get Pro Yearly</a>
+                <a href="#" id="buy-yearly-btn" class="btn-primary w-full">Get Pro Yearly</a>
             </div>
             <div class="pricing-card reveal delay-3">
-                <h3>Lifetime Deal</h3>
+                <h3>Lifetime</h3>
                 <div class="price">$49<span>/once</span></div>
                 <p class="price-desc">Pay once, use forever.</p>
                 <ul class="pricing-features">
                     <li><span class="check">✓</span> <strong>Everything in Pro</strong></li>
-                    <li><span class="check">✓</span> No recurring subscriptions</li>
-                    <li><span class="check">✓</span> Free future updates</li>
+                    <li><span class="check">✓</span> No subscriptions</li>
                     <li><span class="check">✓</span> VIP Support</li>
                 </ul>
-                <a href="#" class="btn-secondary w-full">Get Lifetime</a>
+                <a href="#" id="buy-lifetime-btn" class="btn-secondary w-full">Get Lifetime</a>
             </div>
         </div>
     </section>
