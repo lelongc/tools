@@ -14,7 +14,8 @@
     "clipboardWrite",
     "activeTab",
     "identity",
-    "offscreen"
+    "offscreen",
+    "alarms"
   ],
   "background": {
     "service_worker": "background/service_worker.js"

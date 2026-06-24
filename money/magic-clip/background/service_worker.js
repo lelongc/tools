@@ -4,6 +4,81 @@ importScripts('sync.js');
 
 console.log('Magic Clip service worker running.');
 
+// --- Licensing System ---
+let isProCache = false;
+
+// Initialize on startup
+chrome.storage.sync.get(['isPro', 'licenseKey', 'instanceId'], (data) => {
+    isProCache = !!data.isPro;
+});
+
+// Listen for sync changes from other devices
+chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === 'sync') {
+        if (changes.isPro !== undefined) {
+            isProCache = !!changes.isPro.newValue;
+        }
+    }
+});
+
+// Periodic Subscription Validation (Every 24 hours)
+chrome.alarms.create('checkSubscription', { periodInMinutes: 1440 });
+chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === 'checkSubscription') {
+        validateSubscriptionBackground();
+    }
+});
+
+async function validateSubscriptionBackground() {
+    chrome.storage.sync.get(['isPro', 'licenseKey', 'instanceId'], async (data) => {
+        if (!data.isPro || !data.licenseKey) return;
+        
+        // Validate against Lemon Squeezy to see if subscription is still active
+        try {
+            const response = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
+                method: 'POST',
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ license_key: data.licenseKey, instance_id: data.instanceId })
+            });
+            const result = await response.json();
+            if (!result.valid) {
+                // Subscription expired or canceled
+                isProCache = false;
+                await chrome.storage.sync.set({ isPro: false });
+            }
+        } catch(e) {}
+    });
+}
+
+async function checkLicense(key) {
+    if (!key) return { ok: false, error: 'Empty key' };
+    
+    // Lemon Squeezy API Verification
+    try {
+        const response = await fetch('https://api.lemonsqueezy.com/v1/licenses/activate', {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ 
+                license_key: key, 
+                instance_name: 'Chrome on ' + navigator.userAgent.split(' ')[0] 
+            })
+        });
+        const data = await response.json();
+        
+        if (data.activated) {
+            isProCache = true;
+            await chrome.storage.sync.set({ isPro: true, licenseKey: key, instanceId: data.instance.id });
+            return { ok: true };
+        } else if (data.error && data.error.includes('Activation limit')) {
+            return { ok: false, error: 'Device limit reached. Please deactivate an old device in your Customer Portal.' };
+        }
+        return { ok: false, error: data.error || 'Invalid license key' };
+    } catch (e) {
+        console.error('License verification failed', e);
+        return { ok: false, error: 'Network error. Please try again.' };
+    }
+}
+
 chrome.runtime.onMessage.addListener((req, sender, respond) => {
     handleMessage(req, sender).then(respond).catch(err => {
         console.error('SW error:', err);
@@ -19,7 +94,7 @@ async function handleMessage(req, sender) {
             return { ok: true };
 
         case 'saveItem':
-            const result = await saveItem(req.item);
+            const result = await saveItem(req.item, isProCache);
             if (result.isNew) {
                 broadcastClipboardUpdated(req.item);
             }
@@ -46,10 +121,11 @@ async function handleMessage(req, sender) {
             return { collections: await getCollections() };
 
         case 'getCollectionItems':
-            return { items: await getCollectionItems(req.collectionId) };
+            return { items: await getCollectionItems(req.collectionId, req.search || '') };
 
         case 'createCollection':
-            const cid = await createCollection(req.name);
+            const cid = await createCollection(req.name, isProCache);
+            if (cid === null) return { error: 'Limit reached. Upgrade to Pro.' };
             return { ok: true, id: cid };
 
         case 'renameCollection':
@@ -81,13 +157,22 @@ async function handleMessage(req, sender) {
             return { cleaned: cleanUrl(req.url) };
 
         case 'googleLogin':
+            if (!isProCache) return { error: 'Pro feature only' };
             return await loginToGoogle();
 
         case 'backupToDrive':
+            if (!isProCache) return { error: 'Pro feature only' };
             return { ok: await backupToDrive() };
 
         case 'restoreFromDrive':
+            if (!isProCache) return { error: 'Pro feature only' };
             return { ok: await restoreFromDrive() };
+
+        case 'verifyLicense':
+            return await checkLicense(req.key);
+            
+        case 'getProStatus':
+            return { isPro: isProCache };
 
         default:
             return { error: 'Unknown action' };

@@ -21,7 +21,7 @@ db.open().catch(err => console.error('DB open failed:', err));
 let lastSavedContent = null;
 let lastSavedType = null;
 
-async function saveItem(item) {
+async function saveItem(item, isPro = false) {
     // Auto-detect links first so type comparisons match the final saved item
     if (item.type === 'text' && isUrl(item.content)) {
         item.type = 'link';
@@ -41,9 +41,10 @@ async function saveItem(item) {
     item.timestamp = Date.now();
     item.collectionId = item.collectionId || 0; // use 0 for null to make indexing easier
 
-    // Cap at 500 items
+    // Cap at limits (500 free, 100000 Pro)
     const count = await db.history.count();
-    if (count >= 500) {
+    const limit = isPro ? 100000 : 500;
+    if (count >= limit) {
         const oldest = await db.history.orderBy('timestamp').first();
         if (oldest) await db.history.delete(oldest.id);
     }
@@ -82,8 +83,17 @@ async function getRecent(limit = 50, search = '', typeFilter = 'all') {
     return items;
 }
 
-async function getCollectionItems(collectionId) {
-    return await db.history.where('collectionId').equals(collectionId).reverse().sortBy('timestamp');
+async function getCollectionItems(collectionId, search = '') {
+    let items = await db.history.where('collectionId').equals(collectionId).reverse().sortBy('timestamp');
+    if (search) {
+        const lower = search.toLowerCase();
+        items = items.filter(i => {
+            if (i.type === 'image') return false;
+            if (!i.content || typeof i.content !== 'string') return false;
+            return i.content.toLowerCase().includes(lower);
+        });
+    }
+    return items;
 }
 
 async function deleteItem(id) {
@@ -104,7 +114,11 @@ async function getCollections() {
     return cols;
 }
 
-async function createCollection(name) {
+async function createCollection(name, isPro = false) {
+    if (!isPro) {
+        const count = await db.collections.count();
+        if (count >= 3) return null;
+    }
     return await db.collections.add({ name, createdAt: Date.now() });
 }
 

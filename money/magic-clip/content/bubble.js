@@ -89,6 +89,13 @@
             if (changes.theme) {
                 applyTheme(changes.theme.newValue === 'dark');
             }
+        } else if (area === 'sync') {
+            if (changes.isPro && changes.isPro.newValue === true) {
+                // If Pro is activated on another machine via sync, auto-refresh settings if open
+                if (panel.classList.contains('open') && currentTab === 'settings') {
+                    loadSettings();
+                }
+            }
         }
     });
 
@@ -121,6 +128,7 @@
                 <div class="segment-control">
                     <button class="p-tab active" data-tab="recent">Recent</button>
                     <button class="p-tab" data-tab="collections">Collections</button>
+                    <button class="p-tab" data-tab="settings">Settings</button>
                 </div>
             </div>
             <div class="p-body" id="main-body"></div>
@@ -385,14 +393,32 @@
     searchInput.addEventListener('input', e => {
         clearTimeout(searchTimeout);
         searchTimeout = setTimeout(() => {
-            if (currentTab === 'recent') loadRecent(e.target.value, true);
+            const term = e.target.value;
+            if (currentTab === 'recent') {
+                loadRecent(term, true);
+            } else if (currentTab === 'collections') {
+                if (currentCollectionId) {
+                    loadCollectionItems(currentCollectionId, term, true);
+                } else {
+                    loadCollections(term); // Filter collection list
+                }
+            }
         }, 200);
     });
     searchInput.addEventListener('keydown', e => {
         if (e.key === 'Enter') {
             e.preventDefault();
             clearTimeout(searchTimeout);
-            if (currentTab === 'recent') loadRecent(searchInput.value, true);
+            const term = searchInput.value;
+            if (currentTab === 'recent') {
+                loadRecent(term, true);
+            } else if (currentTab === 'collections') {
+                if (currentCollectionId) {
+                    loadCollectionItems(currentCollectionId, term, true);
+                } else {
+                    loadCollections(term);
+                }
+            }
         }
     });
 
@@ -410,10 +436,14 @@
         if (tab === 'recent') {
             searchBox.style.display = 'block';
             loadRecent();
-        } else {
-            searchBox.style.display = 'none';
+        } else if (tab === 'collections') {
+            searchBox.style.display = 'block'; // Keep search visible!
+            searchInput.value = ''; // Reset search input
             if (currentCollectionId) loadCollectionItems(currentCollectionId);
-            else loadCollections();
+            else loadCollections(searchInput.value);
+        } else if (tab === 'settings') {
+            searchBox.style.display = 'none';
+            loadSettings();
         }
     }
 
@@ -434,13 +464,95 @@
         });
     }
 
-    // ---- Render Collections ----
-    function loadCollections() {
+    // ---- Render Settings ----
+    function loadSettings() {
         const body = shadow.getElementById('main-body');
-        body.innerHTML = '<div class="p-empty">Loading...</div>';
+        body.innerHTML = `
+            <div style="padding: 16px;">
+                <h3 style="margin-top:0; font-size: 14px; color: var(--mc-text);">NeoClip Pro</h3>
+                <p style="font-size: 13px; color: var(--mc-text-light); margin-bottom: 12px;">Unlock unlimited history, collections, and Google Drive Sync.</p>
+                <div id="license-area">Loading...</div>
+                
+                <h3 style="margin-top:24px; font-size: 14px; color: var(--mc-text);">Cloud Sync</h3>
+                <p style="font-size: 13px; color: var(--mc-text-light); margin-bottom: 12px;">Backup your clipboard history to your own Google Drive (Pro Only).</p>
+                <button id="btn-sync-drive" class="btn-secondary" style="width: 100%; border-radius: 8px; padding: 10px;">Sync with Google Drive</button>
+            </div>
+        `;
+        
+        const licenseArea = shadow.getElementById('license-area');
+        
+        chrome.runtime.sendMessage({ action: 'getProStatus' }, res => {
+            if (res && res.isPro) {
+                licenseArea.innerHTML = `
+                    <div style="padding: 12px; background: var(--mc-green); color: white; border-radius: 8px; text-align: center; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        ${ICONS.check} PRO Activated
+                    </div>
+                `;
+            } else {
+                licenseArea.innerHTML = `
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <input type="text" id="license-input" class="inline-input" placeholder="Enter License Key..." style="flex:1;">
+                        <button id="btn-verify-license" class="inline-btn">Verify</button>
+                    </div>
+                    <a href="https://neoclip.vercel.app/#pricing" target="_blank" style="font-size: 12px; color: var(--mc-blue); text-decoration: none;">Get a License Key</a>
+                `;
+                
+                const btnVerify = shadow.getElementById('btn-verify-license');
+                if (btnVerify) {
+                    btnVerify.addEventListener('click', () => {
+                        const key = shadow.getElementById('license-input').value.trim();
+                        if (!key) return;
+                        
+                        btnVerify.textContent = '...';
+                        btnVerify.disabled = true;
+                        
+                        chrome.runtime.sendMessage({ action: 'verifyLicense', key }, (resp) => {
+                            if (resp && resp.ok) {
+                                showToast('Pro activated successfully!');
+                                loadSettings();
+                            } else {
+                                showToast(resp.error || 'Invalid license key', true);
+                                btnVerify.textContent = 'Verify';
+                                btnVerify.disabled = false;
+                            }
+                        });
+                    });
+                }
+            }
+        });
+        
+        const btnSync = shadow.getElementById('btn-sync-drive');
+        if (btnSync) {
+            btnSync.addEventListener('click', () => {
+                btnSync.textContent = 'Syncing...';
+                btnSync.disabled = true;
+                chrome.runtime.sendMessage({ action: 'backupToDrive' }, (resp) => {
+                    btnSync.textContent = 'Sync with Google Drive';
+                    btnSync.disabled = false;
+                    if (resp && resp.error) {
+                        showToast(resp.error, true);
+                    } else if (resp && resp.ok) {
+                        showToast('Synced successfully!');
+                    } else {
+                        showToast('Sync failed', true);
+                    }
+                });
+            });
+        }
+    }
+
+    // ---- Render Collections ----
+    function loadCollections(search = '') {
+        const body = shadow.getElementById('main-body');
+        if (!search) body.innerHTML = '<div class="p-empty">Loading...</div>';
         chrome.runtime.sendMessage({ action: 'getCollections' }, res => {
             body.innerHTML = '';
             collectionsCache = res.collections || [];
+
+            if (search) {
+                const lower = search.toLowerCase();
+                collectionsCache = collectionsCache.filter(c => c.name.toLowerCase().includes(lower));
+            }
 
             // Inline Add Form
             const addWrap = el('div', 'inline-input-wrap');
@@ -453,8 +565,13 @@
             const handleAdd = () => {
                 if (!input.value.trim()) return;
                 btn.disabled = true;
-                chrome.runtime.sendMessage({ action: 'createCollection', name: input.value.trim() }, () => {
-                    loadCollections();
+                chrome.runtime.sendMessage({ action: 'createCollection', name: input.value.trim() }, (res) => {
+                    if (res && res.error) {
+                        showToast(res.error, true);
+                        btn.disabled = false;
+                    } else {
+                        loadCollections(searchInput.value);
+                    }
                 });
             };
             btn.addEventListener('click', handleAdd);
@@ -510,7 +627,7 @@
                 const saveEdit = (e) => {
                     e.stopPropagation();
                     if(editInput.value.trim()){
-                        chrome.runtime.sendMessage({action: 'renameCollection', id: col.id, name: editInput.value.trim()}, () => loadCollections());
+                        chrome.runtime.sendMessage({action: 'renameCollection', id: col.id, name: editInput.value.trim()}, () => loadCollections(searchInput.value));
                     }
                 };
                 saveEditBtn.addEventListener('click', saveEdit);
@@ -526,9 +643,9 @@
                     row.appendChild(c);
 
                     y.addEventListener('click', () => {
-                        chrome.runtime.sendMessage({action: 'deleteCollection', id: col.id}, () => loadCollections());
+                        chrome.runtime.sendMessage({action: 'deleteCollection', id: col.id}, () => loadCollections(searchInput.value));
                     });
-                    n.addEventListener('click', () => loadCollections());
+                    n.addEventListener('click', () => loadCollections(searchInput.value));
                 });
 
                 body.appendChild(row);
@@ -537,12 +654,13 @@
     }
 
     // ---- Render Collection Items ----
-    function loadCollectionItems(colId) {
+    function loadCollectionItems(colId, search = '', isRefresh = false) {
         const body = shadow.getElementById('main-body');
-        body.innerHTML = '<div class="p-empty">Loading...</div>';
+        const scrollPos = body.scrollTop;
+        if (!isRefresh) body.innerHTML = '<div class="p-empty">Loading...</div>';
         const colName = collectionsCache.find(c => c.id === colId)?.name || 'Collection';
 
-        chrome.runtime.sendMessage({ action: 'getCollectionItems', collectionId: colId }, res => {
+        chrome.runtime.sendMessage({ action: 'getCollectionItems', collectionId: colId, search }, res => {
             body.innerHTML = '';
             
             const head = el('div', 'inline-input-wrap');
@@ -554,10 +672,15 @@
             body.appendChild(head);
 
             if (!res || !res.items || res.items.length === 0) {
-                body.appendChild(el('div', 'p-empty', 'Empty collection.'));
+                if (search) {
+                    body.appendChild(el('div', 'p-empty', 'No items found matching your search.'));
+                } else {
+                    body.appendChild(el('div', 'p-empty', 'Empty collection.'));
+                }
                 return;
             }
             res.items.forEach(item => body.appendChild(buildCard(item, true)));
+            if (isRefresh) body.scrollTop = scrollPos;
         });
     }
 
