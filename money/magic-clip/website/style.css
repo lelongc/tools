@@ -3,6 +3,7 @@
     --bg-dark: #09090b; /* Very dark background */
     --bg-card: rgba(24, 24, 27, 0.7); /* Translucent cards */
     --border-color: rgba(255, 255, 255, 0.1);
+    --border-hover: rgba(255, 255, 255, 0.2);
     --text-primary: #f8fafc;
     --text-secondary: #a1a1aa;
     
@@ -15,12 +16,17 @@
     --glass-bg: rgba(255, 255, 255, 0.03);
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    
+    /* Interactive Items */
+    --item-bg: rgba(255, 255, 255, 0.03);
+    --item-hover-bg: rgba(255, 255, 255, 0.08);
 }
 
 body.light-mode {
     --bg-dark: #f8fafc;
     --bg-card: rgba(255, 255, 255, 0.85);
     --border-color: rgba(0, 0, 0, 0.1);
+    --border-hover: rgba(0, 0, 0, 0.2);
     --text-primary: #0f172a;
     --text-secondary: #475569;
     
@@ -31,6 +37,9 @@ body.light-mode {
     --glass-bg: rgba(255, 255, 255, 0.6);
     --glass-border: rgba(0, 0, 0, 0.05);
     --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+    
+    --item-bg: rgba(0, 0, 0, 0.03);
+    --item-hover-bg: rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -183,7 +192,7 @@ body.light-mode .btn-primary {
     backdrop-filter: blur(8px);
 }
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--item-hover-bg);
 }
 .w-full {
     width: 100%;
@@ -264,7 +273,7 @@ body.light-mode .btn-primary {
     gap: 1rem;
 }
 .mockup-item {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--item-bg);
     padding: 1rem 1.25rem;
     border-radius: 12px;
     display: flex;
@@ -318,18 +327,18 @@ body.light-mode .btn-primary {
     transition: all 0.3s ease;
 }
 .card:hover {
-    transform: translateY(-8px);
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: var(--glass-shadow);
+    transform: translateY(-5px);
+    border-color: var(--border-hover);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 .card-icon {
-    font-size: 2.5rem;
+    font-size: 2rem;
     margin-bottom: 1.5rem;
     display: inline-block;
     padding: 1rem;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--item-bg);
     border-radius: 16px;
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border-color);
 }
 .card h3 {
     font-size: 1.5rem;
@@ -418,7 +427,7 @@ details {
     cursor: pointer;
     transition: background 0.2s;
 }
-details:hover { background: rgba(255, 255, 255, 0.05); }
+details:hover { background: var(--item-hover-bg); }
 summary { font-size: 1.15rem; font-weight: 600; outline: none; }
 details p { margin-top: 1rem; color: var(--text-secondary); line-height: 1.6; }
 
