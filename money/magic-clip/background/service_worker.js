@@ -7,6 +7,7 @@ console.log('Magic Clip service worker running.');
 // --- Licensing System (Pro Validation Engine) ---
 let isProCache = false;
 let proValidUntil = 0; // The timestamp until which Pro features can be used offline
+let lastApiCheck = 0; // Tracks the last time we pinged Lemon Squeezy
 
 // Initialize on startup
 chrome.storage.local.get(['isPro', 'proValidUntil', 'licenseKey', 'instanceId'], (data) => {
@@ -24,7 +25,7 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 
 // Periodic Validation Alarm
 chrome.alarms.get('checkSubscription', (alarm) => {
-    if (!alarm) chrome.alarms.create('checkSubscription', { periodInMinutes: 720 }); // Every 12h
+    if (!alarm) chrome.alarms.create('checkSubscription', { periodInMinutes: 60 }); // Every 1h
 });
 chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'checkSubscription') {
@@ -36,6 +37,7 @@ async function validateSubscriptionBackground() {
     const data = await new Promise(res => chrome.storage.local.get(['isPro', 'licenseKey', 'instanceId'], res));
     if (!data.isPro || !data.licenseKey) return;
     
+    lastApiCheck = Date.now();
     try {
         const response = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
             method: 'POST',
@@ -45,8 +47,11 @@ async function validateSubscriptionBackground() {
         const result = await response.json();
         
         if (result.valid) {
-            // Subscription active: Extend lease by 72 hours
-            const newValidUntil = Date.now() + (72 * 60 * 60 * 1000);
+            // Subscription active: Set exactly to expiration date
+            let newValidUntil = Date.now() + (10 * 365 * 24 * 60 * 60 * 1000); // Default to +10 years
+            if (result.license_key && result.license_key.expires_at) {
+                newValidUntil = new Date(result.license_key.expires_at).getTime();
+            }
             proValidUntil = newValidUntil;
             await chrome.storage.local.set({ proValidUntil: newValidUntil });
         } else {
@@ -70,11 +75,13 @@ async function validateSubscriptionBackground() {
 async function isProActive() {
     if (!isProCache) return false;
     
-    if (Date.now() > proValidUntil) {
+    const now = Date.now();
+    // Check if exact expiration passed, OR if it's been > 1 hour since last API check
+    if (now > proValidUntil || (now - lastApiCheck > 60 * 60 * 1000)) {
         if (navigator.onLine) {
             await validateSubscriptionBackground();
-            if (Date.now() <= proValidUntil) return true;
-        } else {
+            if (!isProCache) return false;
+        } else if (now > proValidUntil) {
             return false;
         }
     }
@@ -94,7 +101,13 @@ async function checkLicense(key) {
         
         if (data.activated) {
             isProCache = true;
-            proValidUntil = Date.now() + (72 * 60 * 60 * 1000);
+            // Parse exact expiration date from Lemon Squeezy, or 10 years for Lifetime
+            if (data.license_key && data.license_key.expires_at) {
+                proValidUntil = new Date(data.license_key.expires_at).getTime();
+            } else {
+                proValidUntil = Date.now() + (10 * 365 * 24 * 60 * 60 * 1000); // 10 years fallback for lifetime
+            }
+            
             await chrome.storage.local.set({ isPro: true, proValidUntil, licenseKey: key, instanceId: data.instance.id });
             
             const res = await new Promise(r => chrome.storage.local.get(['driveConnected'], r));
