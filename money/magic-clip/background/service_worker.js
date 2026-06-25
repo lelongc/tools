@@ -44,9 +44,13 @@ async function validateSubscriptionBackground() {
             headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({ license_key: data.licenseKey, instance_id: data.instanceId })
         });
+        
+        // Protection against 500s or gateway timeouts
+        if (!response.ok && response.status >= 500) return;
+
         const result = await response.json();
         
-        if (result.valid) {
+        if (result.valid === true) {
             // Subscription active: Set exactly to expiration date
             let newValidUntil = Date.now() + (10 * 365 * 24 * 60 * 60 * 1000); // Default to +10 years
             if (result.license_key && result.license_key.expires_at) {
@@ -54,7 +58,7 @@ async function validateSubscriptionBackground() {
             }
             proValidUntil = newValidUntil;
             await chrome.storage.local.set({ proValidUntil: newValidUntil });
-        } else {
+        } else if (result.valid === false || result.error) {
             // Subscription expired or canceled: Revoke immediately
             isProCache = false;
             proValidUntil = 0;
@@ -135,9 +139,13 @@ async function restoreLicense(key, instanceId) {
         });
         const result = await response.json();
         
-        if (result.valid) {
+        if (result.valid === true) {
             isProCache = true;
-            proValidUntil = Date.now() + (72 * 60 * 60 * 1000);
+            let newValidUntil = Date.now() + (10 * 365 * 24 * 60 * 60 * 1000);
+            if (result.license_key && result.license_key.expires_at) {
+                newValidUntil = new Date(result.license_key.expires_at).getTime();
+            }
+            proValidUntil = newValidUntil;
             await chrome.storage.local.set({ isPro: true, proValidUntil, licenseKey: key, instanceId: instanceId });
             return { ok: true };
         }
