@@ -370,7 +370,7 @@ body.light-mode .btn-primary {
 /* Pricing */
 .pricing-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 2rem;
     max-width: 1200px;
     margin: 0 auto;
@@ -431,6 +431,21 @@ details {
 details:hover { background: var(--item-hover-bg); }
 summary { font-size: 1.15rem; font-weight: 600; outline: none; }
 details p { margin-top: 1rem; color: var(--text-secondary); line-height: 1.6; }
+.faq-container { max-width: 800px; margin: 0 auto; }
+/* Custom summary marker */
+summary { list-style: none; position: relative; }
+summary::after {
+    content: '+';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.5rem;
+    color: var(--accent-cyan);
+    transition: transform 0.3s ease;
+}
+details[open] summary::after { content: '−'; transform: translateY(-50%) rotate(180deg); }
+details[open] summary { color: var(--accent-cyan); }
 
 /* Footer */
 .footer {
@@ -477,4 +492,9 @@ details p { margin-top: 1rem; color: var(--text-secondary); line-height: 1.6; }
     .footer-content { flex-direction: column; gap: 2rem; text-align: center; }
     .pricing-card.pro { transform: none; }
     .pricing-card.pro:hover { transform: translateY(-5px); }
+    .pricing-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 650px) {
+    .pricing-grid { grid-template-columns: 1fr; }
 }
