@@ -282,25 +282,8 @@ async function handleMessage(req, sender) {
             });
 
         case 'disconnectDrive':
-            return new Promise(async resolve => {
+            return new Promise(resolve => {
                 if (typeof logoutGoogle === 'function') logoutGoogle();
-                
-                const data = await new Promise(r => chrome.storage.local.get(['licenseKey', 'instanceId'], r));
-                if (data.licenseKey && data.instanceId) {
-                    try {
-                        await fetch('https://api.lemonsqueezy.com/v1/licenses/deactivate', {
-                            method: 'POST',
-                            headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: new URLSearchParams({ license_key: data.licenseKey, instance_id: data.instanceId })
-                        });
-                        if (typeof deleteLicenseFromDrive === 'function') {
-                            await deleteLicenseFromDrive();
-                        }
-                    } catch (e) {
-                        console.error('Deactivation failed', e);
-                    }
-                }
-                
                 isProCache = false;
                 proValidUntil = 0;
                 chrome.storage.local.remove(['isPro', 'proValidUntil', 'licenseKey', 'instanceId'], () => {
