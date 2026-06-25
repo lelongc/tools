@@ -193,10 +193,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const val = parseInt(e.target.value);
             chrome.runtime.sendMessage({ action: 'getProStatus' }, res => {
                 const isPro = res && res.isPro;
-                if (!isPro && val > 500) {
-                    showToast('Unlimited and extended history limits are Pro features.', true);
-                    e.target.value = "500";
-                    chrome.storage.local.set({ historyLimit: 500 });
+                if (!isPro && val > 50) {
+                    showToast('Free version is limited to 50 clips and 3 collections. Please upgrade to Pro!', true);
+                    e.target.value = "50";
+                    chrome.storage.local.set({ historyLimit: 50 });
                 } else {
                     chrome.storage.local.set({ historyLimit: val });
                 }

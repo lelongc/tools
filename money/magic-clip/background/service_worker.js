@@ -151,7 +151,7 @@ async function handleMessage(req, sender) {
 
         case 'createCollection':
             const cid = await createCollection(req.name, await isProActive());
-            if (cid === null) return { error: 'Limit reached. Upgrade to Pro.' };
+            if (cid === null) return { error: 'Free limit (3 collections) reached. Upgrade to Pro!' };
             return { ok: true, id: cid };
 
         case 'renameCollection':

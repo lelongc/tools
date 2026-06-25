@@ -256,7 +256,7 @@
                 </div>
                 <!-- State 1: Not Connected -->
                 <div id="sync-state-login">
-                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4;">Sign in to Google Drive to enable cloud backup and restore.</p>
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4;">Backup your clipboard history and collections securely to your own Google Drive. We never see your data.</p>
                     <button id="btn-sync-login" class="btn btn-secondary" style="width: 100%;">Connect Google Drive</button>
                 </div>
 
@@ -299,12 +299,10 @@
                             <div class="setting-label">History Limit</div>
                             <div class="setting-desc">Maximum clips to keep</div>
                         </div>
-                        <select id="setting-limit" class="input-text" style="width: 110px; padding: 4px; cursor: pointer;">
-                            <option value="50">50 items</option>
-                            <option value="100">100 items</option>
-                            <option value="500">500 items</option>
-                            <option value="1000">1,000 items (Pro)</option>
-                            <option value="5000">5,000 items (Pro)</option>
+                        <select class="input-text" id="setting-limit" style="width: auto;">
+                            <option value="50">50 items (Free Plan)</option>
+                            <option value="500">500 items (Pro)</option>
+                            <option value="2000">2000 items (Pro)</option>
                             <option value="999999">Unlimited (Pro)</option>
                         </select>
                     </div>
