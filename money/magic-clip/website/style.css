@@ -398,16 +398,17 @@ body.light-mode .btn-primary {
 }
 .popular-badge {
     position: absolute;
-    top: 1.5rem;
-    right: 1.5rem;
+    top: 0;
+    right: 0;
     background: linear-gradient(135deg, var(--accent-cyan), var(--accent-purple));
     color: white;
     font-size: 0.75rem;
     font-weight: 700;
     padding: 6px 16px;
-    border-radius: 99px;
+    border-bottom-left-radius: 16px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    box-shadow: -4px 4px 10px rgba(0,0,0,0.1);
 }
 .pricing-card h3 { font-size: 1.75rem; font-weight: 700; margin-bottom: 1rem; }
 .price { font-size: 3rem; font-weight: 800; margin-bottom: 0.5rem; line-height: 1; letter-spacing: -0.02em; display: flex; align-items: baseline; justify-content: flex-start; gap: 0.25rem; }
