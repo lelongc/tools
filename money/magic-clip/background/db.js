@@ -56,16 +56,19 @@ async function saveItem(item, isPro = false) {
     }
 
     // Cap at limits
-    let limit = settings.historyLimit || 500;
-    if (!isPro && limit > 500) limit = 500; // Enforce Free limit fallback
+    let limit = settings.historyLimit || 50;
+    if (!isPro && limit > 50) limit = 50; // Enforce Free limit fallback
 
     const count = await db.history.count();
     if (count >= limit) {
-        // Delete oldest items until we are below limit (usually just 1, but we use a loop just in case)
-        const toDelete = count - limit + 1;
-        const oldItems = await db.history.orderBy('timestamp').limit(toDelete).toArray();
-        for (const old of oldItems) {
-            await db.history.delete(old.id);
+        // SOFT-LOCK DATA PRESERVATION:
+        // Even if count is 2000 and limit is 50 (due to Pro expiring),
+        // we NEVER mass-delete their old data. We only delete exactly ONE oldest item 
+        // to make room for the new item. This turns the history into a rolling queue
+        // that stays at 2000 items, protecting their data until they manually delete.
+        const oldItems = await db.history.orderBy('timestamp').limit(1).toArray();
+        if (oldItems.length > 0) {
+            await db.history.delete(oldItems[0].id);
         }
     }
     const newId = await db.history.add(item);
@@ -125,11 +128,13 @@ async function moveToCollection(itemId, collectionId) {
 }
 
 // --- Collections ---
-async function getCollections() {
+async function getCollections(isPro = false) {
     const cols = await db.collections.toArray();
     // Count items per collection
-    for (const col of cols) {
-        col.itemCount = await db.history.where('collectionId').equals(col.id).count();
+    for (let i = 0; i < cols.length; i++) {
+        cols[i].itemCount = await db.history.where('collectionId').equals(cols[i].id).count();
+        // Soft-lock: Free users can only access the first 3 collections
+        cols[i].locked = (!isPro && i >= 3);
     }
     return cols;
 }

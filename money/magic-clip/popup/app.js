@@ -37,6 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function hideAllStates() {
+        if (syncStateLogin) syncStateLogin.style.display = 'none';
+        if (syncStateLocked) syncStateLocked.style.display = 'none';
+        if (syncStatePro) syncStatePro.style.display = 'none';
+    }
+
     function updateUIState() {
         if (syncStatus) {
             syncStatus.textContent = 'Checking status...';
@@ -50,18 +56,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (syncStatus) syncStatus.textContent = '';
                 if (proBadge) proBadge.style.display = isPro ? 'block' : 'none';
 
+                hideAllStates();
+
                 if (!isConnected) {
+                    // State 1: Free, No Drive. Since Drive isn't connected, we don't care about isPro.
                     if (syncStateLogin) syncStateLogin.style.display = 'block';
-                    if (syncStateLocked) syncStateLocked.style.display = 'none';
-                    if (syncStatePro) syncStatePro.style.display = 'none';
                 } else if (isConnected && !isPro) {
-                    if (syncStateLogin) syncStateLogin.style.display = 'none';
+                    // State 2: Drive Connected, No License
                     if (syncStateLocked) syncStateLocked.style.display = 'block';
-                    if (syncStatePro) syncStatePro.style.display = 'none';
                 } else if (isConnected && isPro) {
-                    if (syncStateLogin) syncStateLogin.style.display = 'none';
-                    if (syncStateLocked) syncStateLocked.style.display = 'none';
+                    // State 3: Pro + Drive Connected
                     if (syncStatePro) syncStatePro.style.display = 'block';
+                }
+
+                // Auto-reset historyLimit when not Pro
+                if (!isPro && settingLimit) {
+                    const currentVal = parseInt(settingLimit.value);
+                    if (currentVal > 50) {
+                        settingLimit.value = "50";
+                        chrome.storage.local.set({ historyLimit: 50 });
+                    }
                 }
             });
         });
@@ -69,27 +83,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateUIState();
 
-    if (btnVerify) {
-        btnVerify.addEventListener('click', () => {
-            const key = licenseInput ? licenseInput.value.trim() : '';
-            if (!key) return;
+    // Verify license handler (reusable)
+    function handleVerifyLicense(inputEl, btnEl) {
+        const key = inputEl ? inputEl.value.trim() : '';
+        if (!key) return;
 
-            btnVerify.textContent = '...';
-            btnVerify.disabled = true;
+        btnEl.textContent = '...';
+        btnEl.disabled = true;
 
-            chrome.runtime.sendMessage({ action: 'verifyLicense', key }, (resp) => {
-                if (resp && resp.ok) {
-                    btnVerify.textContent = 'Success!';
-                    showToast('Welcome to NeoClip Pro!');
-                    setTimeout(() => updateUIState(), 1000);
-                } else {
-                    btnVerify.textContent = 'Unlock NeoClip Pro';
-                    btnVerify.disabled = false;
-                    showToast(resp.error || 'Invalid license key', true);
-                }
-            });
+        chrome.runtime.sendMessage({ action: 'verifyLicense', key }, (resp) => {
+            if (resp && resp.ok) {
+                btnEl.textContent = 'Success!';
+                showToast('Welcome to NeoClip Pro!');
+                setTimeout(() => updateUIState(), 1000);
+            } else {
+                btnEl.textContent = 'Unlock NeoClip Pro';
+                btnEl.disabled = false;
+                showToast(resp.error || 'Invalid license key', true);
+            }
         });
-        
+    }
+
+    // State 2 verify button
+    if (btnVerify) {
+        btnVerify.addEventListener('click', () => handleVerifyLicense(licenseInput, btnVerify));
         if (licenseInput) {
             licenseInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') btnVerify.click();
@@ -97,20 +114,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    if (btnLogin) {
-        btnLogin.addEventListener('click', () => {
-            btnLogin.textContent = 'Connecting...';
-            btnLogin.disabled = true;
-            chrome.runtime.sendMessage({ action: 'googleLogin' }, res => {
-                btnLogin.textContent = 'Connect Google Drive';
-                btnLogin.disabled = false;
-                if (res && res.ok) {
-                    updateUIState();
-                } else {
-                    setSyncStatus('Error: ' + (res.error || 'Unknown error'), true);
-                }
-            });
+    // Google login handler (reusable)
+    function handleGoogleLogin(btnEl) {
+        btnEl.textContent = 'Connecting...';
+        btnEl.disabled = true;
+        chrome.runtime.sendMessage({ action: 'googleLogin' }, res => {
+            btnEl.textContent = 'Connect Google Drive';
+            btnEl.disabled = false;
+            if (res && res.ok) {
+                updateUIState();
+            } else {
+                setSyncStatus('Error: ' + (res.error || 'Unknown error'), true);
+            }
         });
+    }
+
+    // State 1 connect button
+    if (btnLogin) {
+        btnLogin.addEventListener('click', () => handleGoogleLogin(btnLogin));
     }
 
     const btnDisconnect1 = document.getElementById('btn-disconnect-drive-1');
@@ -185,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (settingLimit && settingExpiry) {
         chrome.storage.local.get(['historyLimit', 'historyExpiry'], (res) => {
-            settingLimit.value = res.historyLimit || "500";
+            settingLimit.value = res.historyLimit || "50";
             settingExpiry.value = res.historyExpiry || "0";
         });
 

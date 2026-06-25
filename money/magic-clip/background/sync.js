@@ -187,7 +187,7 @@ async function getLicenseFileId(token) {
     return null;
 }
 
-async function saveLicenseToDrive(key) {
+async function saveLicenseToDrive(key, instanceId) {
     const authRes = await getAccessToken(false);
     if (authRes.error) return false;
     const token = authRes.token;
@@ -195,7 +195,9 @@ async function saveLicenseToDrive(key) {
     try {
         const fileId = await getLicenseFileId(token);
         const metadata = { name: LICENSE_FILE_NAME, mimeType: 'application/json', parents: ['appDataFolder'] };
-        const fileContent = new Blob([JSON.stringify({ licenseKey: key })], { type: 'application/json' });
+        const payload = { licenseKey: key };
+        if (instanceId) payload.instanceId = instanceId;
+        const fileContent = new Blob([JSON.stringify(payload)], { type: 'application/json' });
         const form = new FormData();
         form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
         form.append('file', fileContent);
@@ -230,7 +232,7 @@ async function loadLicenseFromDrive() {
         });
         if (!res.ok) throw new Error('License download failed');
         const data = await res.json();
-        return data.licenseKey || null;
+        return { licenseKey: data.licenseKey || null, instanceId: data.instanceId || null };
     } catch (e) {
         console.error('License Restore Error:', e);
         return null;

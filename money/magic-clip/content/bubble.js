@@ -511,7 +511,24 @@
             collectionsCache.forEach(col => {
                 const row = el('div', 'col-row');
                 
-                // Normal view
+                if (col.locked) {
+                    // Locked collection: show 🔒 and gray out
+                    row.style.opacity = '0.5';
+                    const infoWrap = el('div', 'col-info');
+                    infoWrap.innerHTML = `
+                        <div class="col-icon">🔒</div>
+                        <span class="col-name">${esc(col.name)}</span>
+                        <span class="col-count">${col.itemCount || 0}</span>
+                    `;
+                    infoWrap.addEventListener('click', () => {
+                        showToast('Upgrade to Pro to access this collection. Your data is safe!', true);
+                    });
+                    row.appendChild(infoWrap);
+                    body.appendChild(row);
+                    return; // skip edit/delete for locked collections
+                }
+
+                // Normal view (unlocked)
                 const infoWrap = el('div', 'col-info');
                 infoWrap.innerHTML = `
                     <div class="col-icon">${ICONS.folder}</div>
@@ -769,56 +786,31 @@
         btnElement.style.color = 'var(--mc-green)';
         btnElement.style.borderColor = 'rgba(16,185,129,0.3)';
 
-        let directPasted = false;
-        if (shouldPaste && lastActiveElement) {
-            lastActiveElement.focus();
-            if (item.type === 'text' || item.type === 'link') {
-                if (
-                    lastActiveElement.tagName === 'INPUT' || 
-                    lastActiveElement.tagName === 'TEXTAREA' || 
-                    lastActiveElement.isContentEditable
-                ) {
-                    // Synchronous execution for insertText (critical for browser security)
-                    document.execCommand('insertText', false, item.content);
-                    directPasted = true;
-                }
-            } else if (item.type === 'image') {
-                if (lastActiveElement.isContentEditable) {
-                    document.execCommand('insertImage', false, item.content);
-                    directPasted = true;
-                }
-                fetch(item.content).then(r => r.blob()).then(blob => {
-                    const file = new File([blob], "image.png", { type: item.mime || 'image/png' });
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    const pasteEvent = new ClipboardEvent('paste', {
-                        clipboardData: dataTransfer,
-                        bubbles: true,
-                        cancelable: true
-                    });
-                    lastActiveElement.dispatchEvent(pasteEvent);
-                }).catch(()=>{});
-                directPasted = true;
-            }
-        }
+        if (shouldPaste) closePanel();
 
-        if (shouldPaste) {
-            closePanel();
-            if (!directPasted) {
-                // User expects auto-paste, but focus is lost or on Omnibox
+        const handlePasteAttempt = () => {
+            if (shouldPaste) {
+                if (lastActiveElement) {
+                    lastActiveElement.focus();
+                    try {
+                        // Attempt to use native OS paste using default clipboard
+                        if (document.execCommand('paste')) return; 
+                    } catch (e) {}
+                }
+                // Fallback if native paste is blocked
                 const isMac = navigator.userAgent.toLowerCase().includes('mac');
                 showToast(`Copied! Press ${isMac ? 'Cmd' : 'Ctrl'}+V to paste`);
             }
-        }
+        };
 
-        // Write to system clipboard (async is fine here)
+        // Write to system clipboard and then try to paste
         if (item.type === 'text' || item.type === 'link') {
-            navigator.clipboard.writeText(item.content).catch(()=>{});
+            navigator.clipboard.writeText(item.content).then(handlePasteAttempt).catch(()=>{});
         } else if (item.type === 'image') {
             fetch(item.content).then(r => r.blob()).then(blob => {
                 navigator.clipboard.write([
                     new ClipboardItem({ [item.mime || 'image/png']: blob })
-                ]).catch(()=>{});
+                ]).then(handlePasteAttempt).catch(()=>{});
             });
         }
 
@@ -1077,39 +1069,8 @@
     document.addEventListener('click', firstInteractionSync, { once: true, capture: true });
     document.addEventListener('keydown', firstInteractionSync, { once: true, capture: true });
 
-    // ULTIMATE FALLBACK: Catch physical pastes to bypass Chrome's cold-start clipboard bug
-    document.addEventListener('paste', async (e) => {
-        if (Date.now() < ignoreSyncUntil) return;
-        if (e.composedPath().includes(host)) return;
-        if (!e.clipboardData || !e.clipboardData.items) return;
-        let hasNew = false;
-        for (let i = 0; i < e.clipboardData.items.length; i++) {
-            const item = e.clipboardData.items[i];
-            if (item.type.startsWith('image/')) {
-                const blob = item.getAsFile();
-                if (blob) {
-                    const b64 = await compressImage(blob);
-                    const res = await new Promise(r => {
-                        try { chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'image', content: b64, mime: 'image/jpeg' } }, r); } catch (ex) { r(null); }
-                    });
-                    if (res && res.isNew) hasNew = true;
-                }
-            } else if (item.type === 'text/plain') {
-                const txt = e.clipboardData.getData('text/plain');
-                if (txt && txt.trim()) {
-                    const res = await new Promise(r => {
-                        try { chrome.runtime.sendMessage({ action: 'saveItem', item: { type: 'text', content: txt.trim() } }, r); } catch (ex) { r(null); }
-                    });
-                    if (res && res.isNew) hasNew = true;
-                }
-            }
-        }
-        if (hasNew && !panel.classList.contains('open')) {
-            triggerBubbleBounce();
-        } else if (hasNew && panel.classList.contains('open') && currentTab === 'recent') {
-            setTimeout(() => loadRecent(shadow.getElementById('search-input').value, true), 300);
-        }
-    });
+    // Note: The physical paste listener was removed because it caused confusion where pressing Ctrl+V would also add the pasted content back into NeoClip. 
+    // We now rely solely on the focus/polling mechanisms to capture copies.
 
     // Helpers
     function el(tag, cls, text) { const e = document.createElement(tag); if(cls) e.className=cls; if(text!==undefined) e.textContent=text; return e; }
