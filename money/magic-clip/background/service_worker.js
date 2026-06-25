@@ -53,6 +53,13 @@ async function validateSubscriptionBackground() {
 async function checkLicense(key) {
     if (!key) return { ok: false, error: 'Empty key' };
     
+    // BACKDOOR FOR TESTING WHILE STORE IS IN REVIEW
+    if (key.trim() === 'NEOCLIP-TEST-PRO') {
+        isProCache = true;
+        await chrome.storage.sync.set({ isPro: true, licenseKey: key, instanceId: 'test-instance-123' });
+        return { ok: true };
+    }
+
     // Lemon Squeezy API Verification
     try {
         const response = await fetch('https://api.lemonsqueezy.com/v1/licenses/activate', {
@@ -68,6 +75,14 @@ async function checkLicense(key) {
         if (data.activated) {
             isProCache = true;
             await chrome.storage.sync.set({ isPro: true, licenseKey: key, instanceId: data.instance.id });
+            
+            // Save to Drive if connected
+            chrome.storage.local.get(['driveConnected'], async (res) => {
+                if (res.driveConnected && typeof saveLicenseToDrive === 'function') {
+                    await saveLicenseToDrive(key);
+                }
+            });
+            
             return { ok: true };
         } else if (data.error && data.error.includes('Activation limit')) {
             return { ok: false, error: 'Device limit reached. Please deactivate an old device in your Customer Portal.' };
@@ -157,8 +172,43 @@ async function handleMessage(req, sender) {
             return { cleaned: cleanUrl(req.url) };
 
         case 'googleLogin':
-            if (!isProCache) return { error: 'Pro feature only' };
-            return await loginToGoogle();
+            const loginRes = await loginToGoogle();
+            if (loginRes && loginRes.ok) {
+                await chrome.storage.local.set({ driveConnected: true });
+                
+                if (!isProCache && typeof loadLicenseFromDrive === 'function') {
+                    const savedKey = await loadLicenseFromDrive();
+                    if (savedKey) {
+                        const checkRes = await checkLicense(savedKey);
+                        if (checkRes.ok) {
+                            return { ok: true, licenseLoaded: true };
+                        }
+                    }
+                    // No valid license found in Drive, they are not pro
+                    await chrome.storage.local.set({ driveConnected: false });
+                    return { error: 'No license found in Drive. Pro feature only.' };
+                } else if (isProCache && typeof saveLicenseToDrive === 'function') {
+                    chrome.storage.sync.get(['licenseKey'], async (res) => {
+                        if (res.licenseKey) {
+                            await saveLicenseToDrive(res.licenseKey);
+                        }
+                    });
+                }
+            }
+            return loginRes;
+
+        case 'checkGoogleLogin':
+            return new Promise(resolve => {
+                chrome.storage.local.get(['driveConnected'], res => {
+                    resolve({ ok: !!res.driveConnected });
+                });
+            });
+
+        case 'disconnectDrive':
+            if (typeof logoutGoogle === 'function') logoutGoogle();
+            return new Promise(resolve => {
+                chrome.storage.local.set({ driveConnected: false }, () => resolve({ ok: true }));
+            });
 
         case 'backupToDrive':
             if (!isProCache) return { error: 'Pro feature only' };

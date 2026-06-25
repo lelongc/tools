@@ -17,8 +17,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const proLocked = document.getElementById('pro-locked');
     const btnVerify = document.getElementById('btn-verify-license');
     const licenseInput = document.getElementById('license-input');
-    
-    // Sync UI elements
+    const syncStateLogin = document.getElementById('sync-state-login');
+    const syncStateLocked = document.getElementById('sync-state-locked');
+    const syncStatePro = document.getElementById('sync-state-pro');
+    const proBadge = document.getElementById('pro-badge');
     const btnLogin = document.getElementById('btn-sync-login');
     const btnBackup = document.getElementById('btn-sync-now');
     const btnRestore = document.getElementById('btn-sync-restore');
@@ -31,19 +33,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function checkProStatus() {
-        chrome.runtime.sendMessage({ action: 'getProStatus' }, res => {
-            if (res && res.isPro) {
-                if (proUnlocked) proUnlocked.style.display = 'block';
-                if (proLocked) proLocked.style.display = 'none';
-            } else {
-                if (proUnlocked) proUnlocked.style.display = 'none';
-                if (proLocked) proLocked.style.display = 'block';
-            }
+    function updateUIState() {
+        if (syncStatus) {
+            syncStatus.textContent = 'Checking status...';
+            syncStatus.style.color = 'var(--text-light)';
+        }
+
+        chrome.runtime.sendMessage({ action: 'checkGoogleLogin' }, resLogin => {
+            const isConnected = resLogin && resLogin.ok;
+            chrome.runtime.sendMessage({ action: 'getProStatus' }, resPro => {
+                const isPro = resPro && resPro.isPro;
+                if (syncStatus) syncStatus.textContent = '';
+                if (proBadge) proBadge.style.display = isPro ? 'block' : 'none';
+
+                if (!isConnected) {
+                    if (syncStateLogin) syncStateLogin.style.display = 'block';
+                    if (syncStateLocked) syncStateLocked.style.display = 'none';
+                    if (syncStatePro) syncStatePro.style.display = 'none';
+                } else if (isConnected && !isPro) {
+                    if (syncStateLogin) syncStateLogin.style.display = 'none';
+                    if (syncStateLocked) syncStateLocked.style.display = 'block';
+                    if (syncStatePro) syncStatePro.style.display = 'none';
+                } else if (isConnected && isPro) {
+                    if (syncStateLogin) syncStateLogin.style.display = 'none';
+                    if (syncStateLocked) syncStateLocked.style.display = 'none';
+                    if (syncStatePro) syncStatePro.style.display = 'block';
+                }
+            });
         });
     }
 
-    checkProStatus();
+    updateUIState();
 
     if (btnVerify) {
         btnVerify.addEventListener('click', () => {
@@ -54,36 +74,52 @@ document.addEventListener('DOMContentLoaded', () => {
             btnVerify.disabled = true;
 
             chrome.runtime.sendMessage({ action: 'verifyLicense', key }, (resp) => {
-                btnVerify.textContent = 'Verify';
+                btnVerify.textContent = 'Unlock NeoClip Pro';
                 btnVerify.disabled = false;
 
                 if (resp && resp.ok) {
-                    checkProStatus();
+                    updateUIState();
                 } else {
                     alert(resp.error || 'Invalid license key');
                 }
             });
         });
+        
+        if (licenseInput) {
+            licenseInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') btnVerify.click();
+            });
+        }
     }
 
     if (btnLogin) {
         btnLogin.addEventListener('click', () => {
-            btnLogin.textContent = 'Logging in...';
+            btnLogin.textContent = 'Connecting...';
             btnLogin.disabled = true;
             chrome.runtime.sendMessage({ action: 'googleLogin' }, res => {
+                btnLogin.textContent = 'Connect Google Drive';
+                btnLogin.disabled = false;
                 if (res && res.ok) {
-                    btnLogin.style.display = 'none';
-                    if (btnBackup) btnBackup.style.display = 'block';
-                    if (btnRestore) btnRestore.style.display = 'block';
-                    setSyncStatus('Logged in successfully!');
+                    updateUIState();
                 } else {
-                    btnLogin.textContent = 'Login to Google';
-                    btnLogin.disabled = false;
                     setSyncStatus('Error: ' + (res.error || 'Unknown error'), true);
                 }
             });
         });
     }
+
+    const btnDisconnect1 = document.getElementById('btn-disconnect-drive-1');
+    const btnDisconnect2 = document.getElementById('btn-disconnect-drive-2');
+
+    function handleDisconnect(e) {
+        e.preventDefault();
+        chrome.runtime.sendMessage({ action: 'disconnectDrive' }, () => {
+            updateUIState();
+        });
+    }
+
+    if (btnDisconnect1) btnDisconnect1.addEventListener('click', handleDisconnect);
+    if (btnDisconnect2) btnDisconnect2.addEventListener('click', handleDisconnect);
 
     if (btnBackup) {
         btnBackup.addEventListener('click', () => {

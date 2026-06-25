@@ -66,6 +66,14 @@ async function loginToGoogle() {
     return { ok: true };
 }
 
+function logoutGoogle() {
+    if (cachedToken) {
+        fetch(`https://accounts.google.com/o/oauth2/revoke?token=${cachedToken}`).catch(() => {});
+    }
+    cachedToken = null;
+    tokenExpiresAt = 0;
+}
+
 async function getSyncFileId(token) {
     const res = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${FILE_NAME}'`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -163,5 +171,68 @@ async function restoreFromDrive() {
     } catch (e) {
         console.error('Restore Error:', e);
         return false;
+    }
+}
+
+const LICENSE_FILE_NAME = 'neoclip_license.json';
+
+async function getLicenseFileId(token) {
+    const res = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${LICENSE_FILE_NAME}'`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data && data.files && data.files.length > 0) {
+        return data.files[0].id;
+    }
+    return null;
+}
+
+async function saveLicenseToDrive(key) {
+    const authRes = await getAccessToken(false);
+    if (authRes.error) return false;
+    const token = authRes.token;
+
+    try {
+        const fileId = await getLicenseFileId(token);
+        const metadata = { name: LICENSE_FILE_NAME, mimeType: 'application/json', parents: ['appDataFolder'] };
+        const fileContent = new Blob([JSON.stringify({ licenseKey: key })], { type: 'application/json' });
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+        form.append('file', fileContent);
+
+        let url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart';
+        let method = 'POST';
+        if (fileId) {
+            url = `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`;
+            method = 'PATCH';
+        }
+
+        const res = await fetch(url, { method: method, headers: { Authorization: `Bearer ${token}` }, body: form });
+        if (!res.ok) throw new Error('License upload failed');
+        return true;
+    } catch (e) {
+        console.error('License Backup Error:', e);
+        return false;
+    }
+}
+
+async function loadLicenseFromDrive() {
+    const authRes = await getAccessToken(false);
+    if (authRes.error) return null;
+    const token = authRes.token;
+
+    try {
+        const fileId = await getLicenseFileId(token);
+        if (!fileId) return null;
+
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('License download failed');
+        const data = await res.json();
+        return data.licenseKey || null;
+    } catch (e) {
+        console.error('License Restore Error:', e);
+        return null;
     }
 }

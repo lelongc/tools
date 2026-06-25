@@ -254,20 +254,35 @@
                     <span class="setting-label">License & Cloud Sync</span>
                     <span class="pro-badge">PRO</span>
                 </div>
-                <div id="pro-unlocked" style="display: none;">
-                    <div style="font-size: 12px; color: var(--success); font-weight: 500; margin-bottom: 12px;">✓ Pro Activated</div>
-                    <button id="btn-sync-login" class="btn btn-secondary" style="width: 100%; margin-bottom: 8px;">Login to Google</button>
-                    <button id="btn-sync-now" class="btn btn-secondary" style="width: 100%; display: none; margin-bottom: 8px;">Backup to Drive</button>
-                    <button id="btn-sync-restore" class="btn btn-secondary" style="width: 100%; display: none;">Restore from Drive</button>
-                    <div id="sync-status" style="font-size: 11px; margin-top: 8px; color: var(--text-light); text-align: center;"></div>
+                <!-- State 1: Not Connected -->
+                <div id="sync-state-login">
+                    <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4;">Sign in to Google Drive to enable cloud backup and restore.</p>
+                    <button id="btn-sync-login" class="btn btn-secondary" style="width: 100%;">Connect Google Drive</button>
                 </div>
-                <div id="pro-locked">
-                    <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 8px;">Enter key to unlock Drive Sync & Unlimited History.</p>
-                    <div class="input-group">
-                        <input type="text" id="license-input" class="input-text" placeholder="License Key">
-                        <button id="btn-verify-license" class="btn">Verify</button>
+
+                <!-- State 2: Connected, NO License -->
+                <div id="sync-state-locked" style="display: none;">
+                    <div style="font-size: 12px; color: var(--success); font-weight: 500; margin-bottom: 8px;">✓ Drive Connected</div>
+                    <p style="font-size: 12px; color: var(--danger); font-weight: 500; margin-bottom: 8px;">Sync requires NeoClip Pro</p>
+                    <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4;">Enter your License Key to unlock Cloud Sync & Unlimited History.</p>
+                    <input type="text" id="license-input" class="input-text" placeholder="e.g. XXXX-XXXX-XXXX-XXXX" style="width: 100%; margin-bottom: 8px; font-family: monospace; letter-spacing: 0.5px;">
+                    <button id="btn-verify-license" class="btn" style="width: 100%; font-weight: 600; margin-bottom: 8px;">Unlock NeoClip Pro</button>
+                    <div style="text-align: center;">
+                        <a href="#" id="btn-disconnect-drive-1" style="font-size: 11px; color: var(--text-light); text-decoration: underline;">Disconnect Drive</a>
                     </div>
                 </div>
+
+                <!-- State 3: Connected AND Licensed -->
+                <div id="sync-state-pro" style="display: none;">
+                    <div style="font-size: 12px; color: var(--success); font-weight: 500; margin-bottom: 12px;">✓ Google Drive Synced</div>
+                    <button id="btn-sync-now" class="btn btn-secondary" style="width: 100%; margin-bottom: 8px;">Backup to Drive</button>
+                    <button id="btn-sync-restore" class="btn btn-secondary" style="width: 100%; margin-bottom: 8px;">Restore from Drive</button>
+                    <div style="text-align: center;">
+                        <a href="#" id="btn-disconnect-drive-2" style="font-size: 11px; color: var(--text-light); text-decoration: underline;">Disconnect Drive</a>
+                    </div>
+                </div>
+                
+                <div id="sync-status" style="font-size: 11px; margin-top: 8px; color: var(--text-light); text-align: center;"></div>
             </div>
 
             <div class="setting-row">
