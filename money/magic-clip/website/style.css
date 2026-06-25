@@ -437,7 +437,7 @@ details p { margin-top: 1rem; color: var(--text-secondary); line-height: 1.6; }
     border-top: 1px solid var(--glass-border);
     padding: 4rem 2rem;
     margin-top: 6rem;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--bg-card);
 }
 .footer-content {
     max-width: 1200px;
