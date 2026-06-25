@@ -236,3 +236,24 @@ async function loadLicenseFromDrive() {
         return null;
     }
 }
+
+async function deleteLicenseFromDrive() {
+    const authRes = await getAccessToken(false);
+    if (authRes.error) return false;
+    const token = authRes.token;
+
+    try {
+        const fileId = await getLicenseFileId(token);
+        if (!fileId) return true; // Already gone
+
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('License delete failed');
+        return true;
+    } catch (e) {
+        console.error('License Delete Error:', e);
+        return false;
+    }
+}

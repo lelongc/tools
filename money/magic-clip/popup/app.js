@@ -2,15 +2,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const statItems = document.getElementById('stat-items');
     const statCols = document.getElementById('stat-cols');
 
-    // Fetch Stats
-    chrome.runtime.sendMessage({ action: 'getRecent', limit: 999 }, res => {
-        const total = res && res.items ? res.items.length : 0;
-        if (statItems) statItems.textContent = total;
-    });
-    chrome.runtime.sendMessage({ action: 'getCollections' }, colRes => {
-        const cols = colRes && colRes.collections ? colRes.collections.length : 0;
-        if (statCols) statCols.textContent = cols;
-    });
+    function loadStats() {
+        chrome.runtime.sendMessage({ action: 'getRecent', limit: 99999 }, res => {
+            const total = res && res.items ? res.items.length : 0;
+            if (statItems) statItems.textContent = total;
+        });
+        chrome.runtime.sendMessage({ action: 'getCollections' }, colRes => {
+            const cols = colRes && colRes.collections ? colRes.collections.length : 0;
+            if (statCols) statCols.textContent = cols;
+        });
+    }
+    
+    // Initial load
+    loadStats();
 
     // Handle Pro/License Status
     const proUnlocked = document.getElementById('pro-unlocked');
@@ -74,13 +78,14 @@ document.addEventListener('DOMContentLoaded', () => {
             btnVerify.disabled = true;
 
             chrome.runtime.sendMessage({ action: 'verifyLicense', key }, (resp) => {
-                btnVerify.textContent = 'Unlock NeoClip Pro';
-                btnVerify.disabled = false;
-
                 if (resp && resp.ok) {
-                    updateUIState();
+                    btnVerify.textContent = 'Success!';
+                    showToast('Welcome to NeoClip Pro!');
+                    setTimeout(() => updateUIState(), 1000);
                 } else {
-                    alert(resp.error || 'Invalid license key');
+                    btnVerify.textContent = 'Unlock NeoClip Pro';
+                    btnVerify.disabled = false;
+                    showToast(resp.error || 'Invalid license key', true);
                 }
             });
         });
@@ -144,6 +149,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 btnRestore.disabled = false;
                 if (res && res.ok) {
                     setSyncStatus('Restore complete!');
+                    loadStats(); // Update stats in realtime
                 } else {
                     setSyncStatus('Restore failed: ' + (res ? res.error : 'Unknown'), true);
                 }
@@ -159,6 +165,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         toggleBubble.addEventListener('change', (e) => {
             chrome.storage.local.set({ hideBubble: !e.target.checked });
+        });
+    }
+
+    function showToast(msg, isError = false) {
+        const container = document.getElementById('toast-container');
+        const text = document.getElementById('toast-message');
+        if (container && text) {
+            text.textContent = msg;
+            container.style.background = isError ? 'var(--danger)' : 'var(--success)';
+            container.style.opacity = '1';
+            setTimeout(() => { container.style.opacity = '0'; }, 3000);
+        }
+    }
+
+    // Handle Retention Settings
+    const settingLimit = document.getElementById('setting-limit');
+    const settingExpiry = document.getElementById('setting-expiry');
+
+    if (settingLimit && settingExpiry) {
+        chrome.storage.local.get(['historyLimit', 'historyExpiry'], (res) => {
+            settingLimit.value = res.historyLimit || "500";
+            settingExpiry.value = res.historyExpiry || "0";
+        });
+
+        settingLimit.addEventListener('change', (e) => {
+            const val = parseInt(e.target.value);
+            chrome.runtime.sendMessage({ action: 'getProStatus' }, res => {
+                const isPro = res && res.isPro;
+                if (!isPro && val > 500) {
+                    showToast('Unlimited and extended history limits are Pro features.', true);
+                    e.target.value = "500";
+                    chrome.storage.local.set({ historyLimit: 500 });
+                } else {
+                    chrome.storage.local.set({ historyLimit: val });
+                }
+            });
+        });
+
+        settingExpiry.addEventListener('change', (e) => {
+            chrome.storage.local.set({ historyExpiry: parseInt(e.target.value) });
         });
     }
 
@@ -197,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 chrome.runtime.sendMessage({ action: 'clearStorage' }, () => {
                     if (statItems) statItems.textContent = '0';
                     if (statCols) statCols.textContent = '0';
-                    alert('Storage cleared successfully!');
+                    showToast('Storage cleared successfully!');
                 });
             }
         });

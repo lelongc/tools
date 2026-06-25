@@ -4,25 +4,28 @@ importScripts('sync.js');
 
 console.log('Magic Clip service worker running.');
 
-// --- Licensing System ---
+// --- Licensing System (Pro Validation Engine) ---
 let isProCache = false;
+let proValidUntil = 0; // The timestamp until which Pro features can be used offline
 
 // Initialize on startup
-chrome.storage.sync.get(['isPro', 'licenseKey', 'instanceId'], (data) => {
+chrome.storage.sync.get(['isPro', 'proValidUntil', 'licenseKey', 'instanceId'], (data) => {
     isProCache = !!data.isPro;
+    proValidUntil = data.proValidUntil || 0;
 });
 
-// Listen for sync changes from other devices
+// Listen for sync changes
 chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === 'sync') {
-        if (changes.isPro !== undefined) {
-            isProCache = !!changes.isPro.newValue;
-        }
+        if (changes.isPro !== undefined) isProCache = !!changes.isPro.newValue;
+        if (changes.proValidUntil !== undefined) proValidUntil = changes.proValidUntil.newValue;
     }
 });
 
-// Periodic Subscription Validation (Every 24 hours)
-chrome.alarms.create('checkSubscription', { periodInMinutes: 1440 });
+// Periodic Validation Alarm
+chrome.alarms.get('checkSubscription', (alarm) => {
+    if (!alarm) chrome.alarms.create('checkSubscription', { periodInMinutes: 720 }); // Every 12h
+});
 chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'checkSubscription') {
         validateSubscriptionBackground();
@@ -30,66 +33,74 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 async function validateSubscriptionBackground() {
-    chrome.storage.sync.get(['isPro', 'licenseKey', 'instanceId'], async (data) => {
-        if (!data.isPro || !data.licenseKey) return;
+    const data = await new Promise(res => chrome.storage.sync.get(['isPro', 'licenseKey', 'instanceId'], res));
+    if (!data.isPro || !data.licenseKey) return;
+    
+    try {
+        const response = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ license_key: data.licenseKey, instance_id: data.instanceId })
+        });
+        const result = await response.json();
         
-        // Validate against Lemon Squeezy to see if subscription is still active
-        try {
-            const response = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
-                method: 'POST',
-                headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ license_key: data.licenseKey, instance_id: data.instanceId })
-            });
-            const result = await response.json();
-            if (!result.valid) {
-                // Subscription expired or canceled
-                isProCache = false;
-                await chrome.storage.sync.set({ isPro: false });
-            }
-        } catch(e) {}
-    });
+        if (result.valid) {
+            // Subscription active: Extend lease by 72 hours
+            const newValidUntil = Date.now() + (72 * 60 * 60 * 1000);
+            proValidUntil = newValidUntil;
+            await chrome.storage.sync.set({ proValidUntil: newValidUntil });
+        } else {
+            // Subscription expired or canceled: Revoke immediately
+            isProCache = false;
+            proValidUntil = 0;
+            await chrome.storage.sync.remove(['isPro', 'proValidUntil', 'licenseKey', 'instanceId']);
+            // Delete from Drive to prevent unauthorized restore
+            if (typeof deleteLicenseFromDrive === 'function') await deleteLicenseFromDrive();
+            chrome.storage.local.set({ driveConnected: false });
+        }
+    } catch(e) {
+        // Network error: Do nothing. If they are offline for > 72h, isProActive() will naturally block them.
+    }
+}
+
+// Function to check if Pro is currently active (checks lease time)
+async function isProActive() {
+    if (!isProCache) return false;
+    
+    if (Date.now() > proValidUntil) {
+        // Lease expired, force a background check but return false for now
+        validateSubscriptionBackground();
+        return false;
+    }
+    return true;
 }
 
 async function checkLicense(key) {
     if (!key) return { ok: false, error: 'Empty key' };
     
-    // BACKDOOR FOR TESTING WHILE STORE IS IN REVIEW
-    if (key.trim() === 'NEOCLIP-TEST-PRO') {
-        isProCache = true;
-        await chrome.storage.sync.set({ isPro: true, licenseKey: key, instanceId: 'test-instance-123' });
-        return { ok: true };
-    }
-
-    // Lemon Squeezy API Verification
     try {
         const response = await fetch('https://api.lemonsqueezy.com/v1/licenses/activate', {
             method: 'POST',
             headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({ 
-                license_key: key, 
-                instance_name: 'Chrome on ' + navigator.userAgent.split(' ')[0] 
-            })
+            body: new URLSearchParams({ license_key: key, instance_name: 'Chrome on ' + navigator.userAgent.split(' ')[0] })
         });
         const data = await response.json();
         
         if (data.activated) {
             isProCache = true;
-            await chrome.storage.sync.set({ isPro: true, licenseKey: key, instanceId: data.instance.id });
+            proValidUntil = Date.now() + (72 * 60 * 60 * 1000);
+            await chrome.storage.sync.set({ isPro: true, proValidUntil, licenseKey: key, instanceId: data.instance.id });
             
-            // Save to Drive if connected
-            chrome.storage.local.get(['driveConnected'], async (res) => {
-                if (res.driveConnected && typeof saveLicenseToDrive === 'function') {
-                    await saveLicenseToDrive(key);
-                }
-            });
-            
+            const res = await new Promise(r => chrome.storage.local.get(['driveConnected'], r));
+            if (res.driveConnected && typeof saveLicenseToDrive === 'function') {
+                await saveLicenseToDrive(key);
+            }
             return { ok: true };
         } else if (data.error && data.error.includes('Activation limit')) {
-            return { ok: false, error: 'Device limit reached. Please deactivate an old device in your Customer Portal.' };
+            return { ok: false, error: 'Device limit reached. Please deactivate an old device.' };
         }
         return { ok: false, error: data.error || 'Invalid license key' };
     } catch (e) {
-        console.error('License verification failed', e);
         return { ok: false, error: 'Network error. Please try again.' };
     }
 }
@@ -109,7 +120,7 @@ async function handleMessage(req, sender) {
             return { ok: true };
 
         case 'saveItem':
-            const result = await saveItem(req.item, isProCache);
+            const result = await saveItem(req.item, await isProActive());
             if (result.isNew) {
                 broadcastClipboardUpdated(req.item);
             }
@@ -120,7 +131,7 @@ async function handleMessage(req, sender) {
                 await setupOffscreenDocument();
                 const data = await chrome.runtime.sendMessage({ action: 'offscreenSyncClipboard' });
                 if (data) {
-                    const result = await saveItem(data);
+                    const result = await saveItem(data, await isProActive());
                     if (result.isNew) broadcastClipboardUpdated(data);
                     return { ok: true, isNew: result.isNew };
                 }
@@ -139,7 +150,7 @@ async function handleMessage(req, sender) {
             return { items: await getCollectionItems(req.collectionId, req.search || '') };
 
         case 'createCollection':
-            const cid = await createCollection(req.name, isProCache);
+            const cid = await createCollection(req.name, await isProActive());
             if (cid === null) return { error: 'Limit reached. Upgrade to Pro.' };
             return { ok: true, id: cid };
 
@@ -176,7 +187,8 @@ async function handleMessage(req, sender) {
             if (loginRes && loginRes.ok) {
                 await chrome.storage.local.set({ driveConnected: true });
                 
-                if (!isProCache && typeof loadLicenseFromDrive === 'function') {
+                const isProNow = await isProActive();
+                if (!isProNow && typeof loadLicenseFromDrive === 'function') {
                     const savedKey = await loadLicenseFromDrive();
                     if (savedKey) {
                         const checkRes = await checkLicense(savedKey);
@@ -184,10 +196,10 @@ async function handleMessage(req, sender) {
                             return { ok: true, licenseLoaded: true };
                         }
                     }
-                    // No valid license found in Drive, they are not pro
-                    await chrome.storage.local.set({ driveConnected: false });
-                    return { error: 'No license found in Drive. Pro feature only.' };
-                } else if (isProCache && typeof saveLicenseToDrive === 'function') {
+                    // No valid license found in Drive, they are not pro, BUT they are successfully connected!
+                    // Return ok: true so the UI transitions to State 2 (Connected, No License)
+                    return { ok: true, licenseLoaded: false };
+                } else if (isProNow && typeof saveLicenseToDrive === 'function') {
                     chrome.storage.sync.get(['licenseKey'], async (res) => {
                         if (res.licenseKey) {
                             await saveLicenseToDrive(res.licenseKey);
@@ -211,18 +223,18 @@ async function handleMessage(req, sender) {
             });
 
         case 'backupToDrive':
-            if (!isProCache) return { error: 'Pro feature only' };
+            if (!(await isProActive())) return { error: 'Pro feature only' };
             return { ok: await backupToDrive() };
 
         case 'restoreFromDrive':
-            if (!isProCache) return { error: 'Pro feature only' };
+            if (!(await isProActive())) return { error: 'Pro feature only' };
             return { ok: await restoreFromDrive() };
 
         case 'verifyLicense':
             return await checkLicense(req.key);
             
         case 'getProStatus':
-            return { isPro: isProCache };
+            return { isPro: await isProActive() };
 
         default:
             return { error: 'Unknown action' };

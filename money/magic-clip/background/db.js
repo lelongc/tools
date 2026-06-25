@@ -41,12 +41,32 @@ async function saveItem(item, isPro = false) {
     item.timestamp = Date.now();
     item.collectionId = item.collectionId || 0; // use 0 for null to make indexing easier
 
-    // Cap at limits (500 free, 100000 Pro)
+    // Get Retention Settings
+    const settings = await new Promise(resolve => {
+        chrome.storage.local.get(['historyLimit', 'historyExpiry'], resolve);
+    });
+    
+    // Auto-Clear Expired Items
+    const expiryDays = settings.historyExpiry || 0;
+    if (expiryDays > 0) {
+        const expiryMs = expiryDays * 24 * 60 * 60 * 1000;
+        const cutoff = Date.now() - expiryMs;
+        // Delete items older than cutoff that are NOT in a collection (collectionId == 0)
+        await db.history.where('timestamp').below(cutoff).filter(i => i.collectionId === 0).delete();
+    }
+
+    // Cap at limits
+    let limit = settings.historyLimit || 500;
+    if (!isPro && limit > 500) limit = 500; // Enforce Free limit fallback
+
     const count = await db.history.count();
-    const limit = isPro ? 100000 : 500;
     if (count >= limit) {
-        const oldest = await db.history.orderBy('timestamp').first();
-        if (oldest) await db.history.delete(oldest.id);
+        // Delete oldest items until we are below limit (usually just 1, but we use a loop just in case)
+        const toDelete = count - limit + 1;
+        const oldItems = await db.history.orderBy('timestamp').limit(toDelete).toArray();
+        for (const old of oldItems) {
+            await db.history.delete(old.id);
+        }
     }
     const newId = await db.history.add(item);
     lastSavedContent = item.content;

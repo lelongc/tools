@@ -252,7 +252,7 @@
             <div class="pro-section" id="license-area">
                 <div class="pro-header">
                     <span class="setting-label">License & Cloud Sync</span>
-                    <span class="pro-badge">PRO</span>
+                    <span class="pro-badge" id="pro-badge" style="display: none;">PRO</span>
                 </div>
                 <!-- State 1: Not Connected -->
                 <div id="sync-state-login">
@@ -283,6 +283,45 @@
                 </div>
                 
                 <div id="sync-status" style="font-size: 11px; margin-top: 8px; color: var(--text-light); text-align: center;"></div>
+            </div>
+
+            <!-- Data & Privacy Area -->
+            <div class="settings-group">
+                <div class="pro-section" style="padding-bottom: 8px;">
+                    <div class="pro-header">
+                        <div class="header-text">
+                            <h2>Data Retention</h2>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-row" style="padding: 10px 0; border-bottom: 1px solid var(--card-border);">
+                        <div>
+                            <div class="setting-label">History Limit</div>
+                            <div class="setting-desc">Maximum clips to keep</div>
+                        </div>
+                        <select id="setting-limit" class="input-text" style="width: 110px; padding: 4px; cursor: pointer;">
+                            <option value="50">50 items</option>
+                            <option value="100">100 items</option>
+                            <option value="500">500 items</option>
+                            <option value="1000">1,000 items (Pro)</option>
+                            <option value="5000">5,000 items (Pro)</option>
+                            <option value="999999">Unlimited (Pro)</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-row" style="padding: 10px 0; border-bottom: none;">
+                        <div>
+                            <div class="setting-label">Auto-Clear</div>
+                            <div class="setting-desc">Delete clips older than</div>
+                        </div>
+                        <select id="setting-expiry" class="input-text" style="width: 110px; padding: 4px; cursor: pointer;">
+                            <option value="0">Never</option>
+                            <option value="1">1 Day</option>
+                            <option value="7">7 Days</option>
+                            <option value="30">30 Days</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             <div class="setting-row">
@@ -316,6 +355,11 @@
     
     <div class="footer">
         v3.0.0 · 100% Offline
+    </div>
+
+    <!-- Custom Toast Notification -->
+    <div id="toast-container" style="position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--danger); color: white; padding: 8px 16px; border-radius: 6px; font-size: 12px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;">
+        <span id="toast-message">Message</span>
     </div>
 
     <script src="app.js"></script>
