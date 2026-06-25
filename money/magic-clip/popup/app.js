@@ -122,6 +122,9 @@ document.addEventListener('DOMContentLoaded', () => {
             btnEl.textContent = 'Connect Google Drive';
             btnEl.disabled = false;
             if (res && res.ok) {
+                if (res.licenseLoaded) {
+                    showToast('NeoClip Pro restored from Google Drive!');
+                }
                 updateUIState();
             } else {
                 setSyncStatus('Error: ' + (res.error || 'Unknown error'), true);

@@ -252,12 +252,22 @@ async function handleMessage(req, sender) {
                     if (driveLicense && driveLicense.licenseKey) {
                         const { isPro } = await new Promise(r => chrome.storage.local.get(['isPro'], r));
                         if (!isPro) {
+                            let restored = false;
                             if (driveLicense.instanceId) {
                                 const restoreRes = await restoreLicense(driveLicense.licenseKey, driveLicense.instanceId);
-                                if (restoreRes.ok) return { ok: true, licenseLoaded: true };
-                            } else {
+                                if (restoreRes.ok) {
+                                    restored = true;
+                                }
+                            }
+                            if (!restored) {
+                                // Fallback to activating the key again
                                 const checkRes = await checkLicense(driveLicense.licenseKey);
-                                if (checkRes.ok) return { ok: true, licenseLoaded: true };
+                                if (checkRes.ok) {
+                                    restored = true;
+                                }
+                            }
+                            if (restored) {
+                                return { ok: true, licenseLoaded: true };
                             }
                         }
                     }

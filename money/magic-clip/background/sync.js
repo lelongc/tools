@@ -74,12 +74,18 @@ function logoutGoogle() {
 }
 
 async function getSyncFileId(token) {
-    const res = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${FILE_NAME}'`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
-    const data = await res.json();
-    if (data.files && data.files.length > 0) {
-        return data.files[0].id;
+    try {
+        const res = await fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&pageSize=100', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (data && data.files) {
+            const file = data.files.find(f => f.name === FILE_NAME);
+            return file ? file.id : null;
+        }
+    } catch (e) {
+        console.error('getSyncFileId error:', e);
     }
     return null;
 }
@@ -176,12 +182,18 @@ async function restoreFromDrive() {
 const LICENSE_FILE_NAME = 'neoclip_license.json';
 
 async function getLicenseFileId(token) {
-    const res = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${LICENSE_FILE_NAME}'`, {
-        headers: { Authorization: `Bearer ${token}` }
-    });
-    const data = await res.json();
-    if (data && data.files && data.files.length > 0) {
-        return data.files[0].id;
+    try {
+        const res = await fetch('https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&pageSize=100', {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!res.ok) return null;
+        const data = await res.json();
+        if (data && data.files) {
+            const file = data.files.find(f => f.name === LICENSE_FILE_NAME);
+            return file ? file.id : null;
+        }
+    } catch (e) {
+        console.error('getLicenseFileId error:', e);
     }
     return null;
 }
@@ -193,7 +205,11 @@ async function saveLicenseToDrive(key, instanceId) {
 
     try {
         const fileId = await getLicenseFileId(token);
-        const metadata = { name: LICENSE_FILE_NAME, mimeType: 'application/json', parents: ['appDataFolder'] };
+        const metadata = { 
+            name: LICENSE_FILE_NAME, 
+            mimeType: 'application/json', 
+            parents: fileId ? undefined : ['appDataFolder'] 
+        };
         const payload = { licenseKey: key };
         if (instanceId) payload.instanceId = instanceId;
         const fileContent = new Blob([JSON.stringify(payload)], { type: 'application/json' });
