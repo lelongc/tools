@@ -67,9 +67,8 @@ async function loginToGoogle() {
 }
 
 function logoutGoogle() {
-    if (cachedToken) {
-        fetch(`https://accounts.google.com/o/oauth2/revoke?token=${cachedToken}`).catch(() => {});
-    }
+    // Only clear local cache. Do not revoke the token on Google's end, 
+    // so relogging in doesn't prompt the consent screen again.
     cachedToken = null;
     tokenExpiresAt = 0;
 }
