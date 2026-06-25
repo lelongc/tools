@@ -19,6 +19,12 @@
                 <a href="#features">Features</a>
                 <a href="#security">Security</a>
                 <a href="#pricing">Pricing</a>
+                <button id="theme-toggle" class="theme-btn" aria-label="Toggle Dark/Light Mode">
+                    <!-- Sun icon for light mode (hidden in dark mode by default if we want, or dynamically changed) -->
+                    <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                    <!-- Moon icon for dark mode -->
+                    <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; display: none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                </button>
                 <a href="#" class="btn-primary-small">Add to Chrome</a>
             </div>
         </div>
@@ -216,6 +222,44 @@
         </div>
     </footer>
 
+    <script>
+        // Animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+        
+        // Theme Toggle
+        const themeBtn = document.getElementById('theme-toggle');
+        const sunIcon = document.querySelector('.sun-icon');
+        const moonIcon = document.querySelector('.moon-icon');
+        const body = document.body;
+
+        // Default to dark theme, user requested dark as base but wants light option
+        let currentTheme = localStorage.getItem('theme') || 'dark';
+
+        function updateTheme(theme) {
+            if (theme === 'light') {
+                body.classList.add('light-mode');
+                sunIcon.style.display = 'none';
+                moonIcon.style.display = 'block';
+            } else {
+                body.classList.remove('light-mode');
+                sunIcon.style.display = 'block';
+                moonIcon.style.display = 'none';
+            }
+            localStorage.setItem('theme', theme);
+        }
+
+        updateTheme(currentTheme);
+
+        themeBtn.addEventListener('click', () => {
+            currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            updateTheme(currentTheme);
+        });
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
