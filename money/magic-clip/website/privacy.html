@@ -78,37 +78,37 @@
                 <p>At NeoClip, your privacy is our core foundation. We believe that your clipboard data, passwords, and private notes belong strictly to you. This Privacy Policy describes how we process your information when you use our browser extension and website.</p>
 
                 <h2>1. What Data We Access and Store</h2>
-                <p>Unlike traditional clipboard managers, NeoClip is designed with a **Local-First** philosophy:</p>
+                <p>Unlike traditional clipboard managers, NeoClip is designed with a **Local-First** architecture to protect your data:</p>
                 <ul>
-                    <li><strong>Clipboard Data:</strong> All text, links, and image clips you copy are encrypted and stored locally in your browser's private storage (IndexedDB). We do not run any central database, and we cannot read your saved items.</li>
-                    <li><strong>Image Extraction (OCR):</strong> When you use our Image Text Finder, we pass the image directly to Google Lens. We do not store or process your images on any servers of our own.</li>
+                    <li><strong>Clipboard Data:</strong> All clipboard items you copy (including text, URLs, and images) are stored locally on your device using your browser's secure sandboxed storage. We do not transmit your clipboard data to our servers, we do not operate any central database, and we cannot access your clipboard history.</li>
+                    <li><strong>Image Extraction (OCR):</strong> When you use our Image Text Finder feature, processing is handled directly through secure browser APIs. We do not collect, process, or store your images on any external servers controlled by us.</li>
                 </ul>
 
                 <h2>2. Google Drive Cloud Sync</h2>
-                <p>If you choose to purchase NeoClip Pro and enable Cloud Sync:</p>
+                <p>If you choose to purchase NeoClip Pro and enable the optional Cloud Sync feature:</p>
                 <ul>
-                    <li>NeoClip connects directly to your personal Google Drive account.</li>
-                    <li>We request access exclusively to the Google Drive <strong>AppData folder</strong> (<code>drive.appdata</code> scope). This is a hidden, app-specific directory.</li>
-                    <li>NeoClip can only see, write, and modify the files it creates (<code>neoclip_backup.json</code> and <code>neoclip_license.json</code>). We have absolutely no access to the rest of your Google Drive files.</li>
-                    <li>Your sync data is transferred directly between your browser and Google's secure servers. It never passes through us.</li>
+                    <li>NeoClip connects directly to your own personal Google Drive account.</li>
+                    <li>We request access restricted <strong>solely to the Google Drive Application Data Folder</strong> (<code>drive.appdata</code> scope). This is a hidden, app-specific directory isolated from the rest of your Google Drive files. This guarantees that our extension has absolutely no access to any of your other personal files or folders.</li>
+                    <li>The extension only reads and syncs application-specific configuration and backup files that it creates.</li>
+                    <li>Your sync data is transferred directly between your browser and Google's secure servers. It never passes through or is stored by the developer.</li>
                 </ul>
 
                 <h2>3. License Key Verification</h2>
-                <p>When you purchase a Pro plan, payment processing and license key generation are handled securely by **Lemon Squeezy**:</p>
+                <p>When you purchase a Pro plan, payment processing and billing are handled securely by our payment provider, **Lemon Squeezy**:</p>
                 <ul>
-                    <li>To activate Pro features, the extension sends your license key directly to Lemon Squeezy's validation API to confirm your subscription status.</li>
-                    <li>We only store your license key and an anonymized device identifier (Instance ID) locally on your device and inside your private Google Drive AppData folder to maintain your Pro status.</li>
+                    <li>To validate Pro features, the extension sends your license key securely to our payment provider's API to verify your subscription status.</li>
+                    <li>Only your license key and an anonymized device identifier are stored securely within the browser's local sandbox and your private Google Drive app storage to maintain your premium status. No billing details, personal identifiers, or payment details are accessed or stored by the extension.</li>
                 </ul>
 
                 <h2>4. Third-Party Services</h2>
-                <p>Our extension interacts with the following third-party services:</p>
+                <p>Our extension interacts exclusively with the following trusted third-party APIs to deliver core functionalities:</p>
                 <ul>
-                    <li><strong>Google APIs:</strong> Used for OAuth authentication and backing up files to your private Google Drive.</li>
-                    <li><strong>Lemon Squeezy:</strong> Used to process purchases and validate product licenses.</li>
+                    <li><strong>Google APIs:</strong> Used solely for user-initiated Google Drive authentication and database backups.</li>
+                    <li><strong>Lemon Squeezy:</strong> Used solely to process purchases and validate product license status.</li>
                 </ul>
 
                 <h2>5. Security of Your Data</h2>
-                <p>Because all your clipboard data is stored either locally on your machine or on your own Google Drive, the security of your data depends on your device's security and your Google account settings. We recommend keeping your browser updated and using multi-factor authentication for your Google account.</p>
+                <p>Because all your clipboard data is stored either locally on your machine or in your personal Google Drive, the security of your data depends on your device's security and your Google account settings. We recommend keeping your browser updated and using multi-factor authentication for your Google account.</p>
 
                 <h2>6. Changes to This Policy</h2>
                 <p>We may update this Privacy Policy from time to time. Any changes will be posted on this page, and the date at the top of the page will be updated.</p>
