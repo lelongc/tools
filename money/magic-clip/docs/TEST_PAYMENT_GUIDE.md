@@ -24,7 +24,7 @@ Bạn cần chuẩn bị sẵn 3 thông tin từ trang quản trị Lemon Squeez
 
 ---
 
-## 2. Các Bước Cấu Hấu Hình Code Để Chạy Thử (Local Test)
+## 2. Các Bước Cấu Hấu Kinh Code Để Chạy Thử (Local Test)
 
 > [!NOTE]
 > Bạn cần cấu hình Extension để nó gọi API Lemon Squeezy ở chế độ kiểm tra.
