@@ -10,28 +10,70 @@ let proValidUntil = 0; // The timestamp until which Pro features can be used off
 let lastApiCheck = 0; // Tracks the last time we pinged Lemon Squeezy
 
 // Initialize on startup
-chrome.storage.local.get(['isPro', 'proValidUntil', 'licenseKey', 'instanceId'], (data) => {
+chrome.storage.local.get(['isPro', 'proValidUntil', 'licenseKey', 'instanceId', 'autoBackupInterval'], (data) => {
     isProCache = !!data.isPro;
     proValidUntil = data.proValidUntil || 0;
+    
+    // Set up autoBackup alarm on startup if active
+    const interval = data.autoBackupInterval !== undefined ? parseInt(data.autoBackupInterval) : 60;
+    updateAutoBackupAlarm(interval, !!data.isPro);
 });
+
+// Helper to update auto-backup alarm schedule
+function updateAutoBackupAlarm(interval, isPro) {
+    chrome.alarms.clear('autoBackup', () => {
+        if (!isPro || !interval || interval <= 0) {
+            console.log('Auto-backup is disabled.');
+            return;
+        }
+        chrome.alarms.create('autoBackup', { periodInMinutes: interval });
+        console.log(`Auto-backup alarm set for every ${interval} minutes.`);
+    });
+}
 
 // Listen for local changes
 chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName === 'local') {
-        if (changes.isPro !== undefined) isProCache = !!changes.isPro.newValue;
+        if (changes.isPro !== undefined) {
+            isProCache = !!changes.isPro.newValue;
+            chrome.storage.local.get(['autoBackupInterval'], (data) => {
+                const interval = data.autoBackupInterval !== undefined ? parseInt(data.autoBackupInterval) : 60;
+                updateAutoBackupAlarm(interval, isProCache);
+            });
+        }
         if (changes.proValidUntil !== undefined) proValidUntil = changes.proValidUntil.newValue;
+        if (changes.autoBackupInterval !== undefined) {
+            const newInterval = changes.autoBackupInterval.newValue !== undefined ? parseInt(changes.autoBackupInterval.newValue) : 60;
+            chrome.storage.local.get(['isPro'], (data) => {
+                updateAutoBackupAlarm(newInterval, !!data.isPro);
+            });
+        }
     }
 });
 
-// Periodic Validation Alarm
+// Periodic Validation & Auto-Backup Alarm
 chrome.alarms.get('checkSubscription', (alarm) => {
     if (!alarm) chrome.alarms.create('checkSubscription', { periodInMinutes: 60 }); // Every 1h
 });
+
 chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'checkSubscription') {
         validateSubscriptionBackground();
+    } else if (alarm.name === 'autoBackup') {
+        handleAutoBackupAlarm();
     }
 });
+
+async function handleAutoBackupAlarm() {
+    const isPro = await isProActive();
+    if (!isPro) return;
+    const res = await new Promise(r => chrome.storage.local.get(['driveConnected'], r));
+    if (res.driveConnected) {
+        console.log('Periodic auto-backup starting...');
+        const success = await backupToDrive();
+        console.log('Periodic auto-backup status:', success ? 'SUCCESS' : 'FAILED');
+    }
+}
 
 async function validateSubscriptionBackground() {
     const data = await new Promise(res => chrome.storage.local.get(['isPro', 'licenseKey', 'instanceId'], res));

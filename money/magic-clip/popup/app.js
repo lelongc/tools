@@ -29,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnBackup = document.getElementById('btn-sync-now');
     const btnRestore = document.getElementById('btn-sync-restore');
     const syncStatus = document.getElementById('sync-status');
+    const settingBackup = document.getElementById('setting-backup');
 
     function setSyncStatus(msg, isError = false) {
         if (syncStatus) {
@@ -69,12 +70,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (syncStatePro) syncStatePro.style.display = 'block';
                 }
 
-                // Auto-reset historyLimit when not Pro
-                if (!isPro && settingLimit) {
-                    const currentVal = parseInt(settingLimit.value);
-                    if (currentVal > 50) {
-                        settingLimit.value = "50";
-                        chrome.storage.local.set({ historyLimit: 50 });
+                // Auto-reset historyLimit and autoBackupInterval when not Pro
+                if (!isPro) {
+                    if (settingLimit) {
+                        const currentVal = parseInt(settingLimit.value);
+                        if (currentVal > 50) {
+                            settingLimit.value = "50";
+                            chrome.storage.local.set({ historyLimit: 50 });
+                        }
+                    }
+                    if (settingBackup) {
+                        const currentBackup = parseInt(settingBackup.value);
+                        if (currentBackup > 0) {
+                            settingBackup.value = "0";
+                            chrome.storage.local.set({ autoBackupInterval: 0 });
+                        }
                     }
                 }
             });
@@ -203,14 +213,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Handle Retention Settings
+    // Handle Retention & Auto-Backup Settings
     const settingLimit = document.getElementById('setting-limit');
     const settingExpiry = document.getElementById('setting-expiry');
 
-    if (settingLimit && settingExpiry) {
-        chrome.storage.local.get(['historyLimit', 'historyExpiry'], (res) => {
+    if (settingLimit && settingExpiry && settingBackup) {
+        chrome.storage.local.get(['historyLimit', 'historyExpiry', 'autoBackupInterval'], (res) => {
             settingLimit.value = res.historyLimit || "50";
             settingExpiry.value = res.historyExpiry || "0";
+            settingBackup.value = res.autoBackupInterval !== undefined ? String(res.autoBackupInterval) : "60";
         });
 
         settingLimit.addEventListener('change', (e) => {
@@ -229,6 +240,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
         settingExpiry.addEventListener('change', (e) => {
             chrome.storage.local.set({ historyExpiry: parseInt(e.target.value) });
+        });
+
+        settingBackup.addEventListener('change', (e) => {
+            const val = parseInt(e.target.value);
+            chrome.runtime.sendMessage({ action: 'getProStatus' }, res => {
+                const isPro = res && res.isPro;
+                if (!isPro && val > 0) {
+                    showToast('Auto-Backup is a Pro feature. Please upgrade to Pro!', true);
+                    e.target.value = "0";
+                    chrome.storage.local.set({ autoBackupInterval: 0 });
+                } else {
+                    chrome.storage.local.set({ autoBackupInterval: val });
+                }
+            });
         });
     }
 

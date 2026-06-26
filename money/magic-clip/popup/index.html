@@ -311,7 +311,7 @@
                         </select>
                     </div>
 
-                    <div class="setting-row" style="padding: 10px 0; border-bottom: none;">
+                    <div class="setting-row" style="padding: 10px 0; border-bottom: 1px solid var(--card-border);">
                         <div>
                             <div class="setting-label">Auto-Clear</div>
                             <div class="setting-desc">Delete clips older than</div>
@@ -321,6 +321,20 @@
                             <option value="1">1 Day</option>
                             <option value="7">7 Days</option>
                             <option value="30">30 Days</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-row" style="padding: 10px 0; border-bottom: none;">
+                        <div>
+                            <div class="setting-label">Auto-Backup</div>
+                            <div class="setting-desc">Sync to Drive automatically</div>
+                        </div>
+                        <select id="setting-backup" class="input-text" style="width: 110px; padding: 4px; cursor: pointer;">
+                            <option value="0">Off</option>
+                            <option value="15">Every 15 min</option>
+                            <option value="60">Every 1 hour</option>
+                            <option value="720">Every 12 hours</option>
+                            <option value="1440">Daily</option>
                         </select>
                     </div>
                 </div>
