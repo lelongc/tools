@@ -91,6 +91,19 @@ async function getSyncFileId(token) {
 }
 
 async function syncWithDrive(interactive = false) {
+    // 1. Throttle check for non-interactive (silent) syncs to prevent API spamming
+    if (!interactive) {
+        const lastSyncRes = await new Promise(resolve => {
+            chrome.storage.local.get(['lastBackupTime'], resolve);
+        });
+        const lastSync = lastSyncRes.lastBackupTime || 0;
+        const MIN_SYNC_INTERVAL = 5 * 60 * 1000; // 5 minutes
+        if (Date.now() - lastSync < MIN_SYNC_INTERVAL) {
+            console.log('Silent sync skipped to prevent Google API spam (last sync was less than 5 minutes ago).');
+            return { ok: true, skipped: true };
+        }
+    }
+
     let authRes = await getAccessToken(false); // Try silent auth first
     if (authRes.error && interactive) {
         authRes = await getAccessToken(true); // Fallback to interactive ONLY if interactive is true
