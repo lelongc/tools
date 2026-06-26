@@ -14,6 +14,17 @@ async function getAccessToken(interactive = false) {
         return { token: cachedToken };
     }
 
+    // Retrieve from chrome.storage.local if memory is empty (after service worker restarts)
+    const storageRes = await new Promise(resolve => {
+        chrome.storage.local.get(['googleAccessToken', 'googleTokenExpiresAt'], resolve);
+    });
+
+    if (storageRes.googleAccessToken && storageRes.googleTokenExpiresAt && Date.now() < storageRes.googleTokenExpiresAt) {
+        cachedToken = storageRes.googleAccessToken;
+        tokenExpiresAt = storageRes.googleTokenExpiresAt;
+        return { token: cachedToken };
+    }
+
     if (CLIENT_ID === 'YOUR_NEW_WEB_CLIENT_ID_HERE') {
         const redirectUri = chrome.identity.getRedirectURL();
         return { error: `[BƯỚC 1]: Hãy lên Google Cloud tạo Web Application Client ID mới.\n[BƯỚC 2]: Dán link này vào mục "Authorized redirect URIs": ${redirectUri}` };
@@ -49,6 +60,13 @@ async function getAccessToken(interactive = false) {
                 if (token) {
                     cachedToken = token;
                     tokenExpiresAt = Date.now() + (expiresIn * 1000) - 60000;
+                    
+                    // Save to local storage for persistence across service worker restarts
+                    chrome.storage.local.set({
+                        googleAccessToken: cachedToken,
+                        googleTokenExpiresAt: tokenExpiresAt
+                    });
+                    
                     resolve({ token: token, redirectUri: redirectUri });
                 } else {
                     resolve({ error: 'Failed to extract token from Google.', redirectUri: redirectUri });
@@ -67,10 +85,9 @@ async function loginToGoogle() {
 }
 
 function logoutGoogle() {
-    // Only clear local cache. Do not revoke the token on Google's end, 
-    // so relogging in doesn't prompt the consent screen again.
     cachedToken = null;
     tokenExpiresAt = 0;
+    chrome.storage.local.remove(['googleAccessToken', 'googleTokenExpiresAt']);
 }
 
 async function getSyncFileId(token) {
