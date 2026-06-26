@@ -48,8 +48,8 @@
   "commands": {
     "toggle-panel": {
       "suggested_key": {
-        "default": "Alt+C",
-        "mac": "Alt+C"
+        "default": "Alt+V",
+        "mac": "Alt+V"
       },
       "description": "Toggle Magic Clip Panel"
     }

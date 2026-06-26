@@ -374,6 +374,10 @@ async function handleMessage(req, sender) {
             if (!(await isProActive())) return { error: 'Pro feature only' };
             return await syncWithDrive(true);
 
+        case 'syncWithDriveSilent':
+            if (!(await isProActive())) return { error: 'Pro feature only' };
+            return await syncWithDrive(false);
+
         case 'verifyLicense':
             return await checkLicense(req.key);
 

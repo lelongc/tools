@@ -137,7 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (resp && resp.ok) {
                 btnEl.textContent = 'Success!';
                 showToast('Welcome to NeoClip Pro!');
-                setTimeout(() => updateUIState(), 1000);
+                setTimeout(() => {
+                    updateUIState();
+                    loadStats();
+                }, 1000);
             } else {
                 btnEl.textContent = 'Unlock NeoClip Pro';
                 btnEl.disabled = false;
@@ -168,6 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast('NeoClip Pro restored from Google Drive!');
                 }
                 updateUIState();
+                loadStats();
             } else {
                 const errMsg = res ? res.error : '';
                 if (errMsg && (errMsg.includes('did not approve') || errMsg.includes('cancelled') || errMsg.includes('canceled') || errMsg.includes('cancel'))) {
