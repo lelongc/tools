@@ -71,6 +71,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 hideAllStates();
 
+                const licenseArea = document.getElementById('license-area');
+                if (licenseArea) {
+                    if (isConnected && isPro) {
+                        licenseArea.classList.add('pro');
+                    } else {
+                        licenseArea.classList.remove('pro');
+                    }
+                }
+
                 if (!isConnected) {
                     // State 1: Free, No Drive. Since Drive isn't connected, we don't care about isPro.
                     if (syncStateLogin) syncStateLogin.style.display = 'block';
