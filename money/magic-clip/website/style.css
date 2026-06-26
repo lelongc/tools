@@ -425,21 +425,33 @@ details {
     background: var(--bg-card);
     border: 1px solid var(--glass-border);
     border-radius: 12px;
-    padding: 1.5rem;
     margin-bottom: 1rem;
     cursor: pointer;
     transition: background 0.2s;
+    padding: 0;
 }
 details:hover { background: var(--item-hover-bg); }
-summary { font-size: 1.15rem; font-weight: 600; outline: none; }
-details p { margin-top: 1rem; color: var(--text-secondary); line-height: 1.6; }
+summary { 
+    font-size: 1.15rem; 
+    font-weight: 600; 
+    outline: none; 
+    display: block;
+    padding: 1.5rem;
+    padding-right: 3.5rem;
+}
+details p { 
+    padding: 0 1.5rem 1.5rem 1.5rem;
+    margin-top: 0; 
+    color: var(--text-secondary); 
+    line-height: 1.6; 
+}
 .faq-container { max-width: 800px; margin: 0 auto; }
 /* Custom summary marker */
 summary { list-style: none; position: relative; }
 summary::after {
     content: '+';
     position: absolute;
-    right: 0;
+    right: 1.5rem;
     top: 50%;
     transform: translateY(-50%);
     font-size: 1.5rem;
