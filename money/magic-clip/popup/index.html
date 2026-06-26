@@ -278,11 +278,18 @@
 
                 <!-- State 3: Connected AND Licensed -->
                 <div id="sync-state-pro" style="display: none;">
-                    <div style="font-size: 12px; color: var(--success); font-weight: 500; margin-bottom: 12px;">✓ Google Drive Synced</div>
-                    <button id="btn-sync-now" class="btn btn-secondary" style="width: 100%; margin-bottom: 8px;">Backup to Drive</button>
-                    <button id="btn-sync-restore" class="btn btn-secondary" style="width: 100%; margin-bottom: 8px;">Restore from Drive</button>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 12px; color: var(--success); font-weight: 600;">✓ Auto-Sync Active</span>
+                        <span id="last-sync-time" style="font-size: 11px; color: var(--text-light);">Never synced</span>
+                    </div>
+                    <p style="font-size: 11px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 12px;">
+                        Data is merged automatically between this device and Google Drive. No overwrites or loss.
+                    </p>
+                    <div style="margin-bottom: 12px;">
+                        <button id="btn-sync-now" class="btn" style="width: 100%; padding: 8px; font-size: 12px; font-weight: 600;">Sync Now</button>
+                    </div>
                     <div style="text-align: center;">
-                        <a href="#" id="btn-disconnect-drive-2" style="font-size: 11px; color: var(--text-light); text-decoration: underline;">Log out</a>
+                        <a href="#" id="btn-disconnect-drive-2" style="font-size: 11px; color: var(--text-light); text-decoration: underline;">Disconnect Sync</a>
                     </div>
                 </div>
                 
@@ -326,7 +333,7 @@
 
                     <div class="setting-row" style="padding: 10px 0; border-bottom: none;">
                         <div>
-                            <div class="setting-label">Auto-Backup</div>
+                            <div class="setting-label">Auto-Sync</div>
                             <div class="setting-desc">Sync to Drive automatically</div>
                         </div>
                         <select id="setting-backup" class="input-text" style="width: 110px; padding: 4px; cursor: pointer;">
@@ -371,6 +378,17 @@
     
     <div class="footer">
         v3.0.0 · 100% Offline
+    </div>
+
+    <!-- Custom Modal for Destructive Actions -->
+    <div id="confirm-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; z-index: 9999; padding: 20px;">
+        <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; width: 100%; max-width: 290px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); transform: scale(0.9); transition: transform 0.25s ease;" id="confirm-modal-box">
+            <h3 id="modal-title" style="font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text);">Confirm Action</h3>
+            <p id="modal-desc" style="font-size: 11px; color: var(--text-light); line-height: 1.5; margin-bottom: 16px;"></p>
+            <div id="modal-buttons-container" style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- Buttons will be generated dynamically -->
+            </div>
+        </div>
     </div>
 
     <!-- Custom Toast Notification -->

@@ -69,9 +69,9 @@ async function handleAutoBackupAlarm() {
     if (!isPro) return;
     const res = await new Promise(r => chrome.storage.local.get(['driveConnected'], r));
     if (res.driveConnected) {
-        console.log('Periodic auto-backup starting...');
-        const success = await backupToDrive();
-        console.log('Periodic auto-backup status:', success ? 'SUCCESS' : 'FAILED');
+        console.log('Periodic auto-sync starting...');
+        const result = await syncWithDrive();
+        console.log('Periodic auto-sync status:', result && result.ok ? 'SUCCESS' : 'FAILED');
     }
 }
 
@@ -280,6 +280,27 @@ async function handleMessage(req, sender) {
             });
             return { ok: true };
 
+        case 'clearStorageAndCloud':
+            await clearStorage();
+            let deletedCloud = false;
+            try {
+                deletedCloud = await deleteBackupFromDrive();
+            } catch (e) {
+                console.error('Failed to delete backup from Drive:', e);
+            }
+            if (typeof logoutGoogle === 'function') logoutGoogle();
+            await new Promise(resolve => {
+                chrome.storage.local.remove(['isPro', 'proValidUntil', 'licenseKey', 'instanceId'], () => {
+                    chrome.storage.local.set({ driveConnected: false, historyLimit: 50 }, () => resolve());
+                });
+            });
+            chrome.tabs.query({}, tabs => {
+                for (const tab of tabs) {
+                    chrome.tabs.sendMessage(tab.id, { action: 'storageCleared' }).catch(() => {});
+                }
+            });
+            return { ok: true, deletedCloud };
+
         case 'cleanUrl':
             return { cleaned: cleanUrl(req.url) };
 
@@ -343,13 +364,11 @@ async function handleMessage(req, sender) {
                 });
             });
 
+        case 'syncWithDrive':
         case 'backupToDrive':
-            if (!(await isProActive())) return { error: 'Pro feature only' };
-            return { ok: await backupToDrive() };
-
         case 'restoreFromDrive':
             if (!(await isProActive())) return { error: 'Pro feature only' };
-            return { ok: await restoreFromDrive() };
+            return await syncWithDrive();
 
         case 'verifyLicense':
             return await checkLicense(req.key);

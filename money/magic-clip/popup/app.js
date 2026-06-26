@@ -26,8 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const syncStatePro = document.getElementById('sync-state-pro');
     const proBadge = document.getElementById('pro-badge');
     const btnLogin = document.getElementById('btn-sync-login');
-    const btnBackup = document.getElementById('btn-sync-now');
-    const btnRestore = document.getElementById('btn-sync-restore');
+    const btnSyncNow = document.getElementById('btn-sync-now');
     const syncStatus = document.getElementById('sync-status');
     const settingBackup = document.getElementById('setting-backup');
 
@@ -67,7 +66,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (syncStateLocked) syncStateLocked.style.display = 'block';
                 } else if (isConnected && isPro) {
                     // State 3: Pro + Drive Connected
-                    if (syncStatePro) syncStatePro.style.display = 'block';
+                    if (syncStatePro) {
+                        syncStatePro.style.display = 'block';
+                        chrome.storage.local.get(['lastBackupTime'], (sData) => {
+                            const lastSyncTimeEl = document.getElementById('last-sync-time');
+                            if (lastSyncTimeEl) {
+                                if (sData.lastBackupTime) {
+                                    lastSyncTimeEl.textContent = 'Last sync: ' + formatTimeAgo(sData.lastBackupTime);
+                                } else {
+                                    lastSyncTimeEl.textContent = 'Never synced';
+                                }
+                            }
+                        });
+                    }
                 }
 
                 // Auto-reset historyLimit and autoBackupInterval when not Pro
@@ -152,40 +163,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleDisconnect(e) {
         e.preventDefault();
-        chrome.runtime.sendMessage({ action: 'disconnectDrive' }, () => {
-            updateUIState();
-        });
+        showConfirmModal(
+            'Disconnect Sync?',
+            'This will stop automatic backups and log you out. Your cloud data on Google Drive remains safe and untouched.',
+            [
+                {
+                    text: 'Disconnect Sync',
+                    className: 'btn',
+                    style: { background: 'var(--danger)', color: 'white' },
+                    onClick: () => {
+                        chrome.runtime.sendMessage({ action: 'disconnectDrive' }, () => {
+                            updateUIState();
+                            showToast('Disconnected from Google Drive.');
+                        });
+                    }
+                },
+                {
+                    text: 'Cancel',
+                    className: 'btn btn-secondary',
+                    style: { color: 'var(--text-light)' },
+                    onClick: () => {}
+                }
+            ]
+        );
     }
 
     if (btnDisconnect1) btnDisconnect1.addEventListener('click', handleDisconnect);
     if (btnDisconnect2) btnDisconnect2.addEventListener('click', handleDisconnect);
 
-    if (btnBackup) {
-        btnBackup.addEventListener('click', () => {
-            btnBackup.disabled = true;
-            setSyncStatus('Backing up...');
-            chrome.runtime.sendMessage({ action: 'backupToDrive' }, res => {
-                btnBackup.disabled = false;
+    if (btnSyncNow) {
+        btnSyncNow.addEventListener('click', () => {
+            btnSyncNow.disabled = true;
+            setSyncStatus('Syncing...');
+            chrome.runtime.sendMessage({ action: 'syncWithDrive' }, res => {
+                btnSyncNow.disabled = false;
                 if (res && res.ok) {
-                    setSyncStatus('Backup complete!');
-                } else {
-                    setSyncStatus('Backup failed: ' + (res ? res.error : 'Unknown'), true);
-                }
-            });
-        });
-    }
-
-    if (btnRestore) {
-        btnRestore.addEventListener('click', () => {
-            btnRestore.disabled = true;
-            setSyncStatus('Restoring...');
-            chrome.runtime.sendMessage({ action: 'restoreFromDrive' }, res => {
-                btnRestore.disabled = false;
-                if (res && res.ok) {
-                    setSyncStatus('Restore complete!');
+                    setSyncStatus('Sync successful!');
                     loadStats(); // Update stats in realtime
+                    updateUIState();
                 } else {
-                    setSyncStatus('Restore failed: ' + (res ? res.error : 'Unknown'), true);
+                    setSyncStatus('Sync failed: ' + (res ? res.error : 'Unknown'), true);
                 }
             });
         });
@@ -284,62 +301,112 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Handle Setting: Clear Storage (Inline Double-Confirmation UX)
-    const clearStorageBtn = document.getElementById('clear-storage');
-    let clearConfirmActive = false;
-    let clearConfirmTimeout = null;
+    // Modal confirmation helper
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmModalBox = document.getElementById('confirm-modal-box');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDesc = document.getElementById('modal-desc');
 
-    if (clearStorageBtn) {
-        const labelEl = clearStorageBtn.querySelector('.setting-label');
-        const descEl = clearStorageBtn.querySelector('.setting-desc');
-        const originalLabel = labelEl.textContent;
-        const originalDesc = descEl.textContent;
-
-        clearStorageBtn.addEventListener('click', () => {
-            if (!clearConfirmActive) {
-                // First click: activate confirmation state
-                clearConfirmActive = true;
-                labelEl.textContent = 'Confirm Delete?';
-                descEl.textContent = 'Click again within 3s to delete ALL data';
-                descEl.style.color = 'var(--danger)';
-                
-                // Clear any existing timeout
-                if (clearConfirmTimeout) clearTimeout(clearConfirmTimeout);
-                
-                // Reset after 3 seconds if not clicked again
-                clearConfirmTimeout = setTimeout(() => {
-                    resetClearState();
-                }, 3000);
-            } else {
-                // Second click: perform deletion
-                clearConfirmActive = false;
-                if (clearConfirmTimeout) clearTimeout(clearConfirmTimeout);
-                
-                chrome.runtime.sendMessage({ action: 'clearStorage' }, () => {
-                    if (statItems) statItems.textContent = '0';
-                    if (statCols) statCols.textContent = '0';
-                    showToast('Storage cleared successfully!');
-                    resetClearState();
+    function showConfirmModal(title, desc, buttons) {
+        if (!confirmModal || !confirmModalBox || !modalTitle || !modalDesc) return;
+        
+        modalTitle.textContent = title;
+        modalDesc.textContent = desc;
+        
+        const container = document.getElementById('modal-buttons-container');
+        if (container) {
+            container.innerHTML = '';
+            buttons.forEach(btnConfig => {
+                const btn = document.createElement('button');
+                btn.className = btnConfig.className || 'btn';
+                btn.textContent = btnConfig.text;
+                btn.style.width = '100%';
+                btn.style.padding = '8px';
+                btn.style.fontSize = '11px';
+                btn.style.fontWeight = '600';
+                btn.style.borderRadius = '6px';
+                btn.style.cursor = 'pointer';
+                if (btnConfig.style) {
+                    Object.assign(btn.style, btnConfig.style);
+                }
+                btn.addEventListener('click', () => {
+                    btnConfig.onClick();
+                    hideModal();
                 });
-            }
-        });
-
-        // Reset if mouse leaves the button (extra safety)
-        clearStorageBtn.addEventListener('mouseleave', () => {
-            if (clearConfirmActive) {
-                if (clearConfirmTimeout) clearTimeout(clearConfirmTimeout);
-                clearConfirmTimeout = setTimeout(() => {
-                    resetClearState();
-                }, 1000); // 1s grace period when mouse leaves
-            }
-        });
-
-        function resetClearState() {
-            clearConfirmActive = false;
-            labelEl.textContent = originalLabel;
-            descEl.textContent = originalDesc;
-            descEl.style.color = 'var(--text-light)';
+                container.appendChild(btn);
+            });
         }
+        
+        confirmModal.onclick = (e) => {
+            if (e.target === confirmModal) hideModal();
+        };
+        
+        confirmModal.style.opacity = '1';
+        confirmModal.style.pointerEvents = 'auto';
+        confirmModalBox.style.transform = 'scale(1)';
+    }
+
+    function hideModal() {
+        if (confirmModal && confirmModalBox) {
+            confirmModal.style.opacity = '0';
+            confirmModal.style.pointerEvents = 'none';
+            confirmModalBox.style.transform = 'scale(0.9)';
+        }
+    }
+
+    function formatTimeAgo(timestamp) {
+        if (!timestamp) return 'Never';
+        const diff = Date.now() - timestamp;
+        if (diff < 60000) return 'Just now';
+        const mins = Math.floor(diff / 60000);
+        if (mins < 60) return mins + 'm ago';
+        const hours = Math.floor(mins / 60);
+        if (hours < 24) return hours + 'h ago';
+        return new Date(timestamp).toLocaleDateString();
+    }
+
+    // Handle Setting: Clear Storage (Custom Modal Confirmation)
+    const clearStorageBtn = document.getElementById('clear-storage');
+    if (clearStorageBtn) {
+        clearStorageBtn.addEventListener('click', () => {
+            showConfirmModal(
+                'Clear Clipboard Data',
+                'Choose how you want to clear your data. This action is permanent.',
+                [
+                    {
+                        text: 'Delete Local Data Only',
+                        className: 'btn btn-secondary',
+                        style: { color: 'var(--danger)', border: '1px solid var(--danger)', background: 'transparent' },
+                        onClick: () => {
+                            chrome.runtime.sendMessage({ action: 'clearStorage' }, () => {
+                                if (statItems) statItems.textContent = '0';
+                                if (statCols) statCols.textContent = '0';
+                                showToast('Local storage cleared!');
+                            });
+                        }
+                    },
+                    {
+                        text: 'Wipe Local & Google Drive Backup',
+                        className: 'btn',
+                        style: { background: 'var(--danger)', color: 'white' },
+                        onClick: () => {
+                            chrome.runtime.sendMessage({ action: 'clearStorageAndCloud' }, (res) => {
+                                if (statItems) statItems.textContent = '0';
+                                if (statCols) statCols.textContent = '0';
+                                showToast('Local storage & Cloud backup wiped!');
+                                updateUIState();
+                            });
+                        }
+                    },
+                    {
+                        text: 'Cancel',
+                        className: 'btn btn-secondary',
+                        style: { color: 'var(--text-light)' },
+                        onClick: () => {}
+                    }
+                ]
+            );
+        });
     }
 
     // Listen for storage changes to sync checkboxes and body themes dynamically

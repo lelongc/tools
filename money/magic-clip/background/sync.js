@@ -90,18 +90,18 @@ async function getSyncFileId(token) {
     return null;
 }
 
-async function backupToDrive() {
+async function syncWithDrive() {
     let authRes = await getAccessToken(false); // Try silent auth first
     if (authRes.error) {
         authRes = await getAccessToken(true); // Fallback to interactive if silent fails
     }
-    if (authRes.error) return false;
+    if (authRes.error) return { ok: false, error: authRes.error };
     const token = authRes.token;
 
     try {
         const fileId = await getSyncFileId(token);
         
-        // 1. Read existing remote data if any, to merge instead of overwrite
+        // 1. Read existing remote data if any
         let remoteHistory = [];
         let remoteCollections = [];
         if (fileId) {
@@ -110,12 +110,12 @@ async function backupToDrive() {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (downloadRes.ok) {
-                    const remoteData = await downloadRes.json();
+                    const remoteData = await downloadRes.ok ? await downloadRes.json() : {};
                     remoteHistory = remoteData.history || [];
                     remoteCollections = remoteData.collections || [];
                 }
             } catch (e) {
-                console.warn('Could not read existing backup for merging, proceeding with override:', e);
+                console.warn('Could not read existing backup, proceeding with merge:', e);
             }
         }
 
@@ -123,41 +123,62 @@ async function backupToDrive() {
         const localHistory = await db.history.toArray();
         const localCollections = await db.collections.toArray();
 
-        // 3. Merge Collections (by name, keeping local as priority)
+        // 3. Bidirectional Merge in Transaction
+        const colIdMap = {}; // Maps remote collection ID -> local collection ID
         const mergedCollections = [...localCollections];
-        for (const rCol of remoteCollections) {
-            if (!mergedCollections.some(lCol => lCol.name.toLowerCase() === rCol.name.toLowerCase())) {
-                mergedCollections.push(rCol);
+
+        await db.transaction('rw', db.history, db.collections, async () => {
+            // Merge Collections
+            for (const rCol of remoteCollections) {
+                const existing = localCollections.find(lCol => lCol.name.toLowerCase() === rCol.name.toLowerCase());
+                if (existing) {
+                    colIdMap[rCol.id] = existing.id;
+                } else {
+                    const newId = await db.collections.add({ name: rCol.name, createdAt: rCol.createdAt });
+                    colIdMap[rCol.id] = newId;
+                    mergedCollections.push({ id: newId, name: rCol.name, createdAt: rCol.createdAt });
+                }
             }
-        }
 
-        // 4. Merge History (by content + type)
-        const mergedHistory = [...localHistory];
-        for (const rItem of remoteHistory) {
-            const exists = mergedHistory.some(lItem => 
-                lItem.type === rItem.type && 
-                lItem.content === rItem.content
-            );
-            if (!exists) {
-                mergedHistory.push(rItem);
+            // Merge History (no duplicates by content + type)
+            for (const rItem of remoteHistory) {
+                const existing = localHistory.find(lItem => 
+                    lItem.type === rItem.type && 
+                    lItem.content === rItem.content
+                );
+                
+                if (!existing) {
+                    const mappedColId = rItem.collectionId ? (colIdMap[rItem.collectionId] || 0) : 0;
+                    await db.history.add({
+                        type: rItem.type,
+                        content: rItem.content,
+                        timestamp: rItem.timestamp,
+                        collectionId: mappedColId
+                    });
+                }
             }
-        }
+        });
 
-        // Sort by timestamp descending
-        mergedHistory.sort((a, b) => b.timestamp - a.timestamp);
+        // 4. Load full merged database from local to upload back to Drive
+        const finalLocalHistory = await db.history.toArray();
+        const finalLocalCollections = await db.collections.toArray();
 
-        // Cap merged history at history limit
+        // Sort history by timestamp descending
+        finalLocalHistory.sort((a, b) => b.timestamp - a.timestamp);
+
+        // Cap history at limit
         const settings = await new Promise(resolve => {
             chrome.storage.local.get(['historyLimit', 'isPro'], resolve);
         });
         let limit = settings.historyLimit || 50;
         if (!settings.isPro && limit > 50) limit = 50;
         
-        const cappedHistory = mergedHistory.slice(0, limit);
+        const cappedHistory = finalLocalHistory.slice(0, limit);
 
+        // 5. Upload final merged data back to Google Drive
         const backupData = JSON.stringify({ 
             history: cappedHistory, 
-            collections: mergedCollections, 
+            collections: finalLocalCollections, 
             timestamp: Date.now() 
         });
 
@@ -184,87 +205,52 @@ async function backupToDrive() {
             body: form
         });
 
-        if (!res.ok) throw new Error('Upload failed');
-        return true;
+        if (!res.ok) throw new Error('Upload to Drive failed');
+
+        // Update last sync time
+        const now = Date.now();
+        await chrome.storage.local.set({ lastBackupTime: now });
+
+        // Notify content scripts / popup tabs to refresh UI
+        chrome.tabs.query({}, (tabs) => {
+            for (const tab of tabs) {
+                chrome.tabs.sendMessage(tab.id, { action: 'storageCleared' }).catch(() => {});
+            }
+        });
+
+        return { ok: true, timestamp: now };
 
     } catch (e) {
-        console.error('Backup Error:', e);
-        return false;
+        console.error('syncWithDrive Error:', e);
+        return { ok: false, error: e.message || 'Unknown error' };
     }
 }
 
-async function restoreFromDrive() {
-    let authRes = await getAccessToken(false); // Try silent auth first
+async function deleteBackupFromDrive() {
+    let authRes = await getAccessToken(false);
     if (authRes.error) {
-        authRes = await getAccessToken(true); // Fallback to interactive if silent fails
+        authRes = await getAccessToken(true);
     }
     if (authRes.error) return false;
     const token = authRes.token;
 
     try {
         const fileId = await getSyncFileId(token);
-        if (!fileId) {
-            console.error('No backup found.');
-            return false;
-        }
+        if (!fileId) return true; // Already deleted
 
-        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+            method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` }
         });
-
-        if (!res.ok) throw new Error('Download failed');
         
-        const data = await res.json();
-        const backupHistory = data.history || [];
-        const backupCollections = data.collections || [];
-
-        await db.transaction('rw', db.history, db.collections, async () => {
-            // 1. Merge Collections & Map IDs
-            const localCollections = await db.collections.toArray();
-            const colIdMap = {}; // Maps remote collection ID -> local collection ID
-
-            for (const rCol of backupCollections) {
-                const existing = localCollections.find(lCol => lCol.name.toLowerCase() === rCol.name.toLowerCase());
-                if (existing) {
-                    colIdMap[rCol.id] = existing.id;
-                } else {
-                    const newId = await db.collections.add({ name: rCol.name, createdAt: rCol.createdAt });
-                    colIdMap[rCol.id] = newId;
-                }
-            }
-
-            // 2. Merge History (no duplicates by content + type)
-            const localHistory = await db.history.toArray();
-            for (const rItem of backupHistory) {
-                const existing = localHistory.find(lItem => 
-                    lItem.type === rItem.type && 
-                    lItem.content === rItem.content
-                );
-                
-                if (!existing) {
-                    const mappedColId = rItem.collectionId ? (colIdMap[rItem.collectionId] || 0) : 0;
-                    await db.history.add({
-                        type: rItem.type,
-                        content: rItem.content,
-                        timestamp: rItem.timestamp,
-                        collectionId: mappedColId
-                    });
-                }
-            }
-        });
-        
-        chrome.tabs.query({}, (tabs) => {
-            for (const tab of tabs) {
-                chrome.tabs.sendMessage(tab.id, { action: 'storageCleared' }).catch(() => {});
-            }
-        });
-        
+        if (!res.ok && res.status !== 404) throw new Error('Delete backup file failed');
         return true;
     } catch (e) {
-        console.error('Restore Error:', e);
+        console.error('deleteBackupFromDrive Error:', e);
         return false;
     }
 }
+
 
 const LICENSE_FILE_NAME = 'neoclip_license.json';
 
