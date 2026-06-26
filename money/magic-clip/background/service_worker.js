@@ -13,7 +13,7 @@ let lastApiCheck = 0; // Tracks the last time we pinged Lemon Squeezy
 chrome.storage.local.get(['isPro', 'proValidUntil', 'licenseKey', 'instanceId', 'autoBackupInterval'], (data) => {
     isProCache = !!data.isPro;
     proValidUntil = data.proValidUntil || 0;
-    
+
     // Set up autoBackup alarm on startup if active
     const interval = data.autoBackupInterval !== undefined ? parseInt(data.autoBackupInterval) : 60;
     updateAutoBackupAlarm(interval, !!data.isPro);
@@ -78,7 +78,7 @@ async function handleAutoBackupAlarm() {
 async function validateSubscriptionBackground() {
     const data = await new Promise(res => chrome.storage.local.get(['isPro', 'licenseKey', 'instanceId'], res));
     if (!data.isPro || !data.licenseKey) return;
-    
+
     lastApiCheck = Date.now();
     try {
         const response = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
@@ -86,12 +86,12 @@ async function validateSubscriptionBackground() {
             headers: { 'Accept': 'application/json', 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({ license_key: data.licenseKey, instance_id: data.instanceId })
         });
-        
+
         // Protection against 500s or gateway timeouts
         if (!response.ok && response.status >= 500) return;
 
         const result = await response.json();
-        
+
         if (result.valid === true) {
             // Subscription active: Set exactly to expiration date
             let newValidUntil = Date.now() + (10 * 365 * 24 * 60 * 60 * 1000); // Default to +10 years
@@ -112,7 +112,7 @@ async function validateSubscriptionBackground() {
             // NOTE: We intentionally keep driveConnected intact so the user
             // can re-enter a new key without having to log in again.
         }
-    } catch(e) {
+    } catch (e) {
         // Network error: Do nothing. If they are offline for > 72h, isProActive() will naturally block them.
     }
 }
@@ -120,7 +120,7 @@ async function validateSubscriptionBackground() {
 // Function to check if Pro is currently active (checks lease time)
 async function isProActive() {
     if (!isProCache) return false;
-    
+
     const now = Date.now();
     // Check if exact expiration passed, OR if it's been > 1 hour since last API check
     if (now > proValidUntil || (now - lastApiCheck > 60 * 60 * 1000)) {
@@ -136,7 +136,7 @@ async function isProActive() {
 
 async function checkLicense(key) {
     if (!key) return { ok: false, error: 'Empty key' };
-    
+
     try {
         const response = await fetch('https://api.lemonsqueezy.com/v1/licenses/activate', {
             method: 'POST',
@@ -144,7 +144,7 @@ async function checkLicense(key) {
             body: new URLSearchParams({ license_key: key, instance_name: 'Chrome on ' + navigator.userAgent.split(' ')[0] })
         });
         const data = await response.json();
-        
+
         if (data.activated) {
             isProCache = true;
             // Parse exact expiration date from Lemon Squeezy, or 10 years for Lifetime
@@ -153,9 +153,9 @@ async function checkLicense(key) {
             } else {
                 proValidUntil = Date.now() + (10 * 365 * 24 * 60 * 60 * 1000); // 10 years fallback for lifetime
             }
-            
+
             await chrome.storage.local.set({ isPro: true, proValidUntil, licenseKey: key, instanceId: data.instance.id });
-            
+
             const res = await new Promise(r => chrome.storage.local.get(['driveConnected'], r));
             if (res.driveConnected && typeof saveLicenseToDrive === 'function') {
                 await saveLicenseToDrive(key, data.instance.id);
@@ -172,7 +172,7 @@ async function checkLicense(key) {
 
 async function restoreLicense(key, instanceId) {
     if (!key || !instanceId) return { ok: false };
-    
+
     try {
         const response = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
             method: 'POST',
@@ -180,7 +180,7 @@ async function restoreLicense(key, instanceId) {
             body: new URLSearchParams({ license_key: key, instance_id: instanceId })
         });
         const result = await response.json();
-        
+
         if (result.valid === true) {
             isProCache = true;
             let newValidUntil = Date.now() + (10 * 365 * 24 * 60 * 60 * 1000);
@@ -192,7 +192,7 @@ async function restoreLicense(key, instanceId) {
             return { ok: true };
         }
         return { ok: false };
-    } catch(e) {
+    } catch (e) {
         return { ok: false };
     }
 }
@@ -275,7 +275,7 @@ async function handleMessage(req, sender) {
             await clearStorage();
             chrome.tabs.query({}, tabs => {
                 for (const tab of tabs) {
-                    chrome.tabs.sendMessage(tab.id, { action: 'storageCleared' }).catch(() => {});
+                    chrome.tabs.sendMessage(tab.id, { action: 'storageCleared' }).catch(() => { });
                 }
             });
             return { ok: true };
@@ -296,7 +296,7 @@ async function handleMessage(req, sender) {
             });
             chrome.tabs.query({}, tabs => {
                 for (const tab of tabs) {
-                    chrome.tabs.sendMessage(tab.id, { action: 'storageCleared' }).catch(() => {});
+                    chrome.tabs.sendMessage(tab.id, { action: 'storageCleared' }).catch(() => { });
                 }
             });
             return { ok: true, deletedCloud };
@@ -308,7 +308,7 @@ async function handleMessage(req, sender) {
             const loginRes = await loginToGoogle();
             if (loginRes && loginRes.ok) {
                 await chrome.storage.local.set({ driveConnected: true });
-                
+
                 const isProNow = await isProActive();
                 if (!isProNow && typeof loadLicenseFromDrive === 'function') {
                     const driveLicense = await loadLicenseFromDrive();
@@ -376,7 +376,7 @@ async function handleMessage(req, sender) {
 
         case 'verifyLicense':
             return await checkLicense(req.key);
-            
+
         case 'getProStatus':
             return { isPro: await isProActive() };
 
@@ -390,7 +390,7 @@ chrome.commands.onCommand.addListener((command) => {
     if (command === 'toggle-panel') {
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             if (tabs[0]) {
-                chrome.tabs.sendMessage(tabs[0].id, { action: 'togglePanel' }).catch(() => {});
+                chrome.tabs.sendMessage(tabs[0].id, { action: 'togglePanel' }).catch(() => { });
             }
         });
     }
@@ -399,7 +399,7 @@ chrome.commands.onCommand.addListener((command) => {
 function broadcastClipboardUpdated(item) {
     chrome.tabs.query({}, (tabs) => {
         for (const tab of tabs) {
-            chrome.tabs.sendMessage(tab.id, { action: 'clipboardUpdated', item }).catch(() => {});
+            chrome.tabs.sendMessage(tab.id, { action: 'clipboardUpdated', item }).catch(() => { });
         }
     });
 }
@@ -409,7 +409,7 @@ chrome.tabs.onActivated.addListener(() => {
     // Notify active tab to sync
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]) {
-            chrome.tabs.sendMessage(tabs[0].id, { action: 'triggerSync' }).catch(() => {});
+            chrome.tabs.sendMessage(tabs[0].id, { action: 'triggerSync' }).catch(() => { });
         }
     });
 });
