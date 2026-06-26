@@ -148,7 +148,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 updateUIState();
             } else {
-                setSyncStatus('Error: ' + (res.error || 'Unknown error'), true);
+                const errMsg = res ? res.error : '';
+                if (errMsg && (errMsg.includes('did not approve') || errMsg.includes('cancelled') || errMsg.includes('canceled') || errMsg.includes('cancel'))) {
+                    setSyncStatus(''); // Clear status gently on cancel
+                } else {
+                    setSyncStatus('Error: ' + (errMsg || 'Unknown error'), true);
+                }
             }
         });
     }
@@ -202,7 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     loadStats(); // Update stats in realtime
                     updateUIState();
                 } else {
-                    setSyncStatus('Sync failed: ' + (res ? res.error : 'Unknown'), true);
+                    const errMsg = res ? res.error : '';
+                    if (errMsg && (errMsg.includes('did not approve') || errMsg.includes('cancelled') || errMsg.includes('canceled') || errMsg.includes('cancel'))) {
+                        setSyncStatus(''); // Clear status gently on cancel
+                    } else {
+                        setSyncStatus('Sync failed: ' + (errMsg || 'Unknown'), true);
+                    }
                 }
             });
         });

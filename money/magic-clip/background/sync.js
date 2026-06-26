@@ -123,6 +123,13 @@ async function syncWithDrive(interactive = false) {
         const localHistory = await db.history.toArray();
         const localCollections = await db.collections.toArray();
 
+        // Load settings to apply retention policy during sync
+        const settings = await new Promise(resolve => {
+            chrome.storage.local.get(['historyLimit', 'historyExpiry', 'isPro'], resolve);
+        });
+        const expiryDays = settings.historyExpiry || 0;
+        const cutoff = expiryDays > 0 ? Date.now() - (expiryDays * 24 * 60 * 60 * 1000) : 0;
+
         // 3. Bidirectional Merge in Transaction
         const colIdMap = {}; // Maps remote collection ID -> local collection ID
         const mergedCollections = [...localCollections];
@@ -140,8 +147,13 @@ async function syncWithDrive(interactive = false) {
                 }
             }
 
-            // Merge History (no duplicates by content + type)
+            // Merge History (no duplicates by content + type, and not expired)
             for (const rItem of remoteHistory) {
+                // If it is older than cutoff and not pinned in a collection, skip merging it!
+                if (cutoff > 0 && rItem.timestamp < cutoff && (!rItem.collectionId || rItem.collectionId === 0)) {
+                    continue;
+                }
+
                 const existing = localHistory.find(lItem => 
                     lItem.type === rItem.type && 
                     lItem.content === rItem.content
@@ -157,6 +169,11 @@ async function syncWithDrive(interactive = false) {
                     });
                 }
             }
+
+            // Also clean up local expired history items during sync
+            if (cutoff > 0) {
+                await db.history.where('timestamp').below(cutoff).filter(i => i.collectionId === 0).delete();
+            }
         });
 
         // 4. Load full merged database from local to upload back to Drive
@@ -167,9 +184,6 @@ async function syncWithDrive(interactive = false) {
         finalLocalHistory.sort((a, b) => b.timestamp - a.timestamp);
 
         // Cap history at limit
-        const settings = await new Promise(resolve => {
-            chrome.storage.local.get(['historyLimit', 'isPro'], resolve);
-        });
         let limit = settings.historyLimit || 50;
         if (!settings.isPro && limit > 50) limit = 50;
         
