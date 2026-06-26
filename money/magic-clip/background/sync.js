@@ -91,7 +91,10 @@ async function getSyncFileId(token) {
 }
 
 async function backupToDrive() {
-    const authRes = await getAccessToken(true);
+    let authRes = await getAccessToken(false); // Try silent auth first
+    if (authRes.error) {
+        authRes = await getAccessToken(true); // Fallback to interactive if silent fails
+    }
     if (authRes.error) return false;
     const token = authRes.token;
 
@@ -135,7 +138,10 @@ async function backupToDrive() {
 }
 
 async function restoreFromDrive() {
-    const authRes = await getAccessToken(true);
+    let authRes = await getAccessToken(false); // Try silent auth first
+    if (authRes.error) {
+        authRes = await getAccessToken(true); // Fallback to interactive if silent fails
+    }
     if (authRes.error) return false;
     const token = authRes.token;
 
