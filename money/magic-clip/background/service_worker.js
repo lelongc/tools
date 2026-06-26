@@ -414,8 +414,15 @@ chrome.tabs.onActivated.addListener(() => {
     });
 });
 
-chrome.runtime.onStartup.addListener(() => {
-    // Nothing needed on startup, the content script handles sync when loaded
+chrome.runtime.onStartup.addListener(async () => {
+    const isPro = await isProActive();
+    if (!isPro) return;
+    const res = await new Promise(r => chrome.storage.local.get(['driveConnected'], r));
+    if (res.driveConnected) {
+        console.log('Browser startup auto-sync starting...');
+        const result = await syncWithDrive(false);
+        console.log('Browser startup auto-sync status:', result && result.ok ? 'SUCCESS' : 'FAILED');
+    }
 });
 
 let creatingOffscreen;

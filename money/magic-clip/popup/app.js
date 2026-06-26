@@ -43,6 +43,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (syncStatePro) syncStatePro.style.display = 'none';
     }
 
+    function updateLastSyncTimeDisplay() {
+        chrome.storage.local.get(['lastBackupTime'], (sData) => {
+            const lastSyncTimeEl = document.getElementById('last-sync-time');
+            if (lastSyncTimeEl) {
+                if (sData.lastBackupTime) {
+                    lastSyncTimeEl.textContent = 'Last sync: ' + formatTimeAgo(sData.lastBackupTime);
+                } else {
+                    lastSyncTimeEl.textContent = 'Never synced';
+                }
+            }
+        });
+    }
+
     function updateUIState() {
         if (syncStatus) {
             syncStatus.textContent = 'Checking status...';
@@ -68,16 +81,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     // State 3: Pro + Drive Connected
                     if (syncStatePro) {
                         syncStatePro.style.display = 'block';
-                        chrome.storage.local.get(['lastBackupTime'], (sData) => {
-                            const lastSyncTimeEl = document.getElementById('last-sync-time');
-                            if (lastSyncTimeEl) {
-                                if (sData.lastBackupTime) {
-                                    lastSyncTimeEl.textContent = 'Last sync: ' + formatTimeAgo(sData.lastBackupTime);
-                                } else {
-                                    lastSyncTimeEl.textContent = 'Never synced';
-                                }
-                            }
-                        });
+                        updateLastSyncTimeDisplay();
+                        
+                        if (!window.hasAutoSyncedThisSession) {
+                            window.hasAutoSyncedThisSession = true;
+                            chrome.runtime.sendMessage({ action: 'syncWithDriveSilent' }, () => {
+                                loadStats();
+                                updateLastSyncTimeDisplay();
+                            });
+                        }
                     }
                 }
 
