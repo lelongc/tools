@@ -330,6 +330,8 @@ async function handleMessage(req, sender) {
                                 }
                             }
                             if (restored) {
+                                // Restored Pro, now sync data immediately!
+                                await syncWithDrive();
                                 return { ok: true, licenseLoaded: true };
                             }
                         }
@@ -343,6 +345,8 @@ async function handleMessage(req, sender) {
                             await saveLicenseToDrive(res.licenseKey, res.instanceId);
                         }
                     });
+                    // Already Pro, sync data immediately!
+                    await syncWithDrive();
                 }
             }
             return loginRes;
