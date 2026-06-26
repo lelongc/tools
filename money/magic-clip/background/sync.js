@@ -90,10 +90,10 @@ async function getSyncFileId(token) {
     return null;
 }
 
-async function syncWithDrive() {
+async function syncWithDrive(interactive = false) {
     let authRes = await getAccessToken(false); // Try silent auth first
-    if (authRes.error) {
-        authRes = await getAccessToken(true); // Fallback to interactive if silent fails
+    if (authRes.error && interactive) {
+        authRes = await getAccessToken(true); // Fallback to interactive ONLY if interactive is true
     }
     if (authRes.error) return { ok: false, error: authRes.error };
     const token = authRes.token;

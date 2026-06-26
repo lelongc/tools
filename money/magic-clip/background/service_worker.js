@@ -70,7 +70,7 @@ async function handleAutoBackupAlarm() {
     const res = await new Promise(r => chrome.storage.local.get(['driveConnected'], r));
     if (res.driveConnected) {
         console.log('Periodic auto-sync starting...');
-        const result = await syncWithDrive();
+        const result = await syncWithDrive(false);
         console.log('Periodic auto-sync status:', result && result.ok ? 'SUCCESS' : 'FAILED');
     }
 }
@@ -331,7 +331,7 @@ async function handleMessage(req, sender) {
                             }
                             if (restored) {
                                 // Restored Pro, now sync data immediately!
-                                await syncWithDrive();
+                                await syncWithDrive(true);
                                 return { ok: true, licenseLoaded: true };
                             }
                         }
@@ -346,7 +346,7 @@ async function handleMessage(req, sender) {
                         }
                     });
                     // Already Pro, sync data immediately!
-                    await syncWithDrive();
+                    await syncWithDrive(true);
                 }
             }
             return loginRes;
@@ -372,7 +372,7 @@ async function handleMessage(req, sender) {
         case 'backupToDrive':
         case 'restoreFromDrive':
             if (!(await isProActive())) return { error: 'Pro feature only' };
-            return await syncWithDrive();
+            return await syncWithDrive(true);
 
         case 'verifyLicense':
             return await checkLicense(req.key);
