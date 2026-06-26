@@ -99,12 +99,68 @@ async function backupToDrive() {
     const token = authRes.token;
 
     try {
-        const history = await db.history.toArray();
-        const collections = await db.collections.toArray();
-        const backupData = JSON.stringify({ history, collections, timestamp: Date.now() });
-
         const fileId = await getSyncFileId(token);
         
+        // 1. Read existing remote data if any, to merge instead of overwrite
+        let remoteHistory = [];
+        let remoteCollections = [];
+        if (fileId) {
+            try {
+                const downloadRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (downloadRes.ok) {
+                    const remoteData = await downloadRes.json();
+                    remoteHistory = remoteData.history || [];
+                    remoteCollections = remoteData.collections || [];
+                }
+            } catch (e) {
+                console.warn('Could not read existing backup for merging, proceeding with override:', e);
+            }
+        }
+
+        // 2. Read local data
+        const localHistory = await db.history.toArray();
+        const localCollections = await db.collections.toArray();
+
+        // 3. Merge Collections (by name, keeping local as priority)
+        const mergedCollections = [...localCollections];
+        for (const rCol of remoteCollections) {
+            if (!mergedCollections.some(lCol => lCol.name.toLowerCase() === rCol.name.toLowerCase())) {
+                mergedCollections.push(rCol);
+            }
+        }
+
+        // 4. Merge History (by content + type)
+        const mergedHistory = [...localHistory];
+        for (const rItem of remoteHistory) {
+            const exists = mergedHistory.some(lItem => 
+                lItem.type === rItem.type && 
+                lItem.content === rItem.content
+            );
+            if (!exists) {
+                mergedHistory.push(rItem);
+            }
+        }
+
+        // Sort by timestamp descending
+        mergedHistory.sort((a, b) => b.timestamp - a.timestamp);
+
+        // Cap merged history at history limit
+        const settings = await new Promise(resolve => {
+            chrome.storage.local.get(['historyLimit', 'isPro'], resolve);
+        });
+        let limit = settings.historyLimit || 50;
+        if (!settings.isPro && limit > 50) limit = 50;
+        
+        const cappedHistory = mergedHistory.slice(0, limit);
+
+        const backupData = JSON.stringify({ 
+            history: cappedHistory, 
+            collections: mergedCollections, 
+            timestamp: Date.now() 
+        });
+
         const metadata = {
             name: FILE_NAME,
             parents: fileId ? undefined : ['appDataFolder']
@@ -159,16 +215,41 @@ async function restoreFromDrive() {
         if (!res.ok) throw new Error('Download failed');
         
         const data = await res.json();
-        
+        const backupHistory = data.history || [];
+        const backupCollections = data.collections || [];
+
         await db.transaction('rw', db.history, db.collections, async () => {
-            await db.history.clear();
-            await db.collections.clear();
-            
-            if (data.history && data.history.length > 0) {
-                await db.history.bulkAdd(data.history);
+            // 1. Merge Collections & Map IDs
+            const localCollections = await db.collections.toArray();
+            const colIdMap = {}; // Maps remote collection ID -> local collection ID
+
+            for (const rCol of backupCollections) {
+                const existing = localCollections.find(lCol => lCol.name.toLowerCase() === rCol.name.toLowerCase());
+                if (existing) {
+                    colIdMap[rCol.id] = existing.id;
+                } else {
+                    const newId = await db.collections.add({ name: rCol.name, createdAt: rCol.createdAt });
+                    colIdMap[rCol.id] = newId;
+                }
             }
-            if (data.collections && data.collections.length > 0) {
-                await db.collections.bulkAdd(data.collections);
+
+            // 2. Merge History (no duplicates by content + type)
+            const localHistory = await db.history.toArray();
+            for (const rItem of backupHistory) {
+                const existing = localHistory.find(lItem => 
+                    lItem.type === rItem.type && 
+                    lItem.content === rItem.content
+                );
+                
+                if (!existing) {
+                    const mappedColId = rItem.collectionId ? (colIdMap[rItem.collectionId] || 0) : 0;
+                    await db.history.add({
+                        type: rItem.type,
+                        content: rItem.content,
+                        timestamp: rItem.timestamp,
+                        collectionId: mappedColId
+                    });
+                }
             }
         });
         

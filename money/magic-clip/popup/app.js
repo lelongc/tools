@@ -284,18 +284,62 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Handle Setting: Clear Storage
+    // Handle Setting: Clear Storage (Inline Double-Confirmation UX)
     const clearStorageBtn = document.getElementById('clear-storage');
+    let clearConfirmActive = false;
+    let clearConfirmTimeout = null;
+
     if (clearStorageBtn) {
+        const labelEl = clearStorageBtn.querySelector('.setting-label');
+        const descEl = clearStorageBtn.querySelector('.setting-desc');
+        const originalLabel = labelEl.textContent;
+        const originalDesc = descEl.textContent;
+
         clearStorageBtn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to delete ALL clipboard history and collections? This cannot be undone.')) {
+            if (!clearConfirmActive) {
+                // First click: activate confirmation state
+                clearConfirmActive = true;
+                labelEl.textContent = 'Confirm Delete?';
+                descEl.textContent = 'Click again within 3s to delete ALL data';
+                descEl.style.color = 'var(--danger)';
+                
+                // Clear any existing timeout
+                if (clearConfirmTimeout) clearTimeout(clearConfirmTimeout);
+                
+                // Reset after 3 seconds if not clicked again
+                clearConfirmTimeout = setTimeout(() => {
+                    resetClearState();
+                }, 3000);
+            } else {
+                // Second click: perform deletion
+                clearConfirmActive = false;
+                if (clearConfirmTimeout) clearTimeout(clearConfirmTimeout);
+                
                 chrome.runtime.sendMessage({ action: 'clearStorage' }, () => {
                     if (statItems) statItems.textContent = '0';
                     if (statCols) statCols.textContent = '0';
                     showToast('Storage cleared successfully!');
+                    resetClearState();
                 });
             }
         });
+
+        // Reset if mouse leaves the button (extra safety)
+        clearStorageBtn.addEventListener('mouseleave', () => {
+            if (clearConfirmActive) {
+                if (clearConfirmTimeout) clearTimeout(clearConfirmTimeout);
+                clearConfirmTimeout = setTimeout(() => {
+                    resetClearState();
+                }, 1000); // 1s grace period when mouse leaves
+            }
+        });
+
+        function resetClearState() {
+            clearConfirmActive = false;
+            labelEl.textContent = originalLabel;
+            descEl.textContent = originalDesc;
+            descEl.style.color = 'var(--text-light)';
+        }
     }
 
     // Listen for storage changes to sync checkboxes and body themes dynamically
