@@ -185,6 +185,8 @@ async function syncWithDrive(interactive = false) {
         const fallbackData = await new Promise(r => chrome.storage.local.get(['fallbackTombstones'], r));
         let fallbackTombstonesChanged = false;
 
+        let tombstonesToSave = null;
+
         await db.transaction('rw', ...tables, async () => {
             // Load tombstones
             const tombstones = db.tombstones ? await db.tombstones.toArray() : (fallbackData.fallbackTombstones || []);
@@ -282,11 +284,14 @@ async function syncWithDrive(interactive = false) {
             }
 
             if (fallbackTombstonesChanged) {
-                // Trim if > 1000
-                if (tombstones.length > 1000) tombstones.splice(0, tombstones.length - 1000);
-                await new Promise(r => chrome.storage.local.set({ fallbackTombstones: tombstones }, r));
+                tombstonesToSave = tombstones;
             }
         });
+
+        if (tombstonesToSave) {
+            if (tombstonesToSave.length > 1000) tombstonesToSave.splice(0, tombstonesToSave.length - 1000);
+            await new Promise(r => chrome.storage.local.set({ fallbackTombstones: tombstonesToSave }, r));
+        }
 
         // 4. Load full merged database from local to upload back to Drive
         const finalLocalHistory = await db.history.toArray();
