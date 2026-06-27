@@ -27,9 +27,15 @@ chrome.storage.local.get(['isPro', 'proValidUntil', 'licenseKey', 'instanceId', 
 
 // Helper to update auto-backup alarm schedule
 function updateAutoBackupAlarm(interval, isPro) {
-    chrome.alarms.clear('autoBackup', () => {
-        if (!isPro || !interval || interval <= 0) {
-            console.log('Auto-backup is disabled.');
+    if (!isPro || !interval || interval <= 0) {
+        chrome.alarms.clear('autoBackup');
+        console.log('Auto-backup is disabled.');
+        return;
+    }
+    
+    chrome.alarms.get('autoBackup', (alarm) => {
+        if (alarm && alarm.periodInMinutes === interval) {
+            // Alarm already exists with the correct interval, do nothing
             return;
         }
         chrome.alarms.create('autoBackup', { periodInMinutes: interval });
