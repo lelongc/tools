@@ -138,7 +138,8 @@ async function syncWithDrive(interactive = false) {
         let remoteCollections = [];
         if (fileId) {
             try {
-                const downloadRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+                // Add a cache-buster query param to prevent getting stale edge-cached files
+                const downloadRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&t=${Date.now()}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (downloadRes.ok) {
@@ -202,7 +203,7 @@ async function syncWithDrive(interactive = false) {
             for (const lCol of localCollections) {
                 const hash = hashCode("COLLECTION:" + lCol.name.toLowerCase());
                 const tomb = tombstones.find(t => t.hash === hash);
-                if (tomb && tomb.timestamp > (lCol.createdAt || 0)) {
+                if (tomb && (tomb.timestamp + 600000) > (lCol.createdAt || 0)) {
                     await db.collections.delete(lCol.id);
                 }
             }
@@ -210,8 +211,8 @@ async function syncWithDrive(interactive = false) {
                 const lItem = localHistory[i];
                 const hash = hashCode(lItem.type + lItem.content);
                 const tomb = tombstones.find(t => t.hash === hash);
-                // Only delete if the tombstone is NEWER than the item itself
-                if (tomb && tomb.timestamp > lItem.timestamp) {
+                // Allow 10 minutes (600000ms) of clock drift between devices
+                if (tomb && (tomb.timestamp + 600000) > lItem.timestamp) {
                     await db.history.delete(lItem.id);
                     localHistory.splice(i, 1);
                 }
@@ -220,7 +221,7 @@ async function syncWithDrive(interactive = false) {
             for (const rCol of remoteCollections) {
                 const hash = hashCode("COLLECTION:" + rCol.name.toLowerCase());
                 const tomb = tombstones.find(t => t.hash === hash);
-                if (tomb && tomb.timestamp > (rCol.createdAt || 0)) continue; // Skip if deleted locally
+                if (tomb && (tomb.timestamp + 600000) > (rCol.createdAt || 0)) continue; // Skip if deleted locally
 
                 const existing = localCollections.find(lCol => lCol.name.toLowerCase() === rCol.name.toLowerCase());
                 if (existing) {
@@ -234,10 +235,10 @@ async function syncWithDrive(interactive = false) {
 
             // Merge History (no duplicates by content + type, and not expired)
             for (const rItem of remoteHistory) {
-                // Skip if deleted locally (tombstoned after this item was created)
+                // Skip if deleted locally (allow 10m clock drift)
                 const hash = hashCode(rItem.type + rItem.content);
                 const tomb = tombstones.find(t => t.hash === hash);
-                if (tomb && tomb.timestamp > rItem.timestamp) {
+                if (tomb && (tomb.timestamp + 600000) > rItem.timestamp) {
                     continue;
                 }
 
