@@ -143,6 +143,7 @@ async function syncWithDrive(interactive = false) {
                     const remoteData = await downloadRes.ok ? await downloadRes.json() : {};
                     remoteHistory = remoteData.history || [];
                     remoteCollections = remoteData.collections || [];
+                    let remoteTombstones = remoteData.tombstones || [];
 
                     // Apply remote settings if they are newer
                     if (remoteData.settings) {
@@ -179,8 +180,33 @@ async function syncWithDrive(interactive = false) {
             // Load tombstones
             const tombstones = db.tombstones ? await db.tombstones.toArray() : [];
             const tombstoneHashes = new Set(tombstones.map(t => t.hash));
+
+            // Merge Tombstones First (so we know what to delete/ignore)
+            if (typeof remoteTombstones !== 'undefined') {
+                for (const rTomb of remoteTombstones) {
+                    if (!tombstoneHashes.has(rTomb.hash)) {
+                        await db.tombstones.add({ hash: rTomb.hash, timestamp: rTomb.timestamp });
+                        tombstoneHashes.add(rTomb.hash);
+                    }
+                }
+            }
+
+            // Apply tombstones to local data before merging
+            for (const lCol of localCollections) {
+                if (tombstoneHashes.has(hashCode("COLLECTION:" + lCol.name.toLowerCase()))) {
+                    await db.collections.delete(lCol.id);
+                }
+            }
+            for (let i = localHistory.length - 1; i >= 0; i--) {
+                const lItem = localHistory[i];
+                if (tombstoneHashes.has(hashCode(lItem.type + lItem.content))) {
+                    await db.history.delete(lItem.id);
+                    localHistory.splice(i, 1);
+                }
+            }
             // Merge Collections
             for (const rCol of remoteCollections) {
+                if (tombstoneHashes.has(hashCode("COLLECTION:" + rCol.name.toLowerCase()))) continue;
                 const existing = localCollections.find(lCol => lCol.name.toLowerCase() === rCol.name.toLowerCase());
                 if (existing) {
                     colIdMap[rCol.id] = existing.id;
@@ -209,14 +235,21 @@ async function syncWithDrive(interactive = false) {
                     lItem.content === rItem.content
                 );
                 
+                const mappedColId = rItem.collectionId ? (colIdMap[rItem.collectionId] || 0) : 0;
+                
                 if (!existing) {
-                    const mappedColId = rItem.collectionId ? (colIdMap[rItem.collectionId] || 0) : 0;
                     await db.history.add({
                         type: rItem.type,
                         content: rItem.content,
                         timestamp: rItem.timestamp,
                         collectionId: mappedColId
                     });
+                } else {
+                    // Cập nhật trạng thái Collection nếu bị thay đổi (từ remote)
+                    if (existing.collectionId !== mappedColId) {
+                        await db.history.update(existing.id, { collectionId: mappedColId });
+                        existing.collectionId = mappedColId;
+                    }
                 }
             }
 
@@ -243,6 +276,7 @@ async function syncWithDrive(interactive = false) {
             history: finalLocalHistory, 
             collections: finalLocalCollections, 
             settings: localSettingsToSync,
+            tombstones: finalLocalTombstones,
             timestamp: Date.now() 
         });
 

@@ -192,7 +192,17 @@ async function renameCollection(id, name) {
 }
 
 async function deleteCollection(id) {
-    // Also remove all items in this collection
+    const col = await db.collections.get(id);
+    if (col) {
+        const hash = hashCode("COLLECTION:" + col.name.toLowerCase());
+        await db.tombstones.add({ hash, timestamp: Date.now() });
+    }
+    // Remove all items in this collection and tombstone them
+    const items = await db.history.where('collectionId').equals(id).toArray();
+    for (const item of items) {
+        const h = hashCode(item.type + item.content);
+        await db.tombstones.add({ hash: h, timestamp: Date.now() });
+    }
     await db.history.where('collectionId').equals(id).delete();
     return await db.collections.delete(id);
 }
