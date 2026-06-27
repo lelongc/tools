@@ -269,6 +269,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingLimit = document.getElementById('setting-limit');
     const settingExpiry = document.getElementById('setting-expiry');
 
+    function updateSettingAndSync(key, value) {
+        const data = { settingsTimestamp: Date.now() };
+        data[key] = value;
+        chrome.storage.local.set(data, () => {
+            chrome.runtime.sendMessage({ action: 'checkGoogleLogin' }, res => {
+                if (res && res.ok) {
+                    showToast('Syncing settings...');
+                    chrome.runtime.sendMessage({ action: 'syncWithDriveSilent' });
+                }
+            });
+        });
+    }
+
     if (settingLimit && settingExpiry && settingBackup) {
         chrome.storage.local.get(['historyLimit', 'historyExpiry', 'autoBackupInterval'], (res) => {
             settingLimit.value = res.historyLimit || "50";
@@ -283,15 +296,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!isPro && val > 50) {
                     showToast('Free version is limited to 50 clips and 3 collections. Please upgrade to Pro!', true);
                     e.target.value = "50";
-                    chrome.storage.local.set({ historyLimit: 50, settingsTimestamp: Date.now() });
+                    updateSettingAndSync('historyLimit', 50);
                 } else {
-                    chrome.storage.local.set({ historyLimit: val, settingsTimestamp: Date.now() });
+                    updateSettingAndSync('historyLimit', val);
                 }
             });
         });
 
         settingExpiry.addEventListener('change', (e) => {
-            chrome.storage.local.set({ historyExpiry: parseInt(e.target.value), settingsTimestamp: Date.now() });
+            updateSettingAndSync('historyExpiry', parseInt(e.target.value));
         });
 
         settingBackup.addEventListener('change', (e) => {
@@ -301,9 +314,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!isPro && val > 0) {
                     showToast('Auto-Backup is a Pro feature. Please upgrade to Pro!', true);
                     e.target.value = "0";
-                    chrome.storage.local.set({ autoBackupInterval: 0, settingsTimestamp: Date.now() });
+                    updateSettingAndSync('autoBackupInterval', 0);
                 } else {
-                    chrome.storage.local.set({ autoBackupInterval: val, settingsTimestamp: Date.now() });
+                    updateSettingAndSync('autoBackupInterval', val);
                 }
             });
         });
@@ -459,6 +472,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (changes.hideBubble && toggleBubble) {
                 toggleBubble.checked = !changes.hideBubble.newValue;
             }
+            
+            // Sync setting dropdowns if they change from a background sync
+            if (changes.historyLimit && settingLimit) settingLimit.value = changes.historyLimit.newValue;
+            if (changes.historyExpiry && settingExpiry) settingExpiry.value = changes.historyExpiry.newValue;
+            if (changes.autoBackupInterval && settingBackup) settingBackup.value = changes.autoBackupInterval.newValue;
         }
     });
 });
