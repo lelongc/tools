@@ -9,6 +9,12 @@ let isProCache = false;
 let proValidUntil = 0; // The timestamp until which Pro features can be used offline
 let lastApiCheck = 0; // Tracks the last time we pinged Lemon Squeezy
 
+// =========================================================================
+// [BẢO MẬT] ĐIỀN STORE ID CỦA BẠN VÀO ĐÂY ĐỂ VÁ LỖ HỔNG XÁC THỰC CHÉO
+// Bạn có thể lấy Store ID trong Settings của Dashboard Lemon Squeezy.
+// =========================================================================
+const VALID_STORE_ID = 416715; // Store ID của NeoClip Studio (#416715)
+
 // Initialize on startup
 chrome.storage.local.get(['isPro', 'proValidUntil', 'licenseKey', 'instanceId', 'autoBackupInterval'], (data) => {
     isProCache = !!data.isPro;
@@ -92,6 +98,12 @@ async function validateSubscriptionBackground() {
 
         const result = await response.json();
 
+        // Bảo mật: Kiểm tra Store ID để ngăn chặn giả mạo license chéo
+        if (result.valid === true && result.meta && result.meta.store_id !== VALID_STORE_ID) {
+            console.error('Bảo mật: License key thuộc về Store khác! Hủy kích hoạt.');
+            result.valid = false;
+        }
+
         if (result.valid === true) {
             // Subscription active: Set exactly to expiration date
             let newValidUntil = Date.now() + (10 * 365 * 24 * 60 * 60 * 1000); // Default to +10 years
@@ -145,6 +157,11 @@ async function checkLicense(key) {
         });
         const data = await response.json();
 
+        // Bảo mật: Kiểm tra Store ID để ngăn chặn giả mạo license chéo
+        if (data.activated && data.meta && data.meta.store_id !== VALID_STORE_ID) {
+            return { ok: false, error: 'License key không hợp lệ cho ứng dụng này (Sai Store).' };
+        }
+
         if (data.activated) {
             isProCache = true;
             // Parse exact expiration date from Lemon Squeezy, or 10 years for Lifetime
@@ -180,6 +197,11 @@ async function restoreLicense(key, instanceId) {
             body: new URLSearchParams({ license_key: key, instance_id: instanceId })
         });
         const result = await response.json();
+
+        // Bảo mật: Kiểm tra Store ID để ngăn chặn giả mạo license chéo
+        if (result.valid === true && result.meta && result.meta.store_id !== VALID_STORE_ID) {
+            return { ok: false };
+        }
 
         if (result.valid === true) {
             isProCache = true;

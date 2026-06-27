@@ -34,36 +34,53 @@ Trước khi tải mã nguồn lên các chợ ứng dụng, bạn bắt buộc 
 
 ---
 
-## 2. Cấu hình Google Cloud Console (OAuth Client ID cho Production)
+## 2. Cấu hình Google Cloud Console (Thiết lập Đăng nhập & Đồng bộ)
 
-Tính năng đồng bộ đám mây (Cloud Sync) yêu cầu kết nối với tài khoản Google Drive của người dùng thông qua Google OAuth 2.0.
+Tính năng đồng bộ đám mây (Cloud Sync) yêu cầu kết nối với tài khoản Google Drive của người dùng thông qua Google OAuth 2.0. Giao diện Google Cloud Console hiện tại đã được cập nhật.
 
-### Bước 1: Tạo dự án và Thiết lập màn hình đồng ý OAuth (Consent Screen)
-1. Truy cập [Google Cloud Console](https://console.cloud.google.com/).
-2. Tạo một dự án mới (ví dụ đặt tên là `NeoClip`).
-3. Đi đến mục **APIs & Services** -> **OAuth consent screen**:
-   * **User Type:** Chọn **External**.
-   * **App information:** Nhập tên ứng dụng (`NeoClip`), Email hỗ trợ (`worklelong@gmail.com`) và Logo.
-   * **Developer contact information:** Nhập email của bạn (`worklelong@gmail.com`).
-   * **Scopes (Phạm vi):** Bấm **Add or Remove Scopes**, điền thủ công scope dưới đây và lưu lại:
-     `https://www.googleapis.com/auth/drive.appdata`
-     *(Đây là scope restricted nhưng chỉ giới hạn trong thư mục ẩn của ứng dụng, không yêu cầu xác minh bảo mật phức tạp như quyền đọc toàn bộ Drive).*
+### Bước 1: Tạo Thông tin xác thực (Credentials)
+1. Truy cập [Google Cloud Console](https://console.cloud.google.com/) và tạo một dự án mới (ví dụ `NeoClip`).
+2. Đi đến mục **APIs & Services** -> **Credentials**.
+3. Bấm **Create Credentials** -> Chọn **OAuth client ID**.
+4. Chọn loại ứng dụng là **Web application**.
+5. Đặt tên là `NeoClip Production`.
+6. Tại mục **Authorized redirect URIs**, lấy URL của extension trên máy của bạn (chạy `chrome.identity.getRedirectURL()` trong Console, ví dụ: `https://<extension-id>.chromiumapp.org/`).
+7. Dán link này vào, bấm **Create** và copy dãy **Client ID** được sinh ra.
 
-### Bước 2: Tạo Web Application Client ID
-1. Đi đến mục **Credentials** -> Bấm **Create Credentials** -> Chọn **OAuth client ID**.
-2. **Application type:** Chọn **Web application**.
-3. **Name:** Nhập `NeoClip Production`.
-4. **Authorized redirect URIs:**
-   * Bạn cần lấy Redirect URI của extension trên máy của bạn.
-   * Để lấy chính xác link này, mở trình duyệt và chạy dòng lệnh sau ở Console:
-     ```javascript
-     chrome.identity.getRedirectURL()
-     ```
-   * Link trả về sẽ có dạng: `https://<extension-id>.chromiumapp.org/`
-   * Dán link này vào mục **Authorized redirect URIs** trên Google Cloud và bấm **Create**.
-5. Copy dãy **Client ID** được sinh ra (dạng `xxxxxx.apps.googleusercontent.com`).
+### Bước 2: Cấu hình Màn hình xin quyền (OAuth Consent Screen) - Data Access
+1. Chuyển sang tab **Data Access**.
+2. Thêm quyền (Scope) vào mục **Non-sensitive scopes**: Chọn `.../auth/drive.appdata`.
+3. *(Quyền này cho phép ứng dụng chỉ tạo, xem và xóa dữ liệu cấu hình của riêng nó trong một thư mục ẩn trên Google Drive, không đụng chạm đến các file cá nhân khác của người dùng).*
 
-### Bước 3: Dán Client ID vào Code
+### Bước 3: Cấu hình Thương hiệu (Branding)
+1. Chuyển sang tab **Branding**.
+2. Điền **App name**: NeoClip.
+3. Điền **User support email**: lelong190110@gmail.com.
+4. Khai báo 3 đường link chính sách (đã được lưu trữ trên Vercel):
+   * **Application home page**: `https://neoclip.vercel.app/`
+   * **Application privacy policy link**: `https://neoclip.vercel.app/privacy.html`
+   * **Application terms of service link**: `https://neoclip.vercel.app/terms.html`
+5. Tại mục **Authorized domains**, thêm chính xác tên miền: `neoclip.vercel.app`.
+
+### Bước 4: Xác minh Tên miền (Domain Verification)
+Hệ thống có thể báo lỗi "Not registered to you" do chưa nhận diện được chủ sở hữu tên miền Vercel. Bạn cần:
+1. Mở **Google Search Console** bằng tài khoản lelong190110@gmail.com.
+2. Thêm tài sản mới bằng phương pháp **Tiền tố URL (URL prefix)** với link `https://neoclip.vercel.app/`.
+3. Chọn phương pháp xác minh bằng **Thẻ HTML (HTML tag)**.
+4. Copy đoạn mã `<meta name="google-site-verification" content="..." />`.
+5. Dán đoạn mã này vào thẻ `<head>` trong file code `index.html` của website NeoClip và Deploy bản cập nhật lên Vercel.
+6. Quay lại Search Console bấm **Xác minh thành công**.
+7. Trở lại Google Cloud Console (mục Verification Center), chọn **I have fixed the issues** và gửi yêu cầu xác minh lại để hoàn tất.
+
+### Bước 5: Thêm người dùng thử nghiệm (Test Users)
+Trong thời gian ứng dụng đang ở trạng thái **Testing** (chưa được Google phê duyệt chính thức), chỉ những email được bạn cấp quyền mới có thể đăng nhập Google Drive thông qua extension:
+1. Tại trang **OAuth consent screen**, kéo xuống tìm mục **Test users** (hoặc chuyển sang tab **Audience** tùy phiên bản giao diện).
+2. Bấm nút **+ Add Users**.
+3. Nhập chính xác các địa chỉ email của những người sẽ tham gia test extension (ví dụ: email cá nhân của bạn, email tester).
+4. Bấm **Save** để lưu lại.
+*(Lưu ý: Bạn có thể thêm tối đa 100 test users. Khi cài đặt extension, những người dùng này có thể sẽ thấy màn hình cảnh báo "Google hasn’t verified this app" - đây là điều bình thường, họ chỉ cần bấm **Continue/Advanced** để tiếp tục).*
+
+### Bước 6: Dán Client ID vào Code
 1. Mở file [sync.js](file:///d:/folder/tools/money/magic-clip/background/sync.js) trong dự án.
 2. Tìm biến `CLIENT_ID` ở dòng số 6 và thay bằng Client ID Production của bạn:
    ```javascript
@@ -75,10 +92,21 @@ Tính năng đồng bộ đám mây (Cloud Sync) yêu cầu kết nối với t�
 
 ## 3. Phát hành lên Chrome Web Store
 
-### Bước 1: Đăng ký tài khoản nhà phát triển (Chrome Developer Account)
+### Bước 1: Khai báo Hồ sơ Nhà xuất bản (Publisher Profile)
+Mục tiêu của phần này là đăng ký danh tính để được phép thu tiền người dùng hợp pháp.
 1. Truy cập [Chrome Web Store Developer Console](https://chrome.google.com/webstore/devconsole/).
-2. Đăng nhập bằng tài khoản Google của bạn.
-3. Thanh toán khoản phí đăng ký tài khoản 1 lần duy nhất trị giá **$5** cho Google.
+2. Đăng nhập bằng tài khoản Google của bạn và thanh toán $5 phí đăng ký (nếu chưa có).
+3. Điền **Tên hiển thị của nhà xuất bản** (Long Lê hoặc NeoClip).
+4. Thêm **Địa chỉ email liên hệ** (lelong190110@gmail.com).
+5. Tại mục Khai báo tình trạng thương mại, tích chọn **"Đây là tài khoản thương mại"** (bắt buộc đối với extension có thu phí).
+6. Tích chọn ô đồng ý tuân thủ các quy tắc của trang web.
+
+### Bước 2: Xác minh Hồ sơ Thanh toán (Google Pay)
+1. Bấm vào đường link **Quản lý** hoặc **Hồ sơ thanh toán trên Google** tại mục Xác minh tài khoản.
+2. Thiết lập tên trùng khớp 100% với tên trên Căn cước công dân.
+3. Điền chính xác địa chỉ theo đúng giấy tờ chứng minh: *Đội 1, Thôn Thượng, An Vĩ, Khoái Châu, Hưng Yên* (Mã bưu chính: 170000).
+4. Tải lên ảnh chụp mặt trước và mặt sau của Thẻ Căn cước (để xác minh danh tính).
+5. Tải lên file PDF **Sao kê ngân hàng điện tử MBBank** (để xác minh địa chỉ).
 
 ### Bước 2: Tạo Item mới và Upload
 1. Bấm nút **Add new item** (Thêm mục mới).
