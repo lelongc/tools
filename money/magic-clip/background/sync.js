@@ -264,6 +264,7 @@ async function syncWithDrive(interactive = false) {
         // 4. Load full merged database from local to upload back to Drive
         const finalLocalHistory = await db.history.toArray();
         const finalLocalCollections = await db.collections.toArray();
+        const finalLocalTombstones = db.tombstones ? await db.tombstones.toArray() : [];
 
         // Sort history by timestamp descending
         finalLocalHistory.sort((a, b) => b.timestamp - a.timestamp);
