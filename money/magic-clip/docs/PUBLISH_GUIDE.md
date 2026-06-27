@@ -56,11 +56,12 @@ Tính năng đồng bộ đám mây (Cloud Sync) yêu cầu kết nối với t�
 1. Chuyển sang tab **Branding**.
 2. Điền **App name**: NeoClip.
 3. Điền **User support email**: lelong190110@gmail.com.
-4. Khai báo 3 đường link chính sách (đã được lưu trữ trên Vercel):
+4. **App logo**: Bạn tải lên logo hình vuông (khuyên dùng nền trong suốt để đẹp nhất trên nền trắng của Google). *Lưu ý: Ngay khi tải logo lên, Google sẽ yêu cầu ứng dụng phải qua quá trình xác minh.*
+5. Khai báo 3 đường link chính sách (đã được lưu trữ trên Vercel):
    * **Application home page**: `https://neoclip.vercel.app/`
    * **Application privacy policy link**: `https://neoclip.vercel.app/privacy.html`
    * **Application terms of service link**: `https://neoclip.vercel.app/terms.html`
-5. Tại mục **Authorized domains**, thêm chính xác tên miền: `neoclip.vercel.app`.
+6. Tại mục **Authorized domains**, thêm chính xác tên miền: `neoclip.vercel.app`.
 
 ### Bước 4: Xác minh Tên miền (Domain Verification)
 Hệ thống có thể báo lỗi "Not registered to you" do chưa nhận diện được chủ sở hữu tên miền Vercel. Bạn cần:
@@ -72,15 +73,28 @@ Hệ thống có thể báo lỗi "Not registered to you" do chưa nhận diện
 6. Quay lại Search Console bấm **Xác minh thành công**.
 7. Trở lại Google Cloud Console (mục Verification Center), chọn **I have fixed the issues** và gửi yêu cầu xác minh lại để hoàn tất.
 
-### Bước 5: Thêm người dùng thử nghiệm (Test Users)
-Trong thời gian ứng dụng đang ở trạng thái **Testing** (chưa được Google phê duyệt chính thức), chỉ những email được bạn cấp quyền mới có thể đăng nhập Google Drive thông qua extension:
+### Bước 5: Gửi xác minh ứng dụng (Submit for Verification)
+Vì bạn tải lên Logo và phát hành ứng dụng ra công chúng (In production), bạn cần gửi ứng dụng cho Google duyệt (mất 1-3 ngày).
+1. Bấm nút **Submit for verification** ở tab Verification Center hoặc Audience.
+2. Tại ô **Additional info**, hãy dán đoạn giải trình sau:
+   *"NeoClip is a premium Chrome Extension clipboard manager. We request the non-sensitive 'drive.appdata' scope solely to allow users to securely sync their encrypted clipboard history to a hidden, app-specific folder in their own Google Drive. We do not access any other personal files. The provided domain (neoclip.vercel.app) and logo belong to us. Please verify our branding. Thank you!"*
+3. Trả lời **Verification Questionnaire**:
+   * Is your application for personal use only? -> **No**
+   * Is your application for Internal use only? -> **No**
+   * Is your application for Development/Testing/Staging use only? -> **No**
+   * Is your application a Gmail SMTP Plugin...? -> **No**
+   * Tích chọn (Check) CẢ HAI ô cuối cùng để xác nhận đồng ý các điều khoản.
+4. Bấm **Submit** và chờ Google duyệt.
+
+### Bước 6: Thêm người dùng thử nghiệm (Test Users - Không bắt buộc nếu đã Submit)
+Trong thời gian ứng dụng đang ở trạng thái **Testing** hoặc chờ Google phê duyệt chính thức, chỉ những email được bạn cấp quyền mới có thể đăng nhập Google Drive thông qua extension:
 1. Tại trang **OAuth consent screen**, kéo xuống tìm mục **Test users** (hoặc chuyển sang tab **Audience** tùy phiên bản giao diện).
 2. Bấm nút **+ Add Users**.
 3. Nhập chính xác các địa chỉ email của những người sẽ tham gia test extension (ví dụ: email cá nhân của bạn, email tester).
 4. Bấm **Save** để lưu lại.
-*(Lưu ý: Bạn có thể thêm tối đa 100 test users. Khi cài đặt extension, những người dùng này có thể sẽ thấy màn hình cảnh báo "Google hasn’t verified this app" - đây là điều bình thường, họ chỉ cần bấm **Continue/Advanced** để tiếp tục).*
+*(Lưu ý: Khi cài đặt extension, những người dùng này có thể sẽ thấy màn hình cảnh báo "Google hasn’t verified this app" - họ chỉ cần bấm **Continue/Advanced** để tiếp tục).*
 
-### Bước 6: Dán Client ID vào Code
+### Bước 7: Dán Client ID vào Code
 1. Mở file [sync.js](file:///d:/folder/tools/money/magic-clip/background/sync.js) trong dự án.
 2. Tìm biến `CLIENT_ID` ở dòng số 6 và thay bằng Client ID Production của bạn:
    ```javascript

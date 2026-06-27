@@ -456,14 +456,17 @@
         const scrollPos = body.scrollTop;
         if (!isRefresh) body.innerHTML = '<div class="p-empty">Loading...</div>';
         
-        chrome.runtime.sendMessage({ action: 'getRecent', limit: 50, search, typeFilter: currentFilter }, res => {
-            body.innerHTML = '';
-            if (!res || !res.items || res.items.length === 0) {
-                body.innerHTML = '<div class="p-empty">Clipboard is empty.</div>';
-                return;
-            }
-            res.items.forEach(item => body.appendChild(buildCard(item, false)));
-            if (isRefresh) body.scrollTop = scrollPos;
+        chrome.storage.local.get(['historyLimit'], sData => {
+            const limit = sData.historyLimit || 50;
+            chrome.runtime.sendMessage({ action: 'getRecent', limit, search, typeFilter: currentFilter }, res => {
+                body.innerHTML = '';
+                if (!res || !res.items || res.items.length === 0) {
+                    body.innerHTML = '<div class="p-empty">Clipboard is empty.</div>';
+                    return;
+                }
+                res.items.forEach(item => body.appendChild(buildCard(item, false)));
+                if (isRefresh) body.scrollTop = scrollPos;
+            });
         });
     }
 
