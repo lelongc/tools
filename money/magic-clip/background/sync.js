@@ -206,7 +206,7 @@ async function syncWithDrive(interactive = false) {
             for (const lCol of localCollections) {
                 const hash = hashCode("COLLECTION:" + lCol.name.toLowerCase());
                 const tomb = tombstones.find(t => t.hash === hash);
-                if (tomb && (tomb.timestamp + 600000) > (lCol.createdAt || 0)) {
+                if (tomb) {
                     await db.collections.delete(lCol.id);
                 }
             }
@@ -214,8 +214,7 @@ async function syncWithDrive(interactive = false) {
                 const lItem = localHistory[i];
                 const hash = hashCode(lItem.type + lItem.content);
                 const tomb = tombstones.find(t => t.hash === hash);
-                // Allow 10 minutes (600000ms) of clock drift between devices
-                if (tomb && (tomb.timestamp + 600000) > lItem.timestamp) {
+                if (tomb) {
                     await db.history.delete(lItem.id);
                     localHistory.splice(i, 1);
                 }
@@ -224,7 +223,7 @@ async function syncWithDrive(interactive = false) {
             for (const rCol of remoteCollections) {
                 const hash = hashCode("COLLECTION:" + rCol.name.toLowerCase());
                 const tomb = tombstones.find(t => t.hash === hash);
-                if (tomb && (tomb.timestamp + 600000) > (rCol.createdAt || 0)) continue; // Skip if deleted locally
+                if (tomb) continue; // Skip if deleted locally
 
                 const existing = localCollections.find(lCol => lCol.name.toLowerCase() === rCol.name.toLowerCase());
                 if (existing) {
@@ -238,10 +237,9 @@ async function syncWithDrive(interactive = false) {
 
             // Merge History (no duplicates by content + type, and not expired)
             for (const rItem of remoteHistory) {
-                // Skip if deleted locally (allow 10m clock drift)
                 const hash = hashCode(rItem.type + rItem.content);
                 const tomb = tombstones.find(t => t.hash === hash);
-                if (tomb && (tomb.timestamp + 600000) > rItem.timestamp) {
+                if (tomb) {
                     continue;
                 }
 
