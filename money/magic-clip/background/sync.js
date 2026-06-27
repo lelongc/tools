@@ -276,6 +276,7 @@ async function syncWithDrive(interactive = false) {
         await chrome.storage.local.set({ lastBackupTime: now });
 
         // Notify content scripts / popup tabs to refresh UI
+        chrome.runtime.sendMessage({ action: 'syncCompleted' }).catch(() => {});
         chrome.tabs.query({}, (tabs) => {
             for (const tab of tabs) {
                 chrome.tabs.sendMessage(tab.id, { action: 'storageCleared' }).catch(() => {});

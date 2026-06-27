@@ -127,6 +127,13 @@ async function getRecent(limit = 50, search = '', typeFilter = 'all') {
     return items.slice(0, limit);
 }
 
+async function getStats() {
+    return {
+        totalItems: await db.history.count(),
+        totalCollections: await db.collections.count()
+    };
+}
+
 async function getCollectionItems(collectionId, search = '') {
     let items = await db.history.where('collectionId').equals(collectionId).reverse().sortBy('timestamp');
     if (search) {

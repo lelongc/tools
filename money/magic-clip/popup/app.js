@@ -3,15 +3,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const statCols = document.getElementById('stat-cols');
 
     function loadStats() {
-        chrome.runtime.sendMessage({ action: 'getRecent', limit: 99999 }, res => {
-            const total = res && res.items ? res.items.length : 0;
-            if (statItems) statItems.textContent = total;
-        });
-        chrome.runtime.sendMessage({ action: 'getCollections' }, colRes => {
-            const cols = colRes && colRes.collections ? colRes.collections.length : 0;
-            if (statCols) statCols.textContent = cols;
+        chrome.runtime.sendMessage({ action: 'getStats' }, res => {
+            if (statItems) statItems.textContent = res ? res.totalItems : 0;
+            if (statCols) statCols.textContent = res ? res.totalCollections : 0;
         });
     }
+
+    chrome.runtime.onMessage.addListener((req) => {
+        if (req.action === 'syncCompleted') {
+            loadStats();
+        }
+    });
     
     // Initial load
     loadStats();

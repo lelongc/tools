@@ -270,6 +270,9 @@ async function handleMessage(req, sender) {
         case 'getRecent':
             return { items: await getRecent(req.limit || 50, req.search || '', req.typeFilter || 'all') };
 
+        case 'getStats':
+            return await getStats();
+
         case 'getCollections':
             return { collections: await getCollections(await isProActive()) };
 
