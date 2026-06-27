@@ -186,22 +186,32 @@ async function syncWithDrive(interactive = false) {
             // Merge Tombstones First (so we know what to delete/ignore)
             if (typeof remoteTombstones !== 'undefined') {
                 for (const rTomb of remoteTombstones) {
-                    if (!tombstoneHashes.has(rTomb.hash)) {
+                    const existingTomb = tombstones.find(t => t.hash === rTomb.hash);
+                    if (!existingTomb) {
                         await db.tombstones.add({ hash: rTomb.hash, timestamp: rTomb.timestamp });
+                        tombstones.push({ hash: rTomb.hash, timestamp: rTomb.timestamp });
                         tombstoneHashes.add(rTomb.hash);
+                    } else if (rTomb.timestamp > existingTomb.timestamp) {
+                        await db.tombstones.where('hash').equals(rTomb.hash).modify({ timestamp: rTomb.timestamp });
+                        existingTomb.timestamp = rTomb.timestamp;
                     }
                 }
             }
 
             // Apply tombstones to local data before merging
             for (const lCol of localCollections) {
-                if (tombstoneHashes.has(hashCode("COLLECTION:" + lCol.name.toLowerCase()))) {
+                const hash = hashCode("COLLECTION:" + lCol.name.toLowerCase());
+                const tomb = tombstones.find(t => t.hash === hash);
+                if (tomb && tomb.timestamp > lCol.createdAt) {
                     await db.collections.delete(lCol.id);
                 }
             }
             for (let i = localHistory.length - 1; i >= 0; i--) {
                 const lItem = localHistory[i];
-                if (tombstoneHashes.has(hashCode(lItem.type + lItem.content))) {
+                const hash = hashCode(lItem.type + lItem.content);
+                const tomb = tombstones.find(t => t.hash === hash);
+                // Only delete if the tombstone is NEWER than the item itself
+                if (tomb && tomb.timestamp > lItem.timestamp) {
                     await db.history.delete(lItem.id);
                     localHistory.splice(i, 1);
                 }
@@ -221,9 +231,10 @@ async function syncWithDrive(interactive = false) {
 
             // Merge History (no duplicates by content + type, and not expired)
             for (const rItem of remoteHistory) {
-                // Skip if deleted locally (tombstoned)
+                // Skip if deleted locally (tombstoned after this item was created)
                 const hash = hashCode(rItem.type + rItem.content);
-                if (tombstoneHashes.has(hash)) {
+                const tomb = tombstones.find(t => t.hash === hash);
+                if (tomb && tomb.timestamp > rItem.timestamp) {
                     continue;
                 }
 
