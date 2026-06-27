@@ -248,7 +248,7 @@ async function syncWithDrive(interactive = false) {
                     });
                 } else {
                     // Cập nhật trạng thái Collection nếu bị thay đổi (từ remote)
-                    if (existing.collectionId !== mappedColId) {
+                    if (existing.collectionId !== mappedColId && mappedColId !== 0) {
                         await db.history.update(existing.id, { collectionId: mappedColId });
                         existing.collectionId = mappedColId;
                     }
