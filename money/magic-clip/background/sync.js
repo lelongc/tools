@@ -185,7 +185,7 @@ async function syncWithDrive(interactive = false) {
             const tombstoneHashes = new Set(tombstones.map(t => t.hash));
 
             // Merge Tombstones First (so we know what to delete/ignore)
-            if (typeof remoteTombstones !== 'undefined') {
+            if (typeof remoteTombstones !== 'undefined' && db.tombstones) {
                 for (const rTomb of remoteTombstones) {
                     const existingTomb = tombstones.find(t => t.hash === rTomb.hash);
                     if (!existingTomb) {

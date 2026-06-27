@@ -150,14 +150,16 @@ async function getCollectionItems(collectionId, search = '') {
 async function deleteItem(id) {
     const item = await db.history.get(id);
     if (item) {
-        const hash = hashCode(item.type + item.content);
-        await db.tombstones.add({ hash, timestamp: Date.now() });
+        if (db.tombstones) {
+            const hash = hashCode(item.type + item.content);
+            await db.tombstones.add({ hash, timestamp: Date.now() });
         
-        // Trim tombstones if > 1000 to save space
-        const count = await db.tombstones.count();
-        if (count > 1000) {
-            const oldest = await db.tombstones.orderBy('timestamp').first();
-            if (oldest) await db.tombstones.delete(oldest.id);
+            // Trim tombstones if > 1000 to save space
+            const count = await db.tombstones.count();
+            if (count > 1000) {
+                const oldest = await db.tombstones.orderBy('timestamp').first();
+                if (oldest) await db.tombstones.delete(oldest.id);
+            }
         }
     }
     return await db.history.delete(id);
@@ -193,15 +195,17 @@ async function renameCollection(id, name) {
 
 async function deleteCollection(id) {
     const col = await db.collections.get(id);
-    if (col) {
+    if (col && db.tombstones) {
         const hash = hashCode("COLLECTION:" + col.name.toLowerCase());
         await db.tombstones.add({ hash, timestamp: Date.now() });
     }
     // Remove all items in this collection and tombstone them
     const items = await db.history.where('collectionId').equals(id).toArray();
     for (const item of items) {
-        const h = hashCode(item.type + item.content);
-        await db.tombstones.add({ hash: h, timestamp: Date.now() });
+        if (db.tombstones) {
+            const h = hashCode(item.type + item.content);
+            await db.tombstones.add({ hash: h, timestamp: Date.now() });
+        }
     }
     await db.history.where('collectionId').equals(id).delete();
     return await db.collections.delete(id);
