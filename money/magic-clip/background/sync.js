@@ -182,9 +182,12 @@ async function syncWithDrive(interactive = false) {
         const tables = [db.history, db.collections];
         if (db.tombstones) tables.push(db.tombstones);
 
+        const fallbackData = await new Promise(r => chrome.storage.local.get(['fallbackTombstones'], r));
+        let fallbackTombstonesChanged = false;
+
         await db.transaction('rw', ...tables, async () => {
             // Load tombstones
-            const tombstones = db.tombstones ? await db.tombstones.toArray() : [];
+            const tombstones = db.tombstones ? await db.tombstones.toArray() : (fallbackData.fallbackTombstones || []);
             const tombstoneHashes = new Set(tombstones.map(t => t.hash));
 
             // Merge Tombstones First (so we know what to delete/ignore)
@@ -193,10 +196,12 @@ async function syncWithDrive(interactive = false) {
                     const existingTomb = tombstones.find(t => t.hash === rTomb.hash);
                     if (!existingTomb) {
                         if (db.tombstones) await db.tombstones.add({ hash: rTomb.hash, timestamp: rTomb.timestamp });
+                        else fallbackTombstonesChanged = true;
                         tombstones.push({ hash: rTomb.hash, timestamp: rTomb.timestamp });
                         tombstoneHashes.add(rTomb.hash);
                     } else if (rTomb.timestamp > existingTomb.timestamp) {
                         if (db.tombstones) await db.tombstones.where('hash').equals(rTomb.hash).modify({ timestamp: rTomb.timestamp });
+                        else fallbackTombstonesChanged = true;
                         existingTomb.timestamp = rTomb.timestamp;
                     }
                 }
@@ -275,12 +280,20 @@ async function syncWithDrive(interactive = false) {
             if (cutoff > 0) {
                 await db.history.where('timestamp').below(cutoff).filter(i => i.collectionId === 0).delete();
             }
+
+            if (fallbackTombstonesChanged) {
+                // Trim if > 1000
+                if (tombstones.length > 1000) tombstones.splice(0, tombstones.length - 1000);
+                await new Promise(r => chrome.storage.local.set({ fallbackTombstones: tombstones }, r));
+            }
         });
 
         // 4. Load full merged database from local to upload back to Drive
         const finalLocalHistory = await db.history.toArray();
         const finalLocalCollections = await db.collections.toArray();
-        const finalLocalTombstones = db.tombstones ? await db.tombstones.toArray() : [];
+        const localTombstonesData = db.tombstones ? await db.tombstones.toArray() : [];
+        const fallbackDataUpload = await new Promise(r => chrome.storage.local.get(['fallbackTombstones'], r));
+        const finalLocalTombstones = [...localTombstonesData, ...(fallbackDataUpload.fallbackTombstones || [])];
 
         // Sort history by timestamp descending
         finalLocalHistory.sort((a, b) => b.timestamp - a.timestamp);
