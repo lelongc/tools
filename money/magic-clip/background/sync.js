@@ -179,7 +179,10 @@ async function syncWithDrive(interactive = false) {
         const colIdMap = {}; // Maps remote collection ID -> local collection ID
         const mergedCollections = [...localCollections];
 
-        await db.transaction('rw', db.history, db.collections, db.tombstones, async () => {
+        const tables = [db.history, db.collections];
+        if (db.tombstones) tables.push(db.tombstones);
+
+        await db.transaction('rw', ...tables, async () => {
             // Load tombstones
             const tombstones = db.tombstones ? await db.tombstones.toArray() : [];
             const tombstoneHashes = new Set(tombstones.map(t => t.hash));
