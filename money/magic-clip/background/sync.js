@@ -143,6 +143,17 @@ async function syncWithDrive(interactive = false) {
                     const remoteData = await downloadRes.ok ? await downloadRes.json() : {};
                     remoteHistory = remoteData.history || [];
                     remoteCollections = remoteData.collections || [];
+
+                    // Apply remote settings if they are newer
+                    if (remoteData.settings) {
+                        const localSet = await new Promise(r => chrome.storage.local.get(['settingsTimestamp'], r));
+                        const remoteTs = remoteData.settings.settingsTimestamp || 0;
+                        const localTs = localSet.settingsTimestamp || 0;
+                        if (remoteTs > localTs) {
+                            await new Promise(r => chrome.storage.local.set(remoteData.settings, r));
+                            console.log('Applied newer settings from Drive.');
+                        }
+                    }
                 }
             } catch (e) {
                 console.warn('Could not read existing backup, proceeding with merge:', e);
@@ -217,9 +228,12 @@ async function syncWithDrive(interactive = false) {
         // Việc giới hạn hiển thị chỉ áp dụng ở tầng UI, Drive lưu toàn bộ để bảo toàn dữ liệu
 
         // 5. Upload final merged data back to Google Drive
+        const localSettingsToSync = await new Promise(r => chrome.storage.local.get(['historyLimit', 'historyExpiry', 'autoBackupInterval', 'settingsTimestamp'], r));
+
         const backupData = JSON.stringify({ 
             history: finalLocalHistory, 
             collections: finalLocalCollections, 
+            settings: localSettingsToSync,
             timestamp: Date.now() 
         });
 

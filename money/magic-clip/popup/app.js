@@ -283,15 +283,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!isPro && val > 50) {
                     showToast('Free version is limited to 50 clips and 3 collections. Please upgrade to Pro!', true);
                     e.target.value = "50";
-                    chrome.storage.local.set({ historyLimit: 50 });
+                    chrome.storage.local.set({ historyLimit: 50, settingsTimestamp: Date.now() });
                 } else {
-                    chrome.storage.local.set({ historyLimit: val });
+                    chrome.storage.local.set({ historyLimit: val, settingsTimestamp: Date.now() });
                 }
             });
         });
 
         settingExpiry.addEventListener('change', (e) => {
-            chrome.storage.local.set({ historyExpiry: parseInt(e.target.value) });
+            chrome.storage.local.set({ historyExpiry: parseInt(e.target.value), settingsTimestamp: Date.now() });
         });
 
         settingBackup.addEventListener('change', (e) => {
@@ -301,9 +301,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!isPro && val > 0) {
                     showToast('Auto-Backup is a Pro feature. Please upgrade to Pro!', true);
                     e.target.value = "0";
-                    chrome.storage.local.set({ autoBackupInterval: 0 });
+                    chrome.storage.local.set({ autoBackupInterval: 0, settingsTimestamp: Date.now() });
                 } else {
-                    chrome.storage.local.set({ autoBackupInterval: val });
+                    chrome.storage.local.set({ autoBackupInterval: val, settingsTimestamp: Date.now() });
                 }
             });
         });
