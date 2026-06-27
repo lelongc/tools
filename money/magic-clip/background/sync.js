@@ -175,7 +175,10 @@ async function syncWithDrive(interactive = false) {
         const colIdMap = {}; // Maps remote collection ID -> local collection ID
         const mergedCollections = [...localCollections];
 
-        await db.transaction('rw', db.history, db.collections, async () => {
+        await db.transaction('rw', db.history, db.collections, db.tombstones, async () => {
+            // Load tombstones
+            const tombstones = db.tombstones ? await db.tombstones.toArray() : [];
+            const tombstoneHashes = new Set(tombstones.map(t => t.hash));
             // Merge Collections
             for (const rCol of remoteCollections) {
                 const existing = localCollections.find(lCol => lCol.name.toLowerCase() === rCol.name.toLowerCase());
@@ -190,6 +193,12 @@ async function syncWithDrive(interactive = false) {
 
             // Merge History (no duplicates by content + type, and not expired)
             for (const rItem of remoteHistory) {
+                // Skip if deleted locally (tombstoned)
+                const hash = hashCode(rItem.type + rItem.content);
+                if (tombstoneHashes.has(hash)) {
+                    continue;
+                }
+
                 // If it is older than cutoff and not pinned in a collection, skip merging it!
                 if (cutoff > 0 && rItem.timestamp < cutoff && (!rItem.collectionId || rItem.collectionId === 0)) {
                     continue;

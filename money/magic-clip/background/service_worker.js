@@ -323,12 +323,8 @@ async function handleMessage(req, sender) {
             } catch (e) {
                 console.error('Failed to delete backup from Drive:', e);
             }
-            if (typeof logoutGoogle === 'function') logoutGoogle();
-            await new Promise(resolve => {
-                chrome.storage.local.remove(['isPro', 'proValidUntil', 'licenseKey', 'instanceId'], () => {
-                    chrome.storage.local.set({ driveConnected: false, historyLimit: 50 }, () => resolve());
-                });
-            });
+            // Đã sửa: KHÔNG logoutGoogle() và không revoke license Pro.
+            // Chức năng này chỉ nhằm mục đích wipe data.
             chrome.tabs.query({}, tabs => {
                 for (const tab of tabs) {
                     chrome.tabs.sendMessage(tab.id, { action: 'storageCleared' }).catch(() => { });

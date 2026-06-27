@@ -15,7 +15,25 @@ db.version(2).stores({
     folders: null // drop old table
 });
 
+// Version 3: Added tombstones to prevent resurrected deleted items from sync
+db.version(3).stores({
+    history: '++id, type, timestamp, collectionId',
+    collections: '++id, name, createdAt',
+    tombstones: '++id, hash, timestamp'
+});
+
 db.open().catch(err => console.error('DB open failed:', err));
+
+// Fast string hashing for tombstones
+function hashCode(str) {
+    let hash = 0;
+    for (let i = 0, len = str.length; i < len; i++) {
+        let chr = str.charCodeAt(i);
+        hash = (hash << 5) - hash + chr;
+        hash |= 0;
+    }
+    return hash;
+}
 
 // --- History ---
 let lastSavedContent = null;
@@ -123,6 +141,18 @@ async function getCollectionItems(collectionId, search = '') {
 }
 
 async function deleteItem(id) {
+    const item = await db.history.get(id);
+    if (item) {
+        const hash = hashCode(item.type + item.content);
+        await db.tombstones.add({ hash, timestamp: Date.now() });
+        
+        // Trim tombstones if > 1000 to save space
+        const count = await db.tombstones.count();
+        if (count > 1000) {
+            const oldest = await db.tombstones.orderBy('timestamp').first();
+            if (oldest) await db.tombstones.delete(oldest.id);
+        }
+    }
     return await db.history.delete(id);
 }
 
@@ -163,6 +193,7 @@ async function deleteCollection(id) {
 async function clearStorage() {
     await db.history.clear();
     await db.collections.clear();
+    if (db.tombstones) await db.tombstones.clear();
 }
 
 // --- Helpers ---
