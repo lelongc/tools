@@ -85,6 +85,8 @@ async function getRecent(limit = 50, search = '', typeFilter = 'all') {
         items = await db.history.orderBy('timestamp').reverse().toArray();
         
         items = items.filter(i => {
+            // Ẩn items đã thuộc collection khỏi tab Recent
+            if (i.collectionId && i.collectionId !== 0) return false;
             // Apply type filter
             if (typeFilter !== 'all') {
                 if (typeFilter === 'links' && i.type !== 'link') return false;
@@ -101,9 +103,10 @@ async function getRecent(limit = 50, search = '', typeFilter = 'all') {
         });
         return items.slice(0, limit);
     }
-    // High Performance: Only load the exact number of items needed into RAM
-    items = await db.history.orderBy('timestamp').reverse().limit(limit).toArray();
-    return items;
+    // High Performance: Only load items NOT in a collection
+    items = await db.history.orderBy('timestamp').reverse().toArray();
+    items = items.filter(i => !i.collectionId || i.collectionId === 0);
+    return items.slice(0, limit);
 }
 
 async function getCollectionItems(collectionId, search = '') {

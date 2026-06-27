@@ -7,7 +7,7 @@ console.log('Magic Clip service worker running.');
 // --- Licensing System (Pro Validation Engine) ---
 let isProCache = false;
 let proValidUntil = 0; // The timestamp until which Pro features can be used offline
-let lastApiCheck = 0; // Tracks the last time we pinged Lemon Squeezy
+let lastApiCheck = 0; // Tracks the last time we pinged Lemon Squeezy (persisted in storage)
 
 // =========================================================================
 // [BẢO MẬT] ĐIỀN STORE ID CỦA BẠN VÀO ĐÂY ĐỂ VÁ LỖ HỔNG XÁC THỰC CHÉO
@@ -16,12 +16,13 @@ let lastApiCheck = 0; // Tracks the last time we pinged Lemon Squeezy
 const VALID_STORE_ID = 416715; // Store ID của NeoClip Studio (#416715)
 
 // Initialize on startup
-chrome.storage.local.get(['isPro', 'proValidUntil', 'licenseKey', 'instanceId', 'autoBackupInterval'], (data) => {
+chrome.storage.local.get(['isPro', 'proValidUntil', 'licenseKey', 'instanceId', 'autoBackupInterval', 'lastApiCheck'], (data) => {
     isProCache = !!data.isPro;
     proValidUntil = data.proValidUntil || 0;
+    lastApiCheck = data.lastApiCheck || 0; // Khôi phục từ storage để không bị reset khi SW ngủ
 
     // Set up autoBackup alarm on startup if active
-    const interval = data.autoBackupInterval !== undefined ? parseInt(data.autoBackupInterval) : 60;
+    const interval = data.autoBackupInterval !== undefined ? parseInt(data.autoBackupInterval) : 0;
     updateAutoBackupAlarm(interval, !!data.isPro);
 });
 
@@ -49,13 +50,13 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
         if (changes.isPro !== undefined) {
             isProCache = !!changes.isPro.newValue;
             chrome.storage.local.get(['autoBackupInterval'], (data) => {
-                const interval = data.autoBackupInterval !== undefined ? parseInt(data.autoBackupInterval) : 60;
+                const interval = data.autoBackupInterval !== undefined ? parseInt(data.autoBackupInterval) : 0;
                 updateAutoBackupAlarm(interval, isProCache);
             });
         }
         if (changes.proValidUntil !== undefined) proValidUntil = changes.proValidUntil.newValue;
         if (changes.autoBackupInterval !== undefined) {
-            const newInterval = changes.autoBackupInterval.newValue !== undefined ? parseInt(changes.autoBackupInterval.newValue) : 60;
+            const newInterval = changes.autoBackupInterval.newValue !== undefined ? parseInt(changes.autoBackupInterval.newValue) : 0;
             chrome.storage.local.get(['isPro'], (data) => {
                 updateAutoBackupAlarm(newInterval, !!data.isPro);
             });
@@ -92,6 +93,7 @@ async function validateSubscriptionBackground() {
     if (!data.isPro || !data.licenseKey) return;
 
     lastApiCheck = Date.now();
+    chrome.storage.local.set({ lastApiCheck }); // Lưu vào storage để persist qua SW restart
     try {
         const response = await fetch('https://api.lemonsqueezy.com/v1/licenses/validate', {
             method: 'POST',
@@ -140,14 +142,19 @@ async function isProActive() {
     if (!isProCache) return false;
 
     const now = Date.now();
-    // Check if exact expiration passed, OR if it's been > 1 hour since last API check
-    if (now > proValidUntil || (now - lastApiCheck > 60 * 60 * 1000)) {
+    // Chỉ gọi API nếu subscription ĐÃ hết hạn
+    // Nếu chưa hết hạn → cho dùng ngay, không cần chờ API
+    if (now > proValidUntil) {
+        // Hết hạn rồi, kiểm tra online xem có gia hạn không
         if (navigator.onLine) {
             await validateSubscriptionBackground();
             if (!isProCache) return false;
-        } else if (now > proValidUntil) {
-            return false;
+        } else {
+            return false; // Offline + hết hạn = không cho dùng
         }
+    } else if (now - lastApiCheck > 60 * 60 * 1000 && navigator.onLine) {
+        // Chưa hết hạn nhưng lâu không check → check ngầm, KHÔNG block
+        validateSubscriptionBackground(); // fire-and-forget, không await
     }
     return true;
 }

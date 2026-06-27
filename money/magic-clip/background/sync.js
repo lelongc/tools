@@ -213,15 +213,12 @@ async function syncWithDrive(interactive = false) {
         // Sort history by timestamp descending
         finalLocalHistory.sort((a, b) => b.timestamp - a.timestamp);
 
-        // Cap history at limit
-        let limit = settings.historyLimit || 50;
-        if (!settings.isPro && limit > 50) limit = 50;
-        
-        const cappedHistory = finalLocalHistory.slice(0, limit);
+        // Upload ALL data to Drive (không cắt bớt theo limit)
+        // Việc giới hạn hiển thị chỉ áp dụng ở tầng UI, Drive lưu toàn bộ để bảo toàn dữ liệu
 
         // 5. Upload final merged data back to Google Drive
         const backupData = JSON.stringify({ 
-            history: cappedHistory, 
+            history: finalLocalHistory, 
             collections: finalLocalCollections, 
             timestamp: Date.now() 
         });

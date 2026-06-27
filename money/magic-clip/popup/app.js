@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.storage.local.get(['historyLimit', 'historyExpiry', 'autoBackupInterval'], (res) => {
             settingLimit.value = res.historyLimit || "50";
             settingExpiry.value = res.historyExpiry || "0";
-            settingBackup.value = res.autoBackupInterval !== undefined ? String(res.autoBackupInterval) : "60";
+            settingBackup.value = res.autoBackupInterval !== undefined ? String(res.autoBackupInterval) : "0";
         });
 
         settingLimit.addEventListener('change', (e) => {
