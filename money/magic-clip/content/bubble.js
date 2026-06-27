@@ -1135,4 +1135,22 @@
             console.error('NeoClip: Focus polling error:', e);
         }
     }, 1500);
+
+    // ---- Listen for Background Events (Sync / Clear) ----
+    chrome.runtime.onMessage.addListener((req) => {
+        if (req.action === 'storageCleared' || req.action === 'syncCompleted') {
+            if (panel.classList.contains('open')) {
+                if (currentTab === 'recent') {
+                    loadRecent(shadow.getElementById('search-input').value, true);
+                } else if (currentTab === 'collections') {
+                    if (currentCollectionId) {
+                        loadCollectionItems(currentCollectionId, shadow.getElementById('search-input').value, true);
+                    } else {
+                        loadCollections(shadow.getElementById('search-input').value);
+                    }
+                }
+            }
+        }
+    });
+
 })();
