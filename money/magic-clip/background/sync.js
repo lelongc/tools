@@ -202,7 +202,7 @@ async function syncWithDrive(interactive = false) {
             for (const lCol of localCollections) {
                 const hash = hashCode("COLLECTION:" + lCol.name.toLowerCase());
                 const tomb = tombstones.find(t => t.hash === hash);
-                if (tomb && tomb.timestamp > lCol.createdAt) {
+                if (tomb && tomb.timestamp > (lCol.createdAt || 0)) {
                     await db.collections.delete(lCol.id);
                 }
             }
@@ -218,7 +218,10 @@ async function syncWithDrive(interactive = false) {
             }
             // Merge Collections
             for (const rCol of remoteCollections) {
-                if (tombstoneHashes.has(hashCode("COLLECTION:" + rCol.name.toLowerCase()))) continue;
+                const hash = hashCode("COLLECTION:" + rCol.name.toLowerCase());
+                const tomb = tombstones.find(t => t.hash === hash);
+                if (tomb && tomb.timestamp > (rCol.createdAt || 0)) continue; // Skip if deleted locally
+
                 const existing = localCollections.find(lCol => lCol.name.toLowerCase() === rCol.name.toLowerCase());
                 if (existing) {
                     colIdMap[rCol.id] = existing.id;
