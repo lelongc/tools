@@ -40,7 +40,9 @@ async function getAccessToken(interactive = false) {
     return new Promise((resolve) => {
         chrome.identity.launchWebAuthFlow({
             url: authUrl.href,
-            interactive: interactive
+            interactive: interactive,
+            abortOnLoadForNonInteractive: false,
+            timeoutMsForNonInteractive: 5000
         }, (redirectUrl) => {
             if (chrome.runtime.lastError || !redirectUrl) {
                 const errMsg = chrome.runtime.lastError ? chrome.runtime.lastError.message : 'Login cancelled or failed.';
