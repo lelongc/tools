@@ -235,7 +235,12 @@ async function createCollection(name, isPro = false) {
 }
 
 async function renameCollection(id, name) {
-    return await db.collections.update(id, { name });
+    const col = await db.collections.get(id);
+    if (col && col.name !== name) {
+        await addTombstone(hashCode("COLLECTION:" + col.name.toLowerCase()));
+        return await db.collections.update(id, { name });
+    }
+    return 0;
 }
 
 async function deleteCollection(id) {
