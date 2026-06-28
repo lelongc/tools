@@ -125,7 +125,7 @@ async function validateSubscriptionBackground() {
             // Subscription expired or canceled: Revoke immediately
             isProCache = false;
             proValidUntil = 0;
-            await chrome.storage.local.remove(['isPro', 'proValidUntil', 'licenseKey', 'instanceId']);
+            await chrome.storage.local.remove(['isPro', 'proValidUntil', 'licenseKey', 'instanceId', 'settingsTimestamp']);
             // Delete license from Drive to prevent unauthorized restore
             if (typeof deleteLicenseFromDrive === 'function') await deleteLicenseFromDrive();
             // Auto-reset historyLimit to Free tier
@@ -429,7 +429,7 @@ async function handleMessage(req, sender) {
                 if (typeof logoutGoogle === 'function') logoutGoogle();
                 isProCache = false;
                 proValidUntil = 0;
-                chrome.storage.local.remove(['isPro', 'proValidUntil', 'licenseKey', 'instanceId'], () => {
+                chrome.storage.local.remove(['isPro', 'proValidUntil', 'licenseKey', 'instanceId', 'settingsTimestamp'], () => {
                     chrome.storage.local.set({ driveConnected: false, historyLimit: 50 }, () => resolve({ ok: true }));
                 });
             });
