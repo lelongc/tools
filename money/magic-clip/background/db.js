@@ -68,6 +68,19 @@ async function addTombstone(hash) {
     }
 }
 
+async function removeTombstone(hash) {
+    try {
+        const arr = await _getTombstones();
+        const initialLength = arr.length;
+        const filtered = arr.filter(t => t.hash !== hash);
+        if (filtered.length < initialLength) {
+            await _setTombstones(filtered);
+        }
+    } catch (e) {
+        console.error('removeTombstone error:', e);
+    }
+}
+
 async function addTombstones(hashes) {
     try {
         const arr = await _getTombstones();
@@ -216,7 +229,7 @@ async function moveToCollection(itemId, collectionId) {
 
 // --- Collections ---
 async function getCollections(isPro = false) {
-    const cols = await db.collections.toArray();
+    const cols = await db.collections.orderBy('createdAt').toArray();
     // Count items per collection
     for (let i = 0; i < cols.length; i++) {
         cols[i].itemCount = await db.history.where('collectionId').equals(cols[i].id).count();
@@ -231,6 +244,7 @@ async function createCollection(name, isPro = false) {
         const count = await db.collections.count();
         if (count >= 3) return null;
     }
+    await removeTombstone(hashCode("COLLECTION:" + name.toLowerCase()));
     return await db.collections.add({ name, createdAt: Date.now() });
 }
 
@@ -238,6 +252,7 @@ async function renameCollection(id, name) {
     const col = await db.collections.get(id);
     if (col && col.name !== name) {
         await addTombstone(hashCode("COLLECTION:" + col.name.toLowerCase()));
+        await removeTombstone(hashCode("COLLECTION:" + name.toLowerCase()));
         return await db.collections.update(id, { name });
     }
     return 0;

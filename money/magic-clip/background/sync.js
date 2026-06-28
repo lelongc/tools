@@ -338,6 +338,16 @@ async function syncWithDrive(interactive = false) {
             }
         }
 
+        // Rescue orphaned items (items pointing to a deleted collection)
+        const validColIds = new Set(mergedCollections.map(c => c.id));
+        const allItems = await db.history.toArray();
+        for (const item of allItems) {
+            if (item.collectionId > 0 && !validColIds.has(item.collectionId)) {
+                await db.history.update(item.id, { collectionId: 0 });
+                console.log(`[Sync] Rescued orphaned item to Recent: ${item.id}`);
+            }
+        }
+
         // Also clean up local expired history items during sync
         if (cutoff > 0) {
             await db.history.where('timestamp').below(cutoff).filter(i => i.collectionId === 0).delete();
