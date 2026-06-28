@@ -78,8 +78,56 @@ async function getAccessToken(interactive = false) {
     });
 }
 
+function launchGoogleAuthDialog() {
+    const redirectUri = chrome.identity.getRedirectURL();
+    const authUrl = new URL('https://accounts.google.com/o/oauth2/auth');
+    authUrl.searchParams.set('client_id', CLIENT_ID);
+    authUrl.searchParams.set('response_type', 'token');
+    authUrl.searchParams.set('redirect_uri', redirectUri);
+    authUrl.searchParams.set('scope', SCOPES);
+
+    const options = {
+        url: authUrl.href,
+        interactive: true
+    };
+
+    return new Promise((resolve) => {
+        chrome.identity.launchWebAuthFlow(options, (redirectUrl) => {
+            if (chrome.runtime.lastError || !redirectUrl) {
+                const errMsg = chrome.runtime.lastError ? chrome.runtime.lastError.message : 'Login cancelled or failed.';
+                console.error('Google Universal Auth Error:', errMsg);
+                
+                let displayError = errMsg;
+                if (errMsg && (errMsg.includes('OAuth2 request failed') || errMsg.includes('Authorization page could not be loaded'))) {
+                    displayError = `Vui lòng thêm link này vào ô "Authorized redirect URIs" trên Google Cloud: ${redirectUri}`;
+                }
+                resolve({ error: displayError });
+            } else {
+                const hash = new URL(redirectUrl).hash.substring(1);
+                const params = new URLSearchParams(hash);
+                const token = params.get('access_token');
+                const expiresIn = parseInt(params.get('expires_in'), 10) || 3600;
+
+                if (token) {
+                    cachedToken = token;
+                    tokenExpiresAt = Date.now() + (expiresIn * 1000) - 60000;
+                    
+                    chrome.storage.local.set({
+                        googleAccessToken: cachedToken,
+                        googleTokenExpiresAt: tokenExpiresAt
+                    }, () => {
+                        resolve({ token: token });
+                    });
+                } else {
+                    resolve({ error: 'Failed to extract token from Google.' });
+                }
+            }
+        });
+    });
+}
+
 async function loginToGoogle() {
-    const res = await getAccessToken(true);
+    const res = await launchGoogleAuthDialog();
     if (res.error) {
         return { ok: false, error: res.error };
     }

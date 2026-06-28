@@ -339,60 +339,61 @@ async function handleMessage(req, sender) {
             return { cleaned: cleanUrl(req.url) };
 
         case 'googleLogin':
-            await chrome.storage.local.set({ isConnectingDrive: true });
-            let loginRes;
-            try {
-                loginRes = await loginToGoogle();
-            } catch (e) {
-                loginRes = { ok: false, error: e.message || e.toString() };
-            } finally {
-                await chrome.storage.local.set({ isConnectingDrive: false });
-            }
+            return new Promise((resolve) => {
+                // Set status asynchronously (fire-and-forget, no await!)
+                chrome.storage.local.set({ isConnectingDrive: true });
 
-            if (loginRes && loginRes.ok) {
-                await chrome.storage.local.set({ driveConnected: true });
+                launchGoogleAuthDialog().then(async (loginRes) => {
+                    await chrome.storage.local.set({ isConnectingDrive: false });
 
-                const isProNow = await isProActive();
-                if (!isProNow && typeof loadLicenseFromDrive === 'function') {
-                    const driveLicense = await loadLicenseFromDrive();
-                    if (driveLicense && driveLicense.licenseKey) {
-                        const { isPro } = await new Promise(r => chrome.storage.local.get(['isPro'], r));
-                        if (!isPro) {
-                            let restored = false;
-                            if (driveLicense.instanceId) {
-                                const restoreRes = await restoreLicense(driveLicense.licenseKey, driveLicense.instanceId);
-                                if (restoreRes.ok) {
-                                    restored = true;
+                    if (loginRes && !loginRes.error) {
+                        await chrome.storage.local.set({ driveConnected: true });
+
+                        const isProNow = await isProActive();
+                        let licenseLoaded = false;
+                        if (!isProNow && typeof loadLicenseFromDrive === 'function') {
+                            const driveLicense = await loadLicenseFromDrive();
+                            if (driveLicense && driveLicense.licenseKey) {
+                                const { isPro } = await new Promise(r => chrome.storage.local.get(['isPro'], r));
+                                if (!isPro) {
+                                    let restored = false;
+                                    if (driveLicense.instanceId) {
+                                        const restoreRes = await restoreLicense(driveLicense.licenseKey, driveLicense.instanceId);
+                                        if (restoreRes.ok) {
+                                            restored = true;
+                                        }
+                                    }
+                                    if (!restored) {
+                                        const checkRes = await checkLicense(driveLicense.licenseKey);
+                                        if (checkRes.ok) {
+                                            restored = true;
+                                        }
+                                    }
+                                    if (restored) {
+                                        await syncWithDrive(true);
+                                        licenseLoaded = true;
+                                    }
                                 }
                             }
-                            if (!restored) {
-                                // Fallback to activating the key again
-                                const checkRes = await checkLicense(driveLicense.licenseKey);
-                                if (checkRes.ok) {
-                                    restored = true;
+                            resolve({ ok: true, licenseLoaded });
+                        } else {
+                            if (isProNow && typeof saveLicenseToDrive === 'function') {
+                                const res = await new Promise(r => chrome.storage.local.get(['licenseKey', 'instanceId'], r));
+                                if (res.licenseKey) {
+                                    await saveLicenseToDrive(res.licenseKey, res.instanceId);
                                 }
-                            }
-                            if (restored) {
-                                // Restored Pro, now sync data immediately!
                                 await syncWithDrive(true);
-                                return { ok: true, licenseLoaded: true };
                             }
+                            resolve({ ok: true, licenseLoaded: false });
                         }
+                    } else {
+                        resolve({ ok: false, error: loginRes ? loginRes.error : 'Unknown login error' });
                     }
-                    // No valid license found in Drive, they are not pro, BUT they are successfully connected!
-                    // Return ok: true so the UI transitions to State 2 (Connected, No License)
-                    return { ok: true, licenseLoaded: false };
-                } else if (isProNow && typeof saveLicenseToDrive === 'function') {
-                    chrome.storage.local.get(['licenseKey', 'instanceId'], async (res) => {
-                        if (res.licenseKey) {
-                            await saveLicenseToDrive(res.licenseKey, res.instanceId);
-                        }
-                    });
-                    // Already Pro, sync data immediately!
-                    await syncWithDrive(true);
-                }
-            }
-            return loginRes;
+                }).catch(err => {
+                    chrome.storage.local.set({ isConnectingDrive: false });
+                    resolve({ ok: false, error: err.message || err.toString() });
+                });
+            });
 
         case 'checkGoogleLogin':
             return new Promise(resolve => {
