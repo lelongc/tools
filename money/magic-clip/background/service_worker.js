@@ -269,34 +269,38 @@ chrome.runtime.onMessage.addListener((req, sender, respond) => {
                         googleTokenExpiresAt: tokenExpiresAt,
                         driveConnected: true,
                         isConnectingDrive: false
-                    }, () => {
-                        // Do post login logic asynchronously
-                        isProActive().then(isProNow => {
-                            if (!isProNow && typeof loadLicenseFromDrive === 'function') {
-                                loadLicenseFromDrive().then(driveLicense => {
-                                    if (driveLicense && driveLicense.licenseKey) {
-                                        chrome.storage.local.get(['isPro'], resPro => {
-                                            if (!resPro.isPro) {
-                                                if (driveLicense.instanceId) {
-                                                    restoreLicense(driveLicense.licenseKey, driveLicense.instanceId).then(restoreRes => {
-                                                        if (restoreRes.ok) syncWithDrive(true);
-                                                        else checkLicense(driveLicense.licenseKey).then(checkRes => { if (checkRes.ok) syncWithDrive(true); });
-                                                    });
-                                                } else {
-                                                    checkLicense(driveLicense.licenseKey).then(checkRes => { if (checkRes.ok) syncWithDrive(true); });
-                                                }
-                                            }
-                                        });
+                    }, async () => {
+                        // Do post login logic asynchronously waiting
+                        let licenseLoaded = false;
+                        const isProNow = await isProActive();
+                        if (!isProNow && typeof loadLicenseFromDrive === 'function') {
+                            const driveLicense = await loadLicenseFromDrive();
+                            if (driveLicense && driveLicense.licenseKey) {
+                                const { isPro } = await new Promise(r => chrome.storage.local.get(['isPro'], r));
+                                if (!isPro) {
+                                    let restored = false;
+                                    if (driveLicense.instanceId) {
+                                        const restoreRes = await restoreLicense(driveLicense.licenseKey, driveLicense.instanceId);
+                                        if (restoreRes.ok) restored = true;
                                     }
-                                });
-                            } else if (isProNow && typeof saveLicenseToDrive === 'function') {
-                                chrome.storage.local.get(['licenseKey', 'instanceId'], res => {
-                                    if (res.licenseKey) saveLicenseToDrive(res.licenseKey, res.instanceId);
-                                    syncWithDrive(true);
-                                });
+                                    if (!restored) {
+                                        const checkRes = await checkLicense(driveLicense.licenseKey);
+                                        if (checkRes.ok) restored = true;
+                                    }
+                                    if (restored) {
+                                        await syncWithDrive(true);
+                                        licenseLoaded = true;
+                                    }
+                                }
+                            } else {
+                                await syncWithDrive(true);
                             }
-                        });
-                        respond({ ok: true, licenseLoaded: false });
+                        } else if (isProNow && typeof saveLicenseToDrive === 'function') {
+                            const res = await new Promise(r => chrome.storage.local.get(['licenseKey', 'instanceId'], r));
+                            if (res.licenseKey) await saveLicenseToDrive(res.licenseKey, res.instanceId);
+                            await syncWithDrive(true);
+                        }
+                        respond({ ok: true, licenseLoaded: licenseLoaded });
                     });
                 } else {
                     chrome.storage.local.set({ isConnectingDrive: false });
