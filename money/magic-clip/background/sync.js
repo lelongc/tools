@@ -355,13 +355,20 @@ async function syncWithDrive(interactive = false) {
                     type: rItem.type,
                     content: rItem.content,
                     timestamp: rItem.timestamp,
-                    collectionId: mappedColId
+                    collectionId: mappedColId,
+                    modifiedAt: rItem.modifiedAt || rItem.timestamp
                 });
             } else {
                 // Cập nhật trạng thái Collection nếu bị thay đổi (từ remote)
                 if (existing.collectionId !== mappedColId && mappedColId !== 0) {
-                    await db.history.update(existing.id, { collectionId: mappedColId });
-                    existing.collectionId = mappedColId;
+                    const lMod = existing.modifiedAt || existing.timestamp || 0;
+                    const rMod = rItem.modifiedAt || rItem.timestamp || 0;
+                    if (rMod >= lMod) {
+                        await db.history.update(existing.id, { collectionId: mappedColId, modifiedAt: rMod });
+                        existing.collectionId = mappedColId;
+                    } else {
+                        console.log(`[Sync] Local move is newer (${lMod} > ${rMod}), ignoring remote collectionId.`);
+                    }
                 }
             }
         }

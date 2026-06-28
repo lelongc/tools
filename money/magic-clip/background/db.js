@@ -224,7 +224,7 @@ async function deleteItem(id) {
 }
 
 async function moveToCollection(itemId, collectionId) {
-    return await db.history.update(itemId, { collectionId: collectionId });
+    return await db.history.update(itemId, { collectionId: collectionId, modifiedAt: Date.now() });
 }
 
 // --- Collections ---
