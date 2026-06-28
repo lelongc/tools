@@ -37,13 +37,13 @@ async function getAccessToken(interactive = false) {
     authUrl.searchParams.set('redirect_uri', redirectUri);
     authUrl.searchParams.set('scope', SCOPES);
 
+    const options = {
+        url: authUrl.href,
+        interactive: interactive
+    };
+
     return new Promise((resolve) => {
-        chrome.identity.launchWebAuthFlow({
-            url: authUrl.href,
-            interactive: interactive,
-            abortOnLoadForNonInteractive: false,
-            timeoutMsForNonInteractive: 5000
-        }, (redirectUrl) => {
+        chrome.identity.launchWebAuthFlow(options, (redirectUrl) => {
             if (chrome.runtime.lastError || !redirectUrl) {
                 const errMsg = chrome.runtime.lastError ? chrome.runtime.lastError.message : 'Login cancelled or failed.';
                 console.error('Google Universal Auth Error:', errMsg);

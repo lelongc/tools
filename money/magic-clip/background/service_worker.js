@@ -339,7 +339,16 @@ async function handleMessage(req, sender) {
             return { cleaned: cleanUrl(req.url) };
 
         case 'googleLogin':
-            const loginRes = await loginToGoogle();
+            await chrome.storage.local.set({ isConnectingDrive: true });
+            let loginRes;
+            try {
+                loginRes = await loginToGoogle();
+            } catch (e) {
+                loginRes = { ok: false, error: e.message || e.toString() };
+            } finally {
+                await chrome.storage.local.set({ isConnectingDrive: false });
+            }
+
             if (loginRes && loginRes.ok) {
                 await chrome.storage.local.set({ driveConnected: true });
 
@@ -387,8 +396,8 @@ async function handleMessage(req, sender) {
 
         case 'checkGoogleLogin':
             return new Promise(resolve => {
-                chrome.storage.local.get(['driveConnected'], res => {
-                    resolve({ ok: !!res.driveConnected });
+                chrome.storage.local.get(['driveConnected', 'isConnectingDrive'], res => {
+                    resolve({ ok: !!res.driveConnected, isConnectingDrive: !!res.isConnectingDrive });
                 });
             });
 

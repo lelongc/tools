@@ -85,6 +85,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!isConnected) {
                     // State 1: Free, No Drive. Since Drive isn't connected, we don't care about isPro.
                     if (syncStateLogin) syncStateLogin.style.display = 'block';
+                    if (resLogin && resLogin.isConnectingDrive && btnLogin) {
+                        btnLogin.textContent = 'Connecting...';
+                        btnLogin.disabled = true;
+                    } else if (btnLogin) {
+                        btnLogin.textContent = 'Connect Google Drive';
+                        btnLogin.disabled = false;
+                    }
                 } else if (isConnected && !isPro) {
                     // State 2: Drive Connected, No License
                     if (syncStateLocked) syncStateLocked.style.display = 'block';
