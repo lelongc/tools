@@ -15,7 +15,7 @@ db.version(2).stores({
     folders: null // drop old table
 });
 
-// Version 3: Added tombstones to prevent resurrected deleted items from sync
+// Version 3: Added tombstones table (kept for schema compatibility, but we use chrome.storage.local now)
 db.version(3).stores({
     history: '++id, type, timestamp, collectionId',
     collections: '++id, name, createdAt',
@@ -33,6 +33,60 @@ function hashCode(str) {
         hash |= 0;
     }
     return hash;
+}
+
+// ==========================================
+// Tombstone helpers (chrome.storage.local ONLY)
+// ==========================================
+const TOMBSTONE_KEY = 'syncTombstones';
+const MAX_TOMBSTONES = 2000;
+
+async function _getTombstones() {
+    const data = await new Promise(r => chrome.storage.local.get([TOMBSTONE_KEY], r));
+    return data[TOMBSTONE_KEY] || [];
+}
+
+async function _setTombstones(arr) {
+    // Trim oldest if exceeding limit
+    if (arr.length > MAX_TOMBSTONES) {
+        arr.sort((a, b) => a.timestamp - b.timestamp);
+        arr = arr.slice(arr.length - MAX_TOMBSTONES);
+    }
+    await new Promise(r => chrome.storage.local.set({ [TOMBSTONE_KEY]: arr }, r));
+}
+
+async function addTombstone(hash) {
+    try {
+        const arr = await _getTombstones();
+        // Avoid duplicates
+        if (!arr.some(t => t.hash === hash)) {
+            arr.push({ hash, timestamp: Date.now() });
+            await _setTombstones(arr);
+        }
+    } catch (e) {
+        console.error('addTombstone error:', e);
+    }
+}
+
+async function addTombstones(hashes) {
+    try {
+        const arr = await _getTombstones();
+        const existing = new Set(arr.map(t => t.hash));
+        const now = Date.now();
+        for (const hash of hashes) {
+            if (!existing.has(hash)) {
+                arr.push({ hash, timestamp: now });
+                existing.add(hash);
+            }
+        }
+        await _setTombstones(arr);
+    } catch (e) {
+        console.error('addTombstones error:', e);
+    }
+}
+
+async function clearTombstones() {
+    await new Promise(r => chrome.storage.local.remove([TOMBSTONE_KEY], r));
 }
 
 // --- History ---
@@ -151,23 +205,7 @@ async function deleteItem(id) {
     const item = await db.history.get(id);
     if (item) {
         const hash = hashCode(item.type + item.content);
-        if (db.tombstones) {
-            await db.tombstones.add({ hash, timestamp: Date.now() });
-        
-            // Trim tombstones if > 1000 to save space
-            const count = await db.tombstones.count();
-            if (count > 1000) {
-                const oldest = await db.tombstones.orderBy('timestamp').first();
-                if (oldest) await db.tombstones.delete(oldest.id);
-            }
-        } else {
-            // Fallback for v2 clients
-            const data = await new Promise(r => chrome.storage.local.get(['fallbackTombstones'], r));
-            const arr = data.fallbackTombstones || [];
-            arr.push({ hash, timestamp: Date.now() });
-            if (arr.length > 1000) arr.shift();
-            await new Promise(r => chrome.storage.local.set({ fallbackTombstones: arr }, r));
-        }
+        await addTombstone(hash);
     }
     return await db.history.delete(id);
 }
@@ -202,40 +240,21 @@ async function renameCollection(id, name) {
 
 async function deleteCollection(id) {
     const col = await db.collections.get(id);
+    const hashesToAdd = [];
+
     if (col) {
-        const hash = hashCode("COLLECTION:" + col.name.toLowerCase());
-        if (db.tombstones) {
-            await db.tombstones.add({ hash, timestamp: Date.now() });
-        } else {
-            const data = await new Promise(r => chrome.storage.local.get(['fallbackTombstones'], r));
-            const arr = data.fallbackTombstones || [];
-            arr.push({ hash, timestamp: Date.now() });
-            await new Promise(r => chrome.storage.local.set({ fallbackTombstones: arr }, r));
-        }
-    }
-    // Remove all items in this collection and tombstone them
-    const items = await db.history.where('collectionId').equals(id).toArray();
-    
-    // Batch process tombstones for fallback
-    let fallbackAdded = false;
-    let fallbackArr = [];
-    if (!db.tombstones) {
-        const data = await new Promise(r => chrome.storage.local.get(['fallbackTombstones'], r));
-        fallbackArr = data.fallbackTombstones || [];
+        hashesToAdd.push(hashCode("COLLECTION:" + col.name.toLowerCase()));
     }
 
+    // Remove all items in this collection and tombstone them
+    const items = await db.history.where('collectionId').equals(id).toArray();
     for (const item of items) {
-        const h = hashCode(item.type + item.content);
-        if (db.tombstones) {
-            await db.tombstones.add({ hash: h, timestamp: Date.now() });
-        } else {
-            fallbackArr.push({ hash: h, timestamp: Date.now() });
-            fallbackAdded = true;
-        }
+        hashesToAdd.push(hashCode(item.type + item.content));
     }
-    
-    if (fallbackAdded) {
-        await new Promise(r => chrome.storage.local.set({ fallbackTombstones: fallbackArr }, r));
+
+    // Save all tombstones at once
+    if (hashesToAdd.length > 0) {
+        await addTombstones(hashesToAdd);
     }
 
     await db.history.where('collectionId').equals(id).delete();
@@ -246,6 +265,7 @@ async function clearStorage() {
     await db.history.clear();
     await db.collections.clear();
     if (db.tombstones) await db.tombstones.clear();
+    await clearTombstones();
 }
 
 // --- Helpers ---

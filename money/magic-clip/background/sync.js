@@ -133,9 +133,13 @@ async function syncWithDrive(interactive = false) {
     try {
         const fileId = await getSyncFileId(token);
         
-        // 1. Read existing remote data if any
+        // ============================================
+        // STEP 1: Download remote data from Drive
+        // ============================================
         let remoteHistory = [];
         let remoteCollections = [];
+        let remoteTombstones = [];  // DECLARED AT FUNCTION SCOPE
+
         if (fileId) {
             try {
                 // Add a cache-buster query param to prevent getting stale edge-cached files
@@ -143,10 +147,10 @@ async function syncWithDrive(interactive = false) {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (downloadRes.ok) {
-                    const remoteData = await downloadRes.ok ? await downloadRes.json() : {};
+                    const remoteData = await downloadRes.json();
                     remoteHistory = remoteData.history || [];
                     remoteCollections = remoteData.collections || [];
-                    let remoteTombstones = remoteData.tombstones || [];
+                    remoteTombstones = remoteData.tombstones || [];
 
                     // Apply remote settings if they are newer
                     if (remoteData.settings) {
@@ -164,7 +168,9 @@ async function syncWithDrive(interactive = false) {
             }
         }
 
-        // 2. Read local data
+        // ============================================
+        // STEP 2: Read local data
+        // ============================================
         const localHistory = await db.history.toArray();
         const localCollections = await db.collections.toArray();
 
@@ -175,130 +181,126 @@ async function syncWithDrive(interactive = false) {
         const expiryDays = settings.historyExpiry || 0;
         const cutoff = expiryDays > 0 ? Date.now() - (expiryDays * 24 * 60 * 60 * 1000) : 0;
 
-        // 3. Bidirectional Merge in Transaction
-        const colIdMap = {}; // Maps remote collection ID -> local collection ID
-        const mergedCollections = [...localCollections];
+        // ============================================
+        // STEP 3: Merge ALL tombstones (local + remote)
+        // This happens OUTSIDE Dexie transaction, using chrome.storage.local
+        // ============================================
+        const localTombstones = await _getTombstones();
+        const mergedTombMap = new Map();
 
-        const tables = [db.history, db.collections];
-        if (db.tombstones) tables.push(db.tombstones);
-
-        const fallbackData = await new Promise(r => chrome.storage.local.get(['fallbackTombstones'], r));
-        let fallbackTombstonesChanged = false;
-
-        let tombstonesToSave = null;
-
-        await db.transaction('rw', ...tables, async () => {
-            // Load tombstones
-            const tombstones = db.tombstones ? await db.tombstones.toArray() : (fallbackData.fallbackTombstones || []);
-            const tombstoneHashes = new Set(tombstones.map(t => t.hash));
-
-            // Merge Tombstones First (so we know what to delete/ignore)
-            if (typeof remoteTombstones !== 'undefined') {
-                for (const rTomb of remoteTombstones) {
-                    const existingTomb = tombstones.find(t => t.hash === rTomb.hash);
-                    if (!existingTomb) {
-                        if (db.tombstones) await db.tombstones.add({ hash: rTomb.hash, timestamp: rTomb.timestamp });
-                        else fallbackTombstonesChanged = true;
-                        tombstones.push({ hash: rTomb.hash, timestamp: rTomb.timestamp });
-                        tombstoneHashes.add(rTomb.hash);
-                    } else if (rTomb.timestamp > existingTomb.timestamp) {
-                        if (db.tombstones) await db.tombstones.where('hash').equals(rTomb.hash).modify({ timestamp: rTomb.timestamp });
-                        else fallbackTombstonesChanged = true;
-                        existingTomb.timestamp = rTomb.timestamp;
-                    }
-                }
+        // Add local tombstones
+        for (const t of localTombstones) {
+            mergedTombMap.set(t.hash, t);
+        }
+        // Merge remote tombstones
+        for (const t of remoteTombstones) {
+            const existing = mergedTombMap.get(t.hash);
+            if (!existing || t.timestamp > existing.timestamp) {
+                mergedTombMap.set(t.hash, t);
             }
-
-            // Apply tombstones to local data before merging
-            for (const lCol of localCollections) {
-                const hash = hashCode("COLLECTION:" + lCol.name.toLowerCase());
-                const tomb = tombstones.find(t => t.hash === hash);
-                if (tomb) {
-                    await db.collections.delete(lCol.id);
-                }
-            }
-            for (let i = localHistory.length - 1; i >= 0; i--) {
-                const lItem = localHistory[i];
-                const hash = hashCode(lItem.type + lItem.content);
-                const tomb = tombstones.find(t => t.hash === hash);
-                if (tomb) {
-                    await db.history.delete(lItem.id);
-                    localHistory.splice(i, 1);
-                }
-            }
-            // Merge Collections
-            for (const rCol of remoteCollections) {
-                const hash = hashCode("COLLECTION:" + rCol.name.toLowerCase());
-                const tomb = tombstones.find(t => t.hash === hash);
-                if (tomb) continue; // Skip if deleted locally
-
-                const existing = localCollections.find(lCol => lCol.name.toLowerCase() === rCol.name.toLowerCase());
-                if (existing) {
-                    colIdMap[rCol.id] = existing.id;
-                } else {
-                    const newId = await db.collections.add({ name: rCol.name, createdAt: rCol.createdAt });
-                    colIdMap[rCol.id] = newId;
-                    mergedCollections.push({ id: newId, name: rCol.name, createdAt: rCol.createdAt });
-                }
-            }
-
-            // Merge History (no duplicates by content + type, and not expired)
-            for (const rItem of remoteHistory) {
-                const hash = hashCode(rItem.type + rItem.content);
-                const tomb = tombstones.find(t => t.hash === hash);
-                if (tomb) {
-                    continue;
-                }
-
-                // If it is older than cutoff and not pinned in a collection, skip merging it!
-                if (cutoff > 0 && rItem.timestamp < cutoff && (!rItem.collectionId || rItem.collectionId === 0)) {
-                    continue;
-                }
-
-                const existing = localHistory.find(lItem => 
-                    lItem.type === rItem.type && 
-                    lItem.content === rItem.content
-                );
-                
-                const mappedColId = rItem.collectionId ? (colIdMap[rItem.collectionId] || 0) : 0;
-                
-                if (!existing) {
-                    await db.history.add({
-                        type: rItem.type,
-                        content: rItem.content,
-                        timestamp: rItem.timestamp,
-                        collectionId: mappedColId
-                    });
-                } else {
-                    // Cập nhật trạng thái Collection nếu bị thay đổi (từ remote)
-                    if (existing.collectionId !== mappedColId && mappedColId !== 0) {
-                        await db.history.update(existing.id, { collectionId: mappedColId });
-                        existing.collectionId = mappedColId;
-                    }
-                }
-            }
-
-            // Also clean up local expired history items during sync
-            if (cutoff > 0) {
-                await db.history.where('timestamp').below(cutoff).filter(i => i.collectionId === 0).delete();
-            }
-
-            if (fallbackTombstonesChanged) {
-                tombstonesToSave = tombstones;
-            }
-        });
-
-        if (tombstonesToSave) {
-            if (tombstonesToSave.length > 1000) tombstonesToSave.splice(0, tombstonesToSave.length - 1000);
-            await new Promise(r => chrome.storage.local.set({ fallbackTombstones: tombstonesToSave }, r));
         }
 
-        // 4. Load full merged database from local to upload back to Drive
+        const allTombstones = Array.from(mergedTombMap.values());
+        const tombHashes = new Set(allTombstones.map(t => t.hash));
+
+        // Persist merged tombstones back to chrome.storage.local
+        await _setTombstones(allTombstones);
+
+        console.log(`[Sync] Tombstones: ${localTombstones.length} local + ${remoteTombstones.length} remote = ${allTombstones.length} merged`);
+
+        // ============================================
+        // STEP 4: Apply tombstones to local DB (delete matching items)
+        // Simple individual deletes, NO complex Dexie transaction needed
+        // ============================================
+        
+        // Delete tombstoned collections
+        for (const lCol of localCollections) {
+            const hash = hashCode("COLLECTION:" + lCol.name.toLowerCase());
+            if (tombHashes.has(hash)) {
+                console.log(`[Sync] Deleting tombstoned collection: "${lCol.name}"`);
+                await db.collections.delete(lCol.id);
+            }
+        }
+
+        // Delete tombstoned history items
+        for (let i = localHistory.length - 1; i >= 0; i--) {
+            const lItem = localHistory[i];
+            const hash = hashCode(lItem.type + lItem.content);
+            if (tombHashes.has(hash)) {
+                console.log(`[Sync] Deleting tombstoned item: id=${lItem.id} type=${lItem.type}`);
+                await db.history.delete(lItem.id);
+                localHistory.splice(i, 1);
+            }
+        }
+
+        // Refresh local collections after deletions
+        const currentLocalCollections = await db.collections.toArray();
+
+        // ============================================
+        // STEP 5: Merge remote data into local (add new items)
+        // ============================================
+        const colIdMap = {}; // Maps remote collection ID -> local collection ID
+        const mergedCollections = [...currentLocalCollections];
+
+        // Merge Collections
+        for (const rCol of remoteCollections) {
+            const hash = hashCode("COLLECTION:" + rCol.name.toLowerCase());
+            if (tombHashes.has(hash)) continue; // Skip if tombstoned
+
+            const existing = currentLocalCollections.find(lCol => lCol.name.toLowerCase() === rCol.name.toLowerCase());
+            if (existing) {
+                colIdMap[rCol.id] = existing.id;
+            } else {
+                const newId = await db.collections.add({ name: rCol.name, createdAt: rCol.createdAt });
+                colIdMap[rCol.id] = newId;
+                mergedCollections.push({ id: newId, name: rCol.name, createdAt: rCol.createdAt });
+            }
+        }
+
+        // Merge History (no duplicates by content + type, skip tombstoned/expired)
+        for (const rItem of remoteHistory) {
+            const hash = hashCode(rItem.type + rItem.content);
+            if (tombHashes.has(hash)) continue; // Skip tombstoned
+
+            // If it is older than cutoff and not pinned in a collection, skip merging it!
+            if (cutoff > 0 && rItem.timestamp < cutoff && (!rItem.collectionId || rItem.collectionId === 0)) {
+                continue;
+            }
+
+            const existing = localHistory.find(lItem => 
+                lItem.type === rItem.type && 
+                lItem.content === rItem.content
+            );
+            
+            const mappedColId = rItem.collectionId ? (colIdMap[rItem.collectionId] || 0) : 0;
+            
+            if (!existing) {
+                await db.history.add({
+                    type: rItem.type,
+                    content: rItem.content,
+                    timestamp: rItem.timestamp,
+                    collectionId: mappedColId
+                });
+            } else {
+                // Cập nhật trạng thái Collection nếu bị thay đổi (từ remote)
+                if (existing.collectionId !== mappedColId && mappedColId !== 0) {
+                    await db.history.update(existing.id, { collectionId: mappedColId });
+                    existing.collectionId = mappedColId;
+                }
+            }
+        }
+
+        // Also clean up local expired history items during sync
+        if (cutoff > 0) {
+            await db.history.where('timestamp').below(cutoff).filter(i => i.collectionId === 0).delete();
+        }
+
+        // ============================================
+        // STEP 6: Upload final merged data to Drive
+        // ============================================
         const finalLocalHistory = await db.history.toArray();
         const finalLocalCollections = await db.collections.toArray();
-        const localTombstonesData = db.tombstones ? await db.tombstones.toArray() : [];
-        const fallbackDataUpload = await new Promise(r => chrome.storage.local.get(['fallbackTombstones'], r));
-        const finalLocalTombstones = [...localTombstonesData, ...(fallbackDataUpload.fallbackTombstones || [])];
+        const finalTombstones = await _getTombstones();
 
         // Sort history by timestamp descending
         finalLocalHistory.sort((a, b) => b.timestamp - a.timestamp);
@@ -306,16 +308,17 @@ async function syncWithDrive(interactive = false) {
         // Upload ALL data to Drive (không cắt bớt theo limit)
         // Việc giới hạn hiển thị chỉ áp dụng ở tầng UI, Drive lưu toàn bộ để bảo toàn dữ liệu
 
-        // 5. Upload final merged data back to Google Drive
         const localSettingsToSync = await new Promise(r => chrome.storage.local.get(['historyLimit', 'historyExpiry', 'autoBackupInterval', 'settingsTimestamp'], r));
 
         const backupData = JSON.stringify({ 
             history: finalLocalHistory, 
             collections: finalLocalCollections, 
             settings: localSettingsToSync,
-            tombstones: finalLocalTombstones,
+            tombstones: finalTombstones,
             timestamp: Date.now() 
         });
+
+        console.log(`[Sync] Uploading: ${finalLocalHistory.length} items, ${finalLocalCollections.length} collections, ${finalTombstones.length} tombstones`);
 
         const metadata = {
             name: FILE_NAME,
