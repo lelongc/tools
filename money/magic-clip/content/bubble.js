@@ -523,7 +523,7 @@
                         <span class="col-name">${esc(col.name)}</span>
                         <span class="col-count">${col.itemCount || 0}</span>
                     `;
-                    infoWrap.addEventListener('click', () => {
+                    row.addEventListener('click', () => {
                         showToast('Upgrade to Pro to access this collection. Your data is safe!', true);
                     });
                     row.appendChild(infoWrap);
@@ -555,7 +555,8 @@
                 row.appendChild(editMode);
 
                 // Events
-                infoWrap.addEventListener('click', () => {
+                row.addEventListener('click', () => {
+                    if (editMode.style.display !== 'none') return; // Don't open if editing
                     currentCollectionId = col.id;
                     loadCollectionItems(col.id);
                 });
