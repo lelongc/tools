@@ -286,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
             chrome.runtime.sendMessage({ action: 'checkGoogleLogin' }, res => {
                 if (res && res.ok) {
                     showToast('Syncing settings...');
-                    chrome.runtime.sendMessage({ action: 'syncWithDriveSilent' });
+                    chrome.runtime.sendMessage({ action: 'syncWithDrive' });
                 }
             });
         });
