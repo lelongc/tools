@@ -264,9 +264,15 @@ async function syncWithDrive(interactive = false) {
         // Delete tombstoned collections
         for (const lCol of localCollections) {
             const hash = hashCode("COLLECTION:" + lCol.name.toLowerCase());
-            if (tombHashes.has(hash)) {
-                console.log(`[Sync] Deleting tombstoned collection: "${lCol.name}"`);
-                await db.collections.delete(lCol.id);
+            const tomb = mergedTombMap.get(hash);
+            if (tomb) {
+                if (lCol.createdAt && tomb.timestamp && lCol.createdAt > tomb.timestamp) {
+                    console.log(`[Sync] Revived collection "${lCol.name}" overrides older tombstone.`);
+                    mergedTombMap.delete(hash);
+                } else {
+                    console.log(`[Sync] Deleting tombstoned collection: "${lCol.name}"`);
+                    await db.collections.delete(lCol.id);
+                }
             }
         }
 
@@ -274,10 +280,16 @@ async function syncWithDrive(interactive = false) {
         for (let i = localHistory.length - 1; i >= 0; i--) {
             const lItem = localHistory[i];
             const hash = hashCode(lItem.type + lItem.content);
-            if (tombHashes.has(hash)) {
-                console.log(`[Sync] Deleting tombstoned item: id=${lItem.id} type=${lItem.type}`);
-                await db.history.delete(lItem.id);
-                localHistory.splice(i, 1);
+            const tomb = mergedTombMap.get(hash);
+            if (tomb) {
+                if (lItem.timestamp && tomb.timestamp && lItem.timestamp > tomb.timestamp) {
+                    console.log(`[Sync] Revived item overrides older tombstone: id=${lItem.id}`);
+                    mergedTombMap.delete(hash);
+                } else {
+                    console.log(`[Sync] Deleting tombstoned item: id=${lItem.id} type=${lItem.type}`);
+                    await db.history.delete(lItem.id);
+                    localHistory.splice(i, 1);
+                }
             }
         }
 
@@ -293,7 +305,15 @@ async function syncWithDrive(interactive = false) {
         // Merge Collections
         for (const rCol of remoteCollections) {
             const hash = hashCode("COLLECTION:" + rCol.name.toLowerCase());
-            if (tombHashes.has(hash)) continue; // Skip if tombstoned
+            const tomb = mergedTombMap.get(hash);
+            
+            if (tomb && (!rCol.createdAt || rCol.createdAt <= tomb.timestamp)) {
+                continue; // Skip if tombstoned and not revived
+            }
+            if (tomb && rCol.createdAt && rCol.createdAt > tomb.timestamp) {
+                console.log(`[Sync] Remote revived collection overrides tombstone: "${rCol.name}"`);
+                mergedTombMap.delete(hash);
+            }
 
             const existing = currentLocalCollections.find(lCol => lCol.name.toLowerCase() === rCol.name.toLowerCase());
             if (existing) {
@@ -308,7 +328,15 @@ async function syncWithDrive(interactive = false) {
         // Merge History (no duplicates by content + type, skip tombstoned/expired)
         for (const rItem of remoteHistory) {
             const hash = hashCode(rItem.type + rItem.content);
-            if (tombHashes.has(hash)) continue; // Skip tombstoned
+            const tomb = mergedTombMap.get(hash);
+            
+            if (tomb && (!rItem.timestamp || rItem.timestamp <= tomb.timestamp)) {
+                continue; // Skip tombstoned
+            }
+            if (tomb && rItem.timestamp && rItem.timestamp > tomb.timestamp) {
+                console.log(`[Sync] Remote revived item overrides tombstone: ${rItem.type}`);
+                mergedTombMap.delete(hash);
+            }
 
             // If it is older than cutoff and not pinned in a collection, skip merging it!
             if (cutoff > 0 && rItem.timestamp < cutoff && (!rItem.collectionId || rItem.collectionId === 0)) {
@@ -352,6 +380,9 @@ async function syncWithDrive(interactive = false) {
         if (cutoff > 0) {
             await db.history.where('timestamp').below(cutoff).filter(i => i.collectionId === 0).delete();
         }
+
+        // Update tombstones in local storage if any were revived
+        await _setTombstones(Array.from(mergedTombMap.values()));
 
         // ============================================
         // STEP 6: Upload final merged data to Drive
