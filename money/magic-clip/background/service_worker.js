@@ -16,6 +16,7 @@ let lastApiCheck = 0; // Tracks the last time we pinged Lemon Squeezy (persisted
 const VALID_STORE_ID = 416715; // Store ID của NeoClip Studio (#416715)
 
 // Initialize on startup
+chrome.storage.local.remove('isConnectingDrive'); // Clear any stuck connecting states
 chrome.storage.local.get(['isPro', 'proValidUntil', 'licenseKey', 'instanceId', 'autoBackupInterval', 'lastApiCheck'], (data) => {
     isProCache = !!data.isPro;
     proValidUntil = data.proValidUntil || 0;
@@ -424,6 +425,48 @@ async function handleMessage(req, sender) {
 
         case 'verifyLicense':
             return await checkLicense(req.key);
+
+        case 'authCompleted':
+            if (req.ok) {
+                const tokenExpiresAt = Date.now() + (req.expiresIn * 1000) - 60000;
+                await chrome.storage.local.set({
+                    googleAccessToken: req.token,
+                    googleTokenExpiresAt: tokenExpiresAt,
+                    driveConnected: true,
+                    isConnectingDrive: false
+                });
+
+                const isProNow = await isProActive();
+                if (!isProNow && typeof loadLicenseFromDrive === 'function') {
+                    const driveLicense = await loadLicenseFromDrive();
+                    if (driveLicense && driveLicense.licenseKey) {
+                        const { isPro } = await new Promise(r => chrome.storage.local.get(['isPro'], r));
+                        if (!isPro) {
+                            let restored = false;
+                            if (driveLicense.instanceId) {
+                                const restoreRes = await restoreLicense(driveLicense.licenseKey, driveLicense.instanceId);
+                                if (restoreRes.ok) restored = true;
+                            }
+                            if (!restored) {
+                                const checkRes = await checkLicense(driveLicense.licenseKey);
+                                if (checkRes.ok) restored = true;
+                            }
+                            if (restored) {
+                                await syncWithDrive(true);
+                            }
+                        }
+                    }
+                } else if (isProNow && typeof saveLicenseToDrive === 'function') {
+                    const res = await new Promise(r => chrome.storage.local.get(['licenseKey', 'instanceId'], r));
+                    if (res.licenseKey) {
+                        await saveLicenseToDrive(res.licenseKey, res.instanceId);
+                    }
+                    await syncWithDrive(true);
+                }
+            } else {
+                await chrome.storage.local.set({ isConnectingDrive: false });
+            }
+            return { ok: true };
 
         case 'getProStatus':
             return { isPro: await isProActive() };
