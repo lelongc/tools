@@ -173,18 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btnEl.textContent = 'Connecting...';
         btnEl.disabled = true;
 
-        if (navigator.userAgent.includes('Edg/')) {
-            chrome.tabs.create({ url: chrome.runtime.getURL('popup/auth.html') });
-            // Popup usually closes here, but just in case:
-            setTimeout(() => {
-                if (btnEl) {
-                    btnEl.textContent = 'Connect Google Drive';
-                    btnEl.disabled = false;
-                }
-            }, 5000);
-            return;
-        }
-
         chrome.runtime.sendMessage({ action: 'googleLogin' }, res => {
             btnEl.textContent = 'Connect Google Drive';
             btnEl.disabled = false;

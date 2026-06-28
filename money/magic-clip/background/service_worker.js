@@ -234,6 +234,79 @@ async function restoreLicense(key, instanceId) {
 }
 
 chrome.runtime.onMessage.addListener((req, sender, respond) => {
+    if (req.action === 'googleLogin') {
+        chrome.storage.local.set({ isConnectingDrive: true });
+
+        const redirectUri = chrome.identity.getRedirectURL();
+        const authUrl = new URL('https://accounts.google.com/o/oauth2/auth');
+        authUrl.searchParams.set('client_id', CLIENT_ID);
+        authUrl.searchParams.set('response_type', 'token');
+        authUrl.searchParams.set('redirect_uri', redirectUri);
+        authUrl.searchParams.set('scope', SCOPES);
+
+        chrome.identity.launchWebAuthFlow({
+            url: authUrl.href,
+            interactive: true
+        }, (redirectUrl) => {
+            if (chrome.runtime.lastError || !redirectUrl) {
+                const errMsg = chrome.runtime.lastError ? chrome.runtime.lastError.message : 'Login cancelled or failed.';
+                let displayError = errMsg;
+                if (errMsg && (errMsg.includes('OAuth2 request failed') || errMsg.includes('Authorization page could not be loaded'))) {
+                    displayError = `Vui lòng thêm link này vào ô "Authorized redirect URIs" trên Google Cloud: ${redirectUri}`;
+                }
+                chrome.storage.local.set({ isConnectingDrive: false });
+                respond({ ok: false, error: displayError });
+            } else {
+                const hash = new URL(redirectUrl).hash.substring(1);
+                const params = new URLSearchParams(hash);
+                const token = params.get('access_token');
+                const expiresIn = parseInt(params.get('expires_in'), 10) || 3600;
+
+                if (token) {
+                    const tokenExpiresAt = Date.now() + (expiresIn * 1000) - 60000;
+                    chrome.storage.local.set({
+                        googleAccessToken: token,
+                        googleTokenExpiresAt: tokenExpiresAt,
+                        driveConnected: true,
+                        isConnectingDrive: false
+                    }, () => {
+                        // Do post login logic asynchronously
+                        isProActive().then(isProNow => {
+                            if (!isProNow && typeof loadLicenseFromDrive === 'function') {
+                                loadLicenseFromDrive().then(driveLicense => {
+                                    if (driveLicense && driveLicense.licenseKey) {
+                                        chrome.storage.local.get(['isPro'], resPro => {
+                                            if (!resPro.isPro) {
+                                                if (driveLicense.instanceId) {
+                                                    restoreLicense(driveLicense.licenseKey, driveLicense.instanceId).then(restoreRes => {
+                                                        if (restoreRes.ok) syncWithDrive(true);
+                                                        else checkLicense(driveLicense.licenseKey).then(checkRes => { if (checkRes.ok) syncWithDrive(true); });
+                                                    });
+                                                } else {
+                                                    checkLicense(driveLicense.licenseKey).then(checkRes => { if (checkRes.ok) syncWithDrive(true); });
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                            } else if (isProNow && typeof saveLicenseToDrive === 'function') {
+                                chrome.storage.local.get(['licenseKey', 'instanceId'], res => {
+                                    if (res.licenseKey) saveLicenseToDrive(res.licenseKey, res.instanceId);
+                                    syncWithDrive(true);
+                                });
+                            }
+                        });
+                        respond({ ok: true, licenseLoaded: false });
+                    });
+                } else {
+                    chrome.storage.local.set({ isConnectingDrive: false });
+                    respond({ ok: false, error: 'Failed to extract token from Google.' });
+                }
+            }
+        });
+        return true; // Keep message channel open for async respond
+    }
+
     handleMessage(req, sender).then(respond).catch(err => {
         console.error('SW error:', err);
         respond({ error: err.toString() });
@@ -338,63 +411,6 @@ async function handleMessage(req, sender) {
 
         case 'cleanUrl':
             return { cleaned: cleanUrl(req.url) };
-
-        case 'googleLogin':
-            return new Promise((resolve) => {
-                // Set status asynchronously (fire-and-forget, no await!)
-                chrome.storage.local.set({ isConnectingDrive: true });
-
-                launchGoogleAuthDialog().then(async (loginRes) => {
-                    await chrome.storage.local.set({ isConnectingDrive: false });
-
-                    if (loginRes && !loginRes.error) {
-                        await chrome.storage.local.set({ driveConnected: true });
-
-                        const isProNow = await isProActive();
-                        let licenseLoaded = false;
-                        if (!isProNow && typeof loadLicenseFromDrive === 'function') {
-                            const driveLicense = await loadLicenseFromDrive();
-                            if (driveLicense && driveLicense.licenseKey) {
-                                const { isPro } = await new Promise(r => chrome.storage.local.get(['isPro'], r));
-                                if (!isPro) {
-                                    let restored = false;
-                                    if (driveLicense.instanceId) {
-                                        const restoreRes = await restoreLicense(driveLicense.licenseKey, driveLicense.instanceId);
-                                        if (restoreRes.ok) {
-                                            restored = true;
-                                        }
-                                    }
-                                    if (!restored) {
-                                        const checkRes = await checkLicense(driveLicense.licenseKey);
-                                        if (checkRes.ok) {
-                                            restored = true;
-                                        }
-                                    }
-                                    if (restored) {
-                                        await syncWithDrive(true);
-                                        licenseLoaded = true;
-                                    }
-                                }
-                            }
-                            resolve({ ok: true, licenseLoaded });
-                        } else {
-                            if (isProNow && typeof saveLicenseToDrive === 'function') {
-                                const res = await new Promise(r => chrome.storage.local.get(['licenseKey', 'instanceId'], r));
-                                if (res.licenseKey) {
-                                    await saveLicenseToDrive(res.licenseKey, res.instanceId);
-                                }
-                                await syncWithDrive(true);
-                            }
-                            resolve({ ok: true, licenseLoaded: false });
-                        }
-                    } else {
-                        resolve({ ok: false, error: loginRes ? loginRes.error : 'Unknown login error' });
-                    }
-                }).catch(err => {
-                    chrome.storage.local.set({ isConnectingDrive: false });
-                    resolve({ ok: false, error: err.message || err.toString() });
-                });
-            });
 
         case 'checkGoogleLogin':
             return new Promise(resolve => {
