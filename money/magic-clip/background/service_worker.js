@@ -267,8 +267,7 @@ chrome.runtime.onMessage.addListener((req, sender, respond) => {
                     chrome.storage.local.set({
                         googleAccessToken: token,
                         googleTokenExpiresAt: tokenExpiresAt,
-                        driveConnected: true,
-                        isConnectingDrive: false
+                        driveConnected: true
                     }, async () => {
                         // Do post login logic asynchronously waiting
                         let licenseLoaded = false;
@@ -300,6 +299,8 @@ chrome.runtime.onMessage.addListener((req, sender, respond) => {
                             if (res.licenseKey) await saveLicenseToDrive(res.licenseKey, res.instanceId);
                             await syncWithDrive(true);
                         }
+                        
+                        await chrome.storage.local.set({ isConnectingDrive: false });
                         respond({ ok: true, licenseLoaded: licenseLoaded });
                     });
                 } else {
