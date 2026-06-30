@@ -243,6 +243,8 @@ chrome.runtime.onMessage.addListener((req, sender, respond) => {
         authUrl.searchParams.set('response_type', 'token');
         authUrl.searchParams.set('redirect_uri', redirectUri);
         authUrl.searchParams.set('scope', SCOPES);
+        // Add a random state to bypass Google Cloud console warnings
+        authUrl.searchParams.set('state', Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2));
 
         chrome.identity.launchWebAuthFlow({
             url: authUrl.href,

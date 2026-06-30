@@ -130,7 +130,7 @@ async function saveItem(item, isPro = false) {
     const settings = await new Promise(resolve => {
         chrome.storage.local.get(['historyLimit', 'historyExpiry'], resolve);
     });
-    
+
     // Auto-Clear Expired Items
     const expiryDays = settings.historyExpiry || 0;
     if (expiryDays > 0) {
@@ -168,7 +168,7 @@ async function getRecent(limit = 50, search = '', typeFilter = 'all') {
         const lower = search.toLowerCase();
         // SEARCH FIX: Scan everything to find text matches and apply type filters
         items = await db.history.orderBy('timestamp').reverse().toArray();
-        
+
         items = items.filter(i => {
             // Ẩn items đã thuộc collection khỏi tab Recent
             if (i.collectionId && i.collectionId !== 0) return false;
@@ -301,7 +301,7 @@ function isUrl(str) {
 function cleanUrl(url) {
     try {
         const u = new URL(url.trim());
-        const trash = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','fbclid','gclid','ref','affiliate'];
+        const trash = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'fbclid', 'gclid', 'ref', 'affiliate'];
         trash.forEach(k => u.searchParams.delete(k));
         return u.toString();
     } catch {
