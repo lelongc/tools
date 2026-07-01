@@ -1,6 +1,5 @@
 import { keys, resetInputPresses } from './input.js';
 import { getCollision, TILE_SIZE } from './world.js';
-import { createHitEffects } from './effects.js';
 
 export const player = {
     x: 64,
