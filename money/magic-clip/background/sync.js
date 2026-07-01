@@ -4,7 +4,7 @@
 const FILE_NAME = 'neoclip_backup.json';
 // TODO: User must provide the NEW Web Application Client ID
 const CLIENT_ID = '637586583741-204un9j40rq8bm9e8517evmdiaoak933.apps.googleusercontent.com'; 
-const SCOPES = 'https://www.googleapis.com/auth/drive.appdata';
+const SCOPES = 'https://www.googleapis.com/auth/drive.appdata email';
 
 let cachedToken = null;
 let tokenExpiresAt = 0;
@@ -14,9 +14,9 @@ async function getAccessToken(interactive = false) {
         return { token: cachedToken };
     }
 
-    // Retrieve from chrome.storage.local if memory is empty (after service worker restarts)
+    // Retrieve from chrome.storage.local if memory is empty
     const storageRes = await new Promise(resolve => {
-        chrome.storage.local.get(['googleAccessToken', 'googleTokenExpiresAt'], resolve);
+        chrome.storage.local.get(['googleAccessToken', 'googleTokenExpiresAt', 'googleUserEmail'], resolve);
     });
 
     if (storageRes.googleAccessToken && storageRes.googleTokenExpiresAt && Date.now() < storageRes.googleTokenExpiresAt) {
@@ -36,8 +36,13 @@ async function getAccessToken(interactive = false) {
     authUrl.searchParams.set('response_type', 'token');
     authUrl.searchParams.set('redirect_uri', redirectUri);
     authUrl.searchParams.set('scope', SCOPES);
-    // Add a random state to bypass Google Cloud console warnings
-    authUrl.searchParams.set('state', Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2));
+    // Static state to allow Chrome launchWebAuthFlow to cache the request URL efficiently
+    authUrl.searchParams.set('state', 'neoclip-auth-state');
+
+    // Use login_hint to completely bypass the multi-account selector screen on silent refreshes
+    if (storageRes.googleUserEmail) {
+        authUrl.searchParams.set('login_hint', storageRes.googleUserEmail);
+    }
 
     const options = {
         url: authUrl.href,
@@ -48,7 +53,12 @@ async function getAccessToken(interactive = false) {
         chrome.identity.launchWebAuthFlow(options, (redirectUrl) => {
             if (chrome.runtime.lastError || !redirectUrl) {
                 const errMsg = chrome.runtime.lastError ? chrome.runtime.lastError.message : 'Login cancelled or failed.';
-                console.error('Google Universal Auth Error:', errMsg);
+                
+                if (errMsg.includes('User interaction required') && !interactive) {
+                    console.log('Silent auth check: User interaction required (expected).');
+                } else {
+                    console.error('Google Universal Auth Error:', errMsg);
+                }
                 
                 let displayError = errMsg;
                 if (errMsg.includes('OAuth2 request failed') || errMsg.includes('Authorization page could not be loaded')) {
@@ -65,10 +75,26 @@ async function getAccessToken(interactive = false) {
                     cachedToken = token;
                     tokenExpiresAt = Date.now() + (expiresIn * 1000) - 60000;
                     
-                    // Save to local storage for persistence across service worker restarts
-                    chrome.storage.local.set({
-                        googleAccessToken: cachedToken,
-                        googleTokenExpiresAt: tokenExpiresAt
+                    // Fetch user email silently to use as login_hint for future silent requests
+                    fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+                        headers: { Authorization: `Bearer ${token}` }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        const saveData = {
+                            googleAccessToken: cachedToken,
+                            googleTokenExpiresAt: tokenExpiresAt
+                        };
+                        if (data && data.email) {
+                            saveData.googleUserEmail = data.email;
+                        }
+                        chrome.storage.local.set(saveData);
+                    })
+                    .catch(() => {
+                        chrome.storage.local.set({
+                            googleAccessToken: cachedToken,
+                            googleTokenExpiresAt: tokenExpiresAt
+                        });
                     });
                     
                     resolve({ token: token, redirectUri: redirectUri });
@@ -81,53 +107,7 @@ async function getAccessToken(interactive = false) {
 }
 
 function launchGoogleAuthDialog() {
-    const redirectUri = chrome.identity.getRedirectURL();
-    const authUrl = new URL('https://accounts.google.com/o/oauth2/auth');
-    authUrl.searchParams.set('client_id', CLIENT_ID);
-    authUrl.searchParams.set('response_type', 'token');
-    authUrl.searchParams.set('redirect_uri', redirectUri);
-    authUrl.searchParams.set('scope', SCOPES);
-    // Add a random state to bypass Google Cloud console warnings
-    authUrl.searchParams.set('state', Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2));
-
-    const options = {
-        url: authUrl.href,
-        interactive: true
-    };
-
-    return new Promise((resolve) => {
-        chrome.identity.launchWebAuthFlow(options, (redirectUrl) => {
-            if (chrome.runtime.lastError || !redirectUrl) {
-                const errMsg = chrome.runtime.lastError ? chrome.runtime.lastError.message : 'Login cancelled or failed.';
-                console.error('Google Universal Auth Error:', errMsg);
-                
-                let displayError = errMsg;
-                if (errMsg && (errMsg.includes('OAuth2 request failed') || errMsg.includes('Authorization page could not be loaded'))) {
-                    displayError = `Vui lòng thêm link này vào ô "Authorized redirect URIs" trên Google Cloud: ${redirectUri}`;
-                }
-                resolve({ error: displayError });
-            } else {
-                const hash = new URL(redirectUrl).hash.substring(1);
-                const params = new URLSearchParams(hash);
-                const token = params.get('access_token');
-                const expiresIn = parseInt(params.get('expires_in'), 10) || 3600;
-
-                if (token) {
-                    cachedToken = token;
-                    tokenExpiresAt = Date.now() + (expiresIn * 1000) - 60000;
-                    
-                    chrome.storage.local.set({
-                        googleAccessToken: cachedToken,
-                        googleTokenExpiresAt: tokenExpiresAt
-                    }, () => {
-                        resolve({ token: token });
-                    });
-                } else {
-                    resolve({ error: 'Failed to extract token from Google.' });
-                }
-            }
-        });
-    });
+    return getAccessToken(true);
 }
 
 async function loginToGoogle() {
