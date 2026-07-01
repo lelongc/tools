@@ -121,7 +121,7 @@ async function loginToGoogle() {
 function logoutGoogle() {
     cachedToken = null;
     tokenExpiresAt = 0;
-    chrome.storage.local.remove(['googleAccessToken', 'googleTokenExpiresAt']);
+    chrome.storage.local.remove(['googleAccessToken', 'googleTokenExpiresAt', 'googleUserEmail']);
 }
 
 async function getSyncFileId(token) {
