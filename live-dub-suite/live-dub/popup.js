@@ -1282,7 +1282,7 @@
         var tA, rA;
         try {
           tA = (0, U.Wp)({
-            apiKey: "AIzaSyDlJFT3F8TTKhmWvMOitlQ2l6qcU7KuSFo",
+            apiKey: "YOUR_API_KEY_HERE",
             authDomain: "dubtab.firebaseapp.com",
             databaseURL: "https://dubtab-default-rtdb.firebaseio.com",
             projectId: "dubtab",
