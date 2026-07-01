@@ -57,21 +57,22 @@ Tính năng đồng bộ đám mây (Cloud Sync) yêu cầu kết nối với t�
 2. Điền **App name**: NeoClip.
 3. Điền **User support email**: lelong190110@gmail.com.
 4. **App logo**: Bạn tải lên logo hình vuông (khuyên dùng nền trong suốt để đẹp nhất trên nền trắng của Google). *Lưu ý: Ngay khi tải logo lên, Google sẽ yêu cầu ứng dụng phải qua quá trình xác minh.*
-5. Khai báo 3 đường link chính sách (đã được lưu trữ trên Vercel):
-   * **Application home page**: `https://neoclip.vercel.app/`
-   * **Application privacy policy link**: `https://neoclip.vercel.app/privacy.html`
-   * **Application terms of service link**: `https://neoclip.vercel.app/terms.html`
-6. Tại mục **Authorized domains**, thêm chính xác tên miền: `neoclip.vercel.app`.
+5. **LƯU Ý ĐẶC BIỆT VỀ TÊN MIỀN (DOMAIN):** 
+   * Theo chính sách mới của Google OAuth, **bạn KHÔNG ĐƯỢC phép dùng tên miền phụ miễn phí** từ các nền tảng bên thứ 3 (như `vercel.app`, `github.io`, `webflow.io`, v.v.).
+   * Bạn bắt buộc phải **mua một tên miền riêng** (Custom Domain, ví dụ: `neoclip.app`, `neoclip.net`, v.v.) và trỏ nó vào project Vercel của bạn.
+6. Sau khi có tên miền riêng, khai báo 3 đường link chính sách:
+   * **Application home page**: `https://ten-mien-cua-ban.com/`
+   * **Application privacy policy link**: `https://ten-mien-cua-ban.com/privacy.html`
+   * **Application terms of service link**: `https://ten-mien-cua-ban.com/terms.html`
+7. Tại mục **Authorized domains**, thêm chính xác tên miền riêng của bạn: `ten-mien-cua-ban.com`.
 
 ### Bước 4: Xác minh Tên miền (Domain Verification)
-Hệ thống có thể báo lỗi "Not registered to you" do chưa nhận diện được chủ sở hữu tên miền Vercel. Bạn cần:
+Google cần xác minh bạn thực sự là chủ sở hữu tên miền riêng đó:
 1. Mở **Google Search Console** bằng tài khoản lelong190110@gmail.com.
-2. Thêm tài sản mới bằng phương pháp **Tiền tố URL (URL prefix)** với link `https://neoclip.vercel.app/`.
-3. Chọn phương pháp xác minh bằng **Thẻ HTML (HTML tag)**.
-4. Copy đoạn mã `<meta name="google-site-verification" content="..." />`.
-5. Dán đoạn mã này vào thẻ `<head>` trong file code `index.html` của website NeoClip và Deploy bản cập nhật lên Vercel.
-6. Quay lại Search Console bấm **Xác minh thành công**.
-7. Trở lại Google Cloud Console (mục Verification Center), chọn **I have fixed the issues** và gửi yêu cầu xác minh lại để hoàn tất.
+2. Thêm tài sản mới bằng phương pháp **Miền (Domain)** hoặc **Tiền tố URL (URL prefix)** với link `https://ten-mien-cua-ban.com/`.
+3. Nếu dùng phương pháp Miền, bạn phải xác minh bằng **Bản ghi TXT của DNS** (Cấu hình trong trang quản lý tên miền như Namecheap, Cloudflare).
+4. Nếu dùng Tiền tố URL, bạn có thể copy đoạn mã HTML `<meta name="google-site-verification" content="..." />` dán vào `<head>` của `index.html` và deploy lại lên Vercel.
+5. Sau khi xác minh thành công trên Search Console, trở lại Google Cloud Console (mục Verification Center), cập nhật lại các link bằng tên miền mới, chọn **I have fixed the issues** và gửi yêu cầu xác minh lại.
 
 ### Bước 5: Gửi xác minh ứng dụng (Submit for Verification)
 Vì bạn tải lên Logo và phát hành ứng dụng ra công chúng (In production), bạn cần gửi ứng dụng cho Google duyệt (mất 1-3 ngày).
@@ -187,6 +188,23 @@ Khi đã sẵn sàng bán hàng thực tế:
 ### Bước 1: Kích hoạt cửa hàng (Go Live)
 1. Đăng nhập vào [Lemon Squeezy](https://www.lemonsqueezy.com/).
 2. Chuyển nút gạt ở góc trên cùng từ **Test Mode** sang **Live Mode** (Bạn cần khai báo thông tin cá nhân/doanh nghiệp và tài khoản ngân hàng để nhận tiền).
+3. **LƯU Ý QUAN TRỌNG VỀ XÉT DUYỆT (VERIFICATION):**
+   * Sau khi đăng ký, quá trình duyệt có thể mất từ vài ngày đến hơn 1 tuần.
+   * Hãy **thường xuyên kiểm tra Email (cả hộp thư Spam)**. Đội ngũ hỗ trợ của Lemon Squeezy (thường là người thật, ví dụ: Shahan) sẽ gửi email yêu cầu bạn cung cấp thêm thông tin về sản phẩm.
+   * **Nếu họ yêu cầu "Pricing Information" và "Product Overview", hãy reply lại bằng mẫu tiếng Anh sau:**
+     > **Hi Team,**
+     > 
+     > **1. Product Overview:**
+     > NeoClip is a premium clipboard manager Chrome Extension. It saves copied text, links, and images locally. Key features include instant search, image text extraction (OCR), and 100% private cloud sync via the user's own Google Drive. You can view our website here: [Thay-bằng-link-vercel-của-bạn]
+     > 
+     > **2. Pricing Information:**
+     > - Free Tier: $0
+     > - Pro Monthly Subscription: $2.99 / month
+     > - Pro Yearly Subscription: $19.99 / year
+     > - Pro Lifetime (One-time payment): $49.00
+     > 
+     > **Please let me know if you need a demo video or anything else.**
+     > **Best regards,**
 
 ### Bước 2: Tạo sản phẩm chính thức
 1. Tạo 3 biến thể sản phẩm tương ứng với 3 mức giá đã hiển thị trên website:
