@@ -140,20 +140,25 @@ async function validateSubscriptionBackground() {
 
 // Function to check if Pro is currently active (checks lease time)
 async function isProActive() {
-    if (!isProCache) return false;
+    const data = await new Promise(res => chrome.storage.local.get(['isPro', 'proValidUntil', 'lastApiCheck'], res));
+    if (!data.isPro) return false;
 
     const now = Date.now();
+    const validUntil = data.proValidUntil || 0;
+    const lastCheck = data.lastApiCheck || 0;
+
     // Chỉ gọi API nếu subscription ĐÃ hết hạn
     // Nếu chưa hết hạn → cho dùng ngay, không cần chờ API
-    if (now > proValidUntil) {
+    if (now > validUntil) {
         // Hết hạn rồi, kiểm tra online xem có gia hạn không
         if (navigator.onLine) {
             await validateSubscriptionBackground();
-            if (!isProCache) return false;
+            const freshData = await new Promise(res => chrome.storage.local.get(['isPro'], res));
+            return !!freshData.isPro;
         } else {
             return false; // Offline + hết hạn = không cho dùng
         }
-    } else if (now - lastApiCheck > 60 * 60 * 1000 && navigator.onLine) {
+    } else if (now - lastCheck > 60 * 60 * 1000 && navigator.onLine) {
         // Chưa hết hạn nhưng lâu không check → check ngầm, KHÔNG block
         validateSubscriptionBackground(); // fire-and-forget, không await
     }
