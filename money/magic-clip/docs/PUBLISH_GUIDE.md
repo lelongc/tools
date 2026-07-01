@@ -55,45 +55,47 @@ Tính năng đồng bộ đám mây (Cloud Sync) yêu cầu kết nối với t�
 ### Bước 3: Cấu hình Thương hiệu (Branding)
 1. Chuyển sang tab **Branding**.
 2. Điền **App name**: NeoClip.
-3. Điền **User support email**: lelong190110@gmail.com.
-4. **App logo**: Bạn tải lên logo hình vuông (khuyên dùng nền trong suốt để đẹp nhất trên nền trắng của Google). *Lưu ý: Ngay khi tải logo lên, Google sẽ yêu cầu ứng dụng phải qua quá trình xác minh.*
-5. **LƯU Ý ĐẶC BIỆT VỀ TÊN MIỀN (DOMAIN):** 
-   * Theo chính sách mới của Google OAuth, **bạn KHÔNG ĐƯỢC phép dùng tên miền phụ miễn phí** từ các nền tảng bên thứ 3 (như `vercel.app`, `github.io`, `webflow.io`, v.v.).
-   * Bạn bắt buộc phải **mua một tên miền riêng** (Custom Domain, ví dụ: `neoclip.app`, `neoclip.net`, v.v.) và trỏ nó vào project Vercel của bạn.
-6. Sau khi có tên miền riêng, khai báo 3 đường link chính sách:
+3. Điền **User support email**: Email hỗ trợ của bạn (VD: lelong190110@gmail.com).
+4. **App logo**: Tải lên logo hình vuông nền trong suốt. *Lưu ý: Ngay khi tải logo lên, Google sẽ bắt đầu yêu cầu bạn phải xác minh ứng dụng.*
+5. **QUY ĐỊNH NGHIÊM NGẶT CỦA GOOGLE VỀ TÊN MIỀN (DOMAIN):** 
+   * Trái ngược với Lemon Squeezy (cho phép dùng `vercel.app`), Google OAuth **cấm tuyệt đối** các tên miền phụ miễn phí từ nền tảng thứ 3 (như `vercel.app`, `github.io`).
+   * Bạn **bắt buộc phải mua một tên miền riêng** (Custom Domain, ví dụ: `neoclip.com`, `neoclip.net`, `neoclip.app`). Khuyên dùng Namecheap hoặc Porkbun (giá khoảng 250k - 300k VNĐ/năm).
+   * **Đặc quyền Sinh viên:** Nếu bạn có email `.edu.vn`, bạn có thể lấy gói GitHub Student Developer Pack để nhận tên miền `.me` hoặc `.tech` miễn phí 1 năm.
+6. Sau khi có tên miền riêng và trỏ về Vercel, hãy khai báo 3 đường link chính sách:
    * **Application home page**: `https://ten-mien-cua-ban.com/`
    * **Application privacy policy link**: `https://ten-mien-cua-ban.com/privacy.html`
    * **Application terms of service link**: `https://ten-mien-cua-ban.com/terms.html`
 7. Tại mục **Authorized domains**, thêm chính xác tên miền riêng của bạn: `ten-mien-cua-ban.com`.
 
-### Bước 4: Xác minh Tên miền (Domain Verification)
-Google cần xác minh bạn thực sự là chủ sở hữu tên miền riêng đó:
-1. Mở **Google Search Console** bằng tài khoản lelong190110@gmail.com.
-2. Thêm tài sản mới bằng phương pháp **Miền (Domain)** hoặc **Tiền tố URL (URL prefix)** với link `https://ten-mien-cua-ban.com/`.
-3. Nếu dùng phương pháp Miền, bạn phải xác minh bằng **Bản ghi TXT của DNS** (Cấu hình trong trang quản lý tên miền như Namecheap, Cloudflare).
-4. Nếu dùng Tiền tố URL, bạn có thể copy đoạn mã HTML `<meta name="google-site-verification" content="..." />` dán vào `<head>` của `index.html` và deploy lại lên Vercel.
-5. Sau khi xác minh thành công trên Search Console, trở lại Google Cloud Console (mục Verification Center), cập nhật lại các link bằng tên miền mới, chọn **I have fixed the issues** và gửi yêu cầu xác minh lại.
+### Bước 4: Xác minh Tên miền với Google Search Console
+Google cần bằng chứng bạn là chủ sở hữu thực sự của tên miền đó:
+1. Mở **Google Search Console** bằng tài khoản Google của bạn.
+2. Thêm tài sản mới bằng phương pháp **Tiền tố URL (URL prefix)** với link `https://ten-mien-cua-ban.com/`.
+3. Chọn phương pháp xác minh bằng **Thẻ HTML (HTML tag)**.
+4. Copy đoạn mã `<meta name="google-site-verification" content="..." />`.
+5. Dán đoạn mã này vào thẻ `<head>` trong file code `index.html` của website NeoClip, push lên GitHub để Vercel tự động cập nhật.
+6. Quay lại Search Console bấm **Xác minh thành công**.
+7. Trở lại Google Cloud Console (mục Verification Center), chọn **I have fixed the issues** và gửi yêu cầu xác minh lại.
 
 ### Bước 5: Gửi xác minh ứng dụng (Submit for Verification)
-Vì bạn tải lên Logo và phát hành ứng dụng ra công chúng (In production), bạn cần gửi ứng dụng cho Google duyệt (mất 1-3 ngày).
-1. Bấm nút **Submit for verification** ở tab Verification Center hoặc Audience.
+1. Bấm nút **Submit for verification** ở tab Verification Center.
 2. Tại ô **Additional info**, hãy dán đoạn giải trình sau:
-   *"NeoClip is a premium Chrome Extension clipboard manager. We request the non-sensitive 'drive.appdata' scope solely to allow users to securely sync their encrypted clipboard history to a hidden, app-specific folder in their own Google Drive. We do not access any other personal files. The provided domain (neoclip.vercel.app) and logo belong to us. Please verify our branding. Thank you!"*
+   *"NeoClip is a premium Chrome Extension clipboard manager. We request the non-sensitive 'drive.appdata' scope solely to allow users to securely sync their encrypted clipboard history to a hidden, app-specific folder in their own Google Drive. We do not access any other personal files. The provided custom domain and logo belong to us. Thank you!"*
 3. Trả lời **Verification Questionnaire**:
    * Is your application for personal use only? -> **No**
    * Is your application for Internal use only? -> **No**
    * Is your application for Development/Testing/Staging use only? -> **No**
    * Is your application a Gmail SMTP Plugin...? -> **No**
-   * Tích chọn (Check) CẢ HAI ô cuối cùng để xác nhận đồng ý các điều khoản.
-4. Bấm **Submit** và chờ Google duyệt.
+   * Tích chọn CẢ HAI ô cuối cùng để xác nhận đồng ý các điều khoản.
+4. Bấm **Submit** và chờ Google duyệt (1-3 ngày).
 
-### Bước 6: Thêm người dùng thử nghiệm (Test Users - Không bắt buộc nếu đã Submit)
-Trong thời gian ứng dụng đang ở trạng thái **Testing** hoặc chờ Google phê duyệt chính thức, chỉ những email được bạn cấp quyền mới có thể đăng nhập Google Drive thông qua extension:
-1. Tại trang **OAuth consent screen**, kéo xuống tìm mục **Test users** (hoặc chuyển sang tab **Audience** tùy phiên bản giao diện).
-2. Bấm nút **+ Add Users**.
-3. Nhập chính xác các địa chỉ email của những người sẽ tham gia test extension (ví dụ: email cá nhân của bạn, email tester).
-4. Bấm **Save** để lưu lại.
-*(Lưu ý: Khi cài đặt extension, những người dùng này có thể sẽ thấy màn hình cảnh báo "Google hasn’t verified this app" - họ chỉ cần bấm **Continue/Advanced** để tiếp tục).*
+### Bước 6: CHIẾN THUẬT "100 USER HACK" DÀNH CHO FOUNDER ÍT VỐN
+Nếu bạn chưa có tiền mua tên miền riêng và bị Google từ chối xác minh, bạn vẫn CÓ THỂ ra mắt sản phẩm và kiếm tiền ngay lập tức nhờ "Cửa hậu" của Google:
+1. **Chấp nhận rủi ro:** Đừng rep email từ chối của Google. Trong Google Cloud, chuyển trạng thái Publishing Status sang **In Production (Phát hành)**.
+2. **Luật 100 User của Google:** Mặc dù bị từ chối xác minh, Google vẫn cho phép tối đa **100 người dùng đầu tiên** đăng nhập thành công vào app của bạn! 100 User bản Pro là quá đủ để bạn kiếm được hàng nghìn đô la khởi nghiệp.
+3. **Màn hình cảnh báo đỏ:** Đổi lại, 100 khách hàng này khi đăng nhập sẽ gặp màn hình đỏ *"Google hasn't verified this app"*.
+4. **Cách xử lý:** Thêm một dòng ghi chú nhỏ trên Web hoặc Extension hướng dẫn khách: *"Note: Cloud Sync is currently in Beta pending Google Verification. When logging in, if you see a warning screen, please click **Advanced (Nâng cao) -> Go to NeoClip (unsafe)** to proceed."*
+5. Bán được 1-2 đơn hàng đầu tiên, lấy tiền đó mua ngay tên miền `.com` và quay lại Bước 3 để xác minh chính thức!
 
 ### Bước 7: Dán Client ID vào Code
 1. Mở file [sync.js](file:///d:/folder/tools/money/magic-clip/background/sync.js) trong dự án.
