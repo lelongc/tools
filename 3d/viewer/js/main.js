@@ -8,7 +8,7 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
 
-const camera = { x: 0, y: 0, width: canvas.width, height: canvas.height };
+const camera = { x: 0, y: 0, width: canvas.width, height: canvas.height, player: null };
 let lastTime = 0;
 
 // Add some ambient dust particles to the background
@@ -26,6 +26,7 @@ function spawnAmbientDust(dt) {
 }
 
 function update(dt) {
+    camera.player = player;
     updatePlayer(dt, addParticle);
     updateCombat(player, dt);
     spawnAmbientDust(dt);
@@ -47,16 +48,79 @@ function update(dt) {
     // Clear one-frame input presses
     resetInputPresses();
 }
+let shakeTime = 0;
+let shakeIntensity = 0;
+
+window.addEventListener('cameraShake', (e) => {
+    shakeTime = 0.2; // 200ms shake
+    shakeIntensity = e.detail.intensity || 5;
+});
 
 function draw(dt) {
-    // Fill deep dark background
-    ctx.fillStyle = '#0a0a0a';
+    if (shakeTime > 0) {
+        shakeTime -= dt;
+        const shakeX = (Math.random() - 0.5) * shakeIntensity;
+        const shakeY = (Math.random() - 0.5) * shakeIntensity;
+        ctx.save();
+        ctx.translate(shakeX, shakeY);
+    }
+
+    // Draw pure black space
+    ctx.fillStyle = '#050510';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Procedural Cyber Grid Background
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0, 150, 255, 0.15)';
+    ctx.lineWidth = 1;
+    
+    // Grid size and parallax offset
+    const gridSize = 64;
+    const offsetX = -(camera.x * 0.2) % gridSize;
+    const offsetY = -(camera.y * 0.2) % gridSize;
+    
+    ctx.beginPath();
+    // Vertical lines
+    for (let x = offsetX - gridSize; x < canvas.width + gridSize; x += gridSize) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+    }
+    // Horizontal lines
+    for (let y = offsetY - gridSize; y < canvas.height + gridSize; y += gridSize) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+    }
+    ctx.stroke();
+
+    // Floating abstract geometry (Far parallax layer)
+    ctx.strokeStyle = 'rgba(0, 255, 255, 0.05)';
+    ctx.lineWidth = 2;
+    for (let i = 0; i < 5; i++) {
+        const floatX = ((i * 300 - camera.x * 0.05) % (canvas.width + 200) + (canvas.width + 200)) % (canvas.width + 200) - 100;
+        const floatY = canvas.height/2 + Math.sin(Date.now()/2000 + i) * 100 - camera.y * 0.05;
+        
+        ctx.save();
+        ctx.translate(floatX, floatY);
+        ctx.rotate(Date.now()/5000 + i);
+        ctx.beginPath();
+        ctx.moveTo(-50, -50);
+        ctx.lineTo(50, -50);
+        ctx.lineTo(0, 50);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+    }
+    
+    ctx.restore();
 
     drawWorld(ctx, camera);
     updateAndDrawParticles(ctx, camera, dt);
     drawPlayer(ctx, camera);
     drawCombat(ctx, camera);
+
+    if (shakeTime > 0) {
+        ctx.restore();
+    }
 }
 
 function gameLoop(timestamp) {
