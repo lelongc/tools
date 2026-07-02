@@ -27,6 +27,8 @@ export const combatState = {
     dashStrikeCooldown: 0,
     
     isGroundSmashing: false,
+    smashPhase: 0, // 0 = None, 1 = Leap, 2 = Float/Anticipation, 3 = Slam
+    smashTimer: 0,
     smashCooldown: 0,
     
     isCharging: false,
@@ -175,11 +177,22 @@ export function updateCombat(player, dt) {
         releaseChargeAttack(player);
     }
 
-    // SKILL 3: Ground Smash (Triggered by holding Down + Attack in mid-air, or pressing L)
-    if ((keys.skill3Pressed || (!player.isGrounded && keys.down && attackTriggered)) && combatState.smashCooldown <= 0 && !combatState.isGroundSmashing && !combatState.isDashStriking) {
+    // SKILL 3: Ground Smash trigger (L)
+    if ((keys.skill3Pressed || (!player.isGrounded && keys.down && attackTriggered)) && combatState.smashCooldown <= 0 && !combatState.isGroundSmashing && !combatState.isDashStriking && !combatState.isCharging) {
         combatState.isGroundSmashing = true;
         player.vx = 0;
-        player.vy = -300; // Slight hop before smash
+        
+        if (player.isGrounded) {
+            // Cấp 1: Nhảy lấy đà (Leap) từ mặt đất
+            combatState.smashPhase = 1;
+            player.vy = -620; // High leap!
+            player.isGrounded = false;
+        } else {
+            // Cấp 2: Khựng giữa không trung gom năng lượng (Float)
+            combatState.smashPhase = 2;
+            player.vy = -180; // Small upward float
+            combatState.smashTimer = 0.12; // Float duration 120ms
+        }
     }
 
     // SKILL 1: Normal Attack Combo (J or I on ground, or normal air attack if no Down held)
@@ -272,52 +285,83 @@ export function updateCombat(player, dt) {
 
     // Execute Skill 3 (Ground Smash)
     if (combatState.isGroundSmashing) {
-        if (player.vy >= 0) {
-            player.vy = 1500; // Slam down super fast
-            player.scaleX = 0.5;
-            player.scaleY = 2.0;
-            
-            // Trail going down (textured sparks)
-            addParticle(player.x + player.width/2, player.y, (Math.random()-0.5)*150, -300, 'rgba(255, 120, 0, 0.8)', 0.45, 'tex_spark', 15);
-        }
+        player.vx = 0; // Lock horizontal control
         
-        // If hit ground
-        if (player.isGrounded || getCollision(player.x, player.y + 5, player.width, player.height)) {
-            combatState.isGroundSmashing = false;
-            combatState.smashCooldown = 2.0;
+        if (combatState.smashPhase === 1) {
+            // Leap phase: wait until player reaches the peak of their leap
+            if (player.vy >= -50) {
+                combatState.smashPhase = 2;
+                combatState.smashTimer = 0.12; // Float freeze
+                player.vy = 0;
+            }
+        } else if (combatState.smashPhase === 2) {
+            // Float / Gather phase
+            combatState.smashTimer -= dt;
+            player.vy = 0; // Zero gravity freeze
             
-            // SHOCKWAVE EFFECT
-            window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 20}}));
-            
-            // Neon Orange expand shockwave ring!
-            addParticle(player.x + player.width/2, player.y + player.height, 0, 0, 'rgba(255, 100, 0, 1)', 0.45, 'ring', 45);
-            
-            // Dusty orange smoke rising
-            for(let i=0; i<15; i++) {
-                addParticle(
-                    player.x + player.width/2,
-                    player.y + player.height,
-                    (Math.random()-0.5)*250,
-                    -120 - Math.random()*200,
-                    'rgba(255, 90, 0, 0.35)',
-                    0.85,
-                    'tex_smoke',
-                    35 + Math.random()*20
-                );
+            // Spawn sparks gathering below player
+            if (Math.random() < 0.6) {
+                addParticle(player.x + player.width/2 + (Math.random()-0.5)*30, player.y + player.height + 10, 
+                            (Math.random()-0.5)*50, -100, 'rgba(255, 120, 0, 0.85)', 0.25, 'tex_star', 12);
             }
             
-            // Glowing fire embers
-            for(let i=0; i<18; i++) {
-                addParticle(
-                    player.x + player.width/2,
-                    player.y + player.height,
-                    (Math.random()-0.5)*600,
-                    -200 - Math.random()*400,
-                    'rgba(255, 160, 0, 0.95)',
-                    0.6,
-                    'tex_star',
-                    16 + Math.random()*8
-                );
+            if (combatState.smashTimer <= 0) {
+                combatState.smashPhase = 3;
+                player.vy = 1600; // Slam down!
+            }
+        } else if (combatState.smashPhase === 3) {
+            // Slam phase
+            player.vy = 1600;
+            player.scaleX = 0.5;
+            player.scaleY = 2.2;
+            
+            // Downward trail of orange sparks
+            addParticle(player.x + player.width/2, player.y + 10, 
+                        (Math.random()-0.5)*150, -400, 'rgba(255, 120, 0, 0.85)', 0.45, 'tex_spark', 16);
+            
+            // If hit ground
+            if (player.isGrounded || getCollision(player.x, player.y + 6, player.width, player.height)) {
+                combatState.isGroundSmashing = false;
+                combatState.smashPhase = 0;
+                combatState.smashCooldown = 1.8;
+                
+                // SHOCKWAVE & IMPACT EFFECT
+                window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 22}}));
+                
+                // Expand orange shockwave ring!
+                addParticle(player.x + player.width/2, player.y + player.height, 0, 0, 'rgba(255, 100, 0, 1)', 0.45, 'ring', 50);
+                
+                // Spawn animated 16-frame explosion spritesheet particle tinted Orange/Red!
+                addParticle(player.x + player.width/2, player.y + player.height - 15, 0, 0, '#ff6600', 0.6, 'tex_impact', 120);
+                addParticle(player.x + player.width/2, player.y + player.height - 15, 0, 0, '#ffd700', 0.4, 'tex_impact', 60); // Inner golden flash
+                
+                // Dusty orange smoke rising
+                for(let i=0; i<15; i++) {
+                    addParticle(
+                        player.x + player.width/2,
+                        player.y + player.height,
+                        (Math.random()-0.5)*300,
+                        -120 - Math.random()*200,
+                        'rgba(255, 90, 0, 0.35)',
+                        0.95,
+                        'tex_smoke',
+                        35 + Math.random()*20
+                    );
+                }
+                
+                // Glowing fire embers
+                for(let i=0; i<18; i++) {
+                    addParticle(
+                        player.x + player.width/2,
+                        player.y + player.height,
+                        (Math.random()-0.5)*600,
+                        -200 - Math.random()*400,
+                        'rgba(255, 160, 0, 0.95)',
+                        0.65,
+                        'tex_star',
+                        16 + Math.random()*8
+                    );
+                }
             }
         }
     }

@@ -3,26 +3,37 @@ export const particles = [];
 export const particleTex = {
     spark: new Image(),
     star: new Image(),
-    smoke: new Image()
+    smoke: new Image(),
+    impact: new Image()
 };
 particleTex.spark.src = 'assets/spark_03.png';
 particleTex.star.src = 'assets/star_05.png';
 particleTex.smoke.src = 'assets/smoke_04.png';
+particleTex.impact.src = 'assets/impact_ice_128.png';
 
 // Offscreen tint canvas for rendering colored particles
 const tintCanvas = document.createElement('canvas');
 const tintCtx = tintCanvas.getContext('2d');
 
-function drawTintedImage(ctx, img, x, y, width, height, color, alpha, angle = 0) {
+function drawTintedImage(ctx, img, x, y, width, height, color, alpha, angle = 0, sx = 0, sy = 0, sw = null, sh = null) {
     if (!img.complete || img.naturalWidth <= 0) return;
     
-    if (tintCanvas.width !== img.naturalWidth || tintCanvas.height !== img.naturalHeight) {
-        tintCanvas.width = img.naturalWidth;
-        tintCanvas.height = img.naturalHeight;
+    const sW = sw !== null ? sw : img.naturalWidth;
+    const sH = sh !== null ? sh : img.naturalHeight;
+    
+    if (sW <= 0 || sH <= 0 || width <= 0 || height <= 0) return; // Prevent InvalidStateError
+    
+    if (tintCanvas.width !== sW || tintCanvas.height !== sH) {
+        tintCanvas.width = sW;
+        tintCanvas.height = sH;
     }
     
     tintCtx.clearRect(0, 0, tintCanvas.width, tintCanvas.height);
-    tintCtx.drawImage(img, 0, 0);
+    try {
+        tintCtx.drawImage(img, sx, sy, sW, sH, 0, 0, sW, sH);
+    } catch(e) {
+        return; // Catch out of bounds drawing errors
+    }
     
     tintCtx.save();
     tintCtx.globalCompositeOperation = 'source-in';
@@ -78,6 +89,9 @@ export function updateAndDrawParticles(ctx, camera, dt) {
             p.vx *= 0.92;
             p.vy -= 60 * dt; // Rise slightly
             p.angle += 0.3 * dt;
+        } else if (p.type === 'tex_impact') {
+            p.vx = 0; // Stationary explosion
+            p.vy = 0;
         } else if (p.type === 'ring') {
             p.vx *= 0.95;
             p.vy *= 0.95;
@@ -90,7 +104,7 @@ export function updateAndDrawParticles(ctx, camera, dt) {
         const drawY = p.y - camera.y;
         const alpha = p.life / p.maxLife;
 
-        ctx.globalAlpha = alpha;
+        ctx.globalAlpha = Math.max(0, Math.min(1.0, alpha));
 
         // Custom renderings
         if (p.type === 'tex_spark') {
@@ -100,6 +114,11 @@ export function updateAndDrawParticles(ctx, camera, dt) {
         } else if (p.type === 'tex_smoke') {
             const currentSize = p.size * (1 + (1 - alpha) * 1.5);
             drawTintedImage(ctx, particleTex.smoke, drawX, drawY, currentSize, currentSize, p.color, alpha * 0.35, p.angle);
+        } else if (p.type === 'tex_impact') {
+            // Sliced frame of 128x128 impact spritesheet (16 frames)
+            const frameIdx = Math.max(0, Math.min(15, Math.floor((1 - alpha) * 15)));
+            const frameX = frameIdx * 128;
+            drawTintedImage(ctx, particleTex.impact, drawX, drawY, p.size, p.size, p.color, alpha, p.angle, frameX, 0, 128, 128);
         } else if (p.type === 'spark') {
             // Stretched motion-blurred electric spark with white core
             const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy) || 1;

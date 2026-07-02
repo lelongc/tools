@@ -376,33 +376,40 @@ export function drawPlayer(ctx, camera) {
         };
 
         const drawSlashSprite = (pt, angle, size = 64) => {
-            if (!iceSlashImg.complete || iceSlashImg.naturalWidth <= 0) return;
+            if (!iceSlashImg.complete || iceSlashImg.naturalWidth <= 0 || size <= 0) return;
             ctx.save();
             ctx.translate(pt.x, pt.y);
             ctx.rotate(angle);
             
-            // Calculate frame (16 frames spritesheet)
-            const frameIdx = Math.floor(progress * 15);
+            // Calculate frame (16 frames spritesheet) with strict clamp
+            const frameIdx = Math.max(0, Math.min(15, Math.floor(progress * 15)));
             const frameW = 128;
             const frameX = frameIdx * frameW;
             
-            // Render the transparent ice slash sprite centered
-            ctx.drawImage(iceSlashImg, frameX, 0, 128, 128, -size/2, -size/2, size, size);
+            try {
+                ctx.drawImage(iceSlashImg, frameX, 0, 128, 128, -size/2, -size/2, size, size);
+            } catch(e) {
+                // Catch potential canvas render errors
+            }
             ctx.restore();
         };
 
         const drawImpactSprite = (pt, size = 80) => {
-            if (!iceImpactImg.complete || iceImpactImg.naturalWidth <= 0 || progress < 0.5) return;
+            if (!iceImpactImg.complete || iceImpactImg.naturalWidth <= 0 || progress < 0.5 || size <= 0) return;
             ctx.save();
             ctx.translate(pt.x, pt.y);
             
-            // Map progress 0.5 -> 1.0 to frame index 0 -> 15
-            const animProgress = (progress - 0.5) / 0.5;
-            const frameIdx = Math.floor(animProgress * 15);
+            // Map progress 0.5 -> 1.0 to frame index 0 -> 15 with strict clamp
+            const animProgress = Math.max(0, Math.min(1.0, (progress - 0.5) / 0.5));
+            const frameIdx = Math.max(0, Math.min(15, Math.floor(animProgress * 15)));
             const frameW = 128;
             const frameX = frameIdx * frameW;
             
-            ctx.drawImage(iceImpactImg, frameX, 0, 128, 128, -size/2, -size/2, size, size);
+            try {
+                ctx.drawImage(iceImpactImg, frameX, 0, 128, 128, -size/2, -size/2, size, size);
+            } catch(e) {
+                // Catch potential canvas render errors
+            }
             ctx.restore();
         };
 
@@ -474,7 +481,6 @@ export function drawPlayer(ctx, camera) {
             drawHeadSpaceTentacle(-2, -5, 140 + spreadX, spreadY, 4, k);
         }
     } else if (combatState.isGroundSmashing) {
-        // Smash tentacles pointing upwards (Cyan color)
         const drawHeadSpaceTentacle = (startX, startY, endX, endY, thickness, wigglePhase) => {
             const segments = 10;
             const pts = [{ x: startX, y: startY }];
@@ -482,7 +488,11 @@ export function drawPlayer(ctx, camera) {
                 const tVal = i / segments;
                 const targetX = startX + (endX - startX) * tVal;
                 const targetY = startY + (endY - startY) * tVal;
-                const wiggle = Math.sin(t * 20 + tVal * 5 + wigglePhase) * (10 * tVal);
+                
+                const wiggleSpd = combatState.smashPhase === 3 ? 35 : 18;
+                const wiggleAmp = combatState.smashPhase === 3 ? 6 : 12;
+                const wiggle = Math.sin(t * wiggleSpd + tVal * 5 + wigglePhase) * (wiggleAmp * tVal);
+                
                 const dx = endX - startX;
                 const dy = endY - startY;
                 const len = Math.sqrt(dx*dx + dy*dy) || 1;
@@ -509,10 +519,22 @@ export function drawPlayer(ctx, camera) {
             ctx.restore();
         };
 
-        for (let k = 0; k < 4; k++) {
-            const spreadX = (k - 1.5) * 35;
-            const length = 90 + Math.random() * 30;
-            drawHeadSpaceTentacle(-2, -5, spreadX, -length, 5, k);
+        const phase = combatState.smashPhase || 2;
+        if (phase === 1 || phase === 2) {
+            // Leap/Gather: 4 tentacles pointing UPWARDS to gather power from above
+            for (let k = 0; k < 4; k++) {
+                const spreadX = (k - 1.5) * 35;
+                const length = 85 + Math.sin(t * 10 + k) * 15;
+                drawHeadSpaceTentacle(-2, -5, spreadX, -length, 4.5, k);
+            }
+        } else {
+            // Slamming phase (Phase 3): Pointing DOWNWARDS wrapped together like a heavy drill spear!
+            for (let k = 0; k < 4; k++) {
+                const spreadX = (k - 1.5) * 8 + (Math.sin(t * 40 + k) * 4);
+                const length = 110 + Math.cos(t * 40 + k) * 10;
+                const thickness = 7 - Math.abs(k - 1.5) * 2;
+                drawHeadSpaceTentacle(-2, -5, spreadX, length, thickness, k);
+            }
         }
     } else {
         // Draw normal idle antenna
