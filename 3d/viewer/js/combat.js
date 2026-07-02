@@ -410,9 +410,11 @@ export function updateCombat(player, dt) {
             3
         );
         
-        // Wall Ricochet Logic!
-        const hitWallRight = player.facingRight && player.blockedRight;
-        const hitWallLeft = !player.facingRight && player.blockedLeft;
+        // Wall Ricochet Logic (Using lookahead to prevent any physics tunneling!)
+        // Check a few pixels ahead of the player depending on direction
+        const lookaheadX = player.facingRight ? player.x + player.width + 5 : player.x - 5;
+        const hitWallRight = player.facingRight && getCollision(lookaheadX, player.y + 5, 1, player.height - 10);
+        const hitWallLeft = !player.facingRight && getCollision(lookaheadX, player.y + 5, 1, player.height - 10);
         
         if (hitWallRight || hitWallLeft) {
             // Ricochet!

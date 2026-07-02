@@ -13,7 +13,8 @@ const config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 0 },
-            debug: false
+            debug: false,
+            fps: 240 // Sub-stepping to prevent high-speed tunneling
         }
     },
     scene: [ GameScene ]
