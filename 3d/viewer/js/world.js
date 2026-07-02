@@ -52,26 +52,22 @@ export function drawWorld(ctx, camera) {
                     ctx.save();
                     
                     if (tile === 1) { // Normal Ground (Neon Cyan)
-                        if (tilesetImg.complete && tilesetImg.naturalWidth > 0) {
-                            // Map the block to a section of the AI image
-                            const tx = (col * TILE_SIZE * 2) % (tilesetImg.naturalWidth - TILE_SIZE);
-                            const ty = (row * TILE_SIZE * 2) % (tilesetImg.naturalHeight - TILE_SIZE);
-                            ctx.drawImage(tilesetImg, tx, ty, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
-                            
-                            // Blend it with neon vector aesthetic
-                            ctx.fillStyle = 'rgba(0, 20, 30, 0.5)';
-                            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                            ctx.strokeStyle = 'rgba(0, 255, 255, 0.4)';
-                            ctx.lineWidth = 1;
-                            ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
-                        } else {
-                            // Fallback procedural
-                            ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)';
-                            ctx.lineWidth = 2;
-                            ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
-                            ctx.fillStyle = 'rgba(0, 20, 30, 0.8)';
-                            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
-                        }
+                        // Sleek Sci-Fi Vector block
+                        ctx.fillStyle = 'rgba(0, 20, 30, 0.85)';
+                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                        
+                        ctx.strokeStyle = '#00ffcc';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(x + 1, y + 1, TILE_SIZE - 2, TILE_SIZE - 2);
+                        
+                        // Inner detail lines
+                        ctx.beginPath();
+                        ctx.moveTo(x + 5, y + 5);
+                        ctx.lineTo(x + 15, y + 5);
+                        ctx.moveTo(x + TILE_SIZE - 5, y + TILE_SIZE - 5);
+                        ctx.lineTo(x + TILE_SIZE - 15, y + TILE_SIZE - 5);
+                        ctx.strokeStyle = 'rgba(0, 255, 204, 0.4)';
+                        ctx.stroke();
                         
                         // Procedural Bioluminescent Vines on ceilings (only on select columns)
                         if (row < map.length - 1 && map[row+1][col] === 0 && (col * 17) % 6 === 0) {
@@ -137,8 +133,7 @@ export function drawWorld(ctx, camera) {
                                 ctx.restore();
                             }
                         }
-                    } 
-                    else if (tile === 2) { // Bouncy Pad (Neon Green/Yellow)
+                    } else if (tile === 2) { // Bouncy Pad (Neon Green/Yellow)
                         ctx.strokeStyle = 'rgba(100, 255, 100, 1)';
                         ctx.lineWidth = 3;
                         
@@ -156,8 +151,7 @@ export function drawWorld(ctx, camera) {
                         
                         ctx.fillStyle = 'rgba(20, 50, 20, 0.8)';
                         ctx.fillRect(x + 4, y + TILE_SIZE/2, TILE_SIZE - 8, TILE_SIZE/2);
-                    }
-                    else if (tile === 3) { // Ice Block (Glass/Blue)
+                    } else if (tile === 3) { // Ice Block (Glass/Blue)
                         ctx.strokeStyle = 'rgba(200, 200, 255, 0.9)';
                         ctx.lineWidth = 1;
                         ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);

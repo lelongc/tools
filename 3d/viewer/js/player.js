@@ -1492,31 +1492,35 @@ export function drawPlayer(ctx, camera) {
     // Draw Lightning Trail (Procedural Branching Lightning - Optimized Layered Glow)
     if (combatState.isDashStriking) {
         const drawProceduralLightning = (sx, sy, ex, ey, disp, branches, thickness = 3.5) => {
+            if (thickness < 0.5) return;
+            const dx = ex - sx;
+            const dy = ey - sy;
+            const length = Math.sqrt(dx*dx + dy*dy);
+            if (length < 5) return;
+
+            // Reduced steps to significantly improve performance
+            const steps = Math.min(Math.floor(length / 20), 12);
             ctx.save();
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
             const pts = [{ x: sx, y: sy }];
-            const dx = ex - sx;
-            const dy = ey - sy;
-            const dist = Math.sqrt(dx*dx + dy*dy) || 1;
-            const steps = Math.floor(dist / 12);
             
             for (let i = 1; i < steps; i++) {
                 const tVal = i / steps;
                 const tx = sx + dx * tVal;
                 const ty = sy + dy * tVal;
                 
-                const nx = -dy / dist;
-                const ny = dx / dist;
+                const nx = -dy / length;
+                const ny = dx / length;
                 const offset = (Math.random() - 0.5) * disp;
                 
                 const px = tx + nx * offset;
                 const py = ty + ny * offset;
                 pts.push({ x: px, y: py });
                 
-                // Spawn small branching lightning bolts
-                if (branches > 0 && Math.random() < 0.12 && i < steps - 2) {
+                // Spawn small branching lightning bolts (lowered probability for performance)
+                if (branches > 0 && Math.random() < 0.05 && i < steps - 2) {
                     const bx = px + (Math.random() * 30 - 15) + (dx / steps) * 2;
                     const by = py + (Math.random() * 30 - 15) + (dy / steps) * 2;
                     drawProceduralLightning(px, py, bx, by, disp * 0.5, branches - 1, thickness * 0.6);
@@ -1558,7 +1562,8 @@ export function drawPlayer(ctx, camera) {
             const endOffsetX = (-120 - Math.random() * 50) * lengthMultiplier;
             const endOffsetY = (j - (trailCount - 1) / 2) * 16 + (Math.random() - 0.5) * 15;
             
-            drawProceduralLightning(-2, -5 + startOffset, endOffsetX, endOffsetY, disp, lvl === 3 ? 2 : 1, thickness);
+            // Limit branches to max 1 to prevent exponential recursive lag
+            drawProceduralLightning(-2, -5 + startOffset, endOffsetX, endOffsetY, disp, lvl === 3 ? 1 : 0, thickness);
         }
 
         // Draw animated pixel-art lightning sprites from assets!

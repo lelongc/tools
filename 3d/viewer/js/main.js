@@ -5,6 +5,10 @@ const config = {
     width: 640,
     height: 480,
     parent: 'phaser-game',
+    scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    },
     physics: {
         default: 'arcade',
         arcade: {
