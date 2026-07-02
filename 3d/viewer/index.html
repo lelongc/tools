@@ -33,10 +33,16 @@
 <body>
     <div id="ui">
         <h2>2D Pixel Game</h2>
-        <p>Use W, A, S, D or Arrows to move.</p>
+        <p>Movement: A/D. Jump: W</p>
+        <p>Combat: J (Combo), K (Dash Strike), L (Ground Smash)</p>
+        <p>Misc: U (Dash), I (Basic Attack)</p>
     </div>
     <canvas id="gameCanvas" width="640" height="480"></canvas>
     
-    <script type="module" src="js/main.js"></script>
+    <script type="module">
+        // Force fresh load every time - bypass all browser cache
+        const t = Date.now();
+        import('./js/main.js?t=' + t);
+    </script>
 </body>
 </html>

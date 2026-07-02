@@ -147,57 +147,98 @@ export function updateCombat(player, dt) {
 }
 
 export function drawCombat(ctx, camera, player) {
-    if (combatState.isAttacking) {
-        const drawX = combatState.hitbox.x - camera.x;
-        const drawY = combatState.hitbox.y - camera.y;
-
-        ctx.save();
-        ctx.translate(drawX + combatState.hitbox.width/2, drawY + combatState.hitbox.height/2);
-        if (!player.facingRight) ctx.scale(-1, 1);
-
-        const progress = 1 - (combatState.attackTime / (combatState.comboStep === 3 ? 0.25 : 0.15));
-        
-        // Draw Crescent Slash
+    if (!player) return;
+    const time = Date.now() / 1000;
+    
+    // Helper to draw a procedural tentacle
+    const drawTentacle = (startX, startY, endX, endY, progress, thickness, color, wigglePhase) => {
+        const segments = 10;
         ctx.beginPath();
-        ctx.shadowBlur = 20;
-        ctx.lineWidth = 4;
+        ctx.moveTo(startX, startY);
         
-        if (combatState.comboStep === 1) {
-            ctx.shadowColor = 'rgba(0, 255, 255, 1)';
-            ctx.strokeStyle = 'rgba(100, 255, 255, 1)';
-            ctx.arc(-10, 0, 30, -Math.PI/2, Math.PI/2 * progress);
-        } else if (combatState.comboStep === 2) {
-            ctx.shadowColor = 'rgba(0, 255, 255, 1)';
-            ctx.strokeStyle = 'rgba(100, 255, 255, 1)';
-            // Reverse slash
-            ctx.arc(-10, 0, 30, Math.PI/2, -Math.PI/2 * progress, true);
-        } else if (combatState.comboStep === 3) {
-            // Big magenta slash
-            ctx.shadowColor = 'rgba(255, 50, 200, 1)';
-            ctx.strokeStyle = 'rgba(255, 150, 255, 1)';
-            ctx.lineWidth = 8;
-            ctx.arc(-20, 0, 50, -Math.PI, Math.PI * progress);
+        let prevX = startX;
+        let prevY = startY;
+        
+        // Progress affects how far the tentacle extends
+        const curEndX = startX + (endX - startX) * progress;
+        const curEndY = startY + (endY - startY) * progress;
+        
+        for (let i = 1; i <= segments; i++) {
+            const t = i / segments;
+            const targetX = startX + (curEndX - startX) * t;
+            const targetY = startY + (curEndY - startY) * t;
+            
+            // Add sine wave wiggle that increases towards the tip
+            const wiggle = Math.sin(time * 20 + t * 5 + wigglePhase) * (20 * t * progress);
+            
+            // Perpendicular vector for wiggle
+            const dx = endX - startX;
+            const dy = endY - startY;
+            const len = Math.sqrt(dx*dx + dy*dy);
+            const nx = -dy / len;
+            const ny = dx / len;
+            
+            const px = targetX + nx * wiggle;
+            const py = targetY + ny * wiggle;
+            
+            ctx.lineTo(px, py);
         }
         
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = color;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = thickness * Math.max(0.1, 1 - progress*0.5); // taper off
+        ctx.lineCap = 'round';
         ctx.stroke();
-        ctx.restore();
+    };
+
+    if (combatState.isAttacking) {
+        const pX = player.x + player.width/2 - camera.x;
+        const pY = player.y + player.height/2 - camera.y;
+        const dir = player.facingRight ? 1 : -1;
+        const progress = 1 - (combatState.attackTime / (combatState.comboStep === 3 ? 0.25 : 0.15));
+        
+        if (combatState.comboStep === 1) {
+            // Whip forward and slightly up
+            drawTentacle(pX, pY, pX + 80 * dir, pY - 30, progress, 6, 'rgba(0, 255, 255, 1)', 0);
+            drawTentacle(pX, pY, pX + 60 * dir, pY + 10, progress, 4, 'rgba(0, 200, 255, 0.8)', 1);
+        } else if (combatState.comboStep === 2) {
+            // Whip forward and down
+            drawTentacle(pX, pY, pX + 90 * dir, pY + 40, progress, 7, 'rgba(0, 255, 255, 1)', 2);
+            drawTentacle(pX, pY, pX + 70 * dir, pY, progress, 5, 'rgba(0, 200, 255, 0.8)', 3);
+        } else if (combatState.comboStep === 3) {
+            // Big piercing magenta bundle of tentacles
+            for(let k=0; k<5; k++) {
+                const spreadY = (k - 2) * 20;
+                const length = 120 + Math.random()*30;
+                drawTentacle(pX, pY, pX + length * dir, pY + spreadY, progress, 8 - Math.abs(k-2), 'rgba(255, 50, 200, 1)', k);
+            }
+        }
     }
 
     if (combatState.isDashStriking) {
-        // Draw piercing beam
-        ctx.save();
+        // Tentacle Drill during dash
+        const pX = player.x + player.width/2 - camera.x;
+        const pY = player.y + player.height/2 - camera.y;
+        const dir = player.facingRight ? 1 : -1;
+        
+        for(let k=0; k<6; k++) {
+            const spreadY = Math.sin(time * 30 + k) * 30; // Spiral effect
+            const spreadX = Math.cos(time * 30 + k) * 10;
+            drawTentacle(pX - 50*dir, pY, pX + 150 * dir + spreadX, pY + spreadY, 1, 5, 'rgba(255, 255, 0, 1)', k);
+        }
+    }
+
+    if (combatState.isGroundSmashing) {
+        // Tentacles bursting upwards while falling
         const pX = player.x + player.width/2 - camera.x;
         const pY = player.y + player.height/2 - camera.y;
         
-        ctx.shadowBlur = 30;
-        ctx.shadowColor = 'rgba(255, 255, 0, 1)';
-        ctx.strokeStyle = 'rgba(255, 255, 200, 1)';
-        ctx.lineWidth = Math.random() * 10 + 5;
-        
-        ctx.beginPath();
-        ctx.moveTo(pX, pY);
-        ctx.lineTo(pX + (player.facingRight ? 400 : -400), pY);
-        ctx.stroke();
-        ctx.restore();
+        for(let k=0; k<4; k++) {
+            const spreadX = (k - 1.5) * 40;
+            const length = 100 + Math.random()*50;
+            // Draw tentacles trailing upwards
+            drawTentacle(pX, pY, pX + spreadX, pY - length, 1, 6, 'rgba(255, 100, 0, 1)', k);
+        }
     }
 }

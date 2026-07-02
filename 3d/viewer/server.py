@@ -3,13 +3,24 @@ import socketserver
 import json
 import os
 import io
+import re
 import base64
+import time
 
 PORT = 8000
 SAVE_FILE = "save.json"
 TEXTURE_DIR = "assets"
 
+# Global timestamp - changes every server restart, forces full cache bust
+CACHE_BUST = str(int(time.time()))
+
 class CustomHandler(http.server.SimpleHTTPRequestHandler):
+    def end_headers(self):
+        self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+        self.send_header('Pragma', 'no-cache')
+        self.send_header('Expires', '0')
+        super().end_headers()
+
     def do_POST(self):
         if self.path == '/save':
             content_length = int(self.headers['Content-Length'])
@@ -74,9 +85,42 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({"error": str(e)}).encode('utf-8'))
         else:
-            super().do_GET()
+            # Strip query strings for file lookup (e.g. main.js?t=123 -> main.js)
+            clean_path = self.path.split('?')[0]
+            
+            # For .js files, intercept and rewrite import paths with cache bust
+            if clean_path.endswith('.js'):
+                self.path = clean_path  # Use clean path for file lookup
+                file_path = self.translate_path(self.path)
+                try:
+                    with open(file_path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    
+                    # Rewrite all ES module imports to add cache bust timestamp
+                    # Matches: from './xxx.js' or from "./xxx.js"
+                    content = re.sub(
+                        r"from\s+['\"](\./[^'\"]+\.js)['\"]",
+                        lambda m: f"from '{m.group(1)}?_cb={CACHE_BUST}'",
+                        content
+                    )
+                    
+                    encoded = content.encode('utf-8')
+                    self.send_response(200)
+                    self.send_header('Content-type', 'application/javascript')
+                    self.send_header('Content-Length', str(len(encoded)))
+                    self.end_headers()
+                    self.wfile.write(encoded)
+                except FileNotFoundError:
+                    self.send_response(404)
+                    self.end_headers()
+                except Exception as e:
+                    self.send_response(500)
+                    self.end_headers()
+            else:
+                super().do_GET()
 
 if __name__ == '__main__':
+    print(f"Cache bust token: {CACHE_BUST}")
     with socketserver.TCPServer(("", PORT), CustomHandler) as httpd:
         print(f"Serving at http://localhost:{PORT}")
         httpd.serve_forever()

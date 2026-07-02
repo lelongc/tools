@@ -1,5 +1,6 @@
 import { keys, resetInputPresses } from './input.js';
 import { getCollision, TILE_SIZE } from './world.js';
+import { combatState } from './combat.js';
 
 export const player = {
     x: 64,
@@ -20,7 +21,8 @@ export const player = {
     animState: 'idle',
     animTime: 0,
     scaleX: 1,
-    scaleY: 1
+    scaleY: 1,
+    hasClippedJump: false
 };
 
 export function updatePlayer(dt, addParticle) {
@@ -35,6 +37,11 @@ export function updatePlayer(dt, addParticle) {
         if (player.dashTime <= 0) {
             player.isDashing = false;
         }
+    } else if (combatState.isDashStriking) {
+        // Dash Strike physics are completely managed in combat.js
+    } else if (combatState.isGroundSmashing) {
+        // Lock horizontal movement during ground smash (combat.js handles Y)
+        player.vx = 0;
     } else {
         // Horizontal Movement
         let targetVx = 0;
@@ -49,7 +56,12 @@ export function updatePlayer(dt, addParticle) {
         
         // Get tile directly below player for friction
         const groundTile = getCollision(player.x + 5, player.y + player.height + 1, player.width - 10, 1);
-        const friction = groundTile === 3 ? 1.5 : 15; // 3 is Ice block
+        let friction = 15;
+        if (groundTile === 3) {
+            friction = 1.5; // Ice block
+        } else if (!player.isGrounded) {
+            friction = 5; // Air control (mượt mà hơn, giữ quán tính)
+        }
 
         // Smooth acceleration/friction
         player.vx += (targetVx - player.vx) * friction * dt;
@@ -63,6 +75,7 @@ export function updatePlayer(dt, addParticle) {
         if (keys.jumpPressed && player.isGrounded) {
             player.vy = player.jumpForce;
             player.isGrounded = false;
+            player.hasClippedJump = false; // Reset flag for variable jump
             
             // Jump stretch (anticipation & launch)
             player.scaleX = 0.6;
@@ -75,9 +88,10 @@ export function updatePlayer(dt, addParticle) {
             }
         }
 
-        // Variable jump height (release jump early to short hop)
-        if (!keys.jump && player.vy < 0) {
-            player.vy *= 0.5;
+        // Variable jump height: if jump key is released while going up, reduce upward velocity gently once
+        if (!keys.jump && player.vy < -100 && !player.hasClippedJump) {
+            player.vy = -100; // Limit upward velocity to allow short hops mượt mà
+            player.hasClippedJump = true;
         }
 
         // Dashing
