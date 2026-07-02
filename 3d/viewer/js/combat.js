@@ -299,10 +299,10 @@ export function updateCombat(player, dt) {
             combatState.smashTimer -= dt;
             player.vy = 0; // Zero gravity freeze
             
-            // Spawn sparks gathering below player
+            // Spawn sparks gathering below player (Cyan star)
             if (Math.random() < 0.6) {
                 addParticle(player.x + player.width/2 + (Math.random()-0.5)*30, player.y + player.height + 10, 
-                            (Math.random()-0.5)*50, -100, 'rgba(255, 120, 0, 0.85)', 0.25, 'tex_star', 12);
+                            (Math.random()-0.5)*50, -100, 'rgba(0, 255, 255, 0.85)', 0.25, 'tex_star', 12);
             }
             
             if (combatState.smashTimer <= 0) {
@@ -315,9 +315,9 @@ export function updateCombat(player, dt) {
             player.scaleX = 0.5;
             player.scaleY = 2.2;
             
-            // Downward trail of orange sparks
+            // Downward trail of cyan sparks
             addParticle(player.x + player.width/2, player.y + 10, 
-                        (Math.random()-0.5)*150, -400, 'rgba(255, 120, 0, 0.85)', 0.45, 'tex_spark', 16);
+                        (Math.random()-0.5)*150, -400, 'rgba(0, 255, 255, 0.85)', 0.45, 'tex_spark', 16);
             
             // If hit ground
             if (player.isGrounded || getCollision(player.x, player.y + 6, player.width, player.height)) {
@@ -328,35 +328,35 @@ export function updateCombat(player, dt) {
                 // SHOCKWAVE & IMPACT EFFECT
                 window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 22}}));
                 
-                // Expand orange shockwave ring!
-                addParticle(player.x + player.width/2, player.y + player.height, 0, 0, 'rgba(255, 100, 0, 1)', 0.45, 'ring', 50);
+                // Expand cyan shockwave ring!
+                addParticle(player.x + player.width/2, player.y + player.height, 0, 0, '#00ffff', 0.45, 'ring', 50);
                 
-                // Spawn animated 16-frame explosion spritesheet particle tinted Orange/Red!
-                addParticle(player.x + player.width/2, player.y + player.height - 15, 0, 0, '#ff6600', 0.6, 'tex_impact', 120);
-                addParticle(player.x + player.width/2, player.y + player.height - 15, 0, 0, '#ffd700', 0.4, 'tex_impact', 60); // Inner golden flash
+                // Spawn animated 16-frame explosion spritesheet particle tinted Cyan and White!
+                addParticle(player.x + player.width/2, player.y + player.height - 15, 0, 0, '#00ffff', 0.6, 'tex_impact', 120);
+                addParticle(player.x + player.width/2, player.y + player.height - 15, 0, 0, '#ffffff', 0.4, 'tex_impact', 60); // Inner white flash
                 
-                // Dusty orange smoke rising
+                // Dusty cyan smoke rising
                 for(let i=0; i<15; i++) {
                     addParticle(
                         player.x + player.width/2,
                         player.y + player.height,
                         (Math.random()-0.5)*300,
                         -120 - Math.random()*200,
-                        'rgba(255, 90, 0, 0.35)',
+                        'rgba(0, 230, 255, 0.45)',
                         0.95,
                         'tex_smoke',
                         35 + Math.random()*20
                     );
                 }
                 
-                // Glowing fire embers
+                // Glowing cyan and white stars
                 for(let i=0; i<18; i++) {
                     addParticle(
                         player.x + player.width/2,
                         player.y + player.height,
                         (Math.random()-0.5)*600,
                         -200 - Math.random()*400,
-                        'rgba(255, 160, 0, 0.95)',
+                        Math.random() < 0.6 ? '#00ffff' : '#ffffff',
                         0.65,
                         'tex_star',
                         16 + Math.random()*8

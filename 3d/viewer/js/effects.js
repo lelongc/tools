@@ -11,41 +11,80 @@ particleTex.star.src = 'assets/star_05.png';
 particleTex.smoke.src = 'assets/smoke_04.png';
 particleTex.impact.src = 'assets/impact_ice_128.png';
 
-// Offscreen tint canvas for rendering colored particles
-const tintCanvas = document.createElement('canvas');
-const tintCtx = tintCanvas.getContext('2d');
+// Pre-tinted texture cache for zero runtime overhead
+const colorsToPreTint = {
+    cyan: '#00ffff',
+    orange: '#ff6a00',
+    white: '#ffffff'
+};
 
-function drawTintedImage(ctx, img, x, y, width, height, color, alpha, angle = 0, sx = 0, sy = 0, sw = null, sh = null) {
-    if (!img.complete || img.naturalWidth <= 0) return;
+export const tintedTex = {
+    spark: {},
+    star: {},
+    smoke: {},
+    impact: {}
+};
+
+const preTintImage = (img, name) => {
+    const doTint = () => {
+        for (let colKey in colorsToPreTint) {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            const tCtx = canvas.getContext('2d');
+            
+            tCtx.drawImage(img, 0, 0);
+            tCtx.globalCompositeOperation = 'source-in';
+            tCtx.fillStyle = colorsToPreTint[colKey];
+            tCtx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            tintedTex[name][colKey] = canvas;
+        }
+    };
     
-    const sW = sw !== null ? sw : img.naturalWidth;
-    const sH = sh !== null ? sh : img.naturalHeight;
+    if (img.complete && img.naturalWidth > 0) {
+        doTint();
+    } else {
+        img.onload = doTint;
+    }
+};
+
+// Initialize pre-tinting
+preTintImage(particleTex.spark, 'spark');
+preTintImage(particleTex.star, 'star');
+preTintImage(particleTex.smoke, 'smoke');
+preTintImage(particleTex.impact, 'impact');
+
+function drawTintedImage(ctx, name, x, y, width, height, color, alpha, angle = 0, sx = 0, sy = 0, sw = null, sh = null) {
+    // Resolve particle color to pre-tinted key (cyan, orange, white)
+    let colKey = 'cyan';
+    const cLower = color.toLowerCase().replace(/\s/g, ''); // Strip all spaces
     
-    if (sW <= 0 || sH <= 0 || width <= 0 || height <= 0) return; // Prevent InvalidStateError
-    
-    if (tintCanvas.width !== sW || tintCanvas.height !== sH) {
-        tintCanvas.width = sW;
-        tintCanvas.height = sH;
+    if (cLower === '#ffffff' || cLower === 'white' || cLower.includes('255,255,255')) {
+        colKey = 'white';
+    } else if (
+        cLower.includes('255,100') || cLower.includes('255,120') || cLower.includes('255,160') || 
+        cLower.includes('255,90') || cLower.includes('orange') || cLower.includes('yellow') || 
+        cLower.includes('gold') || cLower.includes('#ff6') || cLower.includes('#ff7') || 
+        cLower.includes('#ffd') || cLower.includes('255,215,0') || cLower.includes('255,150') ||
+        cLower.includes('255,170') || cLower.includes('255,180')
+    ) {
+        colKey = 'orange';
     }
     
-    tintCtx.clearRect(0, 0, tintCanvas.width, tintCanvas.height);
-    try {
-        tintCtx.drawImage(img, sx, sy, sW, sH, 0, 0, sW, sH);
-    } catch(e) {
-        return; // Catch out of bounds drawing errors
-    }
+    const tintedImg = tintedTex[name] ? tintedTex[name][colKey] : null;
+    if (!tintedImg) return; // Fallback if image not ready yet
     
-    tintCtx.save();
-    tintCtx.globalCompositeOperation = 'source-in';
-    tintCtx.fillStyle = color;
-    tintCtx.fillRect(0, 0, tintCanvas.width, tintCanvas.height);
-    tintCtx.restore();
+    const sW = sw !== null ? sw : tintedImg.width;
+    const sH = sh !== null ? sh : tintedImg.height;
+    
+    if (sW <= 0 || sH <= 0 || width <= 0 || height <= 0) return;
     
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.translate(x, y);
     ctx.rotate(angle);
-    ctx.drawImage(tintCanvas, -width / 2, -height / 2, width, height);
+    ctx.drawImage(tintedImg, sx, sy, sW, sH, -width / 2, -height / 2, width, height);
     ctx.restore();
 }
 
@@ -108,17 +147,17 @@ export function updateAndDrawParticles(ctx, camera, dt) {
 
         // Custom renderings
         if (p.type === 'tex_spark') {
-            drawTintedImage(ctx, particleTex.spark, drawX, drawY, p.size, p.size, p.color, alpha, p.angle);
+            drawTintedImage(ctx, 'spark', drawX, drawY, p.size, p.size, p.color, alpha, p.angle);
         } else if (p.type === 'tex_star') {
-            drawTintedImage(ctx, particleTex.star, drawX, drawY, p.size, p.size, p.color, alpha, p.angle);
+            drawTintedImage(ctx, 'star', drawX, drawY, p.size, p.size, p.color, alpha, p.angle);
         } else if (p.type === 'tex_smoke') {
             const currentSize = p.size * (1 + (1 - alpha) * 1.5);
-            drawTintedImage(ctx, particleTex.smoke, drawX, drawY, currentSize, currentSize, p.color, alpha * 0.35, p.angle);
+            drawTintedImage(ctx, 'smoke', drawX, drawY, currentSize, currentSize, p.color, alpha * 0.35, p.angle);
         } else if (p.type === 'tex_impact') {
             // Sliced frame of 128x128 impact spritesheet (16 frames)
             const frameIdx = Math.max(0, Math.min(15, Math.floor((1 - alpha) * 15)));
             const frameX = frameIdx * 128;
-            drawTintedImage(ctx, particleTex.impact, drawX, drawY, p.size, p.size, p.color, alpha, p.angle, frameX, 0, 128, 128);
+            drawTintedImage(ctx, 'impact', drawX, drawY, p.size, p.size, p.color, alpha, p.angle, frameX, 0, 128, 128);
         } else if (p.type === 'spark') {
             // Stretched motion-blurred electric spark with white core
             const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy) || 1;
