@@ -266,6 +266,53 @@ export function drawPlayer(ctx, camera) {
         ctx.scale(-1, 1);
     }
 
+    // Draw Static Combat Effects (like Bio-Drill aura) that shouldn't squash, stretch or rotate
+    if (combatState.isBioDrilling) {
+        ctx.save();
+        // Translate to player center (including breathing bounce)
+        const bounceVal = Math.sin(player.animTime * 3) * 2;
+        ctx.translate(0, -player.height/2 + bounceVal);
+        ctx.globalCompositeOperation = 'screen';
+        ctx.strokeStyle = '#00ffff'; // Synced Cyan color
+        ctx.shadowColor = '#00ffff';
+        ctx.shadowBlur = 10;
+        
+        const auraRadius = 14;
+        
+        // Draw static synced cyan electric ring
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.arc(0, 0, auraRadius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Draw crackling sparks (static angles with random jiggle so they don't rotate)
+        ctx.lineWidth = 0.8;
+        const sparkCount = 5;
+        for (let i = 0; i < sparkCount; i++) {
+            const angle = (i / sparkCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+            const startX = Math.cos(angle) * auraRadius;
+            const startY = Math.sin(angle) * auraRadius;
+            
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            
+            // Draw a tiny 3-step zig-zag
+            let curX = startX;
+            let curY = startY;
+            const steps = 3;
+            const zapLength = 5;
+            for (let s = 0; s < steps; s++) {
+                const tangentAngle = angle + Math.PI / 2 + (Math.random() - 0.5) * 1.5;
+                const dist = (zapLength / steps) + (Math.random() * 1.5);
+                curX += Math.cos(tangentAngle) * dist;
+                curY += Math.sin(tangentAngle) * dist;
+                ctx.lineTo(curX, curY);
+            }
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
     // Apply Squash & Stretch
     ctx.scale(player.scaleX, player.scaleY);
 
@@ -327,15 +374,9 @@ export function drawPlayer(ctx, camera) {
     if (player.isDashing) {
         bodyRot = Math.PI / 4; // Lean forward when dashing
     } else if (combatState.isBioDrilling) {
-        bodyRot = t * 60; // RAPID SPIN!
+        bodyRot = 0.15; // Slight forward lean, no spin
     } else if (isAirborne) {
-        if (keys.jump && player.vy < -200) {
-            // Front flip when holding jump button (high jump)
-            bodyRot = t * 15;
-        } else {
-            // Normal jump lean
-            bodyRot = player.vy * 0.0005;
-        }
+        bodyRot = player.vy * 0.0003; // Slight vertical velocity lean, no spin flips
     } else if (isRunning) {
         bounceY = Math.abs(Math.sin(t * 15)) * -4;
         bodyRot = Math.sin(t * 15) * 0.1;
@@ -346,34 +387,222 @@ export function drawPlayer(ctx, camera) {
     ctx.translate(0, -player.height/2 + bounceY);
     ctx.rotate(bodyRot);
 
-    // Draw Back Legs
-    ctx.beginPath();
-    let legAngle1 = isRunning ? Math.sin(t * 15) * 0.5 : (isAirborne ? 0.3 : 0.2);
-    let legAngle2 = isRunning ? Math.sin(t * 15 + Math.PI) * 0.5 : (isAirborne ? -0.2 : -0.2);
-    
-    // Leg 1
-    ctx.moveTo(0, 0);
-    ctx.lineTo(-10 + Math.sin(legAngle1)*10, 15 + Math.cos(legAngle1)*5);
-    // Leg 2
-    ctx.moveTo(0, 0);
-    ctx.lineTo(10 + Math.sin(legAngle2)*10, 15 + Math.cos(legAngle2)*5);
-    ctx.stroke();
+    // Draw Back Legs (Redesigned as slowly wiggling tentacles)
+    const drawLegTentacle = (startX, startY, endX, endY, thickness, wigglePhase) => {
+        const segments = 6;
+        const pts = [{ x: startX, y: startY }];
+        for (let i = 1; i <= segments; i++) {
+            const tVal = i / segments;
+            const targetX = startX + (endX - startX) * tVal;
+            const targetY = startY + (endY - startY) * tVal;
+            
+            // Slow organic wiggle
+            const wiggle = Math.sin(t * 3.5 + tVal * 3 + wigglePhase) * (3 * tVal);
+            
+            const dx = endX - startX;
+            const dy = endY - startY;
+            const len = Math.sqrt(dx*dx + dy*dy) || 1;
+            pts.push({
+                x: targetX + (-dy / len) * wiggle,
+                y: targetY + (dx / len) * wiggle
+            });
+        }
+        
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+        
+        // Cyan outer glow
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = '#00ffff';
+        ctx.strokeStyle = '#00ffff';
+        ctx.lineWidth = thickness;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        
+        // White core
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = thickness * 0.35;
+        ctx.stroke();
+        ctx.restore();
+    };
 
-    // Body Shape (Insectoid Carapace)
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 10, 14, Math.PI/8, 0, Math.PI*2);
-    ctx.fill();
-    ctx.stroke();
+    let legAngle1 = isRunning ? Math.sin(t * 10) * 0.5 : (isAirborne ? 0.3 : 0.2);
+    let legAngle2 = isRunning ? Math.sin(t * 10 + Math.PI) * 0.5 : (isAirborne ? -0.2 : -0.2);
+    
+    drawLegTentacle(0, 0, -10 + Math.sin(legAngle1)*10, 15 + Math.cos(legAngle1)*5, 2.5, 0);
+    drawLegTentacle(0, 0, 10 + Math.sin(legAngle2)*10, 15 + Math.cos(legAngle2)*5, 2.5, Math.PI);
+
+    // Body Shape (Insectoid Carapace) - Redesigned as a bundle of morphing bio-tentacles/wires!
+    const drawMorphingStrand = (startX, startY, destX, destY, thickness, wigglePhase) => {
+        const segments = 10;
+        const pts = [{ x: startX, y: startY }];
+        
+        for (let i = 1; i <= segments; i++) {
+            const tVal = i / segments;
+            const targetX = startX + (destX - startX) * tVal;
+            const targetY = startY + (destY - startY) * tVal;
+            
+            // Wiggle frequency/amplitude morphs during attacks (slowed down from 25 to 5.5)
+            const isAttackingState = combatState.isBioDrilling || combatState.isGroundSmashing || combatState.isRisingBlast || combatState.isAttacking;
+            const wiggleAmp = isAttackingState ? 6 : 2;
+            const wiggle = Math.sin(t * 5.5 + tVal * 4 + wigglePhase) * (wiggleAmp * tVal);
+            
+            const dx = destX - startX;
+            const dy = destY - startY;
+            const len = Math.sqrt(dx*dx + dy*dy) || 1;
+            pts.push({
+                x: targetX + (-dy / len) * wiggle,
+                y: targetY + (dx / len) * wiggle
+            });
+        }
+        
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+        
+        // Cyan outer glow
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#00ffff';
+        ctx.strokeStyle = '#00ffff';
+        ctx.lineWidth = thickness;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        
+        // White inner core
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = thickness * 0.35;
+        ctx.stroke();
+        ctx.restore();
+    };
+
+    // Base endpoints (starts: sx, sy, ends: ex, ey) for the 6 primary body strands
+    const bases = [
+        { sx: -8, sy: -12, ex: -14, ey: -15, thickness: 3.5 },
+        { sx: -8, sy: -4,  ex: -16, ey: -5,  thickness: 3.0 },
+        { sx: -6, sy: 6,   ex: -13, ey: 7,   thickness: 2.5 },
+        { sx: 6,  sy: -10, ex: 14,  ey: -7,  thickness: 3.0 },
+        { sx: 6,  sy: 0,   ex: 15,  ey: 1,   thickness: 2.5 },
+        { sx: 0,  sy: 10,  ex: 2,   ey: 14,  thickness: 2.0 }
+    ];
+
+    for (let k = 0; k < bases.length; k++) {
+        const base = bases[k];
+        let sx = base.sx;
+        let sy = base.sy;
+        let tx = base.ex;
+        let ty = base.ey;
+        let p = 0; // Morph progress
+        
+        if (combatState.isCharging) {
+            p = Math.max(0, Math.min(1.0, combatState.chargeTime / 0.25));
+            const lvl = combatState.chargeLevel || 1;
+            const outerRadius = (lvl === 3 ? 30 : (lvl === 2 ? 22 : 16)) + Math.sin(t * 15) * 2;
+            const innerRadius = 5;
+            
+            // Orbiting angle (spinning the entire tentacles around the body center)
+            const orbitAngle = t * 15 + (k / bases.length) * Math.PI * 2;
+            
+            const targetSx = Math.cos(orbitAngle) * innerRadius;
+            const targetSy = Math.sin(orbitAngle) * innerRadius;
+            sx = base.sx + (targetSx - base.sx) * p;
+            sy = base.sy + (targetSy - base.sy) * p;
+            
+            // Curve the outer ends forward along orbit to create a vortex loop (+0.8 rad)
+            const targetEx = Math.cos(orbitAngle + 0.8) * outerRadius;
+            const targetEy = Math.sin(orbitAngle + 0.8) * outerRadius;
+            tx = base.ex + (targetEx - base.ex) * p;
+            ty = base.ey + (targetEy - base.ey) * p;
+        } else if (combatState.isBioDrilling) {
+            p = Math.max(0, Math.min(1.0, 1 - (combatState.bioDrillTime / 0.35)));
+            // Helix wrapping forward
+            const windAngle = k * Math.PI / 2 + t * 40;
+            const targetX = 50 + k * 4;
+            const targetY = Math.sin(windAngle) * 6;
+            tx = base.ex + (targetX - base.ex) * p;
+            ty = base.ey + (targetY - base.ey) * p;
+        } else if (combatState.isGroundSmashing) {
+            p = 1.0;
+            const phase = combatState.smashPhase || 2;
+            let targetX, targetY;
+            if (phase === 1 || phase === 2) {
+                targetX = (k - 2.5) * 12;
+                targetY = -70;
+            } else {
+                targetX = (k - 2.5) * 4;
+                targetY = 70;
+            }
+            tx = base.ex + (targetX - base.ex) * p;
+            ty = base.ey + (targetY - base.ey) * p;
+        } else if (combatState.isRisingBlast) {
+            p = Math.max(0, Math.min(1.0, 1 - (combatState.risingBlastTime / 0.35)));
+            const targetX = (k - 2.5) * 15;
+            const targetY = -130;
+            tx = base.ex + (targetX - base.ex) * p;
+            ty = base.ey + (targetY - base.ey) * p;
+        } else if (combatState.isLowSweeping) {
+            p = Math.max(0, Math.min(1.0, 1 - (combatState.lowSweepTime / 0.25)));
+            const targetX = 85 + k * 4;
+            const targetY = 12 + (k - 2.5) * 2;
+            tx = base.ex + (targetX - base.ex) * p;
+            ty = base.ey + (targetY - base.ey) * p;
+        } else if (combatState.isUpSlashing) {
+            p = Math.max(0, Math.min(1.0, 1 - (combatState.upSlashTime / 0.2)));
+            const targetX = 40 + (k - 2.5) * 8;
+            const targetY = -90;
+            tx = base.ex + (targetX - base.ex) * p;
+            ty = base.ey + (targetY - base.ey) * p;
+        } else if (combatState.isPogoSlashing) {
+            p = Math.max(0, Math.min(1.0, 1 - (combatState.pogoSlashTime / 0.2)));
+            const targetX = (k - 2.5) * 4;
+            const targetY = 90;
+            tx = base.ex + (targetX - base.ex) * p;
+            ty = base.ey + (targetY - base.ey) * p;
+        } else if (combatState.isAttacking) {
+            p = Math.max(0, Math.min(1.0, 1 - (combatState.attackTime / (combatState.comboStep === 3 ? 0.25 : 0.15))));
+            let targetX, targetY;
+            if (combatState.comboStep === 1) {
+                targetX = 65; targetY = -12;
+            } else if (combatState.comboStep === 2) {
+                targetX = 55; targetY = 15;
+            } else {
+                targetX = 80; targetY = 0;
+            }
+            tx = base.ex + (targetX - base.ex) * p;
+            ty = base.ey + (targetY - base.ey) * p;
+        }
+        
+        // Add organic jiggle to the resting state (when morph progress p is 0)
+        if (p === 0) {
+            tx = base.ex + Math.sin(t * 3.5 + k * 1.5) * 2.5;
+            ty = base.ey + Math.cos(t * 3.5 + k * 1.5) * 2.5;
+        }
+        
+        drawMorphingStrand(sx, sy, tx, ty, base.thickness, k);
+    }
 
     // Head
     ctx.save();
     ctx.translate(5, -12);
     let headRot = isRunning ? 0.2 : (isAirborne ? -0.1 : Math.sin(t * 3) * 0.05);
     ctx.rotate(headRot);
-    ctx.beginPath();
-    ctx.arc(0, 0, 6, 0, Math.PI*2);
-    ctx.fill();
-    ctx.stroke();
+    
+    // Draw head as concentric glowing nerve rings
+    ctx.save();
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = '#00ffff';
+    ctx.strokeStyle = '#00ffff';
+    ctx.lineWidth = 1.2;
+    for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.arc(0, 0, 6 - i * 1.5, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+    ctx.restore();
 
     // Eye (Glowing bright) - changes color during charging (K)
     if (combatState.isCharging) {
@@ -584,18 +813,12 @@ export function drawPlayer(ctx, camera) {
             ctx.moveTo(pts[0].x, pts[0].y);
             for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
             
-            // Outer glow
-            ctx.shadowBlur = 8;
+            // Pure Cyan Outer Glow
+            ctx.shadowBlur = 10;
             ctx.shadowColor = '#00ffff';
             ctx.strokeStyle = '#00ffff';
             ctx.lineWidth = thickness;
             ctx.lineCap = 'round';
-            ctx.stroke();
-            
-            // White core
-            ctx.shadowBlur = 0;
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = thickness * 0.35;
             ctx.stroke();
             ctx.restore();
 
@@ -609,39 +832,7 @@ export function drawPlayer(ctx, camera) {
             if (k === 0) mainTip = tip;
         }
 
-        // Draw tiny electric sparks scattering around the circular aura boundary
-        ctx.save();
-        ctx.globalCompositeOperation = 'screen';
-        ctx.strokeStyle = '#ffffff';
-        ctx.shadowColor = '#00ffff';
-        ctx.shadowBlur = 8;
-        ctx.lineWidth = 0.8;
-        
-        const auraRadius = 14;
-        const sparkCount = 6;
-        for (let i = 0; i < sparkCount; i++) {
-            const angle = (i / sparkCount) * Math.PI * 2 + t * 6;
-            const startX = Math.cos(angle) * auraRadius;
-            const startY = Math.sin(angle) * auraRadius;
-            
-            ctx.beginPath();
-            ctx.moveTo(startX, startY);
-            
-            // Draw a tiny 3-step zig-zag
-            let curX = startX;
-            let curY = startY;
-            const steps = 3;
-            const zapLength = 5;
-            for (let s = 0; s < steps; s++) {
-                const tangentAngle = angle + Math.PI / 2 + (Math.random() - 0.5) * 1.5;
-                const dist = (zapLength / steps) + (Math.random() * 1.5);
-                curX += Math.cos(tangentAngle) * dist;
-                curY += Math.sin(tangentAngle) * dist;
-                ctx.lineTo(curX, curY);
-            }
-            ctx.stroke();
-        }
-        ctx.restore();
+
 
         if (mainTip) {
             const drillProg = (t * 6) % 1.0;
@@ -996,18 +1187,12 @@ export function drawPlayer(ctx, camera) {
     
     ctx.restore();
 
-    // Draw Front Legs
-    ctx.beginPath();
-    let legAngle3 = isRunning ? Math.sin(t * 15 + Math.PI/2) * 0.5 : (isAirborne ? 0.5 : 0);
-    let legAngle4 = isRunning ? Math.sin(t * 15 + Math.PI*1.5) * 0.5 : (isAirborne ? -0.5 : 0.1);
+    // Draw Front Legs (Redesigned as slowly wiggling tentacles)
+    let legAngle3 = isRunning ? Math.sin(t * 10 + Math.PI/2) * 0.5 : (isAirborne ? 0.5 : 0);
+    let legAngle4 = isRunning ? Math.sin(t * 10 + Math.PI*1.5) * 0.5 : (isAirborne ? -0.5 : 0.1);
     
-    // Leg 3
-    ctx.moveTo(2, 2);
-    ctx.lineTo(-8 + Math.sin(legAngle3)*10, 15 + Math.cos(legAngle3)*5);
-    // Leg 4
-    ctx.moveTo(2, 2);
-    ctx.lineTo(12 + Math.sin(legAngle4)*10, 15 + Math.cos(legAngle4)*5);
-    ctx.stroke();
+    drawLegTentacle(2, 2, -8 + Math.sin(legAngle3)*10, 15 + Math.cos(legAngle3)*5, 2.2, Math.PI / 2);
+    drawLegTentacle(2, 2, 12 + Math.sin(legAngle4)*10, 15 + Math.cos(legAngle4)*5, 2.2, Math.PI * 1.5);
 
     ctx.restore();
 }

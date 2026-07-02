@@ -395,18 +395,32 @@ export function updateCombat(player, dt) {
         player.scaleX = 1.6;
         player.scaleY = 0.6;
         
+        // 1. Electric trail behind the player (faint, small sparks)
+        addParticle(
+            player.x + (player.facingRight ? 0 : player.width),
+            player.y + player.height/2 + (Math.random() - 0.5) * player.height,
+            -player.vx * 0.2 + (Math.random() - 0.5) * 40,
+            (Math.random() - 0.5) * 30,
+            'rgba(0, 255, 255, 0.55)', // Faint cyan
+            0.2 + Math.random() * 0.15,
+            'tex_spark',
+            4 + Math.random() * 4 // Small size
+        );
+
+        // 2. Drill impact particles in front of the player (slightly smaller for clean look)
         addParticle(
             player.x + (player.facingRight ? player.width : 0),
             player.y + player.height/2,
-            -player.vx * 0.5,
-            (Math.random() - 0.5) * 100,
+            -player.vx * 0.4,
+            (Math.random() - 0.5) * 80,
             '#00ffff',
-            0.4,
+            0.35,
             'tex_star',
-            18
+            12 // reduced from 18
         );
-        if (Math.random() < 0.4) {
-            addParticle(player.x + player.width/2, player.y + player.height/2, 0, 0, '#ffffff', 0.15, 'ring', 15);
+
+        if (Math.random() < 0.35) {
+            addParticle(player.x + player.width/2, player.y + player.height/2, 0, 0, '#00ffff', 0.12, 'ring', 12);
         }
 
         if (combatState.bioDrillTime <= 0) {
