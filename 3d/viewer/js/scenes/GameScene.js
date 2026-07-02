@@ -76,9 +76,10 @@ export class GameScene extends Phaser.Scene {
         this.canvasImage = this.add.image(320, 240, 'proGameCanvas');
         this.canvasImage.setScrollFactor(0); // Lock it to screen
 
-        // Camera configurations
+        // Camera and Physics configurations
         const mapPixelWidth = map[0].length * TILE_SIZE;
         const mapPixelHeight = map.length * TILE_SIZE;
+        this.physics.world.setBounds(0, 0, mapPixelWidth, mapPixelHeight); // IMPORTANT: Lock physics to map size!
         this.cameras.main.setBounds(0, 0, mapPixelWidth, mapPixelHeight);
         this.cameras.main.startFollow(this.playerBody, true, 0.15, 0.15);
 
