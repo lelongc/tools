@@ -14,7 +14,7 @@ particleTex.impact.src = 'assets/impact_ice_128.png';
 // Pre-tinted texture cache for zero runtime overhead
 const colorsToPreTint = {
     cyan: '#00ffff',
-    orange: '#ff6a00',
+    blue: '#0077ff',
     white: '#ffffff'
 };
 
@@ -55,24 +55,8 @@ preTintImage(particleTex.star, 'star');
 preTintImage(particleTex.smoke, 'smoke');
 preTintImage(particleTex.impact, 'impact');
 
-function drawTintedImage(ctx, name, x, y, width, height, color, alpha, angle = 0, sx = 0, sy = 0, sw = null, sh = null) {
-    // Resolve particle color to pre-tinted key (cyan, orange, white)
-    let colKey = 'cyan';
-    const cLower = color.toLowerCase().replace(/\s/g, ''); // Strip all spaces
-    
-    if (cLower === '#ffffff' || cLower === 'white' || cLower.includes('255,255,255')) {
-        colKey = 'white';
-    } else if (
-        cLower.includes('255,100') || cLower.includes('255,120') || cLower.includes('255,160') || 
-        cLower.includes('255,90') || cLower.includes('orange') || cLower.includes('yellow') || 
-        cLower.includes('gold') || cLower.includes('#ff6') || cLower.includes('#ff7') || 
-        cLower.includes('#ffd') || cLower.includes('255,215,0') || cLower.includes('255,150') ||
-        cLower.includes('255,170') || cLower.includes('255,180')
-    ) {
-        colKey = 'orange';
-    }
-    
-    const tintedImg = tintedTex[name] ? tintedTex[name][colKey] : null;
+function drawTintedImage(ctx, name, x, y, width, height, colKey, alpha, angle = 0, sx = 0, sy = 0, sw = null, sh = null) {
+    const tintedImg = tintedTex[name] ? tintedTex[name][colKey || 'cyan'] : null;
     if (!tintedImg) return; // Fallback if image not ready yet
     
     const sW = sw !== null ? sw : tintedImg.width;
@@ -89,12 +73,30 @@ function drawTintedImage(ctx, name, x, y, width, height, color, alpha, angle = 0
 }
 
 export function addParticle(x, y, vx, vy, color, life, type = 'pixel', size = 3) {
+    // Pre-resolve colKey to avoid regex runtime overhead in draw loop!
+    let colKey = 'cyan';
+    const cLower = color.toLowerCase().replace(/\s/g, ''); // Strip all spaces
+    
+    if (cLower === '#ffffff' || cLower === 'white' || cLower.includes('255,255,255')) {
+        colKey = 'white';
+    } else if (
+        cLower.includes('255,100') || cLower.includes('255,120') || cLower.includes('255,160') || 
+        cLower.includes('255,90') || cLower.includes('orange') || cLower.includes('yellow') || 
+        cLower.includes('gold') || cLower.includes('#ff6') || cLower.includes('#ff7') || 
+        cLower.includes('#ffd') || cLower.includes('255,215,0') || cLower.includes('255,150') ||
+        cLower.includes('255,170') || cLower.includes('255,180') || cLower.includes('red') ||
+        cLower.includes('#ff003c') || cLower.includes('255,0,60')
+    ) {
+        colKey = 'blue';
+    }
+
     particles.push({
         x: x,
         y: y,
         vx: vx,
         vy: vy,
         color: color,
+        colKey: colKey,
         life: life,
         maxLife: life,
         type: type,
@@ -147,39 +149,47 @@ export function updateAndDrawParticles(ctx, camera, dt) {
 
         // Custom renderings
         if (p.type === 'tex_spark') {
-            drawTintedImage(ctx, 'spark', drawX, drawY, p.size, p.size, p.color, alpha, p.angle);
+            drawTintedImage(ctx, 'spark', drawX, drawY, p.size, p.size, p.colKey, alpha, p.angle);
         } else if (p.type === 'tex_star') {
-            drawTintedImage(ctx, 'star', drawX, drawY, p.size, p.size, p.color, alpha, p.angle);
+            drawTintedImage(ctx, 'star', drawX, drawY, p.size, p.size, p.colKey, alpha, p.angle);
         } else if (p.type === 'tex_smoke') {
             const currentSize = p.size * (1 + (1 - alpha) * 1.5);
-            drawTintedImage(ctx, 'smoke', drawX, drawY, currentSize, currentSize, p.color, alpha * 0.35, p.angle);
+            drawTintedImage(ctx, 'smoke', drawX, drawY, currentSize, currentSize, p.colKey, alpha * 0.35, p.angle);
         } else if (p.type === 'tex_impact') {
             // Sliced frame of 128x128 impact spritesheet (16 frames)
             const frameIdx = Math.max(0, Math.min(15, Math.floor((1 - alpha) * 15)));
             const frameX = frameIdx * 128;
-            drawTintedImage(ctx, 'impact', drawX, drawY, p.size, p.size, p.color, alpha, p.angle, frameX, 0, 128, 128);
+            drawTintedImage(ctx, 'impact', drawX, drawY, p.size, p.size, p.colKey, alpha, p.angle, frameX, 0, 128, 128);
         } else if (p.type === 'spark') {
-            // Stretched motion-blurred electric spark with white core
+            // Stretched motion-blurred electric spark with white core (using fast layered strokes!)
             const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy) || 1;
             const nx = p.vx / speed;
             const ny = p.vy / speed;
             const len = Math.max(4, speed * 0.05);
 
             ctx.save();
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = p.color;
-            ctx.strokeStyle = p.color;
-            ctx.lineWidth = p.size;
             ctx.lineCap = 'round';
             
+            // Outer glow layer
+            ctx.strokeStyle = p.color;
+            ctx.globalAlpha = alpha * 0.4;
+            ctx.lineWidth = p.size * 2.2;
             ctx.beginPath();
             ctx.moveTo(drawX - nx * len * 0.5, drawY - ny * len * 0.5);
             ctx.lineTo(drawX + nx * len * 0.5, drawY + ny * len * 0.5);
             ctx.stroke();
 
+            // Core glow layer
+            ctx.globalAlpha = alpha;
+            ctx.lineWidth = p.size;
+            ctx.beginPath();
+            ctx.moveTo(drawX - nx * len * 0.5, drawY - ny * len * 0.5);
+            ctx.lineTo(drawX + nx * len * 0.5, drawY + ny * len * 0.5);
+            ctx.stroke();
+
+            // Inner white highlight
             ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = p.size * 0.4;
-            ctx.shadowBlur = 0;
+            ctx.lineWidth = p.size * 0.45;
             ctx.beginPath();
             ctx.moveTo(drawX - nx * len * 0.5, drawY - ny * len * 0.5);
             ctx.lineTo(drawX + nx * len * 0.5, drawY + ny * len * 0.5);
@@ -189,10 +199,17 @@ export function updateAndDrawParticles(ctx, camera, dt) {
         } else if (p.type === 'ring') {
             const curSize = p.size * (1 + (1 - alpha) * 4);
             ctx.save();
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = p.color;
+            // Outer glow layer
             ctx.strokeStyle = p.color;
-            ctx.lineWidth = 2 * alpha;
+            ctx.globalAlpha = alpha * 0.35;
+            ctx.lineWidth = 4 * alpha;
+            ctx.beginPath();
+            ctx.arc(drawX, drawY, curSize, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Inner core layer
+            ctx.globalAlpha = alpha;
+            ctx.lineWidth = 1.5 * alpha;
             ctx.beginPath();
             ctx.arc(drawX, drawY, curSize, 0, Math.PI * 2);
             ctx.stroke();

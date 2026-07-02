@@ -66,8 +66,6 @@ export function drawWorld(ctx, camera) {
                             ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
                         } else {
                             // Fallback procedural
-                            ctx.shadowBlur = 10;
-                            ctx.shadowColor = 'rgba(0, 200, 255, 0.5)';
                             ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)';
                             ctx.lineWidth = 2;
                             ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
@@ -124,21 +122,23 @@ export function drawWorld(ctx, camera) {
                                 const pt = getBezierPoint(tVal);
                                 
                                 ctx.save();
-                                ctx.shadowBlur = 10;
-                                ctx.shadowColor = colors[i];
-                                ctx.fillStyle = colors[i];
-                                
-                                // Draw leaf or bulb
+                                const r = i === 2 ? 3 : 2;
+                                // Glowing background layer
+                                ctx.fillStyle = colors[i].replace('0.9', '0.35');
                                 ctx.beginPath();
-                                ctx.arc(pt.x, pt.y, i === 2 ? 3 : 2, 0, Math.PI * 2);
+                                ctx.arc(pt.x, pt.y, r * 2.4, 0, Math.PI * 2);
+                                ctx.fill();
+                                
+                                // Solid core layer
+                                ctx.fillStyle = colors[i];
+                                ctx.beginPath();
+                                ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2);
                                 ctx.fill();
                                 ctx.restore();
                             }
                         }
                     } 
                     else if (tile === 2) { // Bouncy Pad (Neon Green/Yellow)
-                        ctx.shadowBlur = 15;
-                        ctx.shadowColor = 'rgba(100, 255, 100, 0.8)';
                         ctx.strokeStyle = 'rgba(100, 255, 100, 1)';
                         ctx.lineWidth = 3;
                         
@@ -158,8 +158,6 @@ export function drawWorld(ctx, camera) {
                         ctx.fillRect(x + 4, y + TILE_SIZE/2, TILE_SIZE - 8, TILE_SIZE/2);
                     }
                     else if (tile === 3) { // Ice Block (Glass/Blue)
-                        ctx.shadowBlur = 5;
-                        ctx.shadowColor = 'rgba(200, 200, 255, 0.5)';
                         ctx.strokeStyle = 'rgba(200, 200, 255, 0.9)';
                         ctx.lineWidth = 1;
                         ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);

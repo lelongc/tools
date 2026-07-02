@@ -56,13 +56,17 @@ window.addEventListener('cameraShake', (e) => {
     shakeIntensity = e.detail.intensity || 5;
 });
 
+let didShakeSave = false;
+
 function draw(dt) {
+    didShakeSave = false;
     if (shakeTime > 0) {
         shakeTime -= dt;
         const shakeX = (Math.random() - 0.5) * shakeIntensity;
         const shakeY = (Math.random() - 0.5) * shakeIntensity;
         ctx.save();
         ctx.translate(shakeX, shakeY);
+        didShakeSave = true;
     }
 
     // Draw pure black space
@@ -118,7 +122,7 @@ function draw(dt) {
     drawPlayer(ctx, camera);
     drawCombat(ctx, camera, player);
 
-    if (shakeTime > 0) {
+    if (didShakeSave) {
         ctx.restore();
     }
 }

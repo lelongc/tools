@@ -166,60 +166,80 @@ export function updatePlayer(dt, addParticle) {
         }
     }
 
-    // Move X and resolve collisions
-    player.x += player.vx * dt;
-    if (getCollision(player.x, player.y, player.width, player.height)) {
-        // Snap to grid
-        if (player.vx > 0) {
-            player.x = Math.floor((player.x + player.width) / TILE_SIZE) * TILE_SIZE - player.width - 0.01;
-        } else if (player.vx < 0) {
-            player.x = Math.floor(player.x / TILE_SIZE) * TILE_SIZE + TILE_SIZE + 0.01;
+    // Move X and resolve collisions with sub-stepping for high speeds to prevent clipping
+    const moveAmountX = player.vx * dt;
+    const absMoveX = Math.abs(moveAmountX);
+    const stepSizeX = 8; // Move in max 8-pixel increments
+    const stepCountX = Math.ceil(absMoveX / stepSizeX);
+    const signX = Math.sign(moveAmountX);
+    
+    for (let step = 0; step < stepCountX; step++) {
+        const nextMove = Math.min(stepSizeX, absMoveX - step * stepSizeX) * signX;
+        player.x += nextMove;
+        if (getCollision(player.x, player.y, player.width, player.height)) {
+            // Snap back slightly
+            if (signX > 0) {
+                player.x = Math.floor((player.x + player.width) / TILE_SIZE) * TILE_SIZE - player.width - 0.01;
+            } else {
+                player.x = Math.floor(player.x / TILE_SIZE) * TILE_SIZE + TILE_SIZE + 0.01;
+            }
+            player.vx = 0;
+            break;
         }
-        player.vx = 0;
     }
 
     const wasGrounded = player.isGrounded;
-    // Move Y and resolve collisions
-    player.y += player.vy * dt;
+    // Move Y and resolve collisions with sub-stepping for high speeds
+    const moveAmountY = player.vy * dt;
+    const absMoveY = Math.abs(moveAmountY);
+    const stepSizeY = 8;
+    const stepCountY = Math.ceil(absMoveY / stepSizeY);
+    const signY = Math.sign(moveAmountY);
+    
     player.isGrounded = false;
-    const collY = getCollision(player.x, player.y, player.width, player.height);
-    if (collY) {
-        if (player.vy > 0) { // Falling down
-            if (collY === 2) {
-                // Bounce Pad!
-                player.y = Math.floor((player.y + player.height) / TILE_SIZE) * TILE_SIZE - player.height - 0.01;
-                player.vy = -1000; // Launch player up
-                player.scaleX = 0.4; // Extreme stretch
-                player.scaleY = 1.8;
-                window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 12}}));
-            } else {
-                // Normal Ground
-                player.y = Math.floor((player.y + player.height) / TILE_SIZE) * TILE_SIZE - player.height - 0.01;
-                player.isGrounded = true;
-                
-                // Landing Splash Dust & Squash
-                if (!wasGrounded) {
-                    player.scaleX = 1.3;
-                    player.scaleY = 0.7;
+    for (let step = 0; step < stepCountY; step++) {
+        const nextMove = Math.min(stepSizeY, absMoveY - step * stepSizeY) * signY;
+        player.y += nextMove;
+        const collY = getCollision(player.x, player.y, player.width, player.height);
+        if (collY) {
+            if (signY > 0) { // Falling down
+                if (collY === 2) {
+                    // Bounce Pad!
+                    player.y = Math.floor((player.y + player.height) / TILE_SIZE) * TILE_SIZE - player.height - 0.01;
+                    player.vy = -1000; // Launch player up
+                    player.scaleX = 0.4; // Extreme stretch
+                    player.scaleY = 1.8;
+                    window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 12}}));
+                } else {
+                    // Normal Ground
+                    player.y = Math.floor((player.y + player.height) / TILE_SIZE) * TILE_SIZE - player.height - 0.01;
+                    player.isGrounded = true;
                     
-                    // Only shake camera on very hard landings (high velocity)
-                    if (player.vy > 600) {
-                        window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 5}}));
-                    }
+                    // Landing Splash Dust & Squash
+                    if (!wasGrounded) {
+                        player.scaleX = 1.3;
+                        player.scaleY = 0.7;
+                        
+                        // Only shake camera on very hard landings (high velocity)
+                        if (player.vy > 600) {
+                            window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 5}}));
+                        }
 
-                    for(let i=0; i<8; i++) {
-                        addParticle(player.x + player.width/2, player.y + player.height, 
-                                    (Math.random()-0.5)*150, -Math.random()*60, 'rgba(0, 255, 255, 0.4)', 0.4);
+                        for(let i=0; i<8; i++) {
+                            addParticle(player.x + player.width/2, player.y + player.height, 
+                                        (Math.random()-0.5)*150, -Math.random()*60, 'rgba(0, 255, 255, 0.4)', 0.4);
+                        }
                     }
                 }
+            } else if (signY < 0) { // Hitting head
+                player.y = Math.floor(player.y / TILE_SIZE) * TILE_SIZE + TILE_SIZE + 0.01;
+                player.vy = 0;
             }
-        } else if (player.vy < 0) { // Hitting head
-            player.y = Math.floor(player.y / TILE_SIZE) * TILE_SIZE + TILE_SIZE + 0.01;
-            player.vy = 0;
-        }
-        
-        if (collY !== 2 && player.vy > 0) {
-            player.vy = 0;
+            
+            if (collY !== 2 && signY > 0) {
+                player.vy = 0;
+            }
+            break;
         }
     }
 
@@ -412,17 +432,18 @@ export function drawPlayer(ctx, camera) {
         ctx.beginPath();
         ctx.moveTo(pts[0].x, pts[0].y);
         for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+        ctx.lineCap = 'round';
         
-        // Cyan outer glow
-        ctx.shadowBlur = 8;
-        ctx.shadowColor = '#00ffff';
+        // Layered Glow
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+        ctx.lineWidth = thickness * 2.5;
+        ctx.stroke();
+        
         ctx.strokeStyle = '#00ffff';
         ctx.lineWidth = thickness;
-        ctx.lineCap = 'round';
         ctx.stroke();
         
         // White core
-        ctx.shadowBlur = 0;
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = thickness * 0.35;
         ctx.stroke();
@@ -554,17 +575,18 @@ export function drawPlayer(ctx, camera) {
         ctx.beginPath();
         ctx.moveTo(pts[0].x, pts[0].y);
         for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+        ctx.lineCap = 'round';
         
-        // Cyan outer glow
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = '#00ffff';
+        // Layered Glow
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+        ctx.lineWidth = thickness * 2.8;
+        ctx.stroke();
+        
         ctx.strokeStyle = '#00ffff';
         ctx.lineWidth = thickness;
-        ctx.lineCap = 'round';
         ctx.stroke();
         
         // White inner core
-        ctx.shadowBlur = 0;
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = thickness * 0.35;
         ctx.stroke();
@@ -676,10 +698,14 @@ export function drawPlayer(ctx, camera) {
         drawMorphingStrand(sx, sy, tx, ty, base.thickness, k);
     }
 
-    // Head
+    // Head - centered during charging K
     ctx.save();
-    ctx.translate(5, -12);
-    let headRot = isRunning ? 0.2 : (isAirborne ? -0.1 : Math.sin(t * 3) * 0.05);
+    if (combatState.isCharging) {
+        ctx.translate(0, 0); // Put head at the exact center of the charging vortex!
+    } else {
+        ctx.translate(5, -12);
+    }
+    let headRot = combatState.isCharging ? 0 : (isRunning ? 0.2 : (isAirborne ? -0.1 : Math.sin(t * 3) * 0.05));
     ctx.rotate(headRot);
     
     // Draw head as concentric glowing nerve rings
@@ -695,18 +721,18 @@ export function drawPlayer(ctx, camera) {
     }
     ctx.restore();
 
-    // Eye (Glowing bright) - changes color during charging (K)
+    // Eye (Glowing bright) - changes color during charging (K) - Cyan and White only!
     if (combatState.isCharging) {
         const cTime = combatState.chargeTime;
         const flash = Math.floor(t * 35) % 2 === 0;
         if (cTime >= 0.7) {
-            // Level 3: Flashes violently between bright red and gold!
-            ctx.fillStyle = flash ? '#ff003c' : '#ffd700';
-            ctx.shadowColor = '#ff003c';
+            // Level 3: Flashes violently between bright cyan and white!
+            ctx.fillStyle = flash ? '#00ffff' : '#ffffff';
+            ctx.shadowColor = '#00ffff';
         } else if (cTime >= 0.3) {
-            // Level 2: Blinks between orange and cyan!
-            ctx.fillStyle = flash ? '#ff7700' : '#00ffff';
-            ctx.shadowColor = '#ff7700';
+            // Level 2: Blinks between cyan and deep blue!
+            ctx.fillStyle = flash ? '#00ffff' : '#0077ff';
+            ctx.shadowColor = '#00ffff';
         } else {
             // Level 1: Blinks between cyan and white!
             ctx.fillStyle = flash ? '#00ffff' : '#ffffff';
@@ -714,14 +740,12 @@ export function drawPlayer(ctx, camera) {
         }
     } else {
         ctx.fillStyle = '#ffffff';
-        ctx.shadowColor = player.color;
     }
-    ctx.shadowBlur = 15;
     ctx.beginPath();
-    ctx.ellipse(3, -1, 2, 3, 0, 0, Math.PI*2);
+    ctx.arc(0, 0, 2.2, 0, Math.PI * 2); // Perfect circle in the center of the head!
     ctx.fill();
     
-    // Sprite Drawing Helpers for VFX
+    // Sprite Drawing Helpers for VFX (Optimized: removed slow shadowBlur from drawImage!)
     const drawSlashSprite = (pt, angle, size, prog) => {
         if (!lightningSlashImg.complete || lightningSlashImg.naturalWidth <= 0 || size <= 0) return;
         ctx.save();
@@ -729,24 +753,24 @@ export function drawPlayer(ctx, camera) {
         ctx.rotate(angle);
         
         ctx.globalCompositeOperation = 'screen';
-        ctx.shadowColor = '#00ffff';
-        ctx.shadowBlur = 15;
+        ctx.globalAlpha = 0.65; // Bolder
         
-        const frameIdx = Math.max(0, Math.min(5, Math.floor(prog * 6)));
+        const activeProg = (prog !== undefined) ? prog : 0.8;
+        const frameIdx = Math.max(0, Math.min(5, Math.floor(activeProg * 6)));
         try { ctx.drawImage(lightningSlashImg, frameIdx * 64, 0, 64, 64, -size/2, -size/2, size, size); } catch(e) {}
         ctx.restore();
     };
 
     const drawImpactSprite = (pt, size, prog) => {
-        if (!lightningImpactImg.complete || lightningImpactImg.naturalWidth <= 0 || prog < 0.5 || size <= 0) return;
+        const activeProg = (prog !== undefined) ? prog : 0.8;
+        if (!lightningImpactImg.complete || lightningImpactImg.naturalWidth <= 0 || activeProg < 0.4 || size <= 0) return;
         ctx.save();
         ctx.translate(pt.x, pt.y);
         
         ctx.globalCompositeOperation = 'screen';
-        ctx.shadowColor = '#00ffff';
-        ctx.shadowBlur = 20;
+        ctx.globalAlpha = 0.6; // Bolder
         
-        const animProg = Math.max(0, Math.min(1.0, (prog - 0.5) / 0.5));
+        const animProg = Math.max(0, Math.min(1.0, (activeProg - 0.4) / 0.6));
         const frameIdx = Math.max(0, Math.min(6, Math.floor(animProg * 7)));
         try { ctx.drawImage(lightningImpactImg, frameIdx * 64, 0, 64, 64, -size/2, -size/2, size, size); } catch(e) {}
         ctx.restore();
@@ -784,21 +808,33 @@ export function drawPlayer(ctx, camera) {
             for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
             
             ctx.save();
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = '#00ffff';
-            ctx.strokeStyle = '#00ffff';
-            ctx.lineWidth = thickness * Math.max(0.1, 1 - progressVal * 0.5);
             ctx.lineCap = 'round';
+            const curThickness = thickness * Math.max(0.1, 1 - progressVal * 0.5);
+            
+            // Layered neon glow
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+            ctx.lineWidth = curThickness * 2.5;
+            ctx.stroke();
+            
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = curThickness;
             ctx.stroke();
             ctx.restore();
             
             for (let i = 2; i < pts.length; i += 2) {
+                const nodeRadius = (thickness * 0.4) * (1 - (i/pts.length) * 0.4);
                 ctx.save();
                 ctx.beginPath();
-                ctx.arc(pts[i].x, pts[i].y, (thickness * 0.4) * (1 - (i/pts.length) * 0.4), 0, Math.PI * 2);
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = '#ffffff';
+                
+                // Cyan glow circle
+                ctx.fillStyle = 'rgba(0, 255, 255, 0.45)';
+                ctx.arc(pts[i].x, pts[i].y, nodeRadius * 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // White core circle
+                ctx.beginPath();
                 ctx.fillStyle = '#ffffff'; 
+                ctx.arc(pts[i].x, pts[i].y, nodeRadius, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.restore();
             }
@@ -809,14 +845,14 @@ export function drawPlayer(ctx, camera) {
             // Whip 1: Forward and slightly up
             const tip1 = drawHeadSpaceTentacle(-2, -5, 80, -10, progress, 6, 0);
             const tip2 = drawHeadSpaceTentacle(-2, -5, 60, 20, progress, 4, 1);
-            drawSlashSprite(tip1, -Math.PI / 8, 70);
-            drawImpactSprite(tip1, 80);
+            drawSlashSprite(tip1, -Math.PI / 8, 30);
+            drawImpactSprite(tip1, 35);
         } else if (combatState.comboStep === 2) {
             // Whip 2: Forward and down
             const tip1 = drawHeadSpaceTentacle(-2, -5, 90, 25, progress, 7, 2);
             const tip2 = drawHeadSpaceTentacle(-2, -5, 70, -15, progress, 5, 3);
-            drawSlashSprite(tip1, Math.PI / 6, 80);
-            drawImpactSprite(tip1, 90);
+            drawSlashSprite(tip1, Math.PI / 6, 35);
+            drawImpactSprite(tip1, 40);
         } else if (combatState.comboStep === 3) {
             // Whip 3: 5 cyan tentacles bursting forward!
             let mainTip = null;
@@ -827,8 +863,8 @@ export function drawPlayer(ctx, camera) {
                 if (k === 2) mainTip = tip;
             }
             if (mainTip) {
-                drawSlashSprite(mainTip, 0, 120); // Massive pixel slash!
-                drawImpactSprite(mainTip, 130);
+                drawSlashSprite(mainTip, 0, 50); // Massive pixel slash!
+                drawImpactSprite(mainTip, 55);
             }
         }
     } else if (combatState.isDashStriking) {
@@ -858,11 +894,14 @@ export function drawPlayer(ctx, camera) {
                 ctx.lineTo(pts[i].x, pts[i].y);
             }
             ctx.save();
-            ctx.shadowBlur = 12;
-            ctx.shadowColor = '#00ffff';
+            ctx.lineCap = 'round';
+            // Layered neon glow
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+            ctx.lineWidth = thickness * 2.5;
+            ctx.stroke();
+            
             ctx.strokeStyle = '#00ffff';
             ctx.lineWidth = thickness;
-            ctx.lineCap = 'round';
             ctx.stroke();
             ctx.restore();
             return pts[pts.length - 1]; // Return tip
@@ -878,7 +917,7 @@ export function drawPlayer(ctx, camera) {
         if (mainTip) {
             // Constant electric drill tip
             const drillProg = (t * 4) % 1.0; 
-            drawImpactSprite(mainTip, 160, drillProg);
+            drawImpactSprite(mainTip, 70, drillProg);
         }
     } else if (combatState.isBioDrilling) {
         // Bio-Drill (Neutral I): helix tentacles wrapping player body to form a tight, clean drill
@@ -923,11 +962,9 @@ export function drawPlayer(ctx, camera) {
             if (k === 0) mainTip = tip;
         }
 
-
-
         if (mainTip) {
             const drillProg = (t * 6) % 1.0;
-            drawImpactSprite(mainTip, 90, drillProg); // reduced size from 150 to 90
+            drawImpactSprite(mainTip, 45, drillProg); // reduced size from 90 to 45
         }
     } else if (combatState.isLowSweeping || combatState.isUpSlashing || combatState.isPogoSlashing || combatState.isRisingBlast) {
         // Shared generic tentacle drawing for Hollow Knight matrix skills
@@ -982,8 +1019,8 @@ export function drawPlayer(ctx, camera) {
                 if (k === 2) mainTip = tip;
             }
             if (mainTip) {
-                drawSlashSprite(mainTip, Math.PI / 8, 120, prog);
-                drawImpactSprite(mainTip, 100, prog);
+                drawSlashSprite(mainTip, Math.PI / 8, 50, prog); // Reduced from 120
+                drawImpactSprite(mainTip, 45, prog); // Reduced from 100
             }
         } else if (combatState.isUpSlashing) {
             const prog = Math.max(0, Math.min(1, 1 - (combatState.upSlashTime / 0.2)));
@@ -993,8 +1030,8 @@ export function drawPlayer(ctx, camera) {
                 if (k === 1) mainTip = tip;
             }
             if (mainTip) {
-                drawSlashSprite(mainTip, -Math.PI / 3, 150, prog); // Aiming upwards
-                drawImpactSprite(mainTip, 120, prog);
+                drawSlashSprite(mainTip, -Math.PI / 3, 55, prog); // Reduced from 150
+                drawImpactSprite(mainTip, 50, prog); // Reduced from 120
             }
         } else if (combatState.isPogoSlashing) {
             const prog = Math.max(0, Math.min(1, 1 - (combatState.pogoSlashTime / 0.2)));
@@ -1004,8 +1041,8 @@ export function drawPlayer(ctx, camera) {
                 if (k === 1) mainTip = tip;
             }
             if (mainTip) {
-                drawSlashSprite(mainTip, Math.PI / 2, 140, prog); // Aiming down
-                drawImpactSprite(mainTip, 110, prog);
+                drawSlashSprite(mainTip, Math.PI / 2, 50, prog); // Reduced from 140
+                drawImpactSprite(mainTip, 45, prog); // Reduced from 110
             }
         } else if (combatState.isRisingBlast) {
             const prog = Math.max(0, Math.min(1.0, 1 - (combatState.risingBlastTime / 0.35)));
@@ -1025,10 +1062,10 @@ export function drawPlayer(ctx, camera) {
                     const frameW = 64;
                     const frameIdx = Math.floor(t * 25 + idx * 2) % 6;
                     const colLength = 220 + Math.sin(t * 30 + idx) * 30;
-                    const colWidth = 70 + Math.random() * 20;
+                    const colWidth = 35 + Math.random() * 10; // Narrower: reduced from 70
                     
-                    ctx.shadowBlur = 25;
-                    ctx.globalAlpha = 0.9;
+                    ctx.shadowBlur = 12; // Reduced from 25
+                    ctx.globalAlpha = 0.45; // Fainter: reduced from 0.9
                     try {
                         ctx.drawImage(lightningSlashImg, frameIdx * 64, 0, 64, 64, -colLength/2, -colWidth/2, colLength, colWidth);
                     } catch(e) {}
@@ -1096,11 +1133,14 @@ export function drawPlayer(ctx, camera) {
                 ctx.lineTo(pts[i].x, pts[i].y);
             }
             ctx.save();
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#00ffff';
+            ctx.lineCap = 'round';
+            // Layered neon glow
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+            ctx.lineWidth = thickness * 2.5;
+            ctx.stroke();
+            
             ctx.strokeStyle = '#00ffff';
             ctx.lineWidth = thickness;
-            ctx.lineCap = 'round';
             ctx.stroke();
             ctx.restore();
             return pts[pts.length - 1]; // Return tip
@@ -1118,7 +1158,7 @@ export function drawPlayer(ctx, camera) {
             }
             if (mainTip) {
                 const prog = (t * 5) % 1.0;
-                drawSlashSprite(mainTip, -Math.PI / 2, 120, prog); 
+                drawSlashSprite(mainTip, -Math.PI / 2, 50, prog); // Reduced from 120
             }
         } else {
             // Slamming phase (Phase 3): Pointing DOWNWARDS wrapped together like a heavy drill spear!
@@ -1132,9 +1172,64 @@ export function drawPlayer(ctx, camera) {
             }
             if (mainTip) {
                 const prog = (t * 8) % 1.0;
-                drawSlashSprite(mainTip, Math.PI / 2, 170, prog); 
-                drawImpactSprite(mainTip, 140, prog);
+                drawSlashSprite(mainTip, Math.PI / 2, 65, prog); // Reduced from 170
+                drawImpactSprite(mainTip, 55, prog); // Reduced from 140
             }
+        }
+    } else if (combatState.isCharging) {
+        // Spin the head tentacles around the head center (which is 0,0 during charging)!
+        const lvl = combatState.chargeLevel || 1;
+        const antennaCount = lvl === 3 ? 3 : 2;
+        const length = 18 + (lvl * 4);
+        
+        for (let a = 0; a < antennaCount; a++) {
+            const angle = t * 24 + (a / antennaCount) * Math.PI * 2;
+            
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(0, 0); // starts at head center (0,0)
+            
+            // Draw a nice wavy tentacle coiling outwards
+            const pts = [{ x: 0, y: 0 }];
+            const targetX = Math.cos(angle) * length;
+            const targetY = Math.sin(angle) * length;
+            
+            const segments = 6;
+            for (let i = 1; i <= segments; i++) {
+                const tVal = i / segments;
+                const tx = targetX * tVal;
+                const ty = targetY * tVal;
+                const wiggle = Math.sin(t * 30 + tVal * 4 + a) * (4 * tVal);
+                
+                const dx = targetX;
+                const dy = targetY;
+                const len = Math.sqrt(dx*dx + dy*dy) || 1;
+                pts.push({
+                    x: tx + (-dy / len) * wiggle,
+                    y: ty + (dx / len) * wiggle
+                });
+            }
+            
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+            
+            ctx.save();
+            ctx.lineCap = 'round';
+            // Layered neon glow
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+            ctx.lineWidth = 1.8 * 2.5;
+            ctx.stroke();
+            
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 1.8;
+            ctx.stroke();
+            ctx.restore();
+            
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 0.6;
+            ctx.stroke();
+            ctx.restore();
         }
     } else {
         // Draw normal idle antenna
@@ -1144,54 +1239,215 @@ export function drawPlayer(ctx, camera) {
         ctx.stroke();
     }
 
-    // Draw Laser Beam (if active) from head antenna base
+    // Draw Laser Beam (if active) from centered eye (0, 0)
     if (combatState.isReleasingBeam) {
         ctx.save();
-        ctx.translate(-2, -5);
+        ctx.translate(0, 0); // Starts exactly at the eye center!
         const lvl = combatState.chargeLevel || 1;
-        const thickness = lvl === 3 ? 32 : (lvl === 2 ? 18 : 8);
-        const color = lvl === 3 ? 'rgba(0, 255, 255, 0.95)' : (lvl === 2 ? 'rgba(0, 240, 255, 0.85)' : 'rgba(0, 200, 255, 0.7)');
+        const thickness = lvl === 3 ? 36 : (lvl === 2 ? 20 : 10);
         
-        ctx.shadowBlur = lvl === 3 ? 40 : 25;
-        ctx.shadowColor = '#00ffff';
-        ctx.strokeStyle = color;
-        ctx.lineWidth = thickness;
+        ctx.globalCompositeOperation = 'screen';
+        
+        // 1. Generate Jagged Top and Bottom Paths
+        const topPts = [{ x: 0, y: 0 }];
+        const bottomPts = [{ x: 0, y: 0 }];
+        const steps = 35;
+        const stepLen = 600 / steps;
+        
+        for (let i = 1; i <= steps; i++) {
+            const x = i * stepLen;
+            const wave = Math.sin(x * 0.06 + t * 35) * (lvl === 3 ? 4.5 : 2);
+            
+            // Jitter displacements to create jagged look
+            const topJitter = (Math.random() - 0.5) * (lvl === 3 ? 7 : 3.5);
+            const botJitter = (Math.random() - 0.5) * (lvl === 3 ? 7 : 3.5);
+            
+            topPts.push({ x, y: -thickness/2 + wave + topJitter });
+            bottomPts.push({ x, y: thickness/2 + wave + botJitter });
+        }
+        
+        // 2. Draw Glowing Filled Body between the Jagged Paths
         ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(600, 0); // screen filling beam
+        ctx.moveTo(topPts[0].x, topPts[0].y);
+        for (let i = 1; i < topPts.length; i++) ctx.lineTo(topPts[i].x, topPts[i].y);
+        for (let i = bottomPts.length - 1; i >= 0; i--) ctx.lineTo(bottomPts[i].x, bottomPts[i].y);
+        ctx.closePath();
+        
+        ctx.fillStyle = lvl === 3 ? 'rgba(0, 255, 255, 0.45)' : 'rgba(0, 255, 255, 0.25)';
+        ctx.fill();
+        
+        // 3. Draw Jagged Edge Borders (Thicker glow outlines using Layered Glow)
+        // Top edge outline
+        ctx.beginPath();
+        ctx.moveTo(topPts[0].x, topPts[0].y);
+        for (let i = 1; i < topPts.length; i++) ctx.lineTo(topPts[i].x, topPts[i].y);
+        
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+        ctx.lineWidth = (lvl === 3 ? 3.0 : 1.5) * 2.5;
+        ctx.stroke();
+        ctx.strokeStyle = '#00ffff';
+        ctx.lineWidth = lvl === 3 ? 3.0 : 1.5;
+        ctx.stroke();
+        ctx.restore();
+        
+        // Bottom edge outline
+        ctx.beginPath();
+        ctx.moveTo(bottomPts[0].x, bottomPts[0].y);
+        for (let i = 1; i < bottomPts.length; i++) ctx.lineTo(bottomPts[i].x, bottomPts[i].y);
+        
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+        ctx.lineWidth = (lvl === 3 ? 3.0 : 1.5) * 2.5;
+        ctx.stroke();
+        ctx.strokeStyle = '#00ffff';
+        ctx.lineWidth = lvl === 3 ? 3.0 : 1.5;
+        ctx.stroke();
+        ctx.restore();
+        
+        // Inner white highlights for the borders
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = lvl === 3 ? 1.0 : 0.5;
+        ctx.stroke(); // strokes bottom
+        
+        ctx.beginPath();
+        ctx.moveTo(topPts[0].x, topPts[0].y);
+        for (let i = 1; i < topPts.length; i++) ctx.lineTo(topPts[i].x, topPts[i].y);
+        ctx.stroke(); // strokes top
+        
+        // 4. Draw Wavy/Vibrating Inner Plasma core (Shaking white line in center using Layered Glow)
+        const jitterY = (Math.random() - 0.5) * (lvl === 3 ? 5 : 2);
+        ctx.beginPath();
+        ctx.moveTo(0, jitterY);
+        ctx.lineTo(600, jitterY);
+        
+        ctx.save();
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.35)';
+        ctx.lineWidth = (thickness * (lvl === 3 ? 0.35 : 0.3)) * 2.8;
         ctx.stroke();
         
         ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = thickness * 0.35;
-        ctx.beginPath();
-        ctx.moveTo(0, 0);
-        ctx.lineTo(600, 0);
+        ctx.lineWidth = thickness * (lvl === 3 ? 0.35 : 0.3);
         ctx.stroke();
+        ctx.restore();
         
-        // Draw secondary branches shooting off the main laser beam at Level 3!
-        if (lvl === 3) {
-            for (let b = 0; b < 4; b++) {
-                const bx = 80 + Math.random() * 400;
-                const by = (Math.random() - 0.5) * 60;
+        // 5. Draw Helix/Spiral Lightning Coils around the Laser (Level 2 & 3 only)
+        if (lvl >= 2) {
+            const coilCount = lvl === 3 ? 2 : 1;
+            for (let c = 0; c < coilCount; c++) {
                 ctx.beginPath();
-                ctx.moveTo(bx - 40, 0);
-                ctx.quadraticCurveTo(bx - 20, by, bx, 0);
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
-                ctx.lineWidth = 1.8;
+                ctx.moveTo(0, 0);
+                
+                const waveLength = lvl === 3 ? 50 : 70;
+                const amp = lvl === 3 ? 18 : 12;
+                const phaseOffset = c * Math.PI + t * 45;
+                
+                for (let x = 15; x < 600; x += 15) {
+                    const y = Math.sin(x / waveLength + phaseOffset) * amp + (Math.random() - 0.5) * 4;
+                    ctx.lineTo(x, y);
+                }
+                
+                ctx.save();
+                const coilThick = lvl === 3 ? 2.2 : 1.2;
+                ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+                ctx.lineWidth = coilThick * 2.5;
                 ctx.stroke();
+                
+                ctx.strokeStyle = lvl === 3 ? '#ffffff' : '#00ffff';
+                ctx.lineWidth = coilThick;
+                ctx.stroke();
+                ctx.restore();
             }
         }
+        
+        // 6. Level 3 Ultimate Laser Extra Effects (Branching lightning discharges & Shockwaves)
+        if (lvl === 3) {
+            // Expanding muzzle shockwaves at the eye (Layered Glow instead of shadowBlur)
+            ctx.save();
+            for (let w = 0; w < 3; w++) {
+                const wProg = (t * 4 + w / 3) % 1.0;
+                const curAlpha = 0.8 * (1 - wProg);
+                
+                // Cyan glow arc
+                ctx.strokeStyle = 'rgba(0, 255, 255, 0.35)';
+                ctx.lineWidth = 6 * (1 - wProg);
+                ctx.globalAlpha = curAlpha;
+                ctx.beginPath();
+                ctx.arc(0, 0, wProg * 35, -Math.PI / 3, Math.PI / 3);
+                ctx.stroke();
+                
+                // White core arc
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1.5 * (1 - wProg);
+                ctx.beginPath();
+                ctx.arc(0, 0, wProg * 35, -Math.PI / 3, Math.PI / 3);
+                ctx.stroke();
+            }
+            ctx.restore();
+            
+            // Random lightning branch-offs shooting from the main beam (Layered glow instead of shadowBlur)
+            for (let b = 0; b < 3; b++) {
+                if (Math.random() < 0.3) {
+                    const startX = 50 + Math.random() * 450;
+                    const len = 40 + Math.random() * 60;
+                    const angle = (Math.random() - 0.5) * (Math.PI / 3);
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(startX, 0);
+                    
+                    let curX = startX;
+                    let curY = 0;
+                    const steps = 4;
+                    for (let s = 0; s < steps; s++) {
+                        curX += Math.cos(angle) * (len / steps);
+                        curY += Math.sin(angle) * (len / steps) + (Math.random() - 0.5) * 10;
+                        ctx.lineTo(curX, curY);
+                    }
+                    
+                    ctx.save();
+                    ctx.lineCap = 'round';
+                    ctx.strokeStyle = 'rgba(0, 255, 255, 0.35)';
+                    ctx.lineWidth = 1.8 * 2.5;
+                    ctx.stroke();
+                    
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 1.8;
+                    ctx.stroke();
+                    ctx.restore();
+                }
+            }
+            
+            // Procedural energy sparks streaming out of the eye along the beam (Layered glow instead of shadowBlur)
+            for (let pIdx = 0; pIdx < 8; pIdx++) {
+                const seed = pIdx * 97.5;
+                const speed = 250 + (seed % 150);
+                const sparkDist = (t * speed + seed) % 400;
+                const spreadY = Math.sin(t * 8 + pIdx) * (18 * (sparkDist / 400));
+                const sparkRadius = 3.5 - (sparkDist / 400) * 3;
+                
+                ctx.save();
+                ctx.beginPath();
+                // Cyan glow circle
+                ctx.fillStyle = 'rgba(0, 255, 255, 0.4)';
+                ctx.arc(sparkDist, spreadY, sparkRadius * 2.2, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // White core circle
+                ctx.beginPath();
+                ctx.arc(sparkDist, spreadY, sparkRadius, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+        
         ctx.restore();
     }
 
-    // Draw Lightning Trail (Procedural Branching Lightning)
+    // Draw Lightning Trail (Procedural Branching Lightning - Optimized Layered Glow)
     if (combatState.isDashStriking) {
         const drawProceduralLightning = (sx, sy, ex, ey, disp, branches, thickness = 3.5) => {
             ctx.save();
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#00ffff';
-            ctx.strokeStyle = '#00ffff';
-            ctx.lineWidth = thickness;
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
 
@@ -1223,18 +1479,25 @@ export function drawPlayer(ctx, camera) {
             }
             pts.push({ x: ex, y: ey });
             
-            // Outer glow path
             ctx.beginPath();
             ctx.moveTo(pts[0].x, pts[0].y);
             for (let i = 1; i < pts.length; i++) {
                 ctx.lineTo(pts[i].x, pts[i].y);
             }
+            
+            // Outer glow layer
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+            ctx.lineWidth = thickness * 2.5;
+            ctx.stroke();
+            
+            // Core glow layer
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = thickness;
             ctx.stroke();
             
             // Inner white core path
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = thickness * 0.35;
-            ctx.shadowBlur = 0;
             ctx.stroke();
             ctx.restore();
         };
