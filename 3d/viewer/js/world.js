@@ -7,20 +7,23 @@ tilesetImg.src = 'assets/tileset_pro.png';
 // 1 = solid ground/wall (Normal grip)
 // 2 = bouncy pad (Spring)
 // 3 = ice block (Slippery)
+// 0 = Empty
+// 1 = Solid Ground (Neon Cyan textured)
+// 2 = Bouncy spring pad (Neon Green)
+// 3 = Ice block (Neon Blue slippery)
 export const map = [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
     [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1],
-    [1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,3,3,3,1],
-    [1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,1,1,1],
-    [1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1],
-    [1,1,1,1,2,2,0,0,0,0,0,0,0,0,1,1,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,1,1,1,1],
-    [1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,2,2,0,0,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,1],
+    [1,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,3,3,1],
+    [1,0,0,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,2,2,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1],
+    [1,1,0,0,0,0,1,1,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1,0,0,1,1,1,1],
+    [1,1,1,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,1,1,1,1],
+    [1,1,1,0,2,1,1,1,1,3,3,3,3,3,3,3,3,3,3,3,3,3,3,0,0,0,1,1,1,1,2,1,1,1,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 ];
 
@@ -72,10 +75,10 @@ export function drawWorld(ctx, camera) {
                             ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
                         }
                         
-                        // Procedural Vines on ceilings (if space below is empty)
-                        if (row < map.length - 1 && map[row+1][col] === 0) {
-                            const vineLength = 15 + ((col * 17) % 20);
-                            let sway = Math.sin(time * 2 + col) * 5;
+                        // Procedural Bioluminescent Vines on ceilings (only on select columns)
+                        if (row < map.length - 1 && map[row+1][col] === 0 && (col * 17) % 6 === 0) {
+                            const vineLength = 20 + ((col * 17) % 25);
+                            let sway = Math.sin(time * 2 + col) * 6;
                             
                             // Player interaction sway
                             if (camera.player) {
@@ -84,23 +87,53 @@ export function drawWorld(ctx, camera) {
                                 const dy = (y + TILE_SIZE + vineLength) - (p.y + p.height/2);
                                 const dist = Math.sqrt(dx*dx + dy*dy);
                                 
-                                if (dist < 50) {
-                                    sway += p.vx * 0.05 * (1 - dist/50);
+                                if (dist < 60) {
+                                    sway += p.vx * 0.08 * (1 - dist/60);
                                 }
                             }
 
+                            const p0x = x + TILE_SIZE/2;
+                            const p0y = y + TILE_SIZE;
+                            const p1x = x + TILE_SIZE/2 + sway;
+                            const p1y = y + TILE_SIZE + vineLength/2;
+                            const p2x = x + TILE_SIZE/2 + sway * 1.5;
+                            const p2y = y + TILE_SIZE + vineLength;
+
+                            // Draw main vine stem
                             ctx.beginPath();
-                            ctx.moveTo(x + TILE_SIZE/2, y + TILE_SIZE);
-                            ctx.quadraticCurveTo(x + TILE_SIZE/2 + sway, y + TILE_SIZE + vineLength/2, x + TILE_SIZE/2 + sway * 1.5, y + TILE_SIZE + vineLength);
-                            ctx.strokeStyle = 'rgba(0, 255, 200, 0.6)';
-                            ctx.lineWidth = 2;
+                            ctx.moveTo(p0x, p0y);
+                            ctx.quadraticCurveTo(p1x, p1y, p2x, p2y);
+                            ctx.strokeStyle = 'rgba(0, 180, 140, 0.8)';
+                            ctx.lineWidth = 2.5;
                             ctx.stroke();
                             
-                            // Vine tip glow
-                            ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
-                            ctx.beginPath();
-                            ctx.arc(x + TILE_SIZE/2 + sway * 1.5, y + TILE_SIZE + vineLength, 2, 0, Math.PI*2);
-                            ctx.fill();
+                            // Draw glowing bioluminescent nodes along the vine curve
+                            const getBezierPoint = (t) => {
+                                const mt = 1 - t;
+                                return {
+                                    x: mt * mt * p0x + 2 * mt * t * p1x + t * t * p2x,
+                                    y: mt * mt * p0y + 2 * mt * t * p1y + t * t * p2y
+                                };
+                            };
+
+                            const nodeTimes = [0.35, 0.7, 0.95];
+                            const colors = ['rgba(255, 0, 150, 0.9)', 'rgba(0, 255, 255, 0.9)', 'rgba(255, 200, 0, 0.9)'];
+                            
+                            for (let i = 0; i < nodeTimes.length; i++) {
+                                const tVal = nodeTimes[i];
+                                const pt = getBezierPoint(tVal);
+                                
+                                ctx.save();
+                                ctx.shadowBlur = 10;
+                                ctx.shadowColor = colors[i];
+                                ctx.fillStyle = colors[i];
+                                
+                                // Draw leaf or bulb
+                                ctx.beginPath();
+                                ctx.arc(pt.x, pt.y, i === 2 ? 3 : 2, 0, Math.PI * 2);
+                                ctx.fill();
+                                ctx.restore();
+                            }
                         }
                     } 
                     else if (tile === 2) { // Bouncy Pad (Neon Green/Yellow)

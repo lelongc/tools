@@ -7,7 +7,7 @@
     <style>
         body {
             margin: 0;
-            background: #111;
+            background: #080d16;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -15,29 +15,74 @@
             color: white;
             font-family: 'Courier New', Courier, monospace;
         }
+        .game-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            flex-direction: row;
+        }
         canvas {
-            background: #222;
-            /* Ensure pixels remain sharp */
-            image-rendering: pixelated; 
-            border: 4px solid #444;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            background: #02050a;
+            border: 4px solid #00ffcc;
+            box-shadow: 0 0 25px rgba(0, 255, 204, 0.3);
         }
         #ui {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            pointer-events: none;
+            background: rgba(0, 15, 25, 0.9);
+            border: 2px solid #00ffcc;
+            border-radius: 8px;
+            padding: 20px;
+            width: 260px;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.15);
+            font-size: 13px;
+        }
+        #ui h2 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            color: #00ffcc;
+            text-shadow: 0 0 8px rgba(0, 255, 204, 0.6);
+            border-bottom: 1px dashed rgba(0, 255, 204, 0.4);
+            padding-bottom: 8px;
+            text-align: center;
+        }
+        #ui h3 {
+            color: #ff0077;
+            margin: 15px 0 5px 0;
+            font-size: 14px;
+            text-shadow: 0 0 5px rgba(255, 0, 119, 0.4);
+        }
+        #ui p {
+            margin: 6px 0;
+            line-height: 1.4;
+        }
+        .key-badge {
+            background: rgba(0, 255, 204, 0.2);
+            color: #00ffcc;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid rgba(0, 255, 204, 0.4);
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div id="ui">
-        <h2>2D Pixel Game</h2>
-        <p>Movement: A/D. Jump: W</p>
-        <p>Combat: J (Combo), K (Dash Strike), L (Ground Smash)</p>
-        <p>Misc: U (Dash), I (Basic Attack)</p>
+    <div class="game-container">
+        <canvas id="gameCanvas" width="640" height="480"></canvas>
+        
+        <div id="ui">
+            <h2>BIO-PROBE HUD</h2>
+            
+            <h3>CONTROLS</h3>
+            <p><span class="key-badge">A</span> / <span class="key-badge">D</span> : Move Left / Right</p>
+            <p><span class="key-badge">W</span> / <span class="key-badge">Space</span> : Jump / Flip</p>
+            <p><span class="key-badge">U</span> : Basic Dash</p>
+            <p><span class="key-badge">I</span> : Basic Attack</p>
+
+            <h3>COMBAT SKILLS</h3>
+            <p><span class="key-badge">J</span> : Tentacle Lash (3-Hit Combo)</p>
+            <p><span class="key-badge">K</span> : Spiral Drill Dash</p>
+            <p><span class="key-badge">L</span> : Bio-Smash (Use in Air)</p>
+        </div>
     </div>
-    <canvas id="gameCanvas" width="640" height="480"></canvas>
     
     <script type="module">
         // Force fresh load every time - bypass all browser cache

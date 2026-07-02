@@ -290,11 +290,135 @@ export function drawPlayer(ctx, camera) {
     ctx.ellipse(3, -1, 2, 3, 0, 0, Math.PI*2);
     ctx.fill();
     
-    // Antenna
-    ctx.beginPath();
-    ctx.moveTo(-2, -5);
-    ctx.quadraticCurveTo(-6, -12, Math.sin(t * 5)*3, -16);
-    ctx.stroke();
+    // Antenna / Combat Tentacle (directly morphing the head antenna!)
+    if (combatState.isAttacking) {
+        // Draw the whipping tentacles starting from the antenna base (-2, -5)
+        const progress = 1 - (combatState.attackTime / (combatState.comboStep === 3 ? 0.25 : 0.15));
+        
+        const drawHeadSpaceTentacle = (startX, startY, endX, endY, progressVal, thickness, color, wigglePhase) => {
+            const segments = 10;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            
+            const curEndX = startX + (endX - startX) * progressVal;
+            const curEndY = startY + (endY - startY) * progressVal;
+            
+            for (let i = 1; i <= segments; i++) {
+                const tVal = i / segments;
+                const targetX = startX + (curEndX - startX) * tVal;
+                const targetY = startY + (curEndY - startY) * tVal;
+                
+                const wiggle = Math.sin(t * 20 + tVal * 5 + wigglePhase) * (20 * tVal * progressVal);
+                
+                // Perpendicular vector for wiggle
+                const dx = endX - startX;
+                const dy = endY - startY;
+                const len = Math.sqrt(dx*dx + dy*dy) || 1;
+                const nx = -dy / len;
+                const ny = dx / len;
+                
+                ctx.lineTo(targetX + nx * wiggle, targetY + ny * wiggle);
+            }
+            
+            ctx.save();
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = color;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = thickness * Math.max(0.1, 1 - progressVal*0.5);
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            ctx.restore();
+        };
+
+        if (combatState.comboStep === 1) {
+            // Whip 1: Forward and slightly up
+            drawHeadSpaceTentacle(-2, -5, 80, -10, progress, 6, 'rgba(0, 255, 255, 1)', 0);
+            drawHeadSpaceTentacle(-2, -5, 60, 20, progress, 4, 'rgba(0, 200, 255, 0.8)', 1);
+        } else if (combatState.comboStep === 2) {
+            // Whip 2: Forward and down
+            drawHeadSpaceTentacle(-2, -5, 90, 25, progress, 7, 'rgba(0, 255, 255, 1)', 2);
+            drawHeadSpaceTentacle(-2, -5, 70, -15, progress, 5, 'rgba(0, 200, 255, 0.8)', 3);
+        } else if (combatState.comboStep === 3) {
+            // Whip 3: 5 magenta tentacles bursting forward!
+            for (let k = 0; k < 5; k++) {
+                const spreadY = (k - 2) * 20;
+                const length = 120 + Math.random() * 30;
+                drawHeadSpaceTentacle(-2, -5, length, spreadY, progress, 8 - Math.abs(k - 2), 'rgba(255, 50, 200, 1)', k);
+            }
+        }
+    } else if (combatState.isDashStriking) {
+        // Spiral drill tentacles emerging from the head antenna
+        const drawHeadSpaceTentacle = (startX, startY, endX, endY, progressVal, thickness, color, wigglePhase) => {
+            const segments = 10;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            for (let i = 1; i <= segments; i++) {
+                const tVal = i / segments;
+                const targetX = startX + (endX - startX) * tVal;
+                const targetY = startY + (endY - startY) * tVal;
+                const wiggle = Math.sin(t * 30 + tVal * 5 + wigglePhase) * (15 * tVal);
+                const dx = endX - startX;
+                const dy = endY - startY;
+                const len = Math.sqrt(dx*dx + dy*dy) || 1;
+                const nx = -dy / len;
+                const ny = dx / len;
+                ctx.lineTo(targetX + nx * wiggle, targetY + ny * wiggle);
+            }
+            ctx.save();
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = color;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = thickness;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            ctx.restore();
+        };
+
+        for (let k = 0; k < 6; k++) {
+            const spreadY = Math.sin(t * 30 + k) * 25;
+            const spreadX = Math.cos(t * 30 + k) * 8;
+            drawHeadSpaceTentacle(-2, -5, 140 + spreadX, spreadY, 1, 4, 'rgba(255, 255, 0, 1)', k);
+        }
+    } else if (combatState.isGroundSmashing) {
+        // Smash tentacles pointing upwards
+        const drawHeadSpaceTentacle = (startX, startY, endX, endY, progressVal, thickness, color, wigglePhase) => {
+            const segments = 10;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            for (let i = 1; i <= segments; i++) {
+                const tVal = i / segments;
+                const targetX = startX + (endX - startX) * tVal;
+                const targetY = startY + (endY - startY) * tVal;
+                const wiggle = Math.sin(t * 20 + tVal * 5 + wigglePhase) * (10 * tVal);
+                const dx = endX - startX;
+                const dy = endY - startY;
+                const len = Math.sqrt(dx*dx + dy*dy) || 1;
+                const nx = -dy / len;
+                const ny = dx / len;
+                ctx.lineTo(targetX + nx * wiggle, targetY + ny * wiggle);
+            }
+            ctx.save();
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = color;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = thickness;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            ctx.restore();
+        };
+
+        for (let k = 0; k < 4; k++) {
+            const spreadX = (k - 1.5) * 35;
+            const length = 90 + Math.random() * 30;
+            drawHeadSpaceTentacle(-2, -5, spreadX, -length, 1, 5, 'rgba(255, 100, 0, 1)', k);
+        }
+    } else {
+        // Draw normal idle antenna
+        ctx.beginPath();
+        ctx.moveTo(-2, -5);
+        ctx.quadraticCurveTo(-6, -12, Math.sin(t * 5) * 3, -16);
+        ctx.stroke();
+    }
     
     ctx.restore();
 
