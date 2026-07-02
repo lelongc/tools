@@ -42,10 +42,6 @@ export function updatePlayer(dt, addParticle) {
     } else if (combatState.isGroundSmashing) {
         // Lock horizontal movement during ground smash (combat.js handles Y)
         player.vx = 0;
-    } else if (combatState.isCharging) {
-        // Lock player position during charging
-        player.vx = 0;
-        player.vy = 0;
     } else {
         // Horizontal Movement
         let targetVx = 0;
@@ -166,82 +162,23 @@ export function updatePlayer(dt, addParticle) {
         }
     }
 
-    // Move X and resolve collisions with sub-stepping for high speeds to prevent clipping
-    const moveAmountX = player.vx * dt;
-    const absMoveX = Math.abs(moveAmountX);
-    const stepSizeX = 8; // Move in max 8-pixel increments
-    const stepCountX = Math.ceil(absMoveX / stepSizeX);
-    const signX = Math.sign(moveAmountX);
-    
-    for (let step = 0; step < stepCountX; step++) {
-        const nextMove = Math.min(stepSizeX, absMoveX - step * stepSizeX) * signX;
-        player.x += nextMove;
-        if (getCollision(player.x, player.y, player.width, player.height)) {
-            // Snap back slightly
-            if (signX > 0) {
-                player.x = Math.floor((player.x + player.width) / TILE_SIZE) * TILE_SIZE - player.width - 0.01;
-            } else {
-                player.x = Math.floor(player.x / TILE_SIZE) * TILE_SIZE + TILE_SIZE + 0.01;
-            }
-            player.vx = 0;
-            break;
+    // We let Phaser Arcade Physics handle X and Y movements and tile collisions!
+    // We only process landing squash/stretch and landing particles here.
+    if (player.isGrounded && !player.wasGroundedLastFrame) {
+        player.scaleX = 1.3;
+        player.scaleY = 0.7;
+        
+        // Hard landing shake
+        if (player.vy > 600) {
+            window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 5}}));
+        }
+
+        for (let i = 0; i < 8; i++) {
+            addParticle(player.x + player.width/2, player.y + player.height, 
+                        (Math.random() - 0.5) * 150, -Math.random() * 60, 'rgba(0, 255, 255, 0.4)', 0.4);
         }
     }
-
-    const wasGrounded = player.isGrounded;
-    // Move Y and resolve collisions with sub-stepping for high speeds
-    const moveAmountY = player.vy * dt;
-    const absMoveY = Math.abs(moveAmountY);
-    const stepSizeY = 8;
-    const stepCountY = Math.ceil(absMoveY / stepSizeY);
-    const signY = Math.sign(moveAmountY);
-    
-    player.isGrounded = false;
-    for (let step = 0; step < stepCountY; step++) {
-        const nextMove = Math.min(stepSizeY, absMoveY - step * stepSizeY) * signY;
-        player.y += nextMove;
-        const collY = getCollision(player.x, player.y, player.width, player.height);
-        if (collY) {
-            if (signY > 0) { // Falling down
-                if (collY === 2) {
-                    // Bounce Pad!
-                    player.y = Math.floor((player.y + player.height) / TILE_SIZE) * TILE_SIZE - player.height - 0.01;
-                    player.vy = -1000; // Launch player up
-                    player.scaleX = 0.4; // Extreme stretch
-                    player.scaleY = 1.8;
-                    window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 12}}));
-                } else {
-                    // Normal Ground
-                    player.y = Math.floor((player.y + player.height) / TILE_SIZE) * TILE_SIZE - player.height - 0.01;
-                    player.isGrounded = true;
-                    
-                    // Landing Splash Dust & Squash
-                    if (!wasGrounded) {
-                        player.scaleX = 1.3;
-                        player.scaleY = 0.7;
-                        
-                        // Only shake camera on very hard landings (high velocity)
-                        if (player.vy > 600) {
-                            window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 5}}));
-                        }
-
-                        for(let i=0; i<8; i++) {
-                            addParticle(player.x + player.width/2, player.y + player.height, 
-                                        (Math.random()-0.5)*150, -Math.random()*60, 'rgba(0, 255, 255, 0.4)', 0.4);
-                        }
-                    }
-                }
-            } else if (signY < 0) { // Hitting head
-                player.y = Math.floor(player.y / TILE_SIZE) * TILE_SIZE + TILE_SIZE + 0.01;
-                player.vy = 0;
-            }
-            
-            if (collY !== 2 && signY > 0) {
-                player.vy = 0;
-            }
-            break;
-        }
-    }
+    player.wasGroundedLastFrame = player.isGrounded;
 
     // Run Dust
     if (player.isGrounded && Math.abs(player.vx) > 50 && Math.random() < 15 * dt) {
@@ -745,129 +682,196 @@ export function drawPlayer(ctx, camera) {
     ctx.arc(0, 0, 2.2, 0, Math.PI * 2); // Perfect circle in the center of the head!
     ctx.fill();
     
-    // Sprite Drawing Helpers for VFX (Optimized: removed slow shadowBlur from drawImage!)
+    // Sprite Drawing Helpers for VFX (with 100% Procedural Vector Fallbacks)
     const drawSlashSprite = (pt, angle, size, prog) => {
-        if (!lightningSlashImg.complete || lightningSlashImg.naturalWidth <= 0 || size <= 0) return;
+        if (!pt || size <= 0) return;
         ctx.save();
         ctx.translate(pt.x, pt.y);
         ctx.rotate(angle);
         
-        ctx.globalCompositeOperation = 'screen';
-        ctx.globalAlpha = 0.65; // Bolder
-        
         const activeProg = (prog !== undefined) ? prog : 0.8;
-        const frameIdx = Math.max(0, Math.min(5, Math.floor(activeProg * 6)));
-        try { ctx.drawImage(lightningSlashImg, frameIdx * 64, 0, 64, 64, -size/2, -size/2, size, size); } catch(e) {}
+        
+        if (lightningSlashImg.complete && lightningSlashImg.naturalWidth > 0) {
+            ctx.globalCompositeOperation = 'screen';
+            ctx.globalAlpha = 0.65;
+            const frameIdx = Math.max(0, Math.min(5, Math.floor(activeProg * 6)));
+            try { ctx.drawImage(lightningSlashImg, frameIdx * 64, 0, 64, 64, -size/2, -size/2, size, size); } catch(e) {}
+            ctx.restore();
+            return;
+        }
+
+        // Procedural Vector Fallback: Neon Crescent Slash Arc
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = 0.85 * (1 - activeProg * 0.5);
+        ctx.strokeStyle = '#00ffff';
+        ctx.lineWidth = size * 0.25;
+        ctx.shadowColor = '#00ffff';
+        ctx.shadowBlur = 15;
+        
+        ctx.beginPath();
+        ctx.arc(0, 0, size * 0.5, -Math.PI * 0.4, Math.PI * 0.4);
+        ctx.stroke();
+        
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = size * 0.1;
+        ctx.beginPath();
+        ctx.arc(0, 0, size * 0.5, -Math.PI * 0.3, Math.PI * 0.3);
+        ctx.stroke();
         ctx.restore();
     };
 
     const drawImpactSprite = (pt, size, prog) => {
         const activeProg = (prog !== undefined) ? prog : 0.8;
-        if (!lightningImpactImg.complete || lightningImpactImg.naturalWidth <= 0 || activeProg < 0.4 || size <= 0) return;
+        if (!pt || activeProg < 0.4 || size <= 0) return;
         ctx.save();
         ctx.translate(pt.x, pt.y);
         
+        if (lightningImpactImg.complete && lightningImpactImg.naturalWidth > 0) {
+            ctx.globalCompositeOperation = 'screen';
+            ctx.globalAlpha = 0.6;
+            const animProg = Math.max(0, Math.min(1.0, (activeProg - 0.4) / 0.6));
+            const frameIdx = Math.max(0, Math.min(6, Math.floor(animProg * 7)));
+            try { ctx.drawImage(lightningImpactImg, frameIdx * 64, 0, 64, 64, -size/2, -size/2, size, size); } catch(e) {}
+            ctx.restore();
+            return;
+        }
+
+        // Procedural Vector Fallback: Electric Starburst Burst
         ctx.globalCompositeOperation = 'screen';
-        ctx.globalAlpha = 0.6; // Bolder
+        ctx.globalAlpha = 0.8;
+        ctx.strokeStyle = '#00ffff';
+        ctx.lineWidth = 3;
+        ctx.shadowColor = '#00ffff';
+        ctx.shadowBlur = 15;
         
-        const animProg = Math.max(0, Math.min(1.0, (activeProg - 0.4) / 0.6));
-        const frameIdx = Math.max(0, Math.min(6, Math.floor(animProg * 7)));
-        try { ctx.drawImage(lightningImpactImg, frameIdx * 64, 0, 64, 64, -size/2, -size/2, size, size); } catch(e) {}
+        const r = size * 0.4;
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+            const a = (i / 6) * Math.PI * 2 + activeProg * 5;
+            ctx.moveTo(0, 0);
+            ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+        }
+        ctx.stroke();
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.3, 0, Math.PI * 2);
+        ctx.fill();
         ctx.restore();
     };
 
-    // Antenna / Combat Tentacle (directly morphing the head antenna!)
+    // Antenna / Combat Tentacles (always visible!)
+    const drawHeadSpaceTentacle = (startX, startY, endX, endY, progressVal, thickness, wigglePhase) => {
+        const segments = 10;
+        const pts = [{ x: startX, y: startY }];
+        
+        const curEndX = startX + (endX - startX) * progressVal;
+        const curEndY = startY + (endY - startY) * progressVal;
+        
+        for (let i = 1; i <= segments; i++) {
+            const tVal = i / segments;
+            const targetX = startX + (curEndX - startX) * tVal;
+            const targetY = startY + (curEndY - startY) * tVal;
+            
+            const wiggleAmp = combatState.isAttacking ? 20 : (combatState.isCharging ? 10 : 5);
+            const wiggleSpeed = combatState.isAttacking ? 20 : (combatState.isCharging ? 30 : 5);
+            const wiggle = Math.sin(t * wiggleSpeed + tVal * 5 + wigglePhase) * (wiggleAmp * tVal * progressVal);
+            
+            const dx = endX - startX;
+            const dy = endY - startY;
+            const len = Math.sqrt(dx*dx + dy*dy) || 1;
+            pts.push({
+                x: targetX + (-dy / len) * wiggle,
+                y: targetY + (dx / len) * wiggle
+            });
+        }
+        
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+        
+        ctx.save();
+        ctx.lineCap = 'round';
+        // Make thickness jagged during charging to look less flat
+        if (combatState.isCharging) {
+            ctx.setLineDash([2, 2]);
+        }
+        
+        const curThickness = thickness * Math.max(0.1, 1 - progressVal * 0.5);
+        
+        // Layered neon glow
+        ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+        ctx.lineWidth = curThickness * 2.5;
+        ctx.stroke();
+        
+        ctx.strokeStyle = '#00ffff';
+        ctx.lineWidth = curThickness;
+        ctx.stroke();
+        ctx.restore();
+        
+        for (let i = 2; i < pts.length; i += 2) {
+            const nodeRadius = (thickness * 0.4) * (1 - (i/pts.length) * 0.4);
+            ctx.save();
+            ctx.beginPath();
+            
+            // Cyan glow circle
+            ctx.fillStyle = 'rgba(0, 255, 255, 0.45)';
+            ctx.arc(pts[i].x, pts[i].y, nodeRadius * 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // White core circle
+            ctx.beginPath();
+            ctx.fillStyle = '#ffffff'; 
+            ctx.arc(pts[i].x, pts[i].y, nodeRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+        return pts[pts.length - 1]; 
+    };
+
     if (combatState.isAttacking) {
         // Draw the whipping tentacles starting from the antenna base (-2, -5)
         const progress = 1 - (combatState.attackTime / (combatState.comboStep === 3 ? 0.25 : 0.15));
-        
-        const drawHeadSpaceTentacle = (startX, startY, endX, endY, progressVal, thickness, wigglePhase) => {
-            const segments = 10;
-            const pts = [{ x: startX, y: startY }];
-            
-            const curEndX = startX + (endX - startX) * progressVal;
-            const curEndY = startY + (endY - startY) * progressVal;
-            
-            for (let i = 1; i <= segments; i++) {
-                const tVal = i / segments;
-                const targetX = startX + (curEndX - startX) * tVal;
-                const targetY = startY + (curEndY - startY) * tVal;
-                
-                const wiggle = Math.sin(t * 20 + tVal * 5 + wigglePhase) * (20 * tVal * progressVal);
-                const dx = endX - startX;
-                const dy = endY - startY;
-                const len = Math.sqrt(dx*dx + dy*dy) || 1;
-                pts.push({
-                    x: targetX + (-dy / len) * wiggle,
-                    y: targetY + (dx / len) * wiggle
-                });
-            }
-            
-            ctx.beginPath();
-            ctx.moveTo(pts[0].x, pts[0].y);
-            for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-            
-            ctx.save();
-            ctx.lineCap = 'round';
-            const curThickness = thickness * Math.max(0.1, 1 - progressVal * 0.5);
-            
-            // Layered neon glow
-            ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
-            ctx.lineWidth = curThickness * 2.5;
-            ctx.stroke();
-            
-            ctx.strokeStyle = '#00ffff';
-            ctx.lineWidth = curThickness;
-            ctx.stroke();
-            ctx.restore();
-            
-            for (let i = 2; i < pts.length; i += 2) {
-                const nodeRadius = (thickness * 0.4) * (1 - (i/pts.length) * 0.4);
-                ctx.save();
-                ctx.beginPath();
-                
-                // Cyan glow circle
-                ctx.fillStyle = 'rgba(0, 255, 255, 0.45)';
-                ctx.arc(pts[i].x, pts[i].y, nodeRadius * 2.5, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // White core circle
-                ctx.beginPath();
-                ctx.fillStyle = '#ffffff'; 
-                ctx.arc(pts[i].x, pts[i].y, nodeRadius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            }
-            return pts[pts.length - 1]; 
-        };
 
         if (combatState.comboStep === 1) {
-            // Whip 1: Forward and slightly up
             const tip1 = drawHeadSpaceTentacle(-2, -5, 80, -10, progress, 6, 0);
             const tip2 = drawHeadSpaceTentacle(-2, -5, 60, 20, progress, 4, 1);
             drawSlashSprite(tip1, -Math.PI / 8, 30);
             drawImpactSprite(tip1, 35);
         } else if (combatState.comboStep === 2) {
-            // Whip 2: Forward and down
             const tip1 = drawHeadSpaceTentacle(-2, -5, 90, 25, progress, 7, 2);
             const tip2 = drawHeadSpaceTentacle(-2, -5, 70, -15, progress, 5, 3);
             drawSlashSprite(tip1, Math.PI / 6, 35);
             drawImpactSprite(tip1, 40);
         } else if (combatState.comboStep === 3) {
-            // Whip 3: 5 cyan tentacles bursting forward!
             let mainTip = null;
             for (let k = 0; k < 5; k++) {
-                const spreadY = (k - 2) * 20;
-                const length = 120 + Math.random() * 30;
-                const tip = drawHeadSpaceTentacle(-2, -5, length, spreadY, progress, 8 - Math.abs(k - 2), k);
+                const angle = -Math.PI/6 + (k/4) * Math.PI/3;
+                const dist = 110 - Math.abs(k - 2) * 15;
+                const tip = drawHeadSpaceTentacle(-2, -5, Math.cos(angle) * dist, Math.sin(angle) * dist, progress, 6 - Math.abs(k-2), k);
                 if (k === 2) mainTip = tip;
             }
             if (mainTip) {
-                drawSlashSprite(mainTip, 0, 50); // Massive pixel slash!
-                drawImpactSprite(mainTip, 55);
+                drawSlashSprite(mainTip, 0, 45);
+                drawImpactSprite(mainTip, 60);
             }
         }
-    } else if (combatState.isDashStriking) {
+    } else if (combatState.isCharging) {
+        // Spin tentacles around the head during charge K
+        const chargeSpeed = t * (15 + combatState.chargeLevel * 10);
+        for (let k = 0; k < 4; k++) {
+            const angle = chargeSpeed + (k * Math.PI / 2);
+            const dist = 25 + combatState.chargeLevel * 10;
+            drawHeadSpaceTentacle(0, 0, Math.cos(angle) * dist, Math.sin(angle) * dist, 1.0, 3 + combatState.chargeLevel, k);
+        }
+    } else {
+        // Idle/Run state: Flowing gracefully backwards
+        const idleFlow = isRunning ? -25 : -15;
+        drawHeadSpaceTentacle(-2, -5, idleFlow, -15, 1.0, 4, 0);
+        drawHeadSpaceTentacle(-2, -5, idleFlow + 5, -8, 1.0, 3, 1.5);
+    }
+
+    if (combatState.isDashStriking) {
         // Dash Strike: spiral drill tentacles emerging from the head antenna
         const drawHeadSpaceTentacle = (startX, startY, endX, endY, thickness, wigglePhase) => {
             const segments = 10;
@@ -1103,6 +1107,53 @@ export function drawPlayer(ctx, camera) {
                 drawTentacle(-2, -5, spreadX, -length, 7 - Math.abs(k - 3) * 0.8, k);
             }
         }
+    } else if (combatState.isLightningNova) {
+        const prog = Math.max(0, Math.min(1.0, 1 - (combatState.lightningNovaTime / 0.3)));
+        // 8 wild tentacles bursting outward 360 degrees
+        for (let k = 0; k < 8; k++) {
+            const angle = (k / 8) * Math.PI * 2 + t * 5;
+            const len = (80 + Math.sin(t * 30 + k) * 20) * (0.4 + prog * 0.6);
+            
+            // Inline the tentacle logic for Nova to avoid missing the generic function
+            const segments = 10;
+            const pts = [{ x: -2, y: -5 }];
+            for (let i = 1; i <= segments; i++) {
+                const tVal = i / segments;
+                const targetX = -2 + (Math.cos(angle) * len - (-2)) * tVal;
+                const targetY = -5 + (Math.sin(angle) * len - (-5)) * tVal;
+                
+                const wiggle = Math.sin(t * 30 + tVal * 5 + k) * (15 * tVal);
+                const dx = Math.cos(angle) * len - (-2);
+                const dy = Math.sin(angle) * len - (-5);
+                const l = Math.sqrt(dx*dx + dy*dy) || 1;
+                pts.push({
+                    x: targetX + (-dy / l) * wiggle,
+                    y: targetY + (dx / l) * wiggle
+                });
+            }
+            
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+            
+            ctx.save();
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#00ffff';
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 6;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 6 * 0.35;
+            ctx.stroke();
+            ctx.restore();
+
+            const tip = pts[pts.length - 1];
+            if (k % 2 === 0) {
+                drawSlashSprite(tip, angle, 45, prog);
+            }
+        }
     } else if (combatState.isGroundSmashing) {
         const drawHeadSpaceTentacle = (startX, startY, endX, endY, thickness, wigglePhase) => {
             const segments = 10;
@@ -1231,12 +1282,6 @@ export function drawPlayer(ctx, camera) {
             ctx.stroke();
             ctx.restore();
         }
-    } else {
-        // Draw normal idle antenna
-        ctx.beginPath();
-        ctx.moveTo(-2, -5);
-        ctx.quadraticCurveTo(-6, -12, Math.sin(t * 5) * 3, -16);
-        ctx.stroke();
     }
 
     // Draw Laser Beam (if active) from centered eye (0, 0)
@@ -1251,7 +1296,7 @@ export function drawPlayer(ctx, camera) {
         // 1. Generate Jagged Top and Bottom Paths
         const topPts = [{ x: 0, y: 0 }];
         const bottomPts = [{ x: 0, y: 0 }];
-        const steps = 35;
+        const steps = 15;
         const stepLen = 600 / steps;
         
         for (let i = 1; i <= steps; i++) {
@@ -1342,7 +1387,7 @@ export function drawPlayer(ctx, camera) {
                 const amp = lvl === 3 ? 18 : 12;
                 const phaseOffset = c * Math.PI + t * 45;
                 
-                for (let x = 15; x < 600; x += 15) {
+                for (let x = 25; x < 600; x += 25) {
                     const y = Math.sin(x / waveLength + phaseOffset) * amp + (Math.random() - 0.5) * 4;
                     ctx.lineTo(x, y);
                 }

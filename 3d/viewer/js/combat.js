@@ -1,4 +1,4 @@
-import { keys } from './input.js';
+import { keys, isBuffered, consumeBuffer } from './input.js';
 import { addParticle } from './effects.js';
 import { getCollision, TILE_SIZE } from './world.js';
 
@@ -45,6 +45,10 @@ export const combatState = {
     risingBlastTime: 0,
     risingBlastCooldown: 0,
     
+    isLightningNova: false,
+    lightningNovaTime: 0,
+    lightningNovaCooldown: 0,
+    
     isCharging: false,
     chargeTime: 0,
     chargeDuration: 0.8,
@@ -61,6 +65,7 @@ export function releaseChargeAttack(player) {
     combatState.isDashStriking = true;
     
     const chargeTime = combatState.chargeTime;
+    combatState.chargeTime = 0; // RESET CHARGE TIME!
     let level = 1;
     let cameraShake = 4;
     let beamDuration = 0.15;
@@ -187,8 +192,13 @@ export function updateCombat(player, dt) {
         releaseChargeAttack(player);
     }
 
+    // Prepare Skill Triggers & Buffer Flags
+    const wantSkill4 = keys.skill4Pressed || isBuffered('skill4');
+    const wantSkill3 = keys.skill3Pressed || isBuffered('skill3');
+    const wantSkill1 = keys.skill1Pressed || isBuffered('skill1');
+
     // SKILL 4: Heavy Attack combos (I) - Spells
-    if (keys.skill4Pressed && !isBusy && !combatState.isCharging) {
+    if (wantSkill4 && !isBusy && !combatState.isCharging) {
         if (keys.down) {
             // S + I: Ground Smash (Desolate Dive)
             if (combatState.smashCooldown <= 0) {
@@ -202,6 +212,7 @@ export function updateCombat(player, dt) {
                     combatState.smashPhase = 3; // Air Smash skips float, straight to drop!
                     player.vy = 1200; 
                 }
+                consumeBuffer('skill4');
             }
         } else if (keys.up) {
             // W + I: Rising Blast (Howling Wraiths)
@@ -212,6 +223,7 @@ export function updateCombat(player, dt) {
                 player.vx = 0;
                 player.vy = -200; // Small upward float
                 window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 6}}));
+                consumeBuffer('skill4');
             }
         } else {
             // Neutral I: Bio-Drill (Vengeful Spirit dash)
@@ -222,12 +234,44 @@ export function updateCombat(player, dt) {
                 player.vx = player.facingRight ? 900 : -900;
                 player.vy = 0; 
                 window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 6}}));
+                consumeBuffer('skill4');
+            }
+        }
+    }
+    
+    // SKILL 3: Lightning Nova (L) - AOE Shockwave Burst
+    else if (wantSkill3 && !isBusy && !combatState.isCharging) {
+        if (combatState.lightningNovaCooldown <= 0) {
+            combatState.isLightningNova = true;
+            combatState.lightningNovaTime = 0.3;
+            combatState.lightningNovaCooldown = 0.8;
+            player.vx *= 0.2; // stall horizontal movement
+            player.vy = -100; // slight air float
+            window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 12}}));
+            consumeBuffer('skill3');
+            
+            // Spawn 360-degree shockwave ring and particles
+            addParticle(player.x + player.width/2, player.y + player.height/2, 0, 0, '#00ffff', 0.4, 'ring', 60);
+            addParticle(player.x + player.width/2, player.y + player.height/2, 0, 0, '#ffffff', 0.25, 'ring', 25);
+            for (let i = 0; i < 16; i++) {
+                const ang = (i / 16) * Math.PI * 2;
+                const spd = 400 + Math.random() * 200;
+                addParticle(
+                    player.x + player.width/2,
+                    player.y + player.height/2,
+                    Math.cos(ang) * spd,
+                    Math.sin(ang) * spd,
+                    '#00ffff',
+                    0.35,
+                    'tex_star',
+                    16 + Math.random() * 8
+                );
             }
         }
     }
     
     // SKILL 1: Light Attack combos (J) - Nail
-    else if (keys.skill1Pressed && !isBusy && !combatState.isCharging) {
+    else if (wantSkill1 && !isBusy && !combatState.isCharging) {
         if (keys.down) {
             if (player.isGrounded) {
                 // Ground S + J: Low Sweep
@@ -236,6 +280,7 @@ export function updateCombat(player, dt) {
                     combatState.lowSweepTime = 0.25;
                     combatState.lowSweepCooldown = 0.6;
                     player.vx = player.facingRight ? 250 : -250; 
+                    consumeBuffer('skill1');
                 }
             } else {
                 // Air S + J: Pogo Strike
@@ -244,6 +289,7 @@ export function updateCombat(player, dt) {
                     combatState.pogoSlashTime = 0.2;
                     combatState.pogoSlashCooldown = 0.3;
                     player.vy = -100; // Slight stall to hit
+                    consumeBuffer('skill1');
                 }
             }
         } else if (keys.up) {
@@ -253,6 +299,7 @@ export function updateCombat(player, dt) {
                 combatState.upSlashTime = 0.2;
                 combatState.upSlashCooldown = 0.4;
                 if (!player.isGrounded) player.vy = -150; // Air stall
+                consumeBuffer('skill1');
             }
         } else {
             // Neutral J: Normal Attack Combo
@@ -277,6 +324,7 @@ export function updateCombat(player, dt) {
                     }
                 }
                 combatState.comboWindow = 0.6;
+                consumeBuffer('skill1');
             }
         }
     }
@@ -317,6 +365,30 @@ export function updateCombat(player, dt) {
         }
     }
 
+    // Execute Skill 3 (Lightning Nova)
+    if (combatState.isLightningNova) {
+        combatState.lightningNovaTime -= dt;
+        player.scaleX = 1.4;
+        player.scaleY = 1.4;
+        
+        if (Math.random() < 0.8) {
+            addParticle(
+                player.x + player.width/2 + (Math.random() - 0.5) * 40,
+                player.y + player.height/2 + (Math.random() - 0.5) * 40,
+                (Math.random() - 0.5) * 150,
+                (Math.random() - 0.5) * 150,
+                'rgba(0, 255, 255, 0.8)',
+                0.2,
+                'spark',
+                4
+            );
+        }
+        
+        if (combatState.lightningNovaTime <= 0) {
+            combatState.isLightningNova = false;
+        }
+    }
+
     // Execute Skill 2 (Dash Strike - Lightning speed)
     if (combatState.isDashStriking) {
         combatState.dashStrikeTime -= dt;
@@ -339,8 +411,8 @@ export function updateCombat(player, dt) {
         );
         
         // Wall Ricochet Logic!
-        const hitWallRight = player.facingRight && getCollision(player.x + player.width + 5, player.y, 5, player.height);
-        const hitWallLeft = !player.facingRight && getCollision(player.x - 5, player.y, 5, player.height);
+        const hitWallRight = player.facingRight && player.blockedRight;
+        const hitWallLeft = !player.facingRight && player.blockedLeft;
         
         if (hitWallRight || hitWallLeft) {
             // Ricochet!

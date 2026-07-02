@@ -56,19 +56,76 @@ preTintImage(particleTex.smoke, 'smoke');
 preTintImage(particleTex.impact, 'impact');
 
 function drawTintedImage(ctx, name, x, y, width, height, colKey, alpha, angle = 0, sx = 0, sy = 0, sw = null, sh = null) {
-    const tintedImg = tintedTex[name] ? tintedTex[name][colKey || 'cyan'] : null;
-    if (!tintedImg) return; // Fallback if image not ready yet
+    const tintedImg = tintedTex[name] ? (tintedTex[name][colKey || 'cyan'] || tintedTex[name]['cyan'] || tintedTex[name]['white']) : null;
     
-    const sW = sw !== null ? sw : tintedImg.width;
-    const sH = sh !== null ? sh : tintedImg.height;
+    if (tintedImg && tintedImg.width > 0) {
+        const sW = sw !== null ? sw : tintedImg.width;
+        const sH = sh !== null ? sh : tintedImg.height;
+        if (sW > 0 && sH > 0 && width > 0 && height > 0) {
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.translate(x, y);
+            ctx.rotate(angle);
+            try {
+                ctx.drawImage(tintedImg, sx, sy, sW, sH, -width / 2, -height / 2, width, height);
+            } catch(e) {}
+            ctx.restore();
+            return;
+        }
+    }
     
-    if (sW <= 0 || sH <= 0 || width <= 0 || height <= 0) return;
-    
+    // Procedural Vector Fallback if image asset is not loaded or tainted
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.translate(x, y);
     ctx.rotate(angle);
-    ctx.drawImage(tintedImg, sx, sy, sW, sH, -width / 2, -height / 2, width, height);
+    
+    const strokeCol = (colKey === 'white') ? '#ffffff' : ((colKey === 'blue') ? '#0077ff' : '#00ffff');
+    
+    if (name === 'star' || name === 'spark') {
+        // Glowing 4-point Star
+        const r = width / 2;
+        ctx.fillStyle = strokeCol;
+        ctx.shadowColor = strokeCol;
+        ctx.shadowBlur = 10;
+        ctx.beginPath();
+        ctx.moveTo(0, -r);
+        ctx.quadraticCurveTo(0, 0, r, 0);
+        ctx.quadraticCurveTo(0, 0, 0, r);
+        ctx.quadraticCurveTo(0, 0, -r, 0);
+        ctx.quadraticCurveTo(0, 0, 0, -r);
+        ctx.closePath();
+        ctx.fill();
+        
+        // White inner core
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(0, 0, r * 0.3, 0, Math.PI * 2);
+        ctx.fill();
+    } else if (name === 'smoke') {
+        // Soft Radial Glow Cloud
+        const r = width / 2;
+        ctx.beginPath();
+        ctx.arc(0, 0, r, 0, Math.PI * 2);
+        ctx.fillStyle = strokeCol;
+        ctx.globalAlpha = alpha * 0.3;
+        ctx.fill();
+    } else if (name === 'impact') {
+        // Spiked Explosion Burst
+        const r = width / 2;
+        ctx.strokeStyle = strokeCol;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = strokeCol;
+        ctx.shadowBlur = 12;
+        ctx.beginPath();
+        for (let i = 0; i < 8; i++) {
+            const a = (i / 8) * Math.PI * 2;
+            const len = (i % 2 === 0) ? r : r * 0.4;
+            ctx.moveTo(0, 0);
+            ctx.lineTo(Math.cos(a) * len, Math.sin(a) * len);
+        }
+        ctx.stroke();
+    }
     ctx.restore();
 }
 

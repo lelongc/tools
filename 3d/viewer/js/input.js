@@ -2,28 +2,49 @@ export const keys = {
     left: false, right: false, up: false, down: false,
     jump: false, dash: false,
     skill1: false, skill2: false, skill3: false, skill4: false,
-    // For single-press actions
     jumpPressed: false, dashPressed: false,
     skill1Pressed: false, skill2Pressed: false, skill3Pressed: false, skill4Pressed: false
 };
 
+export const lastPressedTime = {
+    skill1: 0,
+    skill2: 0,
+    skill3: 0,
+    skill4: 0,
+    jump: 0,
+    dash: 0
+};
+
+export function isBuffered(action, bufferMs = 250) {
+    return (Date.now() - (lastPressedTime[action] || 0)) <= bufferMs;
+}
+
+export function consumeBuffer(action) {
+    lastPressedTime[action] = 0;
+}
+
 const keyState = {};
 
 window.addEventListener('keydown', (e) => {
+    // Only capture keys if target is body or canvas (not input boxes)
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    
     const key = e.key.toLowerCase();
+    const now = Date.now();
+    
     if (!keyState[key]) {
-        if (key === ' ') keys.jumpPressed = true; // Space only for jump
-        if (key === 'u') keys.dashPressed = true;
-        if (key === 'j') keys.skill1Pressed = true;
-        if (key === 'k') keys.skill2Pressed = true;
-        if (key === 'l') keys.skill3Pressed = true;
-        if (key === 'i') keys.skill4Pressed = true;
+        if (key === ' ') { keys.jumpPressed = true; lastPressedTime.jump = now; }
+        if (key === 'u') { keys.dashPressed = true; lastPressedTime.dash = now; }
+        if (key === 'j') { keys.skill1Pressed = true; lastPressedTime.skill1 = now; }
+        if (key === 'k') { keys.skill2Pressed = true; lastPressedTime.skill2 = now; }
+        if (key === 'l') { keys.skill3Pressed = true; lastPressedTime.skill3 = now; }
+        if (key === 'i') { keys.skill4Pressed = true; lastPressedTime.skill4 = now; }
     }
     keyState[key] = true;
 
     if (key === 'arrowleft' || key === 'a') keys.left = true;
     if (key === 'arrowright' || key === 'd') keys.right = true;
-    if (key === 'arrowup' || key === 'w') keys.up = true; // W is up (hover)
+    if (key === 'arrowup' || key === 'w') keys.up = true;
     if (key === 'arrowdown' || key === 's') keys.down = true;
     
     if (key === ' ') keys.jump = true;

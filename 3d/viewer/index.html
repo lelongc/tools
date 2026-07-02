@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>2D Pixel Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
     <style>
         body {
             margin: 0;
@@ -21,10 +24,12 @@
             align-items: flex-start;
             flex-direction: row;
         }
-        canvas {
+        #phaser-game {
             background: #02050a;
             border: 4px solid #00ffcc;
             box-shadow: 0 0 25px rgba(0, 255, 204, 0.3);
+            width: 640px;
+            height: 480px;
         }
         #ui {
             background: rgba(0, 15, 25, 0.9);
@@ -62,11 +67,36 @@
             border: 1px solid rgba(0, 255, 204, 0.4);
             font-weight: bold;
         }
+        #error-log {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(200, 0, 0, 0.9);
+            color: white;
+            padding: 15px;
+            border: 2px solid red;
+            font-size: 14px;
+            z-index: 9999;
+            display: none;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        #copy-log-btn {
+            background: white;
+            color: red;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <div class="game-container">
-        <canvas id="gameCanvas" width="640" height="480"></canvas>
+        <div id="phaser-game"></div>
         
         <div id="ui">
             <h2>BIO-PROBE HUD</h2>
@@ -83,6 +113,9 @@
             <p><strong>Low Sweep:</strong> <span class="key-badge">S</span> + <span class="key-badge">J</span> (Ground)</p>
             <p><strong>Pogo Strike:</strong> <span class="key-badge">S</span> + <span class="key-badge">J</span> (Air)</p>
 
+            <h3>SKILL 3 (AOE) - <span class="key-badge">L</span></h3>
+            <p><strong>Lightning Nova:</strong> <span class="key-badge">L</span> (360° Shockwave)</p>
+
             <h3>SPELLS (Heavy) - <span class="key-badge">I</span></h3>
             <p><strong>Bio-Drill:</strong> <span class="key-badge">I</span> (Neutral)</p>
             <p><strong>Rising Blast:</strong> <span class="key-badge">W</span> + <span class="key-badge">I</span></p>
@@ -90,6 +123,36 @@
         </div>
     </div>
     
+    <div id="error-log">
+        <button id="copy-log-btn">Copy Log</button>
+        <div id="error-text"></div>
+    </div>
+
+    <script>
+        const errorLog = document.getElementById('error-log');
+        const errorText = document.getElementById('error-text');
+        const copyBtn = document.getElementById('copy-log-btn');
+
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            errorLog.style.display = 'block';
+            const errStr = `Error: ${msg}\nLine: ${lineNo}\nColumn: ${columnNo}\nStack: ${error ? error.stack : ''}`;
+            errorText.innerText += errStr + "\n\n";
+            return false;
+        };
+
+        window.addEventListener("unhandledrejection", function(event) {
+            errorLog.style.display = 'block';
+            errorText.innerText += `Promise Rejection: ${event.reason}\n\n`;
+        });
+
+        copyBtn.addEventListener('click', () => {
+            navigator.clipboard.writeText(errorText.innerText).then(() => {
+                copyBtn.innerText = "Copied!";
+                setTimeout(() => copyBtn.innerText = "Copy Log", 2000);
+            });
+        });
+    </script>
+
     <script type="module">
         // Force fresh load every time - bypass all browser cache
         const t = Date.now();
