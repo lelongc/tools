@@ -116,7 +116,7 @@ function draw(dt) {
     drawWorld(ctx, camera);
     updateAndDrawParticles(ctx, camera, dt);
     drawPlayer(ctx, camera);
-    drawCombat(ctx, camera);
+    drawCombat(ctx, camera, player);
 
     if (shakeTime > 0) {
         ctx.restore();

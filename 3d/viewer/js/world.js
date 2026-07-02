@@ -1,27 +1,27 @@
 export const TILE_SIZE = 32;
 
-const tilesetImg = new Image();
-tilesetImg.src = 'assets/tileset_alpha.png';
+export const tilesetImg = new Image();
+tilesetImg.src = 'assets/tileset_pro.png';
 
 // 0 = empty
 // 1 = solid ground/wall (Normal grip)
 // 2 = bouncy pad (Spring)
 // 3 = ice block (Slippery)
 export const map = [
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,3,3,3,1,1],
-    [1,0,0,0,1,1,0,0,0,0,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,1],
-    [1,0,0,1,1,1,2,2,1,1,1,1,1,0,0,0,1,1,1,1,1,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1],
+    [1,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,3,3,3,1],
+    [1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1],
+    [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,1,1,1,1],
+    [1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1],
+    [1,1,1,1,2,2,0,0,0,0,0,0,0,0,1,1,3,3,3,3,3,3,3,3,0,0,0,0,0,0,0,1,1,1,1],
+    [1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,2,2,0,0,1,1,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 ];
 
 export function getTileType(x, y) {
@@ -34,7 +34,7 @@ export function getTileType(x, y) {
 }
 
 export function drawWorld(ctx, camera) {
-    if (!tilesetImg.complete || tilesetImg.naturalWidth === 0) return;
+    const time = Date.now() / 1000;
 
     for (let row = 0; row < map.length; row++) {
         for (let col = 0; col < map[row].length; col++) {
@@ -49,13 +49,59 @@ export function drawWorld(ctx, camera) {
                     ctx.save();
                     
                     if (tile === 1) { // Normal Ground (Neon Cyan)
-                        ctx.shadowBlur = 10;
-                        ctx.shadowColor = 'rgba(0, 200, 255, 0.5)';
-                        ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)';
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
-                        ctx.fillStyle = 'rgba(0, 20, 30, 0.8)';
-                        ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                        if (tilesetImg.complete && tilesetImg.naturalWidth > 0) {
+                            // Map the block to a section of the AI image
+                            const tx = (col * TILE_SIZE * 2) % (tilesetImg.naturalWidth - TILE_SIZE);
+                            const ty = (row * TILE_SIZE * 2) % (tilesetImg.naturalHeight - TILE_SIZE);
+                            ctx.drawImage(tilesetImg, tx, ty, TILE_SIZE, TILE_SIZE, x, y, TILE_SIZE, TILE_SIZE);
+                            
+                            // Blend it with neon vector aesthetic
+                            ctx.fillStyle = 'rgba(0, 20, 30, 0.5)';
+                            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                            ctx.strokeStyle = 'rgba(0, 255, 255, 0.4)';
+                            ctx.lineWidth = 1;
+                            ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+                        } else {
+                            // Fallback procedural
+                            ctx.shadowBlur = 10;
+                            ctx.shadowColor = 'rgba(0, 200, 255, 0.5)';
+                            ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)';
+                            ctx.lineWidth = 2;
+                            ctx.strokeRect(x, y, TILE_SIZE, TILE_SIZE);
+                            ctx.fillStyle = 'rgba(0, 20, 30, 0.8)';
+                            ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                        }
+                        
+                        // Procedural Vines on ceilings (if space below is empty)
+                        if (row < map.length - 1 && map[row+1][col] === 0) {
+                            const vineLength = 15 + ((col * 17) % 20);
+                            let sway = Math.sin(time * 2 + col) * 5;
+                            
+                            // Player interaction sway
+                            if (camera.player) {
+                                const p = camera.player;
+                                const dx = (x + TILE_SIZE/2) - (p.x + p.width/2);
+                                const dy = (y + TILE_SIZE + vineLength) - (p.y + p.height/2);
+                                const dist = Math.sqrt(dx*dx + dy*dy);
+                                
+                                if (dist < 50) {
+                                    sway += p.vx * 0.05 * (1 - dist/50);
+                                }
+                            }
+
+                            ctx.beginPath();
+                            ctx.moveTo(x + TILE_SIZE/2, y + TILE_SIZE);
+                            ctx.quadraticCurveTo(x + TILE_SIZE/2 + sway, y + TILE_SIZE + vineLength/2, x + TILE_SIZE/2 + sway * 1.5, y + TILE_SIZE + vineLength);
+                            ctx.strokeStyle = 'rgba(0, 255, 200, 0.6)';
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                            
+                            // Vine tip glow
+                            ctx.fillStyle = 'rgba(0, 255, 255, 0.8)';
+                            ctx.beginPath();
+                            ctx.arc(x + TILE_SIZE/2 + sway * 1.5, y + TILE_SIZE + vineLength, 2, 0, Math.PI*2);
+                            ctx.fill();
+                        }
                     } 
                     else if (tile === 2) { // Bouncy Pad (Neon Green/Yellow)
                         ctx.shadowBlur = 15;
@@ -98,6 +144,7 @@ export function drawWorld(ctx, camera) {
                     }
                     
                     ctx.restore();
+                }
             }
         }
     }

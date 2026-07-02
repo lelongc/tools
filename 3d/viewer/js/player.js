@@ -216,13 +216,24 @@ export function drawPlayer(ctx, camera) {
     ctx.shadowColor = player.color;
     ctx.shadowBlur = 10;
     
-    // Calculate bounce offset
+    // Calculate bounce offset and body rotation
     let bounceY = 0;
     let bodyRot = 0;
-    if (isRunning) {
+    
+    if (player.isDashing) {
+        bodyRot = Math.PI / 4; // Lean forward when dashing
+    } else if (isAirborne) {
+        if (keys.jump && player.vy < -200) {
+            // Front flip when holding jump button (high jump)
+            bodyRot = t * 15;
+        } else {
+            // Normal jump lean
+            bodyRot = player.vy * 0.0005;
+        }
+    } else if (isRunning) {
         bounceY = Math.abs(Math.sin(t * 15)) * -4;
         bodyRot = Math.sin(t * 15) * 0.1;
-    } else if (!isAirborne) {
+    } else {
         bounceY = Math.sin(t * 3) * 2; // Idle breathing
     }
 
