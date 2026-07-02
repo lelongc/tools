@@ -2,17 +2,11 @@ import { keys } from './input.js';
 import { addParticle } from './effects.js';
 import { getCollision, TILE_SIZE } from './world.js';
 
-export const iceSlashImg = new Image();
-iceSlashImg.src = 'assets/slash_ice_128.png';
+export const lightningSlashImg = new Image();
+lightningSlashImg.src = 'assets/lightining1-Sheet.png'; // 384x64 (6 frames)
 
-export const iceImpactImg = new Image();
-iceImpactImg.src = 'assets/impact_ice_128.png';
-
-export const lightning1Img = new Image();
-lightning1Img.src = 'assets/lightining1-Sheet.png';
-
-export const lightning5Img = new Image();
-lightning5Img.src = 'assets/lightining5-Sheet.png';
+export const lightningImpactImg = new Image();
+lightningImpactImg.src = 'assets/lightining5-Sheet.png'; // 448x64 (7 frames)
 
 export const combatState = {
     isAttacking: false,
@@ -30,6 +24,26 @@ export const combatState = {
     smashPhase: 0, // 0 = None, 1 = Leap, 2 = Float/Anticipation, 3 = Slam
     smashTimer: 0,
     smashCooldown: 0,
+    
+    isLowSweeping: false,
+    lowSweepTime: 0,
+    lowSweepCooldown: 0,
+    
+    isBioDrilling: false,
+    bioDrillTime: 0,
+    bioDrillCooldown: 0,
+    
+    isUpSlashing: false,
+    upSlashTime: 0,
+    upSlashCooldown: 0,
+    
+    isPogoSlashing: false,
+    pogoSlashTime: 0,
+    pogoSlashCooldown: 0,
+    
+    isRisingBlast: false,
+    risingBlastTime: 0,
+    risingBlastCooldown: 0,
     
     isCharging: false,
     chargeTime: 0,
@@ -124,33 +138,31 @@ export function updateCombat(player, dt) {
     if (combatState.comboWindow > 0) combatState.comboWindow -= dt;
     if (combatState.dashStrikeCooldown > 0) combatState.dashStrikeCooldown -= dt;
     if (combatState.smashCooldown > 0) combatState.smashCooldown -= dt;
+    if (combatState.lowSweepCooldown > 0) combatState.lowSweepCooldown -= dt;
+    if (combatState.bioDrillCooldown > 0) combatState.bioDrillCooldown -= dt;
+    if (combatState.upSlashCooldown > 0) combatState.upSlashCooldown -= dt;
+    if (combatState.pogoSlashCooldown > 0) combatState.pogoSlashCooldown -= dt;
+    if (combatState.risingBlastCooldown > 0) combatState.risingBlastCooldown -= dt;
 
     if (combatState.comboWindow <= 0 && !combatState.isAttacking) {
-        combatState.comboStep = 0; // Reset combo if window expires
+        combatState.comboStep = 0;
     }
 
-    const attackTriggered = keys.skill1Pressed || keys.attackPressed;
+    const isBusy = combatState.isAttacking || combatState.isDashStriking || combatState.isGroundSmashing || combatState.isLowSweeping || combatState.isBioDrilling || combatState.isUpSlashing || combatState.isPogoSlashing || combatState.isRisingBlast;
 
-    // SKILL 2: Lightning Charge-up Slash (K) - Triggered by holding K
-    if (keys.skill2 && combatState.dashStrikeCooldown <= 0 && !combatState.isDashStriking && !combatState.isGroundSmashing && !combatState.isAttacking) {
-        if (!combatState.isCharging) {
-            combatState.isCharging = true;
-            combatState.chargeTime = 0;
-        }
-        
+    // SKILL 2: Charge Slash (K)
+    if (keys.skill2 && !isBusy && combatState.dashStrikeCooldown <= 0) {
+        combatState.isCharging = true;
         combatState.chargeTime += dt;
-        player.vx = 0;
-        player.vy = 0; // Stay suspended while charging
         
         const curTime = combatState.chargeTime;
-        let sparkChance = 0.3;
-        let sparkColor = 'rgba(0, 200, 255, 0.7)';
+        let sparkChance = 0;
+        let sparkColor = '#00ffff';
         
-        if (curTime >= 0.7) {
+        if (curTime >= combatState.chargeDuration) {
             sparkChance = 0.8;
             sparkColor = '#ffffff'; // White electricity for max charge
             if (Math.random() < 0.25) {
-                // Subtle camera hum during max charge
                 window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 2.2}}));
             }
         } else if (curTime >= 0.3) {
@@ -158,7 +170,6 @@ export function updateCombat(player, dt) {
             sparkColor = '#00ffff';
         }
         
-        // Pull electricity inward (Using glowing stars!)
         if (Math.random() < sparkChance) {
             const angle = Math.random() * Math.PI * 2;
             const dist = 45 + Math.random() * 35;
@@ -173,51 +184,101 @@ export function updateCombat(player, dt) {
             releaseChargeAttack(player);
         }
     } else if (combatState.isCharging) {
-        // Released key before full charge
         releaseChargeAttack(player);
     }
 
-    // SKILL 3: Ground Smash trigger (L)
-    if ((keys.skill3Pressed || (!player.isGrounded && keys.down && attackTriggered)) && combatState.smashCooldown <= 0 && !combatState.isGroundSmashing && !combatState.isDashStriking && !combatState.isCharging) {
-        combatState.isGroundSmashing = true;
-        player.vx = 0;
-        
-        if (player.isGrounded) {
-            // Cấp 1: Nhảy lấy đà (Leap) từ mặt đất
-            combatState.smashPhase = 1;
-            player.vy = -620; // High leap!
-            player.isGrounded = false;
+    // SKILL 4: Heavy Attack combos (I) - Spells
+    if (keys.skill4Pressed && !isBusy && !combatState.isCharging) {
+        if (keys.down) {
+            // S + I: Ground Smash (Desolate Dive)
+            if (combatState.smashCooldown <= 0) {
+                combatState.isGroundSmashing = true;
+                player.vx = 0;
+                if (player.isGrounded) {
+                    combatState.smashPhase = 1;
+                    player.vy = -620; // Leap
+                    player.isGrounded = false;
+                } else {
+                    combatState.smashPhase = 3; // Air Smash skips float, straight to drop!
+                    player.vy = 1200; 
+                }
+            }
+        } else if (keys.up) {
+            // W + I: Rising Blast (Howling Wraiths)
+            if (combatState.risingBlastCooldown <= 0) {
+                combatState.isRisingBlast = true;
+                combatState.risingBlastTime = 0.35;
+                combatState.risingBlastCooldown = 1.0;
+                player.vx = 0;
+                player.vy = -200; // Small upward float
+                window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 6}}));
+            }
         } else {
-            // Cấp 2: Khựng giữa không trung gom năng lượng (Float)
-            combatState.smashPhase = 2;
-            player.vy = -180; // Small upward float
-            combatState.smashTimer = 0.12; // Float duration 120ms
-        }
-    }
-
-    // SKILL 1: Normal Attack Combo (J or I on ground, or normal air attack if no Down held)
-    if (attackTriggered && combatState.attackCooldown <= 0 && !combatState.isAttacking && !combatState.isDashStriking && !combatState.isGroundSmashing && !combatState.isCharging) {
-        combatState.isAttacking = true;
-        combatState.comboStep++;
-        if (combatState.comboStep > 3) combatState.comboStep = 1;
-        
-        combatState.attackTime = combatState.attackDuration;
-        
-        // Air attack vs Ground Combo
-        if (!player.isGrounded) {
-            combatState.comboStep = 1; // No combo chain in air
-            combatState.attackCooldown = 0.25;
-        } else {
-            if (combatState.comboStep === 3) {
-                combatState.attackTime = 0.25;
-                combatState.attackCooldown = 0.5;
-                player.vx += player.facingRight ? 300 : -300; // Lunge
-            } else {
-                combatState.attackCooldown = 0.2;
-                player.vx += player.facingRight ? 100 : -100;
+            // Neutral I: Bio-Drill (Vengeful Spirit dash)
+            if (combatState.bioDrillCooldown <= 0) {
+                combatState.isBioDrilling = true;
+                combatState.bioDrillTime = 0.35;
+                combatState.bioDrillCooldown = 1.0;
+                player.vx = player.facingRight ? 900 : -900;
+                player.vy = 0; 
+                window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 6}}));
             }
         }
-        combatState.comboWindow = 0.6;
+    }
+    
+    // SKILL 1: Light Attack combos (J) - Nail
+    else if (keys.skill1Pressed && !isBusy && !combatState.isCharging) {
+        if (keys.down) {
+            if (player.isGrounded) {
+                // Ground S + J: Low Sweep
+                if (combatState.lowSweepCooldown <= 0) {
+                    combatState.isLowSweeping = true;
+                    combatState.lowSweepTime = 0.25;
+                    combatState.lowSweepCooldown = 0.6;
+                    player.vx = player.facingRight ? 250 : -250; 
+                }
+            } else {
+                // Air S + J: Pogo Strike
+                if (combatState.pogoSlashCooldown <= 0) {
+                    combatState.isPogoSlashing = true;
+                    combatState.pogoSlashTime = 0.2;
+                    combatState.pogoSlashCooldown = 0.3;
+                    player.vy = -100; // Slight stall to hit
+                }
+            }
+        } else if (keys.up) {
+            // W + J: Up Slash
+            if (combatState.upSlashCooldown <= 0) {
+                combatState.isUpSlashing = true;
+                combatState.upSlashTime = 0.2;
+                combatState.upSlashCooldown = 0.4;
+                if (!player.isGrounded) player.vy = -150; // Air stall
+            }
+        } else {
+            // Neutral J: Normal Attack Combo
+            if (combatState.attackCooldown <= 0) {
+                combatState.isAttacking = true;
+                combatState.comboStep++;
+                if (combatState.comboStep > 3) combatState.comboStep = 1;
+                
+                combatState.attackTime = combatState.attackDuration;
+                
+                if (!player.isGrounded) {
+                    combatState.comboStep = 1; 
+                    combatState.attackCooldown = 0.25;
+                } else {
+                    if (combatState.comboStep === 3) {
+                        combatState.attackTime = 0.25;
+                        combatState.attackCooldown = 0.5;
+                        player.vx += player.facingRight ? 300 : -300;
+                    } else {
+                        combatState.attackCooldown = 0.2;
+                        player.vx += player.facingRight ? 100 : -100;
+                    }
+                }
+                combatState.comboWindow = 0.6;
+            }
+        }
     }
 
     // --- EXECUTE SKILLS ---
@@ -276,11 +337,117 @@ export function updateCombat(player, dt) {
             'spark',
             3
         );
-
-        if (combatState.dashStrikeTime <= 0) {
+        
+        // Wall Ricochet Logic!
+        const hitWallRight = player.facingRight && getCollision(player.x + player.width + 5, player.y, 5, player.height);
+        const hitWallLeft = !player.facingRight && getCollision(player.x - 5, player.y, 5, player.height);
+        
+        if (hitWallRight || hitWallLeft) {
+            // Ricochet!
+            player.facingRight = !player.facingRight;
+            player.vx = player.facingRight ? 800 : -800; // Bounce back
+            player.vy = -500; // Bounce up
+            
+            combatState.isDashStriking = false;
+            combatState.dashStrikeCooldown = 0; // Allow instant recast after bounce!
+            
+            window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 15}}));
+            
+            // Wall Impact Explosion
+            const impactX = hitWallRight ? player.x + player.width : player.x;
+            addParticle(impactX, player.y + player.height/2, 0, 0, '#00ffff', 0.5, 'ring', 40);
+            addParticle(impactX, player.y + player.height/2, (player.facingRight ? 200 : -200), 0, '#ffffff', 0.6, 'tex_impact', 90);
+        } else if (combatState.dashStrikeTime <= 0) {
             combatState.isDashStriking = false;
             player.vx = player.facingRight ? 400 : -400; // Keep momentum
         }
+    }
+
+    // Execute Low Sweep (S + J)
+    if (combatState.isLowSweeping) {
+        combatState.lowSweepTime -= dt;
+        player.scaleX = 1.4;
+        player.scaleY = 0.5; // Flattened body
+        
+        if (Math.random() < 0.6) {
+            addParticle(
+                player.x + (player.facingRight ? player.width : 0),
+                player.y + player.height,
+                player.facingRight ? 400 : -400,
+                -100 - Math.random() * 100,
+                '#00ffff',
+                0.3,
+                'tex_spark',
+                15
+            );
+        }
+        
+        if (combatState.lowSweepTime <= 0) {
+            combatState.isLowSweeping = false;
+        }
+    }
+
+    // Execute Bio-Drill (Neutral I)
+    if (combatState.isBioDrilling) {
+        combatState.bioDrillTime -= dt;
+        player.vy = 0;
+        
+        player.scaleX = 1.6;
+        player.scaleY = 0.6;
+        
+        addParticle(
+            player.x + (player.facingRight ? player.width : 0),
+            player.y + player.height/2,
+            -player.vx * 0.5,
+            (Math.random() - 0.5) * 100,
+            '#00ffff',
+            0.4,
+            'tex_star',
+            18
+        );
+        if (Math.random() < 0.4) {
+            addParticle(player.x + player.width/2, player.y + player.height/2, 0, 0, '#ffffff', 0.15, 'ring', 15);
+        }
+
+        if (combatState.bioDrillTime <= 0) {
+            combatState.isBioDrilling = false;
+            player.vx *= 0.3; // Rapid decelerate
+        }
+    }
+
+    // Execute Up Slash (W + J)
+    if (combatState.isUpSlashing) {
+        combatState.upSlashTime -= dt;
+        player.scaleX = 0.8;
+        player.scaleY = 1.3;
+        if (combatState.upSlashTime <= 0) combatState.isUpSlashing = false;
+    }
+
+    // Execute Pogo Strike (Air S + J)
+    if (combatState.isPogoSlashing) {
+        combatState.pogoSlashTime -= dt;
+        player.scaleX = 0.7;
+        player.scaleY = 1.4;
+        
+        if (Math.random() < 0.5) {
+            addParticle(player.x + player.width/2, player.y + player.height, (Math.random()-0.5)*100, 300, '#00ffff', 0.2, 'tex_spark', 10);
+        }
+
+        if (combatState.pogoSlashTime <= 0) combatState.isPogoSlashing = false;
+    }
+
+    // Execute Rising Blast (W + I)
+    if (combatState.isRisingBlast) {
+        combatState.risingBlastTime -= dt;
+        player.vy = 0; // Lock vertical
+        player.scaleX = 0.5;
+        player.scaleY = 1.6;
+        
+        if (Math.random() < 0.8) {
+            addParticle(player.x + player.width/2 + (Math.random()-0.5)*30, player.y, (Math.random()-0.5)*50, -500 - Math.random()*300, '#ffffff', 0.4, 'tex_star', 15);
+        }
+
+        if (combatState.risingBlastTime <= 0) combatState.isRisingBlast = false;
     }
 
     // Execute Skill 3 (Ground Smash)
