@@ -2,6 +2,10 @@ import { keys, resetInputPresses } from './input.js';
 import { getCollision, TILE_SIZE } from './world.js';
 import { combatState, lightningSlashImg, lightningImpactImg } from './combat.js';
 
+export const laserImg = new Image();
+laserImg.src = 'assets/laser_beam.png';
+
+
 export const player = {
     x: 64,
     y: 100,
@@ -1306,208 +1310,61 @@ export function drawPlayer(ctx, camera) {
         }
     }
 
-    // Draw Laser Beam (if active) from centered eye (0, 0)
     if (combatState.isReleasingBeam) {
         ctx.save();
-        ctx.translate(0, 0); // Starts exactly at the eye center!
+        
+        // Translate to the "eye" position relative to the feet
+        ctx.translate(-2, -15);
+        
         const lvl = combatState.chargeLevel || 1;
-        const thickness = lvl === 3 ? 36 : (lvl === 2 ? 20 : 10);
+        const maxDuration = lvl === 3 ? 0.35 : (lvl === 2 ? 0.22 : 0.15);
+        const prog = Math.max(0, Math.min(1.0, combatState.beamTime / maxDuration));
         
-        ctx.globalCompositeOperation = 'screen';
+        // Intense screen shake based on beam power and progress
+        const shakeMag = (lvl === 3 ? 6 : 3) * prog;
+        ctx.translate((Math.random()-0.5)*shakeMag, (Math.random()-0.5)*shakeMag);
+
+        const baseThickness = lvl === 3 ? 140 : (lvl === 2 ? 90 : 50);
         
-        // 1. Generate Jagged Top and Bottom Paths
-        const topPts = [{ x: 0, y: 0 }];
-        const bottomPts = [{ x: 0, y: 0 }];
-        const steps = 15;
-        const stepLen = 600 / steps;
+        // Pulse and jitter the thickness
+        const pulse = 1.0 + Math.sin(t * 50) * 0.15 + (Math.random() * 0.2);
+        const curThickness = baseThickness * prog * pulse;
         
-        for (let i = 1; i <= steps; i++) {
-            const x = i * stepLen;
-            const wave = Math.sin(x * 0.06 + t * 35) * (lvl === 3 ? 4.5 : 2);
+        // Stretch the beam length rapidly at the start, then hold
+        const beamLength = 100 + (1 - Math.pow(prog, 3)) * 800;
+
+        ctx.globalCompositeOperation = 'screen'; // Blends dark background to transparent
+        
+        if (laserImg.complete && laserImg.naturalWidth > 0) {
+            // Main beam (pulsing and fading)
+            ctx.globalAlpha = Math.min(1.0, prog * 1.5);
+            ctx.drawImage(laserImg, 0, -curThickness / 2, beamLength, curThickness);
             
-            // Jitter displacements to create jagged look
-            const topJitter = (Math.random() - 0.5) * (lvl === 3 ? 7 : 3.5);
-            const botJitter = (Math.random() - 0.5) * (lvl === 3 ? 7 : 3.5);
-            
-            topPts.push({ x, y: -thickness/2 + wave + topJitter });
-            bottomPts.push({ x, y: thickness/2 + wave + botJitter });
+            // Core intense beam (inner overlay for extra brightness)
+            if (lvl >= 2) {
+                ctx.globalAlpha = Math.min(1.0, prog * 2.0);
+                const coreThick = curThickness * 0.4;
+                ctx.drawImage(laserImg, 0, -coreThick / 2, beamLength + 50, coreThick);
+            }
+        } else {
+            // Fallback if image not loaded yet
+            ctx.fillStyle = '#00ffff';
+            ctx.globalAlpha = prog;
+            ctx.fillRect(0, -curThickness / 4, beamLength, curThickness / 2);
         }
         
-        // 2. Draw Glowing Filled Body between the Jagged Paths
-        ctx.beginPath();
-        ctx.moveTo(topPts[0].x, topPts[0].y);
-        for (let i = 1; i < topPts.length; i++) ctx.lineTo(topPts[i].x, topPts[i].y);
-        for (let i = bottomPts.length - 1; i >= 0; i--) ctx.lineTo(bottomPts[i].x, bottomPts[i].y);
-        ctx.closePath();
+        // Muzzle Flash / Energy Orb at the eye
+        const flashRadius = (lvl === 3 ? 60 : 35) * prog * (1.0 + Math.random() * 0.3);
+        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, flashRadius);
+        gradient.addColorStop(0, '#ffffff');
+        gradient.addColorStop(0.3, '#00ffff');
+        gradient.addColorStop(1, 'rgba(0, 255, 255, 0)');
         
-        ctx.fillStyle = lvl === 3 ? 'rgba(0, 255, 255, 0.45)' : 'rgba(0, 255, 255, 0.25)';
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(0, 0, flashRadius, 0, Math.PI * 2);
         ctx.fill();
-        
-        // 3. Draw Jagged Edge Borders (Thicker glow outlines using Layered Glow)
-        // Top edge outline
-        ctx.beginPath();
-        ctx.moveTo(topPts[0].x, topPts[0].y);
-        for (let i = 1; i < topPts.length; i++) ctx.lineTo(topPts[i].x, topPts[i].y);
-        
-        ctx.save();
-        ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
-        ctx.lineWidth = (lvl === 3 ? 3.0 : 1.5) * 2.5;
-        ctx.stroke();
-        ctx.strokeStyle = '#00ffff';
-        ctx.lineWidth = lvl === 3 ? 3.0 : 1.5;
-        ctx.stroke();
-        ctx.restore();
-        
-        // Bottom edge outline
-        ctx.beginPath();
-        ctx.moveTo(bottomPts[0].x, bottomPts[0].y);
-        for (let i = 1; i < bottomPts.length; i++) ctx.lineTo(bottomPts[i].x, bottomPts[i].y);
-        
-        ctx.save();
-        ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
-        ctx.lineWidth = (lvl === 3 ? 3.0 : 1.5) * 2.5;
-        ctx.stroke();
-        ctx.strokeStyle = '#00ffff';
-        ctx.lineWidth = lvl === 3 ? 3.0 : 1.5;
-        ctx.stroke();
-        ctx.restore();
-        
-        // Inner white highlights for the borders
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = lvl === 3 ? 1.0 : 0.5;
-        ctx.stroke(); // strokes bottom
-        
-        ctx.beginPath();
-        ctx.moveTo(topPts[0].x, topPts[0].y);
-        for (let i = 1; i < topPts.length; i++) ctx.lineTo(topPts[i].x, topPts[i].y);
-        ctx.stroke(); // strokes top
-        
-        // 4. Draw Wavy/Vibrating Inner Plasma core (Shaking white line in center using Layered Glow)
-        const jitterY = (Math.random() - 0.5) * (lvl === 3 ? 5 : 2);
-        ctx.beginPath();
-        ctx.moveTo(0, jitterY);
-        ctx.lineTo(600, jitterY);
-        
-        ctx.save();
-        ctx.strokeStyle = 'rgba(0, 255, 255, 0.35)';
-        ctx.lineWidth = (thickness * (lvl === 3 ? 0.35 : 0.3)) * 2.8;
-        ctx.stroke();
-        
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = thickness * (lvl === 3 ? 0.35 : 0.3);
-        ctx.stroke();
-        ctx.restore();
-        
-        // 5. Draw Helix/Spiral Lightning Coils around the Laser (Level 2 & 3 only)
-        if (lvl >= 2) {
-            const coilCount = lvl === 3 ? 2 : 1;
-            for (let c = 0; c < coilCount; c++) {
-                ctx.beginPath();
-                ctx.moveTo(0, 0);
-                
-                const waveLength = lvl === 3 ? 50 : 70;
-                const amp = lvl === 3 ? 18 : 12;
-                const phaseOffset = c * Math.PI + t * 45;
-                
-                for (let x = 25; x < 600; x += 25) {
-                    const y = Math.sin(x / waveLength + phaseOffset) * amp + (Math.random() - 0.5) * 4;
-                    ctx.lineTo(x, y);
-                }
-                
-                ctx.save();
-                const coilThick = lvl === 3 ? 2.2 : 1.2;
-                ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
-                ctx.lineWidth = coilThick * 2.5;
-                ctx.stroke();
-                
-                ctx.strokeStyle = lvl === 3 ? '#ffffff' : '#00ffff';
-                ctx.lineWidth = coilThick;
-                ctx.stroke();
-                ctx.restore();
-            }
-        }
-        
-        // 6. Level 3 Ultimate Laser Extra Effects (Branching lightning discharges & Shockwaves)
-        if (lvl === 3) {
-            // Expanding muzzle shockwaves at the eye (Layered Glow instead of shadowBlur)
-            ctx.save();
-            for (let w = 0; w < 3; w++) {
-                const wProg = (t * 4 + w / 3) % 1.0;
-                const curAlpha = 0.8 * (1 - wProg);
-                
-                // Cyan glow arc
-                ctx.strokeStyle = 'rgba(0, 255, 255, 0.35)';
-                ctx.lineWidth = 6 * (1 - wProg);
-                ctx.globalAlpha = curAlpha;
-                ctx.beginPath();
-                ctx.arc(0, 0, wProg * 35, -Math.PI / 3, Math.PI / 3);
-                ctx.stroke();
-                
-                // White core arc
-                ctx.strokeStyle = '#ffffff';
-                ctx.lineWidth = 1.5 * (1 - wProg);
-                ctx.beginPath();
-                ctx.arc(0, 0, wProg * 35, -Math.PI / 3, Math.PI / 3);
-                ctx.stroke();
-            }
-            ctx.restore();
-            
-            // Random lightning branch-offs shooting from the main beam (Layered glow instead of shadowBlur)
-            for (let b = 0; b < 3; b++) {
-                if (Math.random() < 0.3) {
-                    const startX = 50 + Math.random() * 450;
-                    const len = 40 + Math.random() * 60;
-                    const angle = (Math.random() - 0.5) * (Math.PI / 3);
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(startX, 0);
-                    
-                    let curX = startX;
-                    let curY = 0;
-                    const steps = 4;
-                    for (let s = 0; s < steps; s++) {
-                        curX += Math.cos(angle) * (len / steps);
-                        curY += Math.sin(angle) * (len / steps) + (Math.random() - 0.5) * 10;
-                        ctx.lineTo(curX, curY);
-                    }
-                    
-                    ctx.save();
-                    ctx.lineCap = 'round';
-                    ctx.strokeStyle = 'rgba(0, 255, 255, 0.35)';
-                    ctx.lineWidth = 1.8 * 2.5;
-                    ctx.stroke();
-                    
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 1.8;
-                    ctx.stroke();
-                    ctx.restore();
-                }
-            }
-            
-            // Procedural energy sparks streaming out of the eye along the beam (Layered glow instead of shadowBlur)
-            for (let pIdx = 0; pIdx < 8; pIdx++) {
-                const seed = pIdx * 97.5;
-                const speed = 250 + (seed % 150);
-                const sparkDist = (t * speed + seed) % 400;
-                const spreadY = Math.sin(t * 8 + pIdx) * (18 * (sparkDist / 400));
-                const sparkRadius = 3.5 - (sparkDist / 400) * 3;
-                
-                ctx.save();
-                ctx.beginPath();
-                // Cyan glow circle
-                ctx.fillStyle = 'rgba(0, 255, 255, 0.4)';
-                ctx.arc(sparkDist, spreadY, sparkRadius * 2.2, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // White core circle
-                ctx.beginPath();
-                ctx.arc(sparkDist, spreadY, sparkRadius, 0, Math.PI * 2);
-                ctx.fillStyle = '#ffffff';
-                ctx.fill();
-                ctx.restore();
-            }
-        }
-        
+
         ctx.restore();
     }
 
