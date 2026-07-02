@@ -429,11 +429,102 @@ export function drawPlayer(ctx, camera) {
         ctx.restore();
     };
 
+    const getLegMorphCoords = (j, defaultSx, defaultSy, defaultEx, defaultEy) => {
+        let sx = defaultSx;
+        let sy = defaultSy;
+        let tx = defaultEx;
+        let ty = defaultEy;
+        let p = 0;
+        
+        if (combatState.isCharging) {
+            p = Math.max(0, Math.min(1.0, combatState.chargeTime / 0.25));
+            const lvl = combatState.chargeLevel || 1;
+            const outerRadius = (lvl === 3 ? 30 : (lvl === 2 ? 22 : 16)) + Math.sin(t * 15) * 2;
+            const innerRadius = 5;
+            
+            // Orbit as indices 6, 7, 8, 9 (joining the 6 body strands to form a 10-tentacle vortex!)
+            const k = 6 + j;
+            const orbitAngle = t * 15 + (k / 10) * Math.PI * 2;
+            
+            const targetSx = Math.cos(orbitAngle) * innerRadius;
+            const targetSy = Math.sin(orbitAngle) * innerRadius;
+            sx = defaultSx + (targetSx - defaultSx) * p;
+            sy = defaultSy + (targetSy - defaultSy) * p;
+            
+            const targetEx = Math.cos(orbitAngle + 0.8) * outerRadius;
+            const targetEy = Math.sin(orbitAngle + 0.8) * outerRadius;
+            tx = defaultEx + (targetEx - defaultEx) * p;
+            ty = defaultEy + (targetEy - defaultEy) * p;
+        } else if (combatState.isBioDrilling) {
+            p = Math.max(0, Math.min(1.0, 1 - (combatState.bioDrillTime / 0.35)));
+            // Stretch forward into drill helix
+            const windAngle = j * Math.PI / 2 + t * 40;
+            const targetX = 45 + j * 5;
+            const targetY = Math.sin(windAngle) * 5;
+            tx = defaultEx + (targetX - defaultEx) * p;
+            ty = defaultEy + (targetY - defaultEy) * p;
+        } else if (combatState.isGroundSmashing) {
+            p = 1.0;
+            const phase = combatState.smashPhase || 2;
+            let targetX, targetY;
+            if (phase === 1 || phase === 2) {
+                targetX = (j - 1.5) * 15;
+                targetY = -65;
+            } else {
+                targetX = (j - 1.5) * 4;
+                targetY = 65;
+            }
+            tx = defaultEx + (targetX - defaultEx) * p;
+            ty = defaultEy + (targetY - defaultEy) * p;
+        } else if (combatState.isRisingBlast) {
+            p = Math.max(0, Math.min(1.0, 1 - (combatState.risingBlastTime / 0.35)));
+            const targetX = (j - 1.5) * 20;
+            const targetY = -120;
+            tx = defaultEx + (targetX - defaultEx) * p;
+            ty = defaultEy + (targetY - defaultEy) * p;
+        } else if (combatState.isLowSweeping) {
+            p = Math.max(0, Math.min(1.0, 1 - (combatState.lowSweepTime / 0.25)));
+            const targetX = 75 + j * 6;
+            const targetY = 12 + (j - 1.5) * 2;
+            tx = defaultEx + (targetX - defaultEx) * p;
+            ty = defaultEy + (targetY - defaultEy) * p;
+        } else if (combatState.isUpSlashing) {
+            p = Math.max(0, Math.min(1.0, 1 - (combatState.upSlashTime / 0.2)));
+            const targetX = 35 + (j - 1.5) * 10;
+            const targetY = -85;
+            tx = defaultEx + (targetX - defaultEx) * p;
+            ty = defaultEy + (targetY - defaultEy) * p;
+        } else if (combatState.isPogoSlashing) {
+            p = Math.max(0, Math.min(1.0, 1 - (combatState.pogoSlashTime / 0.2)));
+            const targetX = (j - 1.5) * 6;
+            const targetY = 85;
+            tx = defaultEx + (targetX - defaultEx) * p;
+            ty = defaultEy + (targetY - defaultEy) * p;
+        } else if (combatState.isAttacking) {
+            p = Math.max(0, Math.min(1.0, 1 - (combatState.attackTime / (combatState.comboStep === 3 ? 0.25 : 0.15))));
+            let targetX, targetY;
+            if (combatState.comboStep === 1) {
+                targetX = 60; targetY = -5;
+            } else if (combatState.comboStep === 2) {
+                targetX = 50; targetY = 12;
+            } else {
+                targetX = 75; targetY = 0;
+            }
+            tx = defaultEx + (targetX - defaultEx) * p;
+            ty = defaultEy + (targetY - defaultEy) * p;
+        }
+        
+        return { sx, sy, tx, ty };
+    };
+
     let legAngle1 = isRunning ? Math.sin(t * 10) * 0.5 : (isAirborne ? 0.3 : 0.2);
     let legAngle2 = isRunning ? Math.sin(t * 10 + Math.PI) * 0.5 : (isAirborne ? -0.2 : -0.2);
     
-    drawLegTentacle(0, 0, -10 + Math.sin(legAngle1)*10, 15 + Math.cos(legAngle1)*5, 2.5, 0);
-    drawLegTentacle(0, 0, 10 + Math.sin(legAngle2)*10, 15 + Math.cos(legAngle2)*5, 2.5, Math.PI);
+    const leg1Coords = getLegMorphCoords(0, 0, 0, -10 + Math.sin(legAngle1)*10, 15 + Math.cos(legAngle1)*5);
+    const leg2Coords = getLegMorphCoords(1, 0, 0, 10 + Math.sin(legAngle2)*10, 15 + Math.cos(legAngle2)*5);
+    
+    drawLegTentacle(leg1Coords.sx, leg1Coords.sy, leg1Coords.tx, leg1Coords.ty, 2.5, 0);
+    drawLegTentacle(leg2Coords.sx, leg2Coords.sy, leg2Coords.tx, leg2Coords.ty, 2.5, Math.PI);
 
     // Body Shape (Insectoid Carapace) - Redesigned as a bundle of morphing bio-tentacles/wires!
     const drawMorphingStrand = (startX, startY, destX, destY, thickness, wigglePhase) => {
@@ -1187,12 +1278,15 @@ export function drawPlayer(ctx, camera) {
     
     ctx.restore();
 
-    // Draw Front Legs (Redesigned as slowly wiggling tentacles)
+    // Draw Front Legs (Redesigned as slowly wiggling tentacles, participating in morphs!)
     let legAngle3 = isRunning ? Math.sin(t * 10 + Math.PI/2) * 0.5 : (isAirborne ? 0.5 : 0);
     let legAngle4 = isRunning ? Math.sin(t * 10 + Math.PI*1.5) * 0.5 : (isAirborne ? -0.5 : 0.1);
     
-    drawLegTentacle(2, 2, -8 + Math.sin(legAngle3)*10, 15 + Math.cos(legAngle3)*5, 2.2, Math.PI / 2);
-    drawLegTentacle(2, 2, 12 + Math.sin(legAngle4)*10, 15 + Math.cos(legAngle4)*5, 2.2, Math.PI * 1.5);
+    const leg3Coords = getLegMorphCoords(2, 2, 2, -8 + Math.sin(legAngle3)*10, 15 + Math.cos(legAngle3)*5);
+    const leg4Coords = getLegMorphCoords(3, 2, 2, 12 + Math.sin(legAngle4)*10, 15 + Math.cos(legAngle4)*5);
+    
+    drawLegTentacle(leg3Coords.sx, leg3Coords.sy, leg3Coords.tx, leg3Coords.ty, 2.2, Math.PI / 2);
+    drawLegTentacle(leg4Coords.sx, leg4Coords.sy, leg4Coords.tx, leg4Coords.ty, 2.2, Math.PI * 1.5);
 
     ctx.restore();
 }
