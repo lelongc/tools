@@ -5,7 +5,6 @@ import { combatState, lightningSlashImg, lightningImpactImg } from './combat.js'
 export const laserImg = new Image();
 laserImg.src = 'assets/laser_beam.png';
 
-
 export const player = {
     x: 64,
     y: 100,
@@ -898,213 +897,178 @@ export function drawPlayer(ctx, camera) {
     }
 
     if (combatState.isDashStriking) {
-        // Dash Strike: spiral drill tentacles emerging from the head antenna
-        const drawHeadSpaceTentacle = (startX, startY, endX, endY, thickness, wigglePhase) => {
-            const segments = 10;
-            const pts = [{ x: startX, y: startY }];
-            for (let i = 1; i <= segments; i++) {
-                const tVal = i / segments;
-                const targetX = startX + (endX - startX) * tVal;
-                const targetY = startY + (endY - startY) * tVal;
-                const wiggle = Math.sin(t * 30 + tVal * 5 + wigglePhase) * (15 * tVal);
-                const dx = endX - startX;
-                const dy = endY - startY;
-                const len = Math.sqrt(dx*dx + dy*dy) || 1;
-                const nx = -dy / len;
-                const ny = dx / len;
-                pts.push({
-                    x: targetX + nx * wiggle,
-                    y: targetY + ny * wiggle
-                });
-            }
-            
+        // Dash Strike: Premium Gradient Vector
+        ctx.save();
+        ctx.translate(-2, -15); // Body center
+        ctx.globalCompositeOperation = 'screen';
+        
+        const prog = (t * 8) % 1.0;
+        const drillW = 220;
+        const drillH = 60 + Math.sin(t * 60) * 10;
+        
+        // Dynamic Glowing Gradient
+        const grad = ctx.createLinearGradient(0, 0, drillW, 0);
+        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        grad.addColorStop(0.2, 'rgba(0, 255, 255, 1)');
+        grad.addColorStop(1, 'rgba(0, 255, 255, 0)');
+        
+        // Draw sharp aerodynamic cone
+        ctx.fillStyle = grad;
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = '#00ffff';
+        
+        ctx.beginPath();
+        ctx.moveTo(-10, -drillH/2);
+        ctx.bezierCurveTo(drillW*0.3, -drillH/4, drillW*0.6, -10, drillW, 0);
+        ctx.bezierCurveTo(drillW*0.6, 10, drillW*0.3, drillH/4, -10, drillH/2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Draw energy rings wrapping around the dash
+        for (let i = 0; i < 3; i++) {
+            const ringProg = (prog + i/3) % 1.0;
+            const ringX = ringProg * drillW * 0.8;
+            const ringY = (1 - ringProg) * (drillH/2);
+            ctx.strokeStyle = `rgba(0, 255, 255, ${1 - ringProg})`;
+            ctx.lineWidth = 4;
             ctx.beginPath();
-            ctx.moveTo(pts[0].x, pts[0].y);
-            for (let i = 1; i < pts.length; i++) {
-                ctx.lineTo(pts[i].x, pts[i].y);
-            }
-            ctx.save();
-            ctx.lineCap = 'round';
-            // Layered neon glow
-            ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
-            ctx.lineWidth = thickness * 2.5;
+            ctx.ellipse(ringX, 0, 8, ringY, 0, 0, Math.PI * 2);
             ctx.stroke();
-            
-            ctx.strokeStyle = '#00ffff';
-            ctx.lineWidth = thickness;
-            ctx.stroke();
-            ctx.restore();
-            return pts[pts.length - 1]; // Return tip
-        };
-
-        let mainTip = null;
-        for (let k = 0; k < 6; k++) {
-            const spreadY = Math.sin(t * 30 + k) * 25;
-            const spreadX = Math.cos(t * 30 + k) * 8;
-            const tip = drawHeadSpaceTentacle(-2, -5, 140 + spreadX, spreadY, 4, k);
-            if (k === 3) mainTip = tip;
         }
-        if (mainTip) {
-            // Constant electric drill tip
-            const drillProg = (t * 4) % 1.0; 
-            drawImpactSprite(mainTip, 70, drillProg);
-        }
+        
+        drawImpactSprite({x: drillW*0.9, y: 0}, 80, prog);
+        ctx.restore();
     } else if (combatState.isBioDrilling) {
-        // Bio-Drill (Neutral I): helix tentacles wrapping player body to form a tight, clean drill
-        const drawSpiralDrillTentacle = (radius, wigglePhase, thickness) => {
-            const segments = 12;
-            const pts = [];
-            for (let i = 0; i <= segments; i++) {
-                const tVal = i / segments;
-                // Compact drill shell tight to the body (from X=-12 to X=42)
-                const startX = -12;
-                const endX = 42;
-                const x = startX + (endX - startX) * tVal;
-                
-                const windAngle = tVal * Math.PI * 5 + t * 40 + wigglePhase;
-                const taper = Math.sin(tVal * Math.PI / 2);
-                const curRadius = radius * (1.0 - taper);
-                const y = Math.sin(windAngle) * curRadius; // FIXED: no double offset!
-                pts.push({ x, y });
-            }
-            
-            ctx.save();
+        // Bio-Drill (Neutral I): Premium Gradient Vector
+        const prog = Math.max(0, Math.min(1.0, 1 - (combatState.bioDrillTime / 0.35)));
+        
+        ctx.save();
+        ctx.translate(-2, -15); // Center on body
+        ctx.translate((Math.random()-0.5)*5, (Math.random()-0.5)*5); // Shake
+        ctx.globalCompositeOperation = 'screen';
+        
+        const drillW = 180;
+        const drillH = 50 + Math.sin(t * 50) * 8;
+        
+        const grad = ctx.createLinearGradient(0, 0, drillW, 0);
+        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        grad.addColorStop(0.3, 'rgba(0, 255, 255, 1)');
+        grad.addColorStop(1, 'rgba(0, 255, 255, 0)');
+        
+        ctx.fillStyle = grad;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#00ffff';
+        
+        ctx.beginPath();
+        ctx.moveTo(-15, -drillH/2);
+        ctx.lineTo(drillW, 0);
+        ctx.lineTo(-15, drillH/2);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Spinning Rings
+        const drillProg = (t * 12) % 1.0;
+        for (let i = 0; i < 4; i++) {
+            const ringProg = (drillProg + i/4) % 1.0;
+            const ringX = ringProg * drillW * 0.9;
+            const ringY = (1 - ringProg) * (drillH/2 + 5);
+            ctx.strokeStyle = `rgba(0, 255, 255, ${1 - ringProg})`;
+            ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(pts[0].x, pts[0].y);
-            for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-            
-            // Pure Cyan Outer Glow
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = '#00ffff';
-            ctx.strokeStyle = '#00ffff';
-            ctx.lineWidth = thickness;
-            ctx.lineCap = 'round';
+            ctx.ellipse(ringX, 0, 5, ringY, 0, 0, Math.PI * 2);
             ctx.stroke();
-            ctx.restore();
-
-            return pts[pts.length - 1];
-        };
-
-        let mainTip = null;
-        for (let k = 0; k < 4; k++) {
-            const phaseShift = (k / 4) * Math.PI * 2;
-            const tip = drawSpiralDrillTentacle(11, phaseShift, 2.5 - k * 0.4); // smaller radius (11) and thinner tentacles
-            if (k === 0) mainTip = tip;
         }
-
-        if (mainTip) {
-            const drillProg = (t * 6) % 1.0;
-            drawImpactSprite(mainTip, 45, drillProg); // reduced size from 90 to 45
-        }
+        
+        drawImpactSprite({x: drillW*0.8, y: 0}, 60, (t * 8) % 1.0);
+        ctx.restore();
     } else if (combatState.isLowSweeping || combatState.isUpSlashing || combatState.isPogoSlashing || combatState.isRisingBlast) {
-        // Shared generic tentacle drawing for Hollow Knight matrix skills
-        const drawTentacle = (startX, startY, endX, endY, thickness, wigglePhase) => {
-            const segments = 10;
-            const pts = [{ x: startX, y: startY }];
-            for (let i = 1; i <= segments; i++) {
-                const tVal = i / segments;
-                const targetX = startX + (endX - startX) * tVal;
-                const targetY = startY + (endY - startY) * tVal;
-                
-                const wiggle = Math.sin(t * 30 + tVal * 5 + wigglePhase) * (15 * tVal);
-                const dx = endX - startX;
-                const dy = endY - startY;
-                const len = Math.sqrt(dx*dx + dy*dy) || 1;
-                pts.push({
-                    x: targetX + (-dy / len) * wiggle,
-                    y: targetY + (dx / len) * wiggle
-                });
-            }
-            
-            ctx.beginPath();
-            ctx.moveTo(pts[0].x, pts[0].y);
-            for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-            
-            // Cyan outer glow
+        // Premium Gradient Slash Animation
+        const drawSlashAnimation = (angle, prog) => {
             ctx.save();
+            ctx.translate(-2, -5); // Body center
+            ctx.rotate(angle);
+            ctx.globalCompositeOperation = 'screen';
+            
+            const drawSize = 250;
+            
+            // Crescent Moon Shape with Bezier Curves
+            ctx.beginPath();
+            ctx.moveTo(0, -drawSize/2);
+            // Outer curve
+            ctx.bezierCurveTo(drawSize*0.8, -drawSize/2, drawSize*1.2, 0, drawSize*0.8, drawSize/2);
+            // Inner curve
+            ctx.bezierCurveTo(drawSize*0.6, 0, drawSize*0.6, -drawSize*0.2, 0, -drawSize/2);
+            ctx.closePath();
+            
+            // Linear Gradient for the Slash
+            const grad = ctx.createLinearGradient(0, 0, drawSize, 0);
+            grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+            grad.addColorStop(0.3, 'rgba(0, 255, 255, 1)');
+            grad.addColorStop(1, 'rgba(0, 255, 255, 0)');
+            
+            ctx.fillStyle = grad;
+            ctx.globalAlpha = Math.min(1.0, (1 - prog) * 2.5); // fade out at end
             ctx.shadowBlur = 15;
             ctx.shadowColor = '#00ffff';
-            ctx.strokeStyle = '#00ffff';
-            ctx.lineWidth = thickness;
-            ctx.lineCap = 'round';
-            ctx.stroke();
+            
+            // Stretch horizontally based on prog for dynamic feeling
+            ctx.scale(0.5 + prog, 1);
+            ctx.fill();
             ctx.restore();
-
-            // White core path to make it pop and look premium!
-            ctx.save();
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = thickness * 0.35;
-            ctx.lineCap = 'round';
-            ctx.stroke();
-            ctx.restore();
-
-            return pts[pts.length - 1]; // Return tip
+            
+            // Draw impact sprite at the tip of the slash
+            const tipX = -2 + Math.cos(angle) * 140;
+            const tipY = -5 + Math.sin(angle) * 140;
+            drawImpactSprite({x: tipX, y: tipY}, 60, prog);
         };
 
         if (combatState.isLowSweeping) {
             const prog = Math.max(0, Math.min(1, 1 - (combatState.lowSweepTime / 0.25)));
-            let mainTip;
-            for (let k = 0; k < 5; k++) {
-                const tip = drawTentacle(-2, 10, 110 + k*5, 20 + (k-2)*15, 6, k);
-                if (k === 2) mainTip = tip;
-            }
-            if (mainTip) {
-                drawSlashSprite(mainTip, Math.PI / 8, 50, prog); // Reduced from 120
-                drawImpactSprite(mainTip, 45, prog); // Reduced from 100
-            }
+            drawSlashAnimation(Math.PI / 8, prog);
         } else if (combatState.isUpSlashing) {
             const prog = Math.max(0, Math.min(1, 1 - (combatState.upSlashTime / 0.2)));
-            let mainTip;
-            for (let k = 0; k < 4; k++) {
-                const tip = drawTentacle(-2, -5, 60 + (k-1.5)*30, -110 + Math.abs(k-1.5)*20, 6, k);
-                if (k === 1) mainTip = tip;
-            }
-            if (mainTip) {
-                drawSlashSprite(mainTip, -Math.PI / 3, 55, prog); // Reduced from 150
-                drawImpactSprite(mainTip, 50, prog); // Reduced from 120
-            }
+            drawSlashAnimation(-Math.PI / 3, prog);
         } else if (combatState.isPogoSlashing) {
             const prog = Math.max(0, Math.min(1, 1 - (combatState.pogoSlashTime / 0.2)));
-            let mainTip;
-            for (let k = 0; k < 4; k++) {
-                const tip = drawTentacle(-2, 10, (k-1.5)*15, 120, 7, k);
-                if (k === 1) mainTip = tip;
-            }
-            if (mainTip) {
-                drawSlashSprite(mainTip, Math.PI / 2, 50, prog); // Reduced from 140
-                drawImpactSprite(mainTip, 45, prog); // Reduced from 110
-            }
+            drawSlashAnimation(Math.PI / 2, prog);
         } else if (combatState.isRisingBlast) {
             const prog = Math.max(0, Math.min(1.0, 1 - (combatState.risingBlastTime / 0.35)));
 
-            // 1. Draw 3 massive vertical lightning columns using the lightning sprite sheet FIRST (so tentacles show on top)
-            if (lightningSlashImg.complete && lightningSlashImg.naturalWidth > 0) {
+            // Premium Gradient Pillars
+            ctx.save();
+            ctx.globalCompositeOperation = 'screen';
+            
+            const cols = [-90, -45, 0, 45, 90];
+            cols.forEach((colX, idx) => {
                 ctx.save();
-                ctx.globalCompositeOperation = 'screen';
+                ctx.translate(colX, 20); // Base at feet
+                
+                const colHeight = 500 * Math.pow(prog, 0.5) + (Math.random() * 50); 
+                const colWidth = 60 + (Math.sin(t * 50 + idx) * 10);
+                
+                // Create vertical linear gradient (Transparent at top, White at bottom)
+                const grad = ctx.createLinearGradient(0, -colHeight, 0, 0);
+                grad.addColorStop(0, 'rgba(0, 255, 255, 0)');
+                grad.addColorStop(0.8, 'rgba(0, 255, 255, 1)');
+                grad.addColorStop(1, 'rgba(255, 255, 255, 1)');
+                
+                ctx.fillStyle = grad;
+                ctx.globalAlpha = Math.min(1.0, (1 - prog) * 2.0) * (0.6 + Math.random()*0.4);
+                ctx.shadowBlur = 20;
                 ctx.shadowColor = '#00ffff';
                 
-                const cols = [-40, 0, 40];
-                cols.forEach((colX, idx) => {
-                    ctx.save();
-                    ctx.translate(colX * (player.facingRight ? 1 : -1), -player.height/2 - 80);
-                    ctx.rotate(-Math.PI / 2 + (Math.sin(t * 20 + idx) * 0.15));
+                if (ctx.globalAlpha > 0) {
+                    ctx.fillRect(-colWidth/2, -colHeight, colWidth, colHeight);
                     
-                    const frameW = 64;
-                    const frameIdx = Math.floor(t * 25 + idx * 2) % 6;
-                    const colLength = 220 + Math.sin(t * 30 + idx) * 30;
-                    const colWidth = 35 + Math.random() * 10; // Narrower: reduced from 70
-                    
-                    ctx.shadowBlur = 12; // Reduced from 25
-                    ctx.globalAlpha = 0.45; // Fainter: reduced from 0.9
-                    try {
-                        ctx.drawImage(lightningSlashImg, frameIdx * 64, 0, 64, 64, -colLength/2, -colWidth/2, colLength, colWidth);
-                    } catch(e) {}
-                    ctx.restore();
-                });
+                    // Core bright line
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(-colWidth/8, -colHeight, colWidth/4, colHeight);
+                }
                 ctx.restore();
-            }
+            });
+            ctx.restore();
 
-            // 2. Draw expanding shockwave rings rising upwards SECOND
+            // Draw expanding shockwave rings
             ctx.save();
             ctx.globalCompositeOperation = 'screen';
             ctx.strokeStyle = '#ffffff';
@@ -1126,133 +1090,145 @@ export function drawPlayer(ctx, camera) {
             }
             ctx.restore();
 
-            // 3. Draw 7 wild tentacles shooting upwards and swaying aggressively THIRD (so they render on top of VFX)
-            for (let k = 0; k < 7; k++) {
-                const spreadX = (k - 3) * 30 * (player.facingRight ? 1 : -1);
-                const length = 180 + Math.sin(t * 40 + k) * 30;
-                drawTentacle(-2, -5, spreadX, -length, 7 - Math.abs(k - 3) * 0.8, k);
+            // 3. Proper 2D stylized upward blast (Pillars of Light)
+            ctx.save();
+            ctx.globalCompositeOperation = 'screen';
+            ctx.globalAlpha = Math.min(1.0, (1 - prog) * 2.0); // Fades out
+            ctx.translate(0, 20); // Ground level
+            
+            // Draw 5 vertical beams
+            for(let i=0; i<5; i++) {
+                const spread = (i - 2) * 25 * (1 + prog);
+                const w = 15 - Math.abs(i-2)*3;
+                const h = 400 + Math.random()*50;
+                
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#00ffff';
+                ctx.fillRect(spread - w/2, -h, w, h);
+                
+                ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
+                ctx.fillRect(spread - w, -h, w*2, h);
             }
+            ctx.restore();
         }
     } else if (combatState.isLightningNova) {
         const prog = Math.max(0, Math.min(1.0, 1 - (combatState.lightningNovaTime / 0.3)));
-        // 8 wild tentacles bursting outward 360 degrees
-        for (let k = 0; k < 8; k++) {
+        // Premium Gradient Nova Burst
+        ctx.save();
+        ctx.translate(-2, -15);
+        ctx.globalCompositeOperation = 'screen';
+        ctx.globalAlpha = Math.min(1.0, (1 - prog) * 2.0); // fade out
+        
+        // Scales up aggressively
+        const radius = 50 + prog * 300;
+        
+        const grad = ctx.createRadialGradient(0, 0, radius*0.1, 0, 0, radius);
+        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+        grad.addColorStop(0.2, 'rgba(0, 255, 255, 1)');
+        grad.addColorStop(0.8, 'rgba(0, 255, 255, 0.5)');
+        grad.addColorStop(1, 'rgba(0, 255, 255, 0)');
+        
+        ctx.beginPath();
+        ctx.arc(0, 0, radius, 0, Math.PI*2);
+        ctx.fillStyle = grad;
+        ctx.fill();
+        
+        // Retain 8 jagged lightning spikes for extra flair
+        for(let k=0; k<8; k++) {
             const angle = (k / 8) * Math.PI * 2 + t * 5;
-            const len = (80 + Math.sin(t * 30 + k) * 20) * (0.4 + prog * 0.6);
-            
-            // Inline the tentacle logic for Nova to avoid missing the generic function
-            const segments = 10;
-            const pts = [{ x: -2, y: -5 }];
-            for (let i = 1; i <= segments; i++) {
-                const tVal = i / segments;
-                const targetX = -2 + (Math.cos(angle) * len - (-2)) * tVal;
-                const targetY = -5 + (Math.sin(angle) * len - (-5)) * tVal;
-                
-                const wiggle = Math.sin(t * 30 + tVal * 5 + k) * (15 * tVal);
-                const dx = Math.cos(angle) * len - (-2);
-                const dy = Math.sin(angle) * len - (-5);
-                const l = Math.sqrt(dx*dx + dy*dy) || 1;
-                pts.push({
-                    x: targetX + (-dy / l) * wiggle,
-                    y: targetY + (dx / l) * wiggle
-                });
-            }
+            const spikeLen = radius + Math.sin(t*30 + k)*50;
             
             ctx.beginPath();
-            ctx.moveTo(pts[0].x, pts[0].y);
-            for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-            
-            ctx.save();
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#00ffff';
-            ctx.strokeStyle = '#00ffff';
-            ctx.lineWidth = 6;
-            ctx.lineCap = 'round';
-            ctx.stroke();
-            
+            ctx.moveTo(0, 0);
+            ctx.lineTo(Math.cos(angle - 0.1)*spikeLen*0.5, Math.sin(angle - 0.1)*spikeLen*0.5);
+            ctx.lineTo(Math.cos(angle)*spikeLen, Math.sin(angle)*spikeLen);
+            ctx.lineWidth = 4 * (1 - prog);
             ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 6 * 0.35;
             ctx.stroke();
-            ctx.restore();
-
-            const tip = pts[pts.length - 1];
-            if (k % 2 === 0) {
-                drawSlashSprite(tip, angle, 45, prog);
-            }
+            
+            drawImpactSprite({x: Math.cos(angle)*spikeLen, y: Math.sin(angle)*spikeLen}, 40, prog);
         }
+        ctx.restore();
     } else if (combatState.isGroundSmashing) {
-        const drawHeadSpaceTentacle = (startX, startY, endX, endY, thickness, wigglePhase) => {
-            const segments = 10;
-            const pts = [{ x: startX, y: startY }];
-            for (let i = 1; i <= segments; i++) {
-                const tVal = i / segments;
-                const targetX = startX + (endX - startX) * tVal;
-                const targetY = startY + (endY - startY) * tVal;
-                
-                const wiggleSpd = combatState.smashPhase === 3 ? 35 : 18;
-                const wiggleAmp = combatState.smashPhase === 3 ? 6 : 12;
-                const wiggle = Math.sin(t * wiggleSpd + tVal * 5 + wigglePhase) * (wiggleAmp * tVal);
-                
-                const dx = endX - startX;
-                const dy = endY - startY;
-                const len = Math.sqrt(dx*dx + dy*dy) || 1;
-                const nx = -dy / len;
-                const ny = dx / len;
-                pts.push({
-                    x: targetX + nx * wiggle,
-                    y: targetY + ny * wiggle
-                });
-            }
-            
+        const prog = combatState.smashPhase === 3 ? 1.0 : Math.max(0, 1 - (combatState.smashCooldown / 1.5));
+        
+        ctx.save();
+        ctx.translate(-2, -15);
+        if (combatState.smashPhase === 1 || combatState.smashPhase === 2) {
+            // Gathering power phase (floating)
+            ctx.fillStyle = '#ffffff';
+            ctx.globalAlpha = Math.sin(t * 20) * 0.5 + 0.5;
             ctx.beginPath();
-            ctx.moveTo(pts[0].x, pts[0].y);
-            for (let i = 1; i < pts.length; i++) {
-                ctx.lineTo(pts[i].x, pts[i].y);
-            }
+            ctx.arc(0, -30, 25, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (combatState.smashPhase === 3 && player.isGrounded) {
+            // Proper 2D game ground smash impact
             ctx.save();
-            ctx.lineCap = 'round';
-            // Layered neon glow
-            ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
-            ctx.lineWidth = thickness * 2.5;
-            ctx.stroke();
+            ctx.translate(0, 15); // Feet level
+            ctx.globalCompositeOperation = 'screen';
+            ctx.globalAlpha = Math.min(1.0, (1.5 - combatState.smashCooldown));
+            // Premium Gradient Impact Crater Animation
+            const timeActive = 1.5 - combatState.smashCooldown;
+            const animDuration = 0.5;
+            const animProg = Math.max(0, Math.min(1.0, timeActive / animDuration));
             
-            ctx.strokeStyle = '#00ffff';
-            ctx.lineWidth = thickness;
-            ctx.stroke();
+            const radius = 100 + animProg * 350; // Scales up aggressively
+            
+            ctx.save();
+            ctx.globalAlpha = Math.min(1.0, (animDuration - timeActive) * 2.0); // fade out
+            
+            if (ctx.globalAlpha > 0) {
+                // Draw squashed crater on the ground (Perspective)
+                ctx.scale(1, 0.4);
+                
+                const grad = ctx.createRadialGradient(0, 0, radius*0.2, 0, 0, radius);
+                grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                grad.addColorStop(0.3, 'rgba(0, 255, 255, 1)');
+                grad.addColorStop(1, 'rgba(0, 255, 255, 0)');
+                
+                ctx.beginPath();
+                ctx.arc(0, 0, radius, 0, Math.PI*2);
+                ctx.fillStyle = grad;
+                ctx.fill();
+                
+                // Extra inner bright core
+                ctx.beginPath();
+                ctx.arc(0, 0, radius*0.4, 0, Math.PI*2);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+            }
             ctx.restore();
-            return pts[pts.length - 1]; // Return tip
-        };
-
-        const phase = combatState.smashPhase || 2;
-        if (phase === 1 || phase === 2) {
-            // Leap/Gather: 4 tentacles pointing UPWARDS to gather power from above
-            let mainTip;
-            for (let k = 0; k < 4; k++) {
-                const spreadX = (k - 1.5) * 35;
-                const length = 85 + Math.sin(t * 10 + k) * 15;
-                const tip = drawHeadSpaceTentacle(-2, -5, spreadX, -length, 4.5, k);
-                if (k === 1) mainTip = tip;
-            }
-            if (mainTip) {
-                const prog = (t * 5) % 1.0;
-                drawSlashSprite(mainTip, -Math.PI / 2, 50, prog); // Reduced from 120
-            }
-        } else {
-            // Slamming phase (Phase 3): Pointing DOWNWARDS wrapped together like a heavy drill spear!
-            let mainTip;
-            for (let k = 0; k < 4; k++) {
-                const spreadX = (k - 1.5) * 8 + (Math.sin(t * 40 + k) * 4);
-                const length = 110 + Math.cos(t * 40 + k) * 10;
-                const thickness = 7 - Math.abs(k - 1.5) * 2;
-                const tip = drawHeadSpaceTentacle(-2, -5, spreadX, length, thickness, k);
-                if (k === 1) mainTip = tip;
-            }
-            if (mainTip) {
-                const prog = (t * 8) % 1.0;
-                drawSlashSprite(mainTip, Math.PI / 2, 65, prog); // Reduced from 170
-                drawImpactSprite(mainTip, 55, prog); // Reduced from 140
-            }
+            
+            // Ground glowing crater (ellipse)
+            const craterW = 400 + Math.random()*20;
+            const craterH = 60 + Math.random()*10;
+            
+            ctx.fillStyle = 'rgba(0, 255, 255, 0.6)';
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#00ffff';
+            ctx.beginPath();
+            ctx.ellipse(0, 0, craterW/2, craterH/2, 0, 0, Math.PI*2);
+            ctx.fill();
+            
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.ellipse(0, 0, craterW/4, craterH/4, 0, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Pillar of energy shooting up from impact
+            const pillarH = 300 * Math.max(0, Math.min(1, 1.5 - combatState.smashCooldown));
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(-20, -pillarH, 40, pillarH);
+            ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
+            ctx.fillRect(-40, -pillarH, 80, pillarH);
+            
+            // Impact sparks
+            drawImpactSprite({x: 0, y: 0}, 150, (t*5)%1.0);
+            
+            ctx.restore();
         }
+        ctx.restore();
     } else if (combatState.isCharging) {
         // Spin the head tentacles around the head center (which is 0,0 during charging)!
         const lvl = combatState.chargeLevel || 1;
