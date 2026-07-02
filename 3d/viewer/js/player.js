@@ -561,43 +561,41 @@ export function drawPlayer(ctx, camera) {
             drawImpactSprite(mainTip, 160, drillProg);
         }
     } else if (combatState.isBioDrilling) {
-        // Bio-Drill (Neutral I): helix tentacles wrapping player body to form a tight giant drill
+        // Bio-Drill (Neutral I): helix tentacles wrapping player body to form a tight, clean drill
         const drawSpiralDrillTentacle = (radius, wigglePhase, thickness) => {
-            const segments = 15;
+            const segments = 12;
             const pts = [];
             for (let i = 0; i <= segments; i++) {
                 const tVal = i / segments;
-                // Compact drill shell tight to the body (from X=-15 to X=55)
-                const startX = -15;
-                const endX = 55;
+                // Compact drill shell tight to the body (from X=-12 to X=42)
+                const startX = -12;
+                const endX = 42;
                 const x = startX + (endX - startX) * tVal;
                 
-                const windAngle = tVal * Math.PI * 6 + t * 50 + wigglePhase;
+                const windAngle = tVal * Math.PI * 5 + t * 40 + wigglePhase;
                 const taper = Math.sin(tVal * Math.PI / 2);
                 const curRadius = radius * (1.0 - taper);
-                const y = -player.height/2 + Math.sin(windAngle) * curRadius;
+                const y = Math.sin(windAngle) * curRadius; // FIXED: no double offset!
                 pts.push({ x, y });
             }
             
+            ctx.save();
             ctx.beginPath();
             ctx.moveTo(pts[0].x, pts[0].y);
             for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
             
             // Outer glow
-            ctx.save();
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 8;
             ctx.shadowColor = '#00ffff';
             ctx.strokeStyle = '#00ffff';
             ctx.lineWidth = thickness;
             ctx.lineCap = 'round';
             ctx.stroke();
-            ctx.restore();
             
             // White core
-            ctx.save();
+            ctx.shadowBlur = 0;
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = thickness * 0.35;
-            ctx.lineCap = 'round';
             ctx.stroke();
             ctx.restore();
 
@@ -607,30 +605,47 @@ export function drawPlayer(ctx, camera) {
         let mainTip = null;
         for (let k = 0; k < 4; k++) {
             const phaseShift = (k / 4) * Math.PI * 2;
-            const tip = drawSpiralDrillTentacle(14, phaseShift, 4 - k * 0.6); // smaller radius (14) for tight wrap
+            const tip = drawSpiralDrillTentacle(11, phaseShift, 2.5 - k * 0.4); // smaller radius (11) and thinner tentacles
             if (k === 0) mainTip = tip;
         }
 
-        // Draw tight electric aura shell wrapping the body
+        // Draw tiny electric sparks scattering around the circular aura boundary
         ctx.save();
-        ctx.translate(0, -player.height/2);
         ctx.globalCompositeOperation = 'screen';
         ctx.strokeStyle = '#ffffff';
         ctx.shadowColor = '#00ffff';
-        ctx.shadowBlur = 20;
-        ctx.lineWidth = 1.5;
-        for (let i = 0; i < 3; i++) {
+        ctx.shadowBlur = 8;
+        ctx.lineWidth = 0.8;
+        
+        const auraRadius = 14;
+        const sparkCount = 6;
+        for (let i = 0; i < sparkCount; i++) {
+            const angle = (i / sparkCount) * Math.PI * 2 + t * 6;
+            const startX = Math.cos(angle) * auraRadius;
+            const startY = Math.sin(angle) * auraRadius;
+            
             ctx.beginPath();
-            const r = 16 + Math.sin(t * 35 + i) * 4; // tight radius (16)
-            ctx.arc(0, 0, r, 0, Math.PI * 2);
-            ctx.setLineDash([8 + Math.random()*10, 8 + Math.random()*10]);
+            ctx.moveTo(startX, startY);
+            
+            // Draw a tiny 3-step zig-zag
+            let curX = startX;
+            let curY = startY;
+            const steps = 3;
+            const zapLength = 5;
+            for (let s = 0; s < steps; s++) {
+                const tangentAngle = angle + Math.PI / 2 + (Math.random() - 0.5) * 1.5;
+                const dist = (zapLength / steps) + (Math.random() * 1.5);
+                curX += Math.cos(tangentAngle) * dist;
+                curY += Math.sin(tangentAngle) * dist;
+                ctx.lineTo(curX, curY);
+            }
             ctx.stroke();
         }
         ctx.restore();
 
         if (mainTip) {
             const drillProg = (t * 6) % 1.0;
-            drawImpactSprite(mainTip, 150, drillProg);
+            drawImpactSprite(mainTip, 90, drillProg); // reduced size from 150 to 90
         }
     } else if (combatState.isLowSweeping || combatState.isUpSlashing || combatState.isPogoSlashing || combatState.isRisingBlast) {
         // Shared generic tentacle drawing for Hollow Knight matrix skills
