@@ -43,28 +43,33 @@ export function updatePlayer(dt, addParticle) {
         // Lock horizontal movement during ground smash (combat.js handles Y)
         player.vx = 0;
     } else {
-        // Horizontal Movement
-        let targetVx = 0;
-        if (keys.left) {
-            targetVx = -player.speed;
-            player.facingRight = false;
-        }
-        if (keys.right) {
-            targetVx = player.speed;
-            player.facingRight = true;
-        }
-        
-        // Get tile directly below player for friction
-        const groundTile = getCollision(player.x + 5, player.y + player.height + 1, player.width - 10, 1);
-        let friction = 15;
-        if (groundTile === 3) {
-            friction = 1.5; // Ice block
-        } else if (!player.isGrounded) {
-            friction = 5; // Air control (mượt mà hơn, giữ quán tính)
-        }
+        if (player.wallJumpTimer > 0) {
+            player.wallJumpTimer -= dt;
+            // Retain momentum, ignore input
+        } else {
+            // Horizontal Movement
+            let targetVx = 0;
+            if (keys.left) {
+                targetVx = -player.speed;
+                player.facingRight = false;
+            }
+            if (keys.right) {
+                targetVx = player.speed;
+                player.facingRight = true;
+            }
+            
+            // Get tile directly below player for friction
+            const groundTile = getCollision(player.x + 5, player.y + player.height + 1, player.width - 10, 1);
+            let friction = 15;
+            if (groundTile === 3) {
+                friction = 1.5; // Ice block
+            } else if (!player.isGrounded) {
+                friction = 5; // Air control (mượt mà hơn, giữ quán tính)
+            }
 
-        // Smooth acceleration/friction
-        player.vx += (targetVx - player.vx) * friction * dt;
+            // Smooth acceleration/friction
+            player.vx += (targetVx - player.vx) * friction * dt;
+        }
 
         // Hover Mechanics
         if (player.isGrounded) {
@@ -118,20 +123,37 @@ export function updatePlayer(dt, addParticle) {
         // Terminal velocity
         if (player.vy > 800) player.vy = 800;
 
-        // Jumping
-        if (keys.jumpPressed && player.isGrounded) {
-            player.vy = player.jumpForce;
-            player.isGrounded = false;
-            player.hasClippedJump = false; // Reset flag for variable jump
-            
-            // Jump stretch (anticipation & launch)
-            player.scaleX = 0.6;
-            player.scaleY = 1.4;
+        // Jumping and Wall Jumping
+        if (keys.jumpPressed) {
+            if (player.isWallSliding) {
+                // Wall jump
+                player.vy = player.jumpForce * 1.2;
+                player.vx = player.facingRight ? -450 : 450;
+                player.wallJumpTimer = 0.25; // Disable input briefly to escape wall
+                
+                // Jump stretch
+                player.scaleX = 0.6;
+                player.scaleY = 1.4;
 
-            // Jump dust
-            for(let i=0; i<5; i++) {
-                addParticle(player.x + player.width/2, player.y + player.height, 
-                            (Math.random()-0.5)*100, -Math.random()*50, 'rgba(0, 255, 255, 0.5)', 0.3);
+                // Wall jump dust
+                const dustX = player.facingRight ? player.x + player.width : player.x;
+                for(let i=0; i<8; i++) {
+                    addParticle(dustX, player.y + player.height/2, (Math.random()-0.5)*150, (Math.random()-0.5)*100, '#ffffff', 0.5, 'ring', 25);
+                }
+            } else if (player.isGrounded) {
+                player.vy = player.jumpForce;
+                player.isGrounded = false;
+                player.hasClippedJump = false; // Reset flag for variable jump
+                
+                // Jump stretch (anticipation & launch)
+                player.scaleX = 0.6;
+                player.scaleY = 1.4;
+
+                // Jump dust
+                for(let i=0; i<5; i++) {
+                    addParticle(player.x + player.width/2, player.y + player.height, 
+                                (Math.random()-0.5)*100, -Math.random()*50, 'rgba(0, 255, 255, 0.5)', 0.3);
+                }
             }
         }
 
@@ -1489,22 +1511,21 @@ export function drawPlayer(ctx, camera) {
         ctx.restore();
     }
 
-    // Draw Lightning Trail (Procedural Branching Lightning - Optimized Layered Glow)
+    // Draw Lightning Trail (Fast Non-Recursive Procedural Lightning)
     if (combatState.isDashStriking) {
-        const drawProceduralLightning = (sx, sy, ex, ey, disp, branches, thickness = 3.5) => {
+        const drawFastLightning = (sx, sy, ex, ey, disp, thickness = 3.5) => {
             if (thickness < 0.5) return;
             const dx = ex - sx;
             const dy = ey - sy;
             const length = Math.sqrt(dx*dx + dy*dy);
             if (length < 5) return;
 
-            // Reduced steps to significantly improve performance
-            const steps = Math.min(Math.floor(length / 20), 12);
+            const steps = Math.min(Math.floor(length / 25), 8); // Minimum steps
             ctx.save();
             ctx.lineCap = 'round';
             ctx.lineJoin = 'round';
-
-            const pts = [{ x: sx, y: sy }];
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
             
             for (let i = 1; i < steps; i++) {
                 const tVal = i / steps;
@@ -1515,55 +1536,33 @@ export function drawPlayer(ctx, camera) {
                 const ny = dx / length;
                 const offset = (Math.random() - 0.5) * disp;
                 
-                const px = tx + nx * offset;
-                const py = ty + ny * offset;
-                pts.push({ x: px, y: py });
-                
-                // Spawn small branching lightning bolts (lowered probability for performance)
-                if (branches > 0 && Math.random() < 0.05 && i < steps - 2) {
-                    const bx = px + (Math.random() * 30 - 15) + (dx / steps) * 2;
-                    const by = py + (Math.random() * 30 - 15) + (dy / steps) * 2;
-                    drawProceduralLightning(px, py, bx, by, disp * 0.5, branches - 1, thickness * 0.6);
-                }
+                ctx.lineTo(tx + nx * offset, ty + ny * offset);
             }
-            pts.push({ x: ex, y: ey });
+            ctx.lineTo(ex, ey);
             
-            ctx.beginPath();
-            ctx.moveTo(pts[0].x, pts[0].y);
-            for (let i = 1; i < pts.length; i++) {
-                ctx.lineTo(pts[i].x, pts[i].y);
-            }
-            
-            // Outer glow layer
-            ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+            // Fast double stroke for glow
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.2)';
             ctx.lineWidth = thickness * 2.5;
             ctx.stroke();
             
-            // Core glow layer
-            ctx.strokeStyle = '#00ffff';
-            ctx.lineWidth = thickness;
-            ctx.stroke();
-            
-            // Inner white core path
             ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = thickness * 0.35;
+            ctx.lineWidth = thickness * 0.5;
             ctx.stroke();
             ctx.restore();
         };
 
         const lvl = combatState.chargeLevel || 1;
-        const trailCount = lvl === 3 ? 5 : (lvl === 2 ? 3 : 1);
-        const disp = lvl === 3 ? 16 : (lvl === 2 ? 11 : 6);
-        const lengthMultiplier = lvl === 3 ? 1.6 : (lvl === 2 ? 1.1 : 0.8);
-        const thickness = lvl === 3 ? 5.5 : (lvl === 2 ? 3.5 : 2.0);
+        const trailCount = lvl === 3 ? 3 : (lvl === 2 ? 2 : 1);
+        const disp = lvl === 3 ? 12 : 8;
+        const lengthMultiplier = lvl === 3 ? 1.5 : 1.0;
+        const thickness = lvl === 3 ? 4 : 2;
         
         for (let j = 0; j < trailCount; j++) {
             const startOffset = -10 + j * 4;
             const endOffsetX = (-120 - Math.random() * 50) * lengthMultiplier;
             const endOffsetY = (j - (trailCount - 1) / 2) * 16 + (Math.random() - 0.5) * 15;
             
-            // Limit branches to max 1 to prevent exponential recursive lag
-            drawProceduralLightning(-2, -5 + startOffset, endOffsetX, endOffsetY, disp, lvl === 3 ? 1 : 0, thickness);
+            drawFastLightning(-2, -5 + startOffset, endOffsetX, endOffsetY, disp, thickness);
         }
 
         // Draw animated pixel-art lightning sprites from assets!

@@ -67,27 +67,27 @@ export function releaseChargeAttack(player) {
     const chargeTime = combatState.chargeTime;
     combatState.chargeTime = 0; // RESET CHARGE TIME!
     let level = 1;
-    let cameraShake = 4;
+    let cameraShake = 5;
     let beamDuration = 0.15;
-    let dashSpeed = 1000;
+    let dashSpeed = 600; // Base dash speed
     
     if (chargeTime >= 0.7) {
         level = 3;
         cameraShake = 25;
         beamDuration = 0.35;
-        dashSpeed = 2000; // Ultra fast lightning warp
+        dashSpeed = 1200; // Fast lightning warp (lowered to prevent tunneling)
     } else if (chargeTime >= 0.3) {
         level = 2;
         cameraShake = 12;
         beamDuration = 0.22;
-        dashSpeed = 1400;
+        dashSpeed = 900;
     }
     
     combatState.chargeLevel = level;
     combatState.lastChargeRatio = chargeTime / combatState.chargeDuration;
     
     combatState.dashStrikeTime = level === 3 ? 0.3 : 0.2;
-    combatState.dashStrikeCooldown = 1.4;
+    combatState.dashStrikeCooldown = 0.4;
     
     combatState.isReleasingBeam = true;
     combatState.beamTime = beamDuration;
@@ -419,6 +419,7 @@ export function updateCombat(player, dt) {
             player.facingRight = !player.facingRight;
             player.vx = player.facingRight ? 800 : -800; // Bounce back
             player.vy = -500; // Bounce up
+            player.wallJumpTimer = 0.3; // Give player time to bounce off wall without friction interference
             
             combatState.isDashStriking = false;
             combatState.dashStrikeCooldown = 0; // Allow instant recast after bounce!
