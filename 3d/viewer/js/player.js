@@ -1,6 +1,6 @@
 import { keys, resetInputPresses } from './input.js';
 import { getCollision, TILE_SIZE } from './world.js';
-import { combatState, lightningSlashImg, lightningImpactImg, orbImg, spark1Img, spark2Img } from './combat.js?v=14';
+import { combatState, lightningSlashImg, lightningImpactImg, orbImg, spark1Img, spark2Img } from './combat.js?v=15';
 import { addParticle } from './effects.js';
 
 export const player = {
@@ -38,8 +38,8 @@ export function updatePlayer(dt, addParticle) {
         if (player.dashTime <= 0) {
             player.isDashing = false;
         }
-    } else if (combatState.isDashStriking) {
-        // Dash Strike physics are completely managed in combat.js
+    } else if (combatState.isDashStriking || combatState.isBioDrilling || combatState.isRisingBlast || combatState.isUpSlashing || combatState.isLowSweeping) {
+        // Physics for these hard-commit skills are completely managed in combat.js
     } else if (combatState.isGroundSmashing) {
         // Lock horizontal movement during ground smash (combat.js handles Y)
         player.vx = 0;

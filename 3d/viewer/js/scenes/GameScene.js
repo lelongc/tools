@@ -1,6 +1,6 @@
 import { map, TILE_SIZE, drawWorld } from '../world.js';
-import { player, updatePlayer, drawPlayer } from '../player.js?v=14';
-import { combatState, updateCombat, drawCombat } from '../combat.js?v=14';
+import { player, updatePlayer, drawPlayer } from '../player.js?v=15';
+import { combatState, updateCombat, drawCombat } from '../combat.js?v=15';
 import { updateAndDrawParticles, addParticle } from '../effects.js';
 import { keys, resetInputPresses } from '../input.js';
 
