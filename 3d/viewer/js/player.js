@@ -726,17 +726,22 @@ export function drawPlayer(ctx, camera) {
         }
 
         // Procedural Vector Fallback: Neon Crescent Slash Arc
-        ctx.globalCompositeOperation = 'screen';
         ctx.globalAlpha = 0.85 * (1 - activeProg * 0.5);
-        ctx.strokeStyle = '#00ffff';
-        ctx.lineWidth = size * 0.25;
-        ctx.shadowColor = '#00ffff';
-        ctx.shadowBlur = 15;
         
-        ctx.beginPath();
-        ctx.arc(0, 0, size * 0.5, -Math.PI * 0.4, Math.PI * 0.4);
-        ctx.stroke();
+        const drawArc = (lineWidth, style) => {
+            ctx.strokeStyle = style;
+            ctx.lineWidth = lineWidth;
+            ctx.beginPath();
+            ctx.arc(0, 0, size * 0.5, -Math.PI * 0.4, Math.PI * 0.4);
+            ctx.stroke();
+        };
+
+        // Layer 1: Outer glow
+        drawArc(size * 0.4, 'rgba(0, 255, 255, 0.2)');
+        // Layer 2: Mid glow
+        drawArc(size * 0.25, 'rgba(0, 255, 255, 0.6)');
         
+        // Layer 3: Core (white)
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = size * 0.1;
         ctx.beginPath();
@@ -762,21 +767,27 @@ export function drawPlayer(ctx, camera) {
         }
 
         // Procedural Vector Fallback: Electric Starburst Burst
-        ctx.globalCompositeOperation = 'screen';
         ctx.globalAlpha = 0.8;
-        ctx.strokeStyle = '#00ffff';
-        ctx.lineWidth = 3;
-        ctx.shadowColor = '#00ffff';
-        ctx.shadowBlur = 15;
-        
         const r = size * 0.4;
-        ctx.beginPath();
-        for (let i = 0; i < 6; i++) {
-            const a = (i / 6) * Math.PI * 2 + activeProg * 5;
-            ctx.moveTo(0, 0);
-            ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
-        }
-        ctx.stroke();
+        
+        const drawBurst = (lineWidth, style) => {
+            ctx.strokeStyle = style;
+            ctx.lineWidth = lineWidth;
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const a = (i / 6) * Math.PI * 2 + activeProg * 5;
+                ctx.moveTo(0, 0);
+                ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+            }
+            ctx.stroke();
+        };
+
+        // Layer 1: Outer glow
+        drawBurst(10, 'rgba(0, 255, 255, 0.2)');
+        // Layer 2: Mid glow
+        drawBurst(4, 'rgba(0, 255, 255, 0.6)');
+        // Layer 3: Core
+        drawBurst(1.5, 'rgba(255, 255, 255, 1)');
         
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
@@ -897,74 +908,88 @@ export function drawPlayer(ctx, camera) {
     }
 
     if (combatState.isDashStriking) {
-        // Dash Strike: Premium Gradient Vector
+        // Dash Strike: Multi-Layer Glow Vector
         ctx.save();
         ctx.translate(-2, -15); // Body center
-        ctx.globalCompositeOperation = 'screen';
         
         const prog = (t * 8) % 1.0;
         const drillW = 220;
         const drillH = 60 + Math.sin(t * 60) * 10;
         
-        // Dynamic Glowing Gradient
-        const grad = ctx.createLinearGradient(0, 0, drillW, 0);
-        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        grad.addColorStop(0.2, 'rgba(0, 255, 255, 1)');
-        grad.addColorStop(1, 'rgba(0, 255, 255, 0)');
+        // Define path helper for the aerodynamic cone
+        const drawCone = (scaleX, scaleY) => {
+            ctx.beginPath();
+            ctx.moveTo(-10 * scaleX, -drillH/2 * scaleY);
+            ctx.bezierCurveTo(drillW*0.3 * scaleX, -drillH/4 * scaleY, drillW*0.6 * scaleX, -10 * scaleY, drillW * scaleX, 0);
+            ctx.bezierCurveTo(drillW*0.6 * scaleX, 10 * scaleY, drillW*0.3 * scaleX, drillH/4 * scaleY, -10 * scaleX, drillH/2 * scaleY);
+            ctx.closePath();
+            ctx.fill();
+        };
+
+        // Layer 1: Outer glow
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
+        drawCone(1.1, 1.2);
         
-        // Draw sharp aerodynamic cone
-        ctx.fillStyle = grad;
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = '#00ffff';
+        // Layer 2: Mid glow
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
+        drawCone(1.0, 1.0);
         
-        ctx.beginPath();
-        ctx.moveTo(-10, -drillH/2);
-        ctx.bezierCurveTo(drillW*0.3, -drillH/4, drillW*0.6, -10, drillW, 0);
-        ctx.bezierCurveTo(drillW*0.6, 10, drillW*0.3, drillH/4, -10, drillH/2);
-        ctx.closePath();
-        ctx.fill();
+        // Layer 3: Core (white)
+        ctx.fillStyle = '#ffffff';
+        drawCone(0.8, 0.5);
         
-        // Draw energy rings wrapping around the dash
+        // Draw energy rings wrapping around the dash (Multi-layer for rings too)
         for (let i = 0; i < 3; i++) {
             const ringProg = (prog + i/3) % 1.0;
             const ringX = ringProg * drillW * 0.8;
             const ringY = (1 - ringProg) * (drillH/2);
-            ctx.strokeStyle = `rgba(0, 255, 255, ${1 - ringProg})`;
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.ellipse(ringX, 0, 8, ringY, 0, 0, Math.PI * 2);
-            ctx.stroke();
+            
+            const drawRing = (lineWidth, style) => {
+                ctx.strokeStyle = style;
+                ctx.lineWidth = lineWidth;
+                ctx.beginPath();
+                ctx.ellipse(ringX, 0, 8, ringY, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            };
+            
+            drawRing(8, `rgba(0, 255, 255, ${(1 - ringProg) * 0.3})`); // Outer ring glow
+            drawRing(4, `rgba(0, 255, 255, ${1 - ringProg})`);       // Mid ring
+            drawRing(1.5, `rgba(255, 255, 255, ${1 - ringProg})`);    // Core ring
         }
         
         drawImpactSprite({x: drillW*0.9, y: 0}, 80, prog);
         ctx.restore();
     } else if (combatState.isBioDrilling) {
-        // Bio-Drill (Neutral I): Premium Gradient Vector
+        // Bio-Drill (Neutral I): Multi-Layer Glow Vector
         const prog = Math.max(0, Math.min(1.0, 1 - (combatState.bioDrillTime / 0.35)));
         
         ctx.save();
         ctx.translate(-2, -15); // Center on body
         ctx.translate((Math.random()-0.5)*5, (Math.random()-0.5)*5); // Shake
-        ctx.globalCompositeOperation = 'screen';
         
         const drillW = 180;
         const drillH = 50 + Math.sin(t * 50) * 8;
         
-        const grad = ctx.createLinearGradient(0, 0, drillW, 0);
-        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        grad.addColorStop(0.3, 'rgba(0, 255, 255, 1)');
-        grad.addColorStop(1, 'rgba(0, 255, 255, 0)');
+        const drawDrillShape = (scaleX, scaleY) => {
+            ctx.beginPath();
+            ctx.moveTo(-15 * scaleX, -drillH/2 * scaleY);
+            ctx.lineTo(drillW * scaleX, 0);
+            ctx.lineTo(-15 * scaleX, drillH/2 * scaleY);
+            ctx.closePath();
+            ctx.fill();
+        };
+
+        // Layer 1: Outer glow
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
+        drawDrillShape(1.05, 1.2);
         
-        ctx.fillStyle = grad;
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = '#00ffff';
+        // Layer 2: Mid glow
+        ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
+        drawDrillShape(1.0, 1.0);
         
-        ctx.beginPath();
-        ctx.moveTo(-15, -drillH/2);
-        ctx.lineTo(drillW, 0);
-        ctx.lineTo(-15, drillH/2);
-        ctx.closePath();
-        ctx.fill();
+        // Layer 3: Core (white)
+        ctx.fillStyle = '#ffffff';
+        drawDrillShape(0.8, 0.5);
         
         // Spinning Rings
         const drillProg = (t * 12) % 1.0;
@@ -972,48 +997,63 @@ export function drawPlayer(ctx, camera) {
             const ringProg = (drillProg + i/4) % 1.0;
             const ringX = ringProg * drillW * 0.9;
             const ringY = (1 - ringProg) * (drillH/2 + 5);
-            ctx.strokeStyle = `rgba(0, 255, 255, ${1 - ringProg})`;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.ellipse(ringX, 0, 5, ringY, 0, 0, Math.PI * 2);
-            ctx.stroke();
+            
+            const drawRing = (lineWidth, style) => {
+                ctx.strokeStyle = style;
+                ctx.lineWidth = lineWidth;
+                ctx.beginPath();
+                ctx.ellipse(ringX, 0, 5, ringY, 0, 0, Math.PI * 2);
+                ctx.stroke();
+            };
+            
+            drawRing(6, `rgba(0, 255, 255, ${(1 - ringProg) * 0.3})`);
+            drawRing(3, `rgba(0, 255, 255, ${1 - ringProg})`);
+            drawRing(1, `rgba(255, 255, 255, ${1 - ringProg})`);
         }
         
         drawImpactSprite({x: drillW*0.8, y: 0}, 60, (t * 8) % 1.0);
         ctx.restore();
     } else if (combatState.isLowSweeping || combatState.isUpSlashing || combatState.isPogoSlashing || combatState.isRisingBlast) {
-        // Premium Gradient Slash Animation
+        // Multi-Layer Glow Slash Animation
         const drawSlashAnimation = (angle, prog) => {
             ctx.save();
             ctx.translate(-2, -5); // Body center
             ctx.rotate(angle);
-            ctx.globalCompositeOperation = 'screen';
             
             const drawSize = 250;
+            const fadeAlpha = Math.min(1.0, (1 - prog) * 2.5); // fade out at end
+            if (fadeAlpha <= 0) {
+                ctx.restore();
+                return;
+            }
             
-            // Crescent Moon Shape with Bezier Curves
-            ctx.beginPath();
-            ctx.moveTo(0, -drawSize/2);
-            // Outer curve
-            ctx.bezierCurveTo(drawSize*0.8, -drawSize/2, drawSize*1.2, 0, drawSize*0.8, drawSize/2);
-            // Inner curve
-            ctx.bezierCurveTo(drawSize*0.6, 0, drawSize*0.6, -drawSize*0.2, 0, -drawSize/2);
-            ctx.closePath();
+            const drawCrescent = (scaleX, scaleY) => {
+                ctx.save();
+                // Stretch horizontally based on prog for dynamic feeling
+                ctx.scale((0.5 + prog) * scaleX, scaleY);
+                ctx.beginPath();
+                ctx.moveTo(0, -drawSize/2);
+                // Outer curve
+                ctx.bezierCurveTo(drawSize*0.8, -drawSize/2, drawSize*1.2, 0, drawSize*0.8, drawSize/2);
+                // Inner curve
+                ctx.bezierCurveTo(drawSize*0.6, 0, drawSize*0.6, -drawSize*0.2, 0, -drawSize/2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            };
             
-            // Linear Gradient for the Slash
-            const grad = ctx.createLinearGradient(0, 0, drawSize, 0);
-            grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-            grad.addColorStop(0.3, 'rgba(0, 255, 255, 1)');
-            grad.addColorStop(1, 'rgba(0, 255, 255, 0)');
+            // Layer 1: Outer glow
+            ctx.fillStyle = `rgba(0, 255, 255, ${0.2 * fadeAlpha})`;
+            drawCrescent(1.1, 1.2);
             
-            ctx.fillStyle = grad;
-            ctx.globalAlpha = Math.min(1.0, (1 - prog) * 2.5); // fade out at end
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#00ffff';
+            // Layer 2: Mid glow
+            ctx.fillStyle = `rgba(0, 255, 255, ${0.5 * fadeAlpha})`;
+            drawCrescent(1.0, 1.0);
             
-            // Stretch horizontally based on prog for dynamic feeling
-            ctx.scale(0.5 + prog, 1);
-            ctx.fill();
+            // Layer 3: Core (white)
+            ctx.fillStyle = `rgba(255, 255, 255, ${1.0 * fadeAlpha})`;
+            drawCrescent(0.9, 0.8);
+            
             ctx.restore();
             
             // Draw impact sprite at the tip of the slash
@@ -1034,9 +1074,8 @@ export function drawPlayer(ctx, camera) {
         } else if (combatState.isRisingBlast) {
             const prog = Math.max(0, Math.min(1.0, 1 - (combatState.risingBlastTime / 0.35)));
 
-            // Premium Gradient Pillars
+            // Multi-Layer Glow Pillars
             ctx.save();
-            ctx.globalCompositeOperation = 'screen';
             
             const cols = [-90, -45, 0, 45, 90];
             cols.forEach((colX, idx) => {
@@ -1046,33 +1085,37 @@ export function drawPlayer(ctx, camera) {
                 const colHeight = 500 * Math.pow(prog, 0.5) + (Math.random() * 50); 
                 const colWidth = 60 + (Math.sin(t * 50 + idx) * 10);
                 
-                // Create vertical linear gradient (Transparent at top, White at bottom)
-                const grad = ctx.createLinearGradient(0, -colHeight, 0, 0);
-                grad.addColorStop(0, 'rgba(0, 255, 255, 0)');
-                grad.addColorStop(0.8, 'rgba(0, 255, 255, 1)');
-                grad.addColorStop(1, 'rgba(255, 255, 255, 1)');
-                
-                ctx.fillStyle = grad;
-                ctx.globalAlpha = Math.min(1.0, (1 - prog) * 2.0) * (0.6 + Math.random()*0.4);
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = '#00ffff';
-                
-                if (ctx.globalAlpha > 0) {
-                    ctx.fillRect(-colWidth/2, -colHeight, colWidth, colHeight);
-                    
-                    // Core bright line
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(-colWidth/8, -colHeight, colWidth/4, colHeight);
+                const fadeAlpha = Math.min(1.0, (1 - prog) * 2.0) * (0.6 + Math.random()*0.4);
+                if (fadeAlpha <= 0) {
+                    ctx.restore();
+                    return;
                 }
+                
+                const drawPillar = (widthScale, color, alphaScale) => {
+                    // Manual gradient for fading out at the top
+                    const grad = ctx.createLinearGradient(0, -colHeight, 0, 0);
+                    // Match the color but with 0 alpha at top
+                    grad.addColorStop(0, color.replace('1)', '0)').replace('0.5)', '0)').replace('0.2)', '0)'));
+                    grad.addColorStop(1, color);
+                    
+                    ctx.fillStyle = grad;
+                    ctx.globalAlpha = fadeAlpha * alphaScale;
+                    ctx.fillRect(-(colWidth * widthScale)/2, -colHeight, colWidth * widthScale, colHeight);
+                };
+
+                // Layer 1: Outer glow
+                drawPillar(1.5, 'rgba(0, 255, 255, 0.2)', 1.0);
+                // Layer 2: Mid glow
+                drawPillar(1.0, 'rgba(0, 255, 255, 0.6)', 1.0);
+                // Layer 3: Core (white)
+                drawPillar(0.3, 'rgba(255, 255, 255, 1)', 1.0);
+                
                 ctx.restore();
             });
             ctx.restore();
 
-            // Draw expanding shockwave rings
+            // Draw expanding shockwave rings (Multi-Layer)
             ctx.save();
-            ctx.globalCompositeOperation = 'screen';
-            ctx.strokeStyle = '#ffffff';
-            ctx.shadowColor = '#00ffff';
             
             const ringCount = 3;
             for (let r = 0; r < ringCount; r++) {
@@ -1080,19 +1123,22 @@ export function drawPlayer(ctx, camera) {
                 const radius = ringProg * 90;
                 const alpha = 1.0 - ringProg;
                 
-                ctx.lineWidth = 3 * alpha;
-                ctx.shadowBlur = 15 * alpha;
-                ctx.globalAlpha = alpha;
+                const drawShockwaveRing = (lineWidth, style) => {
+                    ctx.strokeStyle = style;
+                    ctx.lineWidth = lineWidth;
+                    ctx.beginPath();
+                    ctx.ellipse(0, -player.height/2 - ringProg * 120, radius, radius * 0.4, 0, 0, Math.PI * 2);
+                    ctx.stroke();
+                };
                 
-                ctx.beginPath();
-                ctx.ellipse(0, -player.height/2 - ringProg * 120, radius, radius * 0.4, 0, 0, Math.PI * 2);
-                ctx.stroke();
+                drawShockwaveRing(10, `rgba(0, 255, 255, ${alpha * 0.2})`);
+                drawShockwaveRing(4, `rgba(0, 255, 255, ${alpha * 0.8})`);
+                drawShockwaveRing(1.5, `rgba(255, 255, 255, ${alpha})`);
             }
             ctx.restore();
 
-            // 3. Proper 2D stylized upward blast (Pillars of Light)
+            // 3. Proper 2D stylized upward blast (Pillars of Light) - converted to multi-layer
             ctx.save();
-            ctx.globalCompositeOperation = 'screen';
             ctx.globalAlpha = Math.min(1.0, (1 - prog) * 2.0); // Fades out
             ctx.translate(0, 20); // Ground level
             
@@ -1102,52 +1148,64 @@ export function drawPlayer(ctx, camera) {
                 const w = 15 - Math.abs(i-2)*3;
                 const h = 400 + Math.random()*50;
                 
-                ctx.fillStyle = '#ffffff';
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = '#00ffff';
-                ctx.fillRect(spread - w/2, -h, w, h);
-                
+                // Outer glow
+                ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
+                ctx.fillRect(spread - w * 1.5, -h, w * 3, h);
+                // Mid glow
                 ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
                 ctx.fillRect(spread - w, -h, w*2, h);
+                // Core
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(spread - w/2, -h, w, h);
             }
             ctx.restore();
         }
     } else if (combatState.isLightningNova) {
         const prog = Math.max(0, Math.min(1.0, 1 - (combatState.lightningNovaTime / 0.3)));
-        // Premium Gradient Nova Burst
+        // Multi-Layer Glow Nova Burst
         ctx.save();
         ctx.translate(-2, -15);
-        ctx.globalCompositeOperation = 'screen';
-        ctx.globalAlpha = Math.min(1.0, (1 - prog) * 2.0); // fade out
         
-        // Scales up aggressively
-        const radius = 50 + prog * 300;
-        
-        const grad = ctx.createRadialGradient(0, 0, radius*0.1, 0, 0, radius);
-        grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-        grad.addColorStop(0.2, 'rgba(0, 255, 255, 1)');
-        grad.addColorStop(0.8, 'rgba(0, 255, 255, 0.5)');
-        grad.addColorStop(1, 'rgba(0, 255, 255, 0)');
-        
-        ctx.beginPath();
-        ctx.arc(0, 0, radius, 0, Math.PI*2);
-        ctx.fillStyle = grad;
-        ctx.fill();
-        
-        // Retain 8 jagged lightning spikes for extra flair
-        for(let k=0; k<8; k++) {
-            const angle = (k / 8) * Math.PI * 2 + t * 5;
-            const spikeLen = radius + Math.sin(t*30 + k)*50;
+        const fadeAlpha = Math.min(1.0, (1 - prog) * 2.0); // fade out
+        if (fadeAlpha > 0) {
+            // Scales up aggressively
+            const radius = 50 + prog * 300;
             
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(Math.cos(angle - 0.1)*spikeLen*0.5, Math.sin(angle - 0.1)*spikeLen*0.5);
-            ctx.lineTo(Math.cos(angle)*spikeLen, Math.sin(angle)*spikeLen);
-            ctx.lineWidth = 4 * (1 - prog);
-            ctx.strokeStyle = '#ffffff';
-            ctx.stroke();
+            const drawNovaArc = (scale, style) => {
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * scale, 0, Math.PI*2);
+                ctx.fillStyle = style;
+                ctx.fill();
+            };
             
-            drawImpactSprite({x: Math.cos(angle)*spikeLen, y: Math.sin(angle)*spikeLen}, 40, prog);
+            // Layer 1: Outer glow
+            drawNovaArc(1.0, `rgba(0, 255, 255, ${0.15 * fadeAlpha})`);
+            // Layer 2: Mid glow
+            drawNovaArc(0.8, `rgba(0, 255, 255, ${0.5 * fadeAlpha})`);
+            // Layer 3: Core (white)
+            drawNovaArc(0.4, `rgba(255, 255, 255, ${1.0 * fadeAlpha})`);
+            
+            // 8 jagged lightning spikes for extra flair
+            for(let k=0; k<8; k++) {
+                const angle = (k / 8) * Math.PI * 2 + t * 5;
+                const spikeLen = radius + Math.sin(t*30 + k)*50;
+                
+                const drawSpike = (lineWidth, color) => {
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(Math.cos(angle - 0.1)*spikeLen*0.5, Math.sin(angle - 0.1)*spikeLen*0.5);
+                    ctx.lineTo(Math.cos(angle)*spikeLen, Math.sin(angle)*spikeLen);
+                    ctx.lineWidth = lineWidth * (1 - prog);
+                    ctx.strokeStyle = color;
+                    ctx.stroke();
+                };
+                
+                drawSpike(12, `rgba(0, 255, 255, ${0.3 * fadeAlpha})`);
+                drawSpike(6, `rgba(0, 255, 255, ${0.8 * fadeAlpha})`);
+                drawSpike(2, `rgba(255, 255, 255, ${1.0 * fadeAlpha})`);
+                
+                drawImpactSprite({x: Math.cos(angle)*spikeLen, y: Math.sin(angle)*spikeLen}, 40, prog);
+            }
         }
         ctx.restore();
     } else if (combatState.isGroundSmashing) {
@@ -1163,65 +1221,62 @@ export function drawPlayer(ctx, camera) {
             ctx.arc(0, -30, 25, 0, Math.PI * 2);
             ctx.fill();
         } else if (combatState.smashPhase === 3 && player.isGrounded) {
-            // Proper 2D game ground smash impact
+            // Proper 2D game ground smash impact (Multi-Layer)
             ctx.save();
             ctx.translate(0, 15); // Feet level
-            ctx.globalCompositeOperation = 'screen';
-            ctx.globalAlpha = Math.min(1.0, (1.5 - combatState.smashCooldown));
-            // Premium Gradient Impact Crater Animation
+            
             const timeActive = 1.5 - combatState.smashCooldown;
             const animDuration = 0.5;
             const animProg = Math.max(0, Math.min(1.0, timeActive / animDuration));
             
             const radius = 100 + animProg * 350; // Scales up aggressively
+            const fadeAlpha = Math.min(1.0, (animDuration - timeActive) * 2.0); // fade out
             
-            ctx.save();
-            ctx.globalAlpha = Math.min(1.0, (animDuration - timeActive) * 2.0); // fade out
-            
-            if (ctx.globalAlpha > 0) {
+            if (fadeAlpha > 0) {
                 // Draw squashed crater on the ground (Perspective)
+                ctx.save();
                 ctx.scale(1, 0.4);
                 
-                const grad = ctx.createRadialGradient(0, 0, radius*0.2, 0, 0, radius);
-                grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
-                grad.addColorStop(0.3, 'rgba(0, 255, 255, 1)');
-                grad.addColorStop(1, 'rgba(0, 255, 255, 0)');
+                const drawCrater = (scale, style) => {
+                    ctx.beginPath();
+                    ctx.arc(0, 0, radius * scale, 0, Math.PI*2);
+                    ctx.fillStyle = style;
+                    ctx.fill();
+                };
                 
-                ctx.beginPath();
-                ctx.arc(0, 0, radius, 0, Math.PI*2);
-                ctx.fillStyle = grad;
-                ctx.fill();
+                drawCrater(1.0, `rgba(0, 255, 255, ${0.15 * fadeAlpha})`);
+                drawCrater(0.6, `rgba(0, 255, 255, ${0.6 * fadeAlpha})`);
+                drawCrater(0.3, `rgba(255, 255, 255, ${1.0 * fadeAlpha})`);
                 
-                // Extra inner bright core
-                ctx.beginPath();
-                ctx.arc(0, 0, radius*0.4, 0, Math.PI*2);
-                ctx.fillStyle = '#ffffff';
-                ctx.fill();
+                ctx.restore();
             }
-            ctx.restore();
             
-            // Ground glowing crater (ellipse)
+            // Ground glowing crater (ellipse) static multi-layer
             const craterW = 400 + Math.random()*20;
             const craterH = 60 + Math.random()*10;
             
-            ctx.fillStyle = 'rgba(0, 255, 255, 0.6)';
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = '#00ffff';
-            ctx.beginPath();
-            ctx.ellipse(0, 0, craterW/2, craterH/2, 0, 0, Math.PI*2);
-            ctx.fill();
+            const drawEllipseCrater = (wScale, hScale, style) => {
+                ctx.fillStyle = style;
+                ctx.beginPath();
+                ctx.ellipse(0, 0, craterW * wScale, craterH * hScale, 0, 0, Math.PI*2);
+                ctx.fill();
+            };
             
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.ellipse(0, 0, craterW/4, craterH/4, 0, 0, Math.PI*2);
-            ctx.fill();
+            drawEllipseCrater(0.7, 0.7, `rgba(0, 255, 255, ${0.2 * fadeAlpha})`);
+            drawEllipseCrater(0.5, 0.5, `rgba(0, 255, 255, ${0.6 * fadeAlpha})`);
+            drawEllipseCrater(0.25, 0.25, `rgba(255, 255, 255, ${1.0 * fadeAlpha})`);
             
             // Pillar of energy shooting up from impact
             const pillarH = 300 * Math.max(0, Math.min(1, 1.5 - combatState.smashCooldown));
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(-20, -pillarH, 40, pillarH);
-            ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
+            
+            ctx.fillStyle = `rgba(0, 255, 255, ${0.2 * fadeAlpha})`;
+            ctx.fillRect(-60, -pillarH, 120, pillarH);
+            
+            ctx.fillStyle = `rgba(0, 255, 255, ${0.6 * fadeAlpha})`;
             ctx.fillRect(-40, -pillarH, 80, pillarH);
+            
+            ctx.fillStyle = `rgba(255, 255, 255, ${1.0 * fadeAlpha})`;
+            ctx.fillRect(-20, -pillarH, 40, pillarH);
             
             // Impact sparks
             drawImpactSprite({x: 0, y: 0}, 150, (t*5)%1.0);
