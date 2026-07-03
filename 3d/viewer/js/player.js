@@ -1,9 +1,7 @@
 import { keys, resetInputPresses } from './input.js';
 import { getCollision, TILE_SIZE } from './world.js';
 import { combatState, lightningSlashImg, lightningImpactImg } from './combat.js';
-
-export const laserImg = new Image();
-laserImg.src = 'assets/laser_beam.png';
+import { addParticle } from './effects.js';
 
 export const player = {
     x: 64,
@@ -796,6 +794,41 @@ export function drawPlayer(ctx, camera) {
         ctx.restore();
     };
 
+    // Helper: Draw a procedural zigzag lightning bolt
+    const drawLightningBolt = (x1, y1, x2, y2, segments, prog) => {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const length = Math.sqrt(dx*dx + dy*dy);
+        const pts = [{x: x1, y: y1}];
+        
+        for (let i = 1; i < segments; i++) {
+            const tVal = i / segments;
+            const jitter = (Math.random() - 0.5) * (length * 0.15) * (1 - prog);
+            pts.push({
+                x: x1 + dx * tVal - (dy/length) * jitter,
+                y: y1 + dy * tVal + (dx/length) * jitter
+            });
+        }
+        pts.push({x: x2, y: y2});
+
+        const fade = Math.min(1.0, (1 - prog) * 2);
+        
+        const strokeBolt = (lineWidth, style) => {
+            ctx.beginPath();
+            ctx.moveTo(pts[0].x, pts[0].y);
+            for (let i = 1; i <= segments; i++) {
+                ctx.lineTo(pts[i].x, pts[i].y);
+            }
+            ctx.strokeStyle = style;
+            ctx.lineWidth = lineWidth * (1 - prog);
+            ctx.stroke();
+        };
+
+        strokeBolt(8, `rgba(0, 255, 255, ${0.3 * fade})`);
+        strokeBolt(4, `rgba(0, 255, 255, ${0.8 * fade})`);
+        strokeBolt(1.5, `rgba(255, 255, 255, ${1.0 * fade})`);
+    };
+
     // Antenna / Combat Tentacles (always visible!)
     const drawHeadSpaceTentacle = (startX, startY, endX, endY, progressVal, thickness, wigglePhase) => {
         const segments = 10;
@@ -908,37 +941,60 @@ export function drawPlayer(ctx, camera) {
     }
 
     if (combatState.isDashStriking) {
-        // Dash Strike: Multi-Layer Glow Vector
+        // Dash Strike: Multi-Layer Glow Vector + Trail
         ctx.save();
         ctx.translate(-2, -15); // Body center
         
         const prog = (t * 8) % 1.0;
-        const drillW = 220;
-        const drillH = 60 + Math.sin(t * 60) * 10;
+        const drillW = 150; // Shorter and sharper
+        const drillH = 40 + Math.sin(t * 60) * 8;
         
-        // Define path helper for the aerodynamic cone
-        const drawCone = (scaleX, scaleY) => {
+        // Speed lines for motion feel
+        ctx.save();
+        ctx.strokeStyle = `rgba(0, 255, 255, ${0.3 * (1 - prog)})`;
+        ctx.beginPath();
+        for (let s = 0; s < 5; s++) {
+            const lineY = (Math.random() - 0.5) * 80;
+            const lineX = Math.random() * 200 - 100;
+            ctx.moveTo(lineX, lineY);
+            ctx.lineTo(lineX - 100 - Math.random() * 100, lineY);
+        }
+        ctx.stroke();
+        ctx.restore();
+
+        const drawCone = (scaleX, scaleY, alpha) => {
             ctx.beginPath();
             ctx.moveTo(-10 * scaleX, -drillH/2 * scaleY);
             ctx.bezierCurveTo(drillW*0.3 * scaleX, -drillH/4 * scaleY, drillW*0.6 * scaleX, -10 * scaleY, drillW * scaleX, 0);
             ctx.bezierCurveTo(drillW*0.6 * scaleX, 10 * scaleY, drillW*0.3 * scaleX, drillH/4 * scaleY, -10 * scaleX, drillH/2 * scaleY);
             ctx.closePath();
+            ctx.fillStyle = `rgba(0, 255, 255, ${alpha})`;
             ctx.fill();
         };
 
+        // Afterimage trail
+        for (let trail = 1; trail <= 3; trail++) {
+            ctx.save();
+            ctx.translate(-trail * 30, 0);
+            drawCone(1.0, 1.0, 0.1 / trail);
+            ctx.restore();
+        }
+
         // Layer 1: Outer glow
-        ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
-        drawCone(1.1, 1.2);
-        
+        drawCone(1.1, 1.2, 0.2);
         // Layer 2: Mid glow
-        ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
-        drawCone(1.0, 1.0);
+        drawCone(1.0, 1.0, 0.5);
         
         // Layer 3: Core (white)
         ctx.fillStyle = '#ffffff';
-        drawCone(0.8, 0.5);
+        ctx.beginPath();
+        ctx.moveTo(-10 * 0.8, -drillH/2 * 0.5);
+        ctx.bezierCurveTo(drillW*0.3 * 0.8, -drillH/4 * 0.5, drillW*0.6 * 0.8, -10 * 0.5, drillW * 0.8, 0);
+        ctx.bezierCurveTo(drillW*0.6 * 0.8, 10 * 0.5, drillW*0.3 * 0.8, drillH/4 * 0.5, -10 * 0.8, drillH/2 * 0.5);
+        ctx.closePath();
+        ctx.fill();
         
-        // Draw energy rings wrapping around the dash (Multi-layer for rings too)
+        // Draw energy rings wrapping around the dash
         for (let i = 0; i < 3; i++) {
             const ringProg = (prog + i/3) % 1.0;
             const ringX = ringProg * drillW * 0.8;
@@ -952,66 +1008,83 @@ export function drawPlayer(ctx, camera) {
                 ctx.stroke();
             };
             
-            drawRing(8, `rgba(0, 255, 255, ${(1 - ringProg) * 0.3})`); // Outer ring glow
-            drawRing(4, `rgba(0, 255, 255, ${1 - ringProg})`);       // Mid ring
-            drawRing(1.5, `rgba(255, 255, 255, ${1 - ringProg})`);    // Core ring
+            drawRing(8, `rgba(0, 255, 255, ${(1 - ringProg) * 0.3})`);
+            drawRing(4, `rgba(0, 255, 255, ${1 - ringProg})`);
+            drawRing(1.5, `rgba(255, 255, 255, ${1 - ringProg})`);
         }
+        
+        if (Math.random() > 0.5) addParticle(player.x + (player.facingRight ? drillW : -drillW), player.y - 15, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
         
         drawImpactSprite({x: drillW*0.9, y: 0}, 80, prog);
         ctx.restore();
     } else if (combatState.isBioDrilling) {
-        // Bio-Drill (Neutral I): Multi-Layer Glow Vector
+        // Bio-Drill (Neutral I): Short Spiral Helix
         const prog = Math.max(0, Math.min(1.0, 1 - (combatState.bioDrillTime / 0.35)));
         
         ctx.save();
         ctx.translate(-2, -15); // Center on body
         ctx.translate((Math.random()-0.5)*5, (Math.random()-0.5)*5); // Shake
         
-        const drillW = 180;
-        const drillH = 50 + Math.sin(t * 50) * 8;
+        const drillLen = 80; // Much shorter than before (was 180)
+        const drillRad = 25;
+        const spin = t * 25; // Fast spin
         
-        const drawDrillShape = (scaleX, scaleY) => {
-            ctx.beginPath();
-            ctx.moveTo(-15 * scaleX, -drillH/2 * scaleY);
-            ctx.lineTo(drillW * scaleX, 0);
-            ctx.lineTo(-15 * scaleX, drillH/2 * scaleY);
-            ctx.closePath();
-            ctx.fill();
-        };
-
-        // Layer 1: Outer glow
-        ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
-        drawDrillShape(1.05, 1.2);
-        
-        // Layer 2: Mid glow
-        ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
-        drawDrillShape(1.0, 1.0);
-        
-        // Layer 3: Core (white)
+        // Small sharp tip
         ctx.fillStyle = '#ffffff';
-        drawDrillShape(0.8, 0.5);
+        ctx.beginPath();
+        ctx.moveTo(drillLen, -5);
+        ctx.lineTo(drillLen + 20, 0);
+        ctx.lineTo(drillLen, 5);
+        ctx.fill();
+
+        // Draw 3 spiral arms
+        for (let arm = 0; arm < 3; arm++) {
+            const armOffset = (arm / 3) * Math.PI * 2;
+            
+            const drawSpiralArm = (lineWidth, style) => {
+                ctx.beginPath();
+                for (let px = 0; px <= drillLen; px += 5) {
+                    const normX = px / drillLen;
+                    // Taper the radius towards the tip
+                    const r = drillRad * (1 - normX);
+                    const angle = spin + normX * Math.PI * 3 + armOffset;
+                    
+                    const py = Math.sin(angle) * r;
+                    if (px === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.strokeStyle = style;
+                ctx.lineWidth = lineWidth;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+            };
+
+            drawSpiralArm(12, 'rgba(0, 255, 255, 0.2)');
+            drawSpiralArm(6, 'rgba(0, 255, 255, 0.6)');
+            drawSpiralArm(2, '#ffffff');
+        }
         
-        // Spinning Rings
-        const drillProg = (t * 12) % 1.0;
-        for (let i = 0; i < 4; i++) {
-            const ringProg = (drillProg + i/4) % 1.0;
-            const ringX = ringProg * drillW * 0.9;
-            const ringY = (1 - ringProg) * (drillH/2 + 5);
+        // 2 Wide Spinning Rings
+        for (let i = 0; i < 2; i++) {
+            const ringProg = ((t * 8) + i/2) % 1.0;
+            const ringX = ringProg * drillLen * 0.8;
+            const ringY = (1 - ringProg) * (drillRad + 10);
             
             const drawRing = (lineWidth, style) => {
                 ctx.strokeStyle = style;
                 ctx.lineWidth = lineWidth;
                 ctx.beginPath();
-                ctx.ellipse(ringX, 0, 5, ringY, 0, 0, Math.PI * 2);
+                ctx.ellipse(ringX, 0, 4, ringY, 0, 0, Math.PI * 2);
                 ctx.stroke();
             };
             
-            drawRing(6, `rgba(0, 255, 255, ${(1 - ringProg) * 0.3})`);
-            drawRing(3, `rgba(0, 255, 255, ${1 - ringProg})`);
-            drawRing(1, `rgba(255, 255, 255, ${1 - ringProg})`);
+            drawRing(6, `rgba(0, 255, 255, ${(1 - ringProg) * 0.4})`);
+            drawRing(2, `rgba(255, 255, 255, ${1 - ringProg})`);
         }
         
-        drawImpactSprite({x: drillW*0.8, y: 0}, 60, (t * 8) % 1.0);
+        if (Math.random() > 0.3) addParticle(player.x + (player.facingRight ? drillLen : -drillLen), player.y - 15, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
+        
+        drawImpactSprite({x: drillLen, y: 0}, 60, (t * 8) % 1.0);
         ctx.restore();
     } else if (combatState.isLowSweeping || combatState.isUpSlashing || combatState.isPogoSlashing || combatState.isRisingBlast) {
         // Multi-Layer Glow Slash Animation
@@ -1064,17 +1137,57 @@ export function drawPlayer(ctx, camera) {
 
         if (combatState.isLowSweeping) {
             const prog = Math.max(0, Math.min(1, 1 - (combatState.lowSweepTime / 0.25)));
-            drawSlashAnimation(Math.PI / 8, prog);
+            
+            // Ground crack line
+            ctx.save();
+            ctx.translate(0, 15); // Feet
+            ctx.strokeStyle = `rgba(0, 255, 255, ${1 - prog})`;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(80 * prog, 5);
+            ctx.lineTo(160 * prog, -5);
+            ctx.lineTo(240 * prog, 0);
+            ctx.stroke();
+            ctx.restore();
+            
+            for (let trail = 0; trail < 3; trail++) {
+                drawSlashAnimation(Math.PI / 8, Math.max(0, prog - trail * 0.1));
+            }
+            if (Math.random() > 0.5) addParticle(player.x + (player.facingRight ? 100*prog : -100*prog), player.y + 15, (Math.random()-0.5)*50, (Math.random()-0.5)*50 - 50, 'rgba(200,200,200,0.5)', 0.6, 'tex_smoke', 20);
+            
         } else if (combatState.isUpSlashing) {
             const prog = Math.max(0, Math.min(1, 1 - (combatState.upSlashTime / 0.2)));
-            drawSlashAnimation(-Math.PI / 3, prog);
+            
+            // Vertical trail
+            ctx.save();
+            ctx.fillStyle = `rgba(0, 255, 255, ${(1 - prog) * 0.4})`;
+            ctx.fillRect(50, -200 * prog, 40, 200 * prog);
+            ctx.restore();
+            
+            for (let trail = 0; trail < 3; trail++) {
+                drawSlashAnimation(-Math.PI / 3, Math.max(0, prog - trail * 0.1));
+            }
+            if (Math.random() > 0.3) addParticle(player.x + (player.facingRight ? 80 : -80), player.y - 100 * prog, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
+            
         } else if (combatState.isPogoSlashing) {
             const prog = Math.max(0, Math.min(1, 1 - (combatState.pogoSlashTime / 0.2)));
-            drawSlashAnimation(Math.PI / 2, prog);
+            
+            // Downward trail
+            ctx.save();
+            ctx.fillStyle = `rgba(0, 255, 255, ${(1 - prog) * 0.4})`;
+            ctx.fillRect(0, 20, 40, 150 * prog);
+            ctx.restore();
+            
+            for (let trail = 0; trail < 3; trail++) {
+                drawSlashAnimation(Math.PI / 2, Math.max(0, prog - trail * 0.1));
+            }
+            if (Math.random() > 0.5) addParticle(player.x, player.y + 20 + 100 * prog, (Math.random()-0.5)*50, (Math.random()-0.5)*50 - 50, 'rgba(200,200,200,0.5)', 0.6, 'tex_smoke', 20);
+            
         } else if (combatState.isRisingBlast) {
             const prog = Math.max(0, Math.min(1.0, 1 - (combatState.risingBlastTime / 0.35)));
 
-            // Multi-Layer Glow Pillars
+            // Multi-Layer Glow Lightning Pillars
             ctx.save();
             
             const cols = [-90, -45, 0, 45, 90];
@@ -1083,32 +1196,19 @@ export function drawPlayer(ctx, camera) {
                 ctx.translate(colX, 20); // Base at feet
                 
                 const colHeight = 500 * Math.pow(prog, 0.5) + (Math.random() * 50); 
-                const colWidth = 60 + (Math.sin(t * 50 + idx) * 10);
                 
-                const fadeAlpha = Math.min(1.0, (1 - prog) * 2.0) * (0.6 + Math.random()*0.4);
-                if (fadeAlpha <= 0) {
-                    ctx.restore();
-                    return;
-                }
-                
-                const drawPillar = (widthScale, color, alphaScale) => {
-                    // Manual gradient for fading out at the top
-                    const grad = ctx.createLinearGradient(0, -colHeight, 0, 0);
-                    // Match the color but with 0 alpha at top
-                    grad.addColorStop(0, color.replace('1)', '0)').replace('0.5)', '0)').replace('0.2)', '0)'));
-                    grad.addColorStop(1, color);
+                if (prog < 1.0) {
+                    // Draw zigzag lightning bolt upwards
+                    drawLightningBolt(0, 0, (Math.random()-0.5)*40, -colHeight, 8, prog);
                     
-                    ctx.fillStyle = grad;
-                    ctx.globalAlpha = fadeAlpha * alphaScale;
-                    ctx.fillRect(-(colWidth * widthScale)/2, -colHeight, colWidth * widthScale, colHeight);
-                };
-
-                // Layer 1: Outer glow
-                drawPillar(1.5, 'rgba(0, 255, 255, 0.2)', 1.0);
-                // Layer 2: Mid glow
-                drawPillar(1.0, 'rgba(0, 255, 255, 0.6)', 1.0);
-                // Layer 3: Core (white)
-                drawPillar(0.3, 'rgba(255, 255, 255, 1)', 1.0);
+                    // Base impact circle
+                    ctx.fillStyle = `rgba(0, 255, 255, ${(1 - prog)})`;
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, 30 * (1 - prog), 10 * (1 - prog), 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    if (Math.random() > 0.6) addParticle(player.x + (player.facingRight ? colX : -colX), player.y + 20, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
+                }
                 
                 ctx.restore();
             });
@@ -1120,7 +1220,7 @@ export function drawPlayer(ctx, camera) {
             const ringCount = 3;
             for (let r = 0; r < ringCount; r++) {
                 const ringProg = (prog + r / ringCount) % 1.0;
-                const radius = ringProg * 90;
+                const radius = ringProg * 120;
                 const alpha = 1.0 - ringProg;
                 
                 const drawShockwaveRing = (lineWidth, style) => {
@@ -1136,76 +1236,57 @@ export function drawPlayer(ctx, camera) {
                 drawShockwaveRing(1.5, `rgba(255, 255, 255, ${alpha})`);
             }
             ctx.restore();
-
-            // 3. Proper 2D stylized upward blast (Pillars of Light) - converted to multi-layer
-            ctx.save();
-            ctx.globalAlpha = Math.min(1.0, (1 - prog) * 2.0); // Fades out
-            ctx.translate(0, 20); // Ground level
-            
-            // Draw 5 vertical beams
-            for(let i=0; i<5; i++) {
-                const spread = (i - 2) * 25 * (1 + prog);
-                const w = 15 - Math.abs(i-2)*3;
-                const h = 400 + Math.random()*50;
-                
-                // Outer glow
-                ctx.fillStyle = 'rgba(0, 255, 255, 0.2)';
-                ctx.fillRect(spread - w * 1.5, -h, w * 3, h);
-                // Mid glow
-                ctx.fillStyle = 'rgba(0, 255, 255, 0.5)';
-                ctx.fillRect(spread - w, -h, w*2, h);
-                // Core
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(spread - w/2, -h, w, h);
-            }
-            ctx.restore();
         }
     } else if (combatState.isLightningNova) {
         const prog = Math.max(0, Math.min(1.0, 1 - (combatState.lightningNovaTime / 0.3)));
-        // Multi-Layer Glow Nova Burst
+        // Multi-Layer Glow Nova Burst with Zigzag Sét
         ctx.save();
         ctx.translate(-2, -15);
         
         const fadeAlpha = Math.min(1.0, (1 - prog) * 2.0); // fade out
         if (fadeAlpha > 0) {
             // Scales up aggressively
-            const radius = 50 + prog * 300;
+            const radius = 50 + prog * 400;
             
-            const drawNovaArc = (scale, style) => {
+            const drawNovaArc = (lineWidth, style) => {
                 ctx.beginPath();
-                ctx.arc(0, 0, radius * scale, 0, Math.PI*2);
-                ctx.fillStyle = style;
-                ctx.fill();
+                ctx.arc(0, 0, radius, 0, Math.PI*2);
+                ctx.strokeStyle = style;
+                ctx.lineWidth = lineWidth;
+                ctx.stroke();
             };
             
-            // Layer 1: Outer glow
-            drawNovaArc(1.0, `rgba(0, 255, 255, ${0.15 * fadeAlpha})`);
-            // Layer 2: Mid glow
-            drawNovaArc(0.8, `rgba(0, 255, 255, ${0.5 * fadeAlpha})`);
-            // Layer 3: Core (white)
-            drawNovaArc(0.4, `rgba(255, 255, 255, ${1.0 * fadeAlpha})`);
+            // Shockwave ring instead of filled circle
+            drawNovaArc(15, `rgba(0, 255, 255, ${0.2 * fadeAlpha})`);
+            drawNovaArc(6, `rgba(0, 255, 255, ${0.6 * fadeAlpha})`);
+            drawNovaArc(2, `rgba(255, 255, 255, ${1.0 * fadeAlpha})`);
             
-            // 8 jagged lightning spikes for extra flair
+            // 8 jagged zigzag lightning spikes
             for(let k=0; k<8; k++) {
                 const angle = (k / 8) * Math.PI * 2 + t * 5;
                 const spikeLen = radius + Math.sin(t*30 + k)*50;
                 
-                const drawSpike = (lineWidth, color) => {
-                    ctx.beginPath();
-                    ctx.moveTo(0, 0);
-                    ctx.lineTo(Math.cos(angle - 0.1)*spikeLen*0.5, Math.sin(angle - 0.1)*spikeLen*0.5);
-                    ctx.lineTo(Math.cos(angle)*spikeLen, Math.sin(angle)*spikeLen);
-                    ctx.lineWidth = lineWidth * (1 - prog);
-                    ctx.strokeStyle = color;
-                    ctx.stroke();
-                };
+                const endX = Math.cos(angle) * spikeLen;
+                const endY = Math.sin(angle) * spikeLen;
                 
-                drawSpike(12, `rgba(0, 255, 255, ${0.3 * fadeAlpha})`);
-                drawSpike(6, `rgba(0, 255, 255, ${0.8 * fadeAlpha})`);
-                drawSpike(2, `rgba(255, 255, 255, ${1.0 * fadeAlpha})`);
+                drawLightningBolt(0, 0, endX, endY, 6, prog);
                 
-                drawImpactSprite({x: Math.cos(angle)*spikeLen, y: Math.sin(angle)*spikeLen}, 40, prog);
+                if (Math.random() > 0.5) addParticle(player.x + endX, player.y - 15 + endY, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
+                drawImpactSprite({x: endX, y: endY}, 40, prog);
             }
+            
+            // Electric arcs between spikes
+            ctx.beginPath();
+            for(let k=0; k<8; k+=2) {
+                const angle1 = (k / 8) * Math.PI * 2 + t * 5;
+                const angle2 = ((k+1) / 8) * Math.PI * 2 + t * 5;
+                const r = radius * 0.7;
+                ctx.moveTo(Math.cos(angle1) * r, Math.sin(angle1) * r);
+                ctx.lineTo(Math.cos(angle2) * r, Math.sin(angle2) * r);
+            }
+            ctx.strokeStyle = `rgba(0, 255, 255, ${0.8 * fadeAlpha})`;
+            ctx.lineWidth = 2;
+            ctx.stroke();
         }
         ctx.restore();
     } else if (combatState.isGroundSmashing) {
@@ -1221,6 +1302,9 @@ export function drawPlayer(ctx, camera) {
             ctx.arc(0, -30, 25, 0, Math.PI * 2);
             ctx.fill();
         } else if (combatState.smashPhase === 3 && player.isGrounded) {
+            // Screen Shake
+            ctx.translate((Math.random()-0.5)*15, (Math.random()-0.5)*15);
+            
             // Proper 2D game ground smash impact (Multi-Layer)
             ctx.save();
             ctx.translate(0, 15); // Feet level
@@ -1229,14 +1313,24 @@ export function drawPlayer(ctx, camera) {
             const animDuration = 0.5;
             const animProg = Math.max(0, Math.min(1.0, timeActive / animDuration));
             
-            const radius = 100 + animProg * 350; // Scales up aggressively
+            const radius = 100 + animProg * 400; // Scales up aggressively
             const fadeAlpha = Math.min(1.0, (animDuration - timeActive) * 2.0); // fade out
             
             if (fadeAlpha > 0) {
-                // Draw squashed crater on the ground (Perspective)
+                // Ground Cracks
                 ctx.save();
                 ctx.scale(1, 0.4);
+                ctx.strokeStyle = `rgba(0, 255, 255, ${fadeAlpha})`;
+                ctx.lineWidth = 4;
+                for (let c = 0; c < 5; c++) {
+                    const angle = (c / 5) * Math.PI * 2;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(Math.cos(angle)*radius, Math.sin(angle)*radius);
+                    ctx.stroke();
+                }
                 
+                // Draw squashed crater on the ground (Perspective)
                 const drawCrater = (scale, style) => {
                     ctx.beginPath();
                     ctx.arc(0, 0, radius * scale, 0, Math.PI*2);
@@ -1266,17 +1360,17 @@ export function drawPlayer(ctx, camera) {
             drawEllipseCrater(0.5, 0.5, `rgba(0, 255, 255, ${0.6 * fadeAlpha})`);
             drawEllipseCrater(0.25, 0.25, `rgba(255, 255, 255, ${1.0 * fadeAlpha})`);
             
-            // Pillar of energy shooting up from impact
-            const pillarH = 300 * Math.max(0, Math.min(1, 1.5 - combatState.smashCooldown));
+            // Lightning Pillar of energy shooting up from impact
+            const pillarH = 400 * Math.max(0, Math.min(1, 1.5 - combatState.smashCooldown));
+            drawLightningBolt(0, 0, 0, -pillarH, 8, animProg);
             
-            ctx.fillStyle = `rgba(0, 255, 255, ${0.2 * fadeAlpha})`;
-            ctx.fillRect(-60, -pillarH, 120, pillarH);
-            
-            ctx.fillStyle = `rgba(0, 255, 255, ${0.6 * fadeAlpha})`;
-            ctx.fillRect(-40, -pillarH, 80, pillarH);
-            
-            ctx.fillStyle = `rgba(255, 255, 255, ${1.0 * fadeAlpha})`;
-            ctx.fillRect(-20, -pillarH, 40, pillarH);
+            // Debris Particles
+            if (animProg < 0.2) {
+                for(let i=0; i<3; i++) {
+                    addParticle(player.x + (Math.random()-0.5)*100, player.y + 15, (Math.random()-0.5)*50, (Math.random()-0.5)*50 - 50, 'rgba(200,200,200,0.5)', 0.6, 'tex_smoke', 20);
+                    addParticle(player.x + (Math.random()-0.5)*50, player.y + 15, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
+                }
+            }
             
             // Impact sparks
             drawImpactSprite({x: 0, y: 0}, 150, (t*5)%1.0);
@@ -1364,25 +1458,59 @@ export function drawPlayer(ctx, camera) {
         // Stretch the beam length rapidly at the start, then hold
         const beamLength = 100 + (1 - Math.pow(prog, 3)) * 800;
 
-        ctx.globalCompositeOperation = 'screen'; // Blends dark background to transparent
+        // 100% Vector Laser Beam (Replaces heavy 670KB image)
+        ctx.save();
         
-        if (laserImg.complete && laserImg.naturalWidth > 0) {
-            // Main beam (pulsing and fading)
-            ctx.globalAlpha = Math.min(1.0, prog * 1.5);
-            ctx.drawImage(laserImg, 0, -curThickness / 2, beamLength, curThickness);
-            
-            // Core intense beam (inner overlay for extra brightness)
-            if (lvl >= 2) {
-                ctx.globalAlpha = Math.min(1.0, prog * 2.0);
-                const coreThick = curThickness * 0.4;
-                ctx.drawImage(laserImg, 0, -coreThick / 2, beamLength + 50, coreThick);
-            }
-        } else {
-            // Fallback if image not loaded yet
-            ctx.fillStyle = '#00ffff';
-            ctx.globalAlpha = prog;
-            ctx.fillRect(0, -curThickness / 4, beamLength, curThickness / 2);
+        const drawLaserLayer = (scaleY, color, alphaScale) => {
+            ctx.fillStyle = color;
+            ctx.globalAlpha = Math.min(1.0, prog * alphaScale);
+            ctx.beginPath();
+            ctx.rect(0, (-curThickness * scaleY) / 2, beamLength, curThickness * scaleY);
+            ctx.fill();
+        };
+
+        // Layer 1: Outer cyan glow
+        drawLaserLayer(1.5, '#00ffff', 0.2);
+        // Layer 2: Mid cyan core
+        drawLaserLayer(0.8, '#00ffff', 0.6);
+        // Layer 3: Inner white core
+        if (lvl >= 2) drawLaserLayer(0.3, '#ffffff', 1.0);
+
+        // Add Noise/Jitter edges to simulate plasma
+        ctx.globalAlpha = prog * 0.8;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let ix = 0; ix < beamLength; ix += 30) {
+            const jitterY = (Math.random() - 0.5) * curThickness * 1.2;
+            ctx.lineTo(ix, jitterY);
         }
+        ctx.stroke();
+        
+        // Impact Burst at the end of the beam
+        if (prog > 0.5) {
+            ctx.save();
+            ctx.translate(beamLength, 0);
+            
+            const impactRad = curThickness * (Math.random() * 0.5 + 0.8);
+            const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, impactRad);
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.3, '#00ffff');
+            grad.addColorStop(1, 'rgba(0, 255, 255, 0)');
+            
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(0, 0, impactRad, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Beam Particles
+            for(let p=0; p<2; p++) {
+                addParticle(player.x + (player.facingRight ? beamLength : -beamLength), player.y - 15 + (Math.random()-0.5)*curThickness, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
+            }
+            ctx.restore();
+        }
+        
+        ctx.restore();
         
         // Muzzle Flash / Energy Orb at the eye
         const flashRadius = (lvl === 3 ? 60 : 35) * prog * (1.0 + Math.random() * 0.3);
