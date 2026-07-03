@@ -367,6 +367,16 @@ export function drawPlayer(ctx, camera) {
     ctx.translate(0, -player.height/2 + bounceY);
     ctx.rotate(bodyRot);
 
+    // Hide character body during Bio-Drill so the drill IS the character
+    let charAlpha = 1.0;
+    if (combatState.isBioDrilling) {
+        const prog = Math.max(0, Math.min(1.0, 1 - (combatState.bioDrillTime / 0.35)));
+        if (prog < 0.1) charAlpha = 1.0 - (prog / 0.1); 
+        else if (prog > 0.8) charAlpha = (prog - 0.8) / 0.2; 
+        else charAlpha = 0.0;
+    }
+    ctx.globalAlpha = charAlpha;
+
     // Draw Back Legs (Redesigned as slowly wiggling tentacles)
     const drawLegTentacle = (startX, startY, endX, endY, thickness, wigglePhase) => {
         const segments = 6;
@@ -592,10 +602,9 @@ export function drawPlayer(ctx, camera) {
             ty = base.ey + (targetEy - base.ey) * p;
         } else if (combatState.isBioDrilling) {
             p = Math.max(0, Math.min(1.0, 1 - (combatState.bioDrillTime / 0.35)));
-            // Helix wrapping forward
-            const windAngle = k * Math.PI / 2 + t * 40;
-            const targetX = 50 + k * 4;
-            const targetY = Math.sin(windAngle) * 6;
+            // Morph the body into the flat base of the drill (character turns into the drill!)
+            const targetX = 0; 
+            const targetY = (k - 2.5) * 12; // Spread vertically at the back of the drill
             tx = base.ex + (targetX - base.ex) * p;
             ty = base.ey + (targetY - base.ey) * p;
         } else if (combatState.isGroundSmashing) {
@@ -723,28 +732,42 @@ export function drawPlayer(ctx, camera) {
             return;
         }
 
-        // Procedural Vector Fallback: Neon Crescent Slash Arc
+        // Procedural Vector Fallback: Chaotic Jittery Lightning Slash
         ctx.globalAlpha = 0.85 * (1 - activeProg * 0.5);
         
         const drawArc = (lineWidth, style) => {
             ctx.strokeStyle = style;
             ctx.lineWidth = lineWidth;
+            ctx.lineCap = 'round';
             ctx.beginPath();
-            ctx.arc(0, 0, size * 0.5, -Math.PI * 0.4, Math.PI * 0.4);
+            
+            // Draw a jagged arc (chaotic lightning curve)
+            const segments = 6;
+            const startAngle = -Math.PI * 0.4;
+            const endAngle = Math.PI * 0.4;
+            
+            for (let i = 0; i <= segments; i++) {
+                const tSegment = i / segments;
+                const a = startAngle + (endAngle - startAngle) * tSegment;
+                // Add random jitter to radius based on progress and noise
+                const jitter = (Math.random() - 0.5) * size * 0.25;
+                const r = (size * 0.5) + jitter;
+                
+                const px = Math.cos(a) * r;
+                const py = Math.sin(a) * r;
+                
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
             ctx.stroke();
         };
 
         // Layer 1: Outer glow
         drawArc(size * 0.4, 'rgba(0, 255, 255, 0.2)');
         // Layer 2: Mid glow
-        drawArc(size * 0.25, 'rgba(0, 255, 255, 0.6)');
-        
+        drawArc(size * 0.2, 'rgba(0, 255, 255, 0.7)');
         // Layer 3: Core (white)
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = size * 0.1;
-        ctx.beginPath();
-        ctx.arc(0, 0, size * 0.5, -Math.PI * 0.3, Math.PI * 0.3);
-        ctx.stroke();
+        drawArc(size * 0.05, '#ffffff');
         ctx.restore();
     };
 
@@ -898,9 +921,13 @@ export function drawPlayer(ctx, camera) {
         return pts[pts.length - 1]; 
     };
 
-    if (combatState.isAttacking) {
+    if (combatState.isAttacking || combatState.isLowSweeping || combatState.isUpSlashing || combatState.isPogoSlashing) {
         // Draw the whipping tentacles starting from the antenna base (-2, -5)
-        const progress = 1 - (combatState.attackTime / (combatState.comboStep === 3 ? 0.25 : 0.15));
+        let progress = 0;
+        if (combatState.isAttacking) progress = 1 - (combatState.attackTime / (combatState.comboStep === 3 ? 0.25 : 0.15));
+        else if (combatState.isLowSweeping) progress = 1 - (combatState.lowSweepTime / 0.25);
+        else if (combatState.isUpSlashing) progress = 1 - (combatState.upSlashTime / 0.2);
+        else if (combatState.isPogoSlashing) progress = 1 - (combatState.pogoSlashTime / 0.2);
 
         if (combatState.comboStep === 1) {
             const tip1 = drawHeadSpaceTentacle(-2, -5, 80, -10, progress, 6, 0);
@@ -924,6 +951,45 @@ export function drawPlayer(ctx, camera) {
                 drawSlashSprite(mainTip, 0, 45);
                 drawImpactSprite(mainTip, 60);
             }
+        } else if (combatState.isLowSweeping) {
+            let mainTip = null;
+            for (let k = 0; k < 5; k++) {
+                const angle = Math.PI/12 + (k/4) * Math.PI/4;
+                const dist = 110 - Math.abs(k - 2) * 20;
+                const tip = drawHeadSpaceTentacle(-2, -5, Math.cos(angle) * dist, Math.sin(angle) * dist, progress, 7 - Math.abs(k-2), k);
+                if (k === 2) mainTip = tip;
+            }
+            if (mainTip) {
+                drawSlashSprite(mainTip, Math.PI / 6, 60);
+                drawImpactSprite(mainTip, 80);
+                if (Math.random() > 0.3) drawLightningBolt(-2, -5, mainTip.x, mainTip.y + 20, 8, progress);
+            }
+        } else if (combatState.isUpSlashing) {
+            let mainTip = null;
+            for (let k = 0; k < 5; k++) {
+                const angle = -Math.PI/2 + (k/4) * Math.PI/3;
+                const dist = 110 - Math.abs(k - 2) * 20;
+                const tip = drawHeadSpaceTentacle(-2, -5, Math.cos(angle) * dist, Math.sin(angle) * dist, progress, 7 - Math.abs(k-2), k);
+                if (k === 2) mainTip = tip;
+            }
+            if (mainTip) {
+                drawSlashSprite(mainTip, -Math.PI / 3, 60);
+                drawImpactSprite(mainTip, 80);
+                if (Math.random() > 0.3) drawLightningBolt(-2, -5, mainTip.x, mainTip.y - 40, 8, progress);
+            }
+        } else if (combatState.isPogoSlashing) {
+            let mainTip = null;
+            for (let k = 0; k < 5; k++) {
+                const angle = Math.PI/2 - Math.PI/6 + (k/4) * Math.PI/3;
+                const dist = 120 - Math.abs(k - 2) * 15;
+                const tip = drawHeadSpaceTentacle(-2, -5, Math.cos(angle) * dist, Math.sin(angle) * dist, progress, 8 - Math.abs(k-2), k);
+                if (k === 2) mainTip = tip;
+            }
+            if (mainTip) {
+                drawSlashSprite(mainTip, Math.PI / 2, 70);
+                drawImpactSprite(mainTip, 90);
+                if (Math.random() > 0.3) drawLightningBolt(-2, -5, mainTip.x, mainTip.y + 40, 8, progress);
+            }
         }
     } else if (combatState.isCharging) {
         // Spin tentacles around the head during charge K
@@ -932,6 +998,18 @@ export function drawPlayer(ctx, camera) {
             const angle = chargeSpeed + (k * Math.PI / 2);
             const dist = 25 + combatState.chargeLevel * 10;
             drawHeadSpaceTentacle(0, 0, Math.cos(angle) * dist, Math.sin(angle) * dist, 1.0, 3 + combatState.chargeLevel, k);
+        }
+    } else if (combatState.isDashing || player.isDashing) {
+        // Fly backwards during dash
+        for (let k = 0; k < 4; k++) {
+            drawHeadSpaceTentacle(-2, -5, -60, -10 + (k-2)*15, 1.0, 4, k);
+        }
+    } else if (combatState.isBioDrilling) {
+        // Head tentacles stream backwards like drill stabilizers/exhaust
+        const prog = Math.max(0, Math.min(1.0, 1 - (combatState.bioDrillTime / 0.35)));
+        const pullBack = -40 * prog;
+        for (let k = 0; k < 4; k++) {
+            drawHeadSpaceTentacle(-2, -5, pullBack, (k-1.5)*15, prog, 5, k);
         }
     } else {
         // Idle/Run state: Flowing gracefully backwards
@@ -1018,122 +1096,69 @@ export function drawPlayer(ctx, camera) {
         drawImpactSprite({x: drillW*0.9, y: 0}, 80, prog);
         ctx.restore();
     } else if (combatState.isBioDrilling) {
-        // Bio-Drill (Neutral I): Short Spiral Helix
+        // Bio-Drill (Neutral I): Solid Energy/Mechanical Drill
         const prog = Math.max(0, Math.min(1.0, 1 - (combatState.bioDrillTime / 0.35)));
+        
+        ctx.globalAlpha = 1.0; // Ensure the drill itself is fully visible!
         
         ctx.save();
         ctx.translate(-2, -15); // Center on body
-        ctx.translate((Math.random()-0.5)*5, (Math.random()-0.5)*5); // Shake
+        ctx.translate((Math.random()-0.5)*5, (Math.random()-0.5)*5); // Heavy shake
         
-        const drillLen = 80; // Much shorter than before (was 180)
-        const drillRad = 25;
-        const spin = t * 25; // Fast spin
+        const drillLen = 70; // Shortened drill bit
+        const baseRad = 22; // Wide base at the back
+        const spin = (t * 600) % 30; // Fast thread spinning
         
-        // Small sharp tip
-        ctx.fillStyle = '#ffffff';
+        // 1. Draw the main solid cone (Drill Bit)
         ctx.beginPath();
-        ctx.moveTo(drillLen, -5);
-        ctx.lineTo(drillLen + 20, 0);
-        ctx.lineTo(drillLen, 5);
+        ctx.moveTo(drillLen, 0);    // Tip (front)
+        ctx.lineTo(0, -baseRad);    // Top base (back)
+        ctx.lineTo(0, baseRad);     // Bottom base (back)
+        ctx.closePath();
+        
+        // Gradient to make it look like a glowing metallic/energy cone
+        const grad = ctx.createLinearGradient(0, -baseRad, 0, baseRad);
+        grad.addColorStop(0, 'rgba(0, 255, 255, 0.6)');
+        grad.addColorStop(0.5, '#ffffff');
+        grad.addColorStop(1, 'rgba(0, 255, 255, 0.6)');
+        ctx.fillStyle = grad;
         ctx.fill();
-
-        // Draw 3 spiral arms
-        for (let arm = 0; arm < 3; arm++) {
-            const armOffset = (arm / 3) * Math.PI * 2;
-            
-            const drawSpiralArm = (lineWidth, style) => {
-                ctx.beginPath();
-                for (let px = 0; px <= drillLen; px += 5) {
-                    const normX = px / drillLen;
-                    // Taper the radius towards the tip
-                    const r = drillRad * (1 - normX);
-                    const angle = spin + normX * Math.PI * 3 + armOffset;
-                    
-                    const py = Math.sin(angle) * r;
-                    if (px === 0) ctx.moveTo(px, py);
-                    else ctx.lineTo(px, py);
-                }
-                ctx.strokeStyle = style;
-                ctx.lineWidth = lineWidth;
-                ctx.lineCap = 'round';
-                ctx.stroke();
-            };
-
-            drawSpiralArm(12, 'rgba(0, 255, 255, 0.2)');
-            drawSpiralArm(6, 'rgba(0, 255, 255, 0.6)');
-            drawSpiralArm(2, '#ffffff');
-        }
         
-        // 2 Wide Spinning Rings
-        for (let i = 0; i < 2; i++) {
-            const ringProg = ((t * 8) + i/2) % 1.0;
-            const ringX = ringProg * drillLen * 0.8;
-            const ringY = (1 - ringProg) * (drillRad + 10);
-            
-            const drawRing = (lineWidth, style) => {
-                ctx.strokeStyle = style;
-                ctx.lineWidth = lineWidth;
-                ctx.beginPath();
-                ctx.ellipse(ringX, 0, 4, ringY, 0, 0, Math.PI * 2);
-                ctx.stroke();
-            };
-            
-            drawRing(6, `rgba(0, 255, 255, ${(1 - ringProg) * 0.4})`);
-            drawRing(2, `rgba(255, 255, 255, ${1 - ringProg})`);
-        }
+        // 2. Add diagonal drill threads wrapping around the cone
+        ctx.save();
+        // Clip to the cone shape so threads don't bleed out
+        ctx.beginPath();
+        ctx.moveTo(drillLen, 0); ctx.lineTo(0, -baseRad); ctx.lineTo(0, baseRad); ctx.closePath();
+        ctx.clip();
         
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        // Draw angled lines sweeping backwards to simulate rotation
+        for (let x = -30; x < drillLen + 30; x += 25) {
+            const threadX = x + spin; // Move threads to animate rotation
+            ctx.moveTo(threadX, -baseRad);
+            ctx.lineTo(threadX + 40, baseRad);
+        }
+        ctx.stroke();
+        ctx.restore(); // End clip
+        
+        // 3. Draw Base Ring (Connecting the drill to the player)
+        ctx.strokeStyle = '#00ffff';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 8, baseRad + 5, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Sparks at the drill tip
         if (Math.random() > 0.3) addParticle(player.x + (player.facingRight ? drillLen : -drillLen), player.y - 15, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
         
         drawImpactSprite({x: drillLen, y: 0}, 60, (t * 8) % 1.0);
         ctx.restore();
     } else if (combatState.isLowSweeping || combatState.isUpSlashing || combatState.isPogoSlashing || combatState.isRisingBlast) {
-        // Multi-Layer Glow Slash Animation
-        const drawSlashAnimation = (angle, prog) => {
-            ctx.save();
-            ctx.translate(-2, -5); // Body center
-            ctx.rotate(angle);
-            
-            const drawSize = 250;
-            const fadeAlpha = Math.min(1.0, (1 - prog) * 2.5); // fade out at end
-            if (fadeAlpha <= 0) {
-                ctx.restore();
-                return;
-            }
-            
-            const drawCrescent = (scaleX, scaleY) => {
-                ctx.save();
-                // Stretch horizontally based on prog for dynamic feeling
-                ctx.scale((0.5 + prog) * scaleX, scaleY);
-                ctx.beginPath();
-                ctx.moveTo(0, -drawSize/2);
-                // Outer curve
-                ctx.bezierCurveTo(drawSize*0.8, -drawSize/2, drawSize*1.2, 0, drawSize*0.8, drawSize/2);
-                // Inner curve
-                ctx.bezierCurveTo(drawSize*0.6, 0, drawSize*0.6, -drawSize*0.2, 0, -drawSize/2);
-                ctx.closePath();
-                ctx.fill();
-                ctx.restore();
-            };
-            
-            // Layer 1: Outer glow
-            ctx.fillStyle = `rgba(0, 255, 255, ${0.2 * fadeAlpha})`;
-            drawCrescent(1.1, 1.2);
-            
-            // Layer 2: Mid glow
-            ctx.fillStyle = `rgba(0, 255, 255, ${0.5 * fadeAlpha})`;
-            drawCrescent(1.0, 1.0);
-            
-            // Layer 3: Core (white)
-            ctx.fillStyle = `rgba(255, 255, 255, ${1.0 * fadeAlpha})`;
-            drawCrescent(0.9, 0.8);
-            
-            ctx.restore();
-            
-            // Draw impact sprite at the tip of the slash
-            const tipX = -2 + Math.cos(angle) * 140;
-            const tipY = -5 + Math.sin(angle) * 140;
-            drawImpactSprite({x: tipX, y: tipY}, 60, prog);
-        };
 
         if (combatState.isLowSweeping) {
             const prog = Math.max(0, Math.min(1, 1 - (combatState.lowSweepTime / 0.25)));
@@ -1151,9 +1176,6 @@ export function drawPlayer(ctx, camera) {
             ctx.stroke();
             ctx.restore();
             
-            for (let trail = 0; trail < 3; trail++) {
-                drawSlashAnimation(Math.PI / 8, Math.max(0, prog - trail * 0.1));
-            }
             if (Math.random() > 0.5) addParticle(player.x + (player.facingRight ? 100*prog : -100*prog), player.y + 15, (Math.random()-0.5)*50, (Math.random()-0.5)*50 - 50, 'rgba(200,200,200,0.5)', 0.6, 'tex_smoke', 20);
             
         } else if (combatState.isUpSlashing) {
@@ -1165,9 +1187,6 @@ export function drawPlayer(ctx, camera) {
             ctx.fillRect(50, -200 * prog, 40, 200 * prog);
             ctx.restore();
             
-            for (let trail = 0; trail < 3; trail++) {
-                drawSlashAnimation(-Math.PI / 3, Math.max(0, prog - trail * 0.1));
-            }
             if (Math.random() > 0.3) addParticle(player.x + (player.facingRight ? 80 : -80), player.y - 100 * prog, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
             
         } else if (combatState.isPogoSlashing) {
@@ -1179,9 +1198,6 @@ export function drawPlayer(ctx, camera) {
             ctx.fillRect(0, 20, 40, 150 * prog);
             ctx.restore();
             
-            for (let trail = 0; trail < 3; trail++) {
-                drawSlashAnimation(Math.PI / 2, Math.max(0, prog - trail * 0.1));
-            }
             if (Math.random() > 0.5) addParticle(player.x, player.y + 20 + 100 * prog, (Math.random()-0.5)*50, (Math.random()-0.5)*50 - 50, 'rgba(200,200,200,0.5)', 0.6, 'tex_smoke', 20);
             
         } else if (combatState.isRisingBlast) {
@@ -1615,6 +1631,8 @@ export function drawPlayer(ctx, camera) {
     
     drawLegTentacle(leg3Coords.sx, leg3Coords.sy, leg3Coords.tx, leg3Coords.ty, 2.2, Math.PI / 2);
     drawLegTentacle(leg4Coords.sx, leg4Coords.sy, leg4Coords.tx, leg4Coords.ty, 2.2, Math.PI * 1.5);
+    
+    ctx.globalAlpha = 1.0; // Reset alpha to normal at the end of drawPlayer
 
     ctx.restore();
 }

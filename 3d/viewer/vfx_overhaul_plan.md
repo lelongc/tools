@@ -66,33 +66,35 @@ Xúc tu + sprite lightning đã hoạt động tốt. Không sửa.
 ---
 
 ### 4. Low Sweep (S + Click) — "Quét Chân Sóng Xung Kích"
-**Vấn đề:** Chỉ 1 vệt bezier xoay ngang, không có cảm giác đập xuống đất.
+**Vấn đề:** Hiện tại chỉ vẽ 1 vệt lưỡi liềm (crescent vector) lạc quẻ, trông rất "phèn" và không đồng bộ với đòn đánh J thường (xúc tu).
 
-**Giải pháp:**
-- Tạo sprite sheet `sweep_fx.png` (6 frame 64×64, nền đen): vệt năng lượng quét ngang dọc mặt đất.
-- Thêm **dust particles**: 8 hạt bụi/đá bắn lên từ chân bằng `addParticle()`.
-- Thêm **ground crack line**: 1 đường nứt ngang trên mặt đất bằng vector (3 đoạn zigzag).
-- Giữ crescent nhưng thu nhỏ và thêm motion blur (3 bản copy mờ dần).
+**Giải pháp (Làm theo yêu cầu mới):**
+- BỎ HOÀN TOÀN hiệu ứng lưỡi liềm (vector slash).
+- Dùng lại **animation quật xúc tu (head tentacles)** giống hệt đòn J thường (gắn điện/tia sét ở đầu xúc tu).
+- Chỉnh góc quật của xúc tu: Quật chéo xuống mặt đất (góc `Math.PI / 6`).
+- Thêm **đường nứt đất** và **đá vụn** văng lên.
 
 ---
 
 ### 5. Up Slash (W + Click) — "Chém Ngược Trời"
-**Vấn đề:** Giống hệt Low Sweep, chỉ xoay góc.
+**Vấn đề:** Đang dùng vệt lưỡi liềm vector, lạc quẻ và phèn.
 
 **Giải pháp:**
-- Giữ crescent nhưng thêm **vertical energy trail**: 1 vệt sáng dọc từ dưới lên.
-- Thêm **rising sparks**: 6 hạt lửa bắn lên trời bằng `addParticle()`.
-- Crescent mỏng hơn, sắc bén hơn (giảm drawSize từ 250 → 180, tăng tốc scale).
+- BỎ hiệu ứng lưỡi liềm.
+- Dùng **xúc tu quật lên trời** (có điện ở đầu xúc tu) giống đòn J thường.
+- Chỉnh góc quật: Quật hất ngược lên (góc `-Math.PI / 4`).
+- Thêm tia lửa (sparks) bắn lên.
 
 ---
 
 ### 6. Pogo Slash (S + Click trên không) — "Chém Dẫm Xuống"
-**Vấn đề:** Giống hệt Low Sweep.
+**Vấn đề:** Giống hệt các đòn slash khác, không có uy lực.
 
 **Giải pháp:**
-- Giữ crescent hướng xuống nhưng thêm **downward energy streak**.
-- Thêm **impact ring** khi chạm đất: 1 vòng ellipse nhanh.
-- Particle bắn xuống + sang 2 bên.
+- BỎ hiệu ứng lưỡi liềm.
+- Dùng **xúc tu quật thẳng xuống** (có điện ở đầu).
+- Góc quật: Thẳng xuống (`Math.PI / 2`).
+- Chạm đất tạo sóng xung kích (impact ring).
 
 ---
 
