@@ -1,6 +1,6 @@
 import { keys, resetInputPresses } from './input.js';
 import { getCollision, TILE_SIZE } from './world.js';
-import { combatState, lightningSlashImg, lightningImpactImg } from './combat.js';
+import { combatState, lightningSlashImg, lightningImpactImg, orbImg, spark1Img, spark2Img } from './combat.js';
 import { addParticle } from './effects.js';
 
 export const player = {
@@ -789,15 +789,26 @@ export function drawPlayer(ctx, camera) {
 
         // Procedural Vector Fallback: Electric Starburst Burst
         ctx.globalAlpha = 0.8;
-        const r = size * 0.4;
         
         const drawBurst = (lineWidth, style) => {
             ctx.strokeStyle = style;
             ctx.lineWidth = lineWidth;
+            ctx.lineCap = 'round';
             ctx.beginPath();
-            for (let i = 0; i < 6; i++) {
-                const a = (i / 6) * Math.PI * 2 + activeProg * 5;
+            
+            // Random chaotic lines shooting outwards
+            const linesCount = 8;
+            for (let i = 0; i < linesCount; i++) {
+                // Randomize angle slightly
+                const a = (i / linesCount) * Math.PI * 2 + activeProg * 5 + (Math.random() - 0.5);
+                // Randomize length
+                const r = size * 0.2 + Math.random() * (size * 0.3);
+                
                 ctx.moveTo(0, 0);
+                // Draw jagged lightning line
+                const midX = Math.cos(a) * r * 0.5 + (Math.random()-0.5) * size * 0.1;
+                const midY = Math.sin(a) * r * 0.5 + (Math.random()-0.5) * size * 0.1;
+                ctx.lineTo(midX, midY);
                 ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
             }
             ctx.stroke();
@@ -812,8 +823,9 @@ export function drawPlayer(ctx, camera) {
         
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.arc(0, 0, r * 0.3, 0, Math.PI * 2);
+        ctx.arc(0, 0, size * 0.1 * Math.random(), 0, Math.PI * 2);
         ctx.fill();
+        
         ctx.restore();
     };
 
@@ -826,7 +838,8 @@ export function drawPlayer(ctx, camera) {
         
         for (let i = 1; i < segments; i++) {
             const tVal = i / segments;
-            const jitter = (Math.random() - 0.5) * (length * 0.15) * (1 - prog);
+            // Removed (1 - prog) so the lightning is ALWAYS jagged and chaotic!
+            const jitter = (Math.random() - 0.5) * (length * 0.15);
             pts.push({
                 x: x1 + dx * tVal - (dy/length) * jitter,
                 y: y1 + dy * tVal + (dx/length) * jitter
@@ -842,8 +855,9 @@ export function drawPlayer(ctx, camera) {
             for (let i = 1; i <= segments; i++) {
                 ctx.lineTo(pts[i].x, pts[i].y);
             }
+            ctx.lineJoin = 'miter';
             ctx.strokeStyle = style;
-            ctx.lineWidth = lineWidth * (1 - prog);
+            ctx.lineWidth = lineWidth * (1 - prog + 0.2); // keep it slightly thick even at end
             ctx.stroke();
         };
 
@@ -1163,17 +1177,12 @@ export function drawPlayer(ctx, camera) {
         if (combatState.isLowSweeping) {
             const prog = Math.max(0, Math.min(1, 1 - (combatState.lowSweepTime / 0.25)));
             
-            // Ground crack line
+            // Giant lightning crack running across the ground
             ctx.save();
             ctx.translate(0, 15); // Feet
-            ctx.strokeStyle = `rgba(0, 255, 255, ${1 - prog})`;
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(80 * prog, 5);
-            ctx.lineTo(160 * prog, -5);
-            ctx.lineTo(240 * prog, 0);
-            ctx.stroke();
+            for(let bolt=0; bolt<2; bolt++) {
+                drawLightningBolt(0, 0, (player.facingRight ? 300 : -300) * prog, (Math.random()-0.5)*20, 8, prog);
+            }
             ctx.restore();
             
             if (Math.random() > 0.5) addParticle(player.x + (player.facingRight ? 100*prog : -100*prog), player.y + 15, (Math.random()-0.5)*50, (Math.random()-0.5)*50 - 50, 'rgba(200,200,200,0.5)', 0.6, 'tex_smoke', 20);
@@ -1181,10 +1190,12 @@ export function drawPlayer(ctx, camera) {
         } else if (combatState.isUpSlashing) {
             const prog = Math.max(0, Math.min(1, 1 - (combatState.upSlashTime / 0.2)));
             
-            // Vertical trail
+            // Giant lightning strike shooting UPWARDS
             ctx.save();
-            ctx.fillStyle = `rgba(0, 255, 255, ${(1 - prog) * 0.4})`;
-            ctx.fillRect(50, -200 * prog, 40, 200 * prog);
+            for(let bolt=0; bolt<3; bolt++) {
+                const endX = (player.facingRight ? 80 : -80) + (Math.random()-0.5)*40;
+                drawLightningBolt(0, -20, endX, -300 * prog, 8, prog);
+            }
             ctx.restore();
             
             if (Math.random() > 0.3) addParticle(player.x + (player.facingRight ? 80 : -80), player.y - 100 * prog, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
@@ -1192,10 +1203,12 @@ export function drawPlayer(ctx, camera) {
         } else if (combatState.isPogoSlashing) {
             const prog = Math.max(0, Math.min(1, 1 - (combatState.pogoSlashTime / 0.2)));
             
-            // Downward trail
+            // Giant lightning strike shooting DOWNWARDS
             ctx.save();
-            ctx.fillStyle = `rgba(0, 255, 255, ${(1 - prog) * 0.4})`;
-            ctx.fillRect(0, 20, 40, 150 * prog);
+            for(let bolt=0; bolt<3; bolt++) {
+                const endX = (Math.random()-0.5)*40;
+                drawLightningBolt(0, 20, endX, 250 * prog, 8, prog);
+            }
             ctx.restore();
             
             if (Math.random() > 0.5) addParticle(player.x, player.y + 20 + 100 * prog, (Math.random()-0.5)*50, (Math.random()-0.5)*50 - 50, 'rgba(200,200,200,0.5)', 0.6, 'tex_smoke', 20);
@@ -1211,16 +1224,22 @@ export function drawPlayer(ctx, camera) {
                 ctx.save();
                 ctx.translate(colX, 20); // Base at feet
                 
-                const colHeight = 500 * Math.pow(prog, 0.5) + (Math.random() * 50); 
+                const fadeAlpha = Math.min(1.0, (1 - prog) * 2.0);
                 
-                if (prog < 1.0) {
-                    // Draw zigzag lightning bolt upwards
-                    drawLightningBolt(0, 0, (Math.random()-0.5)*40, -colHeight, 8, prog);
+                if (fadeAlpha > 0) {
+                    const colHeight = 350 + Math.random() * 50;
+                    
+                    // Draw 3 chaotic lightning bolts per pillar!
+                    for(let bolt = 0; bolt < 3; bolt++) {
+                        const startX = colX + (Math.random()-0.5)*30;
+                        const endX = colX + (Math.random()-0.5)*30;
+                        drawLightningBolt(startX, 0, endX, -colHeight, 10, prog);
+                    }
                     
                     // Base impact circle
                     ctx.fillStyle = `rgba(0, 255, 255, ${(1 - prog)})`;
                     ctx.beginPath();
-                    ctx.ellipse(0, 0, 30 * (1 - prog), 10 * (1 - prog), 0, 0, Math.PI * 2);
+                    ctx.ellipse(colX, 0, 30 * (1 - prog), 10 * (1 - prog), 0, 0, Math.PI * 2);
                     ctx.fill();
                     
                     if (Math.random() > 0.6) addParticle(player.x + (player.facingRight ? colX : -colX), player.y + 20, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
@@ -1284,11 +1303,14 @@ export function drawPlayer(ctx, camera) {
                 
                 const endX = Math.cos(angle) * spikeLen;
                 const endY = Math.sin(angle) * spikeLen;
-                
-                drawLightningBolt(0, 0, endX, endY, 6, prog);
+                for(let bolt=0; bolt<3; bolt++) {
+                    const boltEndX = endX + (Math.random()-0.5)*40;
+                    const boltEndY = endY + (Math.random()-0.5)*40;
+                    drawLightningBolt(0, 0, boltEndX, boltEndY, 6, prog);
+                }
                 
                 if (Math.random() > 0.5) addParticle(player.x + endX, player.y - 15 + endY, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
-                drawImpactSprite({x: endX, y: endY}, 40, prog);
+                drawImpactSprite({x: endX, y: endY}, 60, prog);
             }
             
             // Electric arcs between spikes
@@ -1311,12 +1333,59 @@ export function drawPlayer(ctx, camera) {
         ctx.save();
         ctx.translate(-2, -15);
         if (combatState.smashPhase === 1 || combatState.smashPhase === 2) {
-            // Gathering power phase (floating)
-            ctx.fillStyle = '#ffffff';
-            ctx.globalAlpha = Math.sin(t * 20) * 0.5 + 0.5;
+            // Gathering power phase (floating) - Image-based Plasma Orb
+            const orbRadius = 15; // SMALLER orb!
+            const orbY = -35;
+            
+            // Draw tentacles holding the orb
+            drawHeadSpaceTentacle(-2, -5, 20, -45, 1.0, 5, 0);
+            drawHeadSpaceTentacle(-2, -5, -20, -45, 1.0, 5, 1);
+            drawHeadSpaceTentacle(-2, -5, 0, -55, 1.0, 6, 2);
+            
+            // Cyan background glow (gives color to the white sprites)
+            ctx.globalCompositeOperation = 'screen';
+            ctx.fillStyle = `rgba(0, 255, 255, ${Math.random() * 0.4 + 0.6})`;
             ctx.beginPath();
-            ctx.arc(0, -30, 25, 0, Math.PI * 2);
+            ctx.arc(0, orbY, orbRadius * 2.5, 0, Math.PI * 2);
             ctx.fill();
+            
+            ctx.save();
+            ctx.translate(0, orbY);
+            
+            // Draw base orb image (circle_05)
+            if (orbImg && orbImg.complete) {
+                const s = orbRadius * 2.5;
+                ctx.save();
+                ctx.rotate(t * 5); // slow spin
+                try { ctx.drawImage(orbImg, -s/2, -s/2, s, s); } catch(e) {}
+                ctx.restore();
+            } else {
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath(); ctx.arc(0, 0, orbRadius, 0, Math.PI * 2); ctx.fill();
+            }
+            
+            // Draw inside electricity (spark_04)
+            if (spark1Img && spark1Img.complete) {
+                const s = orbRadius * 2.0; // Fits inside/on the orb
+                ctx.save();
+                ctx.rotate(-t * 10 + Math.random()); // chaotic spin
+                ctx.globalAlpha = 0.8 + Math.random()*0.2;
+                try { ctx.drawImage(spark1Img, -s/2, -s/2, s, s); } catch(e) {}
+                ctx.restore();
+            }
+            
+            // Draw outside electricity (spark_07)
+            if (spark2Img && spark2Img.complete) {
+                const s = orbRadius * 4.0; // Shoots outside the orb
+                ctx.save();
+                ctx.rotate(t * 15 + Math.random()*2); // extremely chaotic spin
+                ctx.globalAlpha = 0.6 + Math.random()*0.4;
+                try { ctx.drawImage(spark2Img, -s/2, -s/2, s, s); } catch(e) {}
+                ctx.restore();
+            }
+            
+            ctx.restore();
+            ctx.globalCompositeOperation = 'source-over'; // Reset blending
         } else if (combatState.smashPhase === 3 && player.isGrounded) {
             // Screen Shake
             ctx.translate((Math.random()-0.5)*15, (Math.random()-0.5)*15);
@@ -1378,7 +1447,11 @@ export function drawPlayer(ctx, camera) {
             
             // Lightning Pillar of energy shooting up from impact
             const pillarH = 400 * Math.max(0, Math.min(1, 1.5 - combatState.smashCooldown));
-            drawLightningBolt(0, 0, 0, -pillarH, 8, animProg);
+            for(let bolt = 0; bolt < 4; bolt++) {
+                const boltStartX = (Math.random()-0.5)*40;
+                const boltEndX = (Math.random()-0.5)*60;
+                drawLightningBolt(boltStartX, 0, boltEndX, -pillarH, 10, animProg);
+            }
             
             // Debris Particles
             if (animProg < 0.2) {
@@ -1596,6 +1669,7 @@ export function drawPlayer(ctx, camera) {
             
             drawFastLightning(-2, -5 + startOffset, endOffsetX, endOffsetY, disp, thickness);
         }
+
 
         // Draw animated pixel-art lightning sprites from assets!
         if (lightningImpactImg.complete && lightningImpactImg.naturalWidth > 0) {

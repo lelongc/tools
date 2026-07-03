@@ -8,6 +8,15 @@ lightningSlashImg.src = 'assets/lightining1-Sheet.png'; // 384x64 (6 frames)
 export const lightningImpactImg = new Image();
 lightningImpactImg.src = 'assets/lightining5-Sheet.png'; // 448x64 (7 frames)
 
+export const orbImg = new Image();
+orbImg.src = 'assets/circle_05.png';
+
+export const spark1Img = new Image();
+spark1Img.src = 'assets/spark_04.png';
+
+export const spark2Img = new Image();
+spark2Img.src = 'assets/spark_07.png';
+
 export const combatState = {
     isAttacking: false,
     attackTime: 0,
