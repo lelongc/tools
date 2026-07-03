@@ -8,14 +8,28 @@ lightningSlashImg.src = 'assets/lightining1-Sheet.png'; // 384x64 (6 frames)
 export const lightningImpactImg = new Image();
 lightningImpactImg.src = 'assets/lightining5-Sheet.png'; // 448x64 (7 frames)
 
-export const orbImg = new Image();
-orbImg.src = 'assets/circle_05.png';
+function createTintedImage(src, r, g, b) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+    img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0);
+        ctx.globalCompositeOperation = 'source-in';
+        ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        canvas.complete = true; // duck-typing so player.js knows it's ready
+        canvas.naturalWidth = img.width;
+    };
+    img.src = src;
+    return canvas;
+}
 
-export const spark1Img = new Image();
-spark1Img.src = 'assets/spark_04.png';
+export const orbImg = createTintedImage('assets/circle_05.png', 0, 255, 255);
+export const spark1Img = createTintedImage('assets/spark_04.png', 0, 255, 255);
+export const spark2Img = createTintedImage('assets/spark_07.png', 0, 255, 255);
 
-export const spark2Img = new Image();
-spark2Img.src = 'assets/spark_07.png';
 
 export const combatState = {
     isAttacking: false,

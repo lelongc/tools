@@ -1,6 +1,6 @@
 import { keys, resetInputPresses } from './input.js';
 import { getCollision, TILE_SIZE } from './world.js';
-import { combatState, lightningSlashImg, lightningImpactImg, orbImg, spark1Img, spark2Img } from './combat.js';
+import { combatState, lightningSlashImg, lightningImpactImg, orbImg, spark1Img, spark2Img } from './combat.js?v=14';
 import { addParticle } from './effects.js';
 
 export const player = {
@@ -1180,8 +1180,10 @@ export function drawPlayer(ctx, camera) {
             // Giant lightning crack running across the ground
             ctx.save();
             ctx.translate(0, 15); // Feet
-            for(let bolt=0; bolt<2; bolt++) {
-                drawLightningBolt(0, 0, (player.facingRight ? 300 : -300) * prog, (Math.random()-0.5)*20, 8, prog);
+            for(let bolt=0; bolt<4; bolt++) { // More bolts, random lengths
+                const len = (150 + Math.random() * 250) * prog; // Random length 150-400
+                const yOffset = (Math.random()-0.5)*40; // Random Y spread
+                drawLightningBolt(0, 0, len, yOffset, 6 + Math.random()*4, prog);
             }
             ctx.restore();
             
@@ -1190,28 +1192,30 @@ export function drawPlayer(ctx, camera) {
         } else if (combatState.isUpSlashing) {
             const prog = Math.max(0, Math.min(1, 1 - (combatState.upSlashTime / 0.2)));
             
-            // Giant lightning strike shooting UPWARDS
+            // Giant lightning strike shooting UPWARDS in a chaotic fan
             ctx.save();
-            for(let bolt=0; bolt<3; bolt++) {
-                const endX = (player.facingRight ? 80 : -80) + (Math.random()-0.5)*40;
-                drawLightningBolt(0, -20, endX, -300 * prog, 8, prog);
+            for(let bolt=0; bolt<4; bolt++) {
+                const endX = (Math.random()-0.5)*250; // Random wide fan
+                const endY = -(200 + Math.random()*200) * prog; // Random height
+                drawLightningBolt(0, -20, endX, endY, 6 + Math.random()*4, prog);
             }
             ctx.restore();
             
-            if (Math.random() > 0.3) addParticle(player.x + (player.facingRight ? 80 : -80), player.y - 100 * prog, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
+            if (Math.random() > 0.3) addParticle(player.x + (Math.random()-0.5)*100, player.y - 100 * prog, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
             
         } else if (combatState.isPogoSlashing) {
             const prog = Math.max(0, Math.min(1, 1 - (combatState.pogoSlashTime / 0.2)));
             
-            // Giant lightning strike shooting DOWNWARDS
+            // Giant lightning strike shooting DOWNWARDS in a chaotic fan
             ctx.save();
-            for(let bolt=0; bolt<3; bolt++) {
-                const endX = (Math.random()-0.5)*40;
-                drawLightningBolt(0, 20, endX, 250 * prog, 8, prog);
+            for(let bolt=0; bolt<4; bolt++) {
+                const endX = (Math.random()-0.5)*250; // Random wide fan
+                const endY = (200 + Math.random()*200) * prog; // Random depth
+                drawLightningBolt(0, 20, endX, endY, 6 + Math.random()*4, prog);
             }
             ctx.restore();
             
-            if (Math.random() > 0.5) addParticle(player.x, player.y + 20 + 100 * prog, (Math.random()-0.5)*50, (Math.random()-0.5)*50 - 50, 'rgba(200,200,200,0.5)', 0.6, 'tex_smoke', 20);
+            if (Math.random() > 0.5) addParticle(player.x + (Math.random()-0.5)*50, player.y + 20 + 100 * prog, (Math.random()-0.5)*50, (Math.random()-0.5)*50 - 50, 'rgba(200,200,200,0.5)', 0.6, 'tex_smoke', 20);
             
         } else if (combatState.isRisingBlast) {
             const prog = Math.max(0, Math.min(1.0, 1 - (combatState.risingBlastTime / 0.35)));
@@ -1334,54 +1338,52 @@ export function drawPlayer(ctx, camera) {
         ctx.translate(-2, -15);
         if (combatState.smashPhase === 1 || combatState.smashPhase === 2) {
             // Gathering power phase (floating) - Image-based Plasma Orb
-            const orbRadius = 15; // SMALLER orb!
+            const orbRadius = 8; // SMALLER orb!
             const orbY = -35;
             
             // Draw tentacles holding the orb
-            drawHeadSpaceTentacle(-2, -5, 20, -45, 1.0, 5, 0);
-            drawHeadSpaceTentacle(-2, -5, -20, -45, 1.0, 5, 1);
-            drawHeadSpaceTentacle(-2, -5, 0, -55, 1.0, 6, 2);
+            drawHeadSpaceTentacle(-2, -5, 10, -40, 1.0, 5, 0);
+            drawHeadSpaceTentacle(-2, -5, -10, -40, 1.0, 5, 1);
+            drawHeadSpaceTentacle(-2, -5, 0, -45, 1.0, 6, 2);
             
-            // Cyan background glow (gives color to the white sprites)
             ctx.globalCompositeOperation = 'screen';
-            ctx.fillStyle = `rgba(0, 255, 255, ${Math.random() * 0.4 + 0.6})`;
-            ctx.beginPath();
-            ctx.arc(0, orbY, orbRadius * 2.5, 0, Math.PI * 2);
-            ctx.fill();
             
             ctx.save();
             ctx.translate(0, orbY);
             
-            // Draw base orb image (circle_05)
-            if (orbImg && orbImg.complete) {
-                const s = orbRadius * 2.5;
-                ctx.save();
-                ctx.rotate(t * 5); // slow spin
-                try { ctx.drawImage(orbImg, -s/2, -s/2, s, s); } catch(e) {}
-                ctx.restore();
-            } else {
-                ctx.fillStyle = '#ffffff';
-                ctx.beginPath(); ctx.arc(0, 0, orbRadius, 0, Math.PI * 2); ctx.fill();
-            }
+            // Soft Cyan Core Glow
+            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 30);
+            gradient.addColorStop(0, 'rgba(0, 255, 255, 0.8)');
+            gradient.addColorStop(0.5, 'rgba(0, 200, 255, 0.4)');
+            gradient.addColorStop(1, 'rgba(0, 255, 255, 0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(0, 0, 30, 0, Math.PI * 2);
+            ctx.fill();
             
-            // Draw inside electricity (spark_04)
+            // Draw spherical cage of electricity instead of solid orb!
+            // Inner Core (Dense overlapping sparks)
             if (spark1Img && spark1Img.complete) {
-                const s = orbRadius * 2.0; // Fits inside/on the orb
-                ctx.save();
-                ctx.rotate(-t * 10 + Math.random()); // chaotic spin
-                ctx.globalAlpha = 0.8 + Math.random()*0.2;
-                try { ctx.drawImage(spark1Img, -s/2, -s/2, s, s); } catch(e) {}
-                ctx.restore();
+                for(let k = 0; k < 3; k++) {
+                    const s = 40 + Math.random() * 10; // Much larger!
+                    ctx.save();
+                    ctx.rotate(t * (10 + k * 5) + Math.random() * Math.PI * 2); // chaotic spin
+                    ctx.globalAlpha = 0.7 + Math.random()*0.3;
+                    try { ctx.drawImage(spark1Img, -s/2, -s/2, s, s); } catch(e) {}
+                    ctx.restore();
+                }
             }
             
-            // Draw outside electricity (spark_07)
+            // Outer Chaotic Shell (Wild reaching sparks)
             if (spark2Img && spark2Img.complete) {
-                const s = orbRadius * 4.0; // Shoots outside the orb
-                ctx.save();
-                ctx.rotate(t * 15 + Math.random()*2); // extremely chaotic spin
-                ctx.globalAlpha = 0.6 + Math.random()*0.4;
-                try { ctx.drawImage(spark2Img, -s/2, -s/2, s, s); } catch(e) {}
-                ctx.restore();
+                for(let k = 0; k < 4; k++) {
+                    const s = 60 + Math.random() * 20; // Massive!
+                    ctx.save();
+                    ctx.rotate(-t * (15 + k * 4) + Math.random() * Math.PI * 2); // extremely chaotic spin
+                    ctx.globalAlpha = 0.5 + Math.random()*0.5;
+                    try { ctx.drawImage(spark2Img, -s/2, -s/2, s, s); } catch(e) {}
+                    ctx.restore();
+                }
             }
             
             ctx.restore();
