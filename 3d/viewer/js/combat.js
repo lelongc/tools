@@ -45,7 +45,7 @@ export const combatState = {
     
     isCharging: false,
     chargeTime: 0,
-    chargeDuration: 0.8,
+    chargeDuration: 0.5, // Reduced from 0.8s to make it easier/faster to charge
     chargeLevel: 1,
     lastChargeRatio: 0,
     
@@ -90,13 +90,11 @@ export const combatState = {
     lightningNovaCooldown: 0,
     lightningNovaMaxCooldown: 0.8,
     
-    isCharging: false,
-    chargeTime: 0,
-    chargeDuration: 0.8,
     isReleasingBeam: false,
     beamTime: 0,
-    beamDuration: 0.2,
-    chargeLevel: 1, // 1 = Short, 2 = Medium, 3 = Max
+    beamX: 0,
+    beamY: 0,
+    beamFacingRight: true,
     
     hitbox: { x: 0, y: 0, width: 40, height: 40 }
 };
@@ -116,23 +114,32 @@ export function releaseChargeAttack(player) {
         level = 3;
         cameraShake = 25;
         beamDuration = 0.35;
-        dashSpeed = 1200; // Fast lightning warp
+        dashSpeed = 1000; // Reduced from 1200 so it doesn't fly off screen instantly
+        
+        // Simulate massive laser damage hitting enemies and restoring mana
+        combatState.energy = Math.min(combatState.maxEnergy, combatState.energy + 40);
     } else if (chargeTime >= 0.3) {
         level = 2;
         cameraShake = 12;
         beamDuration = 0.22;
-        dashSpeed = 900;
+        dashSpeed = 800;
+        
+        // Simulate moderate laser damage hitting enemies and restoring mana
+        combatState.energy = Math.min(combatState.maxEnergy, combatState.energy + 20);
     }
     
     combatState.chargeLevel = level;
     combatState.lastChargeRatio = chargeTime / combatState.chargeDuration;
     
-    combatState.dashStrikeTime = level === 3 ? 0.3 : 0.2;
+    combatState.dashStrikeTime = level === 3 ? 0.35 : 0.25;
     combatState.dashStrikeCooldown = 0.4;
     combatState.dashStrikeMaxCooldown = 0.4;
     
     combatState.isReleasingBeam = true;
     combatState.beamTime = beamDuration;
+    combatState.beamX = player.x + player.width/2;
+    combatState.beamY = player.y + player.height/2; // Perfectly centered on player body
+    combatState.beamFacingRight = player.facingRight;
     
     player.vx = player.facingRight ? dashSpeed : -dashSpeed;
     player.vy = 0;
@@ -685,6 +692,93 @@ export function updateCombat(player, dt) {
 }
 
 export function drawCombat(ctx, camera, player) {
-    // Combat visuals (tentacles, drill) are drawn directly in player.js
-    // inside the skeletal transform loop to ensure seamless animation and head anchoring.
+    // Render World-Space Laser Beam (Detached from player motion)
+    if (combatState.isReleasingBeam) {
+        ctx.save();
+        
+        // Translate to the world position where the beam was fired, then apply camera offset
+        const drawX = combatState.beamX - camera.x;
+        const drawY = combatState.beamY - camera.y;
+        ctx.translate(drawX, drawY);
+        
+        if (!combatState.beamFacingRight) {
+            ctx.scale(-1, 1);
+        }
+        
+        const lvl = combatState.chargeLevel || 1;
+        const maxDuration = lvl === 3 ? 0.35 : (lvl === 2 ? 0.22 : 0.15);
+        const prog = Math.max(0, Math.min(1.0, combatState.beamTime / maxDuration));
+        
+        // Intense screen shake based on beam power and progress
+        const shakeMag = (lvl === 3 ? 6 : 3) * prog;
+        ctx.translate((Math.random()-0.5)*shakeMag, (Math.random()-0.5)*shakeMag);
+
+        const baseThickness = lvl === 3 ? 140 : (lvl === 2 ? 90 : 50);
+        
+        // Pulse and jitter the thickness
+        const pulse = 1.0 + Math.sin(Date.now() * 0.05) * 0.15 + (Math.random() * 0.2);
+        const curThickness = baseThickness * prog * pulse;
+        
+        // Massive beam length that spans the whole screen width instantly!
+        const beamLength = 1200;
+
+        // 100% Vector Laser Beam
+        const drawLaserLayer = (scaleY, color, alphaScale) => {
+            ctx.fillStyle = color;
+            ctx.globalAlpha = Math.min(1.0, prog * alphaScale);
+            ctx.beginPath();
+            ctx.rect(0, (-curThickness * scaleY) / 2, beamLength, curThickness * scaleY);
+            ctx.fill();
+        };
+
+        // Layer 1: Outer cyan glow
+        drawLaserLayer(1.5, '#00ffff', 0.2);
+        // Layer 2: Mid cyan core
+        drawLaserLayer(0.8, '#00ffff', 0.6);
+        // Layer 3: Inner white core
+        if (lvl >= 2) drawLaserLayer(0.3, '#ffffff', 1.0);
+
+        // Add Noise/Jitter edges to simulate plasma
+        ctx.globalAlpha = prog * 0.8;
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let ix = 0; ix < beamLength; ix += 30) {
+            const jitterY = (Math.random() - 0.5) * curThickness * 1.2;
+            ctx.lineTo(ix, jitterY);
+        }
+        ctx.stroke();
+        
+        // Impact Burst at the end of the beam (Simulated far away)
+        if (prog > 0.5) {
+            ctx.save();
+            ctx.translate(640, 0); // Burst at the edge of the screen!
+            
+            const impactRad = curThickness * (Math.random() * 0.5 + 0.8);
+            const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, impactRad);
+            grad.addColorStop(0, '#ffffff');
+            grad.addColorStop(0.3, '#00ffff');
+            grad.addColorStop(1, 'rgba(0, 255, 255, 0)');
+            
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(0, 0, impactRad, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+        
+        // Muzzle Flash / Energy Orb at the origin
+        const flashRadius = (lvl === 3 ? 60 : 35) * prog * (1.0 + Math.random() * 0.3);
+        const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, flashRadius);
+        gradient.addColorStop(0, '#ffffff');
+        gradient.addColorStop(0.3, '#00ffff');
+        gradient.addColorStop(1, 'rgba(0, 255, 255, 0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(0, 0, flashRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+    }
 }
