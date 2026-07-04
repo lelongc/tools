@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>NeoClip Settings</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --text-light: #64748b;
+            --card-bg: #ffffff;
+            --card-border: #e2e8f0;
+            --primary-gradient: linear-gradient(135deg, #6366f1, #06b6d4);
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --toggle-bg: #cbd5e1;
+            --danger: #ef4444;
+            --danger-bg: rgba(239, 68, 68, 0.05);
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.04);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+            --glow: 0 0 12px rgba(99, 102, 241, 0.15);
+        }
+        body.dark {
+            --bg: #0b0f19;
+            --text: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-light: #94a3b8;
+            --card-bg: #151d30;
+            --card-border: #232f4c;
+            --toggle-bg: #334155;
+            --danger-bg: rgba(239, 68, 68, 0.1);
+            --success-bg: rgba(16, 185, 129, 0.1);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            --glow: 0 0 16px rgba(99, 102, 241, 0.25);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            width: 320px;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        /* Header */
+        .header {
+            padding: 16px 20px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+        }
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-icon {
+            width: 22px;
+            height: 22px;
+            color: var(--primary);
+            filter: drop-shadow(0 2px 4px rgba(99, 102, 241, 0.3));
+        }
+        .header-brand h2 {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Content */
+        .content {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: border-color 0.2s;
+        }
+        .stat-card:hover {
+            border-color: var(--primary);
+        }
+        .stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .stat-label {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        /* License Area specific */
+        .license-card {
+            border-left: 3px solid var(--primary);
+        }
+        .license-card.pro {
+            border-left-color: var(--success);
+            background: var(--success-bg);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .card-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-light);
+        }
+
+        .pro-badge {
+            font-size: 9px;
+            background: var(--primary-gradient);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 99px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Inputs & Buttons */
+        .input-text {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            font-size: 12px;
+            background: var(--card-bg);
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-text:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.15);
+        }
+        .btn:hover {
+            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.25);
+            opacity: 0.95;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid var(--card-border);
+            box-shadow: none;
+        }
+        .btn-secondary:hover {
+            background: var(--bg);
+            border-color: var(--text-light);
+        }
+
+        /* Setting Rows */
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+        }
+        .setting-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding-right: 12px;
+        }
+        .setting-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .setting-desc {
+            font-size: 11px;
+            color: var(--text-light);
+            line-height: 1.3;
+        }
+        
+        /* Select styling */
+        select.input-text {
+            width: auto;
+            max-width: 140px;
+            padding: 4px 24px 4px 8px;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            background-size: 12px;
+        }
+
+        /* Toggle Slider */
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 34px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--toggle-bg);
+            transition: .2s;
+            border-radius: 20px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .2s;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        input:checked + .slider { background: var(--primary-gradient); }
+        input:checked + .slider:before { transform: translateX(14px); }
+
+        /* Destructive Option */
+        .destructive-row {
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: var(--danger-bg);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            transition: border-color 0.2s, background-color 0.2s;
+        }
+        .destructive-row:hover {
+            border-color: var(--danger);
+            background: rgba(239, 68, 68, 0.08);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 12px 20px 20px;
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        /* Modals and Toasts */
+        #confirm-modal {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            opacity: 0; 
+            pointer-events: none; 
+            transition: opacity 0.25s ease; 
+            z-index: 9999; 
+            padding: 20px;
+        }
+        #confirm-modal-box {
+            background: var(--card-bg); 
+            border: 1px solid var(--card-border); 
+            border-radius: 16px; 
+            width: 100%; 
+            max-width: 290px; 
+            padding: 20px; 
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); 
+            transform: scale(0.9); 
+            transition: transform 0.25s ease;
+        }
+        #toast-container {
+            position: fixed; 
+            bottom: 20px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: var(--primary); 
+            color: white; 
+            padding: 10px 18px; 
+            border-radius: 99px; 
+            font-size: 12px; 
+            font-weight: 600; 
+            opacity: 0; 
+            pointer-events: none; 
+            transition: opacity 0.3s ease; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); 
+            z-index: 10000;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-brand">
+            <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="8" y="2" width="8" height="4" rx="1"/>
+                <rect x="4" y="4" width="16" height="18" rx="2"/>
+                <path d="M9 12h6M9 16h4"/>
+            </svg>
+            <h2>NeoClip Settings</h2>
+        </div>
+        <div class="header-badge-container">
+            <span class="pro-badge" id="pro-badge" style="display: none;">PRO</span>
+        </div>
+    </div>
+    
+    <div class="content">
+        <!-- Stats Grid -->
+        <div id="stats" class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="stat-items">-</div>
+                <div class="stat-label">Clips Saved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-cols">-</div>
+                <div class="stat-label">Collections</div>
+            </div>
+        </div>
+
+        <!-- License & Cloud Sync Card -->
+        <div class="card license-card" id="license-area">
+            <div class="card-header">
+                <span class="card-title">License & Cloud Sync</span>
+            </div>
+            
+            <!-- State 1: Not Connected, Not Pro -->
+            <div id="sync-state-login">
+                <p style="font-size: 11.5px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.45;">
+                    Backup your clipboard history and collections securely to your own Google Drive.
+                </p>
+                <button id="btn-sync-login" class="btn btn-secondary" style="width: 100%; margin-bottom: 8px;">Connect Google Drive</button>
+                <p style="font-size: 10.5px; color: var(--text-light); text-align: center;">Connection required to unlock Pro features.</p>
+            </div>
+
+            <!-- State 2: Connected, NO License -->
+            <div id="sync-state-locked" style="display: none;">
+                <div style="font-size: 12px; color: var(--success); font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;">
+                    ✓ Google Drive Connected
+                </div>
+                <p style="font-size: 11.5px; color: var(--danger); font-weight: 600; margin-bottom: 8px;">Sync requires NeoClip Pro</p>
+                <p style="font-size: 11px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.45;">Enter your License Key to unlock Cloud Sync & Unlimited History.</p>
+                <input type="text" id="license-input" class="input-text" placeholder="e.g. XXXX-XXXX-XXXX-XXXX" style="width: 100%; margin-bottom: 8px; font-family: monospace; letter-spacing: 0.5px; text-align: center;">
+                <div style="text-align: center; margin-bottom: 12px;">
+                    <a href="https://neoclip.vercel.app/#pricing" target="_blank" style="font-size: 11px; color: var(--primary); font-weight: 600; text-decoration: none;">Don't have a license? Get Pro here &rarr;</a>
+                </div>
+                <button id="btn-verify-license" class="btn" style="width: 100%; font-weight: 600; margin-bottom: 10px;">Unlock NeoClip Pro</button>
+                <div style="text-align: center;">
+                    <a href="#" id="btn-disconnect-drive-1" style="font-size: 11px; color: var(--text-light); text-decoration: none; border-bottom: 1px dashed var(--text-light);">Log out</a>
+                </div>
+            </div>
+
+            <!-- State 3: Connected AND Licensed -->
+            <div id="sync-state-pro" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 12px; color: var(--success); font-weight: 700; display: flex; align-items: center; gap: 4px;">
+                        ✓ Auto-Sync Active
+                    </span>
+                    <span id="last-sync-time" style="font-size: 11px; color: var(--text-light); font-weight: 500;">Never synced</span>
+                </div>
+                <p style="font-size: 11px; color: var(--text-secondary); line-height: 1.45; margin-bottom: 12px;">
+                    Data is merged automatically between this device and Google Drive.
+                </p>
+                <div style="margin-bottom: 10px;">
+                    <button id="btn-sync-now" class="btn" style="width: 100%; padding: 8px; font-size: 12px; font-weight: 600;">Sync Now</button>
+                </div>
+                <div style="text-align: center;">
+                    <a href="#" id="btn-disconnect-drive-2" style="font-size: 11px; color: var(--text-light); text-decoration: none; border-bottom: 1px dashed var(--text-light);">Disconnect Sync</a>
+                </div>
+            </div>
+            
+            <div id="sync-status" style="font-size: 11px; margin-top: 4px; color: var(--text-light); text-align: center; font-weight: 500;"></div>
+        </div>
+
+        <!-- Data Retention Card -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Data Retention</span>
+            </div>
+            
+            <div class="setting-row" style="border-bottom: 1px solid var(--card-border); padding-bottom: 8px; margin-bottom: 4px;">
+                <div class="setting-info">
+                    <span class="setting-label">History Limit</span>
+                    <span class="setting-desc">Maximum clips to keep</span>
+                </div>
+                <select class="input-text" id="setting-limit">
+                    <option value="50">50 items (Free)</option>
+                    <option value="500">500 items (Pro)</option>
+                    <option value="2000">2000 items (Pro)</option>
+                    <option value="999999">Unlimited (Pro)</option>
+                </select>
+            </div>
+
+            <div class="setting-row" style="border-bottom: 1px solid var(--card-border); padding-bottom: 8px; margin-bottom: 4px;">
+                <div class="setting-info">
+                    <span class="setting-label">Auto-Clear</span>
+                    <span class="setting-desc">Delete clips older than</span>
+                </div>
+                <select id="setting-expiry" class="input-text">
+                    <option value="0">Never</option>
+                    <option value="1">1 Day</option>
+                    <option value="7">7 Days</option>
+                    <option value="30">30 Days</option>
+                </select>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <span class="setting-label">Auto-Sync</span>
+                    <span class="setting-desc">Sync to Drive automatically</span>
+                </div>
+                <select id="setting-backup" class="input-text">
+                    <option value="0">Off</option>
+                    <option value="15">Every 15 min</option>
+                    <option value="60">Every 1 hour</option>
+                    <option value="720">Every 12 hours</option>
+                    <option value="1440">Daily</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Preferences Card -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Preferences</span>
+            </div>
+
+            <div class="setting-row" style="border-bottom: 1px solid var(--card-border); padding-bottom: 8px; margin-bottom: 4px;">
+                <div class="setting-info">
+                    <span class="setting-label">Show Bubble</span>
+                    <span class="setting-desc">Display bubble on webpages</span>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="toggle-bubble" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <span class="setting-label">Dark Mode</span>
+                    <span class="setting-desc">Toggle popup theme</span>
+                </div>
+                <label class="toggle">
+                    <input type="checkbox" id="toggle-theme">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Destructive Action Card -->
+        <div class="card destructive-row" id="clear-storage" style="cursor: pointer;">
+            <div class="setting-row" style="padding: 0;">
+                <div class="setting-info">
+                    <span class="setting-label" style="color: var(--danger);">Clear Storage</span>
+                    <span class="setting-desc">Delete all local history and settings</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        v3.0.0 · 100% Offline
+    </div>
+
+    <!-- Custom Modal for Destructive Actions -->
+    <div id="confirm-modal">
+        <div id="confirm-modal-box">
+            <h3 id="modal-title" style="font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--text);">Confirm Action</h3>
+            <p id="modal-desc" style="font-size: 11px; color: var(--text-light); line-height: 1.5; margin-bottom: 16px;"></p>
+            <div id="modal-buttons-container" style="display: flex; flex-direction: column; gap: 8px;">
+                <!-- Buttons will be generated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Toast Notification -->
+    <div id="toast-container">
+        <span id="toast-message">Message</span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
