@@ -1,6 +1,6 @@
-import { keys, isBuffered, consumeBuffer } from './input.js?v=17';
-import { addParticle } from './effects.js?v=17';
-import { getCollision, TILE_SIZE } from './world.js?v=17';
+import { keys, isBuffered, consumeBuffer } from './input.js';
+import { addParticle } from './effects.js';
+import { getCollision, TILE_SIZE } from './world.js';
 
 export const lightningSlashImg = new Image();
 lightningSlashImg.src = 'assets/lightining1-Sheet.png'; // 384x64 (6 frames)
@@ -33,6 +33,9 @@ export const spark2Img = createTintedImage('assets/spark_07.png', 0, 255, 255);
 
 export const combatState = {
     hp: 100,
+    energy: 100,
+    maxEnergy: 100,
+    
     isAttacking: false,
     attackTime: 0,
     attackDuration: 0.15,
@@ -40,38 +43,52 @@ export const combatState = {
     comboStep: 0,
     comboWindow: 0,
     
+    isCharging: false,
+    chargeTime: 0,
+    chargeDuration: 0.8,
+    chargeLevel: 1,
+    lastChargeRatio: 0,
+    
     isDashStriking: false,
     dashStrikeTime: 0,
     dashStrikeCooldown: 0,
+    dashStrikeMaxCooldown: 0.4,
     
     isGroundSmashing: false,
     smashPhase: 0, // 0 = None, 1 = Leap, 2 = Float/Anticipation, 3 = Slam
     smashTimer: 0,
     smashCooldown: 0,
+    smashMaxCooldown: 1.8,
     
     isLowSweeping: false,
     lowSweepTime: 0,
     lowSweepCooldown: 0,
+    lowSweepMaxCooldown: 0.6,
     
     isBioDrilling: false,
     bioDrillTime: 0,
     bioDrillCooldown: 0,
+    bioDrillMaxCooldown: 1.0,
     
     isUpSlashing: false,
     upSlashTime: 0,
     upSlashCooldown: 0,
+    upSlashMaxCooldown: 0.4,
     
     isPogoSlashing: false,
     pogoSlashTime: 0,
     pogoSlashCooldown: 0,
+    pogoSlashMaxCooldown: 0.3,
     
     isRisingBlast: false,
     risingBlastTime: 0,
     risingBlastCooldown: 0,
+    risingBlastMaxCooldown: 1.0,
     
     isLightningNova: false,
     lightningNovaTime: 0,
     lightningNovaCooldown: 0,
+    lightningNovaMaxCooldown: 0.8,
     
     isCharging: false,
     chargeTime: 0,
@@ -99,7 +116,7 @@ export function releaseChargeAttack(player) {
         level = 3;
         cameraShake = 25;
         beamDuration = 0.35;
-        dashSpeed = 1200; // Fast lightning warp (lowered to prevent tunneling)
+        dashSpeed = 1200; // Fast lightning warp
     } else if (chargeTime >= 0.3) {
         level = 2;
         cameraShake = 12;
@@ -112,6 +129,7 @@ export function releaseChargeAttack(player) {
     
     combatState.dashStrikeTime = level === 3 ? 0.3 : 0.2;
     combatState.dashStrikeCooldown = 0.4;
+    combatState.dashStrikeMaxCooldown = 0.4;
     
     combatState.isReleasingBeam = true;
     combatState.beamTime = beamDuration;
@@ -172,12 +190,13 @@ export function updateCombat(player, dt) {
     if (combatState.upSlashCooldown > 0) combatState.upSlashCooldown -= dt;
     if (combatState.pogoSlashCooldown > 0) combatState.pogoSlashCooldown -= dt;
     if (combatState.risingBlastCooldown > 0) combatState.risingBlastCooldown -= dt;
+    if (combatState.lightningNovaCooldown > 0) combatState.lightningNovaCooldown -= dt;
 
     if (combatState.comboWindow <= 0 && !combatState.isAttacking) {
         combatState.comboStep = 0;
     }
 
-    const isBusy = combatState.isAttacking || combatState.isDashStriking || combatState.isGroundSmashing || combatState.isLowSweeping || combatState.isBioDrilling || combatState.isUpSlashing || combatState.isPogoSlashing || combatState.isRisingBlast;
+    const isBusy = combatState.isAttacking || combatState.isDashStriking || combatState.isGroundSmashing || combatState.isLowSweeping || combatState.isBioDrilling || combatState.isUpSlashing || combatState.isPogoSlashing || combatState.isRisingBlast || combatState.isLightningNova;
 
     // SKILL 2: Charge Slash (K)
     if (keys.skill2 && !isBusy && combatState.dashStrikeCooldown <= 0) {
@@ -222,10 +241,14 @@ export function updateCombat(player, dt) {
     const wantSkill1 = keys.skill1Pressed || isBuffered('skill1');
 
     // SKILL 4: Heavy Attack combos (I) - Spells
-    if (wantSkill4 && !isBusy && !combatState.isCharging) {
+    if (wantSkill4 && !isBusy && !combatState.isCharging && combatState.energy >= 30) {
+        // Global spell cooldown to prevent spamming all 3 simultaneously
+        const spellCd = 0.5;
+        
         if (keys.down) {
             // S + I: Ground Smash (Desolate Dive)
             if (combatState.smashCooldown <= 0) {
+                combatState.energy -= 30;
                 combatState.isGroundSmashing = true;
                 player.vx = 0;
                 if (player.isGrounded) {
@@ -236,14 +259,18 @@ export function updateCombat(player, dt) {
                     combatState.smashPhase = 3; // Air Smash skips float, straight to drop!
                     player.vy = 1200; 
                 }
+                combatState.smashCooldown = spellCd;
+                combatState.smashMaxCooldown = spellCd;
                 consumeBuffer('skill4');
             }
         } else if (keys.up) {
             // W + I: Rising Blast (Howling Wraiths)
             if (combatState.risingBlastCooldown <= 0) {
+                combatState.energy -= 30;
                 combatState.isRisingBlast = true;
                 combatState.risingBlastTime = 0.35;
-                combatState.risingBlastCooldown = 1.0;
+                combatState.risingBlastCooldown = spellCd;
+                combatState.risingBlastMaxCooldown = spellCd;
                 player.vx = 0;
                 player.vy = -200; // Small upward float
                 window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 6}}));
@@ -252,9 +279,11 @@ export function updateCombat(player, dt) {
         } else {
             // Neutral I: Bio-Drill (Vengeful Spirit dash)
             if (combatState.bioDrillCooldown <= 0) {
+                combatState.energy -= 30;
                 combatState.isBioDrilling = true;
                 combatState.bioDrillTime = 0.35;
-                combatState.bioDrillCooldown = 1.0;
+                combatState.bioDrillCooldown = spellCd;
+                combatState.bioDrillMaxCooldown = spellCd;
                 player.vx = player.facingRight ? 900 : -900;
                 player.vy = 0; 
                 window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 6}}));
@@ -264,11 +293,13 @@ export function updateCombat(player, dt) {
     }
     
     // SKILL 3: Lightning Nova (L) - AOE Shockwave Burst
-    else if (wantSkill3 && !isBusy && !combatState.isCharging) {
+    else if (wantSkill3 && !isBusy && !combatState.isCharging && combatState.energy >= 50) {
         if (combatState.lightningNovaCooldown <= 0) {
+            combatState.energy -= 50;
             combatState.isLightningNova = true;
             combatState.lightningNovaTime = 0.3;
-            combatState.lightningNovaCooldown = 0.8;
+            combatState.lightningNovaCooldown = 3.0;
+            combatState.lightningNovaMaxCooldown = 3.0;
             player.vx *= 0.2; // stall horizontal movement
             player.vy = -100; // slight air float
             window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 12}}));
@@ -302,8 +333,10 @@ export function updateCombat(player, dt) {
                 if (combatState.lowSweepCooldown <= 0) {
                     combatState.isLowSweeping = true;
                     combatState.lowSweepTime = 0.25;
-                    combatState.lowSweepCooldown = 0.6;
+                    combatState.lowSweepCooldown = 0.3;
+                    combatState.lowSweepMaxCooldown = 0.3;
                     player.vx = player.facingRight ? 250 : -250; 
+                    combatState.energy = Math.min(combatState.maxEnergy, combatState.energy + 8);
                     consumeBuffer('skill1');
                 }
             } else {
@@ -311,8 +344,10 @@ export function updateCombat(player, dt) {
                 if (combatState.pogoSlashCooldown <= 0) {
                     combatState.isPogoSlashing = true;
                     combatState.pogoSlashTime = 0.2;
-                    combatState.pogoSlashCooldown = 0.3;
+                    combatState.pogoSlashCooldown = 0.25;
+                    combatState.pogoSlashMaxCooldown = 0.25;
                     player.vy = -100; // Slight stall to hit
+                    combatState.energy = Math.min(combatState.maxEnergy, combatState.energy + 8);
                     consumeBuffer('skill1');
                 }
             }
@@ -321,8 +356,10 @@ export function updateCombat(player, dt) {
             if (combatState.upSlashCooldown <= 0) {
                 combatState.isUpSlashing = true;
                 combatState.upSlashTime = 0.2;
-                combatState.upSlashCooldown = 0.4;
+                combatState.upSlashCooldown = 0.25;
+                combatState.upSlashMaxCooldown = 0.25;
                 if (!player.isGrounded) player.vy = -150; // Air stall
+                combatState.energy = Math.min(combatState.maxEnergy, combatState.energy + 8);
                 consumeBuffer('skill1');
             }
         } else {
@@ -333,17 +370,18 @@ export function updateCombat(player, dt) {
                 if (combatState.comboStep > 3) combatState.comboStep = 1;
                 
                 combatState.attackTime = combatState.attackDuration;
+                combatState.energy = Math.min(combatState.maxEnergy, combatState.energy + 10);
                 
                 if (!player.isGrounded) {
                     combatState.comboStep = 1; 
-                    combatState.attackCooldown = 0.25;
+                    combatState.attackCooldown = 0.2;
                 } else {
                     if (combatState.comboStep === 3) {
                         combatState.attackTime = 0.25;
-                        combatState.attackCooldown = 0.5;
+                        combatState.attackCooldown = 0.3;
                         player.vx += player.facingRight ? 300 : -300;
                     } else {
-                        combatState.attackCooldown = 0.2;
+                        combatState.attackCooldown = 0.15;
                         player.vx += player.facingRight ? 100 : -100;
                     }
                 }

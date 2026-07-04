@@ -1,9 +1,9 @@
-import { map, TILE_SIZE, drawWorld, getTileType, updateUnstableBlocks, triggerUnstable, getZone, ZONE_COLORS } from '../world.js?v=19';
-import { player, updatePlayer, drawPlayer } from '../player.js?v=19';
-import { combatState, updateCombat, drawCombat } from '../combat.js?v=19';
-import { updateAndDrawParticles, addParticle } from '../effects.js?v=19';
-import { keys, resetInputPresses } from '../input.js?v=19';
-import { updateHUD } from '../ui.js?v=19';
+import { map, TILE_SIZE, drawWorld, getTileType, updateUnstableBlocks, triggerUnstable, getZone, ZONE_COLORS } from '../world.js';
+import { player, updatePlayer, drawPlayer } from '../player.js';
+import { combatState, updateCombat, drawCombat } from '../combat.js';
+import { updateAndDrawParticles, addParticle } from '../effects.js';
+import { keys, resetInputPresses } from '../input.js';
+import { updateHUD } from '../ui.js';
 
 export class GameScene extends Phaser.Scene {
     constructor() {

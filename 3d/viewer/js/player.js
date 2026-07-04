@@ -1,7 +1,7 @@
-import { keys, resetInputPresses } from './input.js?v=17';
-import { getCollision, TILE_SIZE } from './world.js?v=17';
-import { combatState, lightningSlashImg, lightningImpactImg, orbImg, spark1Img, spark2Img } from './combat.js?v=17';
-import { addParticle } from './effects.js?v=17';
+import { keys, resetInputPresses } from './input.js';
+import { getCollision, TILE_SIZE } from './world.js';
+import { combatState, lightningSlashImg, lightningImpactImg, orbImg, spark1Img, spark2Img } from './combat.js';
+import { addParticle } from './effects.js';
 
 export const player = {
     x: 64,

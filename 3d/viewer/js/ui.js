@@ -1,5 +1,5 @@
-import { combatState } from './combat.js?v=17';
-import { ZONE_NAMES, getZone } from './world.js?v=17';
+import { combatState } from './combat.js';
+import { ZONE_NAMES, getZone } from './world.js';
 
 export function updateHUD(player) {
     // Update Zone Text
@@ -22,55 +22,61 @@ export function updateHUD(player) {
     const manaBar = document.getElementById('hud-mana-bar');
     const manaText = document.getElementById('hud-mana-text');
     if (manaBar && manaText) {
-        // Pseudo-mana based on bio-drill charge as a placeholder, or just 100%
-        let manaPercent = 100;
-        if (combatState.isCharging) {
-            manaPercent = (combatState.chargeTime / 1.0) * 100;
-        }
+        let manaPercent = (combatState.energy / combatState.maxEnergy) * 100;
         manaPercent = Math.min(100, Math.max(0, manaPercent));
         manaBar.style.width = manaPercent + '%';
-        manaText.textContent = Math.floor(manaPercent) + '%';
+        manaText.textContent = Math.floor(combatState.energy) + ' / ' + combatState.maxEnergy;
     }
 
     // Update Cooldown Overlays
+    
+    // Skill J (Slash, Low Sweep, Up Slash, Pogo)
     const cdDash = document.getElementById('cd-dash');
     if (cdDash) {
-        if (combatState.dashStrikeCooldown > 0) {
-            const pct = (combatState.dashStrikeCooldown / 1.5) * 100;
-            cdDash.style.height = pct + '%';
-        } else {
-            cdDash.style.height = '0%';
-        }
+        const attackPct = combatState.attackCooldown / 0.5; // Combo step max is 0.5
+        const sweepPct = combatState.lowSweepCooldown / combatState.lowSweepMaxCooldown;
+        const upPct = combatState.upSlashCooldown / combatState.upSlashMaxCooldown;
+        const pogoPct = combatState.pogoSlashCooldown / combatState.pogoSlashMaxCooldown;
+        
+        const pct = Math.max(0, attackPct, sweepPct, upPct, pogoPct) * 100;
+        cdDash.style.height = pct + '%';
     }
     
-    const cdShield = document.getElementById('cd-shield'); // Used for bio-drill
+    // Skill I (Bio-drill, Ground Smash, Rising Blast)
+    const cdShield = document.getElementById('cd-shield'); 
+    const slotI = document.getElementById('skill-slot-i');
     if (cdShield) {
-        if (combatState.bioDrillCooldown > 0) {
-            const pct = (combatState.bioDrillCooldown / 3.0) * 100;
-            cdShield.style.height = pct + '%';
-        } else {
-            cdShield.style.height = '0%';
+        const bioPct = combatState.bioDrillCooldown / combatState.bioDrillMaxCooldown;
+        const smashPct = combatState.smashCooldown / combatState.smashMaxCooldown;
+        const blastPct = combatState.risingBlastCooldown / combatState.risingBlastMaxCooldown;
+        
+        const pct = Math.max(0, bioPct, smashPct, blastPct) * 100;
+        cdShield.style.height = pct + '%';
+        
+        if (slotI) {
+            if (combatState.energy < 30) slotI.classList.add('opacity-40', 'grayscale');
+            else slotI.classList.remove('opacity-40', 'grayscale');
         }
     }
     
-    const cdSonar = document.getElementById('cd-sonar'); // Used for upward blast
+    // Skill L (Nova)
+    const cdSonar = document.getElementById('cd-sonar'); 
+    const slotL = document.getElementById('skill-slot-l');
     if (cdSonar) {
-        if (combatState.upwardBlastCooldown > 0) {
-            const pct = (combatState.upwardBlastCooldown / 2.0) * 100;
-            cdSonar.style.height = pct + '%';
-        } else {
-            cdSonar.style.height = '0%';
+        const pct = (Math.max(0, combatState.lightningNovaCooldown) / combatState.lightningNovaMaxCooldown) * 100;
+        cdSonar.style.height = pct + '%';
+        
+        if (slotL) {
+            if (combatState.energy < 50) slotL.classList.add('opacity-40', 'grayscale');
+            else slotL.classList.remove('opacity-40', 'grayscale');
         }
     }
     
-    const cdUltimate = document.getElementById('cd-ultimate'); // Used for low sweep
+    // Skill K (Dash Strike / Charge)
+    const cdUltimate = document.getElementById('cd-ultimate'); 
     if (cdUltimate) {
-        if (combatState.lowSweepCooldown > 0) {
-            const pct = (combatState.lowSweepCooldown / 2.5) * 100;
-            cdUltimate.style.height = pct + '%';
-        } else {
-            cdUltimate.style.height = '0%';
-        }
+        const pct = (Math.max(0, combatState.dashStrikeCooldown) / combatState.dashStrikeMaxCooldown) * 100;
+        cdUltimate.style.height = pct + '%';
     }
 
     // Update Minimap Pips
