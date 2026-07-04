@@ -108,3 +108,60 @@
 
 - Thay đổi thanh máu thành dạng UI biểu tượng (Lõi năng lượng). Ví dụ: 5 Lõi. Trúng đòn mất 1 Lõi. Rất dễ nhìn và tạo căng thẳng.
 - UI Core Charge: Một bình chứa (Vial) bên góc màn hình, dâng nước từ từ khi chém trúng địch, và nhấp nháy khi đủ mana xài phép.
+
+---
+
+## 6. CỐT TRUYỆN: DỰ ÁN SYMBIOSIS (DARK YANDERE BỘI CẢNH)
+
+**Thời lượng dự kiến:** 4 tiếng chơi chính, 5 tiếng khám phá 100%.
+**Định hướng:** Dark Sci-fi, Biopunk, Psychological Horror. Sự ám ảnh, biến đổi nhân dạng, và tình yêu độc hại (Yandere).
+
+* **Bối cảnh (Aegis Abyss):** Cơ sở nghiên cứu khổng lồ dưới lòng đất bị phong tỏa sau "Rò rỉ thảm họa". Không còn con người sống sót, chỉ có quái vật và an ninh mạng.
+* **Nhân vật chính (Zero - Tức "Bạn"):** Bị lai tạp giữa máy (Dạng Cyber) và quái vật sinh học (Dạng Bio). Tỉnh dậy mất trí nhớ.
+* **Nữ chính Yandere (Tiến sĩ Eleanor / "El"):** Cô gái duy nhất sống sót, liên lạc với bạn qua chip não bộ. Cô ta có vẻ ngoài cực kỳ xinh đẹp, giọng điệu ngọt ngào, quan tâm chăm sóc, gọi bạn là "Người thương duy nhất".
+
+**Các Plot Twist (Nút Thắt Câu Chuyện):**
+1. **Sự thật về tai nạn:** Không hề có tai nạn nào. Eleanor đã tự tay thả virus và thảm sát toàn bộ nhân sự vì họ định tiêu diệt bạn (vốn là một vật thí nghiệm bị coi là thất bại/nguy hiểm).
+2. **Ảo giác tàn khốc:** Những "quái vật" mà bạn đang xé xác từ đầu game thực chất là Lực lượng Đặc nhiệm Cứu hộ từ mặt đất cử xuống. Con chip của Eleanor đã hack hệ thống thần kinh của bạn, bóp méo hình ảnh họ thành quái vật để bạn tàn sát đồng loại mà không hề áy náy.
+3. **Thân phận thật (Darkest Twist):** Zero từng là người yêu/nhà nghiên cứu cùng Eleanor, đã chết 2 năm trước. Cô ta điên loạn đào xác anh lên, giữ lại não bộ và ghép nối nó vào cái xác quái vật này để "hồi sinh" tình yêu của mình.
+4. **Mục đích cuối cùng:** Con đường Eleanor chỉ dẫn không phải để thoát lên mặt đất, mà đâm thẳng xuống The Sanctuary (Tầng hầm phong ấn sâu nhất), nơi cô ta muốn nhốt bạn lại sống bên cô ta mãi mãi.
+
+**Kết cục (Endings):**
+- **Bad End (Không tìm đủ mảnh ghép ký ức):** Bạn bước vào hầm, cánh cửa đóng sầm lại. Màn hình tắt ngấm với tiếng cười của Eleanor. Bạn mãi là súc vật nuôi của cô ta trong bóng tối.
+- **True End (Khám phá 100% bản đồ):** Bạn tự tay xé nát con chip, đối mặt với Eleanor. Cô ta tự tiêm virus tối thượng vào người, biến thành một Nữ Chúa nửa người/nửa máy khổng lồ để giữ bạn lại (Final Boss Fight). Sau khi hạ gục cô ta, cô ta chết trong vòng tay bạn. Bạn trốn thoát lên mặt đất, nhưng nhận ra cơ thể sinh-cơ học này không thể sống thiếu không khí của phòng thí nghiệm, gục ngã dưới bình minh. 
+
+---
+
+## 7. DANH SÁCH TÀI NGUYÊN (ASSET REQUIREMENTS) CẦN THIẾT
+
+Để tạo hình cốt truyện này và thu hút người chơi (với hình tượng Yandere 2 dạng), dưới đây là danh sách các ảnh/Sprite cần chuẩn bị. Hãy dùng AI hoặc tự vẽ các tài nguyên này:
+
+### A. Nhân Vật Nữ Chính Yandere (Eleanor)
+*Để thu hút người chơi (đặc biệt là phái nam), dạng Người (Human Form) cần phải rất xinh đẹp, phong cách anime sắc sảo nhưng ánh mắt có phần vô hồn, ám ảnh. Dạng Quái (Monster Form) thì mang nét kinh dị sinh học (Biopunk/Body Horror).*
+
+1. **Avatar Hội Thoại (Human Form - Dạng người):**
+   - *Mô tả:* Chân dung (Portrait) một nữ khoa học gia trẻ tuổi, mặc áo blouse trắng xộc xệch hoặc đồ bó sát công nghệ. Tóc dài rối màu trắng hoặc xanh nhạt. Khuôn mặt anime xinh đẹp, ánh mắt sâu thẳm, có thể có chút máu vương trên má. Nụ cười mỉm dịu dàng nhưng đáng sợ.
+   - *Kích thước:* 512x512 hoặc lớn hơn (Hình vuông có nền trong suốt, PNG).
+2. **Avatar Hội Thoại (Glitch Form - Khi tức giận):**
+   - *Mô tả:* Cùng một góc mặt như trên, nhưng ánh mắt trợn trừng điên loạn, con ngươi thu nhỏ, nụ cười méo mó. Hình ảnh có hiệu ứng giật nhiễu (Glitch) đỏ rực.
+3. **Sprite Boss Cuối (Monster Form - Nữ Chúa Biopunk):**
+   - *Mô tả:* Sprite khổng lồ (kích thước gấp 4 lần nhân vật chính). Nửa trên vẫn giữ lại khuôn mặt và phần thân trên xinh đẹp của Eleanor (có thể bị rách rưới nứt nẻ lòi cả lõi máy), nhưng từ hông trở xuống là một khối nhầy nhụa xúc tu sinh học màu xanh lục kết hợp với các chi tiết kim loại gỉ sét màu đỏ.
+   - *Animation cần:* Idle (Thở dốc), Đập xúc tu (Attack 1), Bắn Laser từ mắt (Attack 2), Chết (Tan chảy).
+
+### B. Môi trường & Giao diện (UI & Backgrounds)
+1. **Khung Chat Hội Thoại (Dialogue Box):**
+   - *Mô tả:* Một dải nền UI màu đen bán trong suốt, viền màu Cyan neon (phong cách Cyberpunk) hoặc gỉ sét. Để text chạy bên trong.
+2. **Background - Khu Lưu Trữ (Memory Fragment Background):**
+   - *Mô tả:* Các mảnh giấy hoặc băng ghi âm dính máu.
+3. **Background - "The Sanctuary" (Phòng Boss Cuối):**
+   - *Mô tả:* Tầng hầm sâu nhất. Trông giống một căn phòng tân hôn điên rồ: Vừa có giường ngủ, nến, vừa có hàng ngàn dây cáp cắm vào tường, bình chứa dung dịch ngâm nội tạng, bệ thờ tôn giáo lai tạp máy móc. Tông màu đỏ tối (Dark Red) và Đen.
+
+### C. Quái vật (Kẻ thù) - Cần 2 phiên bản
+*Do tính chất ảo giác, chúng ta cần 2 set quái vật. Khi người chơi chưa biết sự thật, nó là quái vật. Khi UI bị nhiễu sóng (glitch), nó lộ ra hình dạng thật chớp nhoáng.*
+
+1. **Enemy Set 1 (Quái Vật Đột Biến - Ảo Giác):**
+   - Dáng đi khom lưng, toàn thân là khối thịt nhầy nhụa hoặc lắp ghép với lưỡi cưa máy. Trông rùng rợn.
+2. **Enemy Set 2 (Đội Cứu Hộ - Sự thật):**
+   - Sprite chớp nhoáng (Glitch sprite). Hình dáng giống hệt các binh lính đặc nhiệm mặc giáp bảo hộ (Hazmat suit) hoặc giáp SWAT tương lai, cầm súng chĩa vào bạn. Dáng đi của Set 1 sẽ khớp với hình dáng này, tạo cảm giác họ đang giơ súng chống cự chứ không phải vồ lấy bạn.
+
+*(Nếu bạn không có các Sprite này, hãy cho tôi biết, tôi có thể cung cấp đoạn mã để tạo khối vuông giả lập (placeholder) hoặc dùng công cụ sinh ảnh AI `generate_image` nếu hệ thống cho phép).*
