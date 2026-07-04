@@ -3,6 +3,8 @@ import { getCollision, TILE_SIZE } from './world.js';
 import { combatState, lightningSlashImg, lightningImpactImg, orbImg, spark1Img, spark2Img } from './combat.js';
 import { addParticle } from './effects.js';
 
+export function getPlayerColorRgba(alpha) { return player.form === 'cyber' ? `rgba(0, 255, 255, ${alpha})` : `rgba(68, 255, 68, ${alpha})`; }
+
 export const player = {
     x: 64,
     y: 100,
@@ -18,6 +20,8 @@ export const player = {
     dashCooldown: 0,
     isDashing: false,
     dashTime: 0,
+    isPogoBouncing: 0,
+    form: 'cyber', // 'cyber' or 'bio'
     color: '#00ffff', // Cyan
     animState: 'idle',
     animTime: 0,
@@ -50,12 +54,14 @@ export function updatePlayer(dt, addParticle) {
         } else {
             // Horizontal Movement
             let targetVx = 0;
+            const currentSpeed = (combatState.energy >= 50) ? player.speed * 1.2 : player.speed;
+            
             if (keys.left) {
-                targetVx = -player.speed;
+                targetVx = -currentSpeed;
                 player.facingRight = false;
             }
             if (keys.right) {
-                targetVx = player.speed;
+                targetVx = currentSpeed;
                 player.facingRight = true;
             }
             
@@ -79,7 +85,7 @@ export function updatePlayer(dt, addParticle) {
             player.isHovering = false;
         }
 
-        if (!player.isGrounded && keys.up && player.hoverTimer > 0 && player.canHover) {
+        if (!player.isGrounded && keys.up && player.hoverTimer > 0 && player.canHover && !player.isTethering && !player.isDashing) {
             player.isHovering = true;
             player.hoverTimer -= dt;
             player.vy = 0; // Lock vertical movement
@@ -87,7 +93,7 @@ export function updatePlayer(dt, addParticle) {
             // Hover thruster particles
             if (Math.random() < 0.5) {
                 addParticle(player.x + player.width/2 + (Math.random()-0.5)*12, player.y + player.height, 
-                            (Math.random()-0.5)*30, 80 + Math.random()*60, 'rgba(0, 255, 255, 0.9)', 0.25, 'spark');
+                            (Math.random()-0.5)*30, 80 + Math.random()*60, getPlayerColorRgba(0.9), 0.25, 'spark');
             }
         } else {
             player.isHovering = false;
@@ -120,7 +126,7 @@ export function updatePlayer(dt, addParticle) {
                 // Slide sparks
                 if (Math.random() < 0.4) {
                     const px = leftTile ? player.x : player.x + player.width;
-                    const color = (wallTile === 5) ? 'rgba(100, 255, 100, 0.8)' : 'rgba(0, 255, 255, 0.8)';
+                    const color = (wallTile === 5) ? 'rgba(100, 255, 100, 0.8)' : getPlayerColorRgba(0.8);
                     addParticle(px, player.y + player.height/2 + (Math.random()-0.5)*10, 
                                 leftTile ? 40 : -40, -60, color, 0.25, 'spark');
                 }
@@ -159,7 +165,7 @@ export function updatePlayer(dt, addParticle) {
                 // Jump dust
                 for(let i=0; i<5; i++) {
                     addParticle(player.x + player.width/2, player.y + player.height, 
-                                (Math.random()-0.5)*100, -Math.random()*50, 'rgba(0, 255, 255, 0.5)', 0.3);
+                                (Math.random()-0.5)*100, -Math.random()*50, getPlayerColorRgba(0.5), 0.3);
                 }
             }
         }
@@ -170,23 +176,125 @@ export function updatePlayer(dt, addParticle) {
             player.hasClippedJump = true;
         }
 
-        // Dashing
+        if (player.wallJumpTimer > 0) {
+            player.wallJumpTimer -= dt;
+        }
+        
+        if (player.isPogoBouncing > 0) {
+            player.isPogoBouncing -= dt;
+        }
+
+        if (player.isTethering) {
+            player.tetherTime -= dt;
+            
+            const dx = player.tetherX - (player.x + player.width/2);
+            const dy = player.tetherY - (player.y + player.height/2);
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            
+            if (dist > 30 && player.tetherTime > 0) {
+                // Continuous homing pull
+                player.vx = (dx / dist) * 1200;
+                player.vy = (dy / dist) * 1200;
+            } else {
+                // Arrived at anchor or timed out
+                player.isTethering = false;
+                player.tetherTime = 0;
+                player.vx *= 0.8; // Maintain horizontal momentum
+                player.vy = -500; // Big flip off the anchor!
+                player.dashCooldown = 0.2; // Quick recovery for chaining
+            }
+        }
+
+        // Dashing & Tethering
         if (player.dashCooldown > 0) player.dashCooldown -= dt;
         if (keys.dashPressed && player.dashCooldown <= 0) {
-            player.isDashing = true;
-            player.dashTime = 0.15; // 150ms dash
-            player.dashCooldown = 1.0; // 1s cooldown
-            player.vx = player.facingRight ? 800 : -800;
-            player.vy = 0; // Reset vertical velocity for clean horizontal dash
-            
-            // Dash stretch effect
-            player.scaleX = 1.6;
-            player.scaleY = 0.5;
+            if (player.form === 'bio') {
+                // Auto-Aim Magnetic Tether
+                let foundTether = false;
+                const pCx = player.x + player.width/2;
+                const pCy = player.y + player.height/2;
+                const pCol = Math.floor(pCx / TILE_SIZE);
+                const pRow = Math.floor(pCy / TILE_SIZE);
+                
+                let tx = pCx;
+                let ty = pCy;
+                let minD = 999999;
+                
+                // Scan grid ONLY in front and STRICTLY ABOVE (r <= -1)
+                for (let r = -15; r <= -1; r++) {
+                    for (let c = 1; c <= 15; c++) {
+                        const col = pCol + (player.facingRight ? c : -c);
+                        const row = pRow + r;
+                        
+                        const tX = col * TILE_SIZE + TILE_SIZE/2;
+                        const tY = row * TILE_SIZE + TILE_SIZE/2;
+                        
+                        if (getCollision(tX, tY, 1, 1)) {
+                            const dx = tX - pCx;
+                            const dy = tY - pCy;
+                            const distSq = dx*dx + dy*dy;
+                            
+                            // Max range 500px (~500^2 = 250000)
+                            if (distSq < 250000 && distSq < minD) {
+                                minD = distSq;
+                                tx = tX;
+                                ty = tY;
+                                foundTether = true;
+                            }
+                        }
+                    }
+                }
+                
+                if (foundTether) {
+                    player.isTethering = true;
+                    player.tetherX = tx;
+                    player.tetherY = ty;
+                    player.tetherTime = 0.35; // Max 350ms flight
+                    player.dashCooldown = 0.8; 
+                    
+                    // Initial pull
+                    const dx = tx - pCx;
+                    const dy = ty - pCy;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    player.vx = (dx / dist) * 1200;
+                    player.vy = (dy / dist) * 1200;
+                    
+                    // Stretching
+                    player.scaleX = 0.5;
+                    player.scaleY = 1.8;
+                    
+                    // Particles at hook point
+                    for(let i=0; i<10; i++) {
+                        addParticle(tx, ty, (Math.random()-0.5)*200, (Math.random()-0.5)*200, player.color, 0.5, 'spark', 15);
+                    }
+                    window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 5}}));
+                } else {
+                    // Fallback to a short ground dash if no tether point found
+                    player.isDashing = true;
+                    player.dashTime = 0.15;
+                    player.dashCooldown = 0.8;
+                    player.vx = player.facingRight ? 600 : -600;
+                    player.vy = 0;
+                }
+            } else {
+                // Cyber Dash
+                player.isDashing = true;
+                player.dashTime = 0.15; // 150ms dash
+                player.dashCooldown = 1.0; // 1s cooldown
+                player.vx = player.facingRight ? 800 : -800;
+                player.vy = 0; // Reset vertical velocity for clean horizontal dash
+                
+                // Dash stretch effect
+                player.scaleX = 1.6;
+                player.scaleY = 0.5;
 
-            // Dash blast particles
-            for(let i=0; i<15; i++) {
-                addParticle(player.x + player.width/2, player.y + player.height/2, 
-                            (Math.random()-0.5)*300 - player.vx*0.5, (Math.random()-0.5)*100, 'rgba(0, 255, 255, 0.8)', 0.5);
+                // Dash blast particles
+                for(let i=0; i<15; i++) {
+                    addParticle(player.x + player.width/2, player.y + player.height/2, 
+                                -player.vx * 0.2 + (Math.random()-0.5)*100, (Math.random()-0.5)*100, 
+                                player.color, 0.5, 'tex_spark', 15);
+                }
+                window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 3}}));
             }
         }
     }
@@ -204,7 +312,7 @@ export function updatePlayer(dt, addParticle) {
 
         for (let i = 0; i < 8; i++) {
             addParticle(player.x + player.width/2, player.y + player.height, 
-                        (Math.random() - 0.5) * 150, -Math.random() * 60, 'rgba(0, 255, 255, 0.4)', 0.4);
+                        (Math.random() - 0.5) * 150, -Math.random() * 60, getPlayerColorRgba(0.4), 0.4);
         }
     }
     player.wasGroundedLastFrame = player.isGrounded;
@@ -212,7 +320,7 @@ export function updatePlayer(dt, addParticle) {
     // Run Dust
     if (player.isGrounded && Math.abs(player.vx) > 50 && Math.random() < 15 * dt) {
         addParticle(player.x + player.width/2, player.y + player.height, 
-                    -player.vx * 0.2 + (Math.random()-0.5)*20, -Math.random()*30, 'rgba(0, 255, 255, 0.2)', 0.3);
+                    -player.vx * 0.2 + (Math.random()-0.5)*20, -Math.random()*30, getPlayerColorRgba(0.2), 0.3);
     }
 
     // Animation State Machine
@@ -240,6 +348,43 @@ export function updatePlayer(dt, addParticle) {
 }
 
 export function drawPlayer(ctx, camera) {
+    // Draw Magnetic Tether Rope
+    if (player.isTethering) {
+        ctx.save();
+        ctx.beginPath();
+        const startX = player.x + player.width/2 - camera.x;
+        const startY = player.y + player.height/2 - camera.y;
+        const endX = player.tetherX - camera.x;
+        const endY = player.tetherY - camera.y;
+        
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, endY);
+        ctx.strokeStyle = '#44ff44';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        // Inner glowing core
+        ctx.beginPath();
+        ctx.moveTo(startX, startY);
+        ctx.lineTo(endX, endY);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        
+        // Draw tether anchor crosshair
+        ctx.translate(endX, endY);
+        ctx.beginPath();
+        ctx.arc(0, 0, 4, 0, Math.PI*2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(0, 0, 8, 0, Math.PI*2);
+        ctx.strokeStyle = '#44ff44';
+        ctx.stroke();
+        
+        ctx.restore();
+    }
+
     const drawX = player.x + player.width/2 - camera.x;
     const drawY = player.y + player.height - camera.y;
 
@@ -259,7 +404,7 @@ export function drawPlayer(ctx, camera) {
         const bounceVal = Math.sin(player.animTime * 3) * 2;
         ctx.translate(0, -player.height/2 + bounceVal);
         ctx.globalCompositeOperation = 'screen';
-        ctx.strokeStyle = '#00ffff'; // Synced Cyan color
+        ctx.strokeStyle = player.color; // Synced Cyan color
         
         const auraRadius = 14;
         
@@ -309,14 +454,14 @@ export function drawPlayer(ctx, camera) {
         else if (combatState.chargeTime >= 0.3) lvl = 2;
 
         const radius = lvl === 3 ? 35 : (lvl === 2 ? 25 : 18);
-        const color = lvl === 3 ? '#ffffff' : '#00ffff';
+        const color = lvl === 3 ? '#ffffff' : player.color;
         const pulse = Math.sin(tTime * (lvl === 3 ? 40 : 20)) * 5;
         
         ctx.save();
         ctx.translate(0, -player.height/2);
         ctx.beginPath();
         ctx.arc(0, 0, radius + pulse, 0, Math.PI * 2);
-        ctx.fillStyle = lvl === 3 ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 255, 255, 0.15)';
+        ctx.fillStyle = lvl === 3 ? 'rgba(255, 255, 255, 0.2)' : getPlayerColorRgba(0.15);
         ctx.fill();
         
         ctx.lineWidth = 1.5;
@@ -407,11 +552,11 @@ export function drawPlayer(ctx, camera) {
         ctx.lineCap = 'round';
         
         // Layered Glow
-        ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+        ctx.strokeStyle = getPlayerColorRgba(0.25);
         ctx.lineWidth = thickness * 2.5;
         ctx.stroke();
         
-        ctx.strokeStyle = '#00ffff';
+        ctx.strokeStyle = player.color;
         ctx.lineWidth = thickness;
         ctx.stroke();
         
@@ -550,11 +695,11 @@ export function drawPlayer(ctx, camera) {
         ctx.lineCap = 'round';
         
         // Layered Glow
-        ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+        ctx.strokeStyle = getPlayerColorRgba(0.25);
         ctx.lineWidth = thickness * 2.8;
         ctx.stroke();
         
-        ctx.strokeStyle = '#00ffff';
+        ctx.strokeStyle = player.color;
         ctx.lineWidth = thickness;
         ctx.stroke();
         
@@ -681,7 +826,7 @@ export function drawPlayer(ctx, camera) {
     
     // Draw head as concentric glowing nerve rings
     ctx.save();
-    ctx.strokeStyle = '#00ffff';
+    ctx.strokeStyle = player.color;
     ctx.lineWidth = 1.2;
     for (let i = 0; i < 3; i++) {
         ctx.beginPath();
@@ -696,13 +841,13 @@ export function drawPlayer(ctx, camera) {
         const flash = Math.floor(t * 35) % 2 === 0;
         if (cTime >= 0.7) {
             // Level 3: Flashes violently between bright cyan and white!
-            ctx.fillStyle = flash ? '#00ffff' : '#ffffff';
+            ctx.fillStyle = flash ? player.color : '#ffffff';
         } else if (cTime >= 0.3) {
             // Level 2: Blinks between cyan and deep blue!
-            ctx.fillStyle = flash ? '#00ffff' : '#0077ff';
+            ctx.fillStyle = flash ? player.color : '#0077ff';
         } else {
             // Level 1: Blinks between cyan and white!
-            ctx.fillStyle = flash ? '#00ffff' : '#ffffff';
+            ctx.fillStyle = flash ? player.color : '#ffffff';
         }
     } else {
         ctx.fillStyle = '#ffffff';
@@ -760,9 +905,9 @@ export function drawPlayer(ctx, camera) {
         };
 
         // Layer 1: Outer glow
-        drawArc(size * 0.4, 'rgba(0, 255, 255, 0.2)');
+        drawArc(size * 0.4, getPlayerColorRgba(0.2));
         // Layer 2: Mid glow
-        drawArc(size * 0.2, 'rgba(0, 255, 255, 0.7)');
+        drawArc(size * 0.2, getPlayerColorRgba(0.7));
         // Layer 3: Core (white)
         drawArc(size * 0.05, '#ffffff');
         ctx.restore();
@@ -812,9 +957,9 @@ export function drawPlayer(ctx, camera) {
         };
 
         // Layer 1: Outer glow
-        drawBurst(10, 'rgba(0, 255, 255, 0.2)');
+        drawBurst(10, getPlayerColorRgba(0.2));
         // Layer 2: Mid glow
-        drawBurst(4, 'rgba(0, 255, 255, 0.6)');
+        drawBurst(4, getPlayerColorRgba(0.6));
         // Layer 3: Core
         drawBurst(1.5, 'rgba(255, 255, 255, 1)');
         
@@ -858,8 +1003,8 @@ export function drawPlayer(ctx, camera) {
             ctx.stroke();
         };
 
-        strokeBolt(8, `rgba(0, 255, 255, ${0.3 * fade})`);
-        strokeBolt(4, `rgba(0, 255, 255, ${0.8 * fade})`);
+        strokeBolt(8, getPlayerColorRgba(0.3 * fade));
+        strokeBolt(4, getPlayerColorRgba(0.8 * fade));
         strokeBolt(1.5, `rgba(255, 255, 255, ${1.0 * fade})`);
     };
 
@@ -903,11 +1048,11 @@ export function drawPlayer(ctx, camera) {
         const curThickness = thickness * Math.max(0.1, 1 - progressVal * 0.5);
         
         // Layered neon glow
-        ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+        ctx.strokeStyle = getPlayerColorRgba(0.25);
         ctx.lineWidth = curThickness * 2.5;
         ctx.stroke();
         
-        ctx.strokeStyle = '#00ffff';
+        ctx.strokeStyle = player.color;
         ctx.lineWidth = curThickness;
         ctx.stroke();
         ctx.restore();
@@ -918,7 +1063,7 @@ export function drawPlayer(ctx, camera) {
             ctx.beginPath();
             
             // Cyan glow circle
-            ctx.fillStyle = 'rgba(0, 255, 255, 0.45)';
+            ctx.fillStyle = getPlayerColorRgba(0.45);
             ctx.arc(pts[i].x, pts[i].y, nodeRadius * 2.5, 0, Math.PI * 2);
             ctx.fill();
             
@@ -1040,7 +1185,7 @@ export function drawPlayer(ctx, camera) {
         
         // Speed lines for motion feel
         ctx.save();
-        ctx.strokeStyle = `rgba(0, 255, 255, ${0.3 * (1 - prog)})`;
+        ctx.strokeStyle = getPlayerColorRgba(0.3 * (1 - prog));
         ctx.beginPath();
         for (let s = 0; s < 5; s++) {
             const lineY = (Math.random() - 0.5) * 80;
@@ -1057,7 +1202,7 @@ export function drawPlayer(ctx, camera) {
             ctx.bezierCurveTo(drillW*0.3 * scaleX, -drillH/4 * scaleY, drillW*0.6 * scaleX, -10 * scaleY, drillW * scaleX, 0);
             ctx.bezierCurveTo(drillW*0.6 * scaleX, 10 * scaleY, drillW*0.3 * scaleX, drillH/4 * scaleY, -10 * scaleX, drillH/2 * scaleY);
             ctx.closePath();
-            ctx.fillStyle = `rgba(0, 255, 255, ${alpha})`;
+            ctx.fillStyle = getPlayerColorRgba(alpha);
             ctx.fill();
         };
 
@@ -1097,12 +1242,12 @@ export function drawPlayer(ctx, camera) {
                 ctx.stroke();
             };
             
-            drawRing(8, `rgba(0, 255, 255, ${(1 - ringProg) * 0.3})`);
-            drawRing(4, `rgba(0, 255, 255, ${1 - ringProg})`);
+            drawRing(8, getPlayerColorRgba((1 - ringProg) * 0.3));
+            drawRing(4, getPlayerColorRgba(1 - ringProg));
             drawRing(1.5, `rgba(255, 255, 255, ${1 - ringProg})`);
         }
         
-        if (Math.random() > 0.5) addParticle(player.x + (player.facingRight ? drillW : -drillW), player.y - 15, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
+        if (Math.random() > 0.5) addParticle(player.x + (player.facingRight ? drillW : -drillW), player.y - 15, (Math.random()-0.5)*100, (Math.random()-0.5)*100, player.color, 0.4, 'tex_spark', 15);
         
         drawImpactSprite({x: drillW*0.9, y: 0}, 80, prog);
         ctx.restore();
@@ -1129,9 +1274,9 @@ export function drawPlayer(ctx, camera) {
         
         // Gradient to make it look like a glowing metallic/energy cone
         const grad = ctx.createLinearGradient(0, -baseRad, 0, baseRad);
-        grad.addColorStop(0, 'rgba(0, 255, 255, 0.6)');
+        grad.addColorStop(0, getPlayerColorRgba(0.6));
         grad.addColorStop(0.5, '#ffffff');
-        grad.addColorStop(1, 'rgba(0, 255, 255, 0.6)');
+        grad.addColorStop(1, getPlayerColorRgba(0.6));
         ctx.fillStyle = grad;
         ctx.fill();
         
@@ -1155,7 +1300,7 @@ export function drawPlayer(ctx, camera) {
         ctx.restore(); // End clip
         
         // 3. Draw Base Ring (Connecting the drill to the player)
-        ctx.strokeStyle = '#00ffff';
+        ctx.strokeStyle = player.color;
         ctx.lineWidth = 6;
         ctx.beginPath();
         ctx.ellipse(0, 0, 8, baseRad + 5, 0, 0, Math.PI * 2);
@@ -1165,7 +1310,7 @@ export function drawPlayer(ctx, camera) {
         ctx.stroke();
         
         // Sparks at the drill tip
-        if (Math.random() > 0.3) addParticle(player.x + (player.facingRight ? drillLen : -drillLen), player.y - 15, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
+        if (Math.random() > 0.3) addParticle(player.x + (player.facingRight ? drillLen : -drillLen), player.y - 15, (Math.random()-0.5)*100, (Math.random()-0.5)*100, player.color, 0.4, 'tex_spark', 15);
         
         drawImpactSprite({x: drillLen, y: 0}, 60, (t * 8) % 1.0);
         ctx.restore();
@@ -1198,7 +1343,7 @@ export function drawPlayer(ctx, camera) {
             }
             ctx.restore();
             
-            if (Math.random() > 0.3) addParticle(player.x + (Math.random()-0.5)*100, player.y - 100 * prog, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
+            if (Math.random() > 0.3) addParticle(player.x + (Math.random()-0.5)*100, player.y - 100 * prog, (Math.random()-0.5)*100, (Math.random()-0.5)*100, player.color, 0.4, 'tex_spark', 15);
             
         } else if (combatState.isPogoSlashing) {
             const prog = Math.max(0, Math.min(1, 1 - (combatState.pogoSlashTime / 0.2)));
@@ -1238,12 +1383,12 @@ export function drawPlayer(ctx, camera) {
                     }
                     
                     // Base impact circle
-                    ctx.fillStyle = `rgba(0, 255, 255, ${(1 - prog)})`;
+                    ctx.fillStyle = getPlayerColorRgba((1 - prog));
                     ctx.beginPath();
                     ctx.ellipse(colX, 0, 30 * (1 - prog), 10 * (1 - prog), 0, 0, Math.PI * 2);
                     ctx.fill();
                     
-                    if (Math.random() > 0.6) addParticle(player.x + (player.facingRight ? colX : -colX), player.y + 20, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
+                    if (Math.random() > 0.6) addParticle(player.x + (player.facingRight ? colX : -colX), player.y + 20, (Math.random()-0.5)*100, (Math.random()-0.5)*100, player.color, 0.4, 'tex_spark', 15);
                 }
                 
                 ctx.restore();
@@ -1267,8 +1412,8 @@ export function drawPlayer(ctx, camera) {
                     ctx.stroke();
                 };
                 
-                drawShockwaveRing(10, `rgba(0, 255, 255, ${alpha * 0.2})`);
-                drawShockwaveRing(4, `rgba(0, 255, 255, ${alpha * 0.8})`);
+                drawShockwaveRing(10, getPlayerColorRgba(alpha * 0.2));
+                drawShockwaveRing(4, getPlayerColorRgba(alpha * 0.8));
                 drawShockwaveRing(1.5, `rgba(255, 255, 255, ${alpha})`);
             }
             ctx.restore();
@@ -1293,8 +1438,8 @@ export function drawPlayer(ctx, camera) {
             };
             
             // Shockwave ring instead of filled circle
-            drawNovaArc(15, `rgba(0, 255, 255, ${0.2 * fadeAlpha})`);
-            drawNovaArc(6, `rgba(0, 255, 255, ${0.6 * fadeAlpha})`);
+            drawNovaArc(15, getPlayerColorRgba(0.2 * fadeAlpha));
+            drawNovaArc(6, getPlayerColorRgba(0.6 * fadeAlpha));
             drawNovaArc(2, `rgba(255, 255, 255, ${1.0 * fadeAlpha})`);
             
             // 8 jagged zigzag lightning spikes
@@ -1310,7 +1455,7 @@ export function drawPlayer(ctx, camera) {
                     drawLightningBolt(0, 0, boltEndX, boltEndY, 6, prog);
                 }
                 
-                if (Math.random() > 0.5) addParticle(player.x + endX, player.y - 15 + endY, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
+                if (Math.random() > 0.5) addParticle(player.x + endX, player.y - 15 + endY, (Math.random()-0.5)*100, (Math.random()-0.5)*100, player.color, 0.4, 'tex_spark', 15);
                 drawImpactSprite({x: endX, y: endY}, 60, prog);
             }
             
@@ -1323,7 +1468,7 @@ export function drawPlayer(ctx, camera) {
                 ctx.moveTo(Math.cos(angle1) * r, Math.sin(angle1) * r);
                 ctx.lineTo(Math.cos(angle2) * r, Math.sin(angle2) * r);
             }
-            ctx.strokeStyle = `rgba(0, 255, 255, ${0.8 * fadeAlpha})`;
+            ctx.strokeStyle = getPlayerColorRgba(0.8 * fadeAlpha);
             ctx.lineWidth = 2;
             ctx.stroke();
         }
@@ -1350,9 +1495,9 @@ export function drawPlayer(ctx, camera) {
             
             // Soft Cyan Core Glow
             const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, 30);
-            gradient.addColorStop(0, 'rgba(0, 255, 255, 0.8)');
+            gradient.addColorStop(0, getPlayerColorRgba(0.8));
             gradient.addColorStop(0.5, 'rgba(0, 200, 255, 0.4)');
-            gradient.addColorStop(1, 'rgba(0, 255, 255, 0)');
+            gradient.addColorStop(1, getPlayerColorRgba(0));
             ctx.fillStyle = gradient;
             ctx.beginPath();
             ctx.arc(0, 0, 30, 0, Math.PI * 2);
@@ -1404,7 +1549,7 @@ export function drawPlayer(ctx, camera) {
                 // Ground Cracks
                 ctx.save();
                 ctx.scale(1, 0.4);
-                ctx.strokeStyle = `rgba(0, 255, 255, ${fadeAlpha})`;
+                ctx.strokeStyle = getPlayerColorRgba(fadeAlpha);
                 ctx.lineWidth = 4;
                 for (let c = 0; c < 5; c++) {
                     const angle = (c / 5) * Math.PI * 2;
@@ -1422,8 +1567,8 @@ export function drawPlayer(ctx, camera) {
                     ctx.fill();
                 };
                 
-                drawCrater(1.0, `rgba(0, 255, 255, ${0.15 * fadeAlpha})`);
-                drawCrater(0.6, `rgba(0, 255, 255, ${0.6 * fadeAlpha})`);
+                drawCrater(1.0, getPlayerColorRgba(0.15 * fadeAlpha));
+                drawCrater(0.6, getPlayerColorRgba(0.6 * fadeAlpha));
                 drawCrater(0.3, `rgba(255, 255, 255, ${1.0 * fadeAlpha})`);
                 
                 ctx.restore();
@@ -1440,8 +1585,8 @@ export function drawPlayer(ctx, camera) {
                 ctx.fill();
             };
             
-            drawEllipseCrater(0.7, 0.7, `rgba(0, 255, 255, ${0.2 * fadeAlpha})`);
-            drawEllipseCrater(0.5, 0.5, `rgba(0, 255, 255, ${0.6 * fadeAlpha})`);
+            drawEllipseCrater(0.7, 0.7, getPlayerColorRgba(0.2 * fadeAlpha));
+            drawEllipseCrater(0.5, 0.5, getPlayerColorRgba(0.6 * fadeAlpha));
             drawEllipseCrater(0.25, 0.25, `rgba(255, 255, 255, ${1.0 * fadeAlpha})`);
             
             // Lightning Pillar of energy shooting up from impact
@@ -1456,7 +1601,7 @@ export function drawPlayer(ctx, camera) {
             if (animProg < 0.2) {
                 for(let i=0; i<3; i++) {
                     addParticle(player.x + (Math.random()-0.5)*100, player.y + 15, (Math.random()-0.5)*50, (Math.random()-0.5)*50 - 50, 'rgba(200,200,200,0.5)', 0.6, 'tex_smoke', 20);
-                    addParticle(player.x + (Math.random()-0.5)*50, player.y + 15, (Math.random()-0.5)*100, (Math.random()-0.5)*100, '#00ffff', 0.4, 'tex_spark', 15);
+                    addParticle(player.x + (Math.random()-0.5)*50, player.y + 15, (Math.random()-0.5)*100, (Math.random()-0.5)*100, player.color, 0.4, 'tex_spark', 15);
                 }
             }
             
@@ -1507,11 +1652,11 @@ export function drawPlayer(ctx, camera) {
             ctx.save();
             ctx.lineCap = 'round';
             // Layered neon glow
-            ctx.strokeStyle = 'rgba(0, 255, 255, 0.25)';
+            ctx.strokeStyle = getPlayerColorRgba(0.25);
             ctx.lineWidth = 1.8 * 2.5;
             ctx.stroke();
             
-            ctx.strokeStyle = '#00ffff';
+            ctx.strokeStyle = player.color;
             ctx.lineWidth = 1.8;
             ctx.stroke();
             ctx.restore();
@@ -1555,7 +1700,7 @@ export function drawPlayer(ctx, camera) {
             ctx.lineTo(ex, ey);
             
             // Fast double stroke for glow
-            ctx.strokeStyle = 'rgba(0, 255, 255, 0.2)';
+            ctx.strokeStyle = getPlayerColorRgba(0.2);
             ctx.lineWidth = thickness * 2.5;
             ctx.stroke();
             

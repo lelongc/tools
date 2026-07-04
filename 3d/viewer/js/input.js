@@ -2,8 +2,10 @@ export const keys = {
     left: false, right: false, up: false, down: false,
     jump: false, dash: false,
     skill1: false, skill2: false, skill3: false, skill4: false,
+    heal: false,
     jumpPressed: false, dashPressed: false,
-    skill1Pressed: false, skill2Pressed: false, skill3Pressed: false, skill4Pressed: false
+    skill1Pressed: false, skill2Pressed: false, skill3Pressed: false, skill4Pressed: false,
+    healPressed: false
 };
 
 export const lastPressedTime = {
@@ -12,7 +14,8 @@ export const lastPressedTime = {
     skill3: 0,
     skill4: 0,
     jump: 0,
-    dash: 0
+    dash: 0,
+    heal: 0
 };
 
 export function isBuffered(action, bufferMs = 250) {
@@ -39,6 +42,7 @@ window.addEventListener('keydown', (e) => {
         if (key === 'k') { keys.skill2Pressed = true; lastPressedTime.skill2 = now; }
         if (key === 'l') { keys.skill3Pressed = true; lastPressedTime.skill3 = now; }
         if (key === 'i') { keys.skill4Pressed = true; lastPressedTime.skill4 = now; }
+        if (key === 'q') { keys.healPressed = true; lastPressedTime.heal = now; }
     }
     keyState[key] = true;
 
@@ -53,6 +57,7 @@ window.addEventListener('keydown', (e) => {
     if (key === 'k') keys.skill2 = true;
     if (key === 'l') keys.skill3 = true;
     if (key === 'i') keys.skill4 = true;
+    if (key === 'q') keys.heal = true;
 });
 
 window.addEventListener('keyup', (e) => {
@@ -70,6 +75,7 @@ window.addEventListener('keyup', (e) => {
     if (key === 'k') keys.skill2 = false;
     if (key === 'l') keys.skill3 = false;
     if (key === 'i') keys.skill4 = false;
+    if (key === 'q') keys.heal = false;
 });
 
 export function resetInputPresses() {
@@ -79,4 +85,5 @@ export function resetInputPresses() {
     keys.skill2Pressed = false;
     keys.skill3Pressed = false;
     keys.skill4Pressed = false;
+    keys.healPressed = false;
 }

@@ -8,6 +8,12 @@ import { updateHUD } from '../ui.js';
 export class GameScene extends Phaser.Scene {
     constructor() {
         super({ key: 'GameScene' });
+        
+        // Global Hit-Stop logic
+        window.hitStopTime = 0;
+        window.triggerHitStop = (duration) => {
+            window.hitStopTime = duration;
+        };
     }
 
     preload() {
@@ -152,6 +158,8 @@ export class GameScene extends Phaser.Scene {
     }
     
     handleAcidPool(playerObj, acidObj) {
+        if (player.isPogoBouncing > 0) return; // Immune during pogo bounce!
+        
         if (combatState.hp > 0 && !combatState.isDashing) {
             // Take damage and knockback
             combatState.hp -= 5;
@@ -180,7 +188,17 @@ export class GameScene extends Phaser.Scene {
 
     update(time, delta) {
         // Clamp delta to prevent huge jumps
-        const dt = Math.min(delta / 1000, 0.1);
+        const realDt = Math.min(delta / 1000, 0.1);
+        let dt = realDt;
+        
+        // Handle Hit-Stop
+        if (window.hitStopTime > 0) {
+            window.hitStopTime -= realDt;
+            dt = 0; // Freeze game logic
+            this.physics.world.pause();
+        } else {
+            this.physics.world.resume();
+        }
 
         // Update fake camera coordinates to match Phaser camera scroll
         this.fakeCamera.x = this.cameras.main.scrollX;

@@ -110,20 +110,20 @@
         <!-- TOP-LEFT: STATUS BARS -->
         <div class="fixed top-6 left-6 z-40 pointer-events-none">
             <div class="space-y-3">
-                <!-- Health Bar -->
+                <!-- Health Cores -->
                 <div class="relative w-64 md:w-80">
                     <div class="flex justify-between items-end mb-1">
-                        <span class="text-xs font-black tracking-widest text-primary/80">VITAL</span>
-                        <span id="hud-hp-text" class="text-sm font-headline font-bold text-primary">100 / 100</span>
+                        <span class="text-xs font-black tracking-widest text-primary/80">CORE</span>
+                        <span id="hud-hp-text" class="text-sm font-headline font-bold text-primary">5 / 5</span>
                     </div>
-                    <div class="h-4 w-full bg-surface/80 border border-primary/30 p-[2px] overflow-hidden backdrop-blur-sm">
-                        <div id="hud-hp-bar" class="h-full w-full bg-primary shadow-[0_0_10px_rgba(0,255,255,0.4)] transition-all duration-300" style="width: 100%;"></div>
+                    <div id="hud-hp-cores" class="flex gap-2 h-6">
+                        <!-- Cores injected by ui.js -->
                     </div>
                 </div>
-                <!-- Energy Bar -->
-                <div class="relative w-48 md:w-64 ml-4">
+                <!-- Overdrive Bar -->
+                <div class="relative w-48 md:w-64 ml-4 mt-2">
                     <div class="flex justify-between items-end mb-1">
-                        <span class="text-[10px] font-black tracking-widest text-secondary/80">SOUL</span>
+                        <span class="text-[10px] font-black tracking-widest text-secondary/80" id="overdrive-label">OVERDRIVE</span>
                         <span id="hud-mana-text" class="text-xs font-headline font-bold text-secondary">100 / 100</span>
                     </div>
                     <div class="h-2.5 w-full bg-surface/80 border border-secondary/30 p-[1px] overflow-hidden backdrop-blur-sm relative">

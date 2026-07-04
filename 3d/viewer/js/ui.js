@@ -9,23 +9,54 @@ export function updateHUD(player) {
         zoneNameEl.textContent = ZONE_NAMES[zoneIdx];
     }
 
-    // Update HP Bar
-    const hpBar = document.getElementById('hud-hp-bar');
+    // Update HP Cores
+    const hpCoresEl = document.getElementById('hud-hp-cores');
     const hpText = document.getElementById('hud-hp-text');
-    if (hpBar && hpText) {
-        const hpPercent = Math.max(0, (combatState.hp / 100)) * 100;
-        hpBar.style.width = hpPercent + '%';
-        hpText.textContent = Math.floor(combatState.hp) + ' / 100';
+    if (hpCoresEl && hpText) {
+        const totalCores = 5;
+        const activeCores = Math.ceil(combatState.hp / 20); // Each core = 20 HP
+        
+        let html = '';
+        for(let i = 0; i < totalCores; i++) {
+            if (i < activeCores) {
+                // Active Hexagon Core (Cyan)
+                html += `<div class="w-6 h-6 bg-primary" style="clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%); box-shadow: 0 0 8px rgba(0,255,255,0.8);"></div>`;
+            } else {
+                // Empty Hexagon Core
+                html += `<div class="w-6 h-6 bg-surface border-2 border-primary/30" style="clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);"></div>`;
+            }
+        }
+        hpCoresEl.innerHTML = html;
+        hpText.textContent = `${activeCores} / ${totalCores}`;
     }
 
-    // Update Mana/Energy Bar
+    // Update Overdrive Bar
     const manaBar = document.getElementById('hud-mana-bar');
     const manaText = document.getElementById('hud-mana-text');
+    const overdriveLabel = document.getElementById('overdrive-label');
+    
     if (manaBar && manaText) {
         let manaPercent = (combatState.energy / combatState.maxEnergy) * 100;
         manaPercent = Math.min(100, Math.max(0, manaPercent));
         manaBar.style.width = manaPercent + '%';
         manaText.textContent = Math.floor(combatState.energy) + ' / ' + combatState.maxEnergy;
+        
+        // Neon Surge Effect
+        if (combatState.energy >= 50) {
+            manaBar.classList.add('animate-pulse');
+            manaBar.style.boxShadow = '0 0 15px rgba(68,255,68,0.8)';
+            if (overdriveLabel) {
+                overdriveLabel.classList.add('text-secondary', 'animate-pulse');
+                overdriveLabel.classList.remove('text-secondary/80');
+            }
+        } else {
+            manaBar.classList.remove('animate-pulse');
+            manaBar.style.boxShadow = '0 0 8px rgba(68,255,68,0.4)';
+            if (overdriveLabel) {
+                overdriveLabel.classList.remove('text-secondary', 'animate-pulse');
+                overdriveLabel.classList.add('text-secondary/80');
+            }
+        }
     }
 
     // Update Cooldown Overlays

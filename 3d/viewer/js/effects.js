@@ -148,6 +148,12 @@ export function addParticle(x, y, vx, vy, color, life, type = 'pixel', size = 3)
     
     if (cLower === '#ffffff' || cLower === 'white' || cLower.includes('255,255,255')) {
         colKey = 'white';
+    } else if (cLower === '#00ffff' || cLower === 'cyan' || cLower.includes('0,255,255')) {
+        colKey = 'cyan';
+    } else if (cLower === '#44ff44' || cLower === 'green' || cLower.includes('68,255,68')) {
+        colKey = 'green';
+    } else if (cLower.includes('0,119,255') || cLower === '#0077ff') {
+        colKey = 'blue';
     } else if (
         cLower.includes('255,100') || cLower.includes('255,120') || cLower.includes('255,160') || 
         cLower.includes('255,90') || cLower.includes('orange') || cLower.includes('yellow') || 
