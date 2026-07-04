@@ -260,8 +260,6 @@ export function drawPlayer(ctx, camera) {
         ctx.translate(0, -player.height/2 + bounceVal);
         ctx.globalCompositeOperation = 'screen';
         ctx.strokeStyle = '#00ffff'; // Synced Cyan color
-        ctx.shadowColor = '#00ffff';
-        ctx.shadowBlur = 10;
         
         const auraRadius = 14;
         
@@ -350,8 +348,6 @@ export function drawPlayer(ctx, camera) {
     ctx.fillStyle = 'rgba(0, 50, 50, 0.8)'; // Dark inner body
     ctx.strokeStyle = player.color; // Cyan glowing bone
     ctx.lineWidth = 2;
-    ctx.shadowColor = player.color;
-    ctx.shadowBlur = 10;
     
     // Calculate bounce offset and body rotation
     let bounceY = 0;
@@ -685,8 +681,6 @@ export function drawPlayer(ctx, camera) {
     
     // Draw head as concentric glowing nerve rings
     ctx.save();
-    ctx.shadowBlur = 10;
-    ctx.shadowColor = '#00ffff';
     ctx.strokeStyle = '#00ffff';
     ctx.lineWidth = 1.2;
     for (let i = 0; i < 3; i++) {
@@ -703,15 +697,12 @@ export function drawPlayer(ctx, camera) {
         if (cTime >= 0.7) {
             // Level 3: Flashes violently between bright cyan and white!
             ctx.fillStyle = flash ? '#00ffff' : '#ffffff';
-            ctx.shadowColor = '#00ffff';
         } else if (cTime >= 0.3) {
             // Level 2: Blinks between cyan and deep blue!
             ctx.fillStyle = flash ? '#00ffff' : '#0077ff';
-            ctx.shadowColor = '#00ffff';
         } else {
             // Level 1: Blinks between cyan and white!
             ctx.fillStyle = flash ? '#00ffff' : '#ffffff';
-            ctx.shadowColor = '#00ffff';
         }
     } else {
         ctx.fillStyle = '#ffffff';

@@ -1,4 +1,15 @@
-export const particles = [];
+const MAX_PARTICLES = 1500;
+export const particles = new Array(MAX_PARTICLES);
+for (let i = 0; i < MAX_PARTICLES; i++) {
+    particles[i] = {
+        active: false,
+        x: 0, y: 0, vx: 0, vy: 0,
+        color: '#ffffff', colKey: 'cyan',
+        life: 0, maxLife: 0,
+        type: 'pixel', size: 4, angle: 0
+    };
+}
+let particleIndex = 0;
 
 export const particleTex = {
     spark: new Image(),
@@ -91,8 +102,6 @@ function drawTintedImage(ctx, name, x, y, width, height, colKey, alpha, angle = 
         // Glowing 4-point Star
         const r = width / 2;
         ctx.fillStyle = strokeCol;
-        ctx.shadowColor = strokeCol;
-        ctx.shadowBlur = 10;
         ctx.beginPath();
         ctx.moveTo(0, -r);
         ctx.quadraticCurveTo(0, 0, r, 0);
@@ -120,8 +129,6 @@ function drawTintedImage(ctx, name, x, y, width, height, colKey, alpha, angle = 
         const r = width / 2;
         ctx.strokeStyle = strokeCol;
         ctx.lineWidth = 2;
-        ctx.shadowColor = strokeCol;
-        ctx.shadowBlur = 12;
         ctx.beginPath();
         for (let i = 0; i < 8; i++) {
             const a = (i / 8) * Math.PI * 2;
@@ -154,28 +161,42 @@ export function addParticle(x, y, vx, vy, color, life, type = 'pixel', size = 3)
         colKey = 'green';
     }
 
-    particles.push({
-        x: x,
-        y: y,
-        vx: vx,
-        vy: vy,
-        color: color,
-        colKey: colKey,
-        life: life,
-        maxLife: life,
-        type: type,
-        size: size,
-        angle: Math.random() * Math.PI * 2
-    });
+    // Find next inactive particle
+    let found = false;
+    for (let i = 0; i < MAX_PARTICLES; i++) {
+        particleIndex = (particleIndex + 1) % MAX_PARTICLES;
+        if (!particles[particleIndex].active) {
+            found = true;
+            break;
+        }
+    }
+    
+    // Overwrite oldest if pool full
+    const p = particles[particleIndex];
+    
+    p.active = true;
+    p.x = x;
+    p.y = y;
+    p.vx = vx;
+    p.vy = vy;
+    p.color = color;
+    p.colKey = colKey;
+    p.life = life;
+    p.maxLife = life;
+    p.type = type;
+    p.size = size;
+    p.angle = Math.random() * Math.PI * 2;
 }
 
 export function updateAndDrawParticles(ctx, camera, dt) {
     ctx.save();
-    for (let i = particles.length - 1; i >= 0; i--) {
+    for (let i = 0; i < MAX_PARTICLES; i++) {
         let p = particles[i];
+        if (!p.active) continue;
+        
         p.life -= dt;
         if (p.life <= 0) {
-            particles.splice(i, 1);
+            p.active = false;
             continue;
         }
 
@@ -249,8 +270,8 @@ export function updateAndDrawParticles(ctx, camera, dt) {
             ctx.globalAlpha = alpha;
             ctx.lineWidth = p.size;
             ctx.beginPath();
-            ctx.moveTo(drawX - nx * len * 0.5, drawY - ny * len * 0.5);
-            ctx.lineTo(drawX + nx * len * 0.5, drawY + ny * len * 0.5);
+            ctx.moveTo(drawX - nx * len * 0.25, drawY - ny * len * 0.25);
+            ctx.lineTo(drawX + nx * len * 0.25, drawY + ny * len * 0.25);
             ctx.stroke();
 
             // Inner white highlight

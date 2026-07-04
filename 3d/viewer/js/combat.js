@@ -659,8 +659,8 @@ export function updateCombat(player, dt) {
                 addParticle(player.x + player.width/2, player.y + player.height - 15, 0, 0, '#00ffff', 0.6, 'tex_impact', 120);
                 addParticle(player.x + player.width/2, player.y + player.height - 15, 0, 0, '#ffffff', 0.4, 'tex_impact', 60); // Inner white flash
                 
-                // Dusty cyan smoke rising
-                for(let i=0; i<15; i++) {
+                // Dusty cyan smoke rising (Reduced count, increased size for FPS)
+                for(let i=0; i<8; i++) {
                     addParticle(
                         player.x + player.width/2,
                         player.y + player.height,
@@ -669,12 +669,12 @@ export function updateCombat(player, dt) {
                         'rgba(0, 230, 255, 0.45)',
                         0.95,
                         'tex_smoke',
-                        35 + Math.random()*20
+                        50 + Math.random()*25
                     );
                 }
                 
-                // Glowing cyan and white stars
-                for(let i=0; i<18; i++) {
+                // Glowing cyan and white stars (Reduced count for FPS)
+                for(let i=0; i<10; i++) {
                     addParticle(
                         player.x + player.width/2,
                         player.y + player.height,
@@ -683,7 +683,7 @@ export function updateCombat(player, dt) {
                         Math.random() < 0.6 ? '#00ffff' : '#ffffff',
                         0.65,
                         'tex_star',
-                        16 + Math.random()*8
+                        20 + Math.random()*12
                     );
                 }
             }

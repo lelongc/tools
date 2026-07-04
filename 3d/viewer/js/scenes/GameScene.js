@@ -23,34 +23,50 @@ export class GameScene extends Phaser.Scene {
         this.acidPools = this.physics.add.staticGroup();
         this.unstableGroup = this.physics.add.staticGroup();
 
-        // Populate physics world from map array for collisions
+        // Populate physics world from map array for collisions with Horizontal Tile Merging (Massive FPS boost)
         for (let row = 0; row < map.length; row++) {
-            for (let col = 0; col < map[row].length; col++) {
-                const tile = map[row][col];
-                const x = col * TILE_SIZE + TILE_SIZE / 2;
-                const y = row * TILE_SIZE + TILE_SIZE / 2;
+            let startCol = -1;
+            
+            const createMergedBlock = (r, sCol, eCol) => {
+                const width = (eCol - sCol + 1) * TILE_SIZE;
+                const x = sCol * TILE_SIZE + width / 2;
+                const y = r * TILE_SIZE + TILE_SIZE / 2;
+                const block = this.add.rectangle(x, y, width, TILE_SIZE, 0x000000, 0);
+                this.platforms.add(block);
+            };
 
-                if (tile === 1) {
-                    const block = this.add.rectangle(x, y, TILE_SIZE, TILE_SIZE, 0x000000, 0); 
-                    this.platforms.add(block);
-                } else if (tile === 2) {
-                    const pad = this.add.rectangle(x, y, TILE_SIZE, TILE_SIZE, 0x000000, 0);
-                    this.bouncePads.add(pad);
-                } else if (tile === 3) {
-                    const ice = this.add.rectangle(x, y, TILE_SIZE, TILE_SIZE, 0x000000, 0);
-                    this.iceBlocks.add(ice);
-                    this.platforms.add(ice); // Ice is solid
-                } else if (tile === 4) {
-                    const acid = this.add.rectangle(x, y + TILE_SIZE/4, TILE_SIZE, TILE_SIZE/2, 0x000000, 0);
-                    this.acidPools.add(acid);
-                } else if (tile === 5) {
-                    const slime = this.add.rectangle(x, y, TILE_SIZE, TILE_SIZE, 0x000000, 0);
-                    this.platforms.add(slime); // Slime is solid
-                } else if (tile === 6) {
-                    const block = this.add.rectangle(x, y, TILE_SIZE, TILE_SIZE, 0x000000, 0); 
-                    block.col = col; block.row = row; // store map coordinates
-                    this.unstableGroup.add(block);
-                    this.platforms.add(block); // Unstable is initially solid
+            for (let col = 0; col <= map[row].length; col++) {
+                const tile = (col < map[row].length) ? map[row][col] : 0;
+                const isSolidMergeable = (tile === 1 || tile === 3 || tile === 5); // Ground, Ice, Slime
+                
+                if (isSolidMergeable) {
+                    if (startCol === -1) {
+                        startCol = col;
+                    }
+                } else {
+                    if (startCol !== -1) {
+                        createMergedBlock(row, startCol, col - 1);
+                        startCol = -1;
+                    }
+                    
+                    if (tile === 2) {
+                        const x = col * TILE_SIZE + TILE_SIZE / 2;
+                        const y = row * TILE_SIZE + TILE_SIZE / 2;
+                        const pad = this.add.rectangle(x, y, TILE_SIZE, TILE_SIZE, 0x000000, 0);
+                        this.bouncePads.add(pad);
+                    } else if (tile === 4) {
+                        const x = col * TILE_SIZE + TILE_SIZE / 2;
+                        const y = row * TILE_SIZE + TILE_SIZE / 2;
+                        const acid = this.add.rectangle(x, y + TILE_SIZE/4, TILE_SIZE, TILE_SIZE/2, 0x000000, 0);
+                        this.acidPools.add(acid);
+                    } else if (tile === 6) {
+                        const x = col * TILE_SIZE + TILE_SIZE / 2;
+                        const y = row * TILE_SIZE + TILE_SIZE / 2;
+                        const block = this.add.rectangle(x, y, TILE_SIZE, TILE_SIZE, 0x000000, 0); 
+                        block.col = col; block.row = row;
+                        this.unstableGroup.add(block);
+                        this.platforms.add(block);
+                    }
                 }
             }
         }
@@ -90,6 +106,27 @@ export class GameScene extends Phaser.Scene {
         // Add the canvas image to center of screen (320, 240) and set it to follow camera
         this.canvasImage = this.add.image(320, 240, 'proGameCanvas');
         this.canvasImage.setScrollFactor(0); // Lock it to screen
+
+        // Background Solid Color Rectangle
+        this.bgRect = this.add.rectangle(320, 240, 640, 480, 0x000000);
+        this.bgRect.setScrollFactor(0);
+        this.bgRect.setDepth(-10);
+
+        // Generate Grid Texture once (Hardware Accelerated)
+        const gridCanvas = this.textures.createCanvas('gridTexture', 64, 64);
+        const gCtx = gridCanvas.context;
+        gCtx.strokeStyle = '#ffffff';
+        gCtx.lineWidth = 1;
+        gCtx.beginPath();
+        gCtx.moveTo(0, 0); gCtx.lineTo(64, 0);
+        gCtx.moveTo(0, 0); gCtx.lineTo(0, 64);
+        gCtx.stroke();
+        gridCanvas.refresh();
+
+        this.gridSprite = this.add.tileSprite(320, 240, 640, 480, 'gridTexture');
+        this.gridSprite.setScrollFactor(0);
+        this.gridSprite.setDepth(-9);
+        this.gridSprite.setAlpha(0.15);
 
         // Camera and Physics configurations
         const mapPixelWidth = map[0].length * TILE_SIZE;
@@ -230,30 +267,13 @@ export class GameScene extends Phaser.Scene {
         const zoneIdx = getZone(Math.floor((player.x + player.width/2) / TILE_SIZE));
         const colors = ZONE_COLORS[zoneIdx];
         
-        // Background base color
-        ctx.fillStyle = colors.bg;
-        ctx.fillRect(0, 0, 640, 480);
-        
-        ctx.strokeStyle = colors.primary;
-        ctx.globalAlpha = 0.15;
-        ctx.lineWidth = 1;
-        
-        const gridSize = 64;
-        const offsetX = -(this.fakeCamera.x * 0.2) % gridSize;
-        const offsetY = -(this.fakeCamera.y * 0.2) % gridSize;
-        
-        ctx.beginPath();
-        for (let x = offsetX - gridSize; x < 640 + gridSize; x += gridSize) {
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, 480);
-        }
-        for (let y = offsetY - gridSize; y < 480 + gridSize; y += gridSize) {
-            ctx.moveTo(0, y);
-            ctx.lineTo(640, y);
-        }
-        ctx.stroke();
+        // Update hardware accelerated background and grid
+        this.bgRect.fillColor = Phaser.Display.Color.HexStringToColor(colors.bg).color;
+        this.gridSprite.setTint(Phaser.Display.Color.HexStringToColor(colors.primary).color);
+        this.gridSprite.tilePositionX = this.fakeCamera.x * 0.2;
+        this.gridSprite.tilePositionY = this.fakeCamera.y * 0.2;
 
-        // Far parallax based on zone
+        // Far parallax based on zone (Dynamic Shapes)
         const now = Date.now();
         ctx.globalAlpha = 0.1;
         
