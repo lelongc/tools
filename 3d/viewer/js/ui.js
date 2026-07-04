@@ -114,14 +114,155 @@ export function updateHUD(player) {
     const playerPip = document.getElementById('hud-minimap-player');
     const coordText = document.getElementById('hud-minimap-coords');
     if (playerPip && coordText) {
-        // Map is 80x30 tiles (2560x960 px)
         const mapW = 2560;
         const mapH = 960;
-        // Transform player position to minimap center-relative percentage
         const xPct = ((player.x / mapW) - 0.5) * 100;
         const yPct = ((player.y / mapH) - 0.5) * 100;
         
         playerPip.style.transform = `translate(${xPct}px, ${yPct}px)`;
         coordText.textContent = `X: ${Math.floor(player.x)} | Y: ${Math.floor(player.y)}`;
     }
+
+    // Update Target HUD (Closest Enemy)
+    const targetHud = document.getElementById('target-hud');
+    const targetName = document.getElementById('target-name');
+    const targetHp = document.getElementById('target-hp-bar');
+    
+    if (targetHud && targetName && targetHp && window.enemyManager) {
+        let closest = null;
+        let minDist = 300; // Only show if within 300 pixels
+        
+        window.enemyManager.enemies.forEach(e => {
+            if (e.hp > 0 && e.sprite && e.sprite.active) {
+                const dist = Math.hypot(e.sprite.x - player.x, e.sprite.y - player.y);
+                if (dist < minDist) {
+                    minDist = dist;
+                    closest = e;
+                }
+            }
+        });
+        
+        if (closest) {
+            targetHud.classList.remove('hidden');
+            targetHud.classList.add('flex');
+            
+            // Glitch truth name logic
+            if (window.truthRevealed) {
+                // Randomly glitch between truth and normal
+                if (Math.random() < 0.2) {
+                    targetName.textContent = closest.truthName;
+                    targetName.classList.add('animate-pulse');
+                    targetName.style.filter = "contrast(2) hue-rotate(90deg)";
+                } else {
+                    targetName.textContent = closest.name || closest.type;
+                    targetName.classList.remove('animate-pulse');
+                    targetName.style.filter = "none";
+                }
+            } else {
+                targetName.textContent = closest.name || closest.type;
+            }
+            
+            const hpPct = Math.max(0, (closest.hp / closest.maxHp) * 100);
+            targetHp.style.width = hpPct + '%';
+        } else {
+            targetHud.classList.add('hidden');
+            targetHud.classList.remove('flex');
+        }
+    }
 }
+
+export const DialogueSystem = {
+    isActive: false,
+    queue: [],
+    currentText: "",
+    charIndex: 0,
+    typingTimer: null,
+    onCompleteCallback: null,
+
+    show(text, avatarType = 'normal', duration = 4000, onComplete = null) {
+        this.queue.push({ text, avatarType, duration, onComplete });
+        if (!this.isActive) {
+            this.playNext();
+        }
+    },
+
+    playNext() {
+        if (this.queue.length === 0) {
+            this.hide();
+            return;
+        }
+
+        this.isActive = true;
+        const dialog = this.queue.shift();
+        this.currentText = dialog.text;
+        this.charIndex = 0;
+        this.onCompleteCallback = dialog.onComplete;
+
+        const container = document.getElementById('dialogue-container');
+        const textEl = document.getElementById('dialogue-text');
+        const avatarEl = document.getElementById('dialogue-avatar');
+        
+        if (!container) return;
+
+        // Show container
+        container.classList.remove('translate-y-32', 'opacity-0', 'pointer-events-none');
+        
+        // Apply avatar styling based on type
+        avatarEl.src = `assets/el_avatar_${dialog.avatarType}.png`;
+        
+        if (dialog.avatarType === 'glitch') {
+            avatarEl.style.filter = "contrast(1.5) saturate(2) hue-rotate(90deg)";
+        } else {
+            avatarEl.style.filter = "none";
+        }
+
+        textEl.innerHTML = "";
+        
+        if (this.typingTimer) clearInterval(this.typingTimer);
+        
+        this.typingTimer = setInterval(() => {
+            if (this.charIndex < this.currentText.length) {
+                textEl.innerHTML += this.currentText.charAt(this.charIndex);
+                this.charIndex++;
+            } else {
+                clearInterval(this.typingTimer);
+                setTimeout(() => {
+                    if (this.onCompleteCallback) this.onCompleteCallback();
+                    this.playNext();
+                }, dialog.duration);
+            }
+        }, 30); // 30ms per char typewriter effect
+    },
+
+    hide() {
+        this.isActive = false;
+        const container = document.getElementById('dialogue-container');
+        if(container) {
+            container.classList.add('translate-y-32', 'opacity-0', 'pointer-events-none');
+        }
+    }
+};
+
+window.DialogueSystem = DialogueSystem;
+
+export const GlitchSystem = {
+    glitchTimer: null,
+    
+    // intensity is optional for now, duration in ms
+    trigger(duration = 500) {
+        const body = document.body;
+        
+        // Don't restart if already glitching heavily
+        if (body.classList.contains('glitch-active')) return;
+        
+        body.classList.add('glitch-active');
+        
+        if (this.glitchTimer) clearTimeout(this.glitchTimer);
+        
+        this.glitchTimer = setTimeout(() => {
+            body.classList.remove('glitch-active');
+        }, duration);
+    }
+};
+
+window.GlitchSystem = GlitchSystem;

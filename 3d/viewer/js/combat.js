@@ -114,13 +114,13 @@ export function releaseChargeAttack(player) {
     let beamDuration = 0.15;
     let recoilSpeed = 100;
     
-    if (chargeTime >= 0.7) {
+    if (chargeTime >= combatState.chargeDuration - 0.05) { // max charge
         level = 3;
         cameraShake = 25;
         beamDuration = 0.35;
         recoilSpeed = 400; // Big recoil
         combatState.energy = Math.min(combatState.maxEnergy, combatState.energy + 40);
-    } else if (chargeTime >= 0.3) {
+    } else if (chargeTime >= combatState.chargeDuration * 0.4) {
         level = 2;
         cameraShake = 12;
         beamDuration = 0.22;
@@ -188,19 +188,38 @@ export function releaseChargeAttack(player) {
 }
 
 export function releaseBioDrill(player) {
+    const chargeTime = combatState.chargeTime;
     combatState.isCharging = false;
     combatState.chargeTime = 0;
     
+    let level = 1;
+    let drillSpeed = 500;
+    let drillTime = 0.25;
+    let cameraShake = 5;
+    
+    if (chargeTime >= combatState.chargeDuration - 0.05) {
+        level = 3;
+        drillSpeed = 1300;
+        drillTime = 0.45;
+        cameraShake = 20;
+    } else if (chargeTime >= combatState.chargeDuration * 0.4) {
+        level = 2;
+        drillSpeed = 800;
+        drillTime = 0.35;
+        cameraShake = 12;
+    }
+    
     combatState.isBioDrilling = true;
-    combatState.bioDrillTime = 0.35;
+    combatState.bioDrillTime = drillTime;
     combatState.bioDrillCooldown = 1.0;
     combatState.bioDrillMaxCooldown = 1.0;
+    if (window.triggerViolentDialogue) window.triggerViolentDialogue();
     
-    // Pierce forward super fast
-    player.vx = player.facingRight ? 800 : -800;
+    // Pierce forward super fast depending on level
+    player.vx = player.facingRight ? drillSpeed : -drillSpeed;
     player.vy = 0; // Freeze vertical movement
     
-    window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 15}}));
+    window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: cameraShake}}));
     
     // Visual burst
     addParticle(player.x + player.width/2, player.y + player.height/2, 0, 0, player.color, 0.4, 'ring', 40);
@@ -240,8 +259,14 @@ export function updateCombat(player, dt) {
 
     const isBusy = combatState.isAttacking || combatState.isDashStriking || combatState.isGroundSmashing || combatState.isLowSweeping || combatState.isBioDrilling || combatState.isUpSlashing || combatState.isPogoSlashing || combatState.isRisingBlast || combatState.isLightningNova;
 
-    // SKILL 2: Charge Slash (K)
+    // SKILL 2: Charge Slash / Bio-Drill (K)
     if (keys.skill2 && !isBusy && combatState.dashStrikeCooldown <= 0) {
+        // If bio form, only allow if drill is unlocked
+        if (player.form === 'bio' && !window.drillUnlocked) return;
+        
+        // Bio form takes twice as long to charge
+        combatState.chargeDuration = player.form === 'cyber' ? 0.5 : 1.0;
+        
         combatState.isCharging = true;
         combatState.chargeTime += dt;
         
@@ -317,10 +342,7 @@ export function updateCombat(player, dt) {
         window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 8}}));
         if (window.triggerHitStop) window.triggerHitStop(0.05); // Mini pause for impact
         
-        // Transformation Burst
-        addParticle(player.x + player.width/2, player.y + player.height/2, 0, 0, '#ffffff', 0.8, 'ring', 60);
-        addParticle(player.x + player.width/2, player.y + player.height/2, 0, 0, player.color, 0.5, 'ring', 120);
-        
+        // Transformation Burst (No rings)
         for (let i = 0; i < 20; i++) {
             const ang = Math.random() * Math.PI * 2;
             const spd = 200 + Math.random() * 300;
@@ -409,6 +431,7 @@ export function updateCombat(player, dt) {
                     combatState.smashTime = 0.2; 
                     combatState.smashCooldown = 1.0;
                     combatState.smashMaxCooldown = 1.0;
+                    if (window.triggerViolentDialogue) window.triggerViolentDialogue();
                     player.vx = 0;
                     player.vy = -400; 
                     consumeBuffer('skill3');
@@ -685,6 +708,20 @@ export function updateCombat(player, dt) {
         player.vy = 0; // Freeze gravity
         // Drill particles
         addParticle(player.x + (player.facingRight ? player.width : 0), player.y + player.height/2 + (Math.random()-0.5)*20, (player.facingRight ? -200 : 200), (Math.random()-0.5)*100, player.color, 0.4, 'tex_spark', 15);
+        
+        // Drop electric trail
+        if (Math.random() < 0.3) {
+            combatState.activeProjectiles.push({
+                type: 'bio_trail',
+                x: player.x + player.width/2 + (Math.random() - 0.5) * 40,
+                y: player.y + player.height - 5,
+                vx: 0,
+                vy: 0,
+                life: 3.0,
+                color: player.color
+            });
+        }
+        
         if (combatState.bioDrillTime <= 0) combatState.isBioDrilling = false;
     }
 
@@ -725,6 +762,7 @@ export function updateCombat(player, dt) {
                         color: player.color,
                         radius: 120
                     });
+                    if (window.GlitchSystem) window.GlitchSystem.trigger(300);
                     for (let i = 0; i < 20; i++) {
                         addParticle(player.x + player.width/2, player.y + player.height, (Math.random()-0.5)*800, -100 - Math.random()*300, player.color, 0.5, 'tex_spark', 20);
                     }
@@ -760,6 +798,23 @@ export function updateCombat(player, dt) {
         if (p.type === 'acid_orb') {
             p.vy += 800 * dt; // Gravity
             addParticle(p.x, p.y, (Math.random()-0.5)*50, (Math.random()-0.5)*50, p.color, 0.3, 'tex_spark', 8);
+            
+            // Check collision with player
+            if (p.x > player.x && p.x < player.x + player.width && p.y > player.y && p.y < player.y + player.height) {
+                if (combatState.hp > 0 && !combatState.isDashing && combatState.invulnTime <= 0) {
+                    combatState.hp -= 3;
+                    combatState.invulnTime = 1.0;
+                    if (window.triggerDamageDialogue) window.triggerDamageDialogue();
+                    player.vx = p.vx > 0 ? 300 : -300;
+                    player.vy = -200;
+                    window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 5}}));
+                    for (let i = 0; i < 5; i++) {
+                        addParticle(player.x + player.width/2, player.y + player.height/2, (Math.random() - 0.5) * 100, -Math.random() * 200, '#ff0000', 0.5, 'pixel', 6);
+                    }
+                }
+                combatState.activeProjectiles.splice(i, 1);
+                continue;
+            }
         } else if (p.type === 'plasma_orb') {
             addParticle(p.x, p.y, (Math.random()-0.5)*100, (Math.random()-0.5)*100, p.color, 0.4, 'ring', 12);
         } else if (p.type === 'emp_shockwave') {
@@ -1023,6 +1078,24 @@ export function drawCombat(ctx, camera, player) {
             ctx.arc(0, 0, rad * 0.4, 0, Math.PI * 2);
             ctx.fill();
             
+        } else if (p.type === 'bio_trail') {
+            // Static electric trail on ground
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = p.color;
+            ctx.strokeStyle = p.color;
+            ctx.lineWidth = 2 + Math.random() * 2;
+            ctx.beginPath();
+            ctx.moveTo(-15, 0);
+            ctx.lineTo(-5, (Math.random()-0.5)*15);
+            ctx.lineTo(5, (Math.random()-0.5)*15);
+            ctx.lineTo(15, 0);
+            ctx.stroke();
+            
+            // Tiny sparks
+            ctx.fillStyle = '#ffffff';
+            if (Math.random() > 0.5) {
+                ctx.fillRect((Math.random()-0.5)*20, (Math.random()-0.5)*10, 2, 2);
+            }
         } else if (p.type === 'acid_orb') {
             // Draw a teardrop shape pointing to velocity
             const angle = Math.atan2(p.vy, p.vx);

@@ -11,12 +11,12 @@
 
 ## 1. CỐT TRUYỆN VÀ THẾ GIỚI (LORE & ATMOSPHERE)
 
-**Cảm hứng từ Hollow Knight:** Cảm giác cô độc trong một vương quốc tàn lụi, những câu chuyện được kể qua cảnh vật (Environmental Storytelling) hơn là những đoạn hội thoại dài dòng.
+**Cảm hứng từ Hollow Knight & Psychological Horror:** Cảm giác cô độc trong một cơ sở ngầm tàn lụi, những câu chuyện được kể qua cảnh vật (Environmental Storytelling) kết hợp với yếu tố kinh dị tâm lý tội phạm.
 
-* **Bối cảnh (The World):** Bạn không ở trong một vương quốc côn trùng, mà đang ở sâu bên trong **"The Macro-Organism"** - một siêu máy tính sinh học (Bio-mechanical Supercomputer) khổng lồ đã bị lãng quên hàng ngàn năm. Thế giới này là sự pha trộn giữa các mạch điện rỉ sét, cáp quang đứt gãy và những mô sinh học đang bị hoại tử (Toxic Depths, X-ray Labs, Neon Synapse).
-* **Nhân vật chính (The Protagonist):** Bạn là **Probe X-7** (Thực thể Thăm dò sinh học). Một kháng thể cơ khí siêu nhỏ vừa tỉnh giấc. Bạn không có ký ức, không có giọng nói (Hollow), chỉ mang trong mình một nguồn năng lượng rực sáng (Cyan Energy).
-* **Kẻ thù và Mối đe dọa (The Infection):** **"The Glitch" (Lỗi Đột Biến)** - Một loại virus vừa mang tính kỹ thuật số vừa mang tính sinh học. Nó ăn mòn hệ thống, khiến các robot phòng thủ phát điên và các sinh vật lai máy móc trở nên hung hãn. (Khá giống khái niệm Infection màu cam của Hollow Knight, nhưng ở đây là mã độc sinh học màu xanh acid / đỏ thẫm).
-* **Mục tiêu:** Khám phá nguyên nhân sụp đổ của "The Macro-Organism", tiêu diệt các Lõi Nhiễm Độc (Corrupted Cores - Boss) và mở khóa cánh cửa dẫn đến "Trung tâm Não bộ" (Central Cortex).
+* **Bối cảnh (The World):** Bạn tỉnh dậy sâu bên trong **"The Macro-Organism"** - một khu phức hợp phòng thí nghiệm y sinh học dưới lòng đất. Nơi đây từng là hy vọng cứu chữa nhân loại, nhưng giờ đã biến thành một nhà tù của sự điên loạn.
+* **Nhân vật chính (The Protagonist):** Bạn là một người đàn ông mắc bệnh nan y sắp chết. Nhưng vợ bạn, Tiến sĩ Eleanor, vì không chịu đựng nổi cú sốc mất ĐI TOÀN BỘ gia đình trong một thảm kịch trước đó, đã biến bạn thành **Bio-Probe** (Một cỗ máy sinh học bất tử) để cô ấy không phải cô độc. Bạn mất hoàn toàn trí nhớ lúc đầu.
+* **Kẻ thù và Mối đe dọa (The Illusion):** Những sinh vật bạn tiêu diệt thực chất là đội cứu hộ, người thân hoặc nỗ lực của chính hệ thống nhằm giải thoát bạn, nhưng Eleanor đã thao túng thần kinh để bạn nhìn thấy họ như những con quái vật đột biến tởm lợm.
+* **Mục tiêu:** Nhặt lại các mảnh ký ức (Memory Fragments), nhận ra sự thật cay đắng, tiến vào "Lõi Trung Tâm" (Central Core) để ngắt nguồn hệ thống, tự kết liễu sự bất tử và giải thoát cho người vợ điên loạn của mình.
 
 ---
 
@@ -111,24 +111,25 @@
 
 ---
 
-## 6. CỐT TRUYỆN: DỰ ÁN SYMBIOSIS (DARK YANDERE BỘI CẢNH)
+## 6. CỐT TRUYỆN: DỰ ÁN SYMBIOSIS (VÒNG LẶP BI KỊCH CỦA TÌNH YÊU)
 
 **Thời lượng dự kiến:** 4 tiếng chơi chính, 5 tiếng khám phá 100%.
-**Định hướng:** Dark Sci-fi, Biopunk, Psychological Horror. Sự ám ảnh, biến đổi nhân dạng, và tình yêu độc hại (Yandere).
+**Định hướng:** Dark Sci-fi, Biopunk, Psychological Horror. Tình yêu mù quáng, nỗi đau mất mát và sự giải thoát.
 
-* **Bối cảnh (Aegis Abyss):** Cơ sở nghiên cứu khổng lồ dưới lòng đất bị phong tỏa sau "Rò rỉ thảm họa". Không còn con người sống sót, chỉ có quái vật và an ninh mạng.
-* **Nhân vật chính (Zero - Tức "Bạn"):** Bị lai tạp giữa máy (Dạng Cyber) và quái vật sinh học (Dạng Bio). Tỉnh dậy mất trí nhớ.
-* **Nữ chính Yandere (Tiến sĩ Eleanor / "El"):** Cô gái duy nhất sống sót, liên lạc với bạn qua chip não bộ. Cô ta có vẻ ngoài cực kỳ xinh đẹp, giọng điệu ngọt ngào, quan tâm chăm sóc, gọi bạn là "Người thương duy nhất".
+* **Bối cảnh (Aegis Abyss):** Cơ sở nghiên cứu khổng lồ dưới lòng đất. Không còn con người bình thường sống sót, chỉ có các sinh vật đột biến và hệ thống an ninh hóa điên.
+* **Nhân vật chính (Zero - Người Chồng):** Bị lai tạp giữa máy (Dạng Cyber) và quái vật sinh học (Dạng Bio). Tỉnh dậy mất trí nhớ, cơ thể không còn nhân dạng con người.
+* **Nữ chính Yandere (Tiến sĩ Eleanor / "El" - Người Vợ):** Người vợ thiên tài của Zero. Cô liên lạc với bạn qua chip não bộ. Giọng điệu của cô vô cùng yêu thương, bảo bọc, luôn gọi bạn là "Mình ơi" hoặc "Anh yêu". 
 
 **Các Plot Twist (Nút Thắt Câu Chuyện):**
-1. **Sự thật về tai nạn:** Không hề có tai nạn nào. Eleanor đã tự tay thả virus và thảm sát toàn bộ nhân sự vì họ định tiêu diệt bạn (vốn là một vật thí nghiệm bị coi là thất bại/nguy hiểm).
-2. **Ảo giác tàn khốc:** Những "quái vật" mà bạn đang xé xác từ đầu game thực chất là Lực lượng Đặc nhiệm Cứu hộ từ mặt đất cử xuống. Con chip của Eleanor đã hack hệ thống thần kinh của bạn, bóp méo hình ảnh họ thành quái vật để bạn tàn sát đồng loại mà không hề áy náy.
-3. **Thân phận thật (Darkest Twist):** Zero từng là người yêu/nhà nghiên cứu cùng Eleanor, đã chết 2 năm trước. Cô ta điên loạn đào xác anh lên, giữ lại não bộ và ghép nối nó vào cái xác quái vật này để "hồi sinh" tình yêu của mình.
-4. **Mục đích cuối cùng:** Con đường Eleanor chỉ dẫn không phải để thoát lên mặt đất, mà đâm thẳng xuống The Sanctuary (Tầng hầm phong ấn sâu nhất), nơi cô ta muốn nhốt bạn lại sống bên cô ta mãi mãi.
+1. **Bi kịch gia đình:** Qua các mảnh ký ức rải rác, bạn nhận ra Eleanor đã từng mất tất cả: Cha mẹ, người thân, và đặc biệt là **đứa con gái bé bỏng** của hai người trong một thảm họa trên mặt đất. Cú sốc đó khiến tâm trí cô rạn nứt.
+2. **Sự bất tử điên rồ:** Chẳng bao lâu sau, bạn (người chồng) cũng mắc bạo bệnh và sắp chết. Hoảng loạn vì sợ mất đi người cuối cùng trên đời, Eleanor đã đưa bạn xuống phòng thí nghiệm bí mật. Cô ta dùng mọi công nghệ cấm (sinh học lai máy móc) để biến bạn thành một cỗ máy quái vật bất tử. Cô sẵn sàng nhốt bạn dưới lòng đất mãi mãi chỉ để "bảo vệ" bạn.
+3. **Ảo giác tàn khốc:** Những "quái vật" mà bạn đang xé xác từ đầu game thực chất là Lực lượng Đặc nhiệm Cứu hộ được cử xuống để giải cứu bạn và ngăn chặn Eleanor. Con chip của cô ấy đã hack hệ thống thần kinh của bạn, bóp méo hình ảnh họ thành quái vật để bạn tự tay giết những người đến cứu mình.
+4. **Mục đích của hành trình:** Khi nhận ra sự thật, hành trình của bạn không phải là "chạy trốn" nữa, mà là **giải thoát cho vợ mình** khỏi sự điên loạn và kết thúc chuỗi bi kịch đau đớn này.
 
 **Kết cục (Endings):**
-- **Bad End (Không tìm đủ mảnh ghép ký ức):** Bạn bước vào hầm, cánh cửa đóng sầm lại. Màn hình tắt ngấm với tiếng cười của Eleanor. Bạn mãi là súc vật nuôi của cô ta trong bóng tối.
-- **True End (Khám phá 100% bản đồ):** Bạn tự tay xé nát con chip, đối mặt với Eleanor. Cô ta tự tiêm virus tối thượng vào người, biến thành một Nữ Chúa nửa người/nửa máy khổng lồ để giữ bạn lại (Final Boss Fight). Sau khi hạ gục cô ta, cô ta chết trong vòng tay bạn. Bạn trốn thoát lên mặt đất, nhưng nhận ra cơ thể sinh-cơ học này không thể sống thiếu không khí của phòng thí nghiệm, gục ngã dưới bình minh. 
+- **Bad End (Không tìm đủ mảnh ghép ký ức):** Bạn cam chịu số phận, ngoan ngoãn đi xuống tầng hầm sâu nhất (The Sanctuary). Cánh cửa đóng sầm lại. Bạn chấp nhận làm một con quái vật vô hồn sống trong lồng kính, để Eleanor mãi mãi mỉm cười vuốt ve bạn trong bóng tối.
+- **Normal End:** Bạn phá hủy hệ thống, giết chết Eleanor để chấm dứt sự điên loạn. Cơ thể bạn cũng gục ngã vì mất đi năng lượng duy trì từ hệ thống của cô ấy.
+- **True End (Khám phá 100% bản đồ & Lấy được món đồ chơi của con gái):** Bạn đối mặt với Eleanor (Final Boss Fight) lúc này đã tiêm virus biến thành quái vật khổng lồ vì tuyệt vọng. Sau khi đánh bại cô, bạn dùng món đồ chơi của con gái để thức tỉnh chút nhân tính cuối cùng trong cô. Eleanor khóc, xin lỗi và tự tay ngắt kết nối sự sống của cả hai. Hai vợ chồng nắm tay nhau ra đi trong đống đổ nát, linh hồn được giải thoát và đoàn tụ cùng con gái.
 
 ---
 

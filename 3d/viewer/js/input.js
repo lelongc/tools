@@ -43,6 +43,12 @@ window.addEventListener('keydown', (e) => {
         if (key === 'l') { keys.skill3Pressed = true; lastPressedTime.skill3 = now; }
         if (key === 'i') { keys.skill4Pressed = true; lastPressedTime.skill4 = now; }
         if (key === 'q') { keys.healPressed = true; lastPressedTime.heal = now; }
+        
+        // Tab for Lore Menu
+        if (key === 'tab') {
+            e.preventDefault();
+            if (window.LoreSystem) window.LoreSystem.toggleMenu();
+        }
     }
     keyState[key] = true;
 

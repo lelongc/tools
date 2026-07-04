@@ -6,8 +6,8 @@ import { addParticle } from './effects.js';
 export function getPlayerColorRgba(alpha) { return player.form === 'cyber' ? `rgba(0, 255, 255, ${alpha})` : `rgba(68, 255, 68, ${alpha})`; }
 
 export const player = {
-    x: 64,
-    y: 100,
+    x: 100,
+    y: 700,
     width: 20,
     height: 28,
     vx: 0,
@@ -27,7 +27,10 @@ export const player = {
     animTime: 0,
     scaleX: 1,
     scaleY: 1,
-    hasClippedJump: false
+    canHover: true,
+    hoverTimer: 1.0,
+    hasClippedJump: false,
+    doubleJumpAvailable: false,
 };
 
 export function updatePlayer(dt, addParticle) {
@@ -157,6 +160,7 @@ export function updatePlayer(dt, addParticle) {
                 player.vy = player.jumpForce;
                 player.isGrounded = false;
                 player.hasClippedJump = false; // Reset flag for variable jump
+                player.doubleJumpAvailable = true; // Reset double jump
                 
                 // Jump stretch (anticipation & launch)
                 player.scaleX = 0.6;
@@ -167,6 +171,21 @@ export function updatePlayer(dt, addParticle) {
                     addParticle(player.x + player.width/2, player.y + player.height, 
                                 (Math.random()-0.5)*100, -Math.random()*50, getPlayerColorRgba(0.5), 0.3);
                 }
+            } else if (!player.isGrounded && player.doubleJumpAvailable && window.doubleJumpUnlocked) {
+                // Double Jump
+                player.vy = player.jumpForce * 0.9;
+                player.doubleJumpAvailable = false;
+                player.hasClippedJump = false;
+                
+                player.scaleX = 0.7;
+                player.scaleY = 1.3;
+                
+                // Double jump particles
+                for(let i=0; i<10; i++) {
+                    addParticle(player.x + player.width/2, player.y + player.height/2, 
+                                (Math.random()-0.5)*200, Math.random()*150, '#cc44ff', 0.5, 'tex_star', 12);
+                }
+                window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 3}}));
             }
         }
 
@@ -207,7 +226,8 @@ export function updatePlayer(dt, addParticle) {
 
         // Dashing & Tethering
         if (player.dashCooldown > 0) player.dashCooldown -= dt;
-        if (keys.dashPressed && player.dashCooldown <= 0) {
+        if (keys.dashPressed && player.dashCooldown <= 0 && window.dashUnlocked) {
+            keys.dashPressed = false;
             if (player.form === 'bio') {
                 // Auto-Aim Magnetic Tether
                 let foundTether = false;
@@ -1299,15 +1319,7 @@ export function drawPlayer(ctx, camera) {
         ctx.stroke();
         ctx.restore(); // End clip
         
-        // 3. Draw Base Ring (Connecting the drill to the player)
-        ctx.strokeStyle = player.color;
-        ctx.lineWidth = 6;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, 8, baseRad + 5, 0, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
-        ctx.stroke();
+        ctx.restore();
         
         // Sparks at the drill tip
         if (Math.random() > 0.3) addParticle(player.x + (player.facingRight ? drillLen : -drillLen), player.y - 15, (Math.random()-0.5)*100, (Math.random()-0.5)*100, player.color, 0.4, 'tex_spark', 15);

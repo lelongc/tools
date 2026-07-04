@@ -4,6 +4,7 @@ import { combatState, updateCombat, drawCombat } from '../combat.js';
 import { updateAndDrawParticles, addParticle } from '../effects.js';
 import { keys, resetInputPresses } from '../input.js';
 import { updateHUD } from '../ui.js';
+import { EnemyManager } from '../enemies.js';
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -28,6 +29,12 @@ export class GameScene extends Phaser.Scene {
         this.iceBlocks = this.physics.add.staticGroup();
         this.acidPools = this.physics.add.staticGroup();
         this.unstableGroup = this.physics.add.staticGroup();
+        this.lasers = this.physics.add.staticGroup();
+        
+        this.movingPlatforms = this.physics.add.group({
+            allowGravity: false,
+            immovable: true
+        });
 
         // Populate physics world from map array for collisions with Horizontal Tile Merging (Massive FPS boost)
         for (let row = 0; row < map.length; row++) {
@@ -77,6 +84,67 @@ export class GameScene extends Phaser.Scene {
             }
         }
 
+        // Save Points
+        this.savePoints = this.physics.add.group({
+            allowGravity: false,
+            immovable: true
+        });
+        
+        const savePoint1 = this.add.rectangle(1950, 750, 40, 80, 0x00ffcc, 0.5);
+        this.physics.add.existing(savePoint1);
+        savePoint1.body.allowGravity = false;
+        savePoint1.body.immovable = true;
+        this.savePoints.add(savePoint1);
+        
+        const savePoint2 = this.add.rectangle(7800, 750, 40, 80, 0x00ffcc, 0.5);
+        this.physics.add.existing(savePoint2);
+        savePoint2.body.allowGravity = false;
+        savePoint2.body.immovable = true;
+        this.savePoints.add(savePoint2);
+        
+        const savePoint3 = this.add.rectangle(13000, 750, 40, 80, 0x00ffcc, 0.5);
+        this.physics.add.existing(savePoint3);
+        savePoint3.body.allowGravity = false;
+        savePoint3.body.immovable = true;
+        this.savePoints.add(savePoint3);
+
+        const savePoint4 = this.add.rectangle(18000, 750, 40, 80, 0x00ffcc, 0.5);
+        this.physics.add.existing(savePoint4);
+        savePoint4.body.allowGravity = false;
+        savePoint4.body.immovable = true;
+        this.savePoints.add(savePoint4);
+
+        // Memory Fragments (Lore Collectibles)
+        this.memoryFragments = this.physics.add.group({
+            allowGravity: false,
+            immovable: true
+        });
+
+        const fragmentData = [
+            { id: 'mem_01', x: 1200, y: 720 }, // Room 1-2
+            { id: 'mem_02', x: 4900, y: 600 }, // Room 1-8
+            { id: 'mem_03', x: 7500, y: 400 }, // Room 2-5
+            { id: 'mem_04', x: 10500, y: 500 }, // Room 2-10
+            { id: 'mem_05', x: 13500, y: 200 }, // Room 3-3
+            { id: 'mem_06', x: 14500, y: 750 }, // Room 3-5 (Required)
+            { id: 'mem_07', x: 15500, y: 400 }, // Room 3-7
+            { id: 'mem_08', x: 18500, y: 750 }  // Room 4-3
+        ];
+
+        fragmentData.forEach(data => {
+            // Invisible physics body
+            const frag = this.add.rectangle(data.x, data.y, 40, 40, 0xffffff, 0);
+            this.physics.add.existing(frag);
+            frag.body.allowGravity = false;
+            frag.body.immovable = true;
+            frag.memoryId = data.id;
+            
+            // Visuals
+            frag.visual = this.add.rectangle(data.x, data.y, 16, 16, 0x00ffff, 0.8);
+            
+            this.memoryFragments.add(frag);
+        });
+
         // Initialize Keyboard inputs
         this.cursors = this.input.keyboard.createCursorKeys();
         this.keyW = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
@@ -100,10 +168,144 @@ export class GameScene extends Phaser.Scene {
         this.debugText = this.add.text(10, 10, 'Debug:', { font: '16px Courier', fill: '#00ffcc', backgroundColor: '#000000' }).setScrollFactor(0);
         this.debugText.setDepth(100);
 
+        this.roomTriggers = [
+            { x: 100, id: 'tut1', fired: false, action: () => {
+                if (window.DialogueSystem) window.DialogueSystem.show("...Anh ơi? Anh nghe em nói không? Đừng sợ. Hệ thống thần kinh đang khởi động lại... Cử động thử đi anh.", 'normal', 5000);
+            }},
+            { x: 600, id: 'tut2', fired: false, action: () => {
+                if (window.DialogueSystem) window.DialogueSystem.show("Tốt lắm. Cơ thể mới đang phản hồi tốt. Anh thật tuyệt vời.", 'normal', 4000);
+            }},
+            { x: 1000, id: 'r1-2', fired: false, action: () => {
+                if (window.DialogueSystem) window.DialogueSystem.show("Cẩn thận anh! Có sinh vật đột biến phía trước. Hãy dùng cánh tay để tự vệ - nhấn J để chém.", 'normal', 5000);
+            }},
+            { x: 1500, id: 'r1-3', fired: false, action: () => {
+                if (window.DialogueSystem) window.DialogueSystem.show("Khu vực này từng là nơi em làm việc... Trước khi mọi thứ sụp đổ. Đừng nhìn vào những bức ảnh đó, anh. Chúng không quan trọng nữa.", 'worried', 5000);
+            }},
+            { x: 1800, id: 'r1-4', fired: false, action: () => {
+                if (window.DialogueSystem) window.DialogueSystem.show("Đây là Trạm Lưu Trữ. Anh có thể nghỉ ngơi ở đây. Em sẽ luôn ở bên cạnh anh... Luôn luôn.", 'normal', 5000);
+            }},
+            { x: 5300, id: 'boss1', fired: false, action: () => {
+                if (window.DialogueSystem) window.DialogueSystem.show("Cái robot đó... Nó là hệ thống an ninh cũ, đã hóa điên. Tiêu diệt nó đi anh. Đừng để nó ngăn cản chúng ta.", 'angry', 5000);
+            }},
+            { x: 5800, id: 'act2_start', fired: false, action: () => {
+                if (window.DialogueSystem) window.DialogueSystem.show("Khu này... là nơi em nuôi trồng các tế bào sinh học. Đẹp phải không anh? Mọi thứ ở đây đều sống nhờ tình yêu của em dành cho anh.", 'normal', 5000);
+            }},
+            { x: 7000, id: 'acid_warn', fired: false, action: () => {
+                if (window.DialogueSystem) window.DialogueSystem.show("Cẩn thận acid! Cơ thể Bio-Probe của anh có thể chịu được... nhưng em không muốn anh đau.", 'worried', 5000);
+            }},
+            { x: 11000, id: 'boss2', fired: false, action: () => {
+                if (window.DialogueSystem) window.DialogueSystem.show("Sinh vật này... em từng nuôi nó. Nó rất đẹp khi còn nhỏ. Giống như... [im lặng 3 giây] ...Tiêu diệt nó đi.", 'worried', 5000);
+            }},
+            { x: 11800, id: 'act3_start', fired: false, action: () => {
+                if (window.DialogueSystem) window.DialogueSystem.show("Anh... đừng vào khu này. Xin anh. Dữ liệu trong đây bị hỏng hết rồi. Không có gì đáng xem đâu. Quay lại đi...", 'worried', 5000);
+            }},
+            { x: 12200, id: 'glitch1', fired: false, action: () => {
+                if (window.DialogueSystem) window.DialogueSystem.show("CÁI ĐÓ LÀ LỖI! LỖI HIỂN THỊ! ĐỪNG TIN VÀO NÓ! Bọn quái vật đang cố LỪA ANH!", 'glitch', 5000);
+            }},
+            { x: 14500, id: 'room3_5', fired: false, action: () => {
+                window.truthRevealed = true; // ALL ENEMIES REVEAL TRUTH NAMES FROM HERE
+                window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 30}}));
+                if (window.GlitchSystem) window.GlitchSystem.trigger(0.8, 5);
+                if (window.DialogueSystem) window.DialogueSystem.show("ĐỪNG NGHE! XIN ANH ĐỪNG NGHE! Em... em không muốn vậy... Tại dịch bệnh! Em chỉ muốn không ai rời xa em nữa...", 'crying', 6000);
+            }},
+            { x: 15200, id: 'maze', fired: false, action: () => {
+                if (window.DialogueSystem) window.DialogueSystem.show("Rẽ trái anh! PHẢI rẽ trái!", 'angry', 3000);
+            }},
+            { x: 16800, id: 'act4_start', fired: false, action: () => {
+                if (window.DialogueSystem) window.DialogueSystem.show("Anh... anh thật sự muốn đến đó sao? Nếu anh ngắt Lõi... cả hai chúng ta đều sẽ chết. Anh hiểu chứ?", 'crying', 5000);
+            }},
+            { x: 19800, id: 'before_final', fired: false, action: () => {
+                if (window.DialogueSystem) window.DialogueSystem.show("Đây là cơ hội cuối cùng anh quay lại... Nếu anh bước qua cánh cửa kia... chúng ta sẽ không bao giờ trở lại được nữa.", 'glitch', 5000);
+            }},
+            { x: 20000, id: 'final_boss', fired: false, action: () => {
+                if (window.DialogueSystem) window.DialogueSystem.show("Em đã xây dựng tất cả chỉ cho anh. Căn phòng này, cơ thể mới của anh, sự bất tử... TẤT CẢ CHỈ VÌ TÌNH YÊU CỦA EM!", 'glitch', 6000);
+            }}
+        ];
+
+        // Enemy Manager
+        this.enemyManager = new EnemyManager(this);
+        window.enemyManager = this.enemyManager;
+        this.physics.add.collider(this.enemyManager.physicsGroup, this.platforms);
+        
+        // Spawn Enemies for Room 1-2
+        this.enemyManager.spawnCrawler(850, 750);
+        this.enemyManager.spawnCrawler(1100, 750);
+        
+        // Spawn Enemies for Room 1-3
+        this.enemyManager.spawnCrawler(1400, 750);
+        this.enemyManager.spawnSpitter(1600, 750);
+        
+        // Spawn Floater in Room 1-8
+        this.enemyManager.spawnFloater(4800, 500);
+        
+        // Spawn Boss Warden in Room 1-9
+        this.enemyManager.spawnWarden(5400, 750);
+        
+        // --- ACT 2 ---
+        // Spawn Enemies for Room 2-1
+        this.enemyManager.spawnLeechVine(5850, 480);
+        this.enemyManager.spawnLeechVine(6000, 480);
+        
+        // Spawn Enemies for Room 2-2
+        this.enemyManager.spawnCharger(6600, 750);
+        this.enemyManager.spawnCharger(6800, 750);
+        
+        // Spawn Boss Mother Vine in Room 2-11
+        this.enemyManager.spawnMotherVine(11200, 750);
+        
+        // Add moving platforms
+        const mplat1 = this.add.rectangle(6200, 600, 96, 32, 0x444444);
+        this.physics.add.existing(mplat1);
+        mplat1.body.allowGravity = false;
+        mplat1.body.immovable = true;
+        mplat1.body.setVelocityX(100);
+        mplat1.minX = 6200;
+        mplat1.maxX = 6500;
+        this.movingPlatforms.add(mplat1);
+
+        const mplat2 = this.add.rectangle(7000, 600, 96, 32, 0x444444);
+        this.physics.add.existing(mplat2);
+        mplat2.body.allowGravity = false;
+        mplat2.body.immovable = true;
+        mplat2.body.setVelocityY(-100);
+        mplat2.minY = 400;
+        mplat2.maxY = 700;
+        this.movingPlatforms.add(mplat2);
+
+        // --- ACT 3 ---
+        // Laser Corridor
+        for(let r=12; r<18; r++) {
+            const laser = this.add.rectangle(370 * TILE_SIZE + TILE_SIZE/2, r * TILE_SIZE + TILE_SIZE/2, TILE_SIZE, TILE_SIZE, 0xff0000, 0.6);
+            this.lasers.add(laser);
+        }
+        
+        // Spawn Enemies
+        this.enemyManager.spawnCyborg(12000, 750);
+        this.enemyManager.spawnMimic(12500, 750);
+        
+        // Boss Archive Keeper
+        this.enemyManager.spawnArchiveKeeper(16000, 400);
+
+        // --- ACT 4 ---
+        // Lily's Toy (Item)
+        this.lilyToy = this.add.rectangle(605 * TILE_SIZE, 14 * TILE_SIZE, 30, 30, 0xffff00);
+        this.physics.add.existing(this.lilyToy);
+        this.lilyToy.body.allowGravity = false;
+        this.lilyToy.body.immovable = true;
+        
+        // Final Boss Eleanor Mutated
+        this.enemyManager.spawnEleanorMutated(20000, 750);
+
         // Add colliders
         this.physics.add.collider(this.playerBody, this.platforms, this.handlePlatformHit, null, this);
+        this.physics.add.collider(this.playerBody, this.movingPlatforms, this.handleMovingPlatformHit, null, this);
         this.physics.add.overlap(this.playerBody, this.bouncePads, this.handleBouncePad, null, this);
         this.physics.add.overlap(this.playerBody, this.acidPools, this.handleAcidPool, null, this);
+        this.physics.add.overlap(this.playerBody, this.lasers, this.handleLaserHit, null, this);
+        this.physics.add.overlap(this.playerBody, this.savePoints, this.handleSavePoint, null, this);
+        this.physics.add.overlap(this.playerBody, this.memoryFragments, this.handleMemoryPickup, null, this);
+        this.physics.add.overlap(this.playerBody, this.lilyToy, this.handleLilyToy, null, this);
+        this.physics.add.overlap(this.playerBody, this.enemyManager.physicsGroup, this.handleEnemyCollision, null, this);
 
         // Create Canvas Texture for drawing legacy Canvas 2D graphics
         this.canvasTexture = this.textures.createCanvas('proGameCanvas', 640, 480);
@@ -117,6 +319,29 @@ export class GameScene extends Phaser.Scene {
         this.bgRect = this.add.rectangle(320, 240, 640, 480, 0x000000);
         this.bgRect.setScrollFactor(0);
         this.bgRect.setDepth(-10);
+
+        // Dialogue Tracking
+        this.idleTimer = 0;
+        this.idleDialogueTriggered = false;
+        window.triggerViolentDialogue = () => {
+            if (!this.violentCount) this.violentCount = 0;
+            this.violentCount++;
+            if (this.violentCount >= 3) {
+                if (window.DialogueSystem && !window.DialogueSystem.isActive) {
+                    window.DialogueSystem.show("Đúng rồi anh! Nghiền nát chúng! Xé chúng ra từng mảnh! ...Em yêu cách anh chiến đấu.", 'glitch', 5000);
+                    this.violentCount = 0;
+                }
+            }
+        };
+        
+        window.triggerDamageDialogue = () => {
+            if (window.DialogueSystem && !window.DialogueSystem.isActive) {
+                // Randomize a bit to not be annoying
+                if (Math.random() < 0.5) {
+                    window.DialogueSystem.show("Anh bị thương rồi! Đau không anh? Em xin lỗi... Em đã nên thiết kế cơ thể anh tốt hơn... Em sẽ bù đắp cho anh.", 'worried', 5000);
+                }
+            }
+        };
 
         // Generate Grid Texture once (Hardware Accelerated)
         const gridCanvas = this.textures.createCanvas('gridTexture', 64, 64);
@@ -152,8 +377,32 @@ export class GameScene extends Phaser.Scene {
     }
     
     handlePlatformHit(playerObj, platformObj) {
-        if (platformObj.row !== undefined && platformObj.col !== undefined && playerObj.body.touching.down && platformObj.body.touching.up) {
+        player.isGrounded = true;
+        if (platformObj.col !== undefined && map[platformObj.row][platformObj.col] === 6) {
             triggerUnstable(platformObj.row, platformObj.col);
+        }
+    }
+    handleLaserHit(playerObj, laserObj) {
+        if (player.invulnerable > 0) return;
+        player.takeDamage(1);
+        player.invulnerable = 1.0;
+        player.vy = -300;
+        player.vx = player.facingRight ? -400 : 400;
+        window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: 10}}));
+    }
+
+    handleLilyToy(playerObj, toyObj) {
+        if (toyObj.active) {
+            toyObj.destroy();
+            window.trueEndUnlocked = true;
+            if (window.DialogueSystem) {
+                window.DialogueSystem.show("Gấu bông của Lily... Nó vẫn còn ở đây... Mẹ nhớ con...", 'worried', 4000);
+            }
+        }
+    }
+    handleMovingPlatformHit(playerObj, platformObj) {
+        if (playerObj.body.touching.down && platformObj.body.touching.up) {
+            player.isGrounded = true;
         }
     }
     
@@ -163,11 +412,80 @@ export class GameScene extends Phaser.Scene {
         if (combatState.hp > 0 && !combatState.isDashing) {
             // Take damage and knockback
             combatState.hp -= 5;
+            if (window.triggerDamageDialogue) window.triggerDamageDialogue();
+            
             this.playerBody.body.setVelocityY(-400); // knockback up
             this.cameras.main.shake(100, 0.01);
             
             for (let i = 0; i < 5; i++) {
                 addParticle(player.x + Math.random() * player.width, player.y + player.height, (Math.random() - 0.5) * 100, -Math.random() * 200, '#44ff44', 0.5, 'pixel', 6);
+            }
+        }
+    }
+
+    handleSavePoint(playerObj, saveObj) {
+        // Visual cue for save point
+        saveObj.fillAlpha = 0.8;
+        setTimeout(() => saveObj.fillAlpha = 0.5, 100);
+        
+        // If pressing UP or interacting (we can use UP arrow)
+        if (keys['ArrowUp'] && !this.isSaving) {
+            this.isSaving = true;
+            combatState.hp = 100; // Heal
+            
+            // Particles
+            for(let i=0; i<30; i++) {
+                addParticle(saveObj.x, saveObj.y + 40, (Math.random()-0.5)*100, -100-Math.random()*200, '#00ffcc', 0.8, 'tex_star', 8);
+            }
+            
+            if (window.DialogueSystem) {
+                window.DialogueSystem.show("Đã đồng bộ hóa dữ liệu thần kinh. Cơ thể anh đã được phục hồi.", 'normal', 3000);
+            }
+            
+            setTimeout(() => this.isSaving = false, 3000); // Prevent spam
+        }
+    }
+
+    handleMemoryPickup(playerObj, fragObj) {
+        if (window.LoreSystem && window.LoreSystem.unlock(fragObj.memoryId)) {
+            // Particle effect
+            for(let i=0; i<30; i++) {
+                const ang = Math.random() * Math.PI * 2;
+                const spd = Math.random() * 200;
+                addParticle(fragObj.x, fragObj.y, Math.cos(ang)*spd, Math.sin(ang)*spd, '#00ffff', 1.0, 'tex_spark', 10);
+            }
+            
+            // Trigger dialogue if defined
+            const lore = window.LoreData ? window.LoreData.find(l => l.id === fragObj.memoryId) : null;
+            if (lore && lore.dialogueTrigger && window.DialogueSystem) {
+                window.DialogueSystem.show(lore.dialogueTrigger, 'glitch', 6000);
+            }
+            
+            // Glitch effect
+            if (window.GlitchSystem) window.GlitchSystem.trigger(0.3, 3);
+            
+            // Cleanup visually
+            if (fragObj.visual) fragObj.visual.destroy();
+            fragObj.destroy();
+        }
+    }
+
+    handleEnemyCollision(playerObj, enemyBody) {
+        // Simple damage logic
+        if (combatState.hp > 0 && !combatState.isDashing && combatState.invulnTime <= 0) {
+            combatState.hp -= 2; // Base damage
+            combatState.invulnTime = 1.0; // i-frames
+            
+            if (window.triggerDamageDialogue) window.triggerDamageDialogue();
+            
+            // Knockback
+            const dir = playerObj.x < enemyBody.x ? -1 : 1;
+            this.playerBody.body.setVelocityX(dir * 300);
+            this.playerBody.body.setVelocityY(-200);
+            this.cameras.main.shake(100, 0.01);
+            
+            for (let i = 0; i < 5; i++) {
+                addParticle(player.x + player.width/2, player.y + player.height/2, (Math.random() - 0.5) * 100, -Math.random() * 200, '#ff0000', 0.5, 'pixel', 6);
             }
         }
     }
@@ -213,9 +531,45 @@ export class GameScene extends Phaser.Scene {
         player.blockedLeft = this.playerBody.body.blocked.left;
         player.blockedRight = this.playerBody.body.blocked.right;
 
+        // Dialogue Trigger: Idle
+        if (Math.abs(player.vx) < 5 && Math.abs(player.vy) < 5 && player.isGrounded) {
+            this.idleTimer += dt;
+            if (this.idleTimer > 15 && !this.idleDialogueTriggered) {
+                if (window.DialogueSystem) {
+                    window.DialogueSystem.show("Anh ơi? Sao anh dừng lại? Đừng suy nghĩ nhiều... Cứ đi tiếp đi anh. Em đang chờ anh mà.", 'worried', 5000);
+                }
+                this.idleDialogueTriggered = true;
+            }
+        } else {
+            this.idleTimer = 0;
+            this.idleDialogueTriggered = false;
+        }
+
+        // Room Triggers based on Player X position
+        if (this.roomTriggers) {
+            this.roomTriggers.forEach(trigger => {
+                if (!trigger.fired && player.x >= trigger.x) {
+                    trigger.fired = true;
+                    trigger.action();
+                }
+            });
+        }
+
         try {
             // Run updates
             updateUnstableBlocks(dt);
+        
+            // Update Moving Platforms
+            this.movingPlatforms.children.iterate((plat) => {
+                if (plat.minX && plat.maxX) {
+                    if (plat.x >= plat.maxX) plat.body.setVelocityX(-100);
+                    else if (plat.x <= plat.minX) plat.body.setVelocityX(100);
+                }
+                if (plat.minY && plat.maxY) {
+                    if (plat.y >= plat.maxY) plat.body.setVelocityY(-100);
+                    else if (plat.y <= plat.minY) plat.body.setVelocityY(100);
+                }
+            });
             
             // Re-sync platforms group to remove 'gone' unstable blocks
             this.unstableGroup.getChildren().forEach(block => {
@@ -227,8 +581,23 @@ export class GameScene extends Phaser.Scene {
                 }
             });
             
+            // Update memory fragments floating effect
+            const timeSeconds = time / 1000;
+            this.memoryFragments.getChildren().forEach((frag, idx) => {
+                if (frag.active && frag.visual) {
+                    frag.visual.y = frag.y + Math.sin(timeSeconds * 2 + idx) * 10;
+                    frag.visual.rotation = timeSeconds * 1.5;
+                    
+                    // Particles trailing the fragment
+                    if (Math.random() < 0.1) {
+                        addParticle(frag.visual.x + (Math.random()-0.5)*10, frag.visual.y + (Math.random()-0.5)*10, 0, Math.random()*-20, '#00ffff', 0.5, 'tex_spark', 6);
+                    }
+                }
+            });
+
             updatePlayer(dt, addParticle);
             updateCombat(player, dt);
+            this.enemyManager.update(dt, player);
             updateHUD(player);
         } catch(e) {
             this.debugText.setText("UPDATE ERROR: " + e.message + "\n" + e.stack.substring(0, 200));
