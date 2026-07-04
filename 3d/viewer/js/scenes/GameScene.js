@@ -1,8 +1,9 @@
-import { map, TILE_SIZE, drawWorld } from '../world.js';
-import { player, updatePlayer, drawPlayer } from '../player.js?v=15';
-import { combatState, updateCombat, drawCombat } from '../combat.js?v=15';
-import { updateAndDrawParticles, addParticle } from '../effects.js';
-import { keys, resetInputPresses } from '../input.js';
+import { map, TILE_SIZE, drawWorld, getTileType, updateUnstableBlocks, triggerUnstable, getZone, ZONE_COLORS } from '../world.js?v=19';
+import { player, updatePlayer, drawPlayer } from '../player.js?v=19';
+import { combatState, updateCombat, drawCombat } from '../combat.js?v=19';
+import { updateAndDrawParticles, addParticle } from '../effects.js?v=19';
+import { keys, resetInputPresses } from '../input.js?v=19';
+import { updateHUD } from '../ui.js?v=19';
 
 export class GameScene extends Phaser.Scene {
     constructor() {
@@ -19,6 +20,8 @@ export class GameScene extends Phaser.Scene {
         this.platforms = this.physics.add.staticGroup();
         this.bouncePads = this.physics.add.staticGroup();
         this.iceBlocks = this.physics.add.staticGroup();
+        this.acidPools = this.physics.add.staticGroup();
+        this.unstableGroup = this.physics.add.staticGroup();
 
         // Populate physics world from map array for collisions
         for (let row = 0; row < map.length; row++) {
@@ -37,6 +40,17 @@ export class GameScene extends Phaser.Scene {
                     const ice = this.add.rectangle(x, y, TILE_SIZE, TILE_SIZE, 0x000000, 0);
                     this.iceBlocks.add(ice);
                     this.platforms.add(ice); // Ice is solid
+                } else if (tile === 4) {
+                    const acid = this.add.rectangle(x, y + TILE_SIZE/4, TILE_SIZE, TILE_SIZE/2, 0x000000, 0);
+                    this.acidPools.add(acid);
+                } else if (tile === 5) {
+                    const slime = this.add.rectangle(x, y, TILE_SIZE, TILE_SIZE, 0x000000, 0);
+                    this.platforms.add(slime); // Slime is solid
+                } else if (tile === 6) {
+                    const block = this.add.rectangle(x, y, TILE_SIZE, TILE_SIZE, 0x000000, 0); 
+                    block.col = col; block.row = row; // store map coordinates
+                    this.unstableGroup.add(block);
+                    this.platforms.add(block); // Unstable is initially solid
                 }
             }
         }
@@ -65,8 +79,9 @@ export class GameScene extends Phaser.Scene {
         this.debugText.setDepth(100);
 
         // Add colliders
-        this.physics.add.collider(this.playerBody, this.platforms);
+        this.physics.add.collider(this.playerBody, this.platforms, this.handlePlatformHit, null, this);
         this.physics.add.overlap(this.playerBody, this.bouncePads, this.handleBouncePad, null, this);
+        this.physics.add.overlap(this.playerBody, this.acidPools, this.handleAcidPool, null, this);
 
         // Create Canvas Texture for drawing legacy Canvas 2D graphics
         this.canvasTexture = this.textures.createCanvas('proGameCanvas', 640, 480);
@@ -91,6 +106,25 @@ export class GameScene extends Phaser.Scene {
 
         // Expose camera and scene references for drawing loops
         this.fakeCamera = { x: 0, y: 0, width: 640, height: 480, player: player };
+    }
+    
+    handlePlatformHit(playerObj, platformObj) {
+        if (platformObj.row !== undefined && platformObj.col !== undefined && playerObj.body.touching.down && platformObj.body.touching.up) {
+            triggerUnstable(platformObj.row, platformObj.col);
+        }
+    }
+    
+    handleAcidPool(playerObj, acidObj) {
+        if (combatState.hp > 0 && !combatState.isDashing) {
+            // Take damage and knockback
+            combatState.hp -= 5;
+            this.playerBody.body.setVelocityY(-400); // knockback up
+            this.cameras.main.shake(100, 0.01);
+            
+            for (let i = 0; i < 5; i++) {
+                addParticle(player.x + Math.random() * player.width, player.y + player.height, (Math.random() - 0.5) * 100, -Math.random() * 200, '#44ff44', 0.5, 'pixel', 6);
+            }
+        }
     }
 
     handleBouncePad(playerObj, padObj) {
@@ -126,8 +160,21 @@ export class GameScene extends Phaser.Scene {
 
         try {
             // Run updates
+            updateUnstableBlocks(dt);
+            
+            // Re-sync platforms group to remove 'gone' unstable blocks
+            this.unstableGroup.getChildren().forEach(block => {
+                const mapTile = map[block.row][block.col];
+                if (mapTile === 0) {
+                    block.body.enable = false; // Disable collision when gone
+                } else if (mapTile === 6) {
+                    block.body.enable = true;  // Re-enable when respawned
+                }
+            });
+            
             updatePlayer(dt, addParticle);
             updateCombat(player, dt);
+            updateHUD(player);
         } catch(e) {
             this.debugText.setText("UPDATE ERROR: " + e.message + "\n" + e.stack.substring(0, 200));
             console.error("UPDATE ERROR: " + e.message);
@@ -179,7 +226,16 @@ export class GameScene extends Phaser.Scene {
 
     drawParallaxGrid(ctx) {
         ctx.save();
-        ctx.strokeStyle = 'rgba(0, 150, 255, 0.15)';
+        
+        const zoneIdx = getZone(Math.floor((player.x + player.width/2) / TILE_SIZE));
+        const colors = ZONE_COLORS[zoneIdx];
+        
+        // Background base color
+        ctx.fillStyle = colors.bg;
+        ctx.fillRect(0, 0, 640, 480);
+        
+        ctx.strokeStyle = colors.primary;
+        ctx.globalAlpha = 0.15;
         ctx.lineWidth = 1;
         
         const gridSize = 64;
@@ -197,25 +253,53 @@ export class GameScene extends Phaser.Scene {
         }
         ctx.stroke();
 
-        // Far parallax abstract geometry
-        ctx.strokeStyle = 'rgba(0, 255, 255, 0.05)';
-        ctx.lineWidth = 2;
+        // Far parallax based on zone
         const now = Date.now();
-        for (let i = 0; i < 5; i++) {
-            const floatX = ((i * 300 - this.fakeCamera.x * 0.05) % 840 + 840) % 840 - 100;
-            const floatY = 240 + Math.sin(now / 2000 + i) * 100 - this.fakeCamera.y * 0.05;
-            
-            ctx.save();
-            ctx.translate(floatX, floatY);
-            ctx.rotate(now / 5000 + i);
-            ctx.beginPath();
-            ctx.moveTo(-50, -50);
-            ctx.lineTo(50, -50);
-            ctx.lineTo(0, 50);
-            ctx.closePath();
-            ctx.stroke();
-            ctx.restore();
+        ctx.globalAlpha = 0.1;
+        
+        if (zoneIdx === 0) { // Cyber Lab
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 5; i++) {
+                const floatX = ((i * 300 - this.fakeCamera.x * 0.05) % 840 + 840) % 840 - 100;
+                const floatY = 240 + Math.sin(now / 2000 + i) * 100 - this.fakeCamera.y * 0.05;
+                ctx.save();
+                ctx.translate(floatX, floatY);
+                ctx.rotate(now / 5000 + i);
+                ctx.beginPath();
+                ctx.moveTo(-50, -50);
+                ctx.lineTo(50, -50);
+                ctx.lineTo(0, 50);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.restore();
+            }
+        } else if (zoneIdx === 1) { // Toxic Depths
+            ctx.fillStyle = colors.primary;
+            for (let i = 0; i < 15; i++) {
+                const floatX = ((i * 100 - this.fakeCamera.x * 0.08) % 840 + 840) % 840 - 100;
+                const floatY = ((480 + 200 - (now / 20 + i * 50) % 680) % 680) - this.fakeCamera.y * 0.08;
+                ctx.beginPath();
+                ctx.arc(floatX, floatY, 2 + (i % 4), 0, Math.PI*2);
+                ctx.fill();
+            }
+        } else if (zoneIdx === 2) { // Void Core
+            ctx.lineWidth = 3;
+            for (let i = 0; i < 8; i++) {
+                const floatX = ((i * 200 - this.fakeCamera.x * 0.06) % 840 + 840) % 840 - 100;
+                const floatY = 240 + Math.cos(now / 1500 + i) * 150 - this.fakeCamera.y * 0.06;
+                ctx.save();
+                ctx.translate(floatX, floatY);
+                ctx.rotate(now / 2000 - i);
+                ctx.beginPath();
+                ctx.moveTo(-30, 0);
+                ctx.lineTo(30, 0);
+                ctx.moveTo(0, -30);
+                ctx.lineTo(0, 30);
+                ctx.stroke();
+                ctx.restore();
+            }
         }
+        
         ctx.restore();
     }
 }

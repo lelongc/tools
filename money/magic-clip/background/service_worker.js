@@ -4,6 +4,12 @@ importScripts('sync.js');
 
 console.log('Magic Clip service worker running.');
 
+// Open website on first install
+chrome.runtime.onInstalled.addListener((details) => {
+    if (details.reason === 'install') {
+        chrome.tabs.create({ url: "https://neoclip-app.me/" });
+    }
+});
 // --- Licensing System (Pro Validation Engine) ---
 let isProCache = false;
 let proValidUntil = 0; // The timestamp until which Pro features can be used offline

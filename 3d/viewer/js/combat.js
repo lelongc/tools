@@ -1,6 +1,6 @@
-import { keys, isBuffered, consumeBuffer } from './input.js';
-import { addParticle } from './effects.js';
-import { getCollision, TILE_SIZE } from './world.js';
+import { keys, isBuffered, consumeBuffer } from './input.js?v=17';
+import { addParticle } from './effects.js?v=17';
+import { getCollision, TILE_SIZE } from './world.js?v=17';
 
 export const lightningSlashImg = new Image();
 lightningSlashImg.src = 'assets/lightining1-Sheet.png'; // 384x64 (6 frames)
@@ -32,6 +32,7 @@ export const spark2Img = createTintedImage('assets/spark_07.png', 0, 255, 255);
 
 
 export const combatState = {
+    hp: 100,
     isAttacking: false,
     attackTime: 0,
     attackDuration: 0.15,
@@ -453,8 +454,7 @@ export function updateCombat(player, dt) {
             
             // Wall Impact Explosion
             const impactX = hitWallRight ? player.x + player.width : player.x;
-            addParticle(impactX, player.y + player.height/2, 0, 0, '#00ffff', 0.5, 'ring', 40);
-            addParticle(impactX, player.y + player.height/2, (player.facingRight ? 200 : -200), 0, '#ffffff', 0.6, 'tex_impact', 90);
+            addParticle(impactX, player.y + player.height/2, (player.facingRight ? 200 : -200), 0, '#00ffff', 0.6, 'tex_impact', 90);
         } else if (combatState.dashStrikeTime <= 0) {
             combatState.isDashStriking = false;
             player.vx = player.facingRight ? 400 : -400; // Keep momentum

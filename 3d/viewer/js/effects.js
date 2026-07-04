@@ -10,19 +10,23 @@ particleTex.spark.src = 'assets/spark_03.png';
 particleTex.star.src = 'assets/star_05.png';
 particleTex.smoke.src = 'assets/smoke_04.png';
 particleTex.impact.src = 'assets/impact_ice_128.png';
+particleTex.scorch = new Image();
+particleTex.scorch.src = 'assets/scorch.png';
 
 // Pre-tinted texture cache for zero runtime overhead
 const colorsToPreTint = {
     cyan: '#00ffff',
     blue: '#0077ff',
-    white: '#ffffff'
+    white: '#ffffff',
+    green: '#44ff44'
 };
 
 export const tintedTex = {
     spark: {},
     star: {},
     smoke: {},
-    impact: {}
+    impact: {},
+    scorch: {}
 };
 
 const preTintImage = (img, name) => {
@@ -54,6 +58,7 @@ preTintImage(particleTex.spark, 'spark');
 preTintImage(particleTex.star, 'star');
 preTintImage(particleTex.smoke, 'smoke');
 preTintImage(particleTex.impact, 'impact');
+preTintImage(particleTex.scorch, 'scorch');
 
 function drawTintedImage(ctx, name, x, y, width, height, colKey, alpha, angle = 0, sx = 0, sy = 0, sw = null, sh = null) {
     const tintedImg = tintedTex[name] ? (tintedTex[name][colKey || 'cyan'] || tintedTex[name]['cyan'] || tintedTex[name]['white']) : null;
@@ -145,6 +150,8 @@ export function addParticle(x, y, vx, vy, color, life, type = 'pixel', size = 3)
         cLower.includes('#ff003c') || cLower.includes('255,0,60')
     ) {
         colKey = 'blue';
+    } else if (cLower.includes('#44ff44') || cLower.includes('green') || cLower.includes('68,255,68') || cLower.includes('100,255,100')) {
+        colKey = 'green';
     }
 
     particles.push({
@@ -217,6 +224,8 @@ export function updateAndDrawParticles(ctx, camera, dt) {
             const frameIdx = Math.max(0, Math.min(15, Math.floor((1 - alpha) * 15)));
             const frameX = frameIdx * 128;
             drawTintedImage(ctx, 'impact', drawX, drawY, p.size, p.size, p.colKey, alpha, p.angle, frameX, 0, 128, 128);
+        } else if (p.type === 'tex_scorch') {
+            drawTintedImage(ctx, 'scorch', drawX, drawY, p.size, p.size, p.colKey, alpha, p.angle);
         } else if (p.type === 'spark') {
             // Stretched motion-blurred electric spark with white core (using fast layered strokes!)
             const speed = Math.sqrt(p.vx * p.vx + p.vy * p.vy) || 1;

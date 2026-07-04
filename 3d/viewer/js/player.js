@@ -1,7 +1,7 @@
-import { keys, resetInputPresses } from './input.js';
-import { getCollision, TILE_SIZE } from './world.js';
-import { combatState, lightningSlashImg, lightningImpactImg, orbImg, spark1Img, spark2Img } from './combat.js?v=15';
-import { addParticle } from './effects.js';
+import { keys, resetInputPresses } from './input.js?v=17';
+import { getCollision, TILE_SIZE } from './world.js?v=17';
+import { combatState, lightningSlashImg, lightningImpactImg, orbImg, spark1Img, spark2Img } from './combat.js?v=17';
+import { addParticle } from './effects.js?v=17';
 
 export const player = {
     x: 64,
@@ -105,18 +105,24 @@ export function updatePlayer(dt, addParticle) {
         // Wall Slide Logic
         player.isWallSliding = false;
         if (!player.isGrounded && player.vy > 0 && !player.isHovering) {
-            const isPushingLeft = keys.left && getCollision(player.x - 2, player.y, player.width, player.height);
-            const isPushingRight = keys.right && getCollision(player.x + 2, player.y, player.width, player.height);
+            const leftTile = keys.left ? getCollision(player.x - 2, player.y, player.width, player.height) : 0;
+            const rightTile = keys.right ? getCollision(player.x + 2, player.y, player.width, player.height) : 0;
             
-            if (isPushingLeft || isPushingRight) {
+            const wallTile = leftTile || rightTile;
+            if (wallTile) {
                 player.isWallSliding = true;
-                if (player.vy > 80) player.vy = 80; // Slow down descent
+                
+                // Slime (5) is sticky, Ice (3) is slippery, default is 80
+                const slideSpeed = (wallTile === 5) ? 30 : (wallTile === 3) ? 200 : 80;
+                
+                if (player.vy > slideSpeed) player.vy = slideSpeed; // Slow down descent
                 
                 // Slide sparks
                 if (Math.random() < 0.4) {
-                    const px = isPushingLeft ? player.x : player.x + player.width;
+                    const px = leftTile ? player.x : player.x + player.width;
+                    const color = (wallTile === 5) ? 'rgba(100, 255, 100, 0.8)' : 'rgba(0, 255, 255, 0.8)';
                     addParticle(px, player.y + player.height/2 + (Math.random()-0.5)*10, 
-                                isPushingLeft ? 40 : -40, -60, 'rgba(0, 255, 255, 0.8)', 0.25, 'spark');
+                                leftTile ? 40 : -40, -60, color, 0.25, 'spark');
                 }
             }
         }
