@@ -1,5 +1,5 @@
-import { combatState } from './combat.js';
-import { ZONE_NAMES, getZone } from './world.js';
+import { combatState } from './combat.js?v=1783257459';
+import { ZONE_NAMES, getZone } from './world.js?v=1783257459';
 
 export function updateHUD(player) {
     // Update Zone Text

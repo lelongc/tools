@@ -1,13 +1,13 @@
-import { keys, resetInputPresses } from './input.js';
-import { getCollision, TILE_SIZE } from './world.js';
-import { combatState, lightningSlashImg, lightningImpactImg, orbImg, spark1Img, spark2Img } from './combat.js';
-import { addParticle } from './effects.js';
+import { keys, resetInputPresses } from './input.js?v=1783257459';
+import { getCollision, TILE_SIZE } from './world.js?v=1783257459';
+import { combatState, lightningSlashImg, lightningImpactImg, orbImg, spark1Img, spark2Img } from './combat.js?v=1783257459';
+import { addParticle } from './effects.js?v=1783257459';
 
 export function getPlayerColorRgba(alpha) { return player.form === 'cyber' ? `rgba(0, 255, 255, ${alpha})` : `rgba(68, 255, 68, ${alpha})`; }
 
 export const player = {
     x: 100,
-    y: 700,
+    y: 400,
     width: 20,
     height: 28,
     vx: 0,
@@ -171,7 +171,7 @@ export function updatePlayer(dt, addParticle) {
                     addParticle(player.x + player.width/2, player.y + player.height, 
                                 (Math.random()-0.5)*100, -Math.random()*50, getPlayerColorRgba(0.5), 0.3);
                 }
-            } else if (!player.isGrounded && player.doubleJumpAvailable && window.doubleJumpUnlocked) {
+            } else if (!player.isGrounded && player.doubleJumpAvailable) {
                 // Double Jump
                 player.vy = player.jumpForce * 0.9;
                 player.doubleJumpAvailable = false;
@@ -226,7 +226,7 @@ export function updatePlayer(dt, addParticle) {
 
         // Dashing & Tethering
         if (player.dashCooldown > 0) player.dashCooldown -= dt;
-        if (keys.dashPressed && player.dashCooldown <= 0 && window.dashUnlocked) {
+        if (keys.dashPressed && player.dashCooldown <= 0) {
             keys.dashPressed = false;
             if (player.form === 'bio') {
                 // Auto-Aim Magnetic Tether
@@ -241,7 +241,7 @@ export function updatePlayer(dt, addParticle) {
                 let minD = 999999;
                 
                 // Scan grid ONLY in front and STRICTLY ABOVE (r <= -1)
-                for (let r = -15; r <= -1; r++) {
+                for (let r = -30; r <= -1; r++) {
                     for (let c = 1; c <= 15; c++) {
                         const col = pCol + (player.facingRight ? c : -c);
                         const row = pRow + r;
@@ -254,8 +254,8 @@ export function updatePlayer(dt, addParticle) {
                             const dy = tY - pCy;
                             const distSq = dx*dx + dy*dy;
                             
-                            // Max range 500px (~500^2 = 250000)
-                            if (distSq < 250000 && distSq < minD) {
+                            // Max range 1000px (~1000^2 = 1000000)
+                            if (distSq < 1000000 && distSq < minD) {
                                 minD = distSq;
                                 tx = tX;
                                 ty = tY;

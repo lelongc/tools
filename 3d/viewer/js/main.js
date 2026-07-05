@@ -1,5 +1,5 @@
-import { GameScene } from './scenes/GameScene.js';
-import { LoreSystem } from './lore.js';
+import { GameScene } from './scenes/GameScene.js?v=1783257459';
+import { LoreSystem } from './lore.js?v=1783257459';
 
 const config = {
     type: Phaser.AUTO,

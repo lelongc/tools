@@ -176,7 +176,7 @@ for (let r = 0; r < ROWS; r++) {
 }
 mapStr += "];\n";
 
-const worldPath = 'd:/folder/tools/3d/viewer/js/world.js';
+const worldPath = 'd:/folder/tools/3d/viewer/js/world.js?v=1783257459';
 let worldContent = fs.readFileSync(worldPath, 'utf8');
 const regex = /export const map = \[\s*(?:\[.*?\]\s*,?\s*)*\];/;
 worldContent = worldContent.replace(regex, mapStr.trim());

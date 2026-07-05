@@ -1,7 +1,7 @@
-import { keys, isBuffered, consumeBuffer } from './input.js';
-import { addParticle } from './effects.js';
-import { getCollision, getTileType, TILE_SIZE } from './world.js';
-import { getPlayerColorRgba } from './player.js';
+import { keys, isBuffered, consumeBuffer } from './input.js?v=1783257459';
+import { addParticle } from './effects.js?v=1783257459';
+import { getCollision, getTileType, TILE_SIZE } from './world.js?v=1783257459';
+import { getPlayerColorRgba } from './player.js?v=1783257459';
 
 export const lightningSlashImg = new Image();
 lightningSlashImg.src = 'assets/lightining1-Sheet.png'; // 384x64 (6 frames)
@@ -213,10 +213,13 @@ export function releaseBioDrill(player) {
     combatState.bioDrillTime = drillTime;
     combatState.bioDrillCooldown = 1.0;
     combatState.bioDrillMaxCooldown = 1.0;
+    combatState.drillSpeed = drillSpeed;
+    
+    const event = new CustomEvent('cameraShake', { detail: { intensity: cameraShake } });
     if (window.triggerViolentDialogue) window.triggerViolentDialogue();
     
     // Pierce forward super fast depending on level
-    player.vx = player.facingRight ? drillSpeed : -drillSpeed;
+    player.vx = player.facingRight ? combatState.drillSpeed : -combatState.drillSpeed;
     player.vy = 0; // Freeze vertical movement
     
     window.dispatchEvent(new CustomEvent('cameraShake', {detail: {intensity: cameraShake}}));
@@ -261,9 +264,6 @@ export function updateCombat(player, dt) {
 
     // SKILL 2: Charge Slash / Bio-Drill (K)
     if (keys.skill2 && !isBusy && combatState.dashStrikeCooldown <= 0) {
-        // If bio form, only allow if drill is unlocked
-        if (player.form === 'bio' && !window.drillUnlocked) return;
-        
         // Bio form takes twice as long to charge
         combatState.chargeDuration = player.form === 'cyber' ? 0.5 : 1.0;
         

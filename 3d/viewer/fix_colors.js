@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const playerFile = path.join(__dirname, 'js', 'player.js');
+const playerFile = path.join(__dirname, 'js', 'player.js?v=1783257459');
 let content = fs.readFileSync(playerFile, 'utf8');
 
 // 1. Add getPlayerColorRgba at the top
@@ -25,7 +25,7 @@ fs.writeFileSync(playerFile, content, 'utf8');
 console.log('player.js updated');
 
 // Also do it for combat.js
-const combatFile = path.join(__dirname, 'js', 'combat.js');
+const combatFile = path.join(__dirname, 'js', 'combat.js?v=1783257459');
 let combatContent = fs.readFileSync(combatFile, 'utf8');
 
 // combat.js needs getPlayerColorRgba imported if it uses it.
@@ -37,8 +37,8 @@ if (!combatContent.includes('getPlayerColorRgba')) {
     );
     // In case the import format is different:
     combatContent = combatContent.replace(
-        "import { player } from './player.js';",
-        "import { player, getPlayerColorRgba } from './player.js';"
+        "import { player } from './player.js?v=1783257459';",
+        "import { player, getPlayerColorRgba } from './player.js?v=1783257459';"
     );
 }
 

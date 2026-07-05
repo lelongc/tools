@@ -30,8 +30,8 @@ global.Image = class Image { constructor() { this.complete = true; this.naturalW
 global.document = { createElement: () => ({ getContext: () => ctx }) };
 
 async function runTest() {
-    const { player, updatePlayer, drawPlayer } = await import('./js/player.js');
-    const { combatState, updateCombat } = await import('./js/combat.js');
+    const { player, updatePlayer, drawPlayer } = await import('./js/player.js?v=1783257459');
+    const { combatState, updateCombat } = await import('./js/combat.js?v=1783257459');
     
     // Set state to Bio Drilling
     combatState.isDashStriking = false;
