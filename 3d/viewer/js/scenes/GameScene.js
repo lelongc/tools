@@ -20,6 +20,24 @@ export class GameScene extends Phaser.Scene {
     preload() {
         // Load assets for physics collision bounds and sprites
         this.load.image('tileset', 'assets/tileset_pro.png');
+        this.load.image('prop_save_terminal', 'assets/prop_save_terminal.png');
+        this.load.image('prop_memory_fragment', 'assets/prop_memory_fragment.png');
+        this.load.image('lily_toy', 'assets/lily_toy.png');
+        
+        // Enemies
+        this.load.image('enemy_crawler', 'assets/enemy_crawler.png');
+        this.load.image('enemy_spitter', 'assets/enemy_spitter.png');
+        this.load.image('enemy_floater', 'assets/enemy_floater.png');
+        this.load.image('enemy_charger', 'assets/enemy_charger.png');
+        this.load.image('enemy_vine', 'assets/enemy_vine.png');
+        this.load.image('enemy_cyborg', 'assets/enemy_cyborg.png');
+        
+        // Bosses
+        this.load.image('boss_warden', 'assets/boss_warden.png');
+        this.load.image('boss_mother_vine', 'assets/boss_mother_vine.png');
+        this.load.image('boss_archive_keeper', 'assets/boss_archive_keeper.png');
+        this.load.image('boss_eleanor_biomech', 'assets/boss_eleanor_biomech.png');
+        this.load.image('boss_eleanor_hologram', 'assets/el_avatar_normal.png'); // Reuse avatar for hologram
     }
 
     create() {
@@ -90,25 +108,29 @@ export class GameScene extends Phaser.Scene {
             immovable: true
         });
         
-        const savePoint1 = this.add.rectangle(1950, 750, 40, 80, 0x00ffcc, 0.5);
+        const savePoint1 = this.add.sprite(1950, 750, 'prop_save_terminal');
+        savePoint1.setScale(0.1);
         this.physics.add.existing(savePoint1);
         savePoint1.body.allowGravity = false;
         savePoint1.body.immovable = true;
         this.savePoints.add(savePoint1);
         
-        const savePoint2 = this.add.rectangle(7800, 750, 40, 80, 0x00ffcc, 0.5);
+        const savePoint2 = this.add.sprite(7800, 750, 'prop_save_terminal');
+        savePoint2.setScale(0.1);
         this.physics.add.existing(savePoint2);
         savePoint2.body.allowGravity = false;
         savePoint2.body.immovable = true;
         this.savePoints.add(savePoint2);
         
-        const savePoint3 = this.add.rectangle(13000, 750, 40, 80, 0x00ffcc, 0.5);
+        const savePoint3 = this.add.sprite(13000, 750, 'prop_save_terminal');
+        savePoint3.setScale(0.1);
         this.physics.add.existing(savePoint3);
         savePoint3.body.allowGravity = false;
         savePoint3.body.immovable = true;
         this.savePoints.add(savePoint3);
-
-        const savePoint4 = this.add.rectangle(18000, 750, 40, 80, 0x00ffcc, 0.5);
+        
+        const savePoint4 = this.add.sprite(18000, 750, 'prop_save_terminal');
+        savePoint4.setScale(0.1);
         this.physics.add.existing(savePoint4);
         savePoint4.body.allowGravity = false;
         savePoint4.body.immovable = true;
@@ -140,7 +162,8 @@ export class GameScene extends Phaser.Scene {
             frag.memoryId = data.id;
             
             // Visuals
-            frag.visual = this.add.rectangle(data.x, data.y, 16, 16, 0x00ffff, 0.8);
+            frag.visual = this.add.sprite(data.x, data.y, 'prop_memory_fragment');
+            frag.visual.setScale(0.08);
             
             this.memoryFragments.add(frag);
         });
@@ -250,6 +273,11 @@ export class GameScene extends Phaser.Scene {
         this.enemyManager.spawnCharger(6600, 750);
         this.enemyManager.spawnCharger(6800, 750);
         
+        // Spawn Enemies for Room 2-10 (Toxic ambush)
+        this.enemyManager.spawnSpitter(10000, 750);
+        this.enemyManager.spawnCrawler(10200, 750);
+        this.enemyManager.spawnCharger(10600, 750);
+        
         // Spawn Boss Mother Vine in Room 2-11
         this.enemyManager.spawnMotherVine(11200, 750);
         
@@ -280,15 +308,20 @@ export class GameScene extends Phaser.Scene {
         }
         
         // Spawn Enemies
-        this.enemyManager.spawnCyborg(12000, 750);
-        this.enemyManager.spawnMimic(12500, 750);
+        this.enemyManager.spawnCyborg(12200, 750); // Moved to col 381 (safe floor)
+        this.enemyManager.spawnMimic(12800, 750);  // Moved to col 400 (safe floor)
+        
+        // Maze ambush
+        this.enemyManager.spawnCyborg(15200, 750);
+        this.enemyManager.spawnMimic(15400, 750);
         
         // Boss Archive Keeper
         this.enemyManager.spawnArchiveKeeper(16000, 400);
 
         // --- ACT 4 ---
         // Lily's Toy (Item)
-        this.lilyToy = this.add.rectangle(605 * TILE_SIZE, 14 * TILE_SIZE, 30, 30, 0xffff00);
+        this.lilyToy = this.add.sprite(605 * TILE_SIZE, 14 * TILE_SIZE, 'lily_toy');
+        this.lilyToy.setScale(0.06);
         this.physics.add.existing(this.lilyToy);
         this.lilyToy.body.allowGravity = false;
         this.lilyToy.body.immovable = true;
@@ -470,6 +503,60 @@ export class GameScene extends Phaser.Scene {
         }
     }
 
+    handleLilyToy(playerObj, toyObj) {
+        window.trueEndUnlocked = true;
+        
+        // Particle effect
+        for(let i=0; i<50; i++) {
+            addParticle(toyObj.x, toyObj.y, (Math.random()-0.5)*300, (Math.random()-0.5)*300, '#ffff00', 1.0, 'tex_star', 20);
+        }
+        
+        if (window.DialogueSystem) {
+            window.DialogueSystem.show("...Đồ chơi của Lily. Con gái chúng ta... Em nhớ nó quá. Cảm ơn anh đã tìm thấy nó.", 'crying', 6000);
+        }
+        
+        toyObj.destroy();
+    }
+
+    handleAcidPool(playerObj, poolObj) {
+        if (combatState.hp > 0 && combatState.invulnTime <= 0) {
+            combatState.hp -= 1;
+            combatState.invulnTime = 0.5;
+            this.playerBody.body.setVelocityY(-300);
+            this.cameras.main.shake(100, 0.01);
+            if (window.triggerDamageDialogue) window.triggerDamageDialogue();
+        }
+    }
+
+    handleLaserHit(playerObj, laserObj) {
+        if (combatState.hp > 0 && combatState.invulnTime <= 0 && !combatState.isDashing) {
+            combatState.hp -= 2;
+            combatState.invulnTime = 0.8;
+            this.playerBody.body.setVelocityY(-200);
+            this.playerBody.body.setVelocityX(playerObj.x < laserObj.x ? -300 : 300);
+            this.cameras.main.shake(100, 0.02);
+            if (window.triggerDamageDialogue) window.triggerDamageDialogue();
+        }
+    }
+
+    handlePlatformHit(playerObj, platformObj) {
+        if (platformObj.col !== undefined && platformObj.row !== undefined) {
+            triggerUnstable(platformObj.row, platformObj.col);
+            
+            // Note: Since unstableBlocks is tracked in world.js but the actual Phaser physical block is in GameScene, 
+            // we should also probably destroy/disable the physics body if it's 'gone'.
+            // Actually, updateUnstableBlocks in world.js does `map[r][c] = 0`.
+            // The Phaser bodies are NOT rebuilt! So they remain solid even if map[r][c] becomes 0!
+        }
+    }
+
+    handleMovingPlatformHit(playerObj, platformObj) {
+        // Player moves with platform if standing on it
+        if (platformObj.body.velocity.x !== 0 && playerObj.body.blocked.down) {
+            playerObj.x += platformObj.body.velocity.x * (1/60); // approximate
+        }
+    }
+
     handleEnemyCollision(playerObj, enemyBody) {
         // Simple damage logic
         if (combatState.hp > 0 && !combatState.isDashing && combatState.invulnTime <= 0) {
@@ -530,6 +617,20 @@ export class GameScene extends Phaser.Scene {
         player.isGrounded = this.playerBody.body.blocked.down;
         player.blockedLeft = this.playerBody.body.blocked.left;
         player.blockedRight = this.playerBody.body.blocked.right;
+
+        updateUnstableBlocks(dt);
+        
+        // Very inefficient, but simple way to sync Phaser bodies with map changes for unstable blocks
+        this.unstableGroup.getChildren().forEach(block => {
+            const currentTile = map[block.row][block.col];
+            if (currentTile === 0) {
+                block.body.checkCollision.none = true;
+                block.fillAlpha = 0;
+            } else if (currentTile === 6) {
+                block.body.checkCollision.none = false;
+                block.fillAlpha = 1; // Or whatever alpha it had
+            }
+        });
 
         // Dialogue Trigger: Idle
         if (Math.abs(player.vx) < 5 && Math.abs(player.vy) < 5 && player.isGrounded) {

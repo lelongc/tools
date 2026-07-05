@@ -14,7 +14,8 @@ export class EnemyManager {
 
     spawnCrawler(x, y) {
         // Crawler: HP 2, Patrols left/right
-        const body = this.scene.add.rectangle(x, y, 32, 20, 0xff0000);
+        const body = this.scene.add.sprite(x, y, 'enemy_crawler');
+        body.setScale(0.08);
         this.physicsGroup.add(body);
         body.body.setCollideWorldBounds(true);
         body.body.setGravityY(1200);
@@ -91,7 +92,8 @@ export class EnemyManager {
 
     spawnSpitter(x, y) {
         // Spitter: HP 3, Stands still, shoots acid projectiles every 2s
-        const body = this.scene.add.rectangle(x, y, 24, 32, 0xffaa00);
+        const body = this.scene.add.sprite(x, y, 'enemy_spitter');
+        body.setScale(0.08);
         this.physicsGroup.add(body);
         body.body.setCollideWorldBounds(true);
         body.body.setGravityY(1200);
@@ -181,7 +183,8 @@ export class EnemyManager {
 
     spawnFloater(x, y) {
         // Floater: HP 2, hovers and chases player if near
-        const body = this.scene.add.rectangle(x, y, 24, 24, 0xcc00ff);
+        const body = this.scene.add.sprite(x, y, 'enemy_floater');
+        body.setScale(0.08);
         this.physicsGroup.add(body);
         body.body.setCollideWorldBounds(true);
         body.body.setGravityY(0); // Floats
@@ -266,7 +269,8 @@ export class EnemyManager {
 
     spawnWarden(x, y) {
         // Boss MB01 - Warden
-        const body = this.scene.add.rectangle(x, y, 64, 80, 0x880000);
+        const body = this.scene.add.sprite(x, y, 'boss_warden');
+        body.setScale(0.2);
         this.physicsGroup.add(body);
         body.body.setCollideWorldBounds(true);
         body.body.setGravityY(1200);
@@ -365,7 +369,8 @@ export class EnemyManager {
 
     spawnLeechVine(x, y) {
         // Leech Vine: Static enemy hanging from ceiling or on floor, attacks if near
-        const body = this.scene.add.rectangle(x, y, 20, 60, 0x00ff44);
+        const body = this.scene.add.sprite(x, y, 'enemy_vine');
+        body.setScale(0.1);
         this.physicsGroup.add(body);
         body.body.setCollideWorldBounds(true);
         body.body.setGravityY(0);
@@ -432,7 +437,8 @@ export class EnemyManager {
 
     spawnCharger(x, y) {
         // Charger: High speed ground enemy, charges when player is on same Y level
-        const body = this.scene.add.rectangle(x, y, 40, 32, 0xffaa00);
+        const body = this.scene.add.sprite(x, y, 'enemy_charger');
+        body.setScale(0.1);
         this.physicsGroup.add(body);
         body.body.setCollideWorldBounds(true);
         body.body.setGravityY(1200);
@@ -518,7 +524,8 @@ export class EnemyManager {
 
     spawnMotherVine(x, y) {
         // Boss MB02 - Mother Vine
-        const body = this.scene.add.rectangle(x, y, 96, 96, 0x004400);
+        const body = this.scene.add.sprite(x, y, 'boss_mother_vine');
+        body.setScale(0.3);
         this.physicsGroup.add(body);
         body.body.setCollideWorldBounds(true);
         body.body.setGravityY(1200);
@@ -622,7 +629,8 @@ export class EnemyManager {
 
     spawnCyborg(x, y) {
         // Cyborg Guard: Patrols and shoots plasma
-        const body = this.scene.add.rectangle(x, y, 32, 64, 0x00ffff);
+        const body = this.scene.add.sprite(x, y, 'enemy_cyborg');
+        body.setScale(0.15);
         this.physicsGroup.add(body);
         body.body.setCollideWorldBounds(true);
         body.body.setGravityY(1200);
@@ -701,7 +709,8 @@ export class EnemyManager {
 
     spawnMimic(x, y) {
         // Mimic Terminal: Fake save point (looks green, turns red when close)
-        const body = this.scene.add.rectangle(x, y, 40, 80, 0x00ffcc, 0.5);
+        const body = this.scene.add.sprite(x, y, 'prop_save_terminal');
+        body.setScale(0.1);
         this.physicsGroup.add(body);
         body.body.setCollideWorldBounds(true);
         body.body.setGravityY(1200);
@@ -770,7 +779,8 @@ export class EnemyManager {
 
     spawnArchiveKeeper(x, y) {
         // Boss MB03 - Archive Keeper
-        const body = this.scene.add.rectangle(x, y, 64, 64, 0xcc44ff);
+        const body = this.scene.add.sprite(x, y, 'boss_archive_keeper');
+        body.setScale(0.2);
         this.physicsGroup.add(body);
         body.body.setCollideWorldBounds(true);
         body.body.setGravityY(0); // Floats
@@ -876,7 +886,8 @@ export class EnemyManager {
 
     spawnEleanorMutated(x, y) {
         // Final Boss - Eleanor (3 Phases)
-        const body = this.scene.add.rectangle(x, y, 80, 120, 0xffffff); // Hologram color initially
+        const body = this.scene.add.sprite(x, y, 'boss_eleanor_hologram');
+        body.setScale(0.25);
         this.physicsGroup.add(body);
         body.body.setCollideWorldBounds(true);
         body.body.setGravityY(0);
@@ -940,6 +951,8 @@ export class EnemyManager {
 
                     if (activePillars === 0) {
                         enemy.phase = 2;
+                        body.setTexture('boss_eleanor_biomech');
+                        body.setScale(0.35);
                         enemy.hp = 50;
                         enemy.maxHp = 50;
                         enemy.name = 'Bio-Mech Eleanor';
