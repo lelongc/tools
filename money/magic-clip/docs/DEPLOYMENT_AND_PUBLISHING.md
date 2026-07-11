@@ -95,3 +95,34 @@ Khi trạng thái chuyển thành **Đang chờ xem xét**, App của bạn sẽ
 1. Vào Google Cloud Console, ô tìm kiếm gõ **Google Drive API**.
 2. Chọn kết quả và bấm nút **Enable (Bật)**.
 3. Nếu không bật cái này, API sẽ từ chối mọi nỗ lực upload file JSON backup của extension.
+
+---
+
+## PHẦN 5: ĐƯA LÊN MICROSOFT EDGE ADD-ONS
+
+Microsoft Edge dùng chung lõi Chromium với Chrome, nên bạn có thể nộp nguyên file 
+eoclip-release.zip lên kho ứng dụng của Microsoft.
+
+### 1. Đăng ký & Tải file lên
+1. Truy cập [Microsoft Partner Center](https://partner.microsoft.com/en-us/dashboard/microsoftedge/public/login).
+2. Đăng ký tài khoản Developer (Miễn phí). Lưu ý: **Publisher Name** và **Địa chỉ** phải khớp chính xác 100% với Căn cước công dân (CCCD). Zip code Việt Nam là 6 số (ví dụ: Hưng Yên là 160000).
+3. Bấm **Create new extension** và kéo thả file 
+eoclip-release.zip vào.
+
+### 2. Điền thông tin cửa hàng
+Các thông tin điền Y HỆT như bên Chrome:
+- **Tên, Mô tả, Thể loại**: Bê nguyên từ Chrome sang.
+- **Từ khóa (Search terms)**: Dùng các từ khóa (tối đa 21 từ): clipboard manager, clipboard history, copy paste tool, productivity app, google drive sync, extract text, clipboard search.
+- **Hình ảnh**: 
+  - Edge kiểm duyệt gắt định dạng PNG (Không nhận Alpha). Hãy dùng các file có tiền tố edge_ mà chúng ta đã convert.
+  - Tải lên ảnh Promo Tile (440x280) và Logo.
+- **Quyền riêng tư (Permissions)**: Copy y nguyên các câu tiếng Anh giải trình Quyền ở Phần 3 dán sang.
+- **Notes for certification**: 
+  > Hello Edge Team, NeoClip is a smart clipboard manager. We request the <all_urls> permission to globally monitor the 'copy' event and inject our UI. We use standard OAuth2 for Google Drive sync. Thank you!
+
+### 3. Cấu hình Google Cloud cho Edge
+Khi Edge cấp cho bạn một **CRX ID** (Ví dụ: memgcnfeecfmoacpoolhaglhpmjbhlp), bạn phải thêm nó vào Google Cloud để tính năng Sync hoạt động:
+1. Quay lại Google Cloud Console > Credentials > Web Application Client ID.
+2. Thêm dòng này vào **Authorized redirect URIs**:
+   https://[CRX-ID-CỦA-EDGE].chromiumapp.org/
+3. Bấm Save. Vậy là Google Drive Sync sẽ chạy hoàn hảo trên cả trình duyệt Edge!
