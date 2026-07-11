@@ -34,7 +34,7 @@ async function minifyFiles(dir) {
             const code = fs.readFileSync(fullPath, 'utf8');
             const result = await minify(code, {
                 mangle: {
-                    toplevel: true, // Mangle variable names in top level
+                    toplevel: false, // Prevent renaming global functions to fix cross-file calls
                 },
                 compress: {
                     drop_console: true, // Remove console.logs
