@@ -304,9 +304,8 @@ chrome.runtime.onMessage.addListener((req, sender, respond) => {
                                         licenseLoaded = true;
                                     }
                                 }
-                            } else {
-                                await syncWithDrive(true);
                             }
+                            // If no license found on Drive, do NOT sync — Free users don't get cloud sync.
                         } else if (isProNow && typeof saveLicenseToDrive === 'function') {
                             const res = await new Promise(r => chrome.storage.local.get(['licenseKey', 'instanceId'], r));
                             if (res.licenseKey) await saveLicenseToDrive(res.licenseKey, res.instanceId);
