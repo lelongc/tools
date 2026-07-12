@@ -283,10 +283,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = { settingsTimestamp: Date.now() };
         data[key] = value;
         chrome.storage.local.set(data, () => {
-            chrome.runtime.sendMessage({ action: 'checkGoogleLogin' }, res => {
-                if (res && res.ok) {
-                    showToast('Syncing settings...');
-                    chrome.runtime.sendMessage({ action: 'syncWithDrive' });
+            chrome.runtime.sendMessage({ action: 'getProStatus' }, proRes => {
+                const isPro = proRes && proRes.isPro;
+                if (isPro) {
+                    chrome.runtime.sendMessage({ action: 'checkGoogleLogin' }, res => {
+                        if (res && res.ok) {
+                            showToast('Syncing settings...');
+                            chrome.runtime.sendMessage({ action: 'syncWithDrive' });
+                        }
+                    });
                 }
             });
         });
