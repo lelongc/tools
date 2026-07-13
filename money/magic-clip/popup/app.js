@@ -137,7 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Verify license handler (reusable)
     function handleVerifyLicense(inputEl, btnEl) {
         const key = inputEl ? inputEl.value.trim() : '';
-        if (!key) return;
+        if (!key) {
+            showToast('Please enter a license key first', true);
+            return;
+        }
 
         btnEl.textContent = '...';
         btnEl.disabled = true;
