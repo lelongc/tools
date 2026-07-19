@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://fln12345"]
+
+[ext_resource type="Script" path="res://finish_line.gd" id="1_flscript"]
+[ext_resource type="Material" path="res://neon_mat_finish.tres" id="2_mat"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fl"]
+size = Vector3(10, 5, 2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fl"]
+material = ExtResource("2_mat")
+size = Vector3(10, 5, 2)
+
+[node name="FinishLine" type="Area3D"]
+script = ExtResource("1_flscript")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_fl")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_fl")

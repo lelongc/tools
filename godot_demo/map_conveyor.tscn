@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3 uid="uid://map5conveyor"]
+
+[ext_resource type="PackedScene" uid="uid://fln12345" path="res://finish_line.tscn" id="1_finish"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_conveyor"]
+size = Vector3(10, 1, 40)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_conveyor"]
+albedo_color = Color(0.2, 0.2, 0.2, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_conveyor"]
+material = SubResource("StandardMaterial3D_conveyor")
+size = Vector3(10, 1, 40)
+
+[node name="MapConveyor" type="Node3D"]
+
+[node name="ConveyorBelt" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+constant_linear_velocity = Vector3(0, 0, 5)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ConveyorBelt"]
+shape = SubResource("BoxShape3D_conveyor")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ConveyorBelt"]
+mesh = SubResource("BoxMesh_conveyor")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0.433013, -0.25, 0, 0.5, 0.866025, 0.5, -0.75, 0.433013, 0, 10, 0)
+
+[node name="FinishLine" parent="." instance=ExtResource("1_finish")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -18)

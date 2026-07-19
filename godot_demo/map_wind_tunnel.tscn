@@ -1,0 +1,38 @@
+[gd_scene load_steps=6 format=3 uid="uid://map4wind"]
+
+[ext_resource type="PackedScene" uid="uid://fln12345" path="res://finish_line.tscn" id="1_finish"]
+
+[ext_resource type="Script" path="res://wind.gd" id="2_wind"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_g"]
+size = Vector3(20, 1, 40)
+
+[sub_resource type="BoxMesh" id="BoxMesh_g"]
+size = Vector3(20, 1, 40)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wind"]
+size = Vector3(20, 10, 40)
+
+[node name="MapWindTunnel" type="Node3D"]
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_g")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("BoxMesh_g")
+
+[node name="WindArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
+script = ExtResource("2_wind")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WindArea"]
+shape = SubResource("BoxShape3D_wind")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0.433013, -0.25, 0, 0.5, 0.866025, 0.5, -0.75, 0.433013, 0, 10, 0)
+
+[node name="FinishLine" parent="." instance=ExtResource("1_finish")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -18)

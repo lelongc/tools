@@ -21,12 +21,65 @@ var shuffle_timer = 0.0
 @onready var visual_mesh = $MeshInstance3D
 @onready var shuffle_label = $CanvasLayer/Control/ShuffleLabel
 
+var knockback_velocity = Vector3.ZERO
+
+func apply_knockback(force: Vector3):
+	knockback_velocity += force
+
+@rpc("any_peer", "call_local")
+func apply_knockback_rpc(force: Vector3):
+	if is_multiplayer_authority():
+		knockback_velocity += force
+
+func apply_bounce(force: float):
+	velocity.y = force
+
+func _enter_tree():
+	set_multiplayer_authority(name.to_int())
+	add_to_group("player")
+
+func is_player():
+	return true
+
 func _ready():
 	randomize()
+	
+	var colors = [Color(0,1,1), Color(1,0,1), Color(1,1,0), Color(0,1,0), Color(1,0.5,0)]
+	var color = colors[name.to_int() % colors.size()]
+	var mat = StandardMaterial3D.new()
+	mat.albedo_color = color
+	mat.emission_enabled = true
+	mat.emission = color
+	mat.emission_energy_multiplier = 0.8
+	visual_mesh.material_override = mat
+	
+	if has_node("TrailParticles"):
+		var trail_mat = $TrailParticles.draw_pass_1.material.duplicate()
+		trail_mat.albedo_color = color
+		trail_mat.albedo_color.a = 0.5
+		$TrailParticles.draw_pass_1.material = trail_mat
+	
 	if shuffle_label:
 		shuffle_label.visible = false
+		
+	var sync = MultiplayerSynchronizer.new()
+	var config = SceneReplicationConfig.new()
+	config.add_property(NodePath(".:position"))
+	config.add_property(NodePath("MeshInstance3D:rotation"))
+	config.property_set_replication_mode(NodePath(".:position"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	config.property_set_replication_mode(NodePath("MeshInstance3D:rotation"), SceneReplicationConfig.REPLICATION_MODE_ALWAYS)
+	sync.replication_config = config
+	add_child(sync)
+	
+	if not is_multiplayer_authority():
+		$SpringArm3D/Camera3D.current = false
+	else:
+		$SpringArm3D/Camera3D.current = true
 
 func _physics_process(delta):
+	if not is_multiplayer_authority():
+		return
+
 	# Handle Shuffle Timer
 	shuffle_timer += delta
 	if shuffle_timer >= SHUFFLE_INTERVAL:
@@ -42,11 +95,16 @@ func _physics_process(delta):
 	var right = action_map["move_right"]
 	var fwd = action_map["move_forward"]
 	var back = action_map["move_backward"]
-	var jmp = action_map["jump"]
 
-	# Handle jump
-	if Input.is_action_just_pressed(jmp) and is_on_floor():
+	# Handle jump.
+	if Input.is_action_just_pressed(action_map["jump"]) and is_on_floor():
 		velocity.y = JUMP_VELOCITY
+		# Spawn jump particles
+		var particles = preload("res://jump_particles.tscn").instantiate()
+		get_parent().add_child(particles)
+		particles.global_position = global_position
+		if $JumpSound.stream:
+			$JumpSound.play()
 
 	# Get input direction
 	var input_dir = Input.get_vector(left, right, fwd, back)
@@ -63,7 +121,32 @@ func _physics_process(delta):
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 		velocity.z = move_toward(velocity.z, 0, SPEED)
 
+	if knockback_velocity.length() > 0.1:
+		velocity.x += knockback_velocity.x
+		velocity.z += knockback_velocity.z
+		knockback_velocity = knockback_velocity.lerp(Vector3.ZERO, 5.0 * delta)
+
 	move_and_slide()
+	
+	# Pushing other players and passing tag
+	for i in get_slide_collision_count():
+		var col = get_slide_collision(i)
+		var collider = col.get_collider()
+		if collider and collider.is_in_group("player"):
+			if collider.has_method("apply_knockback_rpc"):
+				var push_dir = (collider.global_position - global_position)
+				push_dir.y = 0
+				push_dir = push_dir.normalized()
+				var push_force = velocity.length() * 0.5
+				collider.rpc_id(collider.get_multiplayer_authority(), "apply_knockback_rpc", push_dir * push_force)
+			
+			if is_bomb and is_multiplayer_authority():
+				GameManager.rpc_id(1, "request_pass_bomb", collider.name.to_int())
+
+	# Death check
+	if position.y < -10:
+		GameManager.rpc_id(1, "report_death", name.to_int())
+		queue_free()
 
 func shuffle_controls():
 	var keys = action_map.keys()
@@ -81,9 +164,28 @@ func shuffle_controls():
 		visual_mesh.scale = Vector3(1.5, 0.5, 1.5)
 		tween.tween_property(visual_mesh, "scale", Vector3.ONE, 0.3).set_trans(Tween.TRANS_BOUNCE)
 		
+	# Screen Shake
+	if $SpringArm3D/Camera3D.current:
+		var shake_tween = create_tween()
+		shake_tween.tween_method(func(v): $SpringArm3D/Camera3D.h_offset = randf_range(-v, v); $SpringArm3D/Camera3D.v_offset = randf_range(-v, v), 0.5, 0.0, 0.5)
+		
 	if shuffle_label:
+		shuffle_label.text = "XÁO PHÍM!"
 		shuffle_label.visible = true
 		shuffle_label.modulate.a = 1.0
 		var tween_label = create_tween()
 		tween_label.tween_property(shuffle_label, "modulate:a", 0.0, 1.5)
 		tween_label.tween_callback(func(): shuffle_label.visible = false)
+
+var is_bomb = false
+func check_it(id):
+	if name.to_int() == id:
+		is_bomb = true
+		visual_mesh.material_override.albedo_color = Color(1, 0, 0)
+		visual_mesh.material_override.emission = Color(1, 0, 0)
+	else:
+		is_bomb = false
+		var colors = [Color(0,1,1), Color(1,0,1), Color(1,1,0), Color(0,1,0), Color(1,0.5,0)]
+		var color = colors[name.to_int() % colors.size()]
+		visual_mesh.material_override.albedo_color = color
+		visual_mesh.material_override.emission = color

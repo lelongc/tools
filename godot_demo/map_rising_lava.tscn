@@ -1,0 +1,41 @@
+[gd_scene load_steps=7 format=3 uid="uid://map7lava"]
+
+[ext_resource type="Script" path="res://lava.gd" id="1_lava"]
+[ext_resource type="Material" path="res://neon_mat_lava.tres" id="2_mat"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_g"]
+size = Vector3(10, 20, 10)
+
+[sub_resource type="BoxMesh" id="BoxMesh_g"]
+size = Vector3(10, 20, 10)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_l"]
+size = Vector3(100, 2, 100)
+
+[sub_resource type="BoxMesh" id="BoxMesh_l"]
+material = ExtResource("2_mat")
+size = Vector3(100, 2, 100)
+
+[node name="MapRisingLava" type="Node3D"]
+
+[node name="Tower" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Tower"]
+shape = SubResource("BoxShape3D_g")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Tower"]
+mesh = SubResource("BoxMesh_g")
+
+[node name="Lava" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -10, 0)
+script = ExtResource("1_lava")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Lava"]
+shape = SubResource("BoxShape3D_l")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Lava"]
+mesh = SubResource("BoxMesh_l")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0.433013, -0.25, 0, 0.5, 0.866025, 0.5, -0.75, 0.433013, 0, 10, 0)

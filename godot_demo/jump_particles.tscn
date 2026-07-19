@@ -1,0 +1,28 @@
+[gd_scene load_steps=5 format=3 uid="uid://jump_particles"]
+
+[ext_resource type="Script" path="res://jump_particles.gd" id="1_script"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_jump"]
+direction = Vector3(0, 1, 0)
+initial_velocity_min = 2.0
+initial_velocity_max = 5.0
+gravity = Vector3(0, -9.8, 0)
+scale_min = 0.1
+scale_max = 0.3
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jump"]
+albedo_color = Color(0.8, 0.8, 0.8, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_jump"]
+material = SubResource("StandardMaterial3D_jump")
+radius = 0.5
+height = 1.0
+
+[node name="JumpParticles" type="GPUParticles3D"]
+emitting = false
+amount = 10
+one_shot = true
+explosiveness = 0.8
+process_material = SubResource("ParticleProcessMaterial_jump")
+draw_pass_1 = SubResource("SphereMesh_jump")
+script = ExtResource("1_script")

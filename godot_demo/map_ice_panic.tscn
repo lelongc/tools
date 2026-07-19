@@ -1,0 +1,27 @@
+[gd_scene load_steps=3 format=3 uid="uid://map3ice"]
+
+[ext_resource type="Material" path="res://neon_mat_ice.tres" id="1_mat"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_ice"]
+radius = 10.0
+height = 1.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_ice"]
+material = ExtResource("1_mat")
+top_radius = 10.0
+bottom_radius = 10.0
+height = 1.0
+
+[node name="MapIcePanic" type="Node3D"]
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("CylinderShape3D_ice")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("CylinderMesh_ice")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0.433013, -0.25, 0, 0.5, 0.866025, 0.5, -0.75, 0.433013, 0, 10, 0)

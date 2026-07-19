@@ -1,15 +1,13 @@
 [gd_scene load_steps=5 format=3 uid="uid://b8x7c1d3p4m1"]
 
 [ext_resource type="Script" path="res://bounce_pad.gd" id="1_bounce"]
+[ext_resource type="Material" path="res://neon_mat_bounce.tres" id="2_mat"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_pad"]
 size = Vector3(2, 0.2, 2)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pad"]
-albedo_color = Color(1, 0, 0, 1)
-
 [sub_resource type="BoxMesh" id="BoxMesh_pad"]
-material = SubResource("StandardMaterial3D_pad")
+material = ExtResource("2_mat")
 size = Vector3(2, 0.2, 2)
 
 [node name="BouncePad" type="Area3D"]

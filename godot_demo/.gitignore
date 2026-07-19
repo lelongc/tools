@@ -1,0 +1,12 @@
+# Godot-specific excludes
+.godot/
+*.translation
+
+# Mono-specific excludes
+.mono/
+data_*/
+mono_crash*.log
+
+# System files
+.DS_Store
+Thumbs.db

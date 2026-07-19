@@ -1,0 +1,44 @@
+[gd_scene load_steps=5 format=3 uid="uid://map8gauntlet"]
+
+[ext_resource type="PackedScene" uid="uid://fln12345" path="res://finish_line.tscn" id="1_finish"]
+[ext_resource type="PackedScene" uid="uid://b8x7c1d3p4m1" path="res://bounce_pad.tscn" id="2_bounce"]
+[ext_resource type="Script" path="res://wind.gd" id="3_wind"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_g"]
+size = Vector3(40, 1, 40)
+
+[sub_resource type="BoxMesh" id="BoxMesh_g"]
+size = Vector3(40, 1, 40)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_wind"]
+size = Vector3(10, 10, 10)
+
+[node name="MapGauntlet" type="Node3D"]
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_g")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("BoxMesh_g")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0.433013, -0.25, 0, 0.5, 0.866025, 0.5, -0.75, 0.433013, 0, 10, 0)
+
+[node name="FinishLine" parent="." instance=ExtResource("1_finish")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -18)
+
+[node name="BouncePad1" parent="." instance=ExtResource("2_bounce")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.1, -5)
+
+[node name="BouncePad2" parent="." instance=ExtResource("2_bounce")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0.1, -5)
+
+[node name="WindArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
+script = ExtResource("3_wind")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="WindArea"]
+shape = SubResource("BoxShape3D_wind")
