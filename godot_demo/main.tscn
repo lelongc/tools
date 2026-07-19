@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3 uid="uid://dxe7h1a8j2g4"]
+
+[ext_resource type="PackedScene" uid="uid://b8x7c1d3p4m1" path="res://bounce_pad.tscn" id="1_bounce"]
+[ext_resource type="PackedScene" uid="uid://c8y9z0a1b2c3" path="res://player.tscn" id="2_player"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(20, 1, 20)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+size = Vector3(20, 1, 20)
+
+[node name="Main" type="Node3D"]
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_ground")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("BoxMesh_ground")
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0.433013, -0.25, 0, 0.5, 0.866025, 0.5, -0.75, 0.433013, 0, 10, 0)
+shadow_enabled = true
+
+[node name="BouncePad" parent="." instance=ExtResource("1_bounce")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.1, -5)
