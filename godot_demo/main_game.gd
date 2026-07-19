@@ -41,6 +41,7 @@ func _on_join_pressed():
 	start_game()
 
 func start_game():
+	address_input.release_focus()
 	lobby_ui.hide()
 	hud.show()
 	round_end_ui.hide()
