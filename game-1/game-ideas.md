@@ -1,318 +1,67 @@
-# 🎮 Ý Tưởng Game Indie — Bán Được Tiền, Dễ Viral
+# 🎮 KẾ HOẠCH Ý TƯỞNG GAME: WRONG WAY (ĐUA XE XÁO PHÍM 2D)
 
-> **Mục tiêu:** Chọn 1 game đơn giản, hài hước, multiplayer, máy yếu chạy OK, bán được $5-10 trên Steam/Itch.io.
->
-> **Tham khảo thành công:**
-> - **Meccha Chameleon** (2 người làm, Unreal Engine 5, P2P qua Epic Online Services, $6, bán 10 triệu bản trong 16 ngày)
-> - **Vampire Survivors** (1 người làm, $3-5, doanh thu hàng chục triệu USD)
-> - **Balatro** (1 người làm, poker roguelike, ~$15, hàng triệu bản)
-> - **Skribbl.io** (vẽ + đoán, miễn phí, kiếm tiền từ quảng cáo, hàng triệu người chơi mỗi ngày)
+Tài liệu này tập trung khai thác chuyên sâu và chi tiết ý tưởng game **WRONG WAY** - một tựa game đua xe đi cảnh (side-scroller platformer) nhiều người chơi với cơ chế xáo phím liên tục, hướng tới mục tiêu bán 1 triệu bản trên Steam và dễ dàng trở thành hiện tượng mạng xã hội (viral).
 
 ---
 
-## 📊 Tiêu Chí Đánh Giá
+## 🎯 1. Concept Cốt Lõi: WRONG WAY
 
-| Tiêu chí | Giải thích |
-|---|---|
-| ⚡ Độ khó code | Dễ/TB/Khó — mình code bằng HTML5/JS được không? |
-| 🎭 Tiềm năng viral | Có hài không? Streamer có muốn chơi không? Share clip được không? |
-| 💰 Kiếm tiền | Bán trên Steam/Itch.io được không? Giá bao nhiêu? |
-| 👥 Multiplayer | Local/Online/Cả hai? |
-| 📱 Mobile-friendly | Chơi trên điện thoại được không? |
+> **Pitch 1 câu:** *"Đua xe đi cảnh 2D cùng bạn bè tới đích, nghe có vẻ dễ cho đến khi phím bấm của bạn bị xáo trộn ngẫu nhiên mỗi 10 giây!"*
 
----
-
-## 💡 Ý TƯỞNG 1: "Blend In" — Trốn Tìm Bằng Tô Màu (Kiểu Meccha Chameleon 2D)
-
-**Concept:** Phiên bản 2D của Meccha Chameleon. Người chơi là hình người đơn giản (stickman), phải tự tô màu cơ thể để hòa lẫn vào background (phòng khách, bếp, vườn...). Người tìm click vào chỗ nghi ngờ.
-
-**Gameplay:**
-- 2-8 người chơi. 1 vòng = 60 giây.
-- Hider có 15 giây để chọn vị trí + tô màu bằng công cụ vẽ đơn giản (color picker + brush).
-- Seeker có 45 giây để click vào những thứ "đáng ngờ". Click đúng = +điểm. Click sai = -điểm.
-- Background là ảnh thật hoặc ảnh AI generate (tôi tạo được!).
-
-| Tiêu chí | Đánh giá |
-|---|---|
-| ⚡ Độ khó code | **Trung bình** — Canvas drawing + WebRTC P2P |
-| 🎭 Tiềm năng viral | ⭐⭐⭐⭐⭐ — Rất hài, clip-worthy, giống Meccha |
-| 💰 Kiếm tiền | $4.99 trên Steam (bọc Electron) |
-| 👥 Multiplayer | Online P2P (WebRTC) |
-| 📱 Mobile-friendly | ✅ Touch để vẽ/click |
-
-**Ưu điểm:** Concept đã được chứng minh viral (Meccha Chameleon). Phiên bản 2D nhẹ hơn, dễ code hơn.
-**Nhược điểm:** Có thể bị so sánh với Meccha. Cần background đẹp.
+- **Thể loại:** Multiplayer Party Game / Side-scroller Platformer.
+- **Số lượng người chơi:** 2 - 8 người chơi online qua kết nối P2P (WebRTC).
+- **Core Loop (Vòng lặp chính):**
+    1. Người chơi xuất phát tại vạch xuất phát.
+    2. Cố gắng chạy, nhảy, vượt qua các chướng ngại vật (vực sâu, lò xo nảy, chướng ngại vật di động) để về đích đầu tiên.
+    3. Cứ sau mỗi **10 giây**, hệ thống tự động **xáo trộn ngẫu nhiên phím điều khiển** (ví dụ: A từ đi Trái có thể thành Nhảy, D thành đi Trái, SPACE thành đi Phải...).
+    4. Người chơi phải tự mò lại phím bấm trong khi đang di chuyển để không bị rơi xuống vực. Rơi xuống vực sẽ bị hồi sinh lại tại checkpoint đã vượt qua gần nhất.
 
 ---
 
-## 💡 Ý TƯỞNG 2: "Push Off!" — Sumo Đẩy Nhau Rơi
+## 🎭 2. Tại Sao Game Sẽ Viral & Mang Lại Tiếng Cười Cực Lớn?
 
-**Concept:** 2-4 nhân vật tròn ú trên 1 platform nhỏ. Mỗi người chỉ có 2 nút: NHẢY và ĐẨY. Platform co nhỏ dần. Người cuối cùng còn sống thắng.
+Cơ chế xáo phím đánh trực tiếp vào **phản xạ vô điều kiện** của người chơi:
 
-**Gameplay:**
-- Round 30 giây. Cực nhanh.
-- Physics cơ bản: va chạm đẩy lùi, nhảy có trọng lực.
-- Platform có hiệu ứng: băng (trượt), lava (cháy rìa), gió (đẩy random).
-- Mỗi round platform thay đổi hình dạng ngẫu nhiên.
-
-| Tiêu chí | Đánh giá |
-|---|---|
-| ⚡ Độ khó code | **Dễ** — Physics 2D đơn giản, ít logic |
-| 🎭 Tiềm năng viral | ⭐⭐⭐⭐ — Hài, chaotic, round nhanh, dễ clip |
-| 💰 Kiếm tiền | $2.99-4.99 |
-| 👥 Multiplayer | Local (cùng bàn phím) + Online P2P |
-| 📱 Mobile-friendly | ✅ 2 nút = chạm trái/phải |
-
-**Ưu điểm:** Cực kỳ đơn giản, làm nhanh. Round ngắn = gây nghiện.
-**Nhược điểm:** Content ít, cần nhiều map/power-up để giữ chân.
+1.  **Khoảnh khắc cuống cuồng:** 
+    *   Bạn đang chuẩn bị nhảy qua một hố sâu chứa đầy chướng ngại vật, chỉ còn 1 giây nữa là nhảy $\rightarrow$ **XÁO PHÍM!** 
+    *   Bạn nhấn Space để nhảy theo thói quen nhưng nhân vật lại đi lùi và rơi thẳng xuống vực.
+2.  **Sự ức chế vui nhộn (Funny Frustration):**
+    *   Thất bại trong game không phải do game bất công hay do bạn kém kỹ năng, mà vì bộ não của bạn chưa kịp làm quen với sơ đồ phím mới. Sự bất lực này tạo ra tiếng cười sảng khoái thay vì bực dọc.
+3.  **Streamer Bait hoàn hảo:**
+    *   Các streamer khi chơi cùng nhau sẽ tạo ra các tình huống la hét, bấn loạn khi cố tìm phím: *"Phím nhảy của tao là phím nào?! Là A hả? Không phải! Ối rơi rồi!"*
+    *   Khán giả cực kỳ thích xem các khoảnh khắc người chơi tự hủy do nhấn sai phím.
 
 ---
 
-## 💡 Ý TƯỞNG 3: "Distorted Telephone" — Điện Thoại Hỏng (Vẽ + Đoán)
+## 🕹️ 3. Chi Tiết Thiết Kế Bản Đồ & Chướng Ngại Vật
 
-**Concept:** Kiểu Gartic Phone. Người A nhận từ khóa → vẽ → Người B nhìn tranh → viết mô tả → Người C nhìn mô tả → vẽ lại → ... → cuối cùng so sánh ban đầu vs kết quả. CỰC KỲ HÀI.
+Bản đồ được thiết kế dạng cuộn ngang (side-scroller) dài 2400px với độ khó tăng dần:
 
-**Gameplay:**
-- 4-12 người chơi.
-- Mỗi lượt vẽ = 30 giây. Mỗi lượt đoán = 15 giây.
-- Cuối game, trình chiếu chuỗi biến đổi từ gốc → kết quả. Ai cũng cười.
-- Từ khóa Việt Nam hài hước: "bà ngoại cưỡi khủng long", "thầy giáo ăn bún bò trên mặt trăng"...
-
-| Tiêu chí | Đánh giá |
-|---|---|
-| ⚡ Độ khó code | **Trung bình** — Canvas drawing + turn-based networking |
-| 🎭 Tiềm năng viral | ⭐⭐⭐⭐⭐ — Gartic Phone đã chứng minh. Clip review rất hài |
-| 💰 Kiếm tiền | $3.99-5.99 hoặc free + quảng cáo |
-| 👥 Multiplayer | Online (WebSocket hoặc P2P) |
-| 📱 Mobile-friendly | ✅ Vẽ bằng ngón tay |
-
-**Ưu điểm:** Concept đã viral (Gartic Phone). Phiên bản Việt hóa + từ khóa hài = niche chưa ai khai thác.
-**Nhược điểm:** Gartic Phone đã tồn tại và miễn phí. Cần twist đặc biệt để khác biệt.
+### Các thành phần chính trên đường đua:
+-   **Platform (Sàn đất):** Các khoảng đất cứng nằm rải rác ở các độ cao khác nhau.
+-   **Gaps (Vực sâu):** Những khoảng trống không có đất. Rơi xuống vực sẽ hồi sinh tại checkpoint.
+-   **Bounce Pads (Lò xo nảy):** Đẩy người chơi bay cực cao lên các sàn phía trên. Cần căn đúng nhịp nhảy và hướng di chuyển để hạ cánh an toàn.
+-   **Checkpoints:** Các điểm mốc lưu trữ tiến trình. Khi rơi xuống vực, người chơi hồi sinh tại điểm mốc gần nhất đã đi qua để tránh phải chạy lại từ đầu, giảm ức chế quá đà.
+-   **Finish Line (Vạch đích):** Cột ánh sáng neon ở cuối bản đồ. Người đầu tiên chạm vào vạch đích sẽ thắng cuộc.
 
 ---
 
-## 💡 Ý TƯỞNG 4: "Emoji Merge Lab" — Phòng Thí Nghiệm Ghép Emoji
+## 📦 4. Kế Hoạch Vận Hành & Kiếm Tiền (Monetization & Steam)
 
-**Concept:** Kéo 2 emoji vào nhau → tạo ra emoji mới (kiểu Google Emoji Kitchen). Khám phá hết combo. Chia sẻ combo lạ lên mạng xã hội.
-
-**Gameplay:**
-- Bắt đầu với 4 emoji cơ bản (🔥💧🌍💨).
-- Kéo thả 2 emoji vào nhau → animation hợp nhất → emoji mới xuất hiện.
-- Bộ sưu tập: 500+ combo. Hiển thị % đã khám phá.
-- Social: Nút "Share combo lên Twitter/Facebook" → link dẫn bạn bè vào chơi.
-
-| Tiêu chí | Đánh giá |
-|---|---|
-| ⚡ Độ khó code | **Dễ** — Drag & drop + lookup table |
-| 🎭 Tiềm năng viral | ⭐⭐⭐⭐ — Người ta thích khám phá + share. Infinite Craft đã chứng minh |
-| 💰 Kiếm tiền | Free trên web + quảng cáo. Hoặc $1.99 trên Steam (no ads) |
-| 👥 Multiplayer | Single-player (nhưng social sharing) |
-| 📱 Mobile-friendly | ✅ Kéo thả |
-
-**Ưu điểm:** Gây nghiện kiểu "thêm 1 combo nữa thôi". Content do AI generate.
-**Nhược điểm:** Không phải multiplayer "chơi cùng nhau". Infinite Craft đã chiếm thị trường.
+1.  **Mô hình bán game:** Bán trực tiếp trên Steam với giá rẻ **$3.99 - $4.99**. Đây là mức giá cực kỳ dễ để một nhóm bạn rủ nhau cùng mua mà không cần suy nghĩ.
+2.  **Chi phí vận hành $0:** 
+    *   Sử dụng công nghệ WebRTC P2P (PeerJS) kết nối trực tiếp các trình duyệt/máy tính với nhau.
+    *   Host (người tạo phòng) sẽ làm máy chủ chạy vật lý.
+    *   Không tốn tiền thuê server hàng tháng, giúp game có thể sống vô hạn mà không lo chi phí duy trì.
+3.  **Cá nhân hóa (Skins):** Bán các DLC skin nhân vật ngẫu nhiên, vui nhộn (hình quả chuối, khối thạch wobbly, robot mini...) để tăng doanh thu.
 
 ---
 
-## 💡 Ý TƯỞNG 5: "Don't Touch Red" — Né Chướng Ngại Phản Xạ
+## 🛠️ 5. Lộ Trình Phát Triển Kỹ Thuật (Phaser 3 + PeerJS)
 
-**Concept:** Màn hình đầy bóng bay di chuyển. Bóng XANH = chạm để ghi điểm. Bóng ĐỎ = chạm là chết. Tốc độ tăng dần. Chia sẻ điểm số.
-
-**Gameplay:**
-- Tap/click liên tục vào bóng xanh.
-- Bóng đỏ ngày càng nhiều, di chuyển nhanh hơn.
-- Mỗi 10 giây có event đặc biệt: tất cả đổi màu 1 giây, màn hình xoay, bóng tàng hình...
-- Leaderboard toàn cầu. Daily challenge.
-
-| Tiêu chí | Đánh giá |
-|---|---|
-| ⚡ Độ khó code | **Rất dễ** — Spawn circle + collision detect |
-| 🎭 Tiềm năng viral | ⭐⭐⭐ — Gây nghiện nhưng kém hài. Cần "cái gì đó" thêm |
-| 💰 Kiếm tiền | Free + quảng cáo. Khó bán $5 |
-| 👥 Multiplayer | Single (leaderboard). Có thể thêm race mode |
-| 📱 Mobile-friendly | ✅ Tap |
-
-**Ưu điểm:** Làm trong 1 ngày. Test ý tưởng nhanh.
-**Nhược điểm:** Quá đơn giản, khó bán tiền, dễ bị clone.
-
----
-
-## 💡 Ý TƯỞNG 6: "Liar's Dice Online" — Xì Tố Xúc Xắc
-
-**Concept:** Game cổ điển Liar's Dice (Bluff/Perudo). Mỗi người có 5 xúc xắc giấu. Lần lượt đặt cược "có ít nhất X con số Y trên bàn". Người tiếp theo chọn: tăng cược hoặc gọi "BỊP!". 
-
-**Gameplay:**
-- 2-6 người chơi online.
-- Round ngắn 2-3 phút.
-- Animation xúc xắc lắc, hồi hộp mở.
-- Chat/emoji reaction trong game.
-- Ranking + Season.
-
-| Tiêu chí | Đánh giá |
-|---|---|
-| ⚡ Độ khó code | **Dễ-TB** — Turn-based logic + simple networking |
-| 🎭 Tiềm năng viral | ⭐⭐⭐⭐ — Hồi hộp, bluff, reaction hài |
-| 💰 Kiếm tiền | $2.99-3.99 hoặc free + cosmetics |
-| 👥 Multiplayer | Online (turn-based, dễ code hơn real-time) |
-| 📱 Mobile-friendly | ✅ Tap để chọn |
-
-**Ưu điểm:** Game cổ điển đã chứng minh vui. Turn-based = networking đơn giản hơn real-time rất nhiều.
-**Nhược điểm:** Niche, không ai biết game này ở VN. Cần marketing tốt.
-
----
-
-## 💡 Ý TƯỞNG 7: "Floor is Lava!" — Nhảy Platform Endless
-
-**Concept:** Sàn dâng lên liên tục (lava/nước/acid). Nhảy lên các platform ngẫu nhiên để sống sót. 1 nút duy nhất. Điểm = thời gian sống.
-
-**Gameplay:**
-- Nhân vật tự chạy sang trái/phải (bounce off walls kiểu Pong).
-- Người chơi chỉ bấm 1 nút: NHẢY.
-- Platform ngẫu nhiên: bình thường, băng (trượt), vỡ (chạm 1 lần), lò xo (nhảy cao).
-- Multiplayer race: 2-4 người cùng nhảy, ai chết trước thua.
-
-| Tiêu chí | Đánh giá |
-|---|---|
-| ⚡ Độ khó code | **Dễ** — Simple physics + procedural generation |
-| 🎭 Tiềm năng viral | ⭐⭐⭐ — Gây nghiện nhưng đã có nhiều game tương tự |
-| 💰 Kiếm tiền | $1.99-2.99. Hoặc free + ads |
-| 👥 Multiplayer | Local split-screen hoặc Online race |
-| 📱 Mobile-friendly | ✅ 1 nút tap |
-
-**Ưu điểm:** 1-nút gameplay cực kỳ accessible. Làm nhanh.
-**Nhược điểm:** Thị trường bão hòa. Doodle Jump, Icy Tower đã tồn tại.
-
----
-
-## 💡 Ý TƯỞNG 8: "Impostor Workshop" — Xưởng Lắp Ráp Phá Hoại
-
-**Concept:** 4-8 người chơi cùng làm việc trong xưởng (lắp ráp đồ chơi, nấu ăn, sửa máy...). Nhưng 1-2 người là "phá hoại" (impostor). Họ lén sabotage mà không bị phát hiện. Cuối round bỏ phiếu đuổi.
-
-**Gameplay:**
-- Minigame đơn giản: kéo linh kiện vào đúng chỗ, bấm nút đúng thứ tự.
-- Impostor: thay linh kiện sai, phá máy, bỏ thuốc vào đồ ăn.
-- Cuối round: xem sản phẩm. Nếu hỏng → bỏ phiếu ai là impostor.
-- Bị đuổi đúng = +điểm team. Bị đuổi sai = +điểm impostor.
-
-| Tiêu chí | Đánh giá |
-|---|---|
-| ⚡ Độ khó code | **Trung bình-Khó** — Nhiều minigame + social deduction logic |
-| 🎭 Tiềm năng viral | ⭐⭐⭐⭐⭐ — Among Us đã chứng minh. Thêm minigame = hài hơn |
-| 💰 Kiếm tiền | $4.99-6.99 |
-| 👥 Multiplayer | Online (cần ít nhất 4 người) |
-| 📱 Mobile-friendly | ✅ Touch minigames |
-
-**Ưu điểm:** Social deduction luôn viral. Twist "xưởng sản xuất" rất mới.
-**Nhược điểm:** Code nhiều minigame tốn thời gian. Cần đủ người chơi cùng lúc.
-
----
-
-## 💡 Ý TƯỞNG 9: "Snake Royale" — Rắn Săn Mồi Battle Royale
-
-**Concept:** Classic Snake nhưng 2-4 người trên cùng 1 map. Ăn mồi để dài ra. Đầu rắn mình chạm thân rắn khác = chết. Rắn cuối cùng sống thắng.
-
-**Gameplay:**
-- Map nhỏ, round 1-2 phút.
-- Power-up: tăng tốc, rút ngắn, xuyên tường, đổi đầu-đuôi.
-- Map có chướng ngại vật thay đổi mỗi round.
-- Skin rắn: mua bằng coin kiếm được.
-
-| Tiêu chí | Đánh giá |
-|---|---|
-| ⚡ Độ khó code | **Dễ** — Grid-based movement, collision check |
-| 🎭 Tiềm năng viral | ⭐⭐⭐⭐ — Ai cũng biết Snake. Competitive = hài |
-| 💰 Kiếm tiền | $2.99-3.99 + skin DLC |
-| 👥 Multiplayer | Local + Online |
-| 📱 Mobile-friendly | ✅ Swipe direction |
-
-**Ưu điểm:** Concept ai cũng hiểu. Slither.io đã viral, đây là phiên bản có thể bán.
-**Nhược điểm:** Slither.io miễn phí. Cần twist đặc biệt.
-
----
-
-## 💡 Ý TƯỞNG 10: "Guess The Price VN" — Đoán Giá Kiểu Việt Nam
-
-**Concept:** Show ảnh sản phẩm thật (xe máy, trà sữa, đất nền, iPhone...). Người chơi đoán giá. Ai đoán gần nhất thắng. Sản phẩm từ bình dân đến siêu xa xỉ.
-
-**Gameplay:**
-- 2-8 người chơi online.
-- 10 round/game. Mỗi round hiện 1 sản phẩm + 15 giây đoán giá.
-- Sản phẩm VN: bát phở, xe Wave, căn hộ Vinhomes, vé máy bay...
-- Bonus round: đoán giá đồ "lạ" (1 con bò, 1 cây vàng, 1 hecta đất Đà Lạt).
-- Leaderboard + Daily challenge.
-
-| Tiêu chí | Đánh giá |
-|---|---|
-| ⚡ Độ khó code | **Dễ** — Hiện ảnh + input số + so sánh |
-| 🎭 Tiềm năng viral | ⭐⭐⭐⭐ — Rất phù hợp thị trường VN. Clip TikTok dễ viral |
-| 💰 Kiếm tiền | Free + quảng cáo. Hoặc $1.99 bản premium |
-| 👥 Multiplayer | Online turn-based |
-| 📱 Mobile-friendly | ✅ Nhập số |
-
-**Ưu điểm:** Nội dung Việt Nam = niche chưa ai khai thác. Content dễ mở rộng vô tận.
-**Nhược điểm:** Cần database sản phẩm + giá. Chỉ viral ở VN, khó quốc tế.
-
----
-
-## 🏆 BẢNG SO SÁNH TỔNG HỢP
-
-| # | Tên Game | Độ khó | Viral | Tiền | Multi | Mobile | **Tổng** |
-|---|---|---|---|---|---|---|---|
-| 1 | Blend In (Prop Hunt 2D) | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ✅ Online | ✅ | **🥇 21/25** |
-| 2 | Push Off! (Sumo) | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ✅ Both | ✅ | **🥈 18/25** |
-| 3 | Distorted Telephone | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ✅ Online | ✅ | **🥈 18/25** |
-| 4 | Emoji Merge Lab | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ | ❌ Solo | ✅ | 15/25 |
-| 5 | Don't Touch Red | ⭐ | ⭐⭐⭐ | ⭐⭐ | ❌ Solo | ✅ | 12/25 |
-| 6 | Liar's Dice Online | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ✅ Online | ✅ | 17/25 |
-| 7 | Floor is Lava! | ⭐⭐ | ⭐⭐⭐ | ⭐⭐ | ✅ Race | ✅ | 14/25 |
-| 8 | Impostor Workshop | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ✅ Online | ✅ | **🥇 21/25** |
-| 9 | Snake Royale | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ✅ Both | ✅ | 17/25 |
-| 10 | Guess The Price VN | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐ | ✅ Online | ✅ | 16/25 |
-
----
-
-## 🎯 GỢI Ý TOP 3 NÊN LÀM
-
-### 🥇 1. "Blend In" — Prop Hunt 2D
-- Concept đã proven viral (Meccha Chameleon).
-- 2D = code dễ hơn 3D rất nhiều.
-- Background dùng AI generate image = miễn phí, đẹp.
-- Bán $4.99 trên Steam.
-
-### 🥈 2. "Push Off!" — Sumo Đẩy Nhau
-- Đơn giản nhất trong danh sách. Có thể prototype trong 2-3 ngày.
-- Round 30 giây = test nhanh, iterate nhanh.
-- Kiểu game "friendslop" thuần túy — vui vì bạn bè chứ không vì game phức tạp.
-
-### 🥉 3. "Distorted Telephone" — Vẽ + Đoán
-- Gartic Phone đã chứng minh viral.
-- Việt hóa từ khóa = niche mới.
-- Content do người chơi tạo = không bao giờ hết.
-
----
-
-## 🔧 CÔNG NGHỆ CHUNG CHO TẤT CẢ
-
-| Thành phần | Công nghệ | Chi phí |
+| Thành phần | Công nghệ | Cách hoạt động |
 |---|---|---|
-| Game Engine | **Phaser 3** (HTML5/JS) | Miễn phí |
-| Multiplayer P2P | **WebRTC** (PeerJS library) | Miễn phí |
-| Signaling Server | **Node.js** trên Render.com / Railway | Miễn phí (free tier) |
-| Đóng gói Desktop | **Electron** → .exe cho Steam | Miễn phí |
-| Steam | Steamworks | $100 (hoàn lại sau $1000 revenue) |
-| Itch.io | Upload trực tiếp | Miễn phí |
-| Art / Assets | **AI Generate Image** (tôi tạo) | Miễn phí |
-
-**Tổng chi phí khởi động: $0 - $100**
-
----
-
-## 📋 BƯỚC TIẾP THEO
-
-- [ ] Chọn 1 trong 10 ý tưởng (hoặc kết hợp)
-- [ ] Tạo Implementation Plan chi tiết
-- [ ] Prototype core gameplay (1-2 ngày)
-- [ ] Test với bạn bè
-- [ ] Polish art + UI
-- [ ] Đóng gói Electron + upload Itch.io
-- [ ] Nếu tốt → đăng ký Steam ($100)
+| **Game Engine** | Phaser 3 | Xử lý đồ họa lưới Neon, camera cuộn theo nhân vật, hệ thống vật lý trọng lực Arcade Physics. |
+| **P2P Multiplayer** | PeerJS (WebRTC) | Đồng bộ hóa tọa độ `(x, y)` của tất cả người chơi. Host làm trung gian chạy physics và gửi tín hiệu xáo phím `trigger_shuffle` cho toàn bộ clients. |
+| **Thuật toán Xáo** | JavaScript | Fisher-Yates Shuffle mảng các hành động `['left', 'right', 'jump']` gán lại cho các phím vật lý. |
+| **Đóng gói Steam** | Electron | Bọc toàn bộ code web thành một file `.exe` chạy độc lập, tích hợp Steamworks SDK để quản lý phòng qua danh sách bạn bè trên Steam. |

@@ -194,9 +194,12 @@ async function syncWithDrive(interactive = false) {
                             console.log('Applied newer settings from Drive.');
                         }
                     }
+                } else {
+                    throw new Error(`Failed to download remote data: HTTP ${downloadRes.status}`);
                 }
             } catch (e) {
-                console.warn('Could not read existing backup, proceeding with merge:', e);
+                console.error('CRITICAL: Could not read existing backup from Drive. Aborting sync to prevent data loss:', e);
+                return { ok: false, error: 'Could not read remote backup data due to network error' };
             }
         }
 

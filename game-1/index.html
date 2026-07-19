@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BLACKOUT - Tắt Đèn Chơi Trốn</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Phaser 3 & PeerJS CDNs -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+</head>
+
+<body>
+    <div id="lobby-container">
+        <h1 class="logo">BLACK<span>OUT</span></h1>
+        <p class="subtitle">Đừng để bị bắt trong bóng tối</p>
+
+        <!-- Menu chính -->
+        <div id="main-menu" class="menu-card">
+            <div class="input-group">
+                <label for="username-input">Tên hiển thị:</label>
+                <input type="text" id="username-input" placeholder="Nhập tên của bạn..." maxlength="12">
+            </div>
+
+            <div class="actions">
+                <button id="btn-create" class="btn primary">Tạo phòng</button>
+                <div class="divider"><span>HOẶC</span></div>
+                <div class="join-group">
+                    <input type="text" id="room-input" placeholder="Nhập mã phòng...">
+                    <button id="btn-join" class="btn secondary">Vào phòng</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Màn hình phòng chờ (Lobby Room) -->
+        <div id="room-lobby" class="menu-card hidden">
+            <div class="room-header">
+                <h2>Phòng: <span id="room-code-display" class="highlight">------</span></h2>
+                <button id="btn-copy" class="btn-small">Sao chép link</button>
+            </div>
+
+            <div class="player-list-container">
+                <h3>Người chơi (<span id="player-count">0</span>/8):</h3>
+                <ul id="player-list">
+                    <!-- Danh sách người chơi sẽ được render động ở đây -->
+                </ul>
+            </div>
+
+            <div class="lobby-actions">
+                <button id="btn-start" class="btn primary hidden">Bắt đầu game</button>
+                <button id="btn-leave" class="btn danger">Rời phòng</button>
+            </div>
+            <p id="status-message" class="status"></p>
+        </div>
+    </div>
+
+    <!-- Container cho canvas game của Phaser -->
+    <div id="game-container" class="hidden"></div>
+
+    <!-- Scripts của Game -->
+    <script src="js/network.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
