@@ -1,12 +1,14 @@
-[gd_scene load_steps=5 format=3 uid="uid://dxe7h1a8j2g4"]
+[gd_scene load_steps=6 format=3 uid="uid://dxe7h1a8j2g4"]
 
 [ext_resource type="PackedScene" uid="uid://b8x7c1d3p4m1" path="res://bounce_pad.tscn" id="1_bounce"]
 [ext_resource type="PackedScene" uid="uid://fln12345" path="res://finish_line.tscn" id="2_finish"]
+[ext_resource type="Material" path="res://neon_mat_ground.tres" id="3_ground_mat"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(20, 1, 20)
 
 [sub_resource type="BoxMesh" id="BoxMesh_ground"]
+material = ExtResource("3_ground_mat")
 size = Vector3(20, 1, 20)
 
 [node name="Main" type="Node3D"]

@@ -17,6 +17,12 @@ var tag_it_id = -1
 
 func start_mode(mode: GameMode):
 	round_ended = false
+	
+	# Solo play guard: skip elimination modes if only 1 or 0 players
+	if players_alive.size() <= 1 and mode != GameMode.RACE and mode != GameMode.COPYCAT:
+		print("Solo play: skipping elimination mode, using RACE instead")
+		mode = GameMode.RACE
+	
 	current_mode = mode
 	print("Started Mode: ", GameMode.keys()[mode])
 	
@@ -98,6 +104,8 @@ func end_round(winner_id):
 	
 	print("Round Ended! Winner: ", winner_id)
 	if winner_id != -1:
+		if not scores.has(winner_id):
+			scores[winner_id] = 0
 		scores[winner_id] += 1
 		
 	var main_game = get_tree().get_first_node_in_group("main_game")

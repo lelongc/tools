@@ -11,6 +11,7 @@ var peer = ENetMultiplayerPeer.new()
 @onready var score_label = $HUD/ScoreLabel
 @onready var round_end_ui = $RoundEndUI
 @onready var winner_label = $RoundEndUI/WinnerLabel
+@onready var shuffle_timer_label = $HUD/ShuffleTimerLabel
 
 func _ready():
 	add_to_group("main_game")
@@ -19,13 +20,27 @@ func _ready():
 	address_input.text = "127.0.0.1"
 	hud.hide()
 	round_end_ui.hide()
+	apply_neon_theme()
 
 func _process(_delta):
 	if hud.visible:
-		var score_text = "SCORES:\n"
+		# Show current mode + scores
+		var mode_name = GameManager.GameMode.keys()[GameManager.current_mode]
+		var score_text = "MODE: " + mode_name + "\n"
 		for id in GameManager.scores:
 			score_text += "P" + str(id) + ": " + str(GameManager.scores[id]) + "\n"
+		# Show TAG bomb timer if applicable
+		if GameManager.current_mode == GameManager.GameMode.TAG and GameManager.tag_timer > 0:
+			score_text += "BOMB: %.1fs\n" % GameManager.tag_timer
 		score_label.text = score_text
+		
+		# Find local player and display shuffle countdown
+		var local_player = players_node.get_node_or_null(str(multiplayer.get_unique_id()))
+		if local_player and "shuffle_timer" in local_player and not local_player.is_dead:
+			var time_left = clamp(local_player.SHUFFLE_INTERVAL - local_player.shuffle_timer, 0, local_player.SHUFFLE_INTERVAL)
+			shuffle_timer_label.text = "SHUFFLE IN: %.1fs" % time_left
+		else:
+			shuffle_timer_label.text = ""
 
 func _on_host_pressed():
 	peer.create_server(PORT)
@@ -75,8 +90,29 @@ func load_map(map_path):
 		child.velocity = Vector3.ZERO
 		if "knockback_velocity" in child:
 			child.knockback_velocity = Vector3.ZERO
+		if "is_dead" in child:
+			child.is_dead = false
+			child.show()
+			child.get_node("CollisionShape3D").set_deferred("disabled", false)
+		# Reset shuffle timer and controls on map change
+		if "shuffle_timer" in child:
+			child.shuffle_timer = 0.0
+		if "action_map" in child:
+			child.action_map = {
+				"move_left": "move_left",
+				"move_right": "move_right",
+				"move_forward": "move_forward",
+				"move_backward": "move_backward",
+				"jump": "jump"
+			}
 		if child.has_method("check_it"):
 			child.check_it(-1)
+	
+	# Populate players_alive on server side (critical for TAG/SUMO)
+	if multiplayer.is_server():
+		GameManager.players_alive.clear()
+		for child in players_node.get_children():
+			GameManager.players_alive.append(child.name.to_int())
 
 @rpc("any_peer", "call_local")
 func show_winner(winner_id):
@@ -90,4 +126,72 @@ func show_winner(winner_id):
 		GameManager.players_alive.clear()
 		for child in players_node.get_children():
 			GameManager.players_alive.append(child.name.to_int())
+
+func apply_neon_theme():
+	var theme = Theme.new()
+	
+	# Button Style (Neon borders, translucent dark background)
+	var btn_normal = StyleBoxFlat.new()
+	btn_normal.bg_color = Color(0.02, 0.02, 0.05, 0.7)
+	btn_normal.border_width_left = 2
+	btn_normal.border_width_top = 2
+	btn_normal.border_width_right = 2
+	btn_normal.border_width_bottom = 2
+	btn_normal.border_color = Color(0, 1, 1, 1) # Neon Cyan
+	btn_normal.corner_radius_top_left = 8
+	btn_normal.corner_radius_top_right = 8
+	btn_normal.corner_radius_bottom_left = 8
+	btn_normal.corner_radius_bottom_right = 8
+	btn_normal.shadow_color = Color(0, 1, 1, 0.3)
+	btn_normal.shadow_size = 6
+	
+	var btn_hover = btn_normal.duplicate()
+	btn_hover.bg_color = Color(0.05, 0.05, 0.15, 0.8)
+	btn_hover.border_color = Color(1, 0, 1, 1) # Neon Magenta
+	btn_hover.shadow_color = Color(1, 0, 1, 0.5)
+	btn_hover.shadow_size = 10
+	
+	var btn_pressed = btn_normal.duplicate()
+	btn_pressed.bg_color = Color(0.01, 0.01, 0.03, 0.9)
+	btn_pressed.border_color = Color(1, 1, 0, 1) # Neon Yellow
+	btn_pressed.shadow_color = Color(1, 1, 0, 0.4)
+	btn_pressed.shadow_size = 2
+	
+	theme.set_stylebox("normal", "Button", btn_normal)
+	theme.set_stylebox("hover", "Button", btn_hover)
+	theme.set_stylebox("pressed", "Button", btn_pressed)
+	theme.set_stylebox("disabled", "Button", btn_normal)
+	theme.set_stylebox("focus", "Button", StyleBoxEmpty.new())
+	
+	theme.set_color("font_color", "Button", Color(1, 1, 1))
+	theme.set_color("font_hover_color", "Button", Color(1, 0.7, 1))
+	theme.set_font_size("font_size", "Button", 16)
+	
+	# LineEdit (IP Input)
+	var le_normal = StyleBoxFlat.new()
+	le_normal.bg_color = Color(0.01, 0.01, 0.03, 0.8)
+	le_normal.border_width_left = 2
+	le_normal.border_width_top = 2
+	le_normal.border_width_right = 2
+	le_normal.border_width_bottom = 2
+	le_normal.border_color = Color(0.2, 0.2, 0.4, 1)
+	le_normal.corner_radius_top_left = 6
+	le_normal.corner_radius_top_right = 6
+	le_normal.corner_radius_bottom_left = 6
+	le_normal.corner_radius_bottom_right = 6
+	
+	var le_focus = le_normal.duplicate()
+	le_focus.border_color = Color(0, 1, 1, 1) # Neon Cyan on focus
+	le_focus.shadow_color = Color(0, 1, 1, 0.3)
+	le_focus.shadow_size = 4
+	
+	theme.set_stylebox("normal", "LineEdit", le_normal)
+	theme.set_stylebox("focus", "LineEdit", le_focus)
+	theme.set_color("font_color", "LineEdit", Color(1, 1, 1))
+	theme.set_font_size("font_size", "LineEdit", 14)
+	
+	# Apply to components
+	lobby_ui.theme = theme
+	hud.theme = theme
+	round_end_ui.theme = theme
 

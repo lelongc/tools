@@ -76,7 +76,20 @@ func _ready():
 	else:
 		$SpringArm3D/Camera3D.current = true
 
+var is_dead = false
+
+@rpc("any_peer", "call_local")
+func die():
+	is_dead = true
+	hide()
+	$CollisionShape3D.set_deferred("disabled", true)
+	if is_multiplayer_authority():
+		# Optionally keep camera, but let's just leave it for now
+		pass
+
 func _physics_process(delta):
+	if is_dead:
+		return
 	if not is_multiplayer_authority():
 		return
 
@@ -145,8 +158,15 @@ func _physics_process(delta):
 
 	# Death check
 	if position.y < -10:
-		GameManager.rpc_id(1, "report_death", name.to_int())
-		queue_free()
+		if GameManager.current_mode == GameManager.GameMode.RACE or GameManager.current_mode == GameManager.GameMode.COPYCAT:
+			position = Vector3(randf_range(-2, 2), 5, randf_range(-2, 2))
+			velocity = Vector3.ZERO
+			knockback_velocity = Vector3.ZERO
+			shuffle_timer = 0.0
+		else:
+			if not is_dead:
+				GameManager.rpc_id(1, "report_death", name.to_int())
+				rpc("die")
 
 func shuffle_controls():
 	var keys = action_map.keys()

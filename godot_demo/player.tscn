@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" path="res://player.gd" id="1_q2w3e"]
 
-[ext_resource type="Texture2D" path="res://cute_face.jpg" id="2_face"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 
@@ -34,6 +33,19 @@ gravity = Vector3(0, 1, 0)
 scale_min = 0.5
 scale_max = 1.0
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_face"]
+albedo_color = Color(0.05, 0.05, 0.05, 1)
+roughness = 0.5
+
+[sub_resource type="SphereMesh" id="SphereMesh_eye"]
+material = SubResource("StandardMaterial3D_face")
+radius = 0.08
+height = 0.16
+
+[sub_resource type="BoxMesh" id="BoxMesh_mouth"]
+material = SubResource("StandardMaterial3D_face")
+size = Vector3(0.2, 0.06, 0.06)
+
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_q2w3e")
 
@@ -43,11 +55,17 @@ shape = SubResource("CapsuleShape3D_player")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("CapsuleMesh_player")
 
-[node name="FaceDecal" type="Decal" parent="MeshInstance3D"]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0.4, -0.5)
-size = Vector3(0.8, 0.8, 0.8)
-texture_albedo = ExtResource("2_face")
-albedo_mix = 1.0
+[node name="EyeL" type="MeshInstance3D" parent="MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.25, -0.4)
+mesh = SubResource("SphereMesh_eye")
+
+[node name="EyeR" type="MeshInstance3D" parent="MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0.25, -0.4)
+mesh = SubResource("SphereMesh_eye")
+
+[node name="Mouth" type="MeshInstance3D" parent="MeshInstance3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -0.45)
+mesh = SubResource("BoxMesh_mouth")
 
 [node name="TrailParticles" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0)
@@ -68,6 +86,7 @@ margin = 0.5
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
 [node name="Control" type="Control" parent="CanvasLayer"]
+mouse_filter = 2
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -76,6 +95,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="ShuffleLabel" type="Label" parent="CanvasLayer/Control"]
+mouse_filter = 2
 visible = false
 layout_mode = 1
 anchors_preset = 8

@@ -21,6 +21,9 @@ config/features=PackedStringArray("4.7")
 [autoload]
 
 
+
+
+
 GameManager="*res://game_manager.gd"
 
 [input]

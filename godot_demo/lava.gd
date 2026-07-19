@@ -8,5 +8,8 @@ func _physics_process(delta):
 
 func _on_body_entered(body):
 	if multiplayer.is_server() and body.has_method("is_player"):
+		if "is_dead" in body and body.is_dead:
+			return
 		GameManager.report_death(body.name.to_int())
-		body.queue_free()
+		if body.has_method("die"):
+			body.rpc("die")
