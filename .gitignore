@@ -29,7 +29,8 @@ short/projects/**/styled.ass
 short/projects/**/animation.html
 short/projects/**/frames/
 3d/Whisk1/**
-
+game
+ 
 # Logs & Temporary files
 *.log
 .pytest_cache/
