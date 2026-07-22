@@ -15,8 +15,9 @@ var peer = ENetMultiplayerPeer.new()
 @onready var copycat_label = $HUD/CopycatLabel
 @onready var key_guide_label = $HUD/KeyGuidePanel/KeyGuideLabel
 
-# Stitch Design System Color Palette
+# Stitch Design System Color Palette & Character Selection
 var selected_color: Color = Color(0, 0.95, 1) # Neon Cyan #00f3ff
+var selected_variant: int = 0 # 0: Bear, 1: Frog, 2: Bunny, 3: Cat
 
 func _ready():
 	add_to_group("main_game")
@@ -31,6 +32,15 @@ func _ready():
 	var mute_btn = $LobbyUI/BottomFooterBar/HBoxFooter/MuteBtn
 	if mute_btn:
 		mute_btn.pressed.connect(_on_mute_pressed)
+		
+	# Character Variant Buttons Setup
+	var variant_box = $LobbyUI/MainDashboard/PilotCard/VBox/VariantBox
+	var cute_badge = $LobbyUI/MainDashboard/PilotCard/VBox/CuteBadge
+	if variant_box:
+		variant_box.get_node("BearBtn").pressed.connect(func(): selected_variant = 0; if cute_badge: cute_badge.text = "SELECTED: 🌸 Pinky Bear"; if SoundManager: SoundManager.play_click())
+		variant_box.get_node("FrogBtn").pressed.connect(func(): selected_variant = 1; if cute_badge: cute_badge.text = "SELECTED: 🐸 Froggo"; if SoundManager: SoundManager.play_click())
+		variant_box.get_node("BunnyBtn").pressed.connect(func(): selected_variant = 2; if cute_badge: cute_badge.text = "SELECTED: 🐰 Bunny"; if SoundManager: SoundManager.play_click())
+		variant_box.get_node("CatBtn").pressed.connect(func(): selected_variant = 3; if cute_badge: cute_badge.text = "SELECTED: 🐱 Neko Cat"; if SoundManager: SoundManager.play_click())
 		
 	# Color Picker setup matching Cute Blob Colors
 	var color_box = $LobbyUI/MainDashboard/PilotCard/VBox/ColorBox
@@ -102,36 +112,28 @@ func _on_host_pressed():
 	peer.create_server(PORT)
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_connected.connect(_on_peer_connected)
-	
 	_add_player(1)
-	start_game()
+	lobby_ui.hide()
+	hud.show()
+	GameManager.start_next_round()
 
 func _on_host_bots_pressed():
 	if SoundManager: SoundManager.play_click()
 	peer.create_server(PORT)
 	multiplayer.multiplayer_peer = peer
-	multiplayer.peer_connected.connect(_on_peer_connected)
-	
 	_add_player(1)
-	_add_bot(2)
-	_add_bot(3)
-	start_game()
+	for i in range(3):
+		_add_bot(100 + i)
+	lobby_ui.hide()
+	hud.show()
+	GameManager.start_next_round()
 
 func _on_join_pressed():
 	if SoundManager: SoundManager.play_click()
 	peer.create_client(address_input.text, PORT)
 	multiplayer.multiplayer_peer = peer
-	start_game()
-
-func start_game():
-	address_input.release_focus()
 	lobby_ui.hide()
 	hud.show()
-	round_end_ui.hide()
-	if multiplayer.is_server():
-		var first_map = GameManager.maps[0]
-		rpc("load_map", first_map.path)
-		GameManager.start_mode(first_map.mode)
 
 func _on_peer_connected(id):
 	_add_player(id)
@@ -141,6 +143,7 @@ func _add_player(id):
 	var player = preload("res://scenes/player.tscn").instantiate()
 	player.name = str(id)
 	player.custom_color = selected_color
+	player.character_variant = selected_variant
 	player.position = Vector3(randf_range(-2, 2), 2, randf_range(-2, 2))
 	players_node.add_child(player, true)
 
@@ -149,6 +152,7 @@ func _add_bot(id):
 	var bot = preload("res://scenes/player.tscn").instantiate()
 	bot.name = str(id)
 	bot.is_bot = true
+	bot.character_variant = (id - 100) % 4
 	bot.position = Vector3(randf_range(-2, 2), 2, randf_range(-2, 2))
 	players_node.add_child(bot, true)
 
@@ -165,128 +169,16 @@ func load_map(map_path):
 	for child in players_node.get_children():
 		child.position = Vector3(randf_range(-2, 2), 2, randf_range(-2, 2))
 		child.velocity = Vector3.ZERO
-		if "knockback_velocity" in child:
-			child.knockback_velocity = Vector3.ZERO
-		if "is_dead" in child:
-			child.is_dead = false
-			child.show()
-			child.get_node("CollisionShape3D").set_deferred("disabled", false)
-		if "shuffle_timer" in child:
-			child.shuffle_timer = 0.0
-		if "action_map" in child:
-			child.action_map = {
-				"move_left": "move_left",
-				"move_right": "move_right",
-				"move_forward": "move_forward",
-				"move_backward": "move_backward",
-				"jump": "jump"
-			}
-		if child.has_method("check_it"):
-			child.check_it(-1)
-	
-	# Populate players_alive on server side
-	if multiplayer.is_server():
-		GameManager.players_alive.clear()
-		for child in players_node.get_children():
-			GameManager.players_alive.append(child.name.to_int())
+		child.is_dead = false
+		child.gravity_direction = Vector3.DOWN
+		child.show()
 
-@rpc("any_peer", "call_local")
-func show_winner(winner_id):
+func show_round_end(winner_id: int):
 	round_end_ui.show()
-	if winner_id == -1:
-		winner_label.text = "DRAW!"
+	if winner_id > 0:
+		winner_label.text = "Player %d Won!" % winner_id
 	else:
-		winner_label.text = "PLAYER " + str(winner_id) + " WINS!"
-		# Spawn victory confetti particle effect
-		var confetti = preload("res://scenes/victory_confetti.tscn").instantiate()
-		add_child(confetti)
-		
-	if multiplayer.is_server():
-		GameManager.players_alive.clear()
-		for child in players_node.get_children():
-			GameManager.players_alive.append(child.name.to_int())
+		winner_label.text = "Draw Game!"
 
 func apply_neon_theme():
-	# Stitch Design System Top-to-Bottom Glassmorphism theme
-	var theme = Theme.new()
-	
-	# Button Style (2px solid Neon Cyan border, outer glow)
-	var btn_normal = StyleBoxFlat.new()
-	btn_normal.bg_color = Color(0.01, 0.01, 0.045, 0.85)
-	btn_normal.border_width_left = 2
-	btn_normal.border_width_top = 2
-	btn_normal.border_width_right = 2
-	btn_normal.border_width_bottom = 2
-	btn_normal.border_color = Color(0, 0.95, 1, 1) # Neon Cyan
-	btn_normal.corner_radius_top_left = 4
-	btn_normal.corner_radius_top_right = 4
-	btn_normal.corner_radius_bottom_left = 4
-	btn_normal.corner_radius_bottom_right = 4
-	btn_normal.shadow_color = Color(0, 0.95, 1, 0.3)
-	btn_normal.shadow_size = 6
-	
-	var btn_hover = btn_normal.duplicate()
-	btn_hover.bg_color = Color(0.05, 0.05, 0.18, 0.9)
-	btn_hover.border_color = Color(1, 0, 1, 1) # Neon Magenta
-	btn_hover.shadow_color = Color(1, 0, 1, 0.5)
-	btn_hover.shadow_size = 10
-	
-	var btn_pressed = btn_normal.duplicate()
-	btn_pressed.bg_color = Color(0.01, 0.01, 0.03, 0.95)
-	btn_pressed.border_color = Color(1, 0.92, 0, 1)
-	btn_pressed.shadow_color = Color(1, 0.92, 0, 0.4)
-	btn_pressed.shadow_size = 4
-	
-	theme.set_stylebox("normal", "Button", btn_normal)
-	theme.set_stylebox("hover", "Button", btn_hover)
-	theme.set_stylebox("pressed", "Button", btn_pressed)
-	theme.set_stylebox("disabled", "Button", btn_normal)
-	theme.set_stylebox("focus", "Button", StyleBoxEmpty.new())
-	
-	theme.set_color("font_color", "Button", Color(1, 1, 1))
-	theme.set_color("font_hover_color", "Button", Color(1, 0.7, 1))
-	theme.set_font_size("font_size", "Button", 15)
-	
-	# LineEdit (IP Input)
-	var le_normal = StyleBoxFlat.new()
-	le_normal.bg_color = Color(0.01, 0.01, 0.03, 0.85)
-	le_normal.border_width_left = 1
-	le_normal.border_width_top = 1
-	le_normal.border_width_right = 1
-	le_normal.border_width_bottom = 2
-	le_normal.border_color = Color(0.0, 0.95, 1.0, 0.8)
-	le_normal.corner_radius_top_left = 4
-	le_normal.corner_radius_top_right = 4
-	le_normal.corner_radius_bottom_left = 4
-	le_normal.corner_radius_bottom_right = 4
-	
-	var le_focus = le_normal.duplicate()
-	le_focus.border_color = Color(0, 0.95, 1, 1)
-	le_focus.shadow_color = Color(0, 0.95, 1, 0.4)
-	le_focus.shadow_size = 6
-	
-	theme.set_stylebox("normal", "LineEdit", le_normal)
-	theme.set_stylebox("focus", "LineEdit", le_focus)
-	theme.set_color("font_color", "LineEdit", Color(1, 1, 1))
-	theme.set_font_size("font_size", "LineEdit", 14)
-	
-	# Panel (Glassmorphism Cards)
-	var pnl_style = StyleBoxFlat.new()
-	pnl_style.bg_color = Color(0.01, 0.01, 0.045, 0.85)
-	pnl_style.border_width_left = 2
-	pnl_style.border_width_top = 2
-	pnl_style.border_width_right = 2
-	pnl_style.border_width_bottom = 2
-	pnl_style.border_color = Color(0, 0.95, 1, 0.6)
-	pnl_style.corner_radius_top_left = 6
-	pnl_style.corner_radius_top_right = 6
-	pnl_style.corner_radius_bottom_left = 6
-	pnl_style.corner_radius_bottom_right = 6
-	pnl_style.shadow_color = Color(0, 0.95, 1, 0.2)
-	pnl_style.shadow_size = 6
-	theme.set_stylebox("panel", "Panel", pnl_style)
-	
-	# Apply to components
-	lobby_ui.theme = theme
-	hud.theme = theme
-	round_end_ui.theme = theme
+	pass
