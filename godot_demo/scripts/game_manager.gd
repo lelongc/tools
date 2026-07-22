@@ -18,6 +18,28 @@ var tag_it_id = -1
 var copycat_sequence = []
 var copycat_progress = {} # player_id -> index in sequence
 
+var maps = [
+	{"path": "res://scenes/maps/main.tscn", "mode": GameMode.RACE},
+	{"path": "res://scenes/maps/map_jungle_bounce.tscn", "mode": GameMode.TAG},
+	{"path": "res://scenes/maps/map_ice_panic.tscn", "mode": GameMode.SUMO},
+	{"path": "res://scenes/maps/map_wind_tunnel.tscn", "mode": GameMode.RACE},
+	{"path": "res://scenes/maps/map_conveyor.tscn", "mode": GameMode.COPYCAT},
+	{"path": "res://scenes/maps/map_gravity_flip.tscn", "mode": GameMode.RACE},
+	{"path": "res://scenes/maps/map_shrink.tscn", "mode": GameMode.SUMO},
+	{"path": "res://scenes/maps/map_rising_lava.tscn", "mode": GameMode.FLOOR_RISING},
+	{"path": "res://scenes/maps/map_gauntlet.tscn", "mode": GameMode.RACE}
+]
+var current_map_index = 0
+var round_ended = false
+
+func start_next_round():
+	round_ended = false
+	var map_info = maps[current_map_index]
+	var main_game = get_tree().get_first_node_in_group("main_game")
+	if main_game:
+		main_game.rpc("load_map", map_info.path)
+	start_mode(map_info.mode)
+
 func start_mode(mode: GameMode):
 	round_ended = false
 	
@@ -117,21 +139,6 @@ func check_win_condition():
 		if players_alive.size() <= 1:
 			var winner = players_alive[0] if players_alive.size() == 1 else -1
 			end_round(winner)
-
-var maps = [
-	{"path": "res://scenes/maps/main.tscn", "mode": GameMode.RACE},
-	{"path": "res://scenes/maps/map_jungle_bounce.tscn", "mode": GameMode.TAG},
-	{"path": "res://scenes/maps/map_ice_panic.tscn", "mode": GameMode.SUMO},
-	{"path": "res://scenes/maps/map_wind_tunnel.tscn", "mode": GameMode.RACE},
-	{"path": "res://scenes/maps/map_conveyor.tscn", "mode": GameMode.COPYCAT},
-	{"path": "res://scenes/maps/map_gravity_flip.tscn", "mode": GameMode.RACE},
-	{"path": "res://scenes/maps/map_shrink.tscn", "mode": GameMode.SUMO},
-	{"path": "res://scenes/maps/map_rising_lava.tscn", "mode": GameMode.FLOOR_RISING},
-	{"path": "res://scenes/maps/map_gauntlet.tscn", "mode": GameMode.RACE}
-]
-var current_map_index = 0
-
-var round_ended = false
 
 func end_round(winner_id):
 	if round_ended:

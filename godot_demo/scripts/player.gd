@@ -66,41 +66,133 @@ func _ready():
 		Color(0.45, 0.95, 0.65), # Mint Green
 		Color(1.0, 0.6, 0.35)    # Sorbet Orange
 	]
-	var color = custom_color if custom_color != Color(0, 0, 0, 0) else colors[name.to_int() % colors.size()]
-	var mat = StandardMaterial3D.new()
-	mat.albedo_color = color
-	mat.emission_enabled = true
-	mat.emission = color
-	mat.emission_energy_multiplier = 0.4
-	mat.roughness = 0.2
-	visual_mesh.material_override = mat
+	var color = custom_color if custom_color != Color(0, 0, 0, 0) else colors[character_variant % colors.size()]
 	
-	# Load 3D Low-Poly Character Model from Blender export if available
-	if ResourceLoader.exists("res://assets/cute_blobs.glb"):
-		var glb_scene = load("res://assets/cute_blobs.glb").instantiate()
-		if glb_scene:
-			# Hide default primitive mesh
-			visual_mesh.mesh = null
-			glb_scene.scale = Vector3(0.7, 0.7, 0.7)
-			glb_scene.position = Vector3(0, -0.6, 0)
-			visual_mesh.add_child(glb_scene)
-			
-			# Isolate selected character variant object
-			var variant_names = ["CuteBlob_PinkyBear", "CuteBlob_Froggo", "CuteBlob_Bunny", "CuteBlob_NekoCat"]
-			var target_name = variant_names[character_variant % variant_names.size()]
-			
-			for child in glb_scene.get_children():
-				if child.name.contains(target_name) or child.name == target_name:
-					child.visible = true
-					child.position = Vector3.ZERO
-				else:
-					child.visible = false
+	# Attempt loading exported 3D GLB model from Blender or build procedural 3D cute character
+	var model_paths = [
+		"res://assets/pinky_bear.glb",
+		"res://assets/froggo.glb",
+		"res://assets/bunny.glb",
+		"res://assets/neko_cat.glb"
+	]
+	var selected_path = model_paths[character_variant % model_paths.size()]
+	var glb_loaded = false
+	
+	if ResourceLoader.exists(selected_path):
+		var glb_res = load(selected_path)
+		if glb_res:
+			var glb_scene = glb_res.instantiate()
+			if glb_scene:
+				visual_mesh.mesh = null
+				visual_mesh.material_override = null
+				glb_scene.scale = Vector3(1.3, 1.3, 1.3)
+				glb_scene.position = Vector3(0, -0.8, 0)
+				visual_mesh.add_child(glb_scene)
+				glb_loaded = true
+				
+	if not glb_loaded:
+		build_cute_3d_character(color, character_variant)
 	
 	if has_node("TrailParticles"):
 		$TrailParticles.emitting = true
 		
 	if is_multiplayer_authority() and not is_bot:
 		camera.current = true
+
+func build_cute_3d_character(color: Color, variant: int):
+	visual_mesh.material_override = null
+	
+	# Create Cute Round Blob Body Sphere
+	var body_mesh = SphereMesh.new()
+	body_mesh.radius = 0.75
+	body_mesh.height = 1.4
+	visual_mesh.mesh = body_mesh
+	
+	var mat_body = StandardMaterial3D.new()
+	mat_body.albedo_color = color
+	mat_body.roughness = 0.25
+	visual_mesh.material_override = mat_body
+	
+	# Eye & Blush Materials
+	var mat_eye = StandardMaterial3D.new()
+	mat_eye.albedo_color = Color(0.02, 0.02, 0.05)
+	mat_eye.roughness = 0.1
+	
+	var mat_blush = StandardMaterial3D.new()
+	mat_blush.albedo_color = Color(1.0, 0.4, 0.65)
+	mat_blush.roughness = 0.4
+	
+	# Add Cute Glossy Eyes & Rosy Blush
+	for x in [0.28, -0.28]:
+		var eye = MeshInstance3D.new()
+		var eye_m = SphereMesh.new()
+		eye_m.radius = 0.09
+		eye_m.height = 0.18
+		eye.mesh = eye_m
+		eye.material_override = mat_eye
+		eye.position = Vector3(x, 0.15, -0.68)
+		visual_mesh.add_child(eye)
+		
+		var blush = MeshInstance3D.new()
+		var blush_m = SphereMesh.new()
+		blush_m.radius = 0.11
+		blush_m.height = 0.08
+		blush.mesh = blush_m
+		blush.material_override = mat_blush
+		blush.position = Vector3(x * 1.5, -0.05, -0.65)
+		visual_mesh.add_child(blush)
+
+	# Variant 0: Bear, Variant 1: Frog, Variant 2: Bunny, Variant 3: Cat
+	match variant % 4:
+		0: # Pinky Bear
+			for x in [0.45, -0.45]:
+				var ear = MeshInstance3D.new()
+				var ear_m = SphereMesh.new()
+				ear_m.radius = 0.28
+				ear_m.height = 0.56
+				ear.mesh = ear_m
+				ear.material_override = mat_body
+				ear.position = Vector3(x, 0.65, 0)
+				visual_mesh.add_child(ear)
+		1: # Froggo
+			for x in [0.35, -0.35]:
+				var f_eye = MeshInstance3D.new()
+				var f_m = SphereMesh.new()
+				f_m.radius = 0.25
+				f_m.height = 0.5
+				f_eye.mesh = f_m
+				f_eye.material_override = mat_body
+				f_eye.position = Vector3(x, 0.68, -0.2)
+				visual_mesh.add_child(f_eye)
+				
+				var pupil = MeshInstance3D.new()
+				var p_m = SphereMesh.new()
+				p_m.radius = 0.1
+				p_m.height = 0.2
+				pupil.mesh = p_m
+				pupil.material_override = mat_eye
+				pupil.position = Vector3(x, 0.72, -0.38)
+				visual_mesh.add_child(pupil)
+		2: # Bunny
+			for x in [0.3, -0.3]:
+				var ear = MeshInstance3D.new()
+				var ear_m = CapsuleMesh.new()
+				ear_m.radius = 0.14
+				ear_m.height = 0.8
+				ear.mesh = ear_m
+				ear.material_override = mat_body
+				ear.position = Vector3(x, 0.95, 0)
+				visual_mesh.add_child(ear)
+		3: # Neko Cat
+			for x in [0.45, -0.45]:
+				var ear = MeshInstance3D.new()
+				var ear_m = PrismMesh.new()
+				ear_m.size = Vector3(0.4, 0.45, 0.3)
+				ear.mesh = ear_m
+				ear.material_override = mat_body
+				ear.position = Vector3(x, 0.75, 0)
+				ear.rotation_degrees = Vector3(0, 0, -15 if x > 0 else 15)
+				visual_mesh.add_child(ear)
 
 func _physics_process(delta):
 	if is_dead:
@@ -182,7 +274,7 @@ func show_shuffle_alert():
 	
 	var tween = create_tween()
 	tween.tween_property(label, "position", Vector3(0, 3.2, 0), 1.0)
-	tween.parallel().tween_property(label, "modulate:a", 0.0, 1.0)
+	tween.parallel().tween_property(label, "modulate", Color(1, 0.2, 0.2, 0.0), 1.0)
 	tween.tween_callback(label.queue_free)
 
 func die():

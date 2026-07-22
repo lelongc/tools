@@ -1,0 +1,20 @@
+[gd_scene load_steps=5 format=3 uid="uid://b8x7c1d3p4m1"]
+
+[ext_resource type="Script" path="res://scripts/bounce_pad.gd" id="1_bounce"]
+[ext_resource type="Material" path="res://materials/neon_mat_bounce.tres" id="2_mat"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_pad"]
+size = Vector3(2, 0.2, 2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pad"]
+material = ExtResource("2_mat")
+size = Vector3(2, 0.2, 2)
+
+[node name="BouncePad" type="Area3D"]
+script = ExtResource("1_bounce")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_pad")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_pad")

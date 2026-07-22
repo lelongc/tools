@@ -1,0 +1,44 @@
+[gd_scene load_steps=7 format=3 uid="uid://fln12345"]
+
+[ext_resource type="Script" path="res://scripts/finish_line.gd" id="1_flscript"]
+[ext_resource type="Material" path="res://materials/neon_mat_finish.tres" id="2_mat"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fl"]
+size = Vector3(8, 6, 2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fl"]
+material = ExtResource("2_mat")
+size = Vector3(8, 0.4, 0.4)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pillar"]
+material = ExtResource("2_mat")
+top_radius = 0.2
+bottom_radius = 0.2
+height = 6.0
+
+[sub_resource type="TorusMesh" id="TorusMesh_ring"]
+material = ExtResource("2_mat")
+inner_radius = 2.5
+outer_radius = 2.8
+
+[node name="FinishLine" type="Area3D"]
+script = ExtResource("1_flscript")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_fl")
+
+[node name="PillarL" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.8, 3, 0)
+mesh = SubResource("CylinderMesh_pillar")
+
+[node name="PillarR" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8, 3, 0)
+mesh = SubResource("CylinderMesh_pillar")
+
+[node name="TopArch" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, 0)
+mesh = SubResource("BoxMesh_fl")
+
+[node name="PortalRing" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+mesh = SubResource("TorusMesh_ring")

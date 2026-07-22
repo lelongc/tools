@@ -173,6 +173,10 @@ func load_map(map_path):
 		child.gravity_direction = Vector3.DOWN
 		child.show()
 
+@rpc("any_peer", "call_local")
+func show_winner(winner_id: int):
+	show_round_end(winner_id)
+
 func show_round_end(winner_id: int):
 	round_end_ui.show()
 	if winner_id > 0:

@@ -39,10 +39,6 @@ shape = SubResource("CapsuleShape3D_player")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("CapsuleMesh_player")
 
-[node name="CuteFaceSprite" type="Sprite3D" parent="MeshInstance3D"]
-transform = Transform3D(0.45, 0, 0, 0, 0.45, 0, 0, 0, 0.45, 0, 0.22, -0.42)
-texture = ExtResource("2_cute_tex")
-
 [node name="TrailParticles" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0)
 amount = 8
