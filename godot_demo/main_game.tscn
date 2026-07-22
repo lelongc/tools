@@ -1,7 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://m1n2o3p4q5r6"]
+[gd_scene load_steps=3 format=3 uid="uid://m1n2o3p4q5r6"]
 
 [ext_resource type="Script" path="res://main_game.gd" id="1_mgame"]
-[ext_resource type="Environment" uid="uid://c8x9y0z1w2v" path="res://default_env.tres" id="2_env"]
+[ext_resource type="Environment" uid="uid://c8yay001w2v" path="res://default_env.tres" id="2_env"]
 
 [node name="MainGame" type="Node"]
 script = ExtResource("1_mgame")
@@ -44,10 +44,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -100.0
-offset_top = -50.0
-offset_right = 100.0
-offset_bottom = 50.0
+offset_left = -120.0
+offset_top = -80.0
+offset_right = 120.0
+offset_bottom = 80.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -56,7 +56,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(1, 0, 1, 1)
 theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 44
 text = "NEON WRONG WAY"
 horizontal_alignment = 1
 
@@ -67,7 +67,12 @@ text = "127.0.0.1"
 [node name="HostBtn" type="Button" parent="LobbyUI/VBoxContainer"]
 layout_mode = 2
 focus_mode = 0
-text = "Host Game"
+text = "Host Online Game"
+
+[node name="HostBotsBtn" type="Button" parent="LobbyUI/VBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+text = "Host Solo Game (vs Bots)"
 
 [node name="JoinBtn" type="Button" parent="LobbyUI/VBoxContainer"]
 layout_mode = 2
@@ -88,10 +93,10 @@ mouse_filter = 2
 layout_mode = 1
 offset_left = 20.0
 offset_top = 20.0
-offset_right = 200.0
-offset_bottom = 50.0
+offset_right = 250.0
+offset_bottom = 120.0
 theme_override_colors/font_color = Color(1, 1, 0, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 22
 text = "Scores: "
 
 [node name="ShuffleTimerLabel" type="Label" parent="HUD"]
@@ -110,6 +115,52 @@ theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 28
 text = "SHUFFLE IN: 10.0s"
 horizontal_alignment = 1
+
+[node name="CopycatLabel" type="Label" parent="HUD"]
+visible = false
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -250.0
+offset_top = 65.0
+offset_right = 250.0
+offset_bottom = 105.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.2, 1, 0.5, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 24
+text = "SEQUENCE: "
+horizontal_alignment = 1
+
+[node name="KeyGuidePanel" type="Panel" parent="HUD"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -60.0
+offset_right = 300.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="KeyGuideLabel" type="Label" parent="HUD/KeyGuidePanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "[A] -> LEFT | [D] -> RIGHT | [W] -> FORWARD | [S] -> BACK | [SPACE] -> JUMP"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="RoundEndUI" type="Control" parent="."]
 visible = false
@@ -138,10 +189,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -150.0
-offset_top = -30.0
-offset_right = 150.0
-offset_bottom = 30.0
+offset_left = -200.0
+offset_top = -40.0
+offset_right = 200.0
+offset_bottom = 40.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0, 1, 0, 1)

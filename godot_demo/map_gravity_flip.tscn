@@ -1,0 +1,48 @@
+[gd_scene load_steps=7 format=3 uid="uid://map6gravity"]
+
+[ext_resource type="PackedScene" uid="uid://fln12345" path="res://finish_line.tscn" id="1_finish"]
+[ext_resource type="Script" path="res://gravity_zone.gd" id="2_gravity"]
+[ext_resource type="Material" path="res://neon_mat_ground.tres" id="3_gmat"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_g"]
+size = Vector3(25, 1, 30)
+
+[sub_resource type="BoxMesh" id="BoxMesh_g"]
+material = ExtResource("3_gmat")
+size = Vector3(25, 1, 30)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_gz"]
+size = Vector3(25, 12, 15)
+
+[node name="MapGravityFlip" type="Node3D"]
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_g")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("BoxMesh_g")
+
+[node name="Ceiling" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 12.5, -10)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ceiling"]
+shape = SubResource("BoxShape3D_g")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ceiling"]
+mesh = SubResource("BoxMesh_g")
+
+[node name="GravityFlipZone" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 6, -10)
+script = ExtResource("2_gravity")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GravityFlipZone"]
+shape = SubResource("BoxShape3D_gz")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0.433013, -0.25, 0, 0.5, 0.866025, 0.5, -0.75, 0.433013, 0, 10, 0)
+
+[node name="FinishLine" parent="." instance=ExtResource("1_finish")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 10, -20)

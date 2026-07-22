@@ -15,10 +15,13 @@ var scores = {}
 var tag_timer = 0.0
 var tag_it_id = -1
 
+var copycat_sequence = []
+var copycat_timer = 0.0
+
 func start_mode(mode: GameMode):
 	round_ended = false
 	
-	# Solo play guard: skip elimination modes if only 1 or 0 players
+	# Solo play guard: skip elimination modes if only 1 or 0 players AND no bots
 	if players_alive.size() <= 1 and mode != GameMode.RACE and mode != GameMode.COPYCAT:
 		print("Solo play: skipping elimination mode, using RACE instead")
 		mode = GameMode.RACE
@@ -31,14 +34,30 @@ func start_mode(mode: GameMode):
 		if players_alive.size() > 0:
 			tag_it_id = players_alive[randi() % players_alive.size()]
 			rpc("update_it", tag_it_id)
+			
+	if mode == GameMode.COPYCAT and multiplayer.is_server():
+		generate_copycat_sequence()
+
+func generate_copycat_sequence():
+	var possible_actions = ["A", "D", "W", "S", "SPACE"]
+	copycat_sequence.clear()
+	for i in range(4):
+		copycat_sequence.append(possible_actions[randi() % possible_actions.size()])
+	rpc("sync_copycat_sequence", copycat_sequence)
+
+@rpc("any_peer", "call_local")
+func sync_copycat_sequence(seq):
+	copycat_sequence = seq
 
 func _process(delta):
 	if multiplayer.is_server() and current_mode == GameMode.TAG:
 		if tag_timer > 0:
 			tag_timer -= delta
 			if tag_timer <= 0:
-				# BOOM
+				# BOOM explosion
 				report_death(tag_it_id)
+				if SoundManager:
+					SoundManager.play_explosion()
 				tag_timer = 15.0 # Next bomb
 				if players_alive.size() > 0:
 					tag_it_id = players_alive[randi() % players_alive.size()]
@@ -89,6 +108,7 @@ var maps = [
 	{"path": "res://map_ice_panic.tscn", "mode": GameMode.SUMO},
 	{"path": "res://map_wind_tunnel.tscn", "mode": GameMode.RACE},
 	{"path": "res://map_conveyor.tscn", "mode": GameMode.COPYCAT},
+	{"path": "res://map_gravity_flip.tscn", "mode": GameMode.RACE},
 	{"path": "res://map_shrink.tscn", "mode": GameMode.SUMO},
 	{"path": "res://map_rising_lava.tscn", "mode": GameMode.FLOOR_RISING},
 	{"path": "res://map_gauntlet.tscn", "mode": GameMode.RACE}
@@ -111,6 +131,9 @@ func end_round(winner_id):
 	var main_game = get_tree().get_first_node_in_group("main_game")
 	if main_game:
 		main_game.rpc("show_winner", winner_id)
+		
+	if SoundManager:
+		SoundManager.play_win()
 		
 	# Cycle to next map after a delay
 	await get_tree().create_timer(3.0).timeout

@@ -25,6 +25,7 @@ config/features=PackedStringArray("4.7")
 
 
 GameManager="*res://game_manager.gd"
+SoundManager="*res://sound_manager.gd"
 
 [input]
 

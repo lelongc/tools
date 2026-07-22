@@ -1,10 +1,11 @@
 extends CharacterBody3D
 
 const SPEED = 6.0
-const JUMP_VELOCITY = 6.0
+const JUMP_VELOCITY = 6.5
 
 # Gravity
 var gravity = ProjectSettings.get_setting("physics/3d/default_gravity")
+var gravity_direction = Vector3.DOWN
 
 # Control Shuffle Mechanic
 var action_map = {
@@ -22,6 +23,10 @@ var shuffle_timer = 0.0
 @onready var shuffle_label = $CanvasLayer/Control/ShuffleLabel
 
 var knockback_velocity = Vector3.ZERO
+var is_bot = false
+var bot_change_target_timer = 0.0
+var bot_target_dir = Vector3.FORWARD
+var bot_wants_jump = false
 
 func apply_knockback(force: Vector3):
 	knockback_velocity += force
@@ -32,7 +37,7 @@ func apply_knockback_rpc(force: Vector3):
 		knockback_velocity += force
 
 func apply_bounce(force: float):
-	velocity.y = force
+	velocity.y = force * (-1.0 if gravity_direction.y > 0 else 1.0)
 
 func _enter_tree():
 	set_multiplayer_authority(name.to_int())
@@ -83,9 +88,6 @@ func die():
 	is_dead = true
 	hide()
 	$CollisionShape3D.set_deferred("disabled", true)
-	if is_multiplayer_authority():
-		# Optionally keep camera, but let's just leave it for now
-		pass
 
 func _physics_process(delta):
 	if is_dead:
@@ -101,33 +103,52 @@ func _physics_process(delta):
 
 	# Add gravity
 	if not is_on_floor():
-		velocity.y -= gravity * delta
+		velocity += gravity_direction * gravity * delta
 
-	# Get remapped actions
-	var left = action_map["move_left"]
-	var right = action_map["move_right"]
-	var fwd = action_map["move_forward"]
-	var back = action_map["move_backward"]
+	var input_dir = Vector2.ZERO
+	var wants_jump = false
 
-	# Handle jump.
-	if Input.is_action_just_pressed(action_map["jump"]) and is_on_floor():
-		velocity.y = JUMP_VELOCITY
+	if is_bot:
+		# AI Bot Decision Logic
+		bot_change_target_timer += delta
+		if bot_change_target_timer >= 1.0:
+			bot_change_target_timer = 0.0
+			bot_target_dir = Vector3(randf_range(-1, 1), 0, randf_range(-1, 1)).normalized()
+			bot_wants_jump = (randf() > 0.6)
+			
+		# AI Bot moves towards goal in RACE mode or target in others
+		if GameManager.current_mode == GameManager.GameMode.RACE:
+			bot_target_dir = Vector3(0, 0, -1) # Move towards finish line
+			
+		input_dir = Vector2(bot_target_dir.x, bot_target_dir.z)
+		wants_jump = bot_wants_jump and is_on_floor()
+	else:
+		# Player Input Reading (with remapped actions)
+		var left = action_map["move_left"]
+		var right = action_map["move_right"]
+		var fwd = action_map["move_forward"]
+		var back = action_map["move_backward"]
+		
+		input_dir = Input.get_vector(left, right, fwd, back)
+		wants_jump = Input.is_action_just_pressed(action_map["jump"])
+
+	# Handle Jump
+	if wants_jump and is_on_floor():
+		velocity.y = JUMP_VELOCITY if gravity_direction.y < 0 else -JUMP_VELOCITY
 		# Spawn jump particles
 		var particles = preload("res://jump_particles.tscn").instantiate()
 		get_parent().add_child(particles)
 		particles.global_position = global_position
-		if $JumpSound.stream:
-			$JumpSound.play()
+		if SoundManager:
+			SoundManager.play_jump()
 
-	# Get input direction
-	var input_dir = Input.get_vector(left, right, fwd, back)
+	# Movement calculation
 	var direction = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 	
 	if direction:
 		velocity.x = direction.x * SPEED
 		velocity.z = direction.z * SPEED
 		
-		# Rotate mesh towards movement direction (smoothly)
 		var target_rotation = atan2(-direction.x, -direction.z)
 		visual_mesh.rotation.y = lerp_angle(visual_mesh.rotation.y, target_rotation, 15.0 * delta)
 	else:
@@ -141,7 +162,7 @@ func _physics_process(delta):
 
 	move_and_slide()
 	
-	# Pushing other players and passing tag
+	# Pushing other players & Tag Pass
 	for i in get_slide_collision_count():
 		var col = get_slide_collision(i)
 		var collider = col.get_collider()
@@ -156,8 +177,8 @@ func _physics_process(delta):
 			if is_bomb and is_multiplayer_authority():
 				GameManager.rpc_id(1, "request_pass_bomb", collider.name.to_int())
 
-	# Death check
-	if position.y < -10:
+	# Fall death check
+	if position.y < -15 or position.y > 35:
 		if GameManager.current_mode == GameManager.GameMode.RACE or GameManager.current_mode == GameManager.GameMode.COPYCAT:
 			position = Vector3(randf_range(-2, 2), 5, randf_range(-2, 2))
 			velocity = Vector3.ZERO
@@ -176,7 +197,9 @@ func shuffle_controls():
 	for i in range(keys.size()):
 		action_map[keys[i]] = values[i]
 		
-	print("Controls Shuffled!")
+	print("Controls Shuffled for Player ", name)
+	if SoundManager and is_multiplayer_authority() and not is_bot:
+		SoundManager.play_shuffle()
 	
 	# Visual feedback
 	if visual_mesh:
@@ -189,7 +212,7 @@ func shuffle_controls():
 		var shake_tween = create_tween()
 		shake_tween.tween_method(func(v): $SpringArm3D/Camera3D.h_offset = randf_range(-v, v); $SpringArm3D/Camera3D.v_offset = randf_range(-v, v), 0.5, 0.0, 0.5)
 		
-	if shuffle_label:
+	if shuffle_label and is_multiplayer_authority() and not is_bot:
 		shuffle_label.text = "XÁO PHÍM!"
 		shuffle_label.visible = true
 		shuffle_label.modulate.a = 1.0

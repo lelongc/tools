@@ -9,3 +9,5 @@ func _on_body_entered(body):
 	if body.has_method("is_player") and body.is_multiplayer_authority():
 		if body.has_method("apply_bounce"):
 			body.apply_bounce(bounce_force)
+			if SoundManager:
+				SoundManager.play_bounce()

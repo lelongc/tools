@@ -12,10 +12,14 @@ var peer = ENetMultiplayerPeer.new()
 @onready var round_end_ui = $RoundEndUI
 @onready var winner_label = $RoundEndUI/WinnerLabel
 @onready var shuffle_timer_label = $HUD/ShuffleTimerLabel
+@onready var copycat_label = $HUD/CopycatLabel
+@onready var key_guide_label = $HUD/KeyGuidePanel/KeyGuideLabel
 
 func _ready():
 	add_to_group("main_game")
 	$LobbyUI/VBoxContainer/HostBtn.pressed.connect(_on_host_pressed)
+	if $LobbyUI/VBoxContainer.has_node("HostBotsBtn"):
+		$LobbyUI/VBoxContainer/HostBotsBtn.pressed.connect(_on_host_bots_pressed)
 	$LobbyUI/VBoxContainer/JoinBtn.pressed.connect(_on_join_pressed)
 	address_input.text = "127.0.0.1"
 	hud.hide()
@@ -34,15 +38,42 @@ func _process(_delta):
 			score_text += "BOMB: %.1fs\n" % GameManager.tag_timer
 		score_label.text = score_text
 		
-		# Find local player and display shuffle countdown
+		# Show COPYCAT sequence if applicable
+		if GameManager.current_mode == GameManager.GameMode.COPYCAT:
+			copycat_label.visible = true
+			copycat_label.text = "SEQUENCE: " + " ➔ ".join(GameManager.copycat_sequence)
+		else:
+			copycat_label.visible = false
+		
+		# Find local player and display shuffle countdown + key guide
 		var local_player = players_node.get_node_or_null(str(multiplayer.get_unique_id()))
 		if local_player and "shuffle_timer" in local_player and not local_player.is_dead:
 			var time_left = clamp(local_player.SHUFFLE_INTERVAL - local_player.shuffle_timer, 0, local_player.SHUFFLE_INTERVAL)
 			shuffle_timer_label.text = "SHUFFLE IN: %.1fs" % time_left
+			
+			# Format Key Guide Label
+			var am = local_player.action_map
+			var format_action = func(act_name):
+				match act_name:
+					"move_left": return "LEFT"
+					"move_right": return "RIGHT"
+					"move_forward": return "FORWARD"
+					"move_backward": return "BACKWARD"
+					"jump": return "JUMP"
+					_: return act_name.to_upper()
+			
+			key_guide_label.text = "[A]➔%s | [D]➔%s | [W]➔%s | [S]➔%s | [SPACE]➔%s" % [
+				format_action.call(am["move_left"]),
+				format_action.call(am["move_right"]),
+				format_action.call(am["move_forward"]),
+				format_action.call(am["move_backward"]),
+				format_action.call(am["jump"])
+			]
 		else:
 			shuffle_timer_label.text = ""
 
 func _on_host_pressed():
+	if SoundManager: SoundManager.play_click()
 	peer.create_server(PORT)
 	multiplayer.multiplayer_peer = peer
 	multiplayer.peer_connected.connect(_on_peer_connected)
@@ -50,7 +81,19 @@ func _on_host_pressed():
 	_add_player(1)
 	start_game()
 
+func _on_host_bots_pressed():
+	if SoundManager: SoundManager.play_click()
+	peer.create_server(PORT)
+	multiplayer.multiplayer_peer = peer
+	multiplayer.peer_connected.connect(_on_peer_connected)
+	
+	_add_player(1)
+	_add_bot(2)
+	_add_bot(3)
+	start_game()
+
 func _on_join_pressed():
+	if SoundManager: SoundManager.play_click()
 	peer.create_client(address_input.text, PORT)
 	multiplayer.multiplayer_peer = peer
 	start_game()
@@ -75,6 +118,14 @@ func _add_player(id):
 	player.position = Vector3(randf_range(-2, 2), 2, randf_range(-2, 2))
 	players_node.add_child(player, true)
 
+func _add_bot(id):
+	GameManager.register_player(id)
+	var bot = preload("res://player.tscn").instantiate()
+	bot.name = str(id)
+	bot.is_bot = true
+	bot.position = Vector3(randf_range(-2, 2), 2, randf_range(-2, 2))
+	players_node.add_child(bot, true)
+
 @rpc("any_peer", "call_local")
 func load_map(map_path):
 	round_end_ui.hide()
@@ -94,7 +145,6 @@ func load_map(map_path):
 			child.is_dead = false
 			child.show()
 			child.get_node("CollisionShape3D").set_deferred("disabled", false)
-		# Reset shuffle timer and controls on map change
 		if "shuffle_timer" in child:
 			child.shuffle_timer = 0.0
 		if "action_map" in child:
@@ -108,7 +158,7 @@ func load_map(map_path):
 		if child.has_method("check_it"):
 			child.check_it(-1)
 	
-	# Populate players_alive on server side (critical for TAG/SUMO)
+	# Populate players_alive on server side
 	if multiplayer.is_server():
 		GameManager.players_alive.clear()
 		for child in players_node.get_children():
@@ -130,7 +180,7 @@ func show_winner(winner_id):
 func apply_neon_theme():
 	var theme = Theme.new()
 	
-	# Button Style (Neon borders, translucent dark background)
+	# Button Style
 	var btn_normal = StyleBoxFlat.new()
 	btn_normal.bg_color = Color(0.02, 0.02, 0.05, 0.7)
 	btn_normal.border_width_left = 2
@@ -190,8 +240,23 @@ func apply_neon_theme():
 	theme.set_color("font_color", "LineEdit", Color(1, 1, 1))
 	theme.set_font_size("font_size", "LineEdit", 14)
 	
+	# Panel (Key Guide Panel)
+	var pnl_style = StyleBoxFlat.new()
+	pnl_style.bg_color = Color(0.01, 0.01, 0.05, 0.85)
+	pnl_style.border_width_left = 2
+	pnl_style.border_width_top = 2
+	pnl_style.border_width_right = 2
+	pnl_style.border_width_bottom = 2
+	pnl_style.border_color = Color(0, 1, 1, 0.8)
+	pnl_style.corner_radius_top_left = 8
+	pnl_style.corner_radius_top_right = 8
+	pnl_style.corner_radius_bottom_left = 8
+	pnl_style.corner_radius_bottom_right = 8
+	pnl_style.shadow_color = Color(0, 1, 1, 0.2)
+	pnl_style.shadow_size = 4
+	theme.set_stylebox("panel", "Panel", pnl_style)
+	
 	# Apply to components
 	lobby_ui.theme = theme
 	hud.theme = theme
 	round_end_ui.theme = theme
-
