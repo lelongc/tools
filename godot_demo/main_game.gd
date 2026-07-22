@@ -4,7 +4,7 @@ const PORT = 8080
 var peer = ENetMultiplayerPeer.new()
 
 @onready var lobby_ui = $LobbyUI
-@onready var address_input = $LobbyUI/VBoxContainer/AddressInput
+@onready var address_input = $LobbyUI/MainDashboard/RoomCard/VBox/AddressInput
 @onready var players_node = $Players
 @onready var level_container = $Level
 @onready var hud = $HUD
@@ -15,25 +15,31 @@ var peer = ENetMultiplayerPeer.new()
 @onready var copycat_label = $HUD/CopycatLabel
 @onready var key_guide_label = $HUD/KeyGuidePanel/KeyGuideLabel
 
-var selected_color: Color = Color(0, 1, 1) # Default Cyan
+# Stitch Design System Color Palette
+var selected_color: Color = Color(0, 0.95, 1) # Neon Cyan #00f3ff
 
 func _ready():
 	add_to_group("main_game")
-	$LobbyUI/VBoxContainer/HostBtn.pressed.connect(_on_host_pressed)
-	if $LobbyUI/VBoxContainer.has_node("HostBotsBtn"):
-		$LobbyUI/VBoxContainer/HostBotsBtn.pressed.connect(_on_host_bots_pressed)
-	$LobbyUI/VBoxContainer/JoinBtn.pressed.connect(_on_join_pressed)
 	
-	if $LobbyUI/VBoxContainer.has_node("MuteBtn"):
-		$LobbyUI/VBoxContainer/MuteBtn.pressed.connect(_on_mute_pressed)
+	# Room Buttons
+	var room_vbox = $LobbyUI/MainDashboard/RoomCard/VBox
+	room_vbox.get_node("HostBtn").pressed.connect(_on_host_pressed)
+	room_vbox.get_node("HostBotsBtn").pressed.connect(_on_host_bots_pressed)
+	room_vbox.get_node("JoinBtn").pressed.connect(_on_join_pressed)
+	
+	# Mute Button in Footer
+	var mute_btn = $LobbyUI/BottomFooterBar/HBoxFooter/MuteBtn
+	if mute_btn:
+		mute_btn.pressed.connect(_on_mute_pressed)
 		
-	# Color Picker setup
-	var color_box = $LobbyUI/VBoxContainer/ColorBox
+	# Color Picker setup matching Cute Blob Colors
+	var color_box = $LobbyUI/MainDashboard/PilotCard/VBox/ColorBox
 	if color_box:
-		color_box.get_node("CyanBtn").pressed.connect(func(): selected_color = Color(0, 1, 1); if SoundManager: SoundManager.play_click())
+		color_box.get_node("CyanBtn").pressed.connect(func(): selected_color = Color(0, 0.95, 1); if SoundManager: SoundManager.play_click())
 		color_box.get_node("MagentaBtn").pressed.connect(func(): selected_color = Color(1, 0, 1); if SoundManager: SoundManager.play_click())
-		color_box.get_node("YellowBtn").pressed.connect(func(): selected_color = Color(1, 1, 0); if SoundManager: SoundManager.play_click())
-		color_box.get_node("GreenBtn").pressed.connect(func(): selected_color = Color(0, 1, 0); if SoundManager: SoundManager.play_click())
+		color_box.get_node("YellowBtn").pressed.connect(func(): selected_color = Color(1, 0.92, 0); if SoundManager: SoundManager.play_click())
+		color_box.get_node("GreenBtn").pressed.connect(func(): selected_color = Color(0, 1, 0.4); if SoundManager: SoundManager.play_click())
+		color_box.get_node("OrangeBtn").pressed.connect(func(): selected_color = Color(1, 0.45, 0); if SoundManager: SoundManager.play_click())
 		
 	address_input.text = "127.0.0.1"
 	hud.hide()
@@ -43,7 +49,7 @@ func _ready():
 func _on_mute_pressed():
 	if SoundManager:
 		var muted = SoundManager.toggle_mute()
-		$LobbyUI/VBoxContainer/MuteBtn.text = "🔇 Sound: OFF" if muted else "🔊 Sound: ON"
+		$LobbyUI/BottomFooterBar/HBoxFooter/MuteBtn.text = "🔇 SOUND: OFF" if muted else "🔊 SOUND: ON"
 
 func _process(_delta):
 	if hud.visible:
@@ -201,34 +207,35 @@ func show_winner(winner_id):
 			GameManager.players_alive.append(child.name.to_int())
 
 func apply_neon_theme():
+	# Stitch Design System Top-to-Bottom Glassmorphism theme
 	var theme = Theme.new()
 	
-	# Button Style
+	# Button Style (2px solid Neon Cyan border, outer glow)
 	var btn_normal = StyleBoxFlat.new()
-	btn_normal.bg_color = Color(0.02, 0.02, 0.05, 0.7)
+	btn_normal.bg_color = Color(0.01, 0.01, 0.045, 0.85)
 	btn_normal.border_width_left = 2
 	btn_normal.border_width_top = 2
 	btn_normal.border_width_right = 2
 	btn_normal.border_width_bottom = 2
-	btn_normal.border_color = Color(0, 1, 1, 1) # Neon Cyan
-	btn_normal.corner_radius_top_left = 8
-	btn_normal.corner_radius_top_right = 8
-	btn_normal.corner_radius_bottom_left = 8
-	btn_normal.corner_radius_bottom_right = 8
-	btn_normal.shadow_color = Color(0, 1, 1, 0.3)
+	btn_normal.border_color = Color(0, 0.95, 1, 1) # Neon Cyan
+	btn_normal.corner_radius_top_left = 4
+	btn_normal.corner_radius_top_right = 4
+	btn_normal.corner_radius_bottom_left = 4
+	btn_normal.corner_radius_bottom_right = 4
+	btn_normal.shadow_color = Color(0, 0.95, 1, 0.3)
 	btn_normal.shadow_size = 6
 	
 	var btn_hover = btn_normal.duplicate()
-	btn_hover.bg_color = Color(0.05, 0.05, 0.15, 0.8)
+	btn_hover.bg_color = Color(0.05, 0.05, 0.18, 0.9)
 	btn_hover.border_color = Color(1, 0, 1, 1) # Neon Magenta
 	btn_hover.shadow_color = Color(1, 0, 1, 0.5)
 	btn_hover.shadow_size = 10
 	
 	var btn_pressed = btn_normal.duplicate()
-	btn_pressed.bg_color = Color(0.01, 0.01, 0.03, 0.9)
-	btn_pressed.border_color = Color(1, 1, 0, 1) # Neon Yellow
-	btn_pressed.shadow_color = Color(1, 1, 0, 0.4)
-	btn_pressed.shadow_size = 2
+	btn_pressed.bg_color = Color(0.01, 0.01, 0.03, 0.95)
+	btn_pressed.border_color = Color(1, 0.92, 0, 1)
+	btn_pressed.shadow_color = Color(1, 0.92, 0, 0.4)
+	btn_pressed.shadow_size = 4
 	
 	theme.set_stylebox("normal", "Button", btn_normal)
 	theme.set_stylebox("hover", "Button", btn_hover)
@@ -238,45 +245,45 @@ func apply_neon_theme():
 	
 	theme.set_color("font_color", "Button", Color(1, 1, 1))
 	theme.set_color("font_hover_color", "Button", Color(1, 0.7, 1))
-	theme.set_font_size("font_size", "Button", 16)
+	theme.set_font_size("font_size", "Button", 15)
 	
 	# LineEdit (IP Input)
 	var le_normal = StyleBoxFlat.new()
-	le_normal.bg_color = Color(0.01, 0.01, 0.03, 0.8)
-	le_normal.border_width_left = 2
-	le_normal.border_width_top = 2
-	le_normal.border_width_right = 2
+	le_normal.bg_color = Color(0.01, 0.01, 0.03, 0.85)
+	le_normal.border_width_left = 1
+	le_normal.border_width_top = 1
+	le_normal.border_width_right = 1
 	le_normal.border_width_bottom = 2
-	le_normal.border_color = Color(0.2, 0.2, 0.4, 1)
-	le_normal.corner_radius_top_left = 6
-	le_normal.corner_radius_top_right = 6
-	le_normal.corner_radius_bottom_left = 6
-	le_normal.corner_radius_bottom_right = 6
+	le_normal.border_color = Color(0.0, 0.95, 1.0, 0.8)
+	le_normal.corner_radius_top_left = 4
+	le_normal.corner_radius_top_right = 4
+	le_normal.corner_radius_bottom_left = 4
+	le_normal.corner_radius_bottom_right = 4
 	
 	var le_focus = le_normal.duplicate()
-	le_focus.border_color = Color(0, 1, 1, 1) # Neon Cyan on focus
-	le_focus.shadow_color = Color(0, 1, 1, 0.3)
-	le_focus.shadow_size = 4
+	le_focus.border_color = Color(0, 0.95, 1, 1)
+	le_focus.shadow_color = Color(0, 0.95, 1, 0.4)
+	le_focus.shadow_size = 6
 	
 	theme.set_stylebox("normal", "LineEdit", le_normal)
 	theme.set_stylebox("focus", "LineEdit", le_focus)
 	theme.set_color("font_color", "LineEdit", Color(1, 1, 1))
 	theme.set_font_size("font_size", "LineEdit", 14)
 	
-	# Panel (Key Guide Panel)
+	# Panel (Glassmorphism Cards)
 	var pnl_style = StyleBoxFlat.new()
-	pnl_style.bg_color = Color(0.01, 0.01, 0.05, 0.85)
+	pnl_style.bg_color = Color(0.01, 0.01, 0.045, 0.85)
 	pnl_style.border_width_left = 2
 	pnl_style.border_width_top = 2
 	pnl_style.border_width_right = 2
 	pnl_style.border_width_bottom = 2
-	pnl_style.border_color = Color(0, 1, 1, 0.8)
-	pnl_style.corner_radius_top_left = 8
-	pnl_style.corner_radius_top_right = 8
-	pnl_style.corner_radius_bottom_left = 8
-	pnl_style.corner_radius_bottom_right = 8
-	pnl_style.shadow_color = Color(0, 1, 1, 0.2)
-	pnl_style.shadow_size = 4
+	pnl_style.border_color = Color(0, 0.95, 1, 0.6)
+	pnl_style.corner_radius_top_left = 6
+	pnl_style.corner_radius_top_right = 6
+	pnl_style.corner_radius_bottom_left = 6
+	pnl_style.corner_radius_bottom_right = 6
+	pnl_style.shadow_color = Color(0, 0.95, 1, 0.2)
+	pnl_style.shadow_size = 6
 	theme.set_stylebox("panel", "Panel", pnl_style)
 	
 	# Apply to components

@@ -25,7 +25,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 
 [node name="Background" type="ColorRect" parent="LobbyUI"]
 layout_mode = 1
@@ -34,90 +33,258 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
-color = Color(0.02, 0.02, 0.05, 0.9)
+color = Color(0.02, 0.02, 0.05, 0.95)
 
-[node name="VBoxContainer" type="VBoxContainer" parent="LobbyUI"]
+[node name="TopHeaderBar" type="Panel" parent="LobbyUI"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 70.0
+grow_horizontal = 2
+
+[node name="HBoxHeader" type="HBoxContainer" parent="LobbyUI/TopHeaderBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 30.0
+offset_right = -30.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 0
+
+[node name="Title" type="Label" parent="LobbyUI/TopHeaderBar/HBoxHeader"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(1, 0, 1, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 36
+text = "NEON WRONG WAY 3D"
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="LobbyUI/TopHeaderBar/HBoxHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="StatusBadge" type="Label" parent="LobbyUI/TopHeaderBar/HBoxHeader"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 18
+text = "● v1.0.0 | P2P ONLINE"
+vertical_alignment = 1
+
+[node name="MainDashboard" type="HBoxContainer" parent="LobbyUI"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -140.0
-offset_top = -120.0
-offset_right = 140.0
-offset_bottom = 120.0
+offset_left = -450.0
+offset_top = -180.0
+offset_right = 450.0
+offset_bottom = 180.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 20
 
-[node name="Title" type="Label" parent="LobbyUI/VBoxContainer"]
+[node name="RoomCard" type="Panel" parent="LobbyUI/MainDashboard"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="LobbyUI/MainDashboard/RoomCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="Label" parent="LobbyUI/MainDashboard/RoomCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(1, 0, 1, 1)
-theme_override_constants/outline_size = 4
-theme_override_font_sizes/font_size = 44
-text = "NEON WRONG WAY"
+theme_override_font_sizes/font_size = 20
+text = "NETWORK ROOM"
 horizontal_alignment = 1
 
-[node name="AddressInput" type="LineEdit" parent="LobbyUI/VBoxContainer"]
+[node name="AddressInput" type="LineEdit" parent="LobbyUI/MainDashboard/RoomCard/VBox"]
 layout_mode = 2
 text = "127.0.0.1"
 
-[node name="HostBtn" type="Button" parent="LobbyUI/VBoxContainer"]
+[node name="HostBtn" type="Button" parent="LobbyUI/MainDashboard/RoomCard/VBox"]
+custom_minimum_size = Vector2(0, 45)
 layout_mode = 2
 focus_mode = 0
 text = "Host Online Game"
 
-[node name="HostBotsBtn" type="Button" parent="LobbyUI/VBoxContainer"]
+[node name="HostBotsBtn" type="Button" parent="LobbyUI/MainDashboard/RoomCard/VBox"]
+custom_minimum_size = Vector2(0, 45)
 layout_mode = 2
 focus_mode = 0
-text = "Host Solo Game (vs Bots)"
+text = "Host Solo (vs 3 Bots)"
 
-[node name="JoinBtn" type="Button" parent="LobbyUI/VBoxContainer"]
+[node name="JoinBtn" type="Button" parent="LobbyUI/MainDashboard/RoomCard/VBox"]
+custom_minimum_size = Vector2(0, 45)
 layout_mode = 2
 focus_mode = 0
 text = "Join Game"
 
-[node name="ColorLabel" type="Label" parent="LobbyUI/VBoxContainer"]
+[node name="PilotCard" type="Panel" parent="LobbyUI/MainDashboard"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="LobbyUI/MainDashboard/PilotCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
+
+[node name="Header" type="Label" parent="LobbyUI/MainDashboard/PilotCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "CUTE BLOB PILOT"
+horizontal_alignment = 1
+
+[node name="ColorLabel" type="Label" parent="LobbyUI/MainDashboard/PilotCard/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 0, 1)
 theme_override_font_sizes/font_size = 14
-text = "SELECT COLOR:"
+text = "SELECT NEON COLOR:"
 horizontal_alignment = 1
 
-[node name="ColorBox" type="HBoxContainer" parent="LobbyUI/VBoxContainer"]
+[node name="ColorBox" type="HBoxContainer" parent="LobbyUI/MainDashboard/PilotCard/VBox"]
 layout_mode = 2
 alignment = 1
 
-[node name="CyanBtn" type="Button" parent="LobbyUI/VBoxContainer/ColorBox"]
-custom_minimum_size = Vector2(35, 25)
+[node name="CyanBtn" type="Button" parent="LobbyUI/MainDashboard/PilotCard/VBox/ColorBox"]
+custom_minimum_size = Vector2(40, 35)
 layout_mode = 2
 focus_mode = 0
-text = "C"
+text = "Cyan"
 
-[node name="MagentaBtn" type="Button" parent="LobbyUI/VBoxContainer/ColorBox"]
-custom_minimum_size = Vector2(35, 25)
+[node name="MagentaBtn" type="Button" parent="LobbyUI/MainDashboard/PilotCard/VBox/ColorBox"]
+custom_minimum_size = Vector2(40, 35)
 layout_mode = 2
 focus_mode = 0
-text = "M"
+text = "Pink"
 
-[node name="YellowBtn" type="Button" parent="LobbyUI/VBoxContainer/ColorBox"]
-custom_minimum_size = Vector2(35, 25)
+[node name="YellowBtn" type="Button" parent="LobbyUI/MainDashboard/PilotCard/VBox/ColorBox"]
+custom_minimum_size = Vector2(40, 35)
 layout_mode = 2
 focus_mode = 0
-text = "Y"
+text = "Yel"
 
-[node name="GreenBtn" type="Button" parent="LobbyUI/VBoxContainer/ColorBox"]
-custom_minimum_size = Vector2(35, 25)
+[node name="GreenBtn" type="Button" parent="LobbyUI/MainDashboard/PilotCard/VBox/ColorBox"]
+custom_minimum_size = Vector2(40, 35)
 layout_mode = 2
 focus_mode = 0
-text = "G"
+text = "Grn"
 
-[node name="MuteBtn" type="Button" parent="LobbyUI/VBoxContainer"]
+[node name="OrangeBtn" type="Button" parent="LobbyUI/MainDashboard/PilotCard/VBox/ColorBox"]
+custom_minimum_size = Vector2(40, 35)
 layout_mode = 2
 focus_mode = 0
-text = "🔊 Sound: ON"
+text = "Org"
+
+[node name="CuteBadge" type="Label" parent="LobbyUI/MainDashboard/PilotCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 1, 1)
+theme_override_font_sizes/font_size = 28
+text = "(• ◡ •)"
+horizontal_alignment = 1
+
+[node name="ModesCard" type="Panel" parent="LobbyUI/MainDashboard"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="LobbyUI/MainDashboard/ModesCard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="Label" parent="LobbyUI/MainDashboard/ModesCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0, 1)
+theme_override_font_sizes/font_size = 20
+text = "5 GAME MODES"
+horizontal_alignment = 1
+
+[node name="ModesList" type="Label" parent="LobbyUI/MainDashboard/ModesCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "🏃 1. RACE (Speedrun)
+🧊 2. FLOOR RISING (Lava)
+⚔️ 3. SUMO (Arena Shrink)
+💣 4. TAG (Bomb Pass)
+🧩 5. COPYCAT (Sequence)"
+
+[node name="MapsLabel" type="Label" parent="LobbyUI/MainDashboard/ModesCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "🗺️ 8 Cyber Neon 3D Maps"
+horizontal_alignment = 1
+
+[node name="BottomFooterBar" type="Panel" parent="LobbyUI"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -65.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="HBoxFooter" type="HBoxContainer" parent="LobbyUI/BottomFooterBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 30.0
+offset_right = -30.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 0
+
+[node name="MuteBtn" type="Button" parent="LobbyUI/BottomFooterBar/HBoxFooter"]
+custom_minimum_size = Vector2(160, 40)
+layout_mode = 2
+size_flags_vertical = 4
+focus_mode = 0
+text = "🔊 SOUND: ON"
+
+[node name="Spacer" type="Control" parent="LobbyUI/BottomFooterBar/HBoxFooter"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="FooterInfo" type="Label" parent="LobbyUI/BottomFooterBar/HBoxFooter"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "CONTROL CHAOS PARTY GAME — PRESS KEYS AS SHUFFLED!"
+vertical_alignment = 1
 
 [node name="HUD" type="Control" parent="."]
 visible = false
@@ -127,7 +294,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 
 [node name="ScoreLabel" type="Label" parent="HUD"]
 layout_mode = 1
@@ -187,7 +353,6 @@ offset_right = 300.0
 offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 0
-mouse_filter = 2
 
 [node name="KeyGuideLabel" type="Label" parent="HUD/KeyGuidePanel"]
 layout_mode = 1
@@ -210,7 +375,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 
 [node name="ColorRect" type="ColorRect" parent="RoundEndUI"]
 layout_mode = 1
@@ -219,7 +383,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 color = Color(0, 0, 0, 0.7)
 
 [node name="WinnerLabel" type="Label" parent="RoundEndUI"]
