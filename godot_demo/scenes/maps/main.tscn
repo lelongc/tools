@@ -1,8 +1,8 @@
 [gd_scene load_steps=6 format=3 uid="uid://dxe7h1a8j2g4"]
 
-[ext_resource type="PackedScene" uid="uid://b8x7c1d3p4m1" path="res://bounce_pad.tscn" id="1_bounce"]
-[ext_resource type="PackedScene" uid="uid://fln12345" path="res://finish_line.tscn" id="2_finish"]
-[ext_resource type="Material" path="res://neon_mat_grid.tres" id="3_grid_mat"]
+[ext_resource type="PackedScene" uid="uid://b8x7c1d3p4m1" path="res://scenes/bounce_pad.tscn" id="1_bounce"]
+[ext_resource type="PackedScene" uid="uid://fln12345" path="res://scenes/finish_line.tscn" id="2_finish"]
+[ext_resource type="Material" path="res://materials/neon_mat_grid.tres" id="3_grid_mat"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(24, 1, 30)

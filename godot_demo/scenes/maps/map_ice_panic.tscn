@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://map3ice"]
 
-[ext_resource type="Material" path="res://neon_mat_ice.tres" id="1_mat"]
+[ext_resource type="Material" path="res://materials/neon_mat_ice.tres" id="1_mat"]
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_ice"]
 radius = 10.0

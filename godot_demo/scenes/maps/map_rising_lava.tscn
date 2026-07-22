@@ -1,8 +1,8 @@
 [gd_scene load_steps=8 format=3 uid="uid://map7lava"]
 
-[ext_resource type="Script" path="res://lava.gd" id="1_lava"]
-[ext_resource type="Material" path="res://neon_mat_lava.tres" id="2_mat"]
-[ext_resource type="Material" path="res://neon_mat_ground.tres" id="3_gmat"]
+[ext_resource type="Script" path="res://scripts/lava.gd" id="1_lava"]
+[ext_resource type="Material" path="res://materials/neon_mat_lava.tres" id="2_mat"]
+[ext_resource type="Material" path="res://materials/neon_mat_ground.tres" id="3_gmat"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_g"]
 size = Vector3(10, 20, 10)

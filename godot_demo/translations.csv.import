@@ -8,7 +8,7 @@ uid="uid://bnv4mqrg0qaqa"
 
 files=["res://translations.en.translation", "res://translations.vi.translation"]
 
-source_file="res://translations.csv"
+source_file="res://assets/translations.csv"
 dest_files=["res://translations.en.translation", "res://translations.vi.translation"]
 
 [params]

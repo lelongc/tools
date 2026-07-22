@@ -1,7 +1,7 @@
 [gd_scene load_steps=7 format=3 uid="uid://fln12345"]
 
-[ext_resource type="Script" path="res://finish_line.gd" id="1_flscript"]
-[ext_resource type="Material" path="res://neon_mat_finish.tres" id="2_mat"]
+[ext_resource type="Script" path="res://scripts/finish_line.gd" id="1_flscript"]
+[ext_resource type="Material" path="res://materials/neon_mat_finish.tres" id="2_mat"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_fl"]
 size = Vector3(8, 6, 2)

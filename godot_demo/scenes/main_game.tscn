@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://m1n2o3p4q5r6"]
 
-[ext_resource type="Script" path="res://main_game.gd" id="1_mgame"]
-[ext_resource type="Environment" uid="uid://c8yay001w2v" path="res://default_env.tres" id="2_env"]
+[ext_resource type="Script" path="res://scripts/main_game.gd" id="1_mgame"]
+[ext_resource type="Environment" uid="uid://c8yay001w2v" path="res://materials/default_env.tres" id="2_env"]
 
 [node name="MainGame" type="Node"]
 script = ExtResource("1_mgame")
@@ -16,7 +16,7 @@ environment = ExtResource("2_env")
 [node name="MultiplayerSpawner" type="MultiplayerSpawner" parent="."]
 spawn_path = NodePath("../Players")
 spawn_limit = 0
-_spawnable_scenes = PackedStringArray("res://player.tscn")
+_spawnable_scenes = PackedStringArray("res://scenes/player.tscn")
 
 [node name="LobbyUI" type="Control" parent="."]
 layout_mode = 3
@@ -33,7 +33,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.02, 0.02, 0.05, 0.95)
+color = Color(0.92, 0.88, 0.95, 0.95)
 
 [node name="TopHeaderBar" type="Panel" parent="LobbyUI"]
 layout_mode = 1
@@ -55,8 +55,8 @@ alignment = 0
 
 [node name="Title" type="Label" parent="LobbyUI/TopHeaderBar/HBoxHeader"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 1, 1, 1)
-theme_override_colors/font_outline_color = Color(1, 0, 1, 1)
+theme_override_colors/font_color = Color(0.9, 0.3, 0.6, 1)
+theme_override_colors/font_outline_color = Color(1, 1, 1, 1)
 theme_override_constants/outline_size = 4
 theme_override_font_sizes/font_size = 36
 text = "NEON WRONG WAY 3D"
@@ -68,7 +68,7 @@ size_flags_horizontal = 3
 
 [node name="StatusBadge" type="Label" parent="LobbyUI/TopHeaderBar/HBoxHeader"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.2, 1, 0.5, 1)
+theme_override_colors/font_color = Color(0.2, 0.8, 0.4, 1)
 theme_override_font_sizes/font_size = 18
 text = "● v1.0.0 | P2P ONLINE"
 vertical_alignment = 1
@@ -80,10 +80,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -450.0
-offset_top = -180.0
-offset_right = 450.0
-offset_bottom = 180.0
+offset_left = -480.0
+offset_top = -200.0
+offset_right = 480.0
+offset_bottom = 200.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 20
@@ -107,7 +107,7 @@ theme_override_constants/separation = 12
 
 [node name="Header" type="Label" parent="LobbyUI/MainDashboard/RoomCard/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 1, 1, 1)
+theme_override_colors/font_color = Color(0.2, 0.7, 0.9, 1)
 theme_override_font_sizes/font_size = 20
 text = "NETWORK ROOM"
 horizontal_alignment = 1
@@ -135,7 +135,7 @@ focus_mode = 0
 text = "Join Game"
 
 [node name="PilotCard" type="Panel" parent="LobbyUI/MainDashboard"]
-custom_minimum_size = Vector2(300, 0)
+custom_minimum_size = Vector2(340, 0)
 layout_mode = 2
 
 [node name="VBox" type="VBoxContainer" parent="LobbyUI/MainDashboard/PilotCard"]
@@ -143,26 +143,54 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = 20.0
-offset_right = -20.0
-offset_bottom = -20.0
+offset_left = 15.0
+offset_top = 15.0
+offset_right = -15.0
+offset_bottom = -15.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 15
+theme_override_constants/separation = 10
 
 [node name="Header" type="Label" parent="LobbyUI/MainDashboard/PilotCard/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0, 1, 1)
+theme_override_colors/font_color = Color(0.9, 0.3, 0.6, 1)
 theme_override_font_sizes/font_size = 20
-text = "CUTE BLOB PILOT"
+text = "CHOOSE CUTE CHARACTER"
 horizontal_alignment = 1
+
+[node name="VariantBox" type="HBoxContainer" parent="LobbyUI/MainDashboard/PilotCard/VBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="BearBtn" type="Button" parent="LobbyUI/MainDashboard/PilotCard/VBox/VariantBox"]
+custom_minimum_size = Vector2(70, 40)
+layout_mode = 2
+focus_mode = 0
+text = "🌸 Bear"
+
+[node name="FrogBtn" type="Button" parent="LobbyUI/MainDashboard/PilotCard/VBox/VariantBox"]
+custom_minimum_size = Vector2(70, 40)
+layout_mode = 2
+focus_mode = 0
+text = "🐸 Frog"
+
+[node name="BunnyBtn" type="Button" parent="LobbyUI/MainDashboard/PilotCard/VBox/VariantBox"]
+custom_minimum_size = Vector2(70, 40)
+layout_mode = 2
+focus_mode = 0
+text = "🐰 Bunny"
+
+[node name="CatBtn" type="Button" parent="LobbyUI/MainDashboard/PilotCard/VBox/VariantBox"]
+custom_minimum_size = Vector2(70, 40)
+layout_mode = 2
+focus_mode = 0
+text = "🐱 Cat"
 
 [node name="ColorLabel" type="Label" parent="LobbyUI/MainDashboard/PilotCard/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 0, 1)
+theme_override_colors/font_color = Color(0.8, 0.6, 0.2, 1)
 theme_override_font_sizes/font_size = 14
-text = "SELECT NEON COLOR:"
+text = "SELECT COLOR PALETTE:"
 horizontal_alignment = 1
 
 [node name="ColorBox" type="HBoxContainer" parent="LobbyUI/MainDashboard/PilotCard/VBox"]
@@ -170,40 +198,40 @@ layout_mode = 2
 alignment = 1
 
 [node name="CyanBtn" type="Button" parent="LobbyUI/MainDashboard/PilotCard/VBox/ColorBox"]
-custom_minimum_size = Vector2(40, 35)
+custom_minimum_size = Vector2(50, 35)
 layout_mode = 2
 focus_mode = 0
 text = "Cyan"
 
 [node name="MagentaBtn" type="Button" parent="LobbyUI/MainDashboard/PilotCard/VBox/ColorBox"]
-custom_minimum_size = Vector2(40, 35)
+custom_minimum_size = Vector2(50, 35)
 layout_mode = 2
 focus_mode = 0
 text = "Pink"
 
 [node name="YellowBtn" type="Button" parent="LobbyUI/MainDashboard/PilotCard/VBox/ColorBox"]
-custom_minimum_size = Vector2(40, 35)
+custom_minimum_size = Vector2(50, 35)
 layout_mode = 2
 focus_mode = 0
 text = "Yel"
 
 [node name="GreenBtn" type="Button" parent="LobbyUI/MainDashboard/PilotCard/VBox/ColorBox"]
-custom_minimum_size = Vector2(40, 35)
+custom_minimum_size = Vector2(50, 35)
 layout_mode = 2
 focus_mode = 0
 text = "Grn"
 
 [node name="OrangeBtn" type="Button" parent="LobbyUI/MainDashboard/PilotCard/VBox/ColorBox"]
-custom_minimum_size = Vector2(40, 35)
+custom_minimum_size = Vector2(50, 35)
 layout_mode = 2
 focus_mode = 0
 text = "Org"
 
 [node name="CuteBadge" type="Label" parent="LobbyUI/MainDashboard/PilotCard/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 1, 1, 1)
-theme_override_font_sizes/font_size = 28
-text = "(• ◡ •)"
+theme_override_colors/font_color = Color(0.9, 0.4, 0.7, 1)
+theme_override_font_sizes/font_size = 26
+text = "SELECTED: 🌸 Pinky Bear"
 horizontal_alignment = 1
 
 [node name="ModesCard" type="Panel" parent="LobbyUI/MainDashboard"]
@@ -225,14 +253,14 @@ theme_override_constants/separation = 10
 
 [node name="Header" type="Label" parent="LobbyUI/MainDashboard/ModesCard/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 0, 1)
+theme_override_colors/font_color = Color(0.9, 0.7, 0.2, 1)
 theme_override_font_sizes/font_size = 20
 text = "5 GAME MODES"
 horizontal_alignment = 1
 
 [node name="ModesList" type="Label" parent="LobbyUI/MainDashboard/ModesCard/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+theme_override_colors/font_color = Color(0.2, 0.2, 0.3, 1)
 theme_override_font_sizes/font_size = 14
 text = "🏃 1. RACE (Speedrun)
 🧊 2. FLOOR RISING (Lava)
@@ -242,7 +270,7 @@ text = "🏃 1. RACE (Speedrun)
 
 [node name="MapsLabel" type="Label" parent="LobbyUI/MainDashboard/ModesCard/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 1, 1, 1)
+theme_override_colors/font_color = Color(0.2, 0.7, 0.9, 1)
 theme_override_font_sizes/font_size = 14
 text = "🗺️ 8 Cyber Neon 3D Maps"
 horizontal_alignment = 1
@@ -281,7 +309,7 @@ size_flags_horizontal = 3
 
 [node name="FooterInfo" type="Label" parent="LobbyUI/BottomFooterBar/HBoxFooter"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 1, 1, 1)
+theme_override_colors/font_color = Color(0.3, 0.3, 0.4, 1)
 theme_override_font_sizes/font_size = 15
 text = "CONTROL CHAOS PARTY GAME — PRESS KEYS AS SHUFFLED!"
 vertical_alignment = 1
@@ -301,7 +329,7 @@ offset_left = 20.0
 offset_top = 20.0
 offset_right = 250.0
 offset_bottom = 120.0
-theme_override_colors/font_color = Color(1, 1, 0, 1)
+theme_override_colors/font_color = Color(0.9, 0.7, 0.2, 1)
 theme_override_font_sizes/font_size = 22
 text = "Scores: "
 
@@ -333,7 +361,7 @@ offset_top = 65.0
 offset_right = 250.0
 offset_bottom = 105.0
 grow_horizontal = 2
-theme_override_colors/font_color = Color(0.2, 1, 0.5, 1)
+theme_override_colors/font_color = Color(0.2, 0.8, 0.4, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 24
@@ -361,7 +389,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_colors/font_color = Color(0, 1, 1, 1)
+theme_override_colors/font_color = Color(0.2, 0.7, 0.9, 1)
 theme_override_font_sizes/font_size = 18
 text = "[A] -> LEFT | [D] -> RIGHT | [W] -> FORWARD | [S] -> BACK | [SPACE] -> JUMP"
 horizontal_alignment = 1

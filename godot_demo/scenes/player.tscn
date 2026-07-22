@@ -1,60 +1,32 @@
-[gd_scene load_steps=10 format=3 uid="uid://c8y9z0a1b2c3"]
+[gd_scene load_steps=9 format=3 uid="uid://c8y9z0a1b2c3"]
 
-[ext_resource type="Script" path="res://player.gd" id="1_q2w3e"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="1_q2w3e"]
+[ext_resource type="Texture2D" path="res://assets/cute_face.jpg" id="2_cute_tex"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_player"]
-albedo_color = Color(0.2, 0.7, 0.9, 1)
-emission_enabled = true
-emission = Color(0.2, 0.7, 0.9, 1)
-emission_energy_multiplier = 0.5
-roughness = 0.2
+albedo_color = Color(0.98, 0.55, 0.75, 1)
+roughness = 0.3
 
 [sub_resource type="CapsuleMesh" id="CapsuleMesh_player"]
 material = SubResource("StandardMaterial3D_player")
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cute_black"]
-albedo_color = Color(0.02, 0.02, 0.04, 1)
-roughness = 0.1
-
-[sub_resource type="SphereMesh" id="SphereMesh_eye"]
-material = SubResource("StandardMaterial3D_cute_black")
-radius = 0.09
-height = 0.18
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_pink_blush"]
-albedo_color = Color(1, 0.45, 0.65, 1)
-emission_enabled = true
-emission = Color(1, 0.45, 0.65, 1)
-emission_energy_multiplier = 0.8
-roughness = 0.5
-
-[sub_resource type="SphereMesh" id="SphereMesh_blush"]
-material = SubResource("StandardMaterial3D_pink_blush")
-radius = 0.08
-height = 0.08
-
-[sub_resource type="TorusMesh" id="TorusMesh_smile"]
-material = SubResource("StandardMaterial3D_cute_black")
-inner_radius = 0.08
-outer_radius = 0.12
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_trail"]
 transparency = 1
 blend_mode = 1
 shading_mode = 0
-albedo_color = Color(1, 1, 1, 0.5)
+albedo_color = Color(1, 1, 1, 0.4)
 
 [sub_resource type="SphereMesh" id="SphereMesh_trail"]
 material = SubResource("StandardMaterial3D_trail")
-radius = 0.2
-height = 0.4
+radius = 0.15
+height = 0.3
 
 [sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_trail"]
 emission_shape = 1
-emission_sphere_radius = 0.2
-gravity = Vector3(0, 1, 0)
+emission_sphere_radius = 0.15
+gravity = Vector3(0, 0.5, 0)
 scale_min = 0.5
 scale_max = 1.0
 
@@ -67,30 +39,14 @@ shape = SubResource("CapsuleShape3D_player")
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 mesh = SubResource("CapsuleMesh_player")
 
-[node name="EyeL" type="MeshInstance3D" parent="MeshInstance3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.16, 0.22, -0.42)
-mesh = SubResource("SphereMesh_eye")
-
-[node name="EyeR" type="MeshInstance3D" parent="MeshInstance3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.16, 0.22, -0.42)
-mesh = SubResource("SphereMesh_eye")
-
-[node name="BlushL" type="MeshInstance3D" parent="MeshInstance3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 0.08, -0.38)
-mesh = SubResource("SphereMesh_blush")
-
-[node name="BlushR" type="MeshInstance3D" parent="MeshInstance3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.28, 0.08, -0.38)
-mesh = SubResource("SphereMesh_blush")
-
-[node name="MouthSmile" type="MeshInstance3D" parent="MeshInstance3D"]
-transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 0, 0.05, -0.43)
-mesh = SubResource("TorusMesh_smile")
+[node name="CuteFaceSprite" type="Sprite3D" parent="MeshInstance3D"]
+transform = Transform3D(0.45, 0, 0, 0, 0.45, 0, 0, 0, 0.45, 0, 0.22, -0.42)
+texture = ExtResource("2_cute_tex")
 
 [node name="TrailParticles" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 0)
-amount = 16
-lifetime = 0.5
+amount = 8
+lifetime = 0.4
 process_material = SubResource("ParticleProcessMaterial_trail")
 draw_pass_1 = SubResource("SphereMesh_trail")
 

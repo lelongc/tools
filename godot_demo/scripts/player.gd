@@ -134,7 +134,7 @@ func _physics_process(delta):
 		velocity.y = JUMP_VELOCITY if gravity_direction.y < 0 else -JUMP_VELOCITY
 		mesh_target_scale = Vector3(0.7, 1.4, 0.7) # Jump Stretch!
 		
-		var particles = preload("res://jump_particles.tscn").instantiate()
+		var particles = preload("res://scenes/jump_particles.tscn").instantiate()
 		get_parent().add_child(particles)
 		particles.global_position = global_position
 		if SoundManager and is_multiplayer_authority() and not is_bot:
@@ -200,8 +200,8 @@ func show_shuffle_alert():
 	label.text = tr("SHUFFLE_ALERT")
 	label.show()
 	var tween = create_tween()
-	tween.tween_property(label, "scale", Vector3(1.2, 1.2, 1.2), 0.1)
-	tween.tween_property(label, "scale", Vector3(1.0, 1.0, 1.0), 0.2)
+	tween.tween_property(label, "scale", Vector2(1.2, 1.2), 0.1)
+	tween.tween_property(label, "scale", Vector2(1.0, 1.0), 0.2)
 	tween.tween_interval(0.5)
 	tween.tween_callback(label.hide)
 
@@ -211,7 +211,7 @@ func die():
 	is_dead = true
 	
 	# Spawn cute explosion particles
-	var death_fx = preload("res://death_particles.tscn").instantiate()
+	var death_fx = preload("res://scenes/death_particles.tscn").instantiate()
 	get_parent().add_child(death_fx)
 	death_fx.global_position = global_position
 	

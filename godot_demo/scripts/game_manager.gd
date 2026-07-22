@@ -119,15 +119,15 @@ func check_win_condition():
 			end_round(winner)
 
 var maps = [
-	{"path": "res://main.tscn", "mode": GameMode.RACE},
-	{"path": "res://map_jungle_bounce.tscn", "mode": GameMode.TAG},
-	{"path": "res://map_ice_panic.tscn", "mode": GameMode.SUMO},
-	{"path": "res://map_wind_tunnel.tscn", "mode": GameMode.RACE},
-	{"path": "res://map_conveyor.tscn", "mode": GameMode.COPYCAT},
-	{"path": "res://map_gravity_flip.tscn", "mode": GameMode.RACE},
-	{"path": "res://map_shrink.tscn", "mode": GameMode.SUMO},
-	{"path": "res://map_rising_lava.tscn", "mode": GameMode.FLOOR_RISING},
-	{"path": "res://map_gauntlet.tscn", "mode": GameMode.RACE}
+	{"path": "res://scenes/maps/main.tscn", "mode": GameMode.RACE},
+	{"path": "res://scenes/maps/map_jungle_bounce.tscn", "mode": GameMode.TAG},
+	{"path": "res://scenes/maps/map_ice_panic.tscn", "mode": GameMode.SUMO},
+	{"path": "res://scenes/maps/map_wind_tunnel.tscn", "mode": GameMode.RACE},
+	{"path": "res://scenes/maps/map_conveyor.tscn", "mode": GameMode.COPYCAT},
+	{"path": "res://scenes/maps/map_gravity_flip.tscn", "mode": GameMode.RACE},
+	{"path": "res://scenes/maps/map_shrink.tscn", "mode": GameMode.SUMO},
+	{"path": "res://scenes/maps/map_rising_lava.tscn", "mode": GameMode.FLOOR_RISING},
+	{"path": "res://scenes/maps/map_gauntlet.tscn", "mode": GameMode.RACE}
 ]
 var current_map_index = 0
 

@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://map5conveyor"]
 
-[ext_resource type="PackedScene" uid="uid://fln12345" path="res://finish_line.tscn" id="1_finish"]
+[ext_resource type="PackedScene" uid="uid://fln12345" path="res://scenes/finish_line.tscn" id="1_finish"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_conveyor"]
 size = Vector3(10, 1, 40)

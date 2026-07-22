@@ -138,7 +138,7 @@ func _on_peer_connected(id):
 
 func _add_player(id):
 	GameManager.register_player(id)
-	var player = preload("res://player.tscn").instantiate()
+	var player = preload("res://scenes/player.tscn").instantiate()
 	player.name = str(id)
 	player.custom_color = selected_color
 	player.position = Vector3(randf_range(-2, 2), 2, randf_range(-2, 2))
@@ -146,7 +146,7 @@ func _add_player(id):
 
 func _add_bot(id):
 	GameManager.register_player(id)
-	var bot = preload("res://player.tscn").instantiate()
+	var bot = preload("res://scenes/player.tscn").instantiate()
 	bot.name = str(id)
 	bot.is_bot = true
 	bot.position = Vector3(randf_range(-2, 2), 2, randf_range(-2, 2))
@@ -198,7 +198,7 @@ func show_winner(winner_id):
 	else:
 		winner_label.text = "PLAYER " + str(winner_id) + " WINS!"
 		# Spawn victory confetti particle effect
-		var confetti = preload("res://victory_confetti.tscn").instantiate()
+		var confetti = preload("res://scenes/victory_confetti.tscn").instantiate()
 		add_child(confetti)
 		
 	if multiplayer.is_server():

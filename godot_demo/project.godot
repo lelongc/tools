@@ -16,13 +16,14 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="NEON WRONG WAY 3D"
 config/description="Futuristic Cyberpunk 3D Party Game featuring Control Chaos, 5 Game Modes & Cute Blob Characters."
-run/main_scene="res://main_game.tscn"
-config/features=PackedStringArray("4.7")
+run/main_scene="res://scenes/main_game.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+run/max_fps=60
 
 [autoload]
 
-GameManager="*res://game_manager.gd"
-SoundManager="*res://sound_manager.gd"
+GameManager="*res://scripts/game_manager.gd"
+SoundManager="*res://scripts/sound_manager.gd"
 
 [display]
 
@@ -62,3 +63,9 @@ move_forward={
 [internationalization]
 
 translations=PackedStringArray("res://translations.en.translation", "res://translations.vi.translation")
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.85, 0.8, 0.9, 1)
