@@ -16,7 +16,7 @@ var tag_timer = 0.0
 var tag_it_id = -1
 
 var copycat_sequence = []
-var copycat_timer = 0.0
+var copycat_progress = {} # player_id -> index in sequence
 
 func start_mode(mode: GameMode):
 	round_ended = false
@@ -41,6 +41,7 @@ func start_mode(mode: GameMode):
 func generate_copycat_sequence():
 	var possible_actions = ["A", "D", "W", "S", "SPACE"]
 	copycat_sequence.clear()
+	copycat_progress.clear()
 	for i in range(4):
 		copycat_sequence.append(possible_actions[randi() % possible_actions.size()])
 	rpc("sync_copycat_sequence", copycat_sequence)
@@ -48,6 +49,21 @@ func generate_copycat_sequence():
 @rpc("any_peer", "call_local")
 func sync_copycat_sequence(seq):
 	copycat_sequence = seq
+	copycat_progress.clear()
+
+func check_copycat_input(key_pressed: String, player_id: int):
+	if current_mode != GameMode.COPYCAT or round_ended: return
+	if not copycat_progress.has(player_id):
+		copycat_progress[player_id] = 0
+		
+	var idx = copycat_progress[player_id]
+	if idx < copycat_sequence.size():
+		if copycat_sequence[idx] == key_pressed:
+			copycat_progress[player_id] += 1
+			print("Player ", player_id, " Copycat Progress: ", copycat_progress[player_id])
+			if copycat_progress[player_id] >= copycat_sequence.size():
+				if multiplayer.is_server():
+					end_round(player_id)
 
 func _process(delta):
 	if multiplayer.is_server() and current_mode == GameMode.TAG:

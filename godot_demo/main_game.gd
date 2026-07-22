@@ -15,16 +15,35 @@ var peer = ENetMultiplayerPeer.new()
 @onready var copycat_label = $HUD/CopycatLabel
 @onready var key_guide_label = $HUD/KeyGuidePanel/KeyGuideLabel
 
+var selected_color: Color = Color(0, 1, 1) # Default Cyan
+
 func _ready():
 	add_to_group("main_game")
 	$LobbyUI/VBoxContainer/HostBtn.pressed.connect(_on_host_pressed)
 	if $LobbyUI/VBoxContainer.has_node("HostBotsBtn"):
 		$LobbyUI/VBoxContainer/HostBotsBtn.pressed.connect(_on_host_bots_pressed)
 	$LobbyUI/VBoxContainer/JoinBtn.pressed.connect(_on_join_pressed)
+	
+	if $LobbyUI/VBoxContainer.has_node("MuteBtn"):
+		$LobbyUI/VBoxContainer/MuteBtn.pressed.connect(_on_mute_pressed)
+		
+	# Color Picker setup
+	var color_box = $LobbyUI/VBoxContainer/ColorBox
+	if color_box:
+		color_box.get_node("CyanBtn").pressed.connect(func(): selected_color = Color(0, 1, 1); if SoundManager: SoundManager.play_click())
+		color_box.get_node("MagentaBtn").pressed.connect(func(): selected_color = Color(1, 0, 1); if SoundManager: SoundManager.play_click())
+		color_box.get_node("YellowBtn").pressed.connect(func(): selected_color = Color(1, 1, 0); if SoundManager: SoundManager.play_click())
+		color_box.get_node("GreenBtn").pressed.connect(func(): selected_color = Color(0, 1, 0); if SoundManager: SoundManager.play_click())
+		
 	address_input.text = "127.0.0.1"
 	hud.hide()
 	round_end_ui.hide()
 	apply_neon_theme()
+
+func _on_mute_pressed():
+	if SoundManager:
+		var muted = SoundManager.toggle_mute()
+		$LobbyUI/VBoxContainer/MuteBtn.text = "🔇 Sound: OFF" if muted else "🔊 Sound: ON"
 
 func _process(_delta):
 	if hud.visible:
@@ -115,6 +134,7 @@ func _add_player(id):
 	GameManager.register_player(id)
 	var player = preload("res://player.tscn").instantiate()
 	player.name = str(id)
+	player.custom_color = selected_color
 	player.position = Vector3(randf_range(-2, 2), 2, randf_range(-2, 2))
 	players_node.add_child(player, true)
 
@@ -171,6 +191,9 @@ func show_winner(winner_id):
 		winner_label.text = "DRAW!"
 	else:
 		winner_label.text = "PLAYER " + str(winner_id) + " WINS!"
+		# Spawn victory confetti particle effect
+		var confetti = preload("res://victory_confetti.tscn").instantiate()
+		add_child(confetti)
 		
 	if multiplayer.is_server():
 		GameManager.players_alive.clear()

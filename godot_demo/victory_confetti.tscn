@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3 uid="uid://vicconfetti123"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vc"]
+shading_mode = 0
+albedo_color = Color(0, 1, 1, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_vc"]
+material = SubResource("StandardMaterial3D_vc")
+radius = 0.1
+height = 0.2
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_vc"]
+direction = Vector3(0, 1, 0)
+spread = 90.0
+initial_velocity_min = 8.0
+initial_velocity_max = 14.0
+gravity = Vector3(0, -6.0, 0)
+scale_min = 0.8
+scale_max = 2.0
+
+[sub_resource type="GDScript" id="GDScript_autofree_win"]
+script/source = "extends GPUParticles3D
+
+func _ready():
+	emitting = true
+	var timer = get_tree().create_timer(lifetime + 0.5)
+	timer.timeout.connect(queue_free)
+"
+
+[node name="VictoryConfetti" type="GPUParticles3D"]
+amount = 64
+lifetime = 1.5
+one_shot = true
+explosiveness = 0.9
+process_material = SubResource("ParticleProcessMaterial_vc")
+draw_pass_1 = SubResource("SphereMesh_vc")
+script = SubResource("GDScript_autofree_win")

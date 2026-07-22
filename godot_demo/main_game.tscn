@@ -44,10 +44,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -120.0
-offset_top = -80.0
-offset_right = 120.0
-offset_bottom = 80.0
+offset_left = -140.0
+offset_top = -120.0
+offset_right = 140.0
+offset_bottom = 120.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -78,6 +78,46 @@ text = "Host Solo Game (vs Bots)"
 layout_mode = 2
 focus_mode = 0
 text = "Join Game"
+
+[node name="ColorLabel" type="Label" parent="LobbyUI/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0, 1)
+theme_override_font_sizes/font_size = 14
+text = "SELECT COLOR:"
+horizontal_alignment = 1
+
+[node name="ColorBox" type="HBoxContainer" parent="LobbyUI/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="CyanBtn" type="Button" parent="LobbyUI/VBoxContainer/ColorBox"]
+custom_minimum_size = Vector2(35, 25)
+layout_mode = 2
+focus_mode = 0
+text = "C"
+
+[node name="MagentaBtn" type="Button" parent="LobbyUI/VBoxContainer/ColorBox"]
+custom_minimum_size = Vector2(35, 25)
+layout_mode = 2
+focus_mode = 0
+text = "M"
+
+[node name="YellowBtn" type="Button" parent="LobbyUI/VBoxContainer/ColorBox"]
+custom_minimum_size = Vector2(35, 25)
+layout_mode = 2
+focus_mode = 0
+text = "Y"
+
+[node name="GreenBtn" type="Button" parent="LobbyUI/VBoxContainer/ColorBox"]
+custom_minimum_size = Vector2(35, 25)
+layout_mode = 2
+focus_mode = 0
+text = "G"
+
+[node name="MuteBtn" type="Button" parent="LobbyUI/VBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+text = "🔊 Sound: ON"
 
 [node name="HUD" type="Control" parent="."]
 visible = false

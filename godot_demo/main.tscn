@@ -2,14 +2,14 @@
 
 [ext_resource type="PackedScene" uid="uid://b8x7c1d3p4m1" path="res://bounce_pad.tscn" id="1_bounce"]
 [ext_resource type="PackedScene" uid="uid://fln12345" path="res://finish_line.tscn" id="2_finish"]
-[ext_resource type="Material" path="res://neon_mat_ground.tres" id="3_ground_mat"]
+[ext_resource type="Material" path="res://neon_mat_grid.tres" id="3_grid_mat"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(20, 1, 20)
+size = Vector3(24, 1, 30)
 
 [sub_resource type="BoxMesh" id="BoxMesh_ground"]
-material = ExtResource("3_ground_mat")
-size = Vector3(20, 1, 20)
+material = ExtResource("3_grid_mat")
+size = Vector3(24, 1, 30)
 
 [node name="Main" type="Node3D"]
 
@@ -27,7 +27,7 @@ transform = Transform3D(0.866025, 0.433013, -0.25, 0, 0.5, 0.866025, 0.5, -0.75,
 shadow_enabled = true
 
 [node name="BouncePad" parent="." instance=ExtResource("1_bounce")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0.1, -5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0.1, -6)
 
 [node name="FinishLine" parent="." instance=ExtResource("2_finish")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, -9)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, -12)
