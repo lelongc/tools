@@ -1,0 +1,136 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/bounce_pad.tscn" id="1_bounce"]
+[ext_resource type="PackedScene" path="res://scenes/finish_line.tscn" id="2_finish"]
+[ext_resource type="PackedScene" path="res://assets/low_poly_house.glb" id="3_house"]
+[ext_resource type="PackedScene" path="res://assets/low_poly_tree.glb" id="4_tree"]
+[ext_resource type="PackedScene" path="res://assets/low_poly_rock.glb" id="5_rock"]
+[ext_resource type="PackedScene" path="res://assets/low_poly_fence.glb" id="6_fence"]
+[ext_resource type="PackedScene" path="res://assets/low_poly_lamp.glb" id="7_lamp"]
+[ext_resource type="PackedScene" path="res://assets/low_poly_windmill.glb" id="8_windmill"]
+[ext_resource type="PackedScene" path="res://assets/low_poly_well.glb" id="9_well"]
+[ext_resource type="PackedScene" path="res://assets/low_poly_mushroom.glb" id="10_mush"]
+[ext_resource type="PackedScene" path="res://assets/low_poly_barrel.glb" id="11_barrel"]
+[ext_resource type="PackedScene" path="res://assets/low_poly_crate.glb" id="12_crate"]
+[ext_resource type="PackedScene" path="res://assets/low_poly_signpost.glb" id="13_sign"]
+[ext_resource type="PackedScene" path="res://assets/low_poly_bush.glb" id="14_bush"]
+[ext_resource type="Material" path="res://materials/neon_mat_grid.tres" id="15_mat"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(36, 1, 36)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+material = ExtResource("15_mat")
+size = Vector3(36, 1, 36)
+
+[node name="LowPolyVillage" type="Node3D"]
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("BoxShape3D_ground")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("BoxMesh_ground")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.353, 0.353, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 15, 0)
+shadow_enabled = true
+
+[node name="Houses" type="Node3D" parent="."]
+
+[node name="House1" parent="Houses" instance=ExtResource("3_house")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, -10, 0, -10)
+
+[node name="House2" parent="Houses" instance=ExtResource("3_house")]
+transform = Transform3D(-1.2, 0, -1.049e-07, 0, 1.2, 0, 1.049e-07, 0, -1.2, 10, 0, -10)
+
+[node name="House3" parent="Houses" instance=ExtResource("3_house")]
+transform = Transform3D(-5.245e-08, 0, 1.2, 0, 1.2, 0, -1.2, 0, -5.245e-08, -10, 0, 8)
+
+[node name="Windmill" parent="." instance=ExtResource("8_windmill")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 11, 0, 8)
+
+[node name="WaterWell" parent="." instance=ExtResource("9_well")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 0, -3)
+
+[node name="Signpost" parent="." instance=ExtResource("13_sign")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 0, 5)
+
+[node name="Props" type="Node3D" parent="."]
+
+[node name="Barrel1" parent="Props" instance=ExtResource("11_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, -8)
+
+[node name="Barrel2" parent="Props" instance=ExtResource("11_barrel")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.3, 0, -7.5)
+
+[node name="Crate1" parent="Props" instance=ExtResource("12_crate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7.2, 0, -6.8)
+
+[node name="Crate2" parent="Props" instance=ExtResource("12_crate")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8.5, 0, -8)
+
+[node name="Mushrooms" type="Node3D" parent="."]
+
+[node name="Mush1" parent="Mushrooms" instance=ExtResource("10_mush")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, -11, 0, -3)
+
+[node name="Mush2" parent="Mushrooms" instance=ExtResource("10_mush")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, -11.5, 0, -2.5)
+
+[node name="Mush3" parent="Mushrooms" instance=ExtResource("10_mush")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, -2)
+
+[node name="Trees" type="Node3D" parent="."]
+
+[node name="Tree1" parent="Trees" instance=ExtResource("4_tree")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, -13, 0, -6)
+
+[node name="Tree2" parent="Trees" instance=ExtResource("4_tree")]
+transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, 13, 0, -6)
+
+[node name="Tree3" parent="Trees" instance=ExtResource("4_tree")]
+transform = Transform3D(1.4, 0, 0, 0, 1.4, 0, 0, 0, 1.4, -7, 0, 12)
+
+[node name="Tree4" parent="Trees" instance=ExtResource("4_tree")]
+transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, 7, 0, 12)
+
+[node name="Bushes" type="Node3D" parent="."]
+
+[node name="Bush1" parent="Bushes" instance=ExtResource("14_bush")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, -3.5, 0, -3.2)
+
+[node name="Bush2" parent="Bushes" instance=ExtResource("14_bush")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 4.5, 0, 1.5)
+
+[node name="Rocks" type="Node3D" parent="."]
+
+[node name="Rock1" parent="Rocks" instance=ExtResource("5_rock")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, -5, 0, -7)
+
+[node name="Rock2" parent="Rocks" instance=ExtResource("5_rock")]
+transform = Transform3D(2, 0, 0, 0, 1.8, 0, 0, 0, 2, 5, 0, -7)
+
+[node name="Fences" type="Node3D" parent="."]
+
+[node name="Fence1" parent="Fences" instance=ExtResource("6_fence")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, -4)
+
+[node name="Fence2" parent="Fences" instance=ExtResource("6_fence")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, -4)
+
+[node name="Lamps" type="Node3D" parent="."]
+
+[node name="Lamp1" parent="Lamps" instance=ExtResource("7_lamp")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, -4, 0, 2)
+
+[node name="Lamp2" parent="Lamps" instance=ExtResource("7_lamp")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 4, 0, 2)
+
+[node name="BouncePad" parent="." instance=ExtResource("1_bounce")]
+transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 0.1, -1)
+
+[node name="FinishLine" parent="." instance=ExtResource("2_finish")]
+transform = Transform3D(1.5, 0, 0, 0, 1.5, 0, 0, 0, 1.5, 0, 0.1, -13)

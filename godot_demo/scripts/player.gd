@@ -74,7 +74,7 @@ func load_blender_character_model():
 	for child in visual_mesh.get_children():
 		child.queue_free()
 		
-	var model_names = ["pinky_bear", "froggo", "bunny", "neko_cat"]
+	var model_names = ["pinky_bear", "froggo", "bunny", "neko_cat", "star_yellow", "star_pink", "star_blue", "star_purple"]
 	var model_name = model_names[character_variant % model_names.size()]
 	var glb_res_path = "res://assets/" + model_name + ".glb"
 	var model_inst: Node3D = null
@@ -88,6 +88,13 @@ func load_blender_character_model():
 		model_inst.position = Vector3(0, -0.7, 0)
 		visual_mesh.add_child(model_inst)
 		apply_toon_shader(model_inst)
+		
+		# Play Animation if AnimationPlayer exists in GLB
+		var anim_player = model_inst.find_child("AnimationPlayer", true, false)
+		if anim_player and anim_player is AnimationPlayer:
+			var anim_list = anim_player.get_animation_list()
+			if anim_list.size() > 0:
+				anim_player.play(anim_list[0])
 
 func apply_toon_shader(node: Node):
 	if node is MeshInstance3D:

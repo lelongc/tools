@@ -24,6 +24,7 @@ var copycat_sequence = []
 var copycat_progress = {} # player_id -> index in sequence
 
 var maps = [
+	{"path": "res://scenes/maps/map_lowpoly_village.tscn", "mode": GameMode.RACE},
 	{"path": "res://scenes/maps/main.tscn", "mode": GameMode.RACE},
 	{"path": "res://scenes/maps/map_jungle_bounce.tscn", "mode": GameMode.TAG},
 	{"path": "res://scenes/maps/map_ice_panic.tscn", "mode": GameMode.SUMO},
