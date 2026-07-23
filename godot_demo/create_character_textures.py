@@ -1,5 +1,4 @@
 import os
-import math
 from PIL import Image, ImageDraw
 
 output_dir = r"D:\folder\tools\godot_demo\assets"
@@ -15,169 +14,125 @@ def create_blank_texture(fill_color):
 def save_texture(img, filename):
     out_path = os.path.join(output_dir, filename)
     img.save(out_path, "PNG")
-    print(f"Saved texture: {out_path}")
+    print(f"Saved clean texture: {out_path}")
 
-def draw_jelly_feet_uv(draw, cx, cy, colors):
-    num = len(colors)
-    foot_w = 90
-    foot_h = 55
-    start_x = cx - ((num - 1) * foot_w * 0.7) / 2
-    for i, color in enumerate(colors):
-        fx = start_x + i * foot_w * 0.7 - foot_w / 2
-        fy = cy - foot_h / 2
-        draw.ellipse([fx, fy, fx + foot_w, fy + foot_h], fill=color, outline="#FFFFFF", width=3)
+def draw_shiny_eyes(draw, x1, y1, x2, y2, eye_r=18, eye_color="#4A3E3D"):
+    draw.ellipse([x1 - eye_r, y1 - eye_r, x1 + eye_r, y1 + eye_r], fill=eye_color)
+    draw.ellipse([x2 - eye_r, y2 - eye_r, x2 + eye_r, y2 + eye_r], fill=eye_color)
+    sp_r = 6
+    draw.ellipse([x1 - 6 - sp_r, y1 - 6 - sp_r, x1 - 6 + sp_r, y1 - 6 + sp_r], fill="#FFFFFF")
+    draw.ellipse([x2 - 6 - sp_r, y2 - 6 - sp_r, x2 - 6 + sp_r, y2 - 6 + sp_r], fill="#FFFFFF")
 
 # 1. NEKO CAT
 def make_neko_cat_tex():
     img, draw = create_blank_texture("#FFFDF0")
-    draw.ellipse([280, 160, 512, 420], fill="#CDB4DB")
-    draw.ellipse([512, 160, 744, 420], fill="#98D7C2")
-    draw.ellipse([340, 320, 684, 660], fill="#FFFDF0")
-    eye_r = 18
-    draw.ellipse([442 - eye_r, 450 - eye_r, 442 + eye_r, 450 + eye_r], fill="#4A3E3D")
-    draw.ellipse([582 - eye_r, 450 - eye_r, 582 + eye_r, 450 + eye_r], fill="#4A3E3D")
-    draw.ellipse([512 - 12, 470 - 8, 512 + 12, 470 + 8], fill="#FF85A2")
-    draw.arc([486, 476, 512, 502], 0, 180, fill="#4A3E3D", width=5)
-    draw.arc([512, 476, 538, 502], 0, 180, fill="#4A3E3D", width=5)
-    draw.ellipse([380 - 24, 490 - 14, 380 + 24, 490 + 14], fill="#FFB7B2")
-    draw.ellipse([644 - 24, 490 - 14, 644 + 24, 490 + 14], fill="#FFB7B2")
+    draw.ellipse([260, 140, 512, 400], fill="#CDB4DB")
+    draw.ellipse([512, 140, 764, 400], fill="#98D7C2")
+    draw.ellipse([320, 280, 704, 640], fill="#FFFDF0")
+    draw_shiny_eyes(draw, 435, 430, 589, 430, eye_r=18)
+    draw.ellipse([512 - 12, 452, 512 + 12, 474], fill="#FF85A2")
+    draw.arc([486, 465, 512, 492], 0, 180, fill="#4A3E3D", width=5)
+    draw.arc([512, 465, 538, 492], 0, 180, fill="#4A3E3D", width=5)
+    draw.ellipse([370 - 24, 470 - 14, 370 + 24, 470 + 14], fill="#FFB7B2")
+    draw.ellipse([654 - 24, 470 - 14, 654 + 24, 470 + 14], fill="#FFB7B2")
     colors_whiskers = ["#CDB4DB", "#FFB7B2", "#98D7C2"]
     for i, col in enumerate(colors_whiskers):
-        y_off = (i - 1) * 20
-        draw.line([(310, 480 + y_off), (370, 475 + y_off)], fill=col, width=7)
-        draw.line([(654, 475 + y_off), (714, 480 + y_off)], fill=col, width=7)
-    draw_jelly_feet_uv(draw, 512, 660, ["#FFB7B2", "#FFDAC1", "#98D7C2", "#CDB4DB"])
+        y_off = (i - 1) * 18
+        draw.line([(290, 460 + y_off), (350, 455 + y_off)], fill=col, width=6)
+        draw.line([(674, 455 + y_off), (734, 460 + y_off)], fill=col, width=6)
     save_texture(img, "neko_cat_tex.png")
 
 # 2. PINKY BEAR
 def make_pinky_bear_tex():
     img, draw = create_blank_texture("#FFC6FF")
-    draw.ellipse([400, 420, 624, 550], fill="#FFFDF0")
-    draw.ellipse([512 - 14, 450, 512 + 14, 476], fill="#4A3E3D")
-    draw.line([(512, 476), (512, 496)], fill="#4A3E3D", width=5)
-    eye_r = 18
-    draw.ellipse([430 - eye_r, 435 - eye_r, 430 + eye_r, 435 + eye_r], fill="#4A3E3D")
-    draw.ellipse([594 - eye_r, 435 - eye_r, 594 + eye_r, 435 + eye_r], fill="#4A3E3D")
-    draw.ellipse([370 - 24, 485 - 14, 370 + 24, 485 + 14], fill="#FF6584")
-    draw.ellipse([654 - 24, 485 - 14, 654 + 24, 485 + 14], fill="#FF6584")
-    draw_jelly_feet_uv(draw, 512, 660, ["#FFC6FF", "#FFB7B2", "#FFDAC1"])
+    draw.ellipse([400, 410, 624, 540], fill="#FFFDF0")
+    draw.ellipse([512 - 14, 440, 512 + 14, 466], fill="#4A3E3D")
+    draw.line([(512, 466), (512, 486)], fill="#4A3E3D", width=5)
+    draw_shiny_eyes(draw, 425, 420, 599, 420, eye_r=18)
+    draw.ellipse([365 - 24, 470 - 14, 365 + 24, 470 + 14], fill="#FF6584")
+    draw.ellipse([659 - 24, 470 - 14, 659 + 24, 470 + 14], fill="#FF6584")
     save_texture(img, "pinky_bear_tex.png")
 
-# 3. FROGGO
+# 3. FROGGO (Texture for 3D Eye Frog ONLY - ZERO texture eyes drawn on body!)
 def make_froggo_tex():
-    img, draw = create_blank_texture("#B5EAD7")
-    draw.ellipse([380, 520, 644, 670], fill="#FFFFD1")
-    eye_r = 20
-    draw.ellipse([420 - eye_r, 390 - eye_r, 420 + eye_r, 390 + eye_r], fill="#4A3E3D")
-    draw.ellipse([604 - eye_r, 390 - eye_r, 604 + eye_r, 390 + eye_r], fill="#4A3E3D")
-    draw.ellipse([414 - 6, 384 - 6, 414 + 6, 384 + 6], fill="#FFFDF0")
-    draw.ellipse([598 - 6, 384 - 6, 598 + 6, 384 + 6], fill="#FFFDF0")
-    draw.ellipse([360 - 24, 450 - 14, 360 + 24, 450 + 14], fill="#FFB7B2")
-    draw.ellipse([664 - 24, 450 - 14, 664 + 24, 450 + 14], fill="#FFB7B2")
-    draw_jelly_feet_uv(draw, 512, 670, ["#B5EAD7", "#FFFFD1", "#98D7C2"])
+    img, draw = create_blank_texture("#A8E6CF") # Pastel Mint Green
+    
+    # Smooth Pale Yellow Belly Patch
+    draw.ellipse([340, 530, 684, 730], fill="#FFFFD1")
+
+    # Cute Frog Mouth (:3)
+    draw.arc([486, 440, 512, 468], 0, 180, fill="#2D3748", width=5)
+    draw.arc([512, 440, 538, 468], 0, 180, fill="#2D3748", width=5)
+    
+    # Soft Pink Blush Cheeks
+    draw.ellipse([360 - 26, 450 - 15, 360 + 26, 450 + 15], fill="#FF85A2")
+    draw.ellipse([664 - 26, 450 - 15, 664 + 26, 450 + 15], fill="#FF85A2")
+    
     save_texture(img, "froggo_tex.png")
 
 # 4. BUNNY
 def make_bunny_tex():
     img, draw = create_blank_texture("#FFFFF5")
-    draw.ellipse([380, 520, 644, 670], fill="#FFD1DC")
-    draw.ellipse([512 - 12, 460, 512 + 12, 482], fill="#FF85A2")
-    eye_r = 18
-    draw.ellipse([430 - eye_r, 435 - eye_r, 430 + eye_r, 435 + eye_r], fill="#4A3E3D")
-    draw.ellipse([594 - eye_r, 435 - eye_r, 594 + eye_r, 435 + eye_r], fill="#4A3E3D")
-    draw.ellipse([370 - 24, 485 - 14, 370 + 24, 485 + 14], fill="#FF6584")
-    draw.ellipse([654 - 24, 485 - 14, 654 + 24, 485 + 14], fill="#FF6584")
-    draw_jelly_feet_uv(draw, 512, 660, ["#FFFFF5", "#FFD1DC", "#FFB7B2"])
+    draw.ellipse([360, 530, 664, 720], fill="#FFD1DC")
+    draw.ellipse([512 - 12, 445, 512 + 12, 468], fill="#FF85A2")
+    draw_shiny_eyes(draw, 425, 420, 599, 420, eye_r=18)
+    draw.ellipse([365 - 24, 470 - 14, 365 + 24, 470 + 14], fill="#FF6584")
+    draw.ellipse([659 - 24, 470 - 14, 659 + 24, 470 + 14], fill="#FF6584")
     save_texture(img, "bunny_tex.png")
 
 # 5. SHIBA DOG
 def make_shiba_dog_tex():
     img, draw = create_blank_texture("#F4A261")
-    # White Muzzle & Eyebrows
-    draw.ellipse([360, 420, 664, 620], fill="#FFFDF0")
-    draw.ellipse([410, 380, 450, 405], fill="#FFFDF0")
-    draw.ellipse([574, 380, 614, 405], fill="#FFFDF0")
-    # Nose & Mouth
-    draw.ellipse([512 - 16, 460, 512 + 16, 486], fill="#4A3E3D")
-    draw.line([(512, 486), (512, 506)], fill="#4A3E3D", width=5)
-    # Eyes
-    eye_r = 18
-    draw.ellipse([430 - eye_r, 435 - eye_r, 430 + eye_r, 435 + eye_r], fill="#4A3E3D")
-    draw.ellipse([594 - eye_r, 435 - eye_r, 594 + eye_r, 435 + eye_r], fill="#4A3E3D")
-    # Feet
-    draw_jelly_feet_uv(draw, 512, 660, ["#F4A261", "#FFFDF0", "#E76F51"])
+    draw.ellipse([340, 410, 684, 620], fill="#FFFDF0")
+    draw.ellipse([410, 370, 450, 395], fill="#FFFDF0")
+    draw.ellipse([574, 370, 614, 395], fill="#FFFDF0")
+    draw.ellipse([512 - 16, 450, 512 + 16, 476], fill="#4A3E3D")
+    draw.line([(512, 476), (512, 496)], fill="#4A3E3D", width=5)
+    draw_shiny_eyes(draw, 425, 420, 599, 420, eye_r=18)
     save_texture(img, "shiba_dog_tex.png")
 
 # 6. PANDA
 def make_panda_tex():
     img, draw = create_blank_texture("#FFFFFF")
-    # Black Eye Patches
-    draw.ellipse([380, 410, 470, 490], fill="#333333")
-    draw.ellipse([554, 410, 644, 490], fill="#333333")
-    # Eyes Inside Patches
-    draw.ellipse([425 - 10, 450 - 10, 425 + 10, 450 + 10], fill="#FFFFFF")
-    draw.ellipse([599 - 10, 450 - 10, 599 + 10, 450 + 10], fill="#FFFFFF")
-    # Nose
-    draw.ellipse([512 - 14, 470, 512 + 14, 494], fill="#333333")
-    # Blush
-    draw.ellipse([360 - 20, 495 - 12, 360 + 20, 495 + 12], fill="#FFB7B2")
-    draw.ellipse([664 - 20, 495 - 12, 664 + 20, 495 + 12], fill="#FFB7B2")
-    draw_jelly_feet_uv(draw, 512, 660, ["#333333", "#FFFFFF", "#333333"])
+    draw.ellipse([370, 390, 470, 470], fill="#333333")
+    draw.ellipse([554, 390, 654, 470], fill="#333333")
+    draw_shiny_eyes(draw, 420, 430, 604, 430, eye_r=12, eye_color="#FFFFFF")
+    draw.ellipse([512 - 14, 455, 512 + 14, 480], fill="#333333")
+    draw.ellipse([350 - 20, 480 - 12, 350 + 20, 480 + 12], fill="#FFB7B2")
+    draw.ellipse([674 - 20, 480 - 12, 674 + 20, 480 + 12], fill="#FFB7B2")
     save_texture(img, "panda_tex.png")
 
 # 7. PENGUIN
 def make_penguin_tex():
     img, draw = create_blank_texture("#4EA8DE")
-    # White Belly/Face Patch
-    draw.ellipse([340, 360, 684, 680], fill="#FFFFFF")
-    # Orange Beak
-    draw.polygon([(482, 470), (542, 470), (512, 510)], fill="#F4A261")
-    # Eyes
-    eye_r = 16
-    draw.ellipse([430 - eye_r, 435 - eye_r, 430 + eye_r, 435 + eye_r], fill="#111111")
-    draw.ellipse([594 - eye_r, 435 - eye_r, 594 + eye_r, 435 + eye_r], fill="#111111")
-    draw_jelly_feet_uv(draw, 512, 660, ["#F4A261", "#FFFFFF", "#F4A261"])
+    draw.ellipse([320, 340, 704, 690], fill="#FFFFFF")
+    draw.polygon([(482, 450), (542, 450), (512, 490)], fill="#F4A261")
+    draw_shiny_eyes(draw, 425, 415, 599, 415, eye_r=16, eye_color="#111111")
     save_texture(img, "penguin_tex.png")
 
 # 8. AXOLOTL
 def make_axolotl_tex():
     img, draw = create_blank_texture("#FFB7B2")
-    # Eyes
-    eye_r = 16
-    draw.ellipse([430 - eye_r, 445 - eye_r, 430 + eye_r, 445 + eye_r], fill="#4A3E3D")
-    draw.ellipse([594 - eye_r, 445 - eye_r, 594 + eye_r, 445 + eye_r], fill="#4A3E3D")
-    # Mouth
-    draw.arc([490, 465, 534, 490], 0, 180, fill="#4A3E3D", width=4)
-    # Blush
-    draw.ellipse([370 - 24, 485 - 14, 370 + 24, 485 + 14], fill="#FF4081")
-    draw.ellipse([654 - 24, 485 - 14, 654 + 24, 485 + 14], fill="#FF4081")
-    draw_jelly_feet_uv(draw, 512, 660, ["#FFB7B2", "#FF4081", "#FFD1DC"])
+    draw_shiny_eyes(draw, 425, 430, 599, 430, eye_r=16)
+    draw.arc([490, 450, 534, 475], 0, 180, fill="#4A3E3D", width=4)
+    draw.ellipse([365 - 24, 470 - 14, 365 + 24, 470 + 14], fill="#FF4081")
+    draw.ellipse([659 - 24, 470 - 14, 659 + 24, 470 + 14], fill="#FF4081")
     save_texture(img, "axolotl_tex.png")
 
 # 9. PIGGY
 def make_piggy_tex():
     img, draw = create_blank_texture("#FFACC7")
-    # Pig Snout
-    draw.ellipse([452, 445, 572, 505], fill="#FF85A2")
-    draw.ellipse([482 - 8, 475 - 12, 482 + 8, 475 + 12], fill="#4A3E3D")
-    draw.ellipse([542 - 8, 475 - 12, 542 + 8, 475 + 12], fill="#4A3E3D")
-    # Eyes
-    eye_r = 16
-    draw.ellipse([410 - eye_r, 435 - eye_r, 410 + eye_r, 435 + eye_r], fill="#4A3E3D")
-    draw.ellipse([614 - eye_r, 435 - eye_r, 614 + eye_r, 435 + eye_r], fill="#4A3E3D")
-    draw_jelly_feet_uv(draw, 512, 660, ["#FFACC7", "#FF85A2", "#FFACC7"])
+    draw.ellipse([452, 435, 572, 495], fill="#FF85A2")
+    draw.ellipse([482 - 8, 465 - 12, 482 + 8, 465 + 12], fill="#4A3E3D")
+    draw.ellipse([542 - 8, 465 - 12, 542 + 8, 465 + 12], fill="#4A3E3D")
+    draw_shiny_eyes(draw, 405, 425, 619, 425, eye_r=16)
     save_texture(img, "piggy_tex.png")
 
 # 10. DUCKY
 def make_ducky_tex():
     img, draw = create_blank_texture("#FFD166")
-    # Orange Duck Beak
-    draw.ellipse([442, 460, 582, 515], fill="#F4A261")
-    # Eyes
-    eye_r = 16
-    draw.ellipse([420 - eye_r, 435 - eye_r, 420 + eye_r, 435 + eye_r], fill="#4A3E3D")
-    draw.ellipse([604 - eye_r, 435 - eye_r, 604 + eye_r, 435 + eye_r], fill="#4A3E3D")
-    draw_jelly_feet_uv(draw, 512, 660, ["#FFD166", "#F4A261", "#FFD166"])
+    draw.ellipse([442, 445, 582, 500], fill="#F4A261")
+    draw_shiny_eyes(draw, 415, 425, 609, 425, eye_r=16)
     save_texture(img, "ducky_tex.png")
 
 make_neko_cat_tex()
@@ -191,4 +146,4 @@ make_axolotl_tex()
 make_piggy_tex()
 make_ducky_tex()
 
-print("All 10 character UV textures generated successfully!")
+print("Froggo texture eyes removed completely!")
