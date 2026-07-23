@@ -76,21 +76,6 @@ func load_blender_character_model():
 		
 	var model_names = ["pinky_bear", "froggo", "bunny", "neko_cat"]
 	var model_name = model_names[character_variant % model_names.size()]
-	# Option 1: 2D Sticker Sprite Billboard (Paper Mario 2.5D Style!)
-	var png_res_path = "res://assets/" + model_name + ".png"
-	if ResourceLoader.exists(png_res_path):
-		var tex = load(png_res_path) as Texture2D
-		if tex:
-			var sprite = Sprite3D.new()
-			sprite.texture = tex
-			sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
-			sprite.pixel_size = 0.0035
-			sprite.shaded = false
-			sprite.position = Vector3(0, 0, 0)
-			visual_mesh.add_child(sprite)
-			return
-
-	# Option 2: Fallback 3D GLB model
 	var glb_res_path = "res://assets/" + model_name + ".glb"
 	var model_inst: Node3D = null
 	if ResourceLoader.exists(glb_res_path):
