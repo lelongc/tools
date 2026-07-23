@@ -74,7 +74,7 @@ func load_blender_character_model():
 	for child in visual_mesh.get_children():
 		child.queue_free()
 		
-	var model_names = ["pinky_bear", "froggo", "bunny", "neko_cat", "star_yellow", "star_pink", "star_blue", "star_purple"]
+	var model_names = ["pinky_bear", "froggo", "bunny", "neko_cat", "shiba_dog", "panda", "penguin", "axolotl", "piggy", "ducky"]
 	var model_name = model_names[character_variant % model_names.size()]
 	var glb_res_path = "res://assets/" + model_name + ".glb"
 	var model_inst: Node3D = null
