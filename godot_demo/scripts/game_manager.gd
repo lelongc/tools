@@ -43,6 +43,12 @@ func start_next_round():
 func start_mode(mode: GameMode):
 	round_ended = false
 	
+	var main_game = get_tree().get_first_node_in_group("main_game")
+	if main_game and main_game.has_node("Players"):
+		players_alive.clear()
+		for child in main_game.get_node("Players").get_children():
+			players_alive.append(child.name.to_int())
+	
 	# Solo play guard: skip elimination modes if only 1 or 0 players AND no bots
 	if players_alive.size() <= 1 and mode != GameMode.RACE and mode != GameMode.COPYCAT:
 		print("Solo play: skipping elimination mode, using RACE instead")
@@ -88,7 +94,7 @@ func check_copycat_input(key_pressed: String, player_id: int):
 					end_round(player_id)
 
 func _process(delta):
-	if multiplayer.is_server() and current_mode == GameMode.TAG:
+	if multiplayer.has_multiplayer_peer() and multiplayer.is_server() and current_mode == GameMode.TAG:
 		if tag_timer > 0:
 			tag_timer -= delta
 			if tag_timer <= 0:
@@ -160,6 +166,10 @@ func end_round(winner_id):
 		
 	# Cycle to next map after a delay
 	await get_tree().create_timer(3.0).timeout
+	
+	if multiplayer.multiplayer_peer == null:
+		return
+		
 	current_map_index = (current_map_index + 1) % maps.size()
 	var next_map = maps[current_map_index]
 	

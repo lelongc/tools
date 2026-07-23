@@ -15,6 +15,9 @@ var peer = ENetMultiplayerPeer.new()
 @onready var copycat_label = $HUD/CopycatLabel
 @onready var key_guide_label = $HUD/KeyGuidePanel/KeyGuideLabel
 
+@onready var pause_ui = $PauseUI
+@onready var pause_btn = $HUD/PauseBtn
+
 # Stitch Design System Color Palette & Character Selection
 var selected_color: Color = Color(0, 0.95, 1) # Neon Cyan #00f3ff
 var selected_variant: int = 0 # 0: Bear, 1: Frog, 2: Bunny, 3: Cat
@@ -51,15 +54,65 @@ func _ready():
 		color_box.get_node("GreenBtn").pressed.connect(func(): selected_color = Color(0, 1, 0.4); if SoundManager: SoundManager.play_click())
 		color_box.get_node("OrangeBtn").pressed.connect(func(): selected_color = Color(1, 0.45, 0); if SoundManager: SoundManager.play_click())
 		
+	# Pause UI & HUD Pause Button Connections
+	if pause_btn:
+		pause_btn.pressed.connect(toggle_pause_menu)
+		
+	var pause_vbox = $PauseUI/PausePanel/VBox
+	if pause_vbox:
+		pause_vbox.get_node("ResumeBtn").pressed.connect(func(): pause_ui.hide(); if SoundManager: SoundManager.play_click())
+		pause_vbox.get_node("LobbyBtn").pressed.connect(leave_to_lobby)
+		pause_vbox.get_node("MutePauseBtn").pressed.connect(_on_mute_pressed)
+		pause_vbox.get_node("QuitBtn").pressed.connect(func(): get_tree().quit())
+		
 	address_input.text = "127.0.0.1"
 	hud.hide()
+	pause_ui.hide()
 	round_end_ui.hide()
 	apply_neon_theme()
+
+func _unhandled_input(event):
+	if event.is_action_pressed("ui_cancel"): # ESC key
+		if hud.visible:
+			toggle_pause_menu()
+
+func toggle_pause_menu():
+	if SoundManager: SoundManager.play_click()
+	pause_ui.visible = not pause_ui.visible
+
+func leave_to_lobby():
+	if SoundManager: SoundManager.play_click()
+	
+	# Disconnect multiplayer
+	multiplayer.multiplayer_peer = null
+	if peer:
+		peer.close()
+		peer = ENetMultiplayerPeer.new()
+		
+	# Clear levels and players
+	for child in level_container.get_children():
+		child.queue_free()
+	for child in players_node.get_children():
+		child.queue_free()
+		
+	# Reset GameManager state
+	GameManager.scores.clear()
+	GameManager.players_alive.clear()
+	GameManager.round_ended = false
+	
+	# Switch UI back to Lobby
+	hud.hide()
+	pause_ui.hide()
+	round_end_ui.hide()
+	lobby_ui.show()
 
 func _on_mute_pressed():
 	if SoundManager:
 		var muted = SoundManager.toggle_mute()
 		$LobbyUI/BottomFooterBar/HBoxFooter/MuteBtn.text = "🔇 SOUND: OFF" if muted else "🔊 SOUND: ON"
+		var pause_mute_btn = $PauseUI/PausePanel/VBox/MutePauseBtn
+		if pause_mute_btn:
+			pause_mute_btn.text = "🔇 Sound: OFF" if muted else "🔊 Sound: ON"
 
 func _process(_delta):
 	if hud.visible:

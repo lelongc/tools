@@ -350,6 +350,20 @@ theme_override_font_sizes/font_size = 28
 text = "SHUFFLE IN: 10.0s"
 horizontal_alignment = 1
 
+[node name="PauseBtn" type="Button" parent="HUD"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -160.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = 65.0
+grow_horizontal = 0
+focus_mode = 0
+theme_override_font_sizes/font_size = 16
+text = "⏸️ ESC / PAUSE"
+
 [node name="CopycatLabel" type="Label" parent="HUD"]
 visible = false
 layout_mode = 1
@@ -394,6 +408,83 @@ theme_override_font_sizes/font_size = 18
 text = "[A] -> LEFT | [D] -> RIGHT | [W] -> FORWARD | [S] -> BACK | [SPACE] -> JUMP"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="PauseUI" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ColorRect" type="ColorRect" parent="PauseUI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.75)
+
+[node name="PausePanel" type="Panel" parent="PauseUI"]
+custom_minimum_size = Vector2(320, 360)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -160.0
+offset_top = -180.0
+offset_right = 160.0
+offset_bottom = 180.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="PauseUI/PausePanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 25.0
+offset_top = 25.0
+offset_right = -25.0
+offset_bottom = -25.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 15
+
+[node name="Title" type="Label" parent="PauseUI/PausePanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.3, 0.6, 1)
+theme_override_font_sizes/font_size = 24
+text = "GAME PAUSED"
+horizontal_alignment = 1
+
+[node name="ResumeBtn" type="Button" parent="PauseUI/PausePanel/VBox"]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+focus_mode = 0
+text = "⏯️ Resume Game"
+
+[node name="LobbyBtn" type="Button" parent="PauseUI/PausePanel/VBox"]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+focus_mode = 0
+text = "🚪 Exit Match to Lobby"
+
+[node name="MutePauseBtn" type="Button" parent="PauseUI/PausePanel/VBox"]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+focus_mode = 0
+text = "🔊 Sound: ON"
+
+[node name="QuitBtn" type="Button" parent="PauseUI/PausePanel/VBox"]
+custom_minimum_size = Vector2(0, 45)
+layout_mode = 2
+focus_mode = 0
+text = "❌ Quit Game"
 
 [node name="RoundEndUI" type="Control" parent="."]
 visible = false

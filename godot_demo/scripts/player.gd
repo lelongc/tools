@@ -58,40 +58,7 @@ func is_player():
 func _ready():
 	randomize()
 	
-	# Hand-crafted Cute Pastel Palette
-	var colors = [
-		Color(0.98, 0.55, 0.75), # Pastel Pink
-		Color(0.4, 0.85, 0.95),  # Sky Blue
-		Color(1.0, 0.88, 0.4),   # Butter Yellow
-		Color(0.45, 0.95, 0.65), # Mint Green
-		Color(1.0, 0.6, 0.35)    # Sorbet Orange
-	]
-	var color = custom_color if custom_color != Color(0, 0, 0, 0) else colors[character_variant % colors.size()]
-	
-	# Attempt loading exported 3D GLB model from Blender or build procedural 3D cute character
-	var model_paths = [
-		"res://assets/pinky_bear.glb",
-		"res://assets/froggo.glb",
-		"res://assets/bunny.glb",
-		"res://assets/neko_cat.glb"
-	]
-	var selected_path = model_paths[character_variant % model_paths.size()]
-	var glb_loaded = false
-	
-	if ResourceLoader.exists(selected_path):
-		var glb_res = load(selected_path)
-		if glb_res:
-			var glb_scene = glb_res.instantiate()
-			if glb_scene:
-				visual_mesh.mesh = null
-				visual_mesh.material_override = null
-				glb_scene.scale = Vector3(1.3, 1.3, 1.3)
-				glb_scene.position = Vector3(0, -0.8, 0)
-				visual_mesh.add_child(glb_scene)
-				glb_loaded = true
-				
-	if not glb_loaded:
-		build_cute_3d_character(color, character_variant)
+	load_blender_character_model()
 	
 	if has_node("TrailParticles"):
 		$TrailParticles.emitting = true
@@ -99,100 +66,38 @@ func _ready():
 	if is_multiplayer_authority() and not is_bot:
 		camera.current = true
 
-func build_cute_3d_character(color: Color, variant: int):
+func load_blender_character_model():
+	# 1. ALWAYS remove default capsule pill mesh & override material
+	visual_mesh.mesh = null
 	visual_mesh.material_override = null
 	
-	# Create Cute Round Blob Body Sphere
-	var body_mesh = SphereMesh.new()
-	body_mesh.radius = 0.75
-	body_mesh.height = 1.4
-	visual_mesh.mesh = body_mesh
-	
-	var mat_body = StandardMaterial3D.new()
-	mat_body.albedo_color = color
-	mat_body.roughness = 0.25
-	visual_mesh.material_override = mat_body
-	
-	# Eye & Blush Materials
-	var mat_eye = StandardMaterial3D.new()
-	mat_eye.albedo_color = Color(0.02, 0.02, 0.05)
-	mat_eye.roughness = 0.1
-	
-	var mat_blush = StandardMaterial3D.new()
-	mat_blush.albedo_color = Color(1.0, 0.4, 0.65)
-	mat_blush.roughness = 0.4
-	
-	# Add Cute Glossy Eyes & Rosy Blush
-	for x in [0.28, -0.28]:
-		var eye = MeshInstance3D.new()
-		var eye_m = SphereMesh.new()
-		eye_m.radius = 0.09
-		eye_m.height = 0.18
-		eye.mesh = eye_m
-		eye.material_override = mat_eye
-		eye.position = Vector3(x, 0.15, -0.68)
-		visual_mesh.add_child(eye)
+	for child in visual_mesh.get_children():
+		child.queue_free()
 		
-		var blush = MeshInstance3D.new()
-		var blush_m = SphereMesh.new()
-		blush_m.radius = 0.11
-		blush_m.height = 0.08
-		blush.mesh = blush_m
-		blush.material_override = mat_blush
-		blush.position = Vector3(x * 1.5, -0.05, -0.65)
-		visual_mesh.add_child(blush)
-
-	# Variant 0: Bear, Variant 1: Frog, Variant 2: Bunny, Variant 3: Cat
-	match variant % 4:
-		0: # Pinky Bear
-			for x in [0.45, -0.45]:
-				var ear = MeshInstance3D.new()
-				var ear_m = SphereMesh.new()
-				ear_m.radius = 0.28
-				ear_m.height = 0.56
-				ear.mesh = ear_m
-				ear.material_override = mat_body
-				ear.position = Vector3(x, 0.65, 0)
-				visual_mesh.add_child(ear)
-		1: # Froggo
-			for x in [0.35, -0.35]:
-				var f_eye = MeshInstance3D.new()
-				var f_m = SphereMesh.new()
-				f_m.radius = 0.25
-				f_m.height = 0.5
-				f_eye.mesh = f_m
-				f_eye.material_override = mat_body
-				f_eye.position = Vector3(x, 0.68, -0.2)
-				visual_mesh.add_child(f_eye)
-				
-				var pupil = MeshInstance3D.new()
-				var p_m = SphereMesh.new()
-				p_m.radius = 0.1
-				p_m.height = 0.2
-				pupil.mesh = p_m
-				pupil.material_override = mat_eye
-				pupil.position = Vector3(x, 0.72, -0.38)
-				visual_mesh.add_child(pupil)
-		2: # Bunny
-			for x in [0.3, -0.3]:
-				var ear = MeshInstance3D.new()
-				var ear_m = CapsuleMesh.new()
-				ear_m.radius = 0.14
-				ear_m.height = 0.8
-				ear.mesh = ear_m
-				ear.material_override = mat_body
-				ear.position = Vector3(x, 0.95, 0)
-				visual_mesh.add_child(ear)
-		3: # Neko Cat
-			for x in [0.45, -0.45]:
-				var ear = MeshInstance3D.new()
-				var ear_m = PrismMesh.new()
-				ear_m.size = Vector3(0.4, 0.45, 0.3)
-				ear.mesh = ear_m
-				ear.material_override = mat_body
-				ear.position = Vector3(x, 0.75, 0)
-				ear.rotation_degrees = Vector3(0, 0, -15 if x > 0 else 15)
-				visual_mesh.add_child(ear)
+	var model_names = ["pinky_bear", "froggo", "bunny", "neko_cat"]
+	var model_name = model_names[character_variant % model_names.size()]
+	var glb_res_path = "res://assets/" + model_name + ".glb"
+	var glb_abs_path = ProjectSettings.globalize_path(glb_res_path)
+	
+	var model_inst: Node3D = null
+	
+	# Option A: Runtime direct loading via GLTFDocument (Guaranteed 100% no import needed)
+	var doc = GLTFDocument.new()
+	var state = GLTFState.new()
+	var err = doc.append_from_file(glb_abs_path, state)
+	if err == OK:
+		model_inst = doc.generate_scene(state)
+		
+	# Option B: Fallback to ResourceLoader PackedScene if GLTFDocument is unavailable
+	if not model_inst and ResourceLoader.exists(glb_res_path):
+		var scn = load(glb_res_path)
+		if scn and scn is PackedScene:
+			model_inst = scn.instantiate()
+			
+	if model_inst:
+		model_inst.scale = Vector3(0.7, 0.7, 0.7)
+		model_inst.position = Vector3(0, -0.7, 0)
+		visual_mesh.add_child(model_inst)
 
 func _physics_process(delta):
 	if is_dead:
@@ -248,6 +153,10 @@ func _physics_process(delta):
 				if SoundManager: SoundManager.play_jump()
 
 		input_dir = input_dir.normalized()
+		if input_dir.length() > 0.1:
+			var target_angle = atan2(input_dir.x, input_dir.z)
+			visual_mesh.rotation.y = lerp_angle(visual_mesh.rotation.y, target_angle, 15.0 * delta)
+			
 		var move_speed = SPEED * 1.3 if is_bomb else SPEED
 		velocity.x = input_dir.x * move_speed + knockback_velocity.x
 		velocity.z = input_dir.z * move_speed + knockback_velocity.z
