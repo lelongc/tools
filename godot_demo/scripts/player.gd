@@ -76,20 +76,24 @@ func load_blender_character_model():
 		
 	var model_names = ["pinky_bear", "froggo", "bunny", "neko_cat"]
 	var model_name = model_names[character_variant % model_names.size()]
+	# Option 1: 2D Sticker Sprite Billboard (Paper Mario 2.5D Style!)
+	var png_res_path = "res://assets/" + model_name + ".png"
+	if ResourceLoader.exists(png_res_path):
+		var tex = load(png_res_path) as Texture2D
+		if tex:
+			var sprite = Sprite3D.new()
+			sprite.texture = tex
+			sprite.billboard = BaseMaterial3D.BILLBOARD_FIXED_Y
+			sprite.pixel_size = 0.0035
+			sprite.shaded = false
+			sprite.position = Vector3(0, 0, 0)
+			visual_mesh.add_child(sprite)
+			return
+
+	# Option 2: Fallback 3D GLB model
 	var glb_res_path = "res://assets/" + model_name + ".glb"
-	var glb_abs_path = ProjectSettings.globalize_path(glb_res_path)
-	
 	var model_inst: Node3D = null
-	
-	# Option A: Runtime direct loading via GLTFDocument (Guaranteed 100% no import needed)
-	var doc = GLTFDocument.new()
-	var state = GLTFState.new()
-	var err = doc.append_from_file(glb_abs_path, state)
-	if err == OK:
-		model_inst = doc.generate_scene(state)
-		
-	# Option B: Fallback to ResourceLoader PackedScene if GLTFDocument is unavailable
-	if not model_inst and ResourceLoader.exists(glb_res_path):
+	if ResourceLoader.exists(glb_res_path):
 		var scn = load(glb_res_path)
 		if scn and scn is PackedScene:
 			model_inst = scn.instantiate()
@@ -98,6 +102,33 @@ func load_blender_character_model():
 		model_inst.scale = Vector3(0.7, 0.7, 0.7)
 		model_inst.position = Vector3(0, -0.7, 0)
 		visual_mesh.add_child(model_inst)
+		apply_toon_shader(model_inst)
+
+func apply_toon_shader(node: Node):
+	if node is MeshInstance3D:
+		var mesh = node.mesh
+		if mesh:
+			for i in range(mesh.get_surface_count()):
+				var original_mat = node.get_active_material(i)
+				if not original_mat and mesh is ArrayMesh:
+					original_mat = mesh.surface_get_material(i)
+					
+				var toon_mat: BaseMaterial3D = null
+				if original_mat and original_mat is BaseMaterial3D:
+					toon_mat = original_mat.duplicate() as BaseMaterial3D
+				else:
+					toon_mat = StandardMaterial3D.new()
+					if custom_color.a > 0.1:
+						toon_mat.albedo_color = custom_color
+						
+				toon_mat.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
+				toon_mat.specular_mode = BaseMaterial3D.SPECULAR_TOON
+				toon_mat.roughness = 0.2
+				
+				node.set_surface_override_material(i, toon_mat)
+				
+	for child in node.get_children():
+		apply_toon_shader(child)
 
 func _physics_process(delta):
 	if is_dead:

@@ -12,6 +12,11 @@ var current_mode = GameMode.RACE
 var players_alive = []
 var scores = {}
 
+func is_active_server() -> bool:
+	if multiplayer.multiplayer_peer == null: return false
+	if multiplayer.multiplayer_peer.get_connection_status() == MultiplayerPeer.CONNECTION_DISCONNECTED: return false
+	return multiplayer.is_server()
+
 var tag_timer = 0.0
 var tag_it_id = -1
 
@@ -57,13 +62,13 @@ func start_mode(mode: GameMode):
 	current_mode = mode
 	print("Started Mode: ", GameMode.keys()[mode])
 	
-	if mode == GameMode.TAG and multiplayer.is_server():
+	if mode == GameMode.TAG and is_active_server():
 		tag_timer = 15.0
 		if players_alive.size() > 0:
 			tag_it_id = players_alive[randi() % players_alive.size()]
 			rpc("update_it", tag_it_id)
 			
-	if mode == GameMode.COPYCAT and multiplayer.is_server():
+	if mode == GameMode.COPYCAT and is_active_server():
 		generate_copycat_sequence()
 
 func generate_copycat_sequence():
@@ -90,11 +95,11 @@ func check_copycat_input(key_pressed: String, player_id: int):
 			copycat_progress[player_id] += 1
 			print("Player ", player_id, " Copycat Progress: ", copycat_progress[player_id])
 			if copycat_progress[player_id] >= copycat_sequence.size():
-				if multiplayer.is_server():
+				if is_active_server():
 					end_round(player_id)
 
 func _process(delta):
-	if multiplayer.has_multiplayer_peer() and multiplayer.is_server() and current_mode == GameMode.TAG:
+	if is_active_server() and current_mode == GameMode.TAG:
 		if tag_timer > 0:
 			tag_timer -= delta
 			if tag_timer <= 0:
@@ -116,7 +121,7 @@ var last_tag_time = 0.0
 
 @rpc("any_peer", "call_local")
 func request_pass_bomb(to_id):
-	if multiplayer.is_server():
+	if is_active_server():
 		if Time.get_ticks_msec() / 1000.0 - last_tag_time > 0.5:
 			last_tag_time = Time.get_ticks_msec() / 1000.0
 			update_it(to_id)
@@ -135,7 +140,7 @@ func player_died(id):
 
 @rpc("any_peer", "call_local")
 func report_death(id):
-	if multiplayer.is_server():
+	if is_active_server():
 		player_died(id)
 
 func check_win_condition():
