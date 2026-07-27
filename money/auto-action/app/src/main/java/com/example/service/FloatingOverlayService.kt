@@ -202,7 +202,16 @@ class FloatingOverlayService : Service() {
                     AutoActionAccessibilityService.instance?.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK)
                 }
             })
-            toolMenu.addView(createOverlayButton("🏠 App", "#0284C7") {
+            toolMenu.addView(createOverlayButton("🏠 Home", "#F59E0B") {
+                if (isLiveRecording) {
+                    val step = recordNewStep("GLOBAL_HOME", durationMs = 100L)
+                    AutoActionAccessibilityService.instance?.dispatchSingleGesture(step) {}
+                    Toast.makeText(this, "🏠 Đã thêm bước Nút Home!", Toast.LENGTH_SHORT).show()
+                } else {
+                    AutoActionAccessibilityService.instance?.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_HOME)
+                }
+            })
+            toolMenu.addView(createOverlayButton("📱 App", "#0284C7") {
                 val appIntent = Intent(this, MainActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
                 }
@@ -306,17 +315,23 @@ class FloatingOverlayService : Service() {
         }
         isLiveRecording = !isLiveRecording
         if (isLiveRecording) {
-            // Auto-trigger HOME twice when pressing RECORD so user starts recording from clean MAIN Home screen!
+            // Auto-trigger HOME twice with settling delays when pressing RECORD so user starts recording from clean MAIN Home screen!
             val service = AutoActionAccessibilityService.instance
             service?.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_HOME)
+            updateBubbleCircleUI()
+            Toast.makeText(this, "🔴 Chuẩn bị quay... Đang về Màn hình chính!", Toast.LENGTH_SHORT).show()
+
             Handler(Looper.getMainLooper()).postDelayed({
                 service?.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_HOME)
-            }, 350L)
-            lastStepTimestampMs = System.currentTimeMillis()
-            isInjecting = false
-            startFullTouchRecordingOverlay()
-            updateBubbleCircleUI()
-            Toast.makeText(this, "🔴 BẮT ĐẦU QUAY! Đã tự về MÀN HÌNH CHÍNH (2 lần Home)...", Toast.LENGTH_SHORT).show()
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (isLiveRecording) {
+                        lastStepTimestampMs = System.currentTimeMillis()
+                        isInjecting = false
+                        startFullTouchRecordingOverlay()
+                        Toast.makeText(this@FloatingOverlayService, "🔴 BẮT ĐẦU QUAY!", Toast.LENGTH_SHORT).show()
+                    }
+                }, 500L)
+            }, 600L)
         } else {
             removeTouchRecordingOverlay()
             updateBubbleCircleUI()
@@ -384,7 +399,7 @@ class FloatingOverlayService : Service() {
 
         captureView.setOnTouchListener { _, event ->
             val now = System.currentTimeMillis()
-            if (!isLiveRecording || isInjecting || (now - lastInjectionEndTimeMs < 350L)) return@setOnTouchListener false
+            if (!isLiveRecording || isInjecting || (now - lastInjectionEndTimeMs < 50L)) return@setOnTouchListener false
 
             val viewLoc = IntArray(2)
             captureView.getLocationOnScreen(viewLoc)
@@ -439,20 +454,20 @@ class FloatingOverlayService : Service() {
                             y = startY.roundToInt(),
                             endX = endX.roundToInt(),
                             endY = endY.roundToInt(),
-                            durationMs = touchDuration.coerceIn(150L, 800L)
+                            durationMs = touchDuration.coerceIn(150L, 1500L)
                         )
                         // LONG_PRESS: held > 500ms
                         touchDuration >= 500L -> recordNewStep(
                             type = "LONG_PRESS",
-                            x = ((startX + endX) / 2f).roundToInt(),
-                            y = ((startY + endY) / 2f).roundToInt(),
+                            x = startX.roundToInt(),
+                            y = startY.roundToInt(),
                             durationMs = touchDuration.coerceAtLeast(800L)
                         )
-                        // TAP: quick press (use exact center of thumb touch & human tap duration!)
+                        // TAP: quick press (use exact touch-down coordinate where user aimed!)
                         else -> recordNewStep(
                             type = "TAP",
-                            x = ((startX + endX) / 2f).roundToInt(),
-                            y = ((startY + endY) / 2f).roundToInt(),
+                            x = startX.roundToInt(),
+                            y = startY.roundToInt(),
                             durationMs = touchDuration.coerceIn(50L, 250L)
                         )
                     }
@@ -511,12 +526,12 @@ class FloatingOverlayService : Service() {
         params.flags = passThroughFlags
         safeUpdateViewLayout(captureView, params)
 
-        // Step 2: Give WindowManager & InputDispatcher sufficient time to apply FLAG_NOT_TOUCHABLE (~120ms / ~7 frames)
+        // Step 2: Give WindowManager & InputDispatcher sufficient time to apply FLAG_NOT_TOUCHABLE (~40ms / ~2.5 frames)
         Handler(Looper.getMainLooper()).postDelayed({
             val service = AutoActionAccessibilityService.instance
             if (service != null) {
                 service.dispatchSingleGesture(step) {
-                    // Step 3: Wait 120ms after gesture completes for target app (Zalo/TikTok) to finish responding before restoring capture overlay
+                    // Step 3: Wait 40ms after gesture completes for target app (Zalo/TikTok) to finish responding before restoring capture overlay
                     Handler(Looper.getMainLooper()).postDelayed({
                         if (isLiveRecording && liveRecordOverlayView == captureView) {
                             params.flags = captureFlags
@@ -525,7 +540,7 @@ class FloatingOverlayService : Service() {
                         lastStepTimestampMs = System.currentTimeMillis()
                         lastInjectionEndTimeMs = System.currentTimeMillis()
                         isInjecting = false
-                    }, 120L)
+                    }, 40L)
                 }
             } else {
                 // Accessibility not enabled — still restore overlay

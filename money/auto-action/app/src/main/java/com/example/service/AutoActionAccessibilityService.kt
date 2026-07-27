@@ -105,12 +105,12 @@ class AutoActionAccessibilityService : AccessibilityService() {
 
         executionJob = serviceScope.launch {
             try {
-                // Automatically return to MAIN Home screen first (press HOME twice!)
+                // Automatically return to MAIN Home screen first (press HOME twice with animation settling delays!)
                 if (steps.firstOrNull()?.type != "GLOBAL_HOME") {
                     performGlobalAction(GLOBAL_ACTION_HOME)
-                    delay(350L)
+                    delay(600L)
                     performGlobalAction(GLOBAL_ACTION_HOME)
-                    delay(800L)
+                    delay(700L)
                 }
 
                 steps.forEachIndexed { index, step ->
@@ -166,8 +166,23 @@ class AutoActionAccessibilityService : AccessibilityService() {
                     "SWIPE" -> performSwipe(
                         step.x, step.y,
                         step.endX, step.endY,
-                        step.durationMs.coerceIn(250L, 550L) // Real human swipe speed so apps recognize it instantly on first swipe!
+                        step.durationMs.coerceAtLeast(150L)
                     )
+                    "GLOBAL_BACK" -> {
+                        performGlobalAction(GLOBAL_ACTION_BACK)
+                        delay(200L)
+                    }
+                    "GLOBAL_HOME" -> {
+                        performGlobalAction(GLOBAL_ACTION_HOME)
+                        delay(200L)
+                    }
+                    "GLOBAL_RECENTS" -> {
+                        performGlobalAction(GLOBAL_ACTION_RECENTS)
+                        delay(200L)
+                    }
+                    "COPY_TEXT" -> performCopyText(step.x, step.y)
+                    "PASTE_TEXT" -> performPasteText(step.x, step.y, step.textPayload)
+                    "SCREENSHOT" -> performTakeScreenshot()
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error dispatching single gesture", e)
@@ -192,7 +207,7 @@ class AutoActionAccessibilityService : AccessibilityService() {
     }
 
     private suspend fun performSwipe(startX: Int, startY: Int, endX: Int, endY: Int, durationMs: Long) {
-        val validDuration = durationMs.coerceIn(100L, 600L)
+        val validDuration = durationMs.coerceIn(150L, 1500L)
         val path = Path().apply {
             moveTo(startX.toFloat(), startY.toFloat())
             lineTo(endX.toFloat(), endY.toFloat())
@@ -201,6 +216,7 @@ class AutoActionAccessibilityService : AccessibilityService() {
         val gesture = GestureDescription.Builder().addStroke(stroke).build()
         dispatchGestureAwait(gesture)
     }
+
 
     private suspend fun performPasteText(x: Int, y: Int, textPayload: String) {
         if (x > 0 && y > 0) {
