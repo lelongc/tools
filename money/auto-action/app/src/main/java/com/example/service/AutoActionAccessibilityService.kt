@@ -42,7 +42,22 @@ class AutoActionAccessibilityService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        // Reserved for future use: could log events for smarter recording
+        if (event == null) return
+        if (FloatingOverlayService.isLiveRecordingActive()) {
+            val eventType = event.eventType
+            if (eventType == AccessibilityEvent.TYPE_VIEW_CLICKED || eventType == AccessibilityEvent.TYPE_VIEW_LONG_CLICKED) {
+                val node = event.source ?: rootInActiveWindow
+                node?.let {
+                    val rect = android.graphics.Rect()
+                    it.getBoundsInScreen(rect)
+                    val clickX = rect.centerX()
+                    val clickY = rect.centerY()
+                    if (clickX > 0 && clickY > 0) {
+                        FloatingOverlayService.recordExternalTap(clickX, clickY)
+                    }
+                }
+            }
+        }
     }
 
     override fun onInterrupt() {

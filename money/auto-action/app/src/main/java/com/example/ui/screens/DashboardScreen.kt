@@ -48,8 +48,15 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -87,8 +94,22 @@ fun DashboardScreen(
     val actions by viewModel.allActions.collectAsState()
     val quota by viewModel.currentQuota.collectAsState()
     val isExecuting by viewModel.isExecuting.collectAsState()
-    val isAccessibilityEnabled = AutoActionAccessibilityService.isAccessibilityEnabled(context)
+    var isAccessibilityEnabled by remember { mutableStateOf(AutoActionAccessibilityService.isAccessibilityEnabled(context)) }
+    val isServiceConnected by AutoActionAccessibilityService.isConnected.collectAsState()
     val isOverlayRunning by FloatingOverlayService.isOverlayRunning.collectAsState()
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isAccessibilityEnabled = AutoActionAccessibilityService.isAccessibilityEnabled(context)
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         LazyColumn(
@@ -146,6 +167,7 @@ fun DashboardScreen(
             item {
                 AccessibilityPromptCard(
                     isEnabled = isAccessibilityEnabled,
+                    isConnected = isServiceConnected,
                     onOpenSettings = { AutoActionAccessibilityService.openAccessibilitySettings(context) }
                 )
             }

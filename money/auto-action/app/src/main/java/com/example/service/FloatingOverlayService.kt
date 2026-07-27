@@ -72,6 +72,7 @@ class FloatingOverlayService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        instance = this
         repository = ActionRepository(application)
         _isOverlayRunning.value = true
         startForegroundServiceNotification()
@@ -269,6 +270,20 @@ class FloatingOverlayService : Service() {
     // ──────────────────────────────────────────────
 
     private fun toggleLiveRecording() {
+        if (!isLiveRecording) {
+            val service = AutoActionAccessibilityService.instance
+            if (service == null) {
+                val isEnabledInSettings = AutoActionAccessibilityService.isAccessibilityEnabled(this)
+                val msg = if (isEnabledInSettings) {
+                    "⚠️ Dịch vụ Trợ năng bị ngắt kết nối do app vừa khởi động lại!\nVui lòng vào Cài đặt -> TẮT nút AutoAction Pro rồi BẬT LẠI để kết nối lại."
+                } else {
+                    "⚠️ Vui lòng bật Dịch vụ Trợ năng (Accessibility) cho AutoAction Pro trong Cài đặt!"
+                }
+                Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+                AutoActionAccessibilityService.openAccessibilitySettings(this)
+                return
+            }
+        }
         isLiveRecording = !isLiveRecording
         if (isLiveRecording) {
             lastStepTimestampMs = System.currentTimeMillis()
@@ -326,7 +341,9 @@ class FloatingOverlayService : Service() {
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
             overlayType,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
+            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
             PixelFormat.TRANSLUCENT
         )
 
@@ -338,96 +355,39 @@ class FloatingOverlayService : Service() {
         captureView.setOnTouchListener { _, event ->
             if (!isLiveRecording) return@setOnTouchListener false
 
-            // Skip touches on the floating control bar area
-            controlBarView?.let { bar ->
-                val location = IntArray(2)
-                bar.getLocationOnScreen(location)
-                val barX = location[0]
-                val barY = location[1]
-                val barW = bar.width
-                val barH = bar.height
-                if (event.rawX >= barX && event.rawX <= barX + barW &&
-                    event.rawY >= barY && event.rawY <= barY + barH
-                ) {
-                    return@setOnTouchListener false
+            if (event.action == MotionEvent.ACTION_OUTSIDE) {
+                val rx = event.rawX.toInt()
+                val ry = event.rawY.toInt()
+                if (rx > 0 && ry > 0) {
+                    addRecordedTap(rx, ry)
                 }
+                return@setOnTouchListener true
             }
-
-            // If currently injecting a previous gesture, ignore new touches
-            if (isInjecting) return@setOnTouchListener true
-
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    startX = event.rawX
-                    startY = event.rawY
-                    startTime = System.currentTimeMillis()
-                    true
-                }
-                MotionEvent.ACTION_UP -> {
-                    val endX = event.rawX
-                    val endY = event.rawY
-                    val touchDuration = System.currentTimeMillis() - startTime
-                    val deltaX = abs(endX - startX)
-                    val deltaY = abs(endY - startY)
-
-                    // Calculate REAL delay since last recorded step
-                    val now = System.currentTimeMillis()
-                    val realDelay = if (lastStepTimestampMs > 0) {
-                        (now - lastStepTimestampMs).coerceAtLeast(100L)
-                    } else {
-                        500L
-                    }
-                    lastStepTimestampMs = now
-
-                    // Classify gesture type
-                    val step = when {
-                        // SWIPE: finger moved > 40px
-                        deltaX > 40 || deltaY > 40 -> ActionStepEntity(
-                            actionId = 0,
-                            stepOrder = recordedSteps.size + 1,
-                            type = "SWIPE",
-                            x = startX.toInt(),
-                            y = startY.toInt(),
-                            endX = endX.toInt(),
-                            endY = endY.toInt(),
-                            durationMs = touchDuration.coerceAtLeast(150L),
-                            delayAfterMs = realDelay
-                        )
-                        // LONG_PRESS: held > 500ms without moving
-                        touchDuration >= 500L -> ActionStepEntity(
-                            actionId = 0,
-                            stepOrder = recordedSteps.size + 1,
-                            type = "LONG_PRESS",
-                            x = startX.toInt(),
-                            y = startY.toInt(),
-                            durationMs = touchDuration.coerceAtLeast(800L),
-                            delayAfterMs = realDelay
-                        )
-                        // TAP: quick press
-                        else -> ActionStepEntity(
-                            actionId = 0,
-                            stepOrder = recordedSteps.size + 1,
-                            type = "TAP",
-                            x = startX.toInt(),
-                            y = startY.toInt(),
-                            durationMs = 150L,
-                            delayAfterMs = realDelay
-                        )
-                    }
-
-                    recordedSteps.add(step)
-                    updateBubbleCircleUI()
-
-                    // Now inject the gesture to the app underneath
-                    injectGestureAndRestore(step, captureView, params)
-                    true
-                }
-                else -> true // Consume ACTION_MOVE to track swipe
-            }
+            false
         }
 
         liveRecordOverlayView = captureView
         windowManager?.addView(captureView, params)
+
+        // Bring controlBarView and saveDialogView to the top of WindowManager z-order so touches hit them directly!
+        controlBarView?.let { bar ->
+            try {
+                val barParams = bar.layoutParams as WindowManager.LayoutParams
+                windowManager?.removeView(bar)
+                windowManager?.addView(bar, barParams)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error bringing control bar to front", e)
+            }
+        }
+        saveDialogView?.let { dlg ->
+            try {
+                val dlgParams = dlg.layoutParams as WindowManager.LayoutParams
+                windowManager?.removeView(dlg)
+                windowManager?.addView(dlg, dlgParams)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error bringing save dialog to front", e)
+            }
+        }
     }
 
     /**
@@ -462,7 +422,13 @@ class FloatingOverlayService : Service() {
             }
         } else {
             // Accessibility not enabled — still restore overlay
-            Toast.makeText(this, "⚠️ Bật Dịch vụ Trợ năng để thao tác đến app phía dưới!", Toast.LENGTH_SHORT).show()
+            val isEnabledInSettings = AutoActionAccessibilityService.isAccessibilityEnabled(this)
+            val msg = if (isEnabledInSettings) {
+                "⚠️ Dịch vụ Trợ năng bị ngắt kết nối do app khởi động lại! Vui lòng TẮT rồi BẬT LẠI AutoAction Pro trong Cài đặt."
+            } else {
+                "⚠️ Bật Dịch vụ Trợ năng để thao tác đến app phía dưới!"
+            }
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
             Handler(Looper.getMainLooper()).postDelayed({
                 if (isLiveRecording && liveRecordOverlayView == captureView) {
                     params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -502,7 +468,14 @@ class FloatingOverlayService : Service() {
 
         val service = AutoActionAccessibilityService.instance
         if (service == null) {
-            Toast.makeText(this, "Vui lòng bật Dịch vụ Accessibility!", Toast.LENGTH_LONG).show()
+            val isEnabledInSettings = AutoActionAccessibilityService.isAccessibilityEnabled(this)
+            val msg = if (isEnabledInSettings) {
+                "⚠️ Dịch vụ Trợ năng bị ngắt kết nối do app vừa khởi động lại!\nVui lòng vào Cài đặt -> TẮT nút AutoAction Pro rồi BẬT LẠI để kết nối lại."
+            } else {
+                "⚠️ Vui lòng bật Dịch vụ Trợ năng (Accessibility) cho AutoAction Pro trong Cài đặt!"
+            }
+            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+            AutoActionAccessibilityService.openAccessibilitySettings(this)
             return
         }
 
@@ -716,8 +689,43 @@ class FloatingOverlayService : Service() {
         }
     }
 
+    fun addRecordedTap(x: Int, y: Int) {
+        if (!isLiveRecording) return
+        val now = System.currentTimeMillis()
+        if (now - lastStepTimestampMs < 300L && recordedSteps.isNotEmpty()) {
+            val last = recordedSteps.last()
+            if (abs(last.x - x) < 40 && abs(last.y - y) < 40) {
+                return
+            }
+        }
+
+        val realDelay = if (lastStepTimestampMs > 0) {
+            (now - lastStepTimestampMs).coerceAtLeast(300L)
+        } else {
+            500L
+        }
+        lastStepTimestampMs = now
+
+        val step = ActionStepEntity(
+            actionId = 0,
+            stepOrder = recordedSteps.size + 1,
+            type = "TAP",
+            x = x,
+            y = y,
+            durationMs = 150L,
+            delayAfterMs = realDelay
+        )
+        recordedSteps.add(step)
+        Handler(Looper.getMainLooper()).post {
+            updateBubbleCircleUI()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        if (instance == this) {
+            instance = null
+        }
         if (isLiveRecording) {
             isLiveRecording = false
             removeTouchRecordingOverlay()
@@ -735,6 +743,16 @@ class FloatingOverlayService : Service() {
 
         private val _isOverlayRunning = MutableStateFlow(false)
         val isOverlayRunning: StateFlow<Boolean> = _isOverlayRunning
+
+        private var instance: FloatingOverlayService? = null
+
+        fun isLiveRecordingActive(): Boolean {
+            return instance?.isLiveRecording == true
+        }
+
+        fun recordExternalTap(x: Int, y: Int) {
+            instance?.addRecordedTap(x, y)
+        }
 
         fun startService(context: Context) {
             val intent = Intent(context, FloatingOverlayService::class.java)

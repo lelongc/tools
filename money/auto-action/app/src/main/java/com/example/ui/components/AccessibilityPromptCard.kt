@@ -35,13 +35,23 @@ import com.example.ui.theme.SuccessGreen
 fun AccessibilityPromptCard(
     isEnabled: Boolean,
     onOpenSettings: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isConnected: Boolean = isEnabled
 ) {
+    val isStale = isEnabled && !isConnected
+    val isFullyActive = isEnabled && isConnected
+
+    val statusColor = when {
+        isFullyActive -> SuccessGreen
+        isStale -> Color(0xFFF59E0B) // Warning Orange/Amber
+        else -> DangerRed
+    }
+
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isEnabled) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
@@ -57,17 +67,21 @@ fun AccessibilityPromptCard(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = if (isEnabled) Icons.Default.CheckCircle else Icons.Default.Warning,
+                        imageVector = if (isFullyActive) Icons.Default.CheckCircle else Icons.Default.Warning,
                         contentDescription = null,
-                        tint = if (isEnabled) SuccessGreen else DangerRed,
+                        tint = statusColor,
                         modifier = Modifier.size(24.dp)
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = if (isEnabled) "Dịch vụ AutoAction: HOẠT ĐỘNG" else "Cần Bật Dịch vụ Accessibility!",
+                        text = when {
+                            isFullyActive -> "Dịch vụ AutoAction: HOẠT ĐỘNG"
+                            isStale -> "Dịch vụ Trợ năng: BỊ NGẮT KẾT NỐI!"
+                            else -> "Cần Bật Dịch vụ Accessibility!"
+                        },
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = if (isEnabled) SuccessGreen else DangerRed
+                        color = statusColor
                     )
                 }
             }
@@ -75,29 +89,34 @@ fun AccessibilityPromptCard(
             Spacer(modifier = Modifier.height(6.dp))
 
             Text(
-                text = if (isEnabled)
-                    "Ứng dụng đã có quyền mô phỏng thao tác chạm và vuốt tự động trên màn hình."
-                else
-                    "Android yêu cầu cấp quyền Hỗ trợ tiếp cận (Accessibility Service) để AutoAction Pro có thể tự động chạm/vuốt màn hình theo yêu cầu của bạn.",
+                text = when {
+                    isFullyActive -> "Ứng dụng đã có quyền mô phỏng thao tác chạm và vuốt tự động trên màn hình."
+                    isStale -> "App vừa được cập nhật/tắt nên hệ thống Android tạm ngắt dịch vụ. Vui lòng bấm bên dưới mở Cài đặt -> TẮT nút AutoAction Pro đi rồi BẬT LẠI để kích hoạt."
+                    else -> "Android yêu cầu cấp quyền Hỗ trợ tiếp cận (Accessibility Service) để AutoAction Pro có thể tự động chạm/vuốt màn hình theo yêu cầu của bạn."
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface,
                 fontSize = 12.sp
             )
 
-            if (!isEnabled) {
+            if (!isFullyActive) {
                 Spacer(modifier = Modifier.height(12.dp))
                 Button(
                     onClick = onOpenSettings,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(10.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = DangerRed,
+                        containerColor = if (isStale) Color(0xFFD97706) else DangerRed,
                         contentColor = Color.White
                     )
                 ) {
                     Icon(imageVector = Icons.Default.SettingsAccessibility, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Bật Accessibility Service Ngay", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                    Text(
+                        text = if (isStale) "Tắt & Bật lại Dịch vụ Trợ năng Ngay" else "Bật Accessibility Service Ngay",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.sp
+                    )
                 }
             }
         }

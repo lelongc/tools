@@ -57,12 +57,13 @@ class AutoActionViewModel(application: Application) : AndroidViewModel(applicati
     val inAppOverlayActive: StateFlow<Boolean> = _inAppOverlayActive.asStateFlow()
 
     init {
-        // Pre-populate sample default action if first install
+        // Pre-populate sample default action ONCE on first launch
         viewModelScope.launch {
-            repository.allActions.collect { list ->
-                if (list.isEmpty()) {
-                    createDefaultSampleAction()
-                }
+            val prefs = getApplication<Application>().getSharedPreferences("auto_action_prefs", android.content.Context.MODE_PRIVATE)
+            val isFirstLaunch = prefs.getBoolean("is_first_launch", true)
+            if (isFirstLaunch) {
+                prefs.edit().putBoolean("is_first_launch", false).apply()
+                createDefaultSampleAction()
             }
         }
     }
