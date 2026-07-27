@@ -1,0 +1,6 @@
+{
+  "name": "AutoAction Pro",
+  "description": "Auto Touch Macro Recorder & Scheduler with VietQR VIP unlock",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,26 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Outer Ripple Ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#4CC9FE"
+        android:strokeWidth="3"
+        android:pathData="M54,24 A30,30 0 1,1 53.9,24 Z" />
+    <!-- Inner Ripple Ring -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#3A86FF"
+        android:strokeWidth="2"
+        android:pathData="M54,36 A18,18 0 1,1 53.9,36 Z" />
+    <!-- Center Target Point -->
+    <path
+        android:fillColor="#00F5D4"
+        android:pathData="M54,48 A6,6 0 1,1 53.9,48 Z" />
+    <!-- Lightning Auto Trigger Path -->
+    <path
+        android:fillColor="#FF007A"
+        android:pathData="M58,38 L48,56 L55,56 L50,72 L64,52 L57,52 Z" />
+</vector>

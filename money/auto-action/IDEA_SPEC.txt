@@ -1,0 +1,79 @@
+================================================================================
+  BAN THIET KE Y TUONG - AUTOACTION PRO v2.0 (FINAL)
+================================================================================
+
+1. TONG QUAN SAN PHAM
+--------------------------------------------------------------------------------
+- Ten: AutoAction Pro
+- Nen tang: Android 8.0+ (Kotlin, Jetpack Compose, Material Design 3)
+- Tong mau: Xanh Duong (#1D4ED8 Light / #38BDF8 Dark) & Trang
+- Theme: Ho tro Sang (Light) va Toi (Dark Mode)
+- Muc tieu: Ghi lai THAO TAC THAT tren moi app (Zalo, Facebook, TikTok, 
+  Shopee, MBBank...) bang Bong bong noi, luu thanh hanh dong va tai su dung 
+  (chay thu cong hoac len lich tu dong).
+
+2. USE CASE CHINH
+--------------------------------------------------------------------------------
+Vi du: Copy text tu Zalo -> Paste vao Facebook dang bai + chon anh:
+  Step 1: Bat bong bong noi -> Bam 🔴 REC
+  Step 2: Mo Zalo -> Nhan giu tin nhan -> Copy text
+  Step 3: Chuyen sang Facebook -> Bam "Ban dang nghi gi?" -> Dan text
+  Step 4: Bam chon anh -> Chon anh tu thu vien
+  Step 5: Bam Dang -> Bam ⏹️ STOP tren bong bong
+  Step 6: Dat ten hanh dong "Copy Zalo Paste Facebook"
+  Step 7: Lan sau chi can bam ▶️ Chay hoac ⏰ Dat lich tu dong
+
+3. CO CHE KY THUAT RECORDING
+--------------------------------------------------------------------------------
+- Dung Android Accessibility Service (khong can Root)
+- Bong bong noi (Floating Overlay Widget) dung WindowManager
+- Quy trinh ghi 1 thao tac:
+  a. Overlay toan man hinh (trong suot) bat su kien cham cua user
+  b. Ghi nhan toa do (x, y), loai cu chi (TAP/SWIPE/LONG_PRESS), 
+     thoi gian giu va DELAY THUC TE giua cac thao tac
+  c. Tam tat overlay (FLAG_NOT_TOUCHABLE) de touch xuyen qua app phia duoi
+  d. Dung dispatchGesture() cua AccessibilityService inject cu chi vao app
+  e. Sau khi inject xong, bat lai overlay de bat thao tac tiep theo
+- Playback: Chay lai toan bo chuoi thao tac voi timing chinh xac
+
+4. MO HINH FREE vs VIP
+--------------------------------------------------------------------------------
+FREE:
+  - Tao toi da 1 hanh dong
+  - Chay toi da 3 lan / thang
+  - Len lich toi da 1 lich
+
+VIP (99.000d / thang):
+  - Khong gioi han hanh dong, luot chay, lich tu dong
+  - Thanh toan VietQR + SMS Banking tu dong duyet
+
+5. HE THONG THANH TOAN TU DONG QUA SMS BANKING (60K/THANG)
+--------------------------------------------------------------------------------
+  a. App tao Device ID duy nhat (vd: AA982312)
+  b. App hien ma VietQR 99.000d voi noi dung "VIP AA982312"
+  c. Khach quet QR chuyen tien
+  d. Ngan hang gui SMS bien dong so du toi SIM admin
+  e. MacroDroid tren dien thoai Android admin doc SMS -> Gui Webhook
+  f. Server cap nhat VIP ACTIVE cho Device ID trong 30 ngay
+  g. App khach tu dong mo khoa VIP
+
+6. CAU TRUC DU LIEU (ROOM DATABASE)
+--------------------------------------------------------------------------------
+Table 'actions':
+  id, name, createdAt, isScheduled, scheduleHour, scheduleMinute, 
+  repeatDays, runCount
+
+Table 'action_steps':
+  id, actionId, stepOrder, type (TAP/SWIPE/LONG_PRESS/PASTE_TEXT/COPY_TEXT),
+  x, y, endX, endY, durationMs, delayAfterMs, textPayload
+
+Table 'quotas':
+  deviceId, isVip, vipExpireDateMs, monthlyRunsUsed, lastResetMonth
+
+7. CACH TEST
+--------------------------------------------------------------------------------
+- Google AI Studio: Dung Android Emulator tich hop de chay truc tiep
+- Android Studio: Import project -> Run tren Emulator hoac dien thoai USB
+- Dien thoai that: Build APK (./gradlew assembleDebug) -> Cai len may
+- KHONG THE test trong trinh duyet web (can AccessibilityService + Overlay)
+================================================================================
