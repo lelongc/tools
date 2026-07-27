@@ -45,16 +45,17 @@ class AutoActionAccessibilityService : AccessibilityService() {
         if (event == null) return
         if (FloatingOverlayService.isLiveRecordingActive()) {
             val eventType = event.eventType
-            if (eventType == AccessibilityEvent.TYPE_VIEW_CLICKED || eventType == AccessibilityEvent.TYPE_VIEW_LONG_CLICKED) {
+            if (eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
                 val node = event.source ?: rootInActiveWindow
-                node?.let {
+                val textStr = event.text.joinToString(" ").ifBlank {
+                    node?.text?.toString() ?: ""
+                }
+                if (textStr.isNotBlank()) {
                     val rect = android.graphics.Rect()
-                    it.getBoundsInScreen(rect)
-                    val clickX = rect.centerX()
-                    val clickY = rect.centerY()
-                    if (clickX > 0 && clickY > 0) {
-                        FloatingOverlayService.recordExternalTap(clickX, clickY)
-                    }
+                    node?.getBoundsInScreen(rect)
+                    val clickX = if (rect.centerX() > 0) rect.centerX() else 540
+                    val clickY = if (rect.centerY() > 0) rect.centerY() else 1000
+                    FloatingOverlayService.recordExternalTextPaste(clickX, clickY, textStr)
                 }
             }
         }
@@ -94,6 +95,12 @@ class AutoActionAccessibilityService : AccessibilityService() {
 
         executionJob = serviceScope.launch {
             try {
+                // Automatically return to Home screen first so execution starts on phone launcher/apps instead of inside AutoAction Pro UI
+                if (steps.firstOrNull()?.type != "GLOBAL_HOME") {
+                    performGlobalAction(GLOBAL_ACTION_HOME)
+                    delay(1000L)
+                }
+
                 steps.forEachIndexed { index, step ->
                     if (!_isExecuting.value) return@launch
                     onProgress(index + 1, steps.size)

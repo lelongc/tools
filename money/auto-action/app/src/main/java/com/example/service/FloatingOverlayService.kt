@@ -286,11 +286,13 @@ class FloatingOverlayService : Service() {
         }
         isLiveRecording = !isLiveRecording
         if (isLiveRecording) {
+            // Auto-trigger HOME when pressing RECORD so user starts recording from clean Home screen!
+            AutoActionAccessibilityService.instance?.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_HOME)
             lastStepTimestampMs = System.currentTimeMillis()
             isInjecting = false
             startFullTouchRecordingOverlay()
             updateBubbleCircleUI()
-            Toast.makeText(this, "🔴 BẮT ĐẦU QUAY! Chạm/vuốt tự do trên mọi app...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "🔴 BẮT ĐẦU QUAY! Tự về màn hình chính, chạm/vuốt tự do...", Toast.LENGTH_SHORT).show()
         } else {
             removeTouchRecordingOverlay()
             updateBubbleCircleUI()
@@ -479,7 +481,7 @@ class FloatingOverlayService : Service() {
             return
         }
 
-        Toast.makeText(this, "▶️ Đang chạy ${recordedSteps.size} thao tác...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "▶️ Đang quay về Màn hình chính & tự động thực hiện ${recordedSteps.size} thao tác...", Toast.LENGTH_SHORT).show()
 
         service.executeGestureSequence(
             steps = recordedSteps.toList(),
@@ -721,6 +723,41 @@ class FloatingOverlayService : Service() {
         }
     }
 
+    fun addRecordedTextPaste(x: Int, y: Int, textPayload: String) {
+        if (!isLiveRecording) return
+        val now = System.currentTimeMillis()
+
+        // If last step was a TAP at approximately the same location, upgrade/replace it with PASTE_TEXT
+        if (recordedSteps.isNotEmpty()) {
+            val last = recordedSteps.last()
+            if (last.type == "TAP" && abs(last.x - x) < 120 && abs(last.y - y) < 120) {
+                recordedSteps.removeAt(recordedSteps.size - 1)
+            }
+        }
+
+        val realDelay = if (lastStepTimestampMs > 0) {
+            (now - lastStepTimestampMs).coerceAtLeast(300L)
+        } else {
+            500L
+        }
+        lastStepTimestampMs = now
+
+        val step = ActionStepEntity(
+            actionId = 0,
+            stepOrder = recordedSteps.size + 1,
+            type = "PASTE_TEXT",
+            x = x,
+            y = y,
+            durationMs = 200L,
+            delayAfterMs = realDelay,
+            textPayload = textPayload
+        )
+        recordedSteps.add(step)
+        Handler(Looper.getMainLooper()).post {
+            updateBubbleCircleUI()
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         if (instance == this) {
@@ -752,6 +789,10 @@ class FloatingOverlayService : Service() {
 
         fun recordExternalTap(x: Int, y: Int) {
             instance?.addRecordedTap(x, y)
+        }
+
+        fun recordExternalTextPaste(x: Int, y: Int, textPayload: String) {
+            instance?.addRecordedTextPaste(x, y, textPayload)
         }
 
         fun startService(context: Context) {
