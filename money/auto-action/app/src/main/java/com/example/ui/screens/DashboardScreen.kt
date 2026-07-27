@@ -3,6 +3,7 @@ package com.example.ui.screens
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -321,17 +322,35 @@ fun DashboardScreen(
 
         // Floating Action Button
         FloatingActionButton(
-            onClick = { onNavigateToEditor(0) },
-            containerColor = MaterialTheme.colorScheme.primary,
+            onClick = {
+                val hasOverlayPermission = Settings.canDrawOverlays(context)
+                if (!hasOverlayPermission) {
+                    val intent = Intent(
+                        Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                        Uri.parse("package:${context.packageName}")
+                    )
+                    context.startActivity(intent)
+                } else {
+                    if (!isOverlayRunning) {
+                        FloatingOverlayService.startService(context)
+                    } else {
+                        Toast.makeText(context, "Bảng nổi đang chạy ở màn hình chính/ứng dụng khác!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            },
+            containerColor = if (isOverlayRunning) DangerRed else MaterialTheme.colorScheme.primary,
             contentColor = Color.White,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(20.dp)
         ) {
-            Row(modifier = Modifier.padding(horizontal = 16.dp)) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Tạo mới")
+            Row(modifier = Modifier.padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = if (isOverlayRunning) Icons.Default.Stop else Icons.Default.TouchApp,
+                    contentDescription = null
+                )
                 Spacer(modifier = Modifier.width(6.dp))
-                Text("Tạo Mới Trong App", fontWeight = FontWeight.Bold)
+                Text(if (isOverlayRunning) "Bảng Nổi Đang Chạy" else "🔴 BẬT QUAY LIVE", fontWeight = FontWeight.Bold)
             }
         }
     }

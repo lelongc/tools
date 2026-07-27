@@ -38,12 +38,11 @@ fun AccessibilityPromptCard(
     modifier: Modifier = Modifier,
     isConnected: Boolean = isEnabled
 ) {
-    val isStale = isEnabled && !isConnected
-    val isFullyActive = isEnabled && isConnected
+    val isFullyActive = isEnabled
+    val isStale = false
 
     val statusColor = when {
         isFullyActive -> SuccessGreen
-        isStale -> Color(0xFFF59E0B) // Warning Orange/Amber
         else -> DangerRed
     }
 

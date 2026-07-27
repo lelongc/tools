@@ -182,6 +182,50 @@ class FloatingOverlayService : Service() {
             toolMenu.addView(createOverlayButton("▶️ Chạy", "#10B981") { playRecordedSequence() })
             toolMenu.addView(createOverlayButton("💾 Lưu", "#FFB703") { showSaveActionDialog() })
             toolMenu.addView(createOverlayButton("🗑️ Xoá", "#64748B") { clearAllRecordedSteps() })
+            toolMenu.addView(createOverlayButton("📋 Copy", "#8B5CF6") {
+                if (isLiveRecording) {
+                    val now = System.currentTimeMillis()
+                    val realDelay = if (lastStepTimestampMs > 0) (now - lastStepTimestampMs).coerceAtLeast(300L) else 500L
+                    lastStepTimestampMs = now
+                    val step = ActionStepEntity(
+                        actionId = 0,
+                        stepOrder = recordedSteps.size + 1,
+                        type = "COPY_TEXT",
+                        x = 0,
+                        y = 0,
+                        durationMs = 100L,
+                        delayAfterMs = realDelay
+                    )
+                    recordedSteps.add(step)
+                    updateBubbleCircleUI()
+                    AutoActionAccessibilityService.instance?.dispatchSingleGesture(step) {}
+                    Toast.makeText(this, "📋 Đã thêm bước Copy Text!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Hãy bấm BẮT ĐẦU QUAY 🔴 trước khi thêm bước Copy!", Toast.LENGTH_SHORT).show()
+                }
+            })
+            toolMenu.addView(createOverlayButton("⬅️ Back", "#6366F1") {
+                if (isLiveRecording) {
+                    val now = System.currentTimeMillis()
+                    val realDelay = if (lastStepTimestampMs > 0) (now - lastStepTimestampMs).coerceAtLeast(300L) else 500L
+                    lastStepTimestampMs = now
+                    val step = ActionStepEntity(
+                        actionId = 0,
+                        stepOrder = recordedSteps.size + 1,
+                        type = "GLOBAL_BACK",
+                        x = 0,
+                        y = 0,
+                        durationMs = 100L,
+                        delayAfterMs = realDelay
+                    )
+                    recordedSteps.add(step)
+                    updateBubbleCircleUI()
+                    AutoActionAccessibilityService.instance?.dispatchSingleGesture(step) {}
+                    Toast.makeText(this, "⬅️ Đã thêm bước Nút Back!", Toast.LENGTH_SHORT).show()
+                } else {
+                    AutoActionAccessibilityService.instance?.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_BACK)
+                }
+            })
             toolMenu.addView(createOverlayButton("🏠 App", "#0284C7") {
                 val appIntent = Intent(this, MainActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -286,13 +330,17 @@ class FloatingOverlayService : Service() {
         }
         isLiveRecording = !isLiveRecording
         if (isLiveRecording) {
-            // Auto-trigger HOME when pressing RECORD so user starts recording from clean Home screen!
-            AutoActionAccessibilityService.instance?.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_HOME)
+            // Auto-trigger HOME twice when pressing RECORD so user starts recording from clean MAIN Home screen!
+            val service = AutoActionAccessibilityService.instance
+            service?.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_HOME)
+            Handler(Looper.getMainLooper()).postDelayed({
+                service?.performGlobalAction(android.accessibilityservice.AccessibilityService.GLOBAL_ACTION_HOME)
+            }, 350L)
             lastStepTimestampMs = System.currentTimeMillis()
             isInjecting = false
             startFullTouchRecordingOverlay()
             updateBubbleCircleUI()
-            Toast.makeText(this, "🔴 BẮT ĐẦU QUAY! Tự về màn hình chính, chạm/vuốt tự do...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "🔴 BẮT ĐẦU QUAY! Đã tự về MÀN HÌNH CHÍNH (2 lần Home)...", Toast.LENGTH_SHORT).show()
         } else {
             removeTouchRecordingOverlay()
             updateBubbleCircleUI()
@@ -344,10 +392,14 @@ class FloatingOverlayService : Service() {
             WindowManager.LayoutParams.MATCH_PARENT,
             overlayType,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-            WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or
-            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             PixelFormat.TRANSLUCENT
-        )
+        ).apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+            }
+        }
 
         val captureView = FrameLayout(this)
         var startX = 0f
@@ -355,17 +407,100 @@ class FloatingOverlayService : Service() {
         var startTime = 0L
 
         captureView.setOnTouchListener { _, event ->
-            if (!isLiveRecording) return@setOnTouchListener false
+            if (!isLiveRecording || isInjecting) return@setOnTouchListener false
 
-            if (event.action == MotionEvent.ACTION_OUTSIDE) {
-                val rx = event.rawX.toInt()
-                val ry = event.rawY.toInt()
-                if (rx > 0 && ry > 0) {
-                    addRecordedTap(rx, ry)
+            // Check if touch is inside floating control bar area
+            controlBarView?.let { bar ->
+                val location = IntArray(2)
+                bar.getLocationOnScreen(location)
+                val barX = location[0]
+                val barY = location[1]
+                val barW = bar.width
+                val barH = bar.height
+                if (event.rawX >= barX && event.rawX <= barX + barW &&
+                    event.rawY >= barY && event.rawY <= barY + barH
+                ) {
+                    if (event.action == MotionEvent.ACTION_UP) {
+                        bubbleCircleView?.let { circle ->
+                            val cLoc = IntArray(2)
+                            circle.getLocationOnScreen(cLoc)
+                            if (event.rawX >= cLoc[0] && event.rawX <= cLoc[0] + circle.width &&
+                                event.rawY >= cLoc[1] && event.rawY <= cLoc[1] + circle.height
+                            ) {
+                                toggleLiveRecording()
+                            }
+                        }
+                    }
+                    return@setOnTouchListener true
                 }
-                return@setOnTouchListener true
             }
-            false
+
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    startX = event.rawX
+                    startY = event.rawY
+                    startTime = System.currentTimeMillis()
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    val endX = event.rawX
+                    val endY = event.rawY
+                    val touchDuration = System.currentTimeMillis() - startTime
+                    val deltaX = abs(endX - startX)
+                    val deltaY = abs(endY - startY)
+
+                    val now = System.currentTimeMillis()
+                    val realDelay = if (lastStepTimestampMs > 0) {
+                        (now - lastStepTimestampMs).coerceAtLeast(100L)
+                    } else {
+                        500L
+                    }
+                    lastStepTimestampMs = now
+
+                    val step = when {
+                        // SWIPE: finger moved > 40px
+                        deltaX > 40 || deltaY > 40 -> ActionStepEntity(
+                            actionId = 0,
+                            stepOrder = recordedSteps.size + 1,
+                            type = "SWIPE",
+                            x = startX.toInt(),
+                            y = startY.toInt(),
+                            endX = endX.toInt(),
+                            endY = endY.toInt(),
+                            durationMs = touchDuration.coerceAtLeast(150L),
+                            delayAfterMs = realDelay
+                        )
+                        // LONG_PRESS: held > 500ms
+                        touchDuration >= 500L -> ActionStepEntity(
+                            actionId = 0,
+                            stepOrder = recordedSteps.size + 1,
+                            type = "LONG_PRESS",
+                            x = startX.toInt(),
+                            y = startY.toInt(),
+                            durationMs = touchDuration.coerceAtLeast(800L),
+                            delayAfterMs = realDelay
+                        )
+                        // TAP: quick press
+                        else -> ActionStepEntity(
+                            actionId = 0,
+                            stepOrder = recordedSteps.size + 1,
+                            type = "TAP",
+                            x = startX.toInt(),
+                            y = startY.toInt(),
+                            durationMs = 150L,
+                            delayAfterMs = realDelay
+                        )
+                    }
+
+                    recordedSteps.add(step)
+                    updateBubbleCircleUI()
+
+                    // Make overlay pass-through, inject gesture into app underneath, then restore capture mode
+                    injectGestureAndRestore(step, captureView, params)
+                    true
+                }
+                else -> true
+            }
         }
 
         liveRecordOverlayView = captureView
@@ -405,40 +540,48 @@ class FloatingOverlayService : Service() {
     ) {
         isInjecting = true
 
+        val captureFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        val passThroughFlags = captureFlags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+
         // Step 1: Make overlay pass-through
-        params.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+        params.flags = passThroughFlags
         safeUpdateViewLayout(captureView, params)
 
-        // Step 2: Dispatch the gesture
-        val service = AutoActionAccessibilityService.instance
-        if (service != null) {
-            service.dispatchSingleGesture(step) {
-                // Step 3: Restore overlay to capture mode after gesture completes
-                Handler(Looper.getMainLooper()).post {
+        // Step 2: Give WindowManager & InputDispatcher time to apply FLAG_NOT_TOUCHABLE (~60ms / ~3-4 frames)
+        // 60ms is completely imperceptible to human eye/finger, but safe for OS IPC hit-test updates!
+        Handler(Looper.getMainLooper()).postDelayed({
+            val service = AutoActionAccessibilityService.instance
+            if (service != null) {
+                service.dispatchSingleGesture(step) {
+                    // Step 3: Restore overlay to capture mode after gesture completes & target app responds
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        if (isLiveRecording && liveRecordOverlayView == captureView) {
+                            params.flags = captureFlags
+                            safeUpdateViewLayout(captureView, params)
+                        }
+                        isInjecting = false
+                    }, 150L)
+                }
+            } else {
+                // Accessibility not enabled — still restore overlay
+                val isEnabledInSettings = AutoActionAccessibilityService.isAccessibilityEnabled(this)
+                val msg = if (isEnabledInSettings) {
+                    "⚠️ Dịch vụ Trợ năng bị ngắt kết nối do app khởi động lại! Vui lòng TẮT rồi BẬT LẠI AutoAction Pro trong Cài đặt."
+                } else {
+                    "⚠️ Bật Dịch vụ Trợ năng để thao tác đến app phía dưới!"
+                }
+                Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
+                Handler(Looper.getMainLooper()).postDelayed({
                     if (isLiveRecording && liveRecordOverlayView == captureView) {
-                        params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        params.flags = captureFlags
                         safeUpdateViewLayout(captureView, params)
                     }
                     isInjecting = false
-                }
+                }, 150L)
             }
-        } else {
-            // Accessibility not enabled — still restore overlay
-            val isEnabledInSettings = AutoActionAccessibilityService.isAccessibilityEnabled(this)
-            val msg = if (isEnabledInSettings) {
-                "⚠️ Dịch vụ Trợ năng bị ngắt kết nối do app khởi động lại! Vui lòng TẮT rồi BẬT LẠI AutoAction Pro trong Cài đặt."
-            } else {
-                "⚠️ Bật Dịch vụ Trợ năng để thao tác đến app phía dưới!"
-            }
-            Toast.makeText(this, msg, Toast.LENGTH_LONG).show()
-            Handler(Looper.getMainLooper()).postDelayed({
-                if (isLiveRecording && liveRecordOverlayView == captureView) {
-                    params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    safeUpdateViewLayout(captureView, params)
-                }
-                isInjecting = false
-            }, 200L)
-        }
+        }, 60L)
     }
 
     private fun safeUpdateViewLayout(view: View, params: WindowManager.LayoutParams) {
@@ -692,7 +835,7 @@ class FloatingOverlayService : Service() {
     }
 
     fun addRecordedTap(x: Int, y: Int) {
-        if (!isLiveRecording) return
+        if (!isLiveRecording || isInjecting) return
         val now = System.currentTimeMillis()
         if (now - lastStepTimestampMs < 300L && recordedSteps.isNotEmpty()) {
             val last = recordedSteps.last()
@@ -724,7 +867,7 @@ class FloatingOverlayService : Service() {
     }
 
     fun addRecordedTextPaste(x: Int, y: Int, textPayload: String) {
-        if (!isLiveRecording) return
+        if (!isLiveRecording || isInjecting) return
         val now = System.currentTimeMillis()
 
         // If last step was a TAP at approximately the same location, upgrade/replace it with PASTE_TEXT
@@ -784,7 +927,7 @@ class FloatingOverlayService : Service() {
         private var instance: FloatingOverlayService? = null
 
         fun isLiveRecordingActive(): Boolean {
-            return instance?.isLiveRecording == true
+            return instance?.isLiveRecording == true && instance?.isInjecting == false
         }
 
         fun recordExternalTap(x: Int, y: Int) {

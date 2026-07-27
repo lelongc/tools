@@ -38,6 +38,13 @@ class AutoActionAccessibilityService : AccessibilityService() {
         super.onServiceConnected()
         instance = this
         _isConnected.value = true
+        try {
+            val info = serviceInfo ?: android.accessibilityservice.AccessibilityServiceInfo()
+            info.flags = info.flags or android.accessibilityservice.AccessibilityServiceInfo.FLAG_RETRIEVE_INTERACTIVE_WINDOWS or android.accessibilityservice.AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS
+            serviceInfo = info
+        } catch (e: Exception) {
+            Log.e(TAG, "Error configuring serviceInfo", e)
+        }
         Log.d(TAG, "Accessibility Service Connected!")
     }
 
@@ -95,10 +102,12 @@ class AutoActionAccessibilityService : AccessibilityService() {
 
         executionJob = serviceScope.launch {
             try {
-                // Automatically return to Home screen first so execution starts on phone launcher/apps instead of inside AutoAction Pro UI
+                // Automatically return to MAIN Home screen first (press HOME twice!)
                 if (steps.firstOrNull()?.type != "GLOBAL_HOME") {
                     performGlobalAction(GLOBAL_ACTION_HOME)
-                    delay(1000L)
+                    delay(350L)
+                    performGlobalAction(GLOBAL_ACTION_HOME)
+                    delay(800L)
                 }
 
                 steps.forEachIndexed { index, step ->
@@ -111,7 +120,7 @@ class AutoActionAccessibilityService : AccessibilityService() {
                         "SWIPE" -> performSwipe(
                             step.x, step.y,
                             step.endX, step.endY,
-                            step.durationMs.coerceAtLeast(200L)
+                            step.durationMs.coerceAtLeast(150L)
                         )
                         "PASTE_TEXT" -> performPasteText(step.x, step.y, step.textPayload)
                         "COPY_TEXT" -> performCopyText(step.x, step.y)
@@ -149,12 +158,12 @@ class AutoActionAccessibilityService : AccessibilityService() {
         serviceScope.launch {
             try {
                 when (step.type) {
-                    "TAP" -> performTap(step.x, step.y, step.durationMs.coerceAtLeast(50L))
+                    "TAP" -> performTap(step.x, step.y, 50L)
                     "LONG_PRESS" -> performTap(step.x, step.y, step.durationMs.coerceAtLeast(800L))
                     "SWIPE" -> performSwipe(
                         step.x, step.y,
                         step.endX, step.endY,
-                        step.durationMs.coerceAtLeast(150L)
+                        120L // Snappy 120ms swipe for instant real-time live recording feedback!
                     )
                 }
             } catch (e: Exception) {
@@ -172,18 +181,20 @@ class AutoActionAccessibilityService : AccessibilityService() {
     private suspend fun performTap(x: Int, y: Int, durationMs: Long) {
         val path = Path().apply {
             moveTo(x.toFloat(), y.toFloat())
+            lineTo(x.toFloat() + 1f, y.toFloat() + 1f)
         }
-        val stroke = GestureDescription.StrokeDescription(path, 0, durationMs.coerceAtLeast(50L))
+        val stroke = GestureDescription.StrokeDescription(path, 0, durationMs.coerceIn(50L, 300L))
         val gesture = GestureDescription.Builder().addStroke(stroke).build()
         dispatchGestureAwait(gesture)
     }
 
     private suspend fun performSwipe(startX: Int, startY: Int, endX: Int, endY: Int, durationMs: Long) {
+        val validDuration = durationMs.coerceIn(100L, 600L)
         val path = Path().apply {
             moveTo(startX.toFloat(), startY.toFloat())
             lineTo(endX.toFloat(), endY.toFloat())
         }
-        val stroke = GestureDescription.StrokeDescription(path, 0, durationMs.coerceAtLeast(100L))
+        val stroke = GestureDescription.StrokeDescription(path, 0, validDuration)
         val gesture = GestureDescription.Builder().addStroke(stroke).build()
         dispatchGestureAwait(gesture)
     }
