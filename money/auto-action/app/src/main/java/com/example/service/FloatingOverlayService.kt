@@ -41,6 +41,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.concurrent.LinkedBlockingQueue
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 class FloatingOverlayService : Service() {
 
@@ -56,6 +57,7 @@ class FloatingOverlayService : Service() {
 
     // Gesture injection queue to prevent race conditions
     private var isInjecting = false
+    private var lastInjectionEndTimeMs = 0L
 
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private lateinit var repository: ActionRepository
@@ -184,20 +186,7 @@ class FloatingOverlayService : Service() {
             toolMenu.addView(createOverlayButton("🗑️ Xoá", "#64748B") { clearAllRecordedSteps() })
             toolMenu.addView(createOverlayButton("📋 Copy", "#8B5CF6") {
                 if (isLiveRecording) {
-                    val now = System.currentTimeMillis()
-                    val realDelay = if (lastStepTimestampMs > 0) (now - lastStepTimestampMs).coerceAtLeast(300L) else 500L
-                    lastStepTimestampMs = now
-                    val step = ActionStepEntity(
-                        actionId = 0,
-                        stepOrder = recordedSteps.size + 1,
-                        type = "COPY_TEXT",
-                        x = 0,
-                        y = 0,
-                        durationMs = 100L,
-                        delayAfterMs = realDelay
-                    )
-                    recordedSteps.add(step)
-                    updateBubbleCircleUI()
+                    val step = recordNewStep("COPY_TEXT", durationMs = 100L)
                     AutoActionAccessibilityService.instance?.dispatchSingleGesture(step) {}
                     Toast.makeText(this, "📋 Đã thêm bước Copy Text!", Toast.LENGTH_SHORT).show()
                 } else {
@@ -206,20 +195,7 @@ class FloatingOverlayService : Service() {
             })
             toolMenu.addView(createOverlayButton("⬅️ Back", "#6366F1") {
                 if (isLiveRecording) {
-                    val now = System.currentTimeMillis()
-                    val realDelay = if (lastStepTimestampMs > 0) (now - lastStepTimestampMs).coerceAtLeast(300L) else 500L
-                    lastStepTimestampMs = now
-                    val step = ActionStepEntity(
-                        actionId = 0,
-                        stepOrder = recordedSteps.size + 1,
-                        type = "GLOBAL_BACK",
-                        x = 0,
-                        y = 0,
-                        durationMs = 100L,
-                        delayAfterMs = realDelay
-                    )
-                    recordedSteps.add(step)
-                    updateBubbleCircleUI()
+                    val step = recordNewStep("GLOBAL_BACK", durationMs = 100L)
                     AutoActionAccessibilityService.instance?.dispatchSingleGesture(step) {}
                     Toast.makeText(this, "⬅️ Đã thêm bước Nút Back!", Toast.LENGTH_SHORT).show()
                 } else {
@@ -407,7 +383,13 @@ class FloatingOverlayService : Service() {
         var startTime = 0L
 
         captureView.setOnTouchListener { _, event ->
-            if (!isLiveRecording || isInjecting) return@setOnTouchListener false
+            val now = System.currentTimeMillis()
+            if (!isLiveRecording || isInjecting || (now - lastInjectionEndTimeMs < 350L)) return@setOnTouchListener false
+
+            val viewLoc = IntArray(2)
+            captureView.getLocationOnScreen(viewLoc)
+            val exactScreenX = event.x + viewLoc[0]
+            val exactScreenY = event.y + viewLoc[1]
 
             // Check if touch is inside floating control bar area
             controlBarView?.let { bar ->
@@ -417,15 +399,15 @@ class FloatingOverlayService : Service() {
                 val barY = location[1]
                 val barW = bar.width
                 val barH = bar.height
-                if (event.rawX >= barX && event.rawX <= barX + barW &&
-                    event.rawY >= barY && event.rawY <= barY + barH
+                if (exactScreenX >= barX && exactScreenX <= barX + barW &&
+                    exactScreenY >= barY && exactScreenY <= barY + barH
                 ) {
                     if (event.action == MotionEvent.ACTION_UP) {
                         bubbleCircleView?.let { circle ->
                             val cLoc = IntArray(2)
                             circle.getLocationOnScreen(cLoc)
-                            if (event.rawX >= cLoc[0] && event.rawX <= cLoc[0] + circle.width &&
-                                event.rawY >= cLoc[1] && event.rawY <= cLoc[1] + circle.height
+                            if (exactScreenX >= cLoc[0] && exactScreenX <= cLoc[0] + circle.width &&
+                                exactScreenY >= cLoc[1] && exactScreenY <= cLoc[1] + circle.height
                             ) {
                                 toggleLiveRecording()
                             }
@@ -437,63 +419,43 @@ class FloatingOverlayService : Service() {
 
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    startX = event.rawX
-                    startY = event.rawY
+                    startX = exactScreenX
+                    startY = exactScreenY
                     startTime = System.currentTimeMillis()
                     true
                 }
                 MotionEvent.ACTION_UP -> {
-                    val endX = event.rawX
-                    val endY = event.rawY
+                    val endX = exactScreenX
+                    val endY = exactScreenY
                     val touchDuration = System.currentTimeMillis() - startTime
                     val deltaX = abs(endX - startX)
                     val deltaY = abs(endY - startY)
 
-                    val now = System.currentTimeMillis()
-                    val realDelay = if (lastStepTimestampMs > 0) {
-                        (now - lastStepTimestampMs).coerceAtLeast(100L)
-                    } else {
-                        500L
-                    }
-                    lastStepTimestampMs = now
-
                     val step = when {
                         // SWIPE: finger moved > 40px
-                        deltaX > 40 || deltaY > 40 -> ActionStepEntity(
-                            actionId = 0,
-                            stepOrder = recordedSteps.size + 1,
+                        deltaX > 40 || deltaY > 40 -> recordNewStep(
                             type = "SWIPE",
-                            x = startX.toInt(),
-                            y = startY.toInt(),
-                            endX = endX.toInt(),
-                            endY = endY.toInt(),
-                            durationMs = touchDuration.coerceAtLeast(150L),
-                            delayAfterMs = realDelay
+                            x = startX.roundToInt(),
+                            y = startY.roundToInt(),
+                            endX = endX.roundToInt(),
+                            endY = endY.roundToInt(),
+                            durationMs = touchDuration.coerceIn(150L, 800L)
                         )
                         // LONG_PRESS: held > 500ms
-                        touchDuration >= 500L -> ActionStepEntity(
-                            actionId = 0,
-                            stepOrder = recordedSteps.size + 1,
+                        touchDuration >= 500L -> recordNewStep(
                             type = "LONG_PRESS",
-                            x = startX.toInt(),
-                            y = startY.toInt(),
-                            durationMs = touchDuration.coerceAtLeast(800L),
-                            delayAfterMs = realDelay
+                            x = ((startX + endX) / 2f).roundToInt(),
+                            y = ((startY + endY) / 2f).roundToInt(),
+                            durationMs = touchDuration.coerceAtLeast(800L)
                         )
-                        // TAP: quick press
-                        else -> ActionStepEntity(
-                            actionId = 0,
-                            stepOrder = recordedSteps.size + 1,
+                        // TAP: quick press (use exact center of thumb touch & human tap duration!)
+                        else -> recordNewStep(
                             type = "TAP",
-                            x = startX.toInt(),
-                            y = startY.toInt(),
-                            durationMs = 150L,
-                            delayAfterMs = realDelay
+                            x = ((startX + endX) / 2f).roundToInt(),
+                            y = ((startY + endY) / 2f).roundToInt(),
+                            durationMs = touchDuration.coerceIn(50L, 250L)
                         )
                     }
-
-                    recordedSteps.add(step)
-                    updateBubbleCircleUI()
 
                     // Make overlay pass-through, inject gesture into app underneath, then restore capture mode
                     injectGestureAndRestore(step, captureView, params)
@@ -549,20 +511,21 @@ class FloatingOverlayService : Service() {
         params.flags = passThroughFlags
         safeUpdateViewLayout(captureView, params)
 
-        // Step 2: Give WindowManager & InputDispatcher time to apply FLAG_NOT_TOUCHABLE (~60ms / ~3-4 frames)
-        // 60ms is completely imperceptible to human eye/finger, but safe for OS IPC hit-test updates!
+        // Step 2: Give WindowManager & InputDispatcher sufficient time to apply FLAG_NOT_TOUCHABLE (~120ms / ~7 frames)
         Handler(Looper.getMainLooper()).postDelayed({
             val service = AutoActionAccessibilityService.instance
             if (service != null) {
                 service.dispatchSingleGesture(step) {
-                    // Step 3: Restore overlay to capture mode after gesture completes & target app responds
+                    // Step 3: Wait 120ms after gesture completes for target app (Zalo/TikTok) to finish responding before restoring capture overlay
                     Handler(Looper.getMainLooper()).postDelayed({
                         if (isLiveRecording && liveRecordOverlayView == captureView) {
                             params.flags = captureFlags
                             safeUpdateViewLayout(captureView, params)
                         }
+                        lastStepTimestampMs = System.currentTimeMillis()
+                        lastInjectionEndTimeMs = System.currentTimeMillis()
                         isInjecting = false
-                    }, 150L)
+                    }, 120L)
                 }
             } else {
                 // Accessibility not enabled — still restore overlay
@@ -578,10 +541,12 @@ class FloatingOverlayService : Service() {
                         params.flags = captureFlags
                         safeUpdateViewLayout(captureView, params)
                     }
+                    lastStepTimestampMs = System.currentTimeMillis()
+                    lastInjectionEndTimeMs = System.currentTimeMillis()
                     isInjecting = false
                 }, 150L)
             }
-        }, 60L)
+        }, 120L)
     }
 
     private fun safeUpdateViewLayout(view: View, params: WindowManager.LayoutParams) {
@@ -834,42 +799,85 @@ class FloatingOverlayService : Service() {
         }
     }
 
-    fun addRecordedTap(x: Int, y: Int) {
-        if (!isLiveRecording || isInjecting) return
+    private fun recordNewStep(
+        type: String,
+        x: Int = 0,
+        y: Int = 0,
+        endX: Int = 0,
+        endY: Int = 0,
+        durationMs: Long = 100L,
+        textPayload: String = ""
+    ): ActionStepEntity {
         val now = System.currentTimeMillis()
-        if (now - lastStepTimestampMs < 300L && recordedSteps.isNotEmpty()) {
-            val last = recordedSteps.last()
-            if (abs(last.x - x) < 40 && abs(last.y - y) < 40) {
-                return
+        if (recordedSteps.isNotEmpty()) {
+            val prevIndex = recordedSteps.size - 1
+            val waitTimeSinceLastStep = if (lastStepTimestampMs > 0) {
+                (now - lastStepTimestampMs).coerceIn(300L, 30000L)
+            } else {
+                1000L
             }
-        }
-
-        val realDelay = if (lastStepTimestampMs > 0) {
-            (now - lastStepTimestampMs).coerceAtLeast(300L)
-        } else {
-            500L
+            val oldPrev = recordedSteps[prevIndex]
+            recordedSteps[prevIndex] = oldPrev.copy(delayAfterMs = waitTimeSinceLastStep)
         }
         lastStepTimestampMs = now
 
         val step = ActionStepEntity(
             actionId = 0,
             stepOrder = recordedSteps.size + 1,
-            type = "TAP",
+            type = type,
             x = x,
             y = y,
-            durationMs = 150L,
-            delayAfterMs = realDelay
+            endX = endX,
+            endY = endY,
+            durationMs = durationMs,
+            delayAfterMs = 1000L, // Default delay after final step until another step updates it!
+            textPayload = textPayload
         )
         recordedSteps.add(step)
         Handler(Looper.getMainLooper()).post {
             updateBubbleCircleUI()
         }
+        return step
+    }
+
+    fun addRecordedTap(x: Int, y: Int, label: String = "") {
+        if (!isLiveRecording || isInjecting) return
+        val now = System.currentTimeMillis()
+        if (now - lastStepTimestampMs < 350L && recordedSteps.isNotEmpty()) {
+            val last = recordedSteps.last()
+            if (last.type == "TAP" && abs(last.x - x) < 50 && abs(last.y - y) < 50) {
+                return
+            }
+        }
+        recordNewStep("TAP", x = x, y = y, durationMs = 150L, textPayload = label)
+    }
+
+    fun addRecordedLongPress(x: Int, y: Int, label: String = "") {
+        if (!isLiveRecording || isInjecting) return
+        val now = System.currentTimeMillis()
+        if (now - lastStepTimestampMs < 500L && recordedSteps.isNotEmpty()) {
+            val last = recordedSteps.last()
+            if (abs(last.x - x) < 60 && abs(last.y - y) < 60) {
+                return
+            }
+        }
+        recordNewStep("LONG_PRESS", x = x, y = y, durationMs = 800L, textPayload = label)
+    }
+
+    fun addRecordedSwipe(startX: Int, startY: Int, endX: Int, endY: Int, durationMs: Long = 450L) {
+        if (!isLiveRecording || isInjecting) return
+        val now = System.currentTimeMillis()
+        if (now - lastStepTimestampMs < 400L && recordedSteps.isNotEmpty()) {
+            val last = recordedSteps.last()
+            if (last.type == "SWIPE" && abs(last.x - startX) < 100 && abs(last.y - startY) < 100) {
+                return
+            }
+        }
+        recordNewStep("SWIPE", x = startX, y = startY, endX = endX, endY = endY, durationMs = durationMs)
     }
 
     fun addRecordedTextPaste(x: Int, y: Int, textPayload: String) {
         if (!isLiveRecording || isInjecting) return
-        val now = System.currentTimeMillis()
-
         // If last step was a TAP at approximately the same location, upgrade/replace it with PASTE_TEXT
         if (recordedSteps.isNotEmpty()) {
             val last = recordedSteps.last()
@@ -877,28 +885,7 @@ class FloatingOverlayService : Service() {
                 recordedSteps.removeAt(recordedSteps.size - 1)
             }
         }
-
-        val realDelay = if (lastStepTimestampMs > 0) {
-            (now - lastStepTimestampMs).coerceAtLeast(300L)
-        } else {
-            500L
-        }
-        lastStepTimestampMs = now
-
-        val step = ActionStepEntity(
-            actionId = 0,
-            stepOrder = recordedSteps.size + 1,
-            type = "PASTE_TEXT",
-            x = x,
-            y = y,
-            durationMs = 200L,
-            delayAfterMs = realDelay,
-            textPayload = textPayload
-        )
-        recordedSteps.add(step)
-        Handler(Looper.getMainLooper()).post {
-            updateBubbleCircleUI()
-        }
+        recordNewStep("PASTE_TEXT", x = x, y = y, durationMs = 200L, textPayload = textPayload)
     }
 
     override fun onDestroy() {
@@ -930,8 +917,16 @@ class FloatingOverlayService : Service() {
             return instance?.isLiveRecording == true && instance?.isInjecting == false
         }
 
-        fun recordExternalTap(x: Int, y: Int) {
-            instance?.addRecordedTap(x, y)
+        fun recordExternalTap(x: Int, y: Int, label: String = "") {
+            instance?.addRecordedTap(x, y, label)
+        }
+
+        fun recordExternalLongPress(x: Int, y: Int, label: String = "") {
+            instance?.addRecordedLongPress(x, y, label)
+        }
+
+        fun recordExternalSwipe(startX: Int, startY: Int, endX: Int, endY: Int, durationMs: Long = 450L) {
+            instance?.addRecordedSwipe(startX, startY, endX, endY, durationMs)
         }
 
         fun recordExternalTextPaste(x: Int, y: Int, textPayload: String) {

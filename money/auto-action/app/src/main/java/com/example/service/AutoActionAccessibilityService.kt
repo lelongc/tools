@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.math.abs
 
 class AutoActionAccessibilityService : AccessibilityService() {
 
@@ -51,18 +52,20 @@ class AutoActionAccessibilityService : AccessibilityService() {
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         if (event == null) return
         if (FloatingOverlayService.isLiveRecordingActive()) {
-            val eventType = event.eventType
-            if (eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
-                val node = event.source ?: rootInActiveWindow
-                val textStr = event.text.joinToString(" ").ifBlank {
-                    node?.text?.toString() ?: ""
-                }
-                if (textStr.isNotBlank()) {
-                    val rect = android.graphics.Rect()
-                    node?.getBoundsInScreen(rect)
-                    val clickX = if (rect.centerX() > 0) rect.centerX() else 540
-                    val clickY = if (rect.centerY() > 0) rect.centerY() else 1000
-                    FloatingOverlayService.recordExternalTextPaste(clickX, clickY, textStr)
+            if (event.packageName?.toString() == packageName) return
+            when (event.eventType) {
+                AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED -> {
+                    val node = event.source ?: rootInActiveWindow
+                    val textStr = event.text.joinToString(" ").ifBlank {
+                        node?.text?.toString() ?: ""
+                    }
+                    if (textStr.isNotBlank()) {
+                        val rect = android.graphics.Rect()
+                        node?.getBoundsInScreen(rect)
+                        val clickX = if (rect.centerX() > 0) rect.centerX() else 540
+                        val clickY = if (rect.centerY() > 0) rect.centerY() else 1000
+                        FloatingOverlayService.recordExternalTextPaste(clickX, clickY, textStr)
+                    }
                 }
             }
         }
@@ -158,12 +161,12 @@ class AutoActionAccessibilityService : AccessibilityService() {
         serviceScope.launch {
             try {
                 when (step.type) {
-                    "TAP" -> performTap(step.x, step.y, 50L)
+                    "TAP" -> performTap(step.x, step.y, step.durationMs.coerceIn(80L, 250L))
                     "LONG_PRESS" -> performTap(step.x, step.y, step.durationMs.coerceAtLeast(800L))
                     "SWIPE" -> performSwipe(
                         step.x, step.y,
                         step.endX, step.endY,
-                        120L // Snappy 120ms swipe for instant real-time live recording feedback!
+                        step.durationMs.coerceIn(250L, 550L) // Real human swipe speed so apps recognize it instantly on first swipe!
                     )
                 }
             } catch (e: Exception) {

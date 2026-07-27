@@ -27,36 +27,17 @@ class ActionRepository(private val context: Context) {
 
     val currentQuota: Flow<QuotaEntity> = quotaDao.getQuotaFlow(deviceId).map { entity ->
         val currentMonth = getCurrentMonthString()
-        if (entity == null) {
-            val defaultQuota = QuotaEntity(
-                deviceId = deviceId,
-                isVip = false,
-                vipExpireDateMs = 0L,
-                monthlyRunsUsed = 0,
-                lastResetMonth = currentMonth
-            )
-            quotaDao.insertOrUpdateQuota(defaultQuota)
-            defaultQuota
-        } else {
-            // Check if month changed, reset monthly runs
-            if (entity.lastResetMonth != currentMonth) {
-                val resetQuota = entity.copy(
-                    monthlyRunsUsed = 0,
-                    lastResetMonth = currentMonth
-                )
-                quotaDao.insertOrUpdateQuota(resetQuota)
-                resetQuota
-            } else {
-                // Check if VIP expired
-                if (entity.isVip && entity.vipExpireDateMs > 0 && System.currentTimeMillis() > entity.vipExpireDateMs) {
-                    val expiredQuota = entity.copy(isVip = false)
-                    quotaDao.insertOrUpdateQuota(expiredQuota)
-                    expiredQuota
-                } else {
-                    entity
-                }
-            }
+        val vipQuota = QuotaEntity(
+            deviceId = deviceId,
+            isVip = true,
+            vipExpireDateMs = Long.MAX_VALUE,
+            monthlyRunsUsed = 0,
+            lastResetMonth = currentMonth
+        )
+        if (entity == null || !entity.isVip) {
+            quotaDao.insertOrUpdateQuota(vipQuota)
         }
+        vipQuota
     }
 
     suspend fun getActionWithSteps(actionId: Int): ActionWithSteps? {
@@ -72,16 +53,11 @@ class ActionRepository(private val context: Context) {
     }
 
     suspend fun canCreateAction(): Boolean {
-        val quota = quotaDao.getQuotaOnce(deviceId)
-        if (quota?.isVip == true) return true
-        val count = actionDao.getActionCount()
-        return count < 1
+        return true
     }
 
     suspend fun canExecuteAction(): Boolean {
-        val quota = quotaDao.getQuotaOnce(deviceId) ?: return true
-        if (quota.isVip) return true
-        return quota.monthlyRunsUsed < 3
+        return true
     }
 
     suspend fun recordActionRun(actionId: Int) {
@@ -114,8 +90,8 @@ class ActionRepository(private val context: Context) {
     suspend fun resetVipToFree(): QuotaEntity {
         val currentQuota = quotaDao.getQuotaOnce(deviceId) ?: QuotaEntity(deviceId = deviceId)
         val freeQuota = currentQuota.copy(
-            isVip = false,
-            vipExpireDateMs = 0L,
+            isVip = true,
+            vipExpireDateMs = Long.MAX_VALUE,
             monthlyRunsUsed = 0
         )
         quotaDao.insertOrUpdateQuota(freeQuota)

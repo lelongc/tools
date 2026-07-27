@@ -50,8 +50,8 @@ data class ActionWithSteps(
 @Entity(tableName = "quotas")
 data class QuotaEntity(
     @PrimaryKey val deviceId: String,
-    val isVip: Boolean = false,
-    val vipExpireDateMs: Long = 0L,
+    val isVip: Boolean = true,
+    val vipExpireDateMs: Long = Long.MAX_VALUE,
     val monthlyRunsUsed: Int = 0,
     val lastResetMonth: String = "" // "2026-07"
 )
