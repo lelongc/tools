@@ -22,6 +22,10 @@ run/max_fps=60
 
 [autoload]
 
+McpInteractionServer="*res://mcp_interaction_server.gd"
+
+
+
 GameManager="*res://scripts/game_manager.gd"
 SoundManager="*res://scripts/sound_manager.gd"
 
