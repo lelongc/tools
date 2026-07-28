@@ -22,7 +22,6 @@ run/max_fps=60
 
 [autoload]
 
-McpInteractionServer="*res://mcp_interaction_server.gd"
 
 
 
