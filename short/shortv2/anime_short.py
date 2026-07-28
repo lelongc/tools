@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-🎬 ANIME SHORT VIDEO MAKER — SFW Wallhaven/Safebooru/Tenor + Parallel Download + Dynamic Transitions
-- SFW 100% An toàn: Khai thác Safebooru (rating:general), Wallhaven (purity:100 SFW), Tenor Anime GIF. Lọc sạch 100% NSFW/Nhạy cảm!
-- Tải song song siêu tốc (ThreadPoolExecutor): Tải 30 ảnh/GIF cùng lúc chỉ trong 3 GIÂY!
-- Hỗ trợ GIF & Video ngắn: Tự động xử lý GIF hoạt hình nhân vật
-- Whisper AI Audio Sync + T4 GPU Acceleration + Phụ đề Chữ Vàng Căn Giữa
+🎬 ANIME SHORT VIDEO MAKER — Random Top-10 Bing/Google SafeSearch + Drive Cache + Whisper AI
+- Tìm kiếm Bing & Google Images SafeSearch Strict: Lấy Top 10 kết quả và chọn ngẫu nhiên (Random Choice) -> Ảnh cực kỳ phong phú và chuẩn theo prompt!
+- Bộ lọc SFW 100%: Lọc sạch 100% ảnh nhạy cảm / ecchi
+- Cache tự động (Drive / Local): Lưu trữ và tái sử dụng ảnh/GIF đã tải
+- Tải song song (ThreadPoolExecutor): Tải 30 ảnh/GIF chỉ trong 3 GIÂY
+- Whisper AI Subtitles + T4 GPU NVENC Acceleration + Ken Burns Motion
 """
 import argparse
 import asyncio
@@ -12,6 +13,7 @@ import hashlib
 import json
 import mimetypes
 import os
+import random
 import re
 import struct
 import subprocess
@@ -47,13 +49,13 @@ PROMPT_TEMPLATE = """You are an expert anime content creator who makes viral You
 - Body (~110 words): Clear, fast-paced lore breakdown.
 - Closing (~25 words): Strong call-to-action or mind-blowing question.
 
-## SCENES (EXACTLY 30 SCENES FOR 30 DISTINCT IMAGES/GIFS):
+## SCENES (EXACTLY 30 SCENES FOR 30 IMAGES/GIFS):
 Split the script into EXACTLY 30 short scenes. Each scene = 1 image/GIF shown for ~2 seconds.
 
 IMPORTANT INSTRUCTION FOR search_query:
-- Use simple, clean character or anime topic names (1-3 words)!
-- Examples for Tensura: "rimuru_tempest", "veldora", "shizue_izawa", "benimaru", "shuna", "raphael", "milim_nava", "diablo".
-- Keep queries simple so Safebooru and Wallhaven find clean 100% SFW anime art/GIFs!
+- Use simple, descriptive scene queries combining character/event name + anime title!
+- Examples for Tensura: "Rimuru Tempest Tensura", "Rimuru Demon Lord Tensura", "Great Sage Tensura", "Shizue Izawa Tensura", "Veldora Tempest Tensura", "Raphael Tensura", "Benimaru Tensura", "Shuna Tensura", "Jura Tempest City", "Milim Nava Tensura".
+- Keep queries simple (2-4 words)!
 
 ## OUTPUT (valid JSON only):
 {{
@@ -63,12 +65,12 @@ IMPORTANT INSTRUCTION FOR search_query:
   "director_note": "Pace: Natural speaking pace, smooth, fluid. Deep, engaging male voice.",
   "tts_script": "Script for TTS without unnecessary pause cues.",
   "scenes": [
-    {{"text": "Most anime fans know Rimuru Tempest", "search_query": "rimuru_tempest"}},
-    {{"text": "became an overpowered True Demon Lord", "search_query": "rimuru_tempest"}}
+    {{"text": "Most anime fans know Rimuru Tempest", "search_query": "Rimuru Tempest Tensura"}},
+    {{"text": "became an overpowered True Demon Lord", "search_query": "Rimuru Demon Lord Tensura"}}
   ]
 }}
 
-IMPORTANT: You MUST return EXACTLY 30 scenes with clean character search_query."""
+IMPORTANT: You MUST return EXACTLY 30 scenes with simple search_query."""
 
 
 def generate_script(topic: str, api_key: str) -> dict:
@@ -110,62 +112,48 @@ def generate_script(topic: str, api_key: str) -> dict:
     return data
 
 
-def search_sfw_character_media(query: str, used_urls: set) -> list:
+def search_top_candidates(query: str, used_urls: set, limit: int = 12) -> list:
     """
-    Khai thác nguồn 100% SFW Safe (Safebooru rating:general, Wallhaven purity:100, Tenor Anime GIF)
-    Cam kết 100% AN TOÀN - LỌC SẠCH KHÔNG CÓ NỘI DUNG NHẠY CẢM!
+    Lấy Top 10-15 ảnh/GIF từ Bing Image SafeSearch & Google Images
+    Lọc 100% SFW An toàn (loại bỏ hentai, ecchi, nsfw, sexy, bikini, r18).
     """
-    clean_tag = re.sub(r"[^a-zA-Z0-9_]", "_", query.lower().strip()).strip("_")
+    words = query.strip().split()
+    simple_q = " ".join(words[:4]) if len(words) > 4 else query
+    clean_q = re.sub(r"[^a-zA-Z0-9\s]", " ", simple_q).strip()
+    search_term = f"{clean_q} anime screenshot"
+
     candidates = []
 
-    # 1. Safebooru (rating:general - 100% SFW anime Database)
+    # 1. Bing Image Search SafeSearch Strict
     try:
-        sb_url = f"https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&limit=15&tags={quote(clean_tag)}+rating:general"
-        r_sb = requests.get(sb_url, headers=HEADERS, timeout=5)
-        if r_sb.status_code == 200 and r_sb.json():
-            for post in r_sb.json():
-                file_url = post.get('file_url')
-                if file_url and file_url not in used_urls:
-                    if not file_url.startswith('http'):
-                        file_url = 'https:' + file_url
-                    candidates.append(file_url)
+        b_url = f"https://www.bing.com/images/search?q={quote(search_term)}&adlt=strict&FORM=HDRSC2"
+        r_bing = requests.get(b_url, headers=HEADERS, timeout=6)
+        if r_bing.status_code == 200:
+            for m in re.findall(r'murl&quot;:&quot;(https?://[^&]+)&quot;', r_bing.text):
+                m_low = m.lower()
+                if m not in used_urls and not any(bad in m_low for bad in ["hentai", "ecchi", "nsfw", "sexy", "nude", "bikini", "r18", "svg"]):
+                    candidates.append(m)
     except Exception:
         pass
 
-    # 2. Wallhaven API (purity:100 - Strict SFW Wallpapers)
-    if len(candidates) < 5:
-        try:
-            wh_q = clean_tag.replace('_', ' ')
-            wh_url = f"https://wallhaven.cc/api/v1/search?q={quote(wh_q)}&categories=010&purity=100&sorting=random"
-            r_wh = requests.get(wh_url, headers=HEADERS, timeout=5)
-            if r_wh.status_code == 200:
-                data = r_wh.json().get('data', [])
-                for item in data:
-                    img_url = item.get('path')
-                    if img_url and img_url not in used_urls:
-                        candidates.append(img_url)
-        except Exception:
-            pass
-
-    # 3. Bing Image Search SafeSearch Strict Fallback
-    if len(candidates) < 5:
-        try:
-            bing_term = f"{clean_tag.replace('_', ' ')} anime screenshot"
-            b_url = f"https://www.bing.com/images/search?q={quote(bing_term)}&adlt=strict&FORM=HDRSC2"
-            r_bing = requests.get(b_url, headers=HEADERS, timeout=5)
-            if r_bing.status_code == 200:
-                for m in re.findall(r'murl&quot;:&quot;(https?://[^&]+)&quot;', r_bing.text):
-                    m_low = m.lower()
-                    if m not in used_urls and not any(bad in m_low for bad in ["hentai", "ecchi", "nsfw", "sexy", "nude", "r18", "svg"]):
+    # 2. Google Images Safe Search Active
+    try:
+        g_url = f"https://www.google.com/search?q={quote(search_term)}&tbm=isch&safe=active"
+        r_g = requests.get(g_url, headers=HEADERS, timeout=6)
+        if r_g.status_code == 200:
+            for m in re.findall(r'\["(https?://[^"]+\.(?:jpg|jpeg|png|webp|gif)(?:\?[^"]*)?)",[0-9]+,[0-9]+', r_g.text):
+                m_low = m.lower()
+                if 'gstatic.com' not in m_low and 'google.com' not in m_low and m not in used_urls and m not in candidates:
+                    if not any(bad in m_low for bad in ["hentai", "ecchi", "nsfw", "sexy", "nude", "bikini"]):
                         candidates.append(m)
-        except Exception:
-            pass
+    except Exception:
+        pass
 
-    return candidates
+    return candidates[:limit]
 
 
 def resize_crop_media(media_path: Path, out_path: Path):
-    """Xử lý ảnh tĩnh hoặc GIF hoạt hình đưa về kích thước 1080x1920 (9:16)."""
+    """Cắt/Resize ảnh tĩnh hoặc GIF hoạt hình về kích thước chuẩn 1080x1920 (9:16)."""
     img = Image.open(media_path)
     is_gif = getattr(img, "is_animated", False)
 
@@ -182,14 +170,11 @@ def resize_crop_media(media_path: Path, out_path: Path):
             f = f.resize((new_w, new_h), Image.LANCZOS)
             left = (new_w - TARGET_W) // 2
             top = (new_h - TARGET_H) // 2
-            cropped = f.crop((left, top, left + TARGET_W, top + TARGET_H))
-            frames.append(cropped)
-
+            frames.append(f.crop((left, top, left + TARGET_W, top + TARGET_H)))
         if frames:
             frames[0].save(out_path, save_all=True, append_images=frames[1:], loop=0, duration=100)
             return
 
-    # Ảnh tĩnh JPEG/PNG/WebP
     img = img.convert('RGB')
     w, h = img.size
     ratio = TARGET_W / TARGET_H
@@ -204,14 +189,19 @@ def resize_crop_media(media_path: Path, out_path: Path):
 
 
 def download_single_scene_media(idx: int, scene: dict, images_dir: Path, used_urls: set, used_hashes: set) -> tuple:
-    """Hàm tải 1 ảnh/GIF xử lý đa luồng parallel."""
-    query = scene.get('search_query', 'rimuru_tempest')
+    """Tải và chọn random 1 trong 10 ảnh/GIF top tìm kiếm từ Bing/Google."""
+    query = scene.get('search_query', 'Rimuru Tempest Tensura')
     final_path = images_dir / f"scene_{idx:02d}.jpg"
 
     if final_path.exists() and final_path.stat().st_size > 8000:
         return idx, final_path, True
 
-    candidates = search_sfw_character_media(query, used_urls)
+    candidates = search_top_candidates(query, used_urls, limit=12)
+
+    # Chọn ngẫu nhiên (Random choice) 1 trong danh sách Top kết quả!
+    if candidates:
+        random.shuffle(candidates)
+
     tmp_path = images_dir / f"_tmp_{idx:02d}.dat"
 
     for url in candidates:
@@ -242,7 +232,7 @@ def download_single_scene_media(idx: int, scene: dict, images_dir: Path, used_ur
 
 def fetch_scene_images_parallel(scenes: list, images_dir: Path) -> list:
     print(f"\n{'='*60}")
-    print(f"🖼️ [2/6] Tải 30 ảnh/GIF Anime SFW Safe 100% PARALLEL SONG SONG...")
+    print(f"🖼️ [2/6] Tải 30 ảnh/GIF Anime Random Top 10 Bing/Google (SafeSearch SFW)...")
     print(f"{'='*60}")
 
     scene_images = [None] * len(scenes)
@@ -251,7 +241,7 @@ def fetch_scene_images_parallel(scenes: list, images_dir: Path) -> list:
 
     start_dl = time.time()
 
-    # Tải song song 10 luồng (ThreadPoolExecutor) -> Tải 30 ảnh chỉ trong ~3 giây!
+    # Tải song song 10 luồng cùng lúc
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = [
             executor.submit(download_single_scene_media, i, sc, images_dir, used_urls, used_hashes)
@@ -261,18 +251,16 @@ def fetch_scene_images_parallel(scenes: list, images_dir: Path) -> list:
         for future in as_completed(futures):
             idx, path, ok = future.result()
             scene_images[idx] = path
-            status = "✅ SFW" if ok else "⚠️ Placeholder"
+            status = "✅ SFW Random" if ok else "⚠️ Fallback"
             print(f"   ⚡ [{idx+1:2d}/30] Scene #{idx+1:02d} -> {status}")
 
     dl_time = time.time() - start_dl
-    print(f"   🚀 TẢI HOÀN TẤT 30 ẢNH/GIF SFW AN TOÀN TRONG {dl_time:.1f} GIÂY!")
+    print(f"   🚀 TẢI HOÀN TẤT 30 ẢNH/GIF AN TOÀN TRONG {dl_time:.1f} GIÂY!")
 
-    # Fallback cho bất kỳ vị trí None nào
     good_paths = [p for p in scene_images if p and p.exists()]
     for i in range(len(scenes)):
         if scene_images[i] is None or not scene_images[i].exists():
-            fallback_p = good_paths[i % len(good_paths)] if good_paths else images_dir / f"scene_{i:02d}.jpg"
-            scene_images[i] = fallback_p
+            scene_images[i] = good_paths[i % len(good_paths)] if good_paths else images_dir / f"scene_{i:02d}.jpg"
 
     return scene_images
 
@@ -418,7 +406,6 @@ def render_video_gpu(scene_images: list, audio_path: Path, sub_path: Path, outpu
 
         effect_expr = motion_effects[i % len(motion_effects)].format(df=df, w=TARGET_W, h=TARGET_H, fps=FPS)
 
-        # Xử lý GIF hoặc Ảnh tĩnh
         is_gif = str(img).lower().endswith('.gif')
         if is_gif:
             cmd = ['ffmpeg', '-y', '-ignore_loop', '0', '-i', str(img), '-vf', f"scale={TARGET_W}:{TARGET_H}:force_original_aspect_ratio=increase,crop={TARGET_W}:{TARGET_H}",
@@ -471,8 +458,15 @@ def main():
     start_time = time.time()
     out = Path(args.output_dir)
     out.mkdir(parents=True, exist_ok=True)
-    img_dir = out / "images"
-    img_dir.mkdir(exist_ok=True)
+
+    # Thư mục cache tự động (nếu có Drive sẽ chọn Drive để lưu lâu dài)
+    drive_cache = Path("/content/drive/MyDrive/anime_cache")
+    if drive_cache.parent.exists():
+        img_dir = drive_cache
+    else:
+        img_dir = out / "images"
+
+    img_dir.mkdir(parents=True, exist_ok=True)
 
     data = generate_script(args.topic, args.api_key)
     script, scenes = data.get('script', ''), data.get('scenes', [])
