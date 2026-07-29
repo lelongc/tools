@@ -1,4 +1,6 @@
-# @title 🎬 3. ANIME SHORT STUDIO (FORM CONTROL)
+import json
+
+form_code = """# @title 🎬 3. ANIME SHORT STUDIO (FORM CONTROL)
 # @markdown ---
 # @markdown ### 🔑 1. API & Kịch Bản Video Short
 Gemini_API_Key = "" #@param {type:"string"}
@@ -41,10 +43,10 @@ if Gemini_API_Key.strip():
         SETTINGS_FILE.write_text(json.dumps(curr, indent=4, ensure_ascii=False), encoding="utf-8")
     except Exception: pass
 
-print(f"\n{'='*60}")
+print(f"\\n{'='*60}")
 print(f"🎬 HÀNH ĐỘNG: {Action}")
 print(f"📌 Anime: {Anime_Name} | Nguồn ảnh: {Image_Source}")
-print(f"{'='*60}\n")
+print(f"{'='*60}\\n")
 
 if Action == "Chỉ Cào Ảnh Cho Anime Library":
     run_fetch(Anime_Name, target_per_char=Target_Images_Per_Char, source=Image_Source)
@@ -58,4 +60,29 @@ else:
             api_key=Gemini_API_Key.strip(),
             voice=Voice,
             custom_script=Custom_Script.strip()
-        )
+        )"""
+
+with open('c2.py', 'w', encoding='utf-8') as f:
+    f.write(form_code)
+
+with open('c0.py', encoding='utf-8') as f: c0 = f.read()
+with open('c1.py', encoding='utf-8') as f: c1 = f.read()
+with open('c2.py', encoding='utf-8') as f: c2 = f.read()
+
+nb = {
+  'cells': [
+    {'cell_type': 'code', 'metadata': {'id': 'cell_001'}, 'outputs': [], 'execution_count': None, 'source': [l+'\n' for l in c0.split('\n')]},
+    {'cell_type': 'code', 'metadata': {'id': 'cell_002'}, 'outputs': [], 'execution_count': None, 'source': [l+'\n' for l in c1.split('\n')]},
+    {'cell_type': 'code', 'metadata': {'id': 'cell_003'}, 'outputs': [], 'execution_count': None, 'source': [l+'\n' for l in c2.split('\n')]}
+  ],
+  'metadata': {'colab': {'provenance': []}, 'gpuClass': 'standard', 'language_info': {'name': 'python'}, 'accelerator': 'GPU'},
+  'nbformat': 4, 'nbformat_minor': 0
+}
+
+for cell in nb['cells']:
+    if cell['source'] and cell['source'][-1] == '\n': cell['source'].pop()
+
+with open('anime_short.ipynb', 'w', encoding='utf-8') as f:
+    json.dump(nb, f, indent=2, ensure_ascii=False)
+
+print('Updated anime_short.ipynb with Form UI successfully!')
