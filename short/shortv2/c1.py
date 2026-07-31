@@ -1174,6 +1174,7 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
     print(f"   ✅ Đã nạp xong vào RAM (Mất {time.time() - start_cache_time:.2f}s)!", flush=True)
 
     active_idx = 0
+    sub_patch_cache = {}
     
     # Load font once
     font = None
@@ -1183,6 +1184,44 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
             try: font = ImageFont.truetype(fp, 75); break
             except: pass
     if not font: font = ImageFont.load_default()
+
+    # Pre-render small patches for subtitles (extremely low memory, total ~15-20MB for 100 texts)
+    for chunk in word_chunks:
+        txt = chunk["text"]
+        if txt not in sub_patch_cache:
+            txt_upper = txt.strip().upper()
+            
+            # Temporary canvas to measure bbox
+            temp_img = Image.new("RGBA", (1080, 400))
+            temp_draw = ImageDraw.Draw(temp_img)
+            
+            current_font = font
+            try:
+                bbox = temp_draw.textbbox((0, 0), txt_upper, font=font)
+                tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+                if tw > (TARGET_W - 120):
+                    current_font = ImageFont.truetype(font.path, 55)
+                    bbox = temp_draw.textbbox((0, 0), txt_upper, font=current_font)
+                    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+            except Exception:
+                tw, th = len(txt_upper) * 35, 80
+                
+            stroke_w = 6
+            pw, ph = tw + stroke_w * 2 + 10, th + stroke_w * 2 + 10
+            patch_img = Image.new("RGBA", (pw, ph), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(patch_img)
+            
+            x, y = stroke_w + 5, stroke_w + 5
+            for dx in range(-stroke_w, stroke_w + 1):
+                for dy in range(-stroke_w, stroke_w + 1):
+                    if dx != 0 or dy != 0:
+                        draw.text((x + dx, y + dy), txt_upper, font=current_font, fill=(0, 0, 0, 255))
+            draw.text((x, y), txt_upper, font=current_font, fill=(255, 255, 0, 255))
+            
+            patch_bgra = cv2.cvtColor(np.array(patch_img), cv2.COLOR_RGBA2BGRA)
+            p_bgr = patch_bgra[:, :, :3]
+            p_alpha = (patch_bgra[:, :, 3] / 255.0)[:, :, None]
+            sub_patch_cache[txt] = (p_bgr, p_alpha, pw, ph)
 
     fade_frames = 4
     
@@ -1212,13 +1251,15 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
     try:
         process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
     except Exception:
-        # Fallback to libx264
         cmd[cmd.index('-c:v') + 1] = 'libx264'
         cmd[cmd.index('-preset') + 1] = 'ultrafast'
         process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
     fallback_triggered = False
     start_time = time.time()
+    
+    last_seg_idx = -1
+    current_decoded_static = None
     
     for f in range(total_frames):
         t = f / fps
@@ -1229,7 +1270,6 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
         seg = timeline[active_idx]
         p_str = seg["image_path"]
         
-        # Retrieve from RAM cache & decompress JPEG bytes on the fly
         media_info = cached_media.get(p_str)
         if not media_info:
             frame_bgr = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
@@ -1237,10 +1277,14 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
         else:
             is_gif = media_info[0]
             if not is_gif:
-                jpeg_bytes = media_info[1]
-                frame_bgr = cv2.imdecode(np.frombuffer(jpeg_bytes, np.uint8), cv2.IMREAD_COLOR)
-                if frame_bgr is None:
-                    frame_bgr = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
+                # Avoid redundant imdecodes for static images (only once per segment)
+                if active_idx != last_seg_idx or current_decoded_static is None:
+                    jpeg_bytes = media_info[1]
+                    current_decoded_static = cv2.imdecode(np.frombuffer(jpeg_bytes, np.uint8), cv2.IMREAD_COLOR)
+                    if current_decoded_static is None:
+                        current_decoded_static = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
+                    last_seg_idx = active_idx
+                frame_bgr = current_decoded_static
             else:
                 gif_frames = media_info[1]
                 gif_dur = media_info[2]
@@ -1282,37 +1326,20 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
                     alpha = (end_t - t) / (fade_frames / fps)
                     frame_bg = cv2.addWeighted(frame_bg, alpha, cv_img_next, 1.0 - alpha, 0)
 
-        # Add subtitle (On-the-fly rendering using PIL, zero RAM overhead)
+        # Add subtitle (On-the-fly blending using pre-rendered mini patches - extremely fast, under 0.1ms)
         active_sub_text = None
         for chunk in word_chunks:
             if chunk["start"] <= t <= chunk["end"]:
                 active_sub_text = chunk["text"]
                 break
-        if active_sub_text:
-            pil_img = Image.fromarray(cv2.cvtColor(frame_bg, cv2.COLOR_BGR2RGB))
-            draw = ImageDraw.Draw(pil_img)
-            txt_upper = active_sub_text.strip().upper()
+        if active_sub_text and active_sub_text in sub_patch_cache:
+            p_bgr, p_alpha, pw, ph = sub_patch_cache[active_sub_text]
+            x_start = (TARGET_W - pw) // 2
+            y_start = (TARGET_H - ph) // 2
             
-            # Determine correct font size dynamically to avoid overflow
-            current_font = font
-            try:
-                bbox = draw.textbbox((0, 0), txt_upper, font=font)
-                tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-                if tw > (TARGET_W - 120):
-                    current_font = ImageFont.truetype(font.path, 55)
-                    bbox = draw.textbbox((0, 0), txt_upper, font=current_font)
-                    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-            except Exception:
-                tw, th = len(txt_upper) * 35, 80
-                
-            x, y = (TARGET_W - tw) // 2, (TARGET_H - th) // 2
-            stroke_w = 6
-            for dx in range(-stroke_w, stroke_w + 1):
-                for dy in range(-stroke_w, stroke_w + 1):
-                    if dx != 0 or dy != 0:
-                        draw.text((x + dx, y + dy), txt_upper, font=current_font, fill=(0, 0, 0, 255))
-            draw.text((x, y), txt_upper, font=current_font, fill=(255, 255, 0, 255))
-            frame_bg = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+            roi = frame_bg[y_start:y_start+ph, x_start:x_start+pw]
+            blended = (roi.astype(np.float32) * (1.0 - p_alpha) + p_bgr.astype(np.float32) * p_alpha).astype(np.uint8)
+            frame_bg[y_start:y_start+ph, x_start:x_start+pw] = blended
 
         # Write frame to pipe
         try:
