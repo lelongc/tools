@@ -891,65 +891,67 @@ def analyze_character_timeline_gemini(script_text, available_chars, api_key):
     api_key = get_effective_gemini_key(api_key)
     print("\n🧠 [AI DETECTOR] Đang phân tích kịch bản và quyết định phân bổ nhân vật cho từng phân cảnh...", flush=True)
     
+    # Deterministically split script into segments of ~8 words locally
+    words = script_text.strip().split()
+    segments = []
+    chunk_size = 8
+    for i in range(0, len(words), chunk_size):
+        chunk = words[i : i + chunk_size]
+        segments.append(" ".join(chunk))
+        
     models = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-flash-latest"]
     chars_str = ", ".join(available_chars)
+    main_subject_char = available_chars[0] if available_chars else "Rimuru_Tempest"
     
     prompt = f"""You are an Anime Video Editor. You have a list of available character image folders: [{chars_str}].
-Here is the English script of the video:
-"{script_text}"
+Here are the sequential script segments of the video:
+{json.dumps(segments, indent=2)}
 
 TASK:
-1. Divide the script into sequential segments (approx. 6 to 10 words each).
-2. For each segment, select the most relevant character folder from the available list: [{chars_str}] that should be shown on screen.
-   - If a character is mentioned or active, select their exact folder name.
-   - If no specific character is active, select the main topic character.
-   - Ensure the folder names match EXACTLY the names in the list (e.g. if the list has 'Rimuru_Tempest', use 'Rimuru_Tempest', do not use 'Rimuru').
+For each segment in the list, select the most relevant character folder from the available list: [{chars_str}] that should be shown on screen.
+- If a character is mentioned or active in a segment, select their exact folder name.
+- If no specific character is active, select the main topic character.
+- Ensure the folder names match EXACTLY the names in the list.
 
-Return STRICTLY a JSON array of objects:
+Return STRICTLY a JSON array of strings, where each string is the folder name for the corresponding segment:
 [
-  {{
-    "segment_index": 1,
-    "text_snippet": "exact words of segment 1...",
-    "character_folder": "EXACT_FOLDER_NAME"
-  }}
+  "Folder_For_Segment_1",
+  "Folder_For_Segment_2",
+  ...
 ]"""
 
     body = {'contents': [{'parts': [{'text': prompt}]}], 'generationConfig': {'responseMimeType': 'application/json'}}
+    assigned_folders = []
     for model in models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         try:
             r = requests.post(url, json=body, timeout=20)
             if r.status_code == 200:
                 raw_txt = r.json()['candidates'][0]['content']['parts'][0]['text']
-                scenes = json.loads(clean_json_text(raw_txt))
-                if isinstance(scenes, list) and len(scenes) > 0:
-                    print(f"   ✅ [AI DETECTOR '{model}'] Đã lập kịch bản phân cảnh nhân vật thành công!", flush=True)
-                    for sc in scenes:
-                        print(f"     🎬 Cảnh {sc.get('segment_index')}: [{sc.get('character_folder')}] -> \"{sc.get('text_snippet')}\"", flush=True)
-                    return scenes
+                assigned_folders = json.loads(clean_json_text(raw_txt))
+                if isinstance(assigned_folders, list) and len(assigned_folders) > 0:
+                    print(f"   ✅ [AI DETECTOR '{model}'] Đã phân bổ nhân vật thành công!", flush=True)
+                    break
         except Exception as e:
             print(f"⚠️ Lỗi AI Detector {model}: {e}", flush=True)
             
-    # Fallback sequential matching
-    print("⚠️ Phân tích AI thất bại, tự động phân đoạn tuần tự...", flush=True)
-    words = script_text.split()
+    # Normalize list length to match segments
+    while len(assigned_folders) < len(segments):
+        assigned_folders.append(main_subject_char)
+    assigned_folders = assigned_folders[:len(segments)]
+    
+    # Reconstruct scenes structure expected by caller
     scenes = []
-    chunk_size = max(5, len(words) // 15)
-    for i in range(15):
-        st_idx = i * chunk_size
-        et_idx = (i + 1) * chunk_size if i < 14 else len(words)
-        snip = " ".join(words[st_idx:et_idx])
-        if not snip: continue
-        chosen = available_chars[0] if available_chars else ""
-        for c in available_chars:
-            if c.lower().replace('_', ' ') in snip.lower():
-                chosen = c
-                break
+    for idx, (seg, folder) in enumerate(zip(segments, assigned_folders)):
+        # Validate that the folder returned is valid, otherwise fallback
+        final_folder = folder if folder in available_chars else main_subject_char
         scenes.append({
-            "segment_index": i + 1,
-            "text_snippet": snip,
-            "character_folder": chosen
+            "segment_index": idx + 1,
+            "text_snippet": seg,
+            "character_folder": final_folder
         })
+        print(f"     🎬 Cảnh {idx+1}: [{final_folder}] -> \"{seg}\"", flush=True)
+        
     return scenes
 
 def build_fixed_two_second_timeline(scenes, anime_name, topic, total_duration):
