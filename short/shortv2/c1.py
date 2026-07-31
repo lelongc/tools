@@ -1087,7 +1087,7 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
     fps = 30
     total_frames = int(total_duration * fps)
 
-    # Pre-load and cache all unique images/GIFs used in the timeline to RAM
+    # Pre-load and cache all unique images/GIFs used in the timeline to RAM (Optimized with OpenCV + Numpy slicing)
     cached_media = {}
     unique_paths = list(set(seg["image_path"] for seg in timeline if seg.get("image_path")))
     
@@ -1099,21 +1099,35 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
         is_gif = p.name.lower().endswith(".gif")
         if not is_gif:
             try:
-                with Image.open(p) as pil_img:
-                    pil_img = pil_img.convert("RGB")
-                    w, h = pil_img.size
-                    ratio = TARGET_W / TARGET_H
-                    if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
-                    else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
-                    pil_img = pil_img.resize((nw, nh), Image.LANCZOS)
-                    l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
-                    pil_img = pil_img.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
-                    cv_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
-                    cached_media[p_str] = (False, cv_img)
+                cv_img = cv2.imread(p_str)
+                if cv_img is None:
+                    raise Exception("cv2.imread trả về None")
+                h, w, _ = cv_img.shape
+                ratio = TARGET_W / TARGET_H
+                if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
+                else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
+                cv_img = cv2.resize(cv_img, (nw, nh), interpolation=cv2.INTER_LINEAR)
+                l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
+                cv_img = cv_img[t_crop:t_crop+TARGET_H, l:l+TARGET_W]
+                cached_media[p_str] = (False, cv_img)
             except Exception as e:
-                print(f"⚠️ Không thể nạp ảnh {p.name}: {e}", flush=True)
-                black = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
-                cached_media[p_str] = (False, black)
+                print(f"⚠️ Không thể nạp ảnh {p.name} qua OpenCV (dự phòng PIL): {e}", flush=True)
+                try:
+                    with Image.open(p) as pil_img:
+                        pil_img = pil_img.convert("RGB")
+                        w, h = pil_img.size
+                        ratio = TARGET_W / TARGET_H
+                        if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
+                        else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
+                        pil_img = pil_img.resize((nw, nh), Image.BILINEAR)
+                        l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
+                        pil_img = pil_img.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
+                        cv_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+                        cached_media[p_str] = (False, cv_img)
+                except Exception as e2:
+                    print(f"⚠️ Lỗi hoàn toàn khi nạp ảnh {p.name}: {e2}", flush=True)
+                    black = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
+                    cached_media[p_str] = (False, black)
         else:
             try:
                 gif_frames = []
@@ -1124,18 +1138,17 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
                     
                     for f_idx in range(n_frames):
                         img.seek(f_idx)
-                        frame_pil = img.convert("RGB")
-                        w, h = frame_pil.size
+                        frame_rgb = np.array(img.convert("RGB"))
+                        frame_bgr = cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2BGR)
+                        h, w, _ = frame_bgr.shape
                         ratio = TARGET_W / TARGET_H
                         if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
                         else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
                         
-                        frame_pil = frame_pil.resize((nw, nh), Image.LANCZOS)
+                        frame_resized = cv2.resize(frame_bgr, (nw, nh), interpolation=cv2.INTER_LINEAR)
                         l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
-                        frame_pil = frame_pil.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
-                        
-                        cv_frame = cv2.cvtColor(np.array(frame_pil), cv2.COLOR_RGB2BGR)
-                        gif_frames.append(cv_frame)
+                        frame_cropped = frame_resized[t_crop:t_crop+TARGET_H, l:l+TARGET_W]
+                        gif_frames.append(frame_cropped)
                 cached_media[p_str] = (True, gif_frames, gif_dur)
             except Exception as e:
                 print(f"⚠️ Không thể nạp GIF {p.name}: {e}", flush=True)
@@ -1181,7 +1194,10 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
             draw.text((x, y), txt_upper, font=font, fill=(255, 255, 0, 255))
 
             bgra_np = cv2.cvtColor(np.array(pil_ov), cv2.COLOR_RGBA2BGRA)
-            sub_img_cache[txt] = (bgra_np[:, :, :3], bgra_np[:, :, 3] / 255.0)
+            sub_bgr = bgra_np[:, :, :3].astype(np.float32)
+            sub_alpha = (bgra_np[:, :, 3] / 255.0)[:, :, None].astype(np.float32)
+            sub_inv_alpha = 1.0 - sub_alpha
+            sub_img_cache[txt] = (sub_bgr, sub_alpha, sub_inv_alpha)
 
     fade_frames = 4
     
@@ -1209,12 +1225,12 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
     
     print(f"🎬 Khởi tạo FFmpeg pipe (Sử dụng encoder: {v_codec}, preset: {preset})...", flush=True)
     try:
-        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
     except Exception:
         # Fallback to libx264
         cmd[cmd.index('-c:v') + 1] = 'libx264'
         cmd[cmd.index('-preset') + 1] = 'ultrafast'
-        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
 
     fallback_triggered = False
     start_time = time.time()
@@ -1279,9 +1295,8 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
                 active_sub_text = chunk["text"]
                 break
         if active_sub_text and active_sub_text in sub_img_cache:
-            txt_bgr, alpha_mask = sub_img_cache[active_sub_text]
-            mask_3d = alpha_mask[:, :, None]
-            frame_bg = (frame_bg * (1.0 - mask_3d) + txt_bgr * mask_3d).astype(np.uint8)
+            sub_bgr, sub_alpha, sub_inv_alpha = sub_img_cache[active_sub_text]
+            frame_bg = (frame_bg.astype(np.float32) * sub_inv_alpha + sub_bgr * sub_alpha).astype(np.uint8)
 
         # Write frame to pipe
         try:
@@ -1300,7 +1315,7 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
                 except: pass
                 cmd[cmd.index('-c:v') + 1] = 'libx264'
                 cmd[cmd.index('-preset') + 1] = 'ultrafast'
-                process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+                process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.DEVNULL)
                 # Resend the first frame
                 try: process.stdin.write(frame_bg.tobytes())
                 except: pass
