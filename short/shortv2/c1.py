@@ -543,12 +543,12 @@ Output ONLY the plain text script in English."""
         print("❌ LỖI Stage 1: Không thể tạo văn bản kịch bản!", flush=True)
         return None
 
-    # CÔNG ĐOẠN 2 (STAGE 2): Chia kịch bản đã viết thành 16-18 phân cảnh JSON & Gán nhân vật chuẩn xác
+    # CÔNG ĐOẠN 2 (STAGE 2): Chia kịch bản đã viết thành các phân cảnh vừa vặn ~2.0s & Gán nhân vật chuẩn xác
     stage2_prompt = f"""Here is an English YouTube Shorts script about '{topic}':
 "{script_text}"
 
 TASK:
-1. Divide this script into 16 to 18 structured scenes (~10 words per scene).
+1. Divide this script into natural narrative scenes (approx. 6 to 10 words per scene, so each scene matches ~2 seconds of spoken voiceover).
 2. For EACH scene, assign the most relevant character_key from available list: [{chars_str}].
 If a character is explicitly mentioned or relevant in that scene, assign their character_key. Otherwise, assign '{available_chars[0] if available_chars else "Rimuru_Tempest"}'.
 
@@ -564,7 +564,7 @@ Return STRICTLY valid JSON:
 }}"""
     body2 = {'contents': [{'parts': [{'text': stage2_prompt}]}], 'generationConfig': {'responseMimeType': 'application/json', 'maxOutputTokens': 2048}}
 
-    print("  🔹 [CÔNG ĐOẠN 2/2] AI Gemini đang bóc tách 16 phân cảnh JSON & Gán nhân vật chuẩn xác...", flush=True)
+    print("  🔹 [CÔNG ĐOẠN 2/2] AI Gemini đang bóc tách phân cảnh JSON (~2s/cảnh) & Gán nhân vật chuẩn xác...", flush=True)
     for model in [model_used] + models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         try:
@@ -869,12 +869,12 @@ def render_mp4_video_from_subtitles(word_chunks, all_words, script_text, audio_p
     total_duration = audio_clip.duration
     audio_clip.close()
 
-    num_target_images = max(12, int(total_duration / 2.0))
+    num_target_images = max(10, int(round(total_duration / 2.0)))
     anime_name = out_mp4_path.parent.parent.name
     topic = "Rimuru Tempest"
 
     dynamic_timeline = build_semantic_timeline(all_words, script_text, anime_name, topic, total_duration, api_key, scenes=scenes, target_images=num_target_images)
-    print(f"🎬 Đã nạp {len(dynamic_timeline)} bức ảnh/GIF (2.0s/ảnh mượt mà)...", flush=True)
+    print(f"🎬 Dựa vào độ dài Audio ({total_duration:.1f}s), AI đã phân bổ chính xác {len(dynamic_timeline)} bức ảnh/GIF (Đúng 2.0s/ảnh mượt mà)...", flush=True)
 
     fps = 30
     total_frames = int(total_duration * fps)
