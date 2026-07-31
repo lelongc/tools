@@ -520,6 +520,7 @@ SCRIPT STRUCTURE & EXACT LENGTH:
 1. Exact total word count: STRICTLY 175 to 185 English words (Guarantees final video is EXACTLY 52 to 58 seconds, perfectly under YouTube Shorts 60s limit).
 2. Divide into 14 to 16 scenes (~3 to 3.5 seconds per scene).
 3. Assign the most relevant 'character_key' from [{chars_str}] to EACH scene.
+4. CRITICAL: Ensure the script is 100% complete and grammatically whole! NEVER leave an incomplete phrase or cut off at the end!
 
 Return STRICTLY valid JSON:
 {{
@@ -533,7 +534,7 @@ Return STRICTLY valid JSON:
     }}
   ]
 }}"""
-    body = {'contents': [{'parts': [{'text': prompt}]}], 'generationConfig': {'responseMimeType': 'application/json'}}
+    body = {'contents': [{'parts': [{'text': prompt}]}], 'generationConfig': {'responseMimeType': 'application/json', 'maxOutputTokens': 2048}}
     for model in models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         try:
@@ -541,6 +542,17 @@ Return STRICTLY valid JSON:
             if r.status_code == 200:
                 raw_txt = r.json()['candidates'][0]['content']['parts'][0]['text']
                 data = json.loads(clean_json_text(raw_txt))
+                
+                # Trọng yếu: Tự động loại bỏ vế câu bị cụt/ngắt dở dang ở cuối nếu AI trả về lỗi
+                sc_text = data.get('tts_script') or data.get('script', '')
+                if sc_text and not sc_text.strip().endswith(('.', '?', '!')):
+                    # Trim to last complete sentence
+                    last_punc = max(sc_text.rfind('.'), sc_text.rfind('?'), sc_text.rfind('!'))
+                    if last_punc > 50:
+                        clean_sc = sc_text[:last_punc+1].strip()
+                        data['tts_script'] = clean_sc
+                        data['script'] = clean_sc
+                
                 print(f"   ✅ Đã tạo kịch bản VIRAL ({hook_style} + {ending_style}) thành công từ Gemini model '{model}'!", flush=True)
                 return data
             else:
