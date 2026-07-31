@@ -1071,19 +1071,21 @@ def build_fixed_two_second_timeline(scenes, anime_name, topic, total_duration):
     return timeline_segments
 
 def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, pbar_widget=None, label_widget=None):
-    from moviepy.editor import VideoFileClip, AudioFileClip
+    import subprocess
     print("🚀 [BƯỚC 2] Đang dựng Video Short MP4 từ file Phụ Đề & Audio đã xuất (Đan Xen Ảnh Tỷ Lệ Đều & Phụ Đề Từ Vựng)...", flush=True)
 
-    audio_clip = AudioFileClip(str(audio_path))
-    total_duration = audio_clip.duration
-    audio_clip.close()
+    # Calculate audio duration
+    try:
+        from moviepy.editor import AudioFileClip
+        audio_clip = AudioFileClip(str(audio_path))
+        total_duration = audio_clip.duration
+        audio_clip.close()
+    except Exception:
+        # Fallback to checking whisper word timestamps if moviepy fails to load audio duration
+        total_duration = word_chunks[-1]["end"] if word_chunks else 45.0
 
     fps = 30
     total_frames = int(total_duration * fps)
-
-    temp_raw_avi = out_mp4_path.parent / f"_raw_{int(time.time())}.avi"
-    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
-    writer = cv2.VideoWriter(str(temp_raw_avi), fourcc, fps, (TARGET_W, TARGET_H))
 
     def get_pil_frame_at_time(image_path, t_rel):
         try:
@@ -1122,10 +1124,6 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
             loaded_imgs.append((seg["start"], seg["end"], None, idx, p, True))
 
     active_idx = 0
-    font_path = "C:/Windows/Fonts/impact.ttf" if os.name == 'nt' else "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
-    if not Path(font_path).exists():
-        font_path = "arial.ttf"
-
     sub_img_cache = {}
     for chunk in word_chunks:
         txt = chunk["text"]
@@ -1165,13 +1163,44 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
             sub_img_cache[txt] = (bgra_np[:, :, :3], bgra_np[:, :, 3] / 255.0)
 
     fade_frames = 4
-    print(f"🎥 Rendering {total_frames} frames with Zoom, Transitions and Subtitles...", flush=True)
+    
+    # Set up GPU or CPU ffmpeg pipeline
+    use_gpu = check_gpu()
+    v_codec = "h264_nvenc" if use_gpu else "libx264"
+    preset = "p1" if use_gpu else "ultrafast"
+    
+    cmd = [
+        'ffmpeg', '-y',
+        '-f', 'rawvideo',
+        '-vcodec', 'rawvideo',
+        '-pix_fmt', 'bgr24',
+        '-s', f'{TARGET_W}x{TARGET_H}',
+        '-r', str(fps),
+        '-i', '-',
+        '-i', str(audio_path),
+        '-c:v', v_codec,
+        '-preset', preset,
+        '-pix_fmt', 'yuv420p',
+        '-c:a', 'aac',
+        '-shortest',
+        str(out_mp4_path)
+    ]
+    
+    print(f"🎬 Khởi tạo FFmpeg pipe (Sử dụng encoder: {v_codec}, preset: {preset})...", flush=True)
+    try:
+        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+    except Exception:
+        # Fallback to libx264
+        cmd[cmd.index('-c:v') + 1] = 'libx264'
+        cmd[cmd.index('-preset') + 1] = 'ultrafast'
+        process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+
+    fallback_triggered = False
+    start_time = time.time()
+    
     for f in range(total_frames):
         t = f / fps
         
-        if f % 30 == 0:
-            if pbar_widget: pbar_widget.value = 45 + int(35 * (f / total_frames))
-
         while active_idx < len(loaded_imgs) - 1 and t >= loaded_imgs[active_idx][1]:
             active_idx += 1
             
@@ -1228,27 +1257,49 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
             mask_3d = alpha_mask[:, :, None]
             frame_bg = (frame_bg * (1.0 - mask_3d) + txt_bgr * mask_3d).astype(np.uint8)
 
-        writer.write(frame_bg)
+        # Write frame to pipe
+        try:
+            process.stdin.write(frame_bg.tobytes())
+            # Test first frame to check if pipe died
+            if f == 0:
+                process.stdin.flush()
+                time.sleep(0.1)
+                if process.poll() is not None:
+                    raise Exception("GPU Encoder failed")
+        except Exception:
+            if not fallback_triggered:
+                fallback_triggered = True
+                print(f"\n⚠️ Lỗi khởi tạo GPU Encoder ({v_codec}), đang tự động chuyển sang CPU encoder (libx264)...", flush=True)
+                try: process.kill()
+                except: pass
+                cmd[cmd.index('-c:v') + 1] = 'libx264'
+                cmd[cmd.index('-preset') + 1] = 'ultrafast'
+                process = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+                # Resend the first frame
+                try: process.stdin.write(frame_bg.tobytes())
+                except: pass
+        
+        # Calculate time & progress
+        if (f + 1) % 15 == 0 or f == total_frames - 1:
+            elapsed = time.time() - start_time
+            fps_current = (f + 1) / elapsed
+            eta = (total_frames - (f + 1)) / fps_current if fps_current > 0 else 0
+            pct = int((f + 1) / total_frames * 100)
+            overall_pct = int(50 + (pct * 0.48)) # Scale between 50% and 98%
+            
+            codec_used = "CPU:libx264" if fallback_triggered or not use_gpu else "GPU:h264_nvenc"
+            msg = f"🎥 [5/5] Đang dựng Video ({codec_used}): {overall_pct}% | Đã chạy: {elapsed:.1f}s | Dự kiến còn: {eta:.1f}s | Tốc độ: {fps_current:.1f} fps"
+            print(f"\r{msg}", end="", flush=True)
+            if pbar_widget: pbar_widget.value = overall_pct
+            if label_widget: label_widget.value = f"<b>{msg}</b>"
 
-    writer.release()
-
-    if label_widget: label_widget.value = "<b>🎬 [5/5] 85%</b> — Đang ghép mượt Audio vào Video (FFmpeg)..."
-    if pbar_widget: pbar_widget.value = 85
-
+    print("\n🎬 Hoàn tất gửi dữ liệu, đang đóng file video...", flush=True)
     try:
-        final_video = VideoFileClip(str(temp_raw_avi))
-        audio_clip = AudioFileClip(str(audio_path))
-        final_video = final_video.set_audio(audio_clip)
-        final_video.write_videofile(str(out_mp4_path), codec="libx264", audio_codec="aac", fps=fps, preset="ultrafast", logger=None)
-        final_video.close()
-        audio_clip.close()
-    except Exception as e:
-        print(f"❌ FFmpeg Lỗi: {e}", flush=True)
-
-    try:
-        if temp_raw_avi.exists(): temp_raw_avi.unlink()
-    except Exception: pass
-
+        process.stdin.close()
+        process.wait()
+    except Exception:
+        pass
+    
     print(f"✅ TẠO VIDEO THÀNH CÔNG (LOCAL): {out_mp4_path}", flush=True)
 
 def generate_video_short(anime_name, topic, api_key, voice, custom_script, custom_subs, hook_style, ending_style, pbar_widget, label_widget):
