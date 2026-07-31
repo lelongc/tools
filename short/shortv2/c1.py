@@ -416,9 +416,9 @@ ENDING MANDATE:
 
 Available character keys for image mapping: [{chars_str}]
 
-SCRIPT STRUCTURE & LENGTH:
-1. Exact total word count: 185 to 195 English words (~40-45 seconds of natural speech).
-2. Divide into 15 to 17 scenes (~2.5-3 seconds per scene).
+SCRIPT STRUCTURE & EXACT LENGTH:
+1. Exact total word count: STRICTLY 175 to 185 English words (Guarantees final video is EXACTLY 52 to 58 seconds, perfectly under YouTube Shorts 60s limit).
+2. Divide into 14 to 16 scenes (~3 to 3.5 seconds per scene).
 3. Assign the most relevant 'character_key' from [{chars_str}] to EACH scene.
 
 Return STRICTLY valid JSON:
@@ -499,7 +499,7 @@ def pick_unique_scene_images(scenes, anime_name):
 
 async def _edge_tts_save(text, voice, out_mp3):
     import edge_tts
-    communicate = edge_tts.Communicate(text, voice, rate="+15%")
+    communicate = edge_tts.Communicate(text, voice, rate="+10%")
     await communicate.save(str(out_mp3))
 
 def generate_tts_robust(text, voice, out_mp3):
@@ -519,7 +519,7 @@ def generate_tts_robust(text, voice, out_mp3):
     
     txt_tmp = out_mp3.parent / "script_tts_tmp.txt"
     txt_tmp.write_text(text, encoding="utf-8")
-    cmd = f'edge-tts --file "{txt_tmp}" --voice "{voice}" --rate="+15%" --write-media "{out_mp3}"'
+    cmd = f'edge-tts --file "{txt_tmp}" --voice "{voice}" --rate="+10%" --write-media "{out_mp3}"'
     os.system(cmd)
     txt_tmp.unlink(missing_ok=True)
     return out_mp3.exists() and out_mp3.stat().st_size > 1000
