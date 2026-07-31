@@ -482,20 +482,21 @@ def clean_json_text(text):
     return text.strip()
 
 def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_style="Shocking Secret", ending_style="Viral Comment Question"):
+    api_key = get_effective_gemini_key(api_key)
     models = ["gemini-flash-latest", "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemma-4-31b-it"]
     chars_str = ", ".join(available_chars) if available_chars else anime_name
     
     hook_prompts = {
-        "Shocking Secret": "Start with an explosive, shocking secret hook that immediately grabs attention (e.g., 'Did you know the dark truth behind... that 99% of fans missed?').",
-        "Power Scaling": "Start with a mind-blowing power scaling hook about how insanely broken this ability/character is.",
+        "Shocking Secret": "Start with an explosive 3-second hook: 'Did you know the dark truth behind... that 99% of fans missed?'",
+        "Power Scaling": "Start with a mind-blowing power scaling hook about how insanely broken this character or ability is.",
         "Controversial Take": "Start with a controversial, debate-triggering take that makes viewers want to comment immediately.",
         "Mysterious Twist": "Start with a mysterious question that promises a crazy plot twist."
     }
     
     ending_prompts = {
-        "Viral Comment Question": "End with a compelling question asking viewers for their opinion to drive hundreds of comments (crucial for YouTube algorithm boosting!).",
-        "Seamless Loop": "End with a cliffhanger phrase that seamlessly loops back to the beginning of the video.",
-        "Deep Lore Conclusion": "End with a powerful, epic summary statement about the character's legacy."
+        "Viral Comment Question": "End with a complete, powerful viral question asking viewers for their opinion (e.g. 'Was it true justice, or did he cross the line? What do you think? Comment below!'). MUST end with a complete question mark '?'!",
+        "Seamless Loop": "End with a complete cliffhanger sentence that seamlessly loops back to the opening hook. MUST be a complete, full sentence!",
+        "Deep Lore Conclusion": "End with a epic summary statement about the character's legacy. MUST end with a period '.'!"
     }
     
     selected_hook_instruction = hook_prompts.get(hook_style, hook_prompts["Shocking Secret"])
@@ -508,24 +509,23 @@ CRITICAL MANDATE:
 - MUST avoid generic Wikipedia summaries to ensure 100% YOUTUBE MONETIZATION COMPLIANCE & ORIGINAL CONTENT.
 - Use high-retention storytelling, fast pacing, and emotional impact.
 
-HOOK MANDATE:
+HOOK INSTRUCTION:
 {selected_hook_instruction}
 
-ENDING MANDATE:
+ENDING INSTRUCTION:
 {selected_ending_instruction}
+CRITICAL: The script MUST end with a 100% complete, standalone sentence! DO NOT append incomplete trailing words or cut-off fragments like 'because the reason why...'!
 
 Available character keys for image mapping: [{chars_str}]
 
 SCRIPT STRUCTURE & EXACT LENGTH:
-1. Exact total word count: STRICTLY 175 to 185 English words (Guarantees final video is EXACTLY 52 to 58 seconds, perfectly under YouTube Shorts 60s limit).
+1. Exact total word count: STRICTLY 175 to 185 English words (Guarantees final video is EXACTLY 52 to 58 seconds).
 2. Divide into 14 to 16 scenes (~3 to 3.5 seconds per scene).
 3. Assign the most relevant 'character_key' from [{chars_str}] to EACH scene.
-4. CRITICAL: Ensure the script is 100% complete and grammatically whole! NEVER leave an incomplete phrase or cut off at the end!
 
 Return STRICTLY valid JSON:
 {{
   "script": "Full narrative script text in English...",
-  "tts_script": "Full voiceover text in English...",
   "scenes": [
     {{
       "scene_index": 1,
@@ -543,16 +543,13 @@ Return STRICTLY valid JSON:
                 raw_txt = r.json()['candidates'][0]['content']['parts'][0]['text']
                 data = json.loads(clean_json_text(raw_txt))
                 
-                # Trọng yếu: Tự động loại bỏ vế câu bị cụt/ngắt dở dang ở cuối nếu AI trả về lỗi
-                sc_text = data.get('tts_script') or data.get('script', '')
-                if sc_text and not sc_text.strip().endswith(('.', '?', '!')):
-                    # Trim to last complete sentence
-                    last_punc = max(sc_text.rfind('.'), sc_text.rfind('?'), sc_text.rfind('!'))
-                    if last_punc > 50:
-                        clean_sc = sc_text[:last_punc+1].strip()
-                        data['tts_script'] = clean_sc
-                        data['script'] = clean_sc
-                
+                # Tự động ghép tts_script chính xác 100% từ danh sách scenes để KHÔNG BAO GIỜ bị ảo giác vế câu thừa ở cuối!
+                if data.get('scenes') and isinstance(data['scenes'], list):
+                    clean_snippets = [sc['text_snippet'].strip() for sc in data['scenes'] if sc.get('text_snippet')]
+                    full_tts = " ".join(clean_snippets)
+                    data['tts_script'] = full_tts
+                    data['script'] = full_tts
+
                 print(f"   ✅ Đã tạo kịch bản VIRAL ({hook_style} + {ending_style}) thành công từ Gemini model '{model}'!", flush=True)
                 return data
             else:
