@@ -456,7 +456,7 @@ def pick_unique_scene_images(scenes, anime_name):
     if anime_dir.exists():
         for cdir in anime_dir.iterdir():
             if cdir.is_dir() and cdir.name != "output_shorts":
-                imgs = list(cdir.glob("*.jpg")) + list(cdir.glob("*.png")) + list(cdir.glob("*.jpeg")) + list(cdir.glob("*.webp"))
+                imgs = list(cdir.glob("*.jpg")) + list(cdir.glob("*.png")) + list(cdir.glob("*.jpeg")) + list(cdir.glob("*.webp")) + list(cdir.glob("*.gif")) + list(cdir.glob("*.GIF"))
                 random.shuffle(imgs)
                 char_images_map[cdir.name] = imgs
             
@@ -602,7 +602,7 @@ def build_semantic_timeline(all_words, script_text, anime_name, topic, total_dur
     if anime_dir.exists():
         for cdir in anime_dir.iterdir():
             if cdir.is_dir() and cdir.name != "output_shorts":
-                imgs = list(cdir.glob("*.jpg")) + list(cdir.glob("*.png")) + list(cdir.glob("*.jpeg")) + list(cdir.glob("*.webp"))
+                imgs = list(cdir.glob("*.jpg")) + list(cdir.glob("*.png")) + list(cdir.glob("*.jpeg")) + list(cdir.glob("*.webp")) + list(cdir.glob("*.gif")) + list(cdir.glob("*.GIF"))
                 random.shuffle(imgs)
                 if imgs:
                     char_images_map[cdir.name] = imgs
@@ -687,18 +687,41 @@ def render_mp4_video_word_sync(timeline, script_text, audio_path, out_mp4_path, 
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     writer = cv2.VideoWriter(str(temp_raw_avi), fourcc, fps, (TARGET_W, TARGET_H))
     
+    def get_pil_frame_at_time(image_path, t_rel):
+        try:
+            img = Image.open(image_path)
+            if str(image_path).lower().endswith(".gif"):
+                n_frames = getattr(img, 'n_frames', 1)
+                dur = img.info.get('duration', 100) / 1000.0
+                if dur <= 0: dur = 0.1
+                total_gif_dur = max(0.1, n_frames * dur)
+                f_idx = int((t_rel % total_gif_dur) / dur) % n_frames
+                img.seek(f_idx)
+            return img.convert("RGB")
+        except Exception:
+            return Image.new("RGB", (TARGET_W, TARGET_H), (0, 0, 0))
+
     loaded_imgs = []
     for idx, seg in enumerate(dynamic_timeline):
-        pil_img = Image.open(seg["image_path"]).convert("RGB")
-        w, h = pil_img.size
-        ratio = TARGET_W / TARGET_H
-        if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
-        else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
-        pil_img = pil_img.resize((nw, nh), Image.LANCZOS)
-        l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
-        pil_img = pil_img.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
-        cv_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
-        loaded_imgs.append((seg["start"], seg["end"], cv_img, idx))
+        p = Path(seg["image_path"])
+        is_gif = p.name.lower().endswith(".gif")
+        if not is_gif:
+            try:
+                pil_img = Image.open(p).convert("RGB")
+                w, h = pil_img.size
+                ratio = TARGET_W / TARGET_H
+                if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
+                else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
+                pil_img = pil_img.resize((nw, nh), Image.LANCZOS)
+                l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
+                pil_img = pil_img.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
+                cv_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+                loaded_imgs.append((seg["start"], seg["end"], cv_img, idx, p, False))
+            except Exception:
+                black = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
+                loaded_imgs.append((seg["start"], seg["end"], black, idx, p, False))
+        else:
+            loaded_imgs.append((seg["start"], seg["end"], None, idx, p, True))
 
     # PRE-RENDER BRIGHT YELLOW SUBTITLES WITH CORRECT BGR CONVERSION
     sub_img_cache = {}
