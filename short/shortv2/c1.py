@@ -683,19 +683,31 @@ def align_word_subtitles_whisper_smart(audio_path, script_text, max_words_per_ch
 
 def build_semantic_timeline(all_words, script_text, anime_name, topic, total_duration, api_key, target_images=30):
     anime_dir = BASE_LIBRARY_DIR / anime_name
-    char_images_map = {}
+    char_static_map = {}
+    char_gif_map = {}
+
     if anime_dir.exists():
         for cdir in anime_dir.iterdir():
             if cdir.is_dir() and cdir.name != "output_shorts":
-                imgs = list(cdir.glob("*.jpg")) + list(cdir.glob("*.png")) + list(cdir.glob("*.jpeg")) + list(cdir.glob("*.webp")) + list(cdir.glob("*.gif")) + list(cdir.glob("*.GIF"))
-                random.shuffle(imgs)
-                if imgs:
-                    char_images_map[cdir.name] = imgs
-                    
-    all_anime_imgs = [img for imgs in char_images_map.values() for img in imgs]
+                statics = list(cdir.glob("*.jpg")) + list(cdir.glob("*.png")) + list(cdir.glob("*.jpeg")) + list(cdir.glob("*.webp"))
+                gifs = list(cdir.glob("*.gif")) + list(cdir.glob("*.GIF"))
+                gif_subdir = cdir / "gif"
+                if gif_subdir.exists():
+                    gifs += list(gif_subdir.glob("*.gif")) + list(gif_subdir.glob("*.GIF"))
+
+                random.shuffle(statics)
+                random.shuffle(gifs)
+                if statics: char_static_map[cdir.name] = statics
+                if gifs: char_gif_map[cdir.name] = gifs
+
+    all_anime_statics = [img for imgs in char_static_map.values() for img in imgs]
+    all_anime_gifs = [img for imgs in char_gif_map.values() for img in imgs]
+    all_anime_imgs = all_anime_statics + all_anime_gifs
+    random.shuffle(all_anime_statics)
     random.shuffle(all_anime_imgs)
-    available_chars = list(char_images_map.keys())
-    
+
+    available_chars = list(set(list(char_static_map.keys()) + list(char_gif_map.keys())))
+
     # 1. Determine Main Subject Character (e.g. Rimuru_Tempest)
     main_subject_char = available_chars[0] if available_chars else "Rimuru_Tempest"
     topic_clean = topic.lower().replace("_", " ")
@@ -704,23 +716,21 @@ def build_semantic_timeline(all_words, script_text, anime_name, topic, total_dur
         if ckey_clean in topic_clean or any(part in topic_clean for part in ckey_clean.split()):
             main_subject_char = ckey
             break
-            
+
     print(f"🎯 Nhân vật chủ đề chính của Video: [{main_subject_char}]", flush=True)
 
-    # 2. Divide video into 30 intervals (2.0s per image)
     interval_dur = total_duration / target_images
     timeline_segments = []
-    used_images_per_char = {c: [] for c in available_chars}
-    
+    used_statics_per_char = {c: [] for c in available_chars}
+    used_gifs_per_char = {c: [] for c in available_chars}
+
     for i in range(target_images):
         st = i * interval_dur
         et = (i + 1) * interval_dur if i < target_images - 1 else total_duration
-        
-        # Collect spoken words in this 2s window
+
         words_in_interval = [w["word"].lower() for w in all_words if st <= w["start"] < et]
         interval_text = " ".join(words_in_interval)
-        
-        # Check if another character is explicitly mentioned in this 2s window
+
         assigned_char = main_subject_char
         for ckey in available_chars:
             ckey_parts = ckey.lower().replace("_", " ").split()
@@ -728,26 +738,46 @@ def build_semantic_timeline(all_words, script_text, anime_name, topic, total_dur
             if first_name in interval_text and len(first_name) >= 3:
                 assigned_char = ckey
                 break
-                
-        # Pick image for assigned_char
-        pool = char_images_map.get(assigned_char, all_anime_imgs)
-        used = used_images_per_char.get(assigned_char, [])
-        avail = [img for img in pool if img not in used]
-        if not avail:
-            used_images_per_char[assigned_char] = []
-            avail = pool
-        chosen_img = random.choice(avail) if avail else random.choice(all_anime_imgs)
-        if assigned_char in used_images_per_char:
-            used_images_per_char[assigned_char].append(chosen_img)
-            
+
+        # TỰ ĐỘNG ƯU TIÊN GIF NẾU CÓ, NẾU RỖNG THÌ TỰ ĐỘNG CHUYỂN SANG ẢNH TĨNH 100% KHÔNG BAO GIỜ BỊ LỖI
+        prefer_gif = (i % 2 == 1) or any(kw in interval_text.lower() for kw in ['skill', 'fight', 'power', 'attack', 'kill', 'demon', 'slash', 'blast', 'magic', 'true', 'ultimate'])
+
+        chosen_img = None
+        if prefer_gif and assigned_char in char_gif_map:
+            gif_pool = char_gif_map[assigned_char]
+            used = used_gifs_per_char.get(assigned_char, [])
+            avail = [g for g in gif_pool if g not in used]
+            if not avail:
+                used_gifs_per_char[assigned_char] = []
+                avail = gif_pool
+            if avail:
+                chosen_img = random.choice(avail)
+                used_gifs_per_char[assigned_char].append(chosen_img)
+
+        # Fallback tự động lấy ảnh tĩnh nếu không có GIF hoặc thư mục GIF rỗng
+        if not chosen_img and assigned_char in char_static_map:
+            static_pool = char_static_map[assigned_char]
+            used = used_statics_per_char.get(assigned_char, [])
+            avail = [s for s in static_pool if s not in used]
+            if not avail:
+                used_statics_per_char[assigned_char] = []
+                avail = static_pool
+            if avail:
+                chosen_img = random.choice(avail)
+                used_statics_per_char[assigned_char].append(chosen_img)
+
+        # Ultimate fallback nếu thư mục ảnh tĩnh cũng rỗng
+        if not chosen_img and all_anime_imgs:
+            chosen_img = random.choice(all_anime_imgs)
+
         timeline_segments.append({
             "start": st,
             "end": et,
             "char": assigned_char,
             "snippet": interval_text,
-            "image_path": str(chosen_img)
+            "image_path": str(chosen_img) if chosen_img else ""
         })
-        
+
     return timeline_segments
 
 def render_mp4_video_word_sync(timeline, script_text, audio_path, out_mp4_path, pbar_widget=None, label_widget=None, api_key=None):
