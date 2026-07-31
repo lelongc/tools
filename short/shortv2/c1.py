@@ -163,8 +163,20 @@ except Exception:
 
 TARGET_W, TARGET_H = 1080, 1920
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
-BASE_LIBRARY_DIR = Path('/content/drive/MyDrive/anime_library')
+def get_base_library_dir():
+    drive_dir = Path('/content/drive/MyDrive/anime_library')
+    local_dir = Path('/content/anime_library')
+    if Path('/content/drive/MyDrive').exists():
+        try:
+            drive_dir.mkdir(parents=True, exist_ok=True)
+            return drive_dir
+        except Exception: pass
+    local_dir.mkdir(parents=True, exist_ok=True)
+    return local_dir
+
+BASE_LIBRARY_DIR = get_base_library_dir()
 SETTINGS_FILE = BASE_LIBRARY_DIR / "studio_settings.json"
+
 
 def check_gpu():
     try:
