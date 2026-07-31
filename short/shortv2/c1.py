@@ -358,52 +358,79 @@ def resize_crop_save(media_data, out_path):
         tmp.unlink(missing_ok=True)
         return False
 
-def build_library(char_key, anime_name, base_dir, target=50, source='pinterest'):
+def build_library(char_key, anime_name, base_dir, target=50, source='pinterest', media_type='image'):
     char_dir = base_dir / char_key
     char_dir.mkdir(parents=True, exist_ok=True)
-    existing = list(char_dir.glob("*.jpg")) + list(char_dir.glob("*.png")) + list(char_dir.glob("*.jpeg")) + list(char_dir.glob("*.webp"))
+    if media_type == 'gif':
+        save_dir = char_dir / "gif"
+        save_dir.mkdir(parents=True, exist_ok=True)
+        existing = list(save_dir.glob("*.gif")) + list(save_dir.glob("*.GIF")) + list(char_dir.glob("*.gif")) + list(char_dir.glob("*.GIF"))
+        ext_str = "file GIF ĐỘNG (thư mục /gif)"
+    else:
+        save_dir = char_dir
+        existing = list(save_dir.glob("*.jpg")) + list(save_dir.glob("*.png")) + list(save_dir.glob("*.jpeg")) + list(save_dir.glob("*.webp"))
+        ext_str = "ảnh tĩnh"
+
     if len(existing) >= target:
-        print(f"  ✅ [{char_key}]: Đã đủ {len(existing)}/{target} ảnh yêu cầu! (Bỏ qua không tải nữa)")
+        print(f"  ✅ [{char_key}]: Đã đủ {len(existing)}/{target} {ext_str} yêu cầu!", flush=True)
         return
     used_hashes = {hashlib.md5(f.read_bytes()).hexdigest() for f in existing if f.exists()}
     query = f"{char_key.replace('_', ' ')} {anime_name.replace('_', ' ')}"
-    print(f"🔎 Đang cào ảnh ({source}) cho '{query}' (Hiện có: {len(existing)}/{target})...")
-    urls = search_bing_direct(query, limit=target * 2) if source == 'bing' else search_google_direct(query, limit=target * 2) if source == 'google' else search_pinterest_direct(query, limit=target * 2)
+    print(f"🔎 Đang cào {ext_str} ({source.upper()}) cho '{query}' (Hiện có: {len(existing)}/{target})...", flush=True)
+
+    if media_type == 'gif':
+        urls = search_bing_gifs(query, limit=target * 4) if source == 'bing' else search_pinterest_gifs(query, limit=target * 4)
+    else:
+        urls = search_bing_direct(query, limit=target * 2) if source == 'bing' else search_google_direct(query, limit=target * 2) if source == 'google' else search_pinterest_direct(query, limit=target * 2)
+
     saved_count = len(existing)
     for url in urls:
         if saved_count >= target: break
         try:
-            r = requests.get(url, headers=HEADERS, timeout=10)
+            r = requests.get(url, headers=HEADERS, timeout=12)
             if r.status_code != 200 or len(r.content) < 8000: continue
             h = hashlib.md5(r.content).hexdigest()
             if h in used_hashes: continue
-            used_hashes.add(h)
-            out_file = char_dir / f"{char_key}_{saved_count+1:02d}.jpg"
-            if resize_crop_save(r.content, out_file):
-                saved_count += 1
-                print(f"    + [{char_key}] #{saved_count:02d}: Đã lưu ảnh ({source})!")
-        except Exception: continue
-    print(f"  🎉 HOÀN THÀNH [{char_key}]: {saved_count}/{target} ảnh!")
 
-def run_fetch(anime_name, char_list=None, single_char=None, target_per_char=50, source='pinterest'):
+            if media_type == 'gif':
+                out_file = save_dir / f"{char_key}_gif_{saved_count+1:02d}.gif"
+                out_file.write_bytes(r.content)
+                try:
+                    img = Image.open(out_file)
+                    n_frames = getattr(img, 'n_frames', 1)
+                    is_anim = getattr(img, 'is_animated', False)
+                    # LỌC BỎ ẢNH TĨNH GIẢ NẠP ĐUÔI .GIF (Chỉ nhận GIF thực sự có chuyển động > 1 khung hình!)
+                    if n_frames <= 1 or not is_anim:
+                        out_file.unlink(missing_ok=True)
+                        continue
+                    used_hashes.add(h)
+                    saved_count += 1
+                    print(f"    🎬 [{char_key}] GIF ĐỘNG #{saved_count:02d}: Đã lưu GIF thực sự có chuyển động ({n_frames} khung hình) vào thư mục /gif!", flush=True)
+                except Exception:
+                    out_file.unlink(missing_ok=True)
+            else:
+                out_file = save_dir / f"{char_key}_{saved_count+1:02d}.jpg"
+                if resize_crop_save(r.content, out_file):
+                    used_hashes.add(h)
+                    saved_count += 1
+                    print(f"    🖼️ [{char_key}] Ảnh #{saved_count:02d}: Đã lưu ảnh ({source})!", flush=True)
+        except Exception: continue
+    print(f"  🎉 HOÀN THÀNH [{char_key}]: {saved_count}/{target} {ext_str}!", flush=True)
+
+def run_fetch(anime_name, char_list=None, single_char=None, target_per_char=50, source='pinterest', media_type='image'):
     anime_dir = BASE_LIBRARY_DIR / anime_name
     conf_path = anime_dir / "characters_config.json"
     if not conf_path.exists():
-        print(f"LỖI: Chưa có file characters_config.json cho '{anime_name}'!")
+        print(f"LỖI: Chưa có file characters_config.json cho '{anime_name}'!", flush=True)
         return
     try: char_dict = json.loads(conf_path.read_text(encoding="utf-8"))
-    except Exception as e: print(f"LỖI đọc config: {e}"); return
+    except Exception as e: print(f"LỖI đọc config: {e}", flush=True); return
     
-    if single_char:
-        target_chars = [single_char]
-    elif char_list and len(char_list) > 0:
-        target_chars = list(char_list)
-    else:
-        target_chars = list(char_dict.keys())
-    
-    print(f"\n{'='*50}\n🚀 TẢI ẢNH ({source}) CHO {len(target_chars)} NV TRONG: {anime_name} (Chỉ tiêu: {target_per_char} ảnh/NV)\n{'='*50}")
+    target_chars = [single_char] if single_char else list(char_list) if char_list else list(char_dict.keys())
+    type_str = "GIF ĐỘNG 🎬" if media_type == 'gif' else "ẢNH TĨNH 🖼️"
+    print(f"\n{'='*50}\n🚀 TẢI {type_str} ({source.upper()}) CHO {len(target_chars)} NV TRONG: {anime_name} (Chỉ tiêu: {target_per_char} file/NV)\n{'='*50}", flush=True)
     for char_key in target_chars:
-        build_library(char_key, anime_name, anime_dir, target=target_per_char, source=source)
+        build_library(char_key, anime_name, anime_dir, target=target_per_char, source=source, media_type=media_type)
 
 def parse_custom_script_into_scenes(script_text, available_chars):
     words = script_text.strip().split()
