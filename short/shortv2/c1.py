@@ -1174,46 +1174,15 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
     print(f"   ✅ Đã nạp xong vào RAM (Mất {time.time() - start_cache_time:.2f}s)!", flush=True)
 
     active_idx = 0
-    sub_img_cache = {}
-    for chunk in word_chunks:
-        txt = chunk["text"]
-        if txt not in sub_img_cache:
-            overlay = np.zeros((TARGET_H, TARGET_W, 4), dtype=np.uint8)
-            pil_ov = Image.fromarray(overlay, mode="RGBA")
-            draw = ImageDraw.Draw(pil_ov)
-
-            font = None
-            font_paths = ["/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", "C:\\Windows\\Fonts\\arialbd.ttf"]
-            for fp in font_paths:
-                if os.path.exists(fp):
-                    try: font = ImageFont.truetype(fp, 75); break
-                    except: pass
-            if not font: font = ImageFont.load_default()
-
-            txt_upper = txt.strip().upper()
-            bbox = draw.textbbox((0, 0), txt_upper, font=font)
-            tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-            if tw > (TARGET_W - 120):
-                for fs in [65, 55, 45]:
-                    try:
-                        font = ImageFont.truetype(font.path, fs)
-                        break
-                    except: pass
-                bbox = draw.textbbox((0, 0), txt_upper, font=font)
-                tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-
-            x, y = (TARGET_W - tw) // 2, (TARGET_H - th) // 2
-            stroke_w = 6
-            for dx in range(-stroke_w, stroke_w + 1):
-                for dy in range(-stroke_w, stroke_w + 1):
-                    if dx != 0 or dy != 0: draw.text((x + dx, y + dy), txt_upper, font=font, fill=(0, 0, 0, 255))
-            draw.text((x, y), txt_upper, font=font, fill=(255, 255, 0, 255))
-
-            bgra_np = cv2.cvtColor(np.array(pil_ov), cv2.COLOR_RGBA2BGRA)
-            sub_bgr = bgra_np[:, :, :3].astype(np.float32)
-            sub_alpha = (bgra_np[:, :, 3] / 255.0)[:, :, None].astype(np.float32)
-            sub_inv_alpha = 1.0 - sub_alpha
-            sub_img_cache[txt] = (sub_bgr, sub_alpha, sub_inv_alpha)
+    
+    # Load font once
+    font = None
+    font_paths = ["/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", "C:\\Windows\\Fonts\\arialbd.ttf"]
+    for fp in font_paths:
+        if os.path.exists(fp):
+            try: font = ImageFont.truetype(fp, 75); break
+            except: pass
+    if not font: font = ImageFont.load_default()
 
     fade_frames = 4
     
@@ -1296,29 +1265,54 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
         zl, zt = (zw - TARGET_W) // 2, (zh - TARGET_H) // 2
         frame_bg = img_zoomed[zt:zt+TARGET_H, zl:zl+TARGET_W]
 
-        # Transition effect
+        # Transition effect (Decodes next frame bytes to numpy array properly)
         if active_idx < len(timeline) - 1 and (end_t - t) < (fade_frames / fps):
             next_seg = timeline[active_idx + 1]
             next_p_str = next_seg["image_path"]
             next_media_info = cached_media.get(next_p_str)
             if next_media_info:
-                if not next_media_info[0]:
-                    cv_img_next = next_media_info[1]
+                is_next_gif = next_media_info[0]
+                if not is_next_gif:
+                    jpeg_bytes_next = next_media_info[1]
                 else:
-                    cv_img_next = next_media_info[1][0]
+                    jpeg_bytes_next = next_media_info[1][0]
                 
-                alpha = (end_t - t) / (fade_frames / fps)
-                frame_bg = cv2.addWeighted(frame_bg, alpha, cv_img_next, 1.0 - alpha, 0)
+                cv_img_next = cv2.imdecode(np.frombuffer(jpeg_bytes_next, np.uint8), cv2.IMREAD_COLOR)
+                if cv_img_next is not None:
+                    alpha = (end_t - t) / (fade_frames / fps)
+                    frame_bg = cv2.addWeighted(frame_bg, alpha, cv_img_next, 1.0 - alpha, 0)
 
-        # Add subtitle
+        # Add subtitle (On-the-fly rendering using PIL, zero RAM overhead)
         active_sub_text = None
         for chunk in word_chunks:
             if chunk["start"] <= t <= chunk["end"]:
                 active_sub_text = chunk["text"]
                 break
-        if active_sub_text and active_sub_text in sub_img_cache:
-            sub_bgr, sub_alpha, sub_inv_alpha = sub_img_cache[active_sub_text]
-            frame_bg = (frame_bg.astype(np.float32) * sub_inv_alpha + sub_bgr * sub_alpha).astype(np.uint8)
+        if active_sub_text:
+            pil_img = Image.fromarray(cv2.cvtColor(frame_bg, cv2.COLOR_BGR2RGB))
+            draw = ImageDraw.Draw(pil_img)
+            txt_upper = active_sub_text.strip().upper()
+            
+            # Determine correct font size dynamically to avoid overflow
+            current_font = font
+            try:
+                bbox = draw.textbbox((0, 0), txt_upper, font=font)
+                tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+                if tw > (TARGET_W - 120):
+                    current_font = ImageFont.truetype(font.path, 55)
+                    bbox = draw.textbbox((0, 0), txt_upper, font=current_font)
+                    tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+            except Exception:
+                tw, th = len(txt_upper) * 35, 80
+                
+            x, y = (TARGET_W - tw) // 2, (TARGET_H - th) // 2
+            stroke_w = 6
+            for dx in range(-stroke_w, stroke_w + 1):
+                for dy in range(-stroke_w, stroke_w + 1):
+                    if dx != 0 or dy != 0:
+                        draw.text((x + dx, y + dy), txt_upper, font=current_font, fill=(0, 0, 0, 255))
+            draw.text((x, y), txt_upper, font=current_font, fill=(255, 255, 0, 255))
+            frame_bg = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
 
         # Write frame to pipe
         try:
