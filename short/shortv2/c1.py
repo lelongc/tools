@@ -1,3 +1,15 @@
+def get_effective_gemini_key(user_key=""):
+    if user_key and user_key.strip():
+        return user_key.strip()
+    if SETTINGS_FILE.exists():
+        try:
+            data = json.loads(SETTINGS_FILE.read_text(encoding="utf-8"))
+            k = data.get("gemini_api_key", "").strip()
+            if k: return k
+        except Exception: pass
+    return os.environ.get("GEMINI_API_KEY", "")
+
+
 def get_anilist_anime_info(anime_name):
     query = '''
     query ($search: String) {
