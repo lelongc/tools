@@ -1136,7 +1136,14 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
                     gif_dur = img.info.get('duration', 100) / 1000.0
                     if gif_dur <= 0: gif_dur = 0.1
                     
-                    for f_idx in range(n_frames):
+                    # Tối ưu hóa tránh OOM RAM Colab: Chỉ nạp tối đa 25 khung hình cho mỗi GIF
+                    max_cache_frames = 25
+                    step = 1
+                    if n_frames > max_cache_frames:
+                        step = max(1, n_frames // max_cache_frames)
+                        gif_dur = gif_dur * step
+                    
+                    for f_idx in range(0, n_frames, step):
                         img.seek(f_idx)
                         frame_rgb = np.array(img.convert("RGB"))
                         frame_bgr = cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2BGR)
