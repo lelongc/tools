@@ -861,20 +861,194 @@ def build_semantic_timeline(all_words, script_text, anime_name, topic, total_dur
 
     return timeline_segments
 
-def render_mp4_video_from_subtitles(word_chunks, all_words, script_text, audio_path, out_mp4_path, api_key=None, scenes=None):
+def analyze_character_timeline_gemini(script_text, available_chars, api_key):
     api_key = get_effective_gemini_key(api_key)
-    print("🚀 [BƯỚC 2] Đang dựng Video Short MP4 từ file Phụ Đề & Audio đã xuất (Hỗ trợ GIF Động & Đan Xen AI)...", flush=True)
+    print("\n🧠 [AI DETECTOR] Đang phân tích kịch bản và quyết định phân bổ nhân vật cho từng phân cảnh...", flush=True)
+    
+    models = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-flash-latest"]
+    chars_str = ", ".join(available_chars)
+    
+    prompt = f"""You are an Anime Video Editor. You have a list of available character image folders: [{chars_str}].
+Here is the English script of the video:
+"{script_text}"
+
+TASK:
+1. Divide the script into sequential segments (approx. 6 to 10 words each).
+2. For each segment, select the most relevant character folder from the available list: [{chars_str}] that should be shown on screen.
+   - If a character is mentioned or active, select their exact folder name.
+   - If no specific character is active, select the main topic character.
+   - Ensure the folder names match EXACTLY the names in the list (e.g. if the list has 'Rimuru_Tempest', use 'Rimuru_Tempest', do not use 'Rimuru').
+
+Return STRICTLY a JSON array of objects:
+[
+  {{
+    "segment_index": 1,
+    "text_snippet": "exact words of segment 1...",
+    "character_folder": "EXACT_FOLDER_NAME"
+  }}
+]"""
+
+    body = {'contents': [{'parts': [{'text': prompt}]}], 'generationConfig': {'responseMimeType': 'application/json'}}
+    for model in models:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        try:
+            r = requests.post(url, json=body, timeout=20)
+            if r.status_code == 200:
+                raw_txt = r.json()['candidates'][0]['content']['parts'][0]['text']
+                scenes = json.loads(clean_json_text(raw_txt))
+                if isinstance(scenes, list) and len(scenes) > 0:
+                    print(f"   ✅ [AI DETECTOR '{model}'] Đã lập kịch bản phân cảnh nhân vật thành công!", flush=True)
+                    for sc in scenes:
+                        print(f"     🎬 Cảnh {sc.get('segment_index')}: [{sc.get('character_folder')}] -> \"{sc.get('text_snippet')}\"", flush=True)
+                    return scenes
+        except Exception as e:
+            print(f"⚠️ Lỗi AI Detector {model}: {e}", flush=True)
+            
+    # Fallback sequential matching
+    print("⚠️ Phân tích AI thất bại, tự động phân đoạn tuần tự...", flush=True)
+    words = script_text.split()
+    scenes = []
+    chunk_size = max(5, len(words) // 15)
+    for i in range(15):
+        st_idx = i * chunk_size
+        et_idx = (i + 1) * chunk_size if i < 14 else len(words)
+        snip = " ".join(words[st_idx:et_idx])
+        if not snip: continue
+        chosen = available_chars[0] if available_chars else ""
+        for c in available_chars:
+            if c.lower().replace('_', ' ') in snip.lower():
+                chosen = c
+                break
+        scenes.append({
+            "segment_index": i + 1,
+            "text_snippet": snip,
+            "character_folder": chosen
+        })
+    return scenes
+
+def build_fixed_two_second_timeline(scenes, anime_name, topic, total_duration):
+    segment_dur = 2.0
+    num_segments = int(total_duration // segment_dur)
+    if num_segments == 0:
+        num_segments = 1
+        
+    timeline_segments = []
+    
+    anime_dir = BASE_LIBRARY_DIR / anime_name
+    available_chars = []
+    if anime_dir.exists():
+        for cdir in anime_dir.iterdir():
+            if cdir.is_dir() and cdir.name != "output_shorts":
+                available_chars.append(cdir.name)
+                
+    main_subject_char = available_chars[0] if available_chars else "Rimuru_Tempest"
+    
+    # Check and download character assets if folder is low on images
+    for i in range(num_segments):
+        sc_idx = min(int((i / num_segments) * len(scenes)), len(scenes) - 1)
+        sc = scenes[sc_idx]
+        cf = sc.get("character_folder", "").strip()
+        if cf in available_chars:
+            char_dir = anime_dir / cf
+            statics = list(char_dir.glob("*.jpg")) + list(char_dir.glob("*.png")) + list(char_dir.glob("*.jpeg")) + list(char_dir.glob("*.webp"))
+            gifs = list(char_dir.glob("*.gif")) + list(char_dir.glob("*.GIF"))
+            gif_subdir = char_dir / "gif"
+            if gif_subdir.exists():
+                gifs += list(gif_subdir.glob("*.gif")) + list(gif_subdir.glob("*.GIF"))
+                
+            total_files = len(statics) + len(gifs)
+            if total_files < 10:
+                print(f"⚠️ Thư mục [{cf}] thiếu ảnh ({total_files}/10). Tự động cào thêm...", flush=True)
+                try:
+                    run_fetch(anime_name, single_char=cf, target_per_char=20, source='pinterest', media_type='image')
+                    run_fetch(anime_name, single_char=cf, target_per_char=10, source='pinterest', media_type='gif')
+                except Exception as e:
+                    print(f"⚠️ Lỗi cào tự động: {e}", flush=True)
+
+    char_static_map = {}
+    char_gif_map = {}
+    if anime_dir.exists():
+        for cdir in anime_dir.iterdir():
+            if cdir.is_dir() and cdir.name != "output_shorts":
+                statics = list(cdir.glob("*.jpg")) + list(cdir.glob("*.png")) + list(cdir.glob("*.jpeg")) + list(cdir.glob("*.webp"))
+                gifs = list(cdir.glob("*.gif")) + list(cdir.glob("*.GIF"))
+                gif_subdir = cdir / "gif"
+                if gif_subdir.exists():
+                    gifs += list(gif_subdir.glob("*.gif")) + list(gif_subdir.glob("*.GIF"))
+
+                random.shuffle(statics)
+                random.shuffle(gifs)
+                if statics: char_static_map[cdir.name] = statics
+                if gifs: char_gif_map[cdir.name] = gifs
+
+    all_anime_statics = [img for imgs in char_static_map.values() for img in imgs]
+    all_anime_gifs = [img for imgs in char_gif_map.values() for img in imgs]
+    all_anime_imgs = all_anime_statics + all_anime_gifs
+    random.shuffle(all_anime_statics)
+    random.shuffle(all_anime_imgs)
+
+    used_statics_per_char = {c: [] for c in available_chars}
+    used_gifs_per_char = {c: [] for c in available_chars}
+
+    for i in range(num_segments):
+        st = i * segment_dur
+        et = (i + 1) * segment_dur if i < num_segments - 1 else total_duration
+        
+        sc_idx = min(int((i / num_segments) * len(scenes)), len(scenes) - 1)
+        sc = scenes[sc_idx]
+        assigned_char = sc.get("character_folder", "").strip()
+        if not assigned_char or assigned_char not in available_chars:
+            assigned_char = main_subject_char
+            
+        snippet_text = sc.get("text_snippet", "").lower()
+        prefer_gif = (i % 2 == 1) or any(kw in snippet_text for kw in ['skill', 'fight', 'power', 'attack', 'kill', 'demon', 'slash', 'blast', 'magic', 'true', 'ultimate'])
+
+        chosen_img = None
+        if prefer_gif and assigned_char in char_gif_map:
+            gif_pool = char_gif_map[assigned_char]
+            used = used_gifs_per_char.get(assigned_char, [])
+            avail = [g for g in gif_pool if g not in used]
+            if not avail:
+                used_gifs_per_char[assigned_char] = []
+                avail = gif_pool
+            if avail:
+                chosen_img = random.choice(avail)
+                used_gifs_per_char[assigned_char].append(chosen_img)
+
+        if not chosen_img and assigned_char in char_static_map:
+            static_pool = char_static_map[assigned_char]
+            used = used_statics_per_char.get(assigned_char, [])
+            avail = [s for s in static_pool if s not in used]
+            if not avail:
+                used_statics_per_char[assigned_char] = []
+                avail = static_pool
+            if avail:
+                chosen_img = random.choice(avail)
+                used_statics_per_char[assigned_char].append(chosen_img)
+
+        if not chosen_img and all_anime_imgs:
+            chosen_img = random.choice(all_anime_imgs)
+
+        timeline_segments.append({
+            "start": st,
+            "end": et,
+            "char": assigned_char,
+            "snippet": snippet_text,
+            "image_path": str(chosen_img) if chosen_img else ""
+        })
+        
+        img_name = Path(chosen_img).name if chosen_img else "None"
+        print(f"     🎬 Khớp ảnh [{assigned_char}] ({img_name}) cho mốc {st:.2f}s -> {et:.2f}s: \"{snippet_text}\"", flush=True)
+
+    return timeline_segments
+
+def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, pbar_widget=None, label_widget=None):
+    from moviepy.editor import VideoFileClip, AudioFileClip
+    print("🚀 [BƯỚC 2] Đang dựng Video Short MP4 từ file Phụ Đề & Audio đã xuất (Đan Xen Ảnh Tỷ Lệ Đều & Phụ Đề Từ Vựng)...", flush=True)
 
     audio_clip = AudioFileClip(str(audio_path))
     total_duration = audio_clip.duration
     audio_clip.close()
-
-    num_target_images = max(10, int(round(total_duration / 2.0)))
-    anime_name = out_mp4_path.parent.parent.name
-    topic = "Rimuru Tempest"
-
-    dynamic_timeline = build_semantic_timeline(all_words, script_text, anime_name, topic, total_duration, api_key, scenes=scenes, target_images=num_target_images)
-    print(f"🎬 Dựa vào độ dài Audio ({total_duration:.1f}s), AI đã phân bổ chính xác {len(dynamic_timeline)} bức ảnh/GIF (Đúng 2.0s/ảnh mượt mà)...", flush=True)
 
     fps = 30
     total_frames = int(total_duration * fps)
@@ -898,7 +1072,7 @@ def render_mp4_video_from_subtitles(word_chunks, all_words, script_text, audio_p
             return Image.new("RGB", (TARGET_W, TARGET_H), (0, 0, 0))
 
     loaded_imgs = []
-    for idx, seg in enumerate(dynamic_timeline):
+    for idx, seg in enumerate(timeline):
         p = Path(seg["image_path"])
         is_gif = p.name.lower().endswith(".gif")
         if not is_gif:
@@ -918,6 +1092,11 @@ def render_mp4_video_from_subtitles(word_chunks, all_words, script_text, audio_p
                 loaded_imgs.append((seg["start"], seg["end"], black, idx, p, False))
         else:
             loaded_imgs.append((seg["start"], seg["end"], None, idx, p, True))
+
+    active_idx = 0
+    font_path = "C:/Windows/Fonts/impact.ttf" if os.name == 'nt' else "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
+    if not Path(font_path).exists():
+        font_path = "arial.ttf"
 
     sub_img_cache = {}
     for chunk in word_chunks:
@@ -939,11 +1118,11 @@ def render_mp4_video_from_subtitles(word_chunks, all_words, script_text, audio_p
             bbox = draw.textbbox((0, 0), txt_upper, font=font)
             tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
             if tw > (TARGET_W - 120):
-                f_size = int(75 * (TARGET_W - 120) / tw)
-                for fp in font_paths:
-                    if os.path.exists(fp):
-                        try: font = ImageFont.truetype(fp, f_size); break
-                        except: pass
+                for fs in [65, 55, 45]:
+                    try:
+                        font = ImageFont.truetype(font.path, fs)
+                        break
+                    except: pass
                 bbox = draw.textbbox((0, 0), txt_upper, font=font)
                 tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
 
@@ -958,23 +1137,23 @@ def render_mp4_video_from_subtitles(word_chunks, all_words, script_text, audio_p
             sub_img_cache[txt] = (bgra_np[:, :, :3], bgra_np[:, :, 3] / 255.0)
 
     fade_frames = 4
-    print(f"🎬 C++ OpenCV đang ghi {total_frames} khung hình (Tự động lặp GIF sinh động & Phụ đề Vàng)...", flush=True)
+    print(f"🎥 Rendering {total_frames} frames with Zoom, Transitions and Subtitles...", flush=True)
+    for f in range(total_frames):
+        t = f / fps
+        
+        if f % 30 == 0:
+            if pbar_widget: pbar_widget.value = 45 + int(35 * (f / total_frames))
 
-    for frame_idx in range(total_frames):
-        t = frame_idx / fps
-
-        seg_idx = 0
-        for st, et, _, idx, _, _ in loaded_imgs:
-            if st <= t <= et:
-                seg_idx = idx
-                break
-
-        st, et, cv_img_curr, _, img_path, is_gif = loaded_imgs[seg_idx]
-        seg_dur = max(0.1, et - st)
-        progress = min(1.0, max(0.0, (t - st) / seg_dur))
-
+        while active_idx < len(loaded_imgs) - 1 and t >= loaded_imgs[active_idx][1]:
+            active_idx += 1
+            
+        start_t, end_t, cv_img, idx, p, is_gif = loaded_imgs[active_idx]
+        seg_dur = max(0.1, end_t - start_t)
+        progress = min(1.0, max(0.0, (t - start_t) / seg_dur))
+        
         if is_gif:
-            pil_frame = get_pil_frame_at_time(img_path, t - st)
+            t_rel = t - start_t
+            pil_frame = get_pil_frame_at_time(p, t_rel)
             w, h = pil_frame.size
             ratio = TARGET_W / TARGET_H
             if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
@@ -982,19 +1161,22 @@ def render_mp4_video_from_subtitles(word_chunks, all_words, script_text, audio_p
             pil_frame = pil_frame.resize((nw, nh), Image.LANCZOS)
             l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
             pil_frame = pil_frame.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
-            cv_img_curr = cv2.cvtColor(np.array(pil_frame), cv2.COLOR_RGB2BGR)
+            frame_bgr = cv2.cvtColor(np.array(pil_frame), cv2.COLOR_RGB2BGR)
+        else:
+            frame_bgr = cv_img.copy()
 
-        scale = (1.0 + 0.06 * progress) if (seg_idx % 2 == 0) else (1.06 - 0.06 * progress)
-
+        # Zoom effect
+        scale = (1.0 + 0.06 * progress) if (idx % 2 == 0) else (1.06 - 0.06 * progress)
         zw, zh = int(TARGET_W * scale), int(TARGET_H * scale)
-        img_zoomed = cv2.resize(cv_img_curr, (zw, zh), interpolation=cv2.INTER_LINEAR)
+        img_zoomed = cv2.resize(frame_bgr, (zw, zh), interpolation=cv2.INTER_LINEAR)
         zl, zt = (zw - TARGET_W) // 2, (zh - TARGET_H) // 2
         frame_bg = img_zoomed[zt:zt+TARGET_H, zl:zl+TARGET_W]
 
-        if seg_idx < len(loaded_imgs) - 1 and (et - t) < (fade_frames / fps):
-            next_st, next_et, cv_img_next, _, _, next_is_gif = loaded_imgs[seg_idx + 1]
+        # Transition effect
+        if idx < len(loaded_imgs) - 1 and (end_t - t) < (fade_frames / fps):
+            next_st, next_et, cv_img_next, _, next_p, next_is_gif = loaded_imgs[idx + 1]
             if next_is_gif:
-                pil_next_f = get_pil_frame_at_time(loaded_imgs[seg_idx + 1][4], 0)
+                pil_next_f = get_pil_frame_at_time(next_p, 0)
                 w, h = pil_next_f.size
                 ratio = TARGET_W / TARGET_H
                 if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
@@ -1003,64 +1185,77 @@ def render_mp4_video_from_subtitles(word_chunks, all_words, script_text, audio_p
                 l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
                 pil_next_f = pil_next_f.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
                 cv_img_next = cv2.cvtColor(np.array(pil_next_f), cv2.COLOR_RGB2BGR)
-
-            alpha = (et - t) / (fade_frames / fps)
+            
+            alpha = (end_t - t) / (fade_frames / fps)
             frame_bg = cv2.addWeighted(frame_bg, alpha, cv_img_next, 1.0 - alpha, 0)
 
+        # Add subtitle
         active_sub_text = None
         for chunk in word_chunks:
             if chunk["start"] <= t <= chunk["end"]:
                 active_sub_text = chunk["text"]
                 break
-
         if active_sub_text and active_sub_text in sub_img_cache:
             txt_bgr, alpha_mask = sub_img_cache[active_sub_text]
             mask_3d = alpha_mask[:, :, None]
-            frame_final = (frame_bg * (1.0 - mask_3d) + txt_bgr * mask_3d).astype(np.uint8)
-        else:
-            frame_final = frame_bg
+            frame_bg = (frame_bg * (1.0 - mask_3d) + txt_bgr * mask_3d).astype(np.uint8)
 
-        writer.write(frame_final)
+        writer.write(frame_bg)
 
     writer.release()
-    print("⚡ FFmpeg đang muxing MP4 AAC (stream copy ~2s)...", flush=True)
 
-    cmd = f'ffmpeg -y -i "{temp_raw_avi}" -i "{audio_path}" -c:v libx264 -preset ultrafast -c:a aac -shortest "{out_mp4_path}"'
-    subprocess.run(cmd, shell=True)
+    if label_widget: label_widget.value = "<b>🎬 [5/5] 85%</b> — Đang ghép mượt Audio vào Video (FFmpeg)..."
+    if pbar_widget: pbar_widget.value = 85
 
-    temp_raw_avi.unlink(missing_ok=True)
+    try:
+        final_video = VideoFileClip(str(temp_raw_avi))
+        audio_clip = AudioFileClip(str(audio_path))
+        final_video = final_video.set_audio(audio_clip)
+        final_video.write_videofile(str(out_mp4_path), codec="libx264", audio_codec="aac", fps=fps, preset="ultrafast", logger=None)
+        final_video.close()
+        audio_clip.close()
+    except Exception as e:
+        print(f"❌ FFmpeg Lỗi: {e}", flush=True)
 
+    try:
+        if temp_raw_avi.exists(): temp_raw_avi.unlink()
+    except Exception: pass
 
-def generate_video_short(anime_name, topic, api_key, voice="en-US-ChristopherNeural", custom_script="", custom_subs="", hook_style="Shocking Secret", ending_style="Viral Comment Question", pbar_widget=None, label_widget=None):
-    api_key = get_effective_gemini_key(api_key)
+    print(f"✅ TẠO VIDEO THÀNH CÔNG (LOCAL): {out_mp4_path}", flush=True)
+
+def generate_video_short(anime_name, topic, api_key, voice, custom_script, custom_subs, hook_style, ending_style, pbar_widget, label_widget):
+    import time
+    
+    # Save final video to Drive, but do processing locally in Colab SSD!
+    local_temp_dir = Path('/content/temp_processing') if Path('/content').exists() else Path('temp_processing')
+    local_temp_dir.mkdir(parents=True, exist_ok=True)
+    
     out_dir = BASE_LIBRARY_DIR / anime_name / "output_shorts"
     out_dir.mkdir(parents=True, exist_ok=True)
     
-    anime_dir = BASE_LIBRARY_DIR / anime_name
+    anime_dir = get_base_library_dir() / anime_name
     conf_path = anime_dir / "characters_config.json"
     available_chars = list(json.loads(conf_path.read_text(encoding="utf-8")).keys()) if conf_path.exists() else []
     
     if custom_script and custom_script.strip():
         if label_widget: label_widget.value = "<b>📝 [1/5] 10%</b> — Đang nạp Kịch bản Tùy Chỉnh do bạn nhập..."
         if pbar_widget: pbar_widget.value = 10
-        scenes, script_text = parse_custom_script_into_scenes(custom_script, available_chars)
+        script_text = custom_script.strip()
     else:
         if label_widget: label_widget.value = "<b>🚀 [1/5] 5%</b> — AI Gemini đang viết kịch bản Tiếng Anh 30 phân cảnh..."
         if pbar_widget: pbar_widget.value = 5
         script_data = generate_script_gemini(topic, anime_name, available_chars, api_key, hook_style=hook_style, ending_style=ending_style)
-        if not script_data or 'scenes' not in script_data:
+        if not script_data or 'script' not in script_data:
             if label_widget: label_widget.value = "<b style='color:red;'>❌ LỖI: Không thể tạo kịch bản Gemini. Kiểm tra lại API Key hoặc nhập kịch bản tùy chỉnh!</b>"
             return
-        scenes = script_data['scenes']
         script_text = script_data.get('tts_script') or script_data.get('script', '')
     
-    if label_widget: label_widget.value = f"<b>🖼️ [2/5] 20%</b> — Đang lựa chọn 30 bức ảnh nhân vật từ Drive..."
-    if pbar_widget: pbar_widget.value = 20
-    timeline = pick_unique_scene_images(scenes, anime_name)
+    # AI character timeline planner
+    scenes = analyze_character_timeline_gemini(script_text, available_chars, api_key)
     
     if label_widget: label_widget.value = "<b>🎙️ [3/5] 35%</b> — Đang tạo giọng đọc Edge-TTS Tiếng Anh (Tốc độ +15%)..."
     if pbar_widget: pbar_widget.value = 35
-    audio_temp_path = out_dir / "_temp_audio.mp3"
+    audio_temp_path = local_temp_dir / "_temp_audio.mp3"
     ok = generate_tts_robust(script_text, voice, audio_temp_path)
     if not ok:
         if label_widget: label_widget.value = "<b style='color:red;'>❌ LỖI: Không tạo được giọng đọc TTS!</b>"
@@ -1069,6 +1264,43 @@ def generate_video_short(anime_name, topic, api_key, voice="en-US-ChristopherNeu
     if label_widget: label_widget.value = "<b>🧠 [4/5] 45%</b> — Whisper AI đang bóc tách mốc phát âm từng từ..."
     if pbar_widget: pbar_widget.value = 45
     
+    # Whisper AI
+    word_chunks, all_words = align_word_subtitles_whisper_smart(audio_temp_path, script_text)
+    
+    # Correct transcription typos (e.g. RAMURU -> RIMURU)
+    word_chunks = refine_subtitles_gemini(word_chunks, script_text, api_key)
+    
+    # Post-process corrections to guarantee key name spellings are correct
+    corrections = {
+        "RAMURU": "RIMURU",
+        "RAMURU'S": "RIMURU'S",
+        "RIMURUS": "RIMURU'S",
+        "VELDORAS": "VELDORA'S",
+    }
+    for chunk in word_chunks:
+        for k, v in corrections.items():
+            chunk["text"] = re.sub(r'\b' + re.escape(k) + r'\b', v, chunk["text"].upper())
+
+    # Build strict 2.0s duration timeline based on Gemini folder planning
+    total_dur = all_words[-1]["end"] if all_words else 45.0
+    timeline = build_fixed_two_second_timeline(scenes, anime_name, topic, total_dur)
+    
+    # Render final MP4 locally, then copy to Drive
+    local_mp4_path = local_temp_dir / f"_temp_video_final.mp4"
+    render_mp4_video_word_sync(timeline, word_chunks, audio_temp_path, local_mp4_path, pbar_widget, label_widget)
+    
+    # Copy final MP4 to Drive
     timestamp = int(time.time())
-    out_mp4_path = out_dir / f"{anime_name}_Short_{timestamp}.mp4"
-    render_mp4_video_word_sync(timeline, script_text, audio_temp_path, out_mp4_path, pbar_widget, label_widget, api_key)
+    dest_mp4_path = out_dir / f"{anime_name}_Short_{timestamp}.mp4"
+    if local_mp4_path.exists():
+        shutil.copy(local_mp4_path, dest_mp4_path)
+        print(f"✅ TẠO VIDEO THÀNH CÔNG: {dest_mp4_path}", flush=True)
+        if label_widget: label_widget.value = f"<b style='color:green;'>✅ XONG! Video đã lưu tại: {dest_mp4_path}</b>"
+        if pbar_widget: pbar_widget.value = 100
+        try:
+            local_mp4_path.unlink()
+            audio_temp_path.unlink()
+        except: pass
+    else:
+        print(f"❌ Lỗi: Không tìm thấy video được render tại {local_mp4_path}", flush=True)
+        if label_widget: label_widget.value = "<b style='color:red;'>❌ LỖI: Không tìm thấy file video sau khi render!</b>"
