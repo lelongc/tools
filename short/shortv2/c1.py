@@ -550,9 +550,13 @@ Output ONLY the plain text script in English."""
 "{script_text}"
 
 TASK:
-1. Divide this script into natural narrative scenes (approx. 6 to 10 words per scene, so each scene matches ~2 seconds of spoken voiceover).
+1. Divide this script into sequential narrative scenes (approx. 6 to 10 words per scene, so each scene matches ~2 seconds of spoken voiceover).
 2. For EACH scene, assign the most relevant character_key from available list: [{chars_str}].
 If a character is explicitly mentioned or relevant in that scene, assign their character_key. Otherwise, assign '{available_chars[0] if available_chars else "Rimuru_Tempest"}'.
+
+CRITICAL INSTRUCTION:
+- You MUST cover 100% of the original script. Do NOT shorten, summarize, paraphrase, or omit any sentences or words!
+- The sequential concatenation of all "text_snippet" fields MUST match the original script exactly, word-for-word.
 
 Return STRICTLY valid JSON:
 {{
