@@ -358,7 +358,7 @@ def resize_crop_save(media_data, out_path):
         tmp.unlink(missing_ok=True)
         return False
 
-def build_library(char_key, anime_name, base_dir, target=50, source='pinterest', media_type='image'):
+def build_library(char_key, anime_name, base_dir, target=50, source='pinterest', media_type='image', query_aliases=None):
     char_dir = base_dir / char_key
     char_dir.mkdir(parents=True, exist_ok=True)
     if media_type == 'gif':
@@ -375,13 +375,27 @@ def build_library(char_key, anime_name, base_dir, target=50, source='pinterest',
         print(f"  ✅ [{char_key}]: Đã đủ {len(existing)}/{target} {ext_str} yêu cầu!", flush=True)
         return
     used_hashes = {hashlib.md5(f.read_bytes()).hexdigest() for f in existing if f.exists()}
-    query = f"{char_key.replace('_', ' ')} {anime_name.replace('_', ' ')}"
-    print(f"🔎 Đang cào {ext_str} ({source.upper()}) cho '{query}' (Hiện có: {len(existing)}/{target})...", flush=True)
-
-    if media_type == 'gif':
-        urls = search_bing_gifs(query, limit=target * 4) if source == 'bing' else search_pinterest_gifs(query, limit=target * 4)
+    
+    # Hỗ trợ cào đa dạng từ khóa nếu config dạng Danh Sách ["Rimuru Tempest", "Rimuru Demon Lord"] hoặc Chuỗi
+    queries = []
+    if isinstance(query_aliases, list) and query_aliases:
+        queries = [f"{q.strip()} {anime_name.replace('_', ' ')}" for q in query_aliases if q.strip()]
+    elif isinstance(query_aliases, str) and query_aliases.strip():
+        queries = [f"{query_aliases.strip()} {anime_name.replace('_', ' ')}"]
     else:
-        urls = search_bing_direct(query, limit=target * 2) if source == 'bing' else search_google_direct(query, limit=target * 2) if source == 'google' else search_pinterest_direct(query, limit=target * 2)
+        queries = [f"{char_key.replace('_', ' ')} {anime_name.replace('_', ' ')}"]
+
+    print(f"🔎 Đang cào {ext_str} ({source.upper()}) cho '{char_key}' với {len(queries)} từ khóa tìm kiếm (Hiện có: {len(existing)}/{target})...", flush=True)
+
+    urls = []
+    for q in queries:
+        if len(urls) >= target * 3: break
+        if media_type == 'gif':
+            new_urls = search_bing_gifs(q, limit=target * 3) if source == 'bing' else search_pinterest_gifs(q, limit=target * 3)
+        else:
+            new_urls = search_bing_direct(q, limit=target * 2) if source == 'bing' else search_google_direct(q, limit=target * 2) if source == 'google' else search_pinterest_direct(q, limit=target * 2)
+        for u in new_urls:
+            if u not in urls: urls.append(u)
 
     saved_count = len(existing)
     for url in urls:
@@ -430,7 +444,8 @@ def run_fetch(anime_name, char_list=None, single_char=None, target_per_char=50, 
     type_str = "GIF ĐỘNG 🎬" if media_type == 'gif' else "ẢNH TĨNH 🖼️"
     print(f"\n{'='*50}\n🚀 TẢI {type_str} ({source.upper()}) CHO {len(target_chars)} NV TRONG: {anime_name} (Chỉ tiêu: {target_per_char} file/NV)\n{'='*50}", flush=True)
     for char_key in target_chars:
-        build_library(char_key, anime_name, anime_dir, target=target_per_char, source=source, media_type=media_type)
+        query_aliases = char_dict.get(char_key)
+        build_library(char_key, anime_name, anime_dir, target=target_per_char, source=source, media_type=media_type, query_aliases=query_aliases)
 
 def parse_custom_script_into_scenes(script_text, available_chars):
     words = script_text.strip().split()
