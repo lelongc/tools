@@ -1087,41 +1087,62 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
     fps = 30
     total_frames = int(total_duration * fps)
 
-    def get_pil_frame_at_time(image_path, t_rel):
-        try:
-            img = Image.open(image_path)
-            if str(image_path).lower().endswith(".gif"):
-                n_frames = getattr(img, 'n_frames', 1)
-                dur = img.info.get('duration', 100) / 1000.0
-                if dur <= 0: dur = 0.1
-                total_gif_dur = max(0.1, n_frames * dur)
-                f_idx = int((t_rel % total_gif_dur) / dur) % n_frames
-                img.seek(f_idx)
-            return img.convert("RGB")
-        except Exception:
-            return Image.new("RGB", (TARGET_W, TARGET_H), (0, 0, 0))
-
-    loaded_imgs = []
-    for idx, seg in enumerate(timeline):
-        p = Path(seg["image_path"])
+    # Pre-load and cache all unique images/GIFs used in the timeline to RAM
+    cached_media = {}
+    unique_paths = list(set(seg["image_path"] for seg in timeline if seg.get("image_path")))
+    
+    print(f"⚡ Đang nạp trước và resize {len(unique_paths)} ảnh/GIF vào RAM...", flush=True)
+    start_cache_time = time.time()
+    
+    for p_str in unique_paths:
+        p = Path(p_str)
         is_gif = p.name.lower().endswith(".gif")
         if not is_gif:
             try:
-                pil_img = Image.open(p).convert("RGB")
-                w, h = pil_img.size
-                ratio = TARGET_W / TARGET_H
-                if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
-                else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
-                pil_img = pil_img.resize((nw, nh), Image.LANCZOS)
-                l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
-                pil_img = pil_img.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
-                cv_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
-                loaded_imgs.append((seg["start"], seg["end"], cv_img, idx, p, False))
-            except Exception:
+                with Image.open(p) as pil_img:
+                    pil_img = pil_img.convert("RGB")
+                    w, h = pil_img.size
+                    ratio = TARGET_W / TARGET_H
+                    if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
+                    else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
+                    pil_img = pil_img.resize((nw, nh), Image.LANCZOS)
+                    l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
+                    pil_img = pil_img.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
+                    cv_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+                    cached_media[p_str] = (False, cv_img)
+            except Exception as e:
+                print(f"⚠️ Không thể nạp ảnh {p.name}: {e}", flush=True)
                 black = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
-                loaded_imgs.append((seg["start"], seg["end"], black, idx, p, False))
+                cached_media[p_str] = (False, black)
         else:
-            loaded_imgs.append((seg["start"], seg["end"], None, idx, p, True))
+            try:
+                gif_frames = []
+                with Image.open(p) as img:
+                    n_frames = getattr(img, 'n_frames', 1)
+                    gif_dur = img.info.get('duration', 100) / 1000.0
+                    if gif_dur <= 0: gif_dur = 0.1
+                    
+                    for f_idx in range(n_frames):
+                        img.seek(f_idx)
+                        frame_pil = img.convert("RGB")
+                        w, h = frame_pil.size
+                        ratio = TARGET_W / TARGET_H
+                        if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
+                        else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
+                        
+                        frame_pil = frame_pil.resize((nw, nh), Image.LANCZOS)
+                        l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
+                        frame_pil = frame_pil.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
+                        
+                        cv_frame = cv2.cvtColor(np.array(frame_pil), cv2.COLOR_RGB2BGR)
+                        gif_frames.append(cv_frame)
+                cached_media[p_str] = (True, gif_frames, gif_dur)
+            except Exception as e:
+                print(f"⚠️ Không thể nạp GIF {p.name}: {e}", flush=True)
+                black = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
+                cached_media[p_str] = (True, [black], 0.1)
+                
+    print(f"   ✅ Đã nạp xong vào RAM (Mất {time.time() - start_cache_time:.2f}s)!", flush=True)
 
     active_idx = 0
     sub_img_cache = {}
@@ -1201,50 +1222,55 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
     for f in range(total_frames):
         t = f / fps
         
-        while active_idx < len(loaded_imgs) - 1 and t >= loaded_imgs[active_idx][1]:
+        while active_idx < len(timeline) - 1 and t >= timeline[active_idx]["end"]:
             active_idx += 1
             
-        start_t, end_t, cv_img, idx, p, is_gif = loaded_imgs[active_idx]
+        seg = timeline[active_idx]
+        p_str = seg["image_path"]
+        
+        # Retrieve from RAM cache
+        media_info = cached_media.get(p_str)
+        if not media_info:
+            frame_bgr = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
+            is_gif = False
+        else:
+            is_gif = media_info[0]
+            if not is_gif:
+                frame_bgr = media_info[1]
+            else:
+                gif_frames = media_info[1]
+                gif_dur = media_info[2]
+                t_rel = t - seg["start"]
+                n_frames = len(gif_frames)
+                total_gif_dur = n_frames * gif_dur
+                f_idx = int((t_rel % total_gif_dur) / gif_dur) % n_frames
+                frame_bgr = gif_frames[f_idx]
+
+        start_t = seg["start"]
+        end_t = seg["end"]
         seg_dur = max(0.1, end_t - start_t)
         progress = min(1.0, max(0.0, (t - start_t) / seg_dur))
-        
-        if is_gif:
-            t_rel = t - start_t
-            pil_frame = get_pil_frame_at_time(p, t_rel)
-            w, h = pil_frame.size
-            ratio = TARGET_W / TARGET_H
-            if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
-            else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
-            pil_frame = pil_frame.resize((nw, nh), Image.LANCZOS)
-            l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
-            pil_frame = pil_frame.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
-            frame_bgr = cv2.cvtColor(np.array(pil_frame), cv2.COLOR_RGB2BGR)
-        else:
-            frame_bgr = cv_img.copy()
 
         # Zoom effect
-        scale = (1.0 + 0.06 * progress) if (idx % 2 == 0) else (1.06 - 0.06 * progress)
+        scale = (1.0 + 0.06 * progress) if (active_idx % 2 == 0) else (1.06 - 0.06 * progress)
         zw, zh = int(TARGET_W * scale), int(TARGET_H * scale)
         img_zoomed = cv2.resize(frame_bgr, (zw, zh), interpolation=cv2.INTER_LINEAR)
         zl, zt = (zw - TARGET_W) // 2, (zh - TARGET_H) // 2
         frame_bg = img_zoomed[zt:zt+TARGET_H, zl:zl+TARGET_W]
 
         # Transition effect
-        if idx < len(loaded_imgs) - 1 and (end_t - t) < (fade_frames / fps):
-            next_st, next_et, cv_img_next, _, next_p, next_is_gif = loaded_imgs[idx + 1]
-            if next_is_gif:
-                pil_next_f = get_pil_frame_at_time(next_p, 0)
-                w, h = pil_next_f.size
-                ratio = TARGET_W / TARGET_H
-                if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
-                else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
-                pil_next_f = pil_next_f.resize((nw, nh), Image.LANCZOS)
-                l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
-                pil_next_f = pil_next_f.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
-                cv_img_next = cv2.cvtColor(np.array(pil_next_f), cv2.COLOR_RGB2BGR)
-            
-            alpha = (end_t - t) / (fade_frames / fps)
-            frame_bg = cv2.addWeighted(frame_bg, alpha, cv_img_next, 1.0 - alpha, 0)
+        if active_idx < len(timeline) - 1 and (end_t - t) < (fade_frames / fps):
+            next_seg = timeline[active_idx + 1]
+            next_p_str = next_seg["image_path"]
+            next_media_info = cached_media.get(next_p_str)
+            if next_media_info:
+                if not next_media_info[0]:
+                    cv_img_next = next_media_info[1]
+                else:
+                    cv_img_next = next_media_info[1][0]
+                
+                alpha = (end_t - t) / (fade_frames / fps)
+                frame_bg = cv2.addWeighted(frame_bg, alpha, cv_img_next, 1.0 - alpha, 0)
 
         # Add subtitle
         active_sub_text = None
