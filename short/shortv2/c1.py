@@ -483,7 +483,7 @@ def clean_json_text(text):
 
 def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_style="Shocking Secret", ending_style="Viral Comment Question"):
     api_key = get_effective_gemini_key(api_key)
-    # Đưa gemini-3.1-flash-lite lên đầu tiên theo yêu cầu
+    # Ưu tiên gemini-3.1-flash-lite cho cả 2 công đoạn
     models = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-flash-latest", "gemma-4-31b-it"]
     chars_str = ", ".join(available_chars) if available_chars else anime_name
     
@@ -500,100 +500,95 @@ def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_sty
         "Deep Lore Conclusion": f"End with an epic summary statement about the legacy of {topic} in {anime_name}."
     }
     
-    selected_hook_instruction = hook_prompts.get(hook_style, hook_prompts["Shocking Secret"])
-    selected_ending_instruction = ending_prompts.get(ending_style, ending_prompts["Viral Comment Question"])
+    selected_hook = hook_prompts.get(hook_style, hook_prompts["Shocking Secret"])
+    selected_ending = ending_prompts.get(ending_style, ending_prompts["Viral Comment Question"])
 
-    # PASS 1: Soạn kịch bản chi tiết ban đầu
-    prompt_pass1 = f"""You are a YouTube Shorts Master Producer. Write a viral, 100% original narrative script in ENGLISH about '{topic}' for anime '{anime_name}'.
+    # CÔNG ĐOẠN 1 (STAGE 1): Tập trung 100% AI vào việc viết kịch bản hấp dẫn (Không bị áp lực JSON)
+    stage1_prompt = f"""You are a YouTube Shorts Master Storyteller. Write a viral, high-retention narrative script in 100% ENGLISH about '{topic}' for anime '{anime_name}'.
 
 CRITICAL MANDATE:
-- Script language MUST BE 100% ENGLISH!
-- MUST avoid generic Wikipedia summaries to ensure 100% YOUTUBE MONETIZATION COMPLIANCE & ORIGINAL CONTENT.
-- Use high-retention storytelling, fast pacing, and emotional impact.
+- Script MUST BE 100% ENGLISH!
+- MUST be 100% original narrative (no generic Wikipedia summaries).
+- EXACT LENGTH: STRICTLY 175 to 185 English words (~52-58s voiceover).
 
-HOOK INSTRUCTION:
-{selected_hook_instruction}
+HOOK:
+{selected_hook}
 
-ENDING INSTRUCTION:
-{selected_ending_instruction}
+ENDING:
+{selected_ending}
 CRITICAL: The script MUST end with a 100% complete, standalone sentence! DO NOT append incomplete trailing words or cut-off fragments!
 
-Available character keys for image mapping: [{chars_str}]
+Output ONLY the plain text script in English."""
 
-SCRIPT STRUCTURE & LENGTH REQUIREMENT:
-1. Target total word count: STRICTLY 175 to 185 English words (Guarantees final video is EXACTLY 52 to 58 seconds).
-2. Divide into 16 to 18 scenes (~3 seconds per scene).
-3. Assign the most relevant 'character_key' from [{chars_str}] to EACH scene.
+    script_text = ""
+    model_used = models[0]
 
-Return STRICTLY valid JSON:
-{{
-  "scenes": [
-    {{
-      "scene_index": 1,
-      "text_snippet": "English spoken text in this ~3s scene",
-      "character_key": "Character_Name_Key"
-    }}
-  ]
-}}"""
-    body1 = {'contents': [{'parts': [{'text': prompt_pass1}]}], 'generationConfig': {'responseMimeType': 'application/json', 'maxOutputTokens': 2048}}
-    
+    print("  🔹 [CÔNG ĐOẠN 1/2] AI Gemini đang viết câu chuyện Viral Tiếng Anh (180 từ)...", flush=True)
     for model in models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        body1 = {'contents': [{'parts': [{'text': stage1_prompt}]}]}
         try:
-            r = requests.post(url, json=body1, timeout=30)
-            if r.status_code == 200:
-                raw_txt = r.json()['candidates'][0]['content']['parts'][0]['text']
-                data = json.loads(clean_json_text(raw_txt))
-                
-                if data.get('scenes') and isinstance(data['scenes'], list):
-                    clean_snippets = [sc['text_snippet'].strip() for sc in data['scenes'] if sc.get('text_snippet')]
-                    full_tts = " ".join(clean_snippets)
-                    w_count = len(full_tts.split())
-                    
-                    # NẾU LẦN 1 TẠO ÍT TỪ (<160 từ), TỰ ĐỘNG GỌI PASS 2 ĐỂ MỞ RỘNG CHI TIẾT LÊN ĐỦ 175-185 TỪ
-                    if w_count < 160:
-                        print(f"   ⏳ [PASS 1 '{model}'] Kịch bản có {w_count} từ (chưa đủ 175-185 từ). Đang gọi PASS 2 để bổ sung chi tiết lore...", flush=True)
-                        prompt_pass2 = f"""The following script has {w_count} words:
-"{full_tts}"
+            r1 = requests.post(url, json=body1, timeout=30)
+            if r1.status_code == 200:
+                raw1 = r1.json()['candidates'][0]['content']['parts'][0]['text'].strip()
+                if len(raw1.split()) >= 130:
+                    script_text = raw1
+                    model_used = model
+                    print(f"   ✅ [STAGE 1 '{model}'] Đã viết xong kịch bản hấp dẫn ({len(script_text.split())} từ English)!", flush=True)
+                    break
+        except Exception as e:
+            print(f"⚠️ Stage 1 lỗi {model}: {e}", flush=True)
+
+    if not script_text:
+        print("❌ LỖI Stage 1: Không thể tạo văn bản kịch bản!", flush=True)
+        return None
+
+    # CÔNG ĐOẠN 2 (STAGE 2): Chia kịch bản đã viết thành 16-18 phân cảnh JSON & Gán nhân vật chuẩn xác
+    stage2_prompt = f"""Here is an English YouTube Shorts script about '{topic}':
+"{script_text}"
 
 TASK:
-Expand and enrich this script so the total length is STRICTLY 175 to 185 English words (~52 to 58 seconds).
-Add deeper lore details, emotional pacing, and maintain the exact Hook and Ending.
-Divide into 16 to 18 scenes. Assign character_key from [{chars_str}] to each scene.
+1. Divide this script into 16 to 18 structured scenes (~10 words per scene).
+2. For EACH scene, assign the most relevant character_key from available list: [{chars_str}].
+If a character is explicitly mentioned or relevant in that scene, assign their character_key. Otherwise, assign '{available_chars[0] if available_chars else "Rimuru_Tempest"}'.
 
 Return STRICTLY valid JSON:
 {{
   "scenes": [
     {{
       "scene_index": 1,
-      "text_snippet": "Expanded text snippet...",
+      "text_snippet": "exact spoken text in scene 1...",
       "character_key": "Character_Name_Key"
     }}
   ]
 }}"""
-                        body2 = {'contents': [{'parts': [{'text': prompt_pass2}]}], 'generationConfig': {'responseMimeType': 'application/json', 'maxOutputTokens': 2048}}
-                        try:
-                            r2 = requests.post(url, json=body2, timeout=30)
-                            if r2.status_code == 200:
-                                raw_txt2 = r2.json()['candidates'][0]['content']['parts'][0]['text']
-                                data2 = json.loads(clean_json_text(raw_txt2))
-                                if data2.get('scenes') and isinstance(data2['scenes'], list):
-                                    data = data2
-                                    clean_snippets = [sc['text_snippet'].strip() for sc in data['scenes'] if sc.get('text_snippet')]
-                                    full_tts = " ".join(clean_snippets)
-                                    w_count = len(full_tts.split())
-                        except Exception as e2:
-                            print(f"⚠️ Lỗi Pass 2 expansion: {e2}", flush=True)
+    body2 = {'contents': [{'parts': [{'text': stage2_prompt}]}], 'generationConfig': {'responseMimeType': 'application/json', 'maxOutputTokens': 2048}}
 
-                    data['tts_script'] = full_tts
-                    data['script'] = full_tts
-                    print(f"   ✅ [GEMINI AI '{model}'] Đã tạo kịch bản VIRAL hoàn chỉnh ({w_count} từ English, {len(data['scenes'])} phân cảnh)!", flush=True)
-                    return data
-            else:
-                print(f"⚠️ Thử model {model} (Status {r.status_code})...", flush=True)
+    print("  🔹 [CÔNG ĐOẠN 2/2] AI Gemini đang bóc tách 16 phân cảnh JSON & Gán nhân vật chuẩn xác...", flush=True)
+    for model in [model_used] + models:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        try:
+            r2 = requests.post(url, json=body2, timeout=30)
+            if r2.status_code == 200:
+                raw2 = r2.json()['candidates'][0]['content']['parts'][0]['text']
+                data2 = json.loads(clean_json_text(raw2))
+                if data2.get('scenes') and isinstance(data2['scenes'], list):
+                    clean_snippets = [sc['text_snippet'].strip() for sc in data2['scenes'] if sc.get('text_snippet')]
+                    full_tts = " ".join(clean_snippets)
+                    data2['tts_script'] = full_tts
+                    data2['script'] = full_tts
+                    print(f"   ✅ [STAGE 2 '{model}'] Đã phân chia {len(data2['scenes'])} phân cảnh & gán nhân vật chuẩn xác 100%!", flush=True)
+                    return data2
         except Exception as e:
-            print(f"⚠️ Lỗi model {model}: {e}", flush=True)
-    return None
+            print(f"⚠️ Stage 2 lỗi {model}: {e}", flush=True)
+
+    # Dự phòng nếu Stage 2 JSON bị lỗi mạng
+    fallback_scenes, full_tts = parse_custom_script_into_scenes(script_text, available_chars)
+    return {
+        "script": full_tts,
+        "tts_script": full_tts,
+        "scenes": fallback_scenes
+    }
 
 
 def pick_unique_scene_images(scenes, anime_name):
