@@ -81,6 +81,8 @@ Return STRICTLY a JSON array of 5 strings:
         except Exception as e:
             print(f"⚠️ Thử Gemini Suggestion {model}: {e}", flush=True)
             
+    print("⚠️ API Key chưa hợp lệ hoặc bị lỗi Status 401! Đang nạp 5 chủ đề mẫu mặc định...", flush=True)
+    print("👉 Hãy dán Gemini API Key chuẩn từ https://aistudio.google.com/app/apikey vào ô 'Gemini Key:'!", flush=True)
     return [
         f"The Dark Secret Behind {anime_name} That 99% Of Fans Missed",
         f"Why {anime_name}'s Main Character Is Way Overpowered",
