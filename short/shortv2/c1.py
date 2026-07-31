@@ -1259,7 +1259,10 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
     start_time = time.time()
     
     last_seg_idx = -1
+    current_gif_decoded_frames = []
     current_decoded_static = None
+    current_decoded_next_frame = None
+    current_decoded_next_seg_idx = -1
     
     for f in range(total_frames):
         t = f / fps
@@ -1270,31 +1273,46 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
         seg = timeline[active_idx]
         p_str = seg["image_path"]
         
-        media_info = cached_media.get(p_str)
-        if not media_info:
-            frame_bgr = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
-            is_gif = False
-        else:
-            is_gif = media_info[0]
-            if not is_gif:
-                # Avoid redundant imdecodes for static images (only once per segment)
-                if active_idx != last_seg_idx or current_decoded_static is None:
+        # Avoid redundant imdecodes when switching segments
+        if active_idx != last_seg_idx:
+            current_decoded_static = None
+            current_gif_decoded_frames = []
+            
+            media_info = cached_media.get(p_str)
+            if media_info:
+                is_gif = media_info[0]
+                if is_gif:
+                    # Decode all frames of this GIF once per segment
+                    gif_frames_bytes = media_info[1]
+                    for f_bytes in gif_frames_bytes:
+                        dec = cv2.imdecode(np.frombuffer(f_bytes, np.uint8), cv2.IMREAD_COLOR)
+                        if dec is None:
+                            dec = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
+                        current_gif_decoded_frames.append(dec)
+                else:
+                    # Decode static image once per segment
                     jpeg_bytes = media_info[1]
                     current_decoded_static = cv2.imdecode(np.frombuffer(jpeg_bytes, np.uint8), cv2.IMREAD_COLOR)
                     if current_decoded_static is None:
                         current_decoded_static = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
-                    last_seg_idx = active_idx
+            last_seg_idx = active_idx
+
+        media_info = cached_media.get(p_str)
+        if not media_info:
+            frame_bgr = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
+        else:
+            is_gif = media_info[0]
+            if not is_gif:
                 frame_bgr = current_decoded_static
             else:
-                gif_frames = media_info[1]
-                gif_dur = media_info[2]
-                t_rel = t - seg["start"]
-                n_frames = len(gif_frames)
-                total_gif_dur = n_frames * gif_dur
-                f_idx = int((t_rel % total_gif_dur) / gif_dur) % n_frames
-                jpeg_bytes = gif_frames[f_idx]
-                frame_bgr = cv2.imdecode(np.frombuffer(jpeg_bytes, np.uint8), cv2.IMREAD_COLOR)
-                if frame_bgr is None:
+                if current_gif_decoded_frames:
+                    gif_dur = media_info[2]
+                    t_rel = t - seg["start"]
+                    n_frames = len(current_gif_decoded_frames)
+                    total_gif_dur = n_frames * gif_dur
+                    f_idx = int((t_rel % total_gif_dur) / gif_dur) % n_frames
+                    frame_bgr = current_gif_decoded_frames[f_idx]
+                else:
                     frame_bgr = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
 
         start_t = seg["start"]
@@ -1302,29 +1320,34 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
         seg_dur = max(0.1, end_t - start_t)
         progress = min(1.0, max(0.0, (t - start_t) / seg_dur))
 
-        # Zoom effect
+        # Zoom effect (Optimized with INTER_NEAREST for massive speedup)
         scale = (1.0 + 0.06 * progress) if (active_idx % 2 == 0) else (1.06 - 0.06 * progress)
         zw, zh = int(TARGET_W * scale), int(TARGET_H * scale)
-        img_zoomed = cv2.resize(frame_bgr, (zw, zh), interpolation=cv2.INTER_LINEAR)
+        img_zoomed = cv2.resize(frame_bgr, (zw, zh), interpolation=cv2.INTER_NEAREST)
         zl, zt = (zw - TARGET_W) // 2, (zh - TARGET_H) // 2
         frame_bg = img_zoomed[zt:zt+TARGET_H, zl:zl+TARGET_W]
 
-        # Transition effect (Decodes next frame bytes to numpy array properly)
+        # Transition effect (Decodes next frame bytes to numpy array properly, cached once per segment)
         if active_idx < len(timeline) - 1 and (end_t - t) < (fade_frames / fps):
             next_seg = timeline[active_idx + 1]
             next_p_str = next_seg["image_path"]
             next_media_info = cached_media.get(next_p_str)
             if next_media_info:
-                is_next_gif = next_media_info[0]
-                if not is_next_gif:
-                    jpeg_bytes_next = next_media_info[1]
-                else:
-                    jpeg_bytes_next = next_media_info[1][0]
+                if current_decoded_next_seg_idx != active_idx:
+                    is_next_gif = next_media_info[0]
+                    if not is_next_gif:
+                        jpeg_bytes_next = next_media_info[1]
+                    else:
+                        jpeg_bytes_next = next_media_info[1][0]
+                    
+                    current_decoded_next_frame = cv2.imdecode(np.frombuffer(jpeg_bytes_next, np.uint8), cv2.IMREAD_COLOR)
+                    if current_decoded_next_frame is None:
+                        current_decoded_next_frame = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
+                    current_decoded_next_seg_idx = active_idx
                 
-                cv_img_next = cv2.imdecode(np.frombuffer(jpeg_bytes_next, np.uint8), cv2.IMREAD_COLOR)
-                if cv_img_next is not None:
+                if current_decoded_next_frame is not None:
                     alpha = (end_t - t) / (fade_frames / fps)
-                    frame_bg = cv2.addWeighted(frame_bg, alpha, cv_img_next, 1.0 - alpha, 0)
+                    frame_bg = cv2.addWeighted(frame_bg, alpha, current_decoded_next_frame, 1.0 - alpha, 0)
 
         # Add subtitle (On-the-fly blending using pre-rendered mini patches - extremely fast, under 0.1ms)
         active_sub_text = None
