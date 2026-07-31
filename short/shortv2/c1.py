@@ -644,11 +644,18 @@ async def _edge_tts_save(text, voice, out_mp3):
     await communicate.save(str(out_mp3))
 
 def generate_tts_robust(text, voice, out_mp3):
+    # Ensure old file is deleted to avoid reusing stale audio
+    if out_mp3.exists():
+        try:
+            out_mp3.unlink()
+        except Exception:
+            pass
+            
     try:
         loop = asyncio.get_event_loop()
         if loop.is_running():
             loop.create_task(_edge_tts_save(text, voice, out_mp3))
-            for _ in range(30):
+            for _ in range(60):
                 if out_mp3.exists() and out_mp3.stat().st_size > 1000:
                     return True
                 time.sleep(0.5)
@@ -658,12 +665,17 @@ def generate_tts_robust(text, voice, out_mp3):
     except Exception:
         pass
     
+    # Fallback to CLI edge-tts
+    if out_mp3.exists():
+        try: out_mp3.unlink()
+        except: pass
     txt_tmp = out_mp3.parent / "script_tts_tmp.txt"
     txt_tmp.write_text(text, encoding="utf-8")
     cmd = f'edge-tts --file "{txt_tmp}" --voice "{voice}" --rate="+10%" --write-media "{out_mp3}"'
     os.system(cmd)
     txt_tmp.unlink(missing_ok=True)
     return out_mp3.exists() and out_mp3.stat().st_size > 1000
+
 
 
 def refine_subtitles_gemini(word_chunks, script_text, api_key):
