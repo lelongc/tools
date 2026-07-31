@@ -1,3 +1,40 @@
+
+def load_conf_for_anime(anime_name):
+    anime_dir = BASE_LIBRARY_DIR / anime_name
+    anime_dir.mkdir(parents=True, exist_ok=True)
+    conf_path = anime_dir / "characters_config.json"
+    if conf_path.exists():
+        try:
+            return json.loads(conf_path.read_text(encoding="utf-8"))
+        except Exception: pass
+    return {}
+
+def save_conf_for_anime(anime_name, data):
+    anime_dir = BASE_LIBRARY_DIR / anime_name
+    anime_dir.mkdir(parents=True, exist_ok=True)
+    conf_path = anime_dir / "characters_config.json"
+    conf_path.write_text(json.dumps(data, indent=4, ensure_ascii=False), encoding="utf-8")
+
+def get_all_animes():
+    BASE_LIBRARY_DIR.mkdir(parents=True, exist_ok=True)
+    animes = []
+    for item in BASE_LIBRARY_DIR.iterdir():
+        if item.is_dir() and not item.name.startswith('.'):
+            animes.append(item.name)
+    if not animes:
+        animes = ["Tensei_Slime"]
+        save_conf_for_anime("Tensei_Slime", {
+            "Rimuru_Tempest": "Rimuru Tempest",
+            "Veldora_Tempest": "Veldora Tempest",
+            "Milim_Nava": "Milim Nava",
+            "Guy_Crimson": "Guy Crimson",
+            "Diablo": "Diablo",
+            "Benimaru": "Benimaru",
+            "Shion": "Shion"
+        })
+    return sorted(animes)
+
+
 # @title ⚙️ 2. Core Engine (Hỗ Trợ Tự Nhập Kịch Bản Tùy Chỉnh + AI Gemini Auto + Live Progress Bar %)
 import warnings
 warnings.filterwarnings('ignore')
@@ -238,35 +275,54 @@ def clean_json_text(text):
         text = text[:-3]
     return text.strip()
 
-def generate_script_gemini(topic, anime_name, available_chars, api_key):
-    models = [
-        "gemini-3.5-flash-lite",
-        "gemini-3.1-flash-lite",
-        "gemini-3.6-flash",
-        "gemini-3.5-flash",
-        "gemini-2.5-flash",
-        "gemini-2.5-flash-lite",
-        "gemini-1.5-flash"
-    ]
+def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_style="Shocking Secret", ending_style="Viral Comment Question"):
+    models = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.6-flash", "gemini-1.5-flash"]
     chars_str = ", ".join(available_chars) if available_chars else anime_name
-    prompt = f"""You are an expert anime Short video director. Write a viral 60-second narrative script in ENGLISH about '{topic}' for anime '{anime_name}'.
-CRITICAL MANDATE: Regardless of what language the topic is provided in, the generated script and voiceover text MUST BE WRITTEN ENTIRELY IN ENGLISH!
+    
+    hook_prompts = {
+        "Shocking Secret": "Start with an explosive, shocking secret hook that immediately grabs attention (e.g., 'Did you know the dark truth behind... that 99% of fans missed?').",
+        "Power Scaling": "Start with a mind-blowing power scaling hook about how insanely broken this ability/character is.",
+        "Controversial Take": "Start with a controversial, debate-triggering take that makes viewers want to comment immediately.",
+        "Mysterious Twist": "Start with a mysterious question that promises a crazy plot twist."
+    }
+    
+    ending_prompts = {
+        "Viral Comment Question": "End with a compelling question asking viewers for their opinion to drive hundreds of comments (crucial for YouTube algorithm boosting!).",
+        "Seamless Loop": "End with a cliffhanger phrase that seamlessly loops back to the beginning of the video.",
+        "Deep Lore Conclusion": "End with a powerful, epic summary statement about the character's legacy."
+    }
+    
+    selected_hook_instruction = hook_prompts.get(hook_style, hook_prompts["Shocking Secret"])
+    selected_ending_instruction = ending_prompts.get(ending_style, ending_prompts["Viral Comment Question"])
 
-Available character keys in this anime library: [{chars_str}]
+    prompt = f"""You are a YouTube Shorts Master Producer. Write a viral, 100% original narrative script in ENGLISH about '{topic}' for anime '{anime_name}'.
 
-REQUIREMENTS:
-1. The full script must be 150-160 English words (~60 seconds reading duration).
-2. Divide the script into EXACTLY 30 scenes (each scene corresponds to ~2 seconds of English narration).
-3. For EACH scene, assign the most relevant 'character_key' from the available list: [{chars_str}]. If a scene refers to general events, assign the main protagonist character key.
+CRITICAL MANDATE:
+- Script language MUST BE 100% ENGLISH!
+- MUST avoid generic Wikipedia summaries to ensure 100% YOUTUBE MONETIZATION COMPLIANCE & ORIGINAL CONTENT.
+- Use high-retention storytelling, fast pacing, and emotional impact.
 
-Return STRICTLY valid JSON with structure:
+HOOK MANDATE:
+{selected_hook_instruction}
+
+ENDING MANDATE:
+{selected_ending_instruction}
+
+Available character keys for image mapping: [{chars_str}]
+
+SCRIPT STRUCTURE & LENGTH:
+1. Exact total word count: 185 to 195 English words (~40-45 seconds of natural speech).
+2. Divide into 15 to 17 scenes (~2.5-3 seconds per scene).
+3. Assign the most relevant 'character_key' from [{chars_str}] to EACH scene.
+
+Return STRICTLY valid JSON:
 {{
   "script": "Full narrative script text in English...",
   "tts_script": "Full voiceover text in English...",
   "scenes": [
     {{
       "scene_index": 1,
-      "text_snippet": "Short English text spoken in this 2s scene",
+      "text_snippet": "English spoken text in this ~3s scene",
       "character_key": "Character_Name_Key"
     }}
   ]
@@ -275,18 +331,18 @@ Return STRICTLY valid JSON with structure:
     for model in models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         try:
-            r = requests.post(url, json=body, timeout=12)
+            r = requests.post(url, json=body, timeout=30)
             if r.status_code == 200:
                 raw_txt = r.json()['candidates'][0]['content']['parts'][0]['text']
-                clean_txt = clean_json_text(raw_txt)
-                data = json.loads(clean_txt)
-                print(f"   ✅ Đã tạo kịch bản thành công từ Gemini model '{model}'!")
+                data = json.loads(clean_json_text(raw_txt))
+                print(f"   ✅ Đã tạo kịch bản VIRAL ({hook_style} + {ending_style}) thành công từ Gemini model '{model}'!", flush=True)
                 return data
             else:
-                print(f"⚠️ Thử model {model} (Status {r.status_code}): {r.text[:80]}...")
+                print(f"⚠️ Thử model {model} (Status {r.status_code})...", flush=True)
         except Exception as e:
-            print(f"⚠️ Lỗi model {model}: {e}")
+            print(f"⚠️ Lỗi model {model}: {e}", flush=True)
     return None
+
 
 def pick_unique_scene_images(scenes, anime_name):
     anime_dir = BASE_LIBRARY_DIR / anime_name
@@ -647,7 +703,7 @@ def generate_video_short(anime_name, topic, api_key, voice="en-US-ChristopherNeu
     else:
         if label_widget: label_widget.value = "<b>🚀 [1/5] 5%</b> — AI Gemini đang viết kịch bản Tiếng Anh 30 phân cảnh..."
         if pbar_widget: pbar_widget.value = 5
-        script_data = generate_script_gemini(topic, anime_name, available_chars, api_key)
+        script_data = generate_script_gemini(topic, anime_name, available_chars, api_key, hook_style=hook_style, ending_style=ending_style)
         if not script_data or 'scenes' not in script_data:
             if label_widget: label_widget.value = "<b style='color:red;'>❌ LỖI: Không thể tạo kịch bản Gemini. Kiểm tra lại API Key hoặc nhập kịch bản tùy chỉnh!</b>"
             return
