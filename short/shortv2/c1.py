@@ -488,16 +488,16 @@ def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_sty
     chars_str = ", ".join(available_chars) if available_chars else anime_name
     
     hook_prompts = {
-        "Shocking Secret": "Start with an explosive 3-second hook: 'Did you know the dark truth behind... that 99% of fans missed?'",
-        "Power Scaling": "Start with a mind-blowing power scaling hook about how insanely broken this character or ability is.",
-        "Controversial Take": "Start with a controversial, debate-triggering take that makes viewers want to comment immediately.",
-        "Mysterious Twist": "Start with a mysterious question that promises a crazy plot twist."
+        "Shocking Secret": f"Start with an explosive 3-second hook about '{topic}': 'Did you know the dark truth about {topic} that 99% of fans completely missed?'",
+        "Power Scaling": f"Start with a mind-blowing power scaling hook: 'Think {topic} is balanced? You won't believe how insanely broken this power really is!'",
+        "Controversial Take": f"Start with a controversial, debate-triggering take about '{topic}' that forces viewers to comment immediately.",
+        "Mysterious Twist": f"Start with a mysterious question about '{topic}' that promises a mind-bending plot twist."
     }
     
     ending_prompts = {
-        "Viral Comment Question": "End with a complete, powerful viral question asking viewers for their opinion (e.g. 'Was it true justice, or did he cross the line? What do you think? Comment below!'). MUST end with a complete question mark '?'!",
-        "Seamless Loop": "End with a complete cliffhanger sentence that seamlessly loops back to the opening hook. MUST be a complete, full sentence!",
-        "Deep Lore Conclusion": "End with a epic summary statement about the character's legacy. MUST end with a period '.'!"
+        "Viral Comment Question": f"End with a complete, powerful viral question: 'What do you think about {topic}? Is it truly unmatched? Comment your opinion below!'",
+        "Seamless Loop": f"End with a complete cliffhanger sentence that connects back to the opening hook: 'And that is why the truth behind {topic} will never be forgotten.'",
+        "Deep Lore Conclusion": f"End with an epic summary statement about the legacy of {topic} in {anime_name}."
     }
     
     selected_hook_instruction = hook_prompts.get(hook_style, hook_prompts["Shocking Secret"])
