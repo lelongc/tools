@@ -483,7 +483,8 @@ def clean_json_text(text):
 
 def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_style="Shocking Secret", ending_style="Viral Comment Question"):
     api_key = get_effective_gemini_key(api_key)
-    models = ["gemini-flash-latest", "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemma-4-31b-it"]
+    # Đưa gemini-3.1-flash-lite lên đầu tiên theo yêu cầu
+    models = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-flash-latest", "gemma-4-31b-it"]
     chars_str = ", ".join(available_chars) if available_chars else anime_name
     
     hook_prompts = {
@@ -502,7 +503,8 @@ def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_sty
     selected_hook_instruction = hook_prompts.get(hook_style, hook_prompts["Shocking Secret"])
     selected_ending_instruction = ending_prompts.get(ending_style, ending_prompts["Viral Comment Question"])
 
-    prompt = f"""You are a YouTube Shorts Master Producer. Write a viral, 100% original narrative script in ENGLISH about '{topic}' for anime '{anime_name}'.
+    # PASS 1: Soạn kịch bản chi tiết ban đầu
+    prompt_pass1 = f"""You are a YouTube Shorts Master Producer. Write a viral, 100% original narrative script in ENGLISH about '{topic}' for anime '{anime_name}'.
 
 CRITICAL MANDATE:
 - Script language MUST BE 100% ENGLISH!
@@ -514,18 +516,17 @@ HOOK INSTRUCTION:
 
 ENDING INSTRUCTION:
 {selected_ending_instruction}
-CRITICAL: The script MUST end with a 100% complete, standalone sentence! DO NOT append incomplete trailing words or cut-off fragments like 'because the reason why...'!
+CRITICAL: The script MUST end with a 100% complete, standalone sentence! DO NOT append incomplete trailing words or cut-off fragments!
 
 Available character keys for image mapping: [{chars_str}]
 
-SCRIPT STRUCTURE & EXACT LENGTH:
-1. Exact total word count: STRICTLY 175 to 185 English words (Guarantees final video is EXACTLY 52 to 58 seconds).
-2. Divide into 14 to 16 scenes (~3 to 3.5 seconds per scene).
+SCRIPT STRUCTURE & LENGTH REQUIREMENT:
+1. Target total word count: STRICTLY 175 to 185 English words (Guarantees final video is EXACTLY 52 to 58 seconds).
+2. Divide into 16 to 18 scenes (~3 seconds per scene).
 3. Assign the most relevant 'character_key' from [{chars_str}] to EACH scene.
 
 Return STRICTLY valid JSON:
 {{
-  "script": "Full narrative script text in English...",
   "scenes": [
     {{
       "scene_index": 1,
@@ -534,24 +535,60 @@ Return STRICTLY valid JSON:
     }}
   ]
 }}"""
-    body = {'contents': [{'parts': [{'text': prompt}]}], 'generationConfig': {'responseMimeType': 'application/json', 'maxOutputTokens': 2048}}
+    body1 = {'contents': [{'parts': [{'text': prompt_pass1}]}], 'generationConfig': {'responseMimeType': 'application/json', 'maxOutputTokens': 2048}}
+    
     for model in models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         try:
-            r = requests.post(url, json=body, timeout=30)
+            r = requests.post(url, json=body1, timeout=30)
             if r.status_code == 200:
                 raw_txt = r.json()['candidates'][0]['content']['parts'][0]['text']
                 data = json.loads(clean_json_text(raw_txt))
                 
-                # Tự động ghép tts_script chính xác 100% từ danh sách scenes để KHÔNG BAO GIỜ bị ảo giác vế câu thừa ở cuối!
                 if data.get('scenes') and isinstance(data['scenes'], list):
                     clean_snippets = [sc['text_snippet'].strip() for sc in data['scenes'] if sc.get('text_snippet')]
                     full_tts = " ".join(clean_snippets)
+                    w_count = len(full_tts.split())
+                    
+                    # NẾU LẦN 1 TẠO ÍT TỪ (<160 từ), TỰ ĐỘNG GỌI PASS 2 ĐỂ MỞ RỘNG CHI TIẾT LÊN ĐỦ 175-185 TỪ
+                    if w_count < 160:
+                        print(f"   ⏳ [PASS 1 '{model}'] Kịch bản có {w_count} từ (chưa đủ 175-185 từ). Đang gọi PASS 2 để bổ sung chi tiết lore...", flush=True)
+                        prompt_pass2 = f"""The following script has {w_count} words:
+"{full_tts}"
+
+TASK:
+Expand and enrich this script so the total length is STRICTLY 175 to 185 English words (~52 to 58 seconds).
+Add deeper lore details, emotional pacing, and maintain the exact Hook and Ending.
+Divide into 16 to 18 scenes. Assign character_key from [{chars_str}] to each scene.
+
+Return STRICTLY valid JSON:
+{{
+  "scenes": [
+    {{
+      "scene_index": 1,
+      "text_snippet": "Expanded text snippet...",
+      "character_key": "Character_Name_Key"
+    }}
+  ]
+}}"""
+                        body2 = {'contents': [{'parts': [{'text': prompt_pass2}]}], 'generationConfig': {'responseMimeType': 'application/json', 'maxOutputTokens': 2048}}
+                        try:
+                            r2 = requests.post(url, json=body2, timeout=30)
+                            if r2.status_code == 200:
+                                raw_txt2 = r2.json()['candidates'][0]['content']['parts'][0]['text']
+                                data2 = json.loads(clean_json_text(raw_txt2))
+                                if data2.get('scenes') and isinstance(data2['scenes'], list):
+                                    data = data2
+                                    clean_snippets = [sc['text_snippet'].strip() for sc in data['scenes'] if sc.get('text_snippet')]
+                                    full_tts = " ".join(clean_snippets)
+                                    w_count = len(full_tts.split())
+                        except Exception as e2:
+                            print(f"⚠️ Lỗi Pass 2 expansion: {e2}", flush=True)
+
                     data['tts_script'] = full_tts
                     data['script'] = full_tts
-
-                print(f"   ✅ Đã tạo kịch bản VIRAL ({hook_style} + {ending_style}) thành công từ Gemini model '{model}'!", flush=True)
-                return data
+                    print(f"   ✅ [GEMINI AI '{model}'] Đã tạo kịch bản VIRAL hoàn chỉnh ({w_count} từ English, {len(data['scenes'])} phân cảnh)!", flush=True)
+                    return data
             else:
                 print(f"⚠️ Thử model {model} (Status {r.status_code})...", flush=True)
         except Exception as e:
