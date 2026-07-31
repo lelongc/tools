@@ -742,7 +742,7 @@ def align_word_subtitles_whisper_smart(audio_path, script_text, max_words_per_ch
             
     return chunks, whisper_words
 
-def build_semantic_timeline(all_words, script_text, anime_name, topic, total_duration, api_key, target_images=30):
+def build_semantic_timeline(all_words, script_text, anime_name, topic, total_duration, api_key, scenes=None, target_images=30):
     anime_dir = BASE_LIBRARY_DIR / anime_name
     char_static_map = {}
     char_gif_map = {}
@@ -778,12 +778,30 @@ def build_semantic_timeline(all_words, script_text, anime_name, topic, total_dur
             main_subject_char = ckey
             break
 
-    print(f"🎯 Nhân vật chủ đề chính của Video: [{main_subject_char}]", flush=True)
+    print(f"🎯 AI phân bổ nhân vật chủ đề chính của Video: [{main_subject_char}]", flush=True)
 
     interval_dur = total_duration / target_images
     timeline_segments = []
     used_statics_per_char = {c: [] for c in available_chars}
     used_gifs_per_char = {c: [] for c in available_chars}
+
+    # Map scenes directly from AI Gemini if available!
+    scene_char_map = []
+    if scenes and isinstance(scenes, list):
+        for sc in scenes:
+            sc_key = sc.get('character_key', '').strip()
+            if sc_key and sc_key in available_chars:
+                scene_char_map.append(sc_key)
+            else:
+                # Match against available_chars with strict regex word boundaries
+                matched = None
+                snip_lower = sc.get('text_snippet', '').lower()
+                for ckey in available_chars:
+                    first_name = ckey.lower().replace("_", " ").split()[0]
+                    if len(first_name) >= 3 and re.search(r'\b' + re.escape(first_name) + r'\b', snip_lower):
+                        matched = ckey
+                        break
+                scene_char_map.append(matched or main_subject_char)
 
     for i in range(target_images):
         st = i * interval_dur
@@ -792,16 +810,23 @@ def build_semantic_timeline(all_words, script_text, anime_name, topic, total_dur
         words_in_interval = [w["word"].lower() for w in all_words if st <= w["start"] < et]
         interval_text = " ".join(words_in_interval)
 
-        assigned_char = main_subject_char
-        for ckey in available_chars:
-            ckey_parts = ckey.lower().replace("_", " ").split()
-            first_name = ckey_parts[0]
-            if first_name in interval_text and len(first_name) >= 3:
-                assigned_char = ckey
-                break
+        # Trọng yếu: Ưu tiên lấy trực tiếp nhân vật do AI Gemini phân bổ cho từng phân cảnh!
+        assigned_char = None
+        if scene_char_map:
+            sc_idx = min(int((i / target_images) * len(scene_char_map)), len(scene_char_map) - 1)
+            assigned_char = scene_char_map[sc_idx]
+
+        if not assigned_char:
+            assigned_char = main_subject_char
+            for ckey in available_chars:
+                first_name = ckey.lower().replace("_", " ").split()[0]
+                # Sử dụng Regex \bword\b CHÍNH XÁC NGUYÊN TỪ (không bao giờ nhầm BRAIN thành RAIN hay ULTIMATE thành ULTIMA)
+                if len(first_name) >= 3 and re.search(r'\b' + re.escape(first_name) + r'\b', interval_text):
+                    assigned_char = ckey
+                    break
 
         # TỰ ĐỘNG ƯU TIÊN GIF NẾU CÓ, NẾU RỖNG THÌ TỰ ĐỘNG CHUYỂN SANG ẢNH TĨNH 100% KHÔNG BAO GIỜ BỊ LỖI
-        prefer_gif = (i % 2 == 1) or any(kw in interval_text.lower() for kw in ['skill', 'fight', 'power', 'attack', 'kill', 'demon', 'slash', 'blast', 'magic', 'true', 'ultimate'])
+        prefer_gif = (i % 2 == 1) or any(kw in interval_text for kw in ['skill', 'fight', 'power', 'attack', 'kill', 'demon', 'slash', 'blast', 'magic', 'true', 'ultimate'])
 
         chosen_img = None
         if prefer_gif and assigned_char in char_gif_map:
@@ -841,28 +866,28 @@ def build_semantic_timeline(all_words, script_text, anime_name, topic, total_dur
 
     return timeline_segments
 
-def render_mp4_video_word_sync(timeline, script_text, audio_path, out_mp4_path, pbar_widget=None, label_widget=None, api_key=None):
-    print("🚀 [PERFECT YELLOW SUBTITLE & MAIN CHARACTER ENGINE] Đồng bộ mốc từ Whisper & Phụ đề Vàng...", flush=True)
-    
+def render_mp4_video_from_subtitles(word_chunks, all_words, script_text, audio_path, out_mp4_path, api_key=None, scenes=None):
+    api_key = get_effective_gemini_key(api_key)
+    print("🚀 [BƯỚC 2] Đang dựng Video Short MP4 từ file Phụ Đề & Audio đã xuất (Hỗ trợ GIF Động & Đan Xen AI)...", flush=True)
+
     audio_clip = AudioFileClip(str(audio_path))
     total_duration = audio_clip.duration
     audio_clip.close()
-    
-    word_chunks, all_words = align_word_subtitles_whisper_smart(audio_path, script_text, max_words_per_chunk=2)
-    
+
+    num_target_images = max(12, int(total_duration / 2.0))
     anime_name = out_mp4_path.parent.parent.name
-    # Get topic from output filename or default
     topic = "Rimuru Tempest"
-    dynamic_timeline = build_semantic_timeline(all_words, script_text, anime_name, topic, total_duration, api_key, target_images=30)
-    print(f"🎬 Đã nạp {len(dynamic_timeline)} bức ảnh (Chủ đề chính + Khớp NV khi nhắc tên, 2.0s/ảnh)...", flush=True)
-    
+
+    dynamic_timeline = build_semantic_timeline(all_words, script_text, anime_name, topic, total_duration, api_key, scenes=scenes, target_images=num_target_images)
+    print(f"🎬 Đã nạp {len(dynamic_timeline)} bức ảnh/GIF (2.0s/ảnh mượt mà)...", flush=True)
+
     fps = 30
     total_frames = int(total_duration * fps)
-    
+
     temp_raw_avi = out_mp4_path.parent / f"_raw_{int(time.time())}.avi"
     fourcc = cv2.VideoWriter_fourcc(*'MJPG')
     writer = cv2.VideoWriter(str(temp_raw_avi), fourcc, fps, (TARGET_W, TARGET_H))
-    
+
     def get_pil_frame_at_time(image_path, t_rel):
         try:
             img = Image.open(image_path)
@@ -899,7 +924,6 @@ def render_mp4_video_word_sync(timeline, script_text, audio_path, out_mp4_path, 
         else:
             loaded_imgs.append((seg["start"], seg["end"], None, idx, p, True))
 
-    # PRE-RENDER BRIGHT YELLOW SUBTITLES WITH CORRECT BGR CONVERSION
     sub_img_cache = {}
     for chunk in word_chunks:
         txt = chunk["text"]
@@ -907,7 +931,7 @@ def render_mp4_video_word_sync(timeline, script_text, audio_path, out_mp4_path, 
             overlay = np.zeros((TARGET_H, TARGET_W, 4), dtype=np.uint8)
             pil_ov = Image.fromarray(overlay, mode="RGBA")
             draw = ImageDraw.Draw(pil_ov)
-            
+
             font = None
             font_paths = ["/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf", "C:\\Windows\\Fonts\\arialbd.ttf"]
             for fp in font_paths:
@@ -915,7 +939,7 @@ def render_mp4_video_word_sync(timeline, script_text, audio_path, out_mp4_path, 
                     try: font = ImageFont.truetype(fp, 75); break
                     except: pass
             if not font: font = ImageFont.load_default()
-            
+
             txt_upper = txt.strip().upper()
             bbox = draw.textbbox((0, 0), txt_upper, font=font)
             tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
@@ -927,73 +951,93 @@ def render_mp4_video_word_sync(timeline, script_text, audio_path, out_mp4_path, 
                         except: pass
                 bbox = draw.textbbox((0, 0), txt_upper, font=font)
                 tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
-                
+
             x, y = (TARGET_W - tw) // 2, (TARGET_H - th) // 2
             stroke_w = 6
-            # Draw thick black outline
             for dx in range(-stroke_w, stroke_w + 1):
                 for dy in range(-stroke_w, stroke_w + 1):
                     if dx != 0 or dy != 0: draw.text((x + dx, y + dy), txt_upper, font=font, fill=(0, 0, 0, 255))
-            # Draw BRIGHT YELLOW text (RGBA: 255, 255, 0, 255)
             draw.text((x, y), txt_upper, font=font, fill=(255, 255, 0, 255))
-            
-            # PROPER RGBA -> BGRA conversion for OpenCV
+
             bgra_np = cv2.cvtColor(np.array(pil_ov), cv2.COLOR_RGBA2BGRA)
             sub_img_cache[txt] = (bgra_np[:, :, :3], bgra_np[:, :, 3] / 255.0)
 
     fade_frames = 4
-    print(f"🎬 C++ OpenCV đang ghi {total_frames} khung hình (Phụ đề Vàng rực rỡ & Khớp tuyệt đối)...", flush=True)
+    print(f"🎬 C++ OpenCV đang ghi {total_frames} khung hình (Tự động lặp GIF sinh động & Phụ đề Vàng)...", flush=True)
 
     for frame_idx in range(total_frames):
         t = frame_idx / fps
-        
+
         seg_idx = 0
-        for st, et, _, idx in loaded_imgs:
+        for st, et, _, idx, _, _ in loaded_imgs:
             if st <= t <= et:
                 seg_idx = idx
                 break
-                
-        st, et, cv_img_curr, _ = loaded_imgs[seg_idx]
+
+        st, et, cv_img_curr, _, img_path, is_gif = loaded_imgs[seg_idx]
         seg_dur = max(0.1, et - st)
         progress = min(1.0, max(0.0, (t - st) / seg_dur))
-        
+
+        if is_gif:
+            pil_frame = get_pil_frame_at_time(img_path, t - st)
+            w, h = pil_frame.size
+            ratio = TARGET_W / TARGET_H
+            if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
+            else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
+            pil_frame = pil_frame.resize((nw, nh), Image.LANCZOS)
+            l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
+            pil_frame = pil_frame.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
+            cv_img_curr = cv2.cvtColor(np.array(pil_frame), cv2.COLOR_RGB2BGR)
+
         scale = (1.0 + 0.06 * progress) if (seg_idx % 2 == 0) else (1.06 - 0.06 * progress)
-        
+
         zw, zh = int(TARGET_W * scale), int(TARGET_H * scale)
         img_zoomed = cv2.resize(cv_img_curr, (zw, zh), interpolation=cv2.INTER_LINEAR)
         zl, zt = (zw - TARGET_W) // 2, (zh - TARGET_H) // 2
         frame_bg = img_zoomed[zt:zt+TARGET_H, zl:zl+TARGET_W]
-        
+
         if seg_idx < len(loaded_imgs) - 1 and (et - t) < (fade_frames / fps):
-            next_st, next_et, cv_img_next, _ = loaded_imgs[seg_idx + 1]
+            next_st, next_et, cv_img_next, _, _, next_is_gif = loaded_imgs[seg_idx + 1]
+            if next_is_gif:
+                pil_next_f = get_pil_frame_at_time(loaded_imgs[seg_idx + 1][4], 0)
+                w, h = pil_next_f.size
+                ratio = TARGET_W / TARGET_H
+                if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
+                else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
+                pil_next_f = pil_next_f.resize((nw, nh), Image.LANCZOS)
+                l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
+                pil_next_f = pil_next_f.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
+                cv_img_next = cv2.cvtColor(np.array(pil_next_f), cv2.COLOR_RGB2BGR)
+
             alpha = (et - t) / (fade_frames / fps)
             frame_bg = cv2.addWeighted(frame_bg, alpha, cv_img_next, 1.0 - alpha, 0)
-            
+
         active_sub_text = None
         for chunk in word_chunks:
             if chunk["start"] <= t <= chunk["end"]:
                 active_sub_text = chunk["text"]
                 break
-                
+
         if active_sub_text and active_sub_text in sub_img_cache:
             txt_bgr, alpha_mask = sub_img_cache[active_sub_text]
             mask_3d = alpha_mask[:, :, None]
             frame_final = (frame_bg * (1.0 - mask_3d) + txt_bgr * mask_3d).astype(np.uint8)
         else:
             frame_final = frame_bg
-            
+
         writer.write(frame_final)
-        
+
     writer.release()
     print("⚡ FFmpeg đang muxing MP4 AAC (stream copy ~2s)...", flush=True)
-    
+
     cmd = f'ffmpeg -y -i "{temp_raw_avi}" -i "{audio_path}" -c:v libx264 -preset ultrafast -c:a aac -shortest "{out_mp4_path}"'
     subprocess.run(cmd, shell=True)
-    
+
     temp_raw_avi.unlink(missing_ok=True)
 
 
-def generate_video_short(anime_name, topic, api_key, voice="en-US-ChristopherNeural", custom_script="", pbar_widget=None, label_widget=None):
+def generate_video_short(anime_name, topic, api_key, voice="en-US-ChristopherNeural", custom_script="", custom_subs="", hook_style="Shocking Secret", ending_style="Viral Comment Question", pbar_widget=None, label_widget=None):
+    api_key = get_effective_gemini_key(api_key)
     out_dir = BASE_LIBRARY_DIR / anime_name / "output_shorts"
     out_dir.mkdir(parents=True, exist_ok=True)
     
