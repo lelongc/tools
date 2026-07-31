@@ -1,3 +1,79 @@
+def get_anilist_anime_info(anime_name):
+    query = '''
+    query ($search: String) {
+      Media (search: $search, type: ANIME) {
+        title { english romaji }
+        description(asHtml: false)
+        genres
+        characters(limit: 12) {
+          nodes {
+            name { full }
+          }
+        }
+      }
+    }
+    '''
+    try:
+        r = requests.post('https://graphql.anilist.co', json={'query': query, 'variables': {'search': anime_name.replace('_', ' ')}}, timeout=10)
+        if r.status_code == 200:
+            data = r.json().get('data', {}).get('Media', {})
+            title = data.get('title', {}).get('english') or data.get('title', {}).get('romaji') or anime_name
+            desc = data.get('description', '')
+            genres = ", ".join(data.get('genres', []))
+            chars = ", ".join([c['name']['full'] for c in data.get('characters', {}).get('nodes', [])])
+            return f"Anime: {title}\nGenres: {genres}\nCharacters: {chars}\nSynopsis: {desc[:600]}"
+    except Exception as e:
+        print(f"⚠️ Lỗi AniList API: {e}")
+    return f"Anime: {anime_name}"
+
+def suggest_viral_topics(anime_name, api_key):
+    print(f"🔎 [ANILIST AI] Đang cào dữ liệu Lore & Tóm tắt cho Anime '{anime_name}'...", flush=True)
+    lore_info = get_anilist_anime_info(anime_name)
+    
+    models = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.6-flash", "gemini-1.5-flash"]
+    prompt = f"""You are a top YouTube Shorts Strategist for Anime Channels with 10M subscribers.
+Anime Name: {anime_name}
+
+Anime Lore & Metadata from AniList:
+{lore_info}
+
+TASK:
+Analyze this anime and generate 5 EXPLOSIVE, VIRAL YouTube Short Topic Titles in ENGLISH that will:
+1. Drive high click-through rate (CTR) and initial 3-second retention.
+2. Spark massive comment section debates.
+3. Deliver high lore value to convince viewers to SUBSCRIBE immediately.
+
+Return STRICTLY a JSON array of 5 strings:
+[
+  "Topic 1 Title...",
+  "Topic 2 Title...",
+  "Topic 3 Title...",
+  "Topic 4 Title...",
+  "Topic 5 Title..."
+]"""
+    body = {'contents': [{'parts': [{'text': prompt}]}], 'generationConfig': {'responseMimeType': 'application/json'}}
+    for model in models:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        try:
+            r = requests.post(url, json=body, timeout=12)
+            if r.status_code == 200:
+                raw_txt = r.json()['candidates'][0]['content']['parts'][0]['text']
+                topics = json.loads(clean_json_text(raw_txt))
+                if isinstance(topics, list) and len(topics) >= 5:
+                    print(f"   ✅ [ANILIST AI '{model}'] Đã tạo 5 Chủ đề Viral xuất sắc!", flush=True)
+                    return topics[:5]
+        except Exception as e:
+            print(f"⚠️ Thử Gemini Suggestion {model}: {e}", flush=True)
+            
+    return [
+        f"The Dark Secret Behind {anime_name} That 99% Of Fans Missed",
+        f"Why {anime_name}'s Main Character Is Way Overpowered",
+        f"The Most Shocking Plot Twist In {anime_name} History",
+        f"Top 3 Hidden Facts About {anime_name} You Didn't Know",
+        f"The True Power Scaling Secrets Of {anime_name}"
+    ]
+
+
 
 def load_conf_for_anime(anime_name):
     anime_dir = BASE_LIBRARY_DIR / anime_name
