@@ -240,6 +240,64 @@ def search_google_direct(query, limit=50):
     unique = [u for u in cands if not (u in seen or seen.add(u))]
     return unique[:limit]
 
+def search_pinterest_gifs(query, limit=50):
+    query_clean = urllib.parse.quote(query + " gif")
+    search_url = f"https://www.pinterest.com/search/pins/?q={query_clean}"
+    session = cffi_requests.Session()
+    urls = []
+    bookmarks = []
+    try:
+        r1 = session.get(search_url, impersonate="chrome124")
+        csrf_token = session.cookies.get("csrftoken") or "123456"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+            "Accept": "application/json, text/javascript, */*, q=0.01",
+            "X-Requested-With": "XMLHttpRequest",
+            "X-CSRFToken": csrf_token,
+            "X-Pinterest-AppState": "active",
+            "X-Pinterest-PWS-Handler": "www/search/pins.js",
+            "Referer": search_url,
+        }
+        for page in range(5):
+            options = {"isPrefetch": False, "query": query + " gif", "scope": "pins", "no_fetch_context_on_resource": False}
+            if bookmarks: options["bookmarks"] = bookmarks
+            params = {"source_url": f"/search/pins/?q={query_clean}", "data": json.dumps({"options": options, "context": {}}), "_": str(int(time.time() * 1000))}
+            api_url = "https://www.pinterest.com/resource/BaseSearchResource/get/"
+            r2 = session.get(api_url, params=params, headers=headers, impersonate="chrome124")
+            if r2.status_code == 200:
+                res_resp = r2.json().get("resource_response", {})
+                results = res_resp.get("data", {}).get("results", [])
+                new_b = res_resp.get("bookmark")
+                if new_b: bookmarks = [new_b]
+                for pin in results:
+                    images = pin.get("images", {})
+                    orig = images.get("orig", {}).get("url") or images.get("736x", {}).get("url") or images.get("474x", {}).get("url")
+                    if orig and orig not in urls and (orig.lower().endswith(".gif") or "originals" in orig):
+                        urls.append(orig)
+                if len(urls) >= limit or not new_b: break
+            else: break
+            time.sleep(1)
+    except Exception as e:
+        print(f"Lỗi Pinterest GIF: {e}")
+    seen = set()
+    return [u for u in urls if not (u in seen or seen.add(u))][:limit]
+
+def search_bing_gifs(query, limit=50):
+    query_clean = urllib.parse.quote(query + " anime gif")
+    search_url = f"https://www.bing.com/images/search?q={query_clean}&qft=+filterui:photo-animatedgif"
+    cands = []
+    try:
+        r = requests.get(search_url, headers=HEADERS, timeout=10)
+        if r.status_code == 200:
+            import re
+            for match in re.findall(r'murl&quot;:&quot;(.*?)&quot;', r.text):
+                if match.lower().endswith('.gif'):
+                    cands.append(match)
+    except Exception as e:
+        print(f"Lỗi Bing GIF: {e}")
+    seen = set()
+    return [u for u in cands if not (u in seen or seen.add(u))][:limit]
+
 def search_pinterest_direct(query, limit=50):
     query_clean = urllib.parse.quote(query)
     search_url = f"https://www.pinterest.com/search/pins/?q={query_clean}"
