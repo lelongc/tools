@@ -509,7 +509,7 @@ def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_sty
 CRITICAL MANDATE:
 - Script MUST BE 100% ENGLISH!
 - MUST be 100% original narrative (no generic Wikipedia summaries).
-- EXACT LENGTH: STRICTLY 175 to 185 English words (~52-58s voiceover).
+- EXACT LENGTH: STRICTLY 195 to 215 English words (~52-59s voiceover at +10% speed).
 
 HOOK:
 {selected_hook}
@@ -523,7 +523,7 @@ Output ONLY the plain text script in English."""
     script_text = ""
     model_used = models[0]
 
-    print("  🔹 [CÔNG ĐOẠN 1/2] AI Gemini đang viết câu chuyện Viral Tiếng Anh (180 từ)...", flush=True)
+    print("  🔹 [CÔNG ĐOẠN 1/2] AI Gemini đang viết câu chuyện Viral Tiếng Anh (200 từ)...", flush=True)
     for model in models:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         body1 = {'contents': [{'parts': [{'text': stage1_prompt}]}]}
@@ -531,11 +531,13 @@ Output ONLY the plain text script in English."""
             r1 = requests.post(url, json=body1, timeout=30)
             if r1.status_code == 200:
                 raw1 = r1.json()['candidates'][0]['content']['parts'][0]['text'].strip()
-                if len(raw1.split()) >= 130:
+                word_count = len(raw1.split())
+                if word_count >= 180:
                     script_text = raw1
                     model_used = model
-                    print(f"   ✅ [STAGE 1 '{model}'] Đã viết xong kịch bản hấp dẫn ({len(script_text.split())} từ English)!", flush=True)
+                    print(f"   ✅ [STAGE 1 '{model}'] Đã viết xong kịch bản hấp dẫn ({word_count} từ English)!", flush=True)
                     break
+
         except Exception as e:
             print(f"⚠️ Stage 1 lỗi {model}: {e}", flush=True)
 
