@@ -1109,7 +1109,10 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
                 cv_img = cv2.resize(cv_img, (nw, nh), interpolation=cv2.INTER_LINEAR)
                 l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
                 cv_img = cv_img[t_crop:t_crop+TARGET_H, l:l+TARGET_W]
-                cached_media[p_str] = (False, cv_img)
+                
+                # Nén JPEG byte lưu RAM
+                _, enc = cv2.imencode('.jpg', cv_img, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                cached_media[p_str] = (False, enc.tobytes())
             except Exception as e:
                 print(f"⚠️ Không thể nạp ảnh {p.name} qua OpenCV (dự phòng PIL): {e}", flush=True)
                 try:
@@ -1123,11 +1126,13 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
                         l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
                         pil_img = pil_img.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
                         cv_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
-                        cached_media[p_str] = (False, cv_img)
+                        _, enc = cv2.imencode('.jpg', cv_img, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                        cached_media[p_str] = (False, enc.tobytes())
                 except Exception as e2:
                     print(f"⚠️ Lỗi hoàn toàn khi nạp ảnh {p.name}: {e2}", flush=True)
                     black = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
-                    cached_media[p_str] = (False, black)
+                    _, enc = cv2.imencode('.jpg', black, [cv2.IMWRITE_JPEG_QUALITY, 80])
+                    cached_media[p_str] = (False, enc.tobytes())
         else:
             try:
                 gif_frames = []
@@ -1136,7 +1141,7 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
                     gif_dur = img.info.get('duration', 100) / 1000.0
                     if gif_dur <= 0: gif_dur = 0.1
                     
-                    # Tối ưu hóa tránh OOM RAM Colab: Chỉ nạp tối đa 25 khung hình cho mỗi GIF
+                    # Tối ưu hóa tuyệt đối RAM Colab: Chỉ nạp tối đa 25 khung hình dạng JPEG bytes
                     max_cache_frames = 25
                     step = 1
                     if n_frames > max_cache_frames:
@@ -1155,12 +1160,16 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
                         frame_resized = cv2.resize(frame_bgr, (nw, nh), interpolation=cv2.INTER_LINEAR)
                         l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
                         frame_cropped = frame_resized[t_crop:t_crop+TARGET_H, l:l+TARGET_W]
-                        gif_frames.append(frame_cropped)
+                        
+                        # Nén JPEG byte lưu RAM
+                        _, enc = cv2.imencode('.jpg', frame_cropped, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                        gif_frames.append(enc.tobytes())
                 cached_media[p_str] = (True, gif_frames, gif_dur)
             except Exception as e:
                 print(f"⚠️ Không thể nạp GIF {p.name}: {e}", flush=True)
                 black = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
-                cached_media[p_str] = (True, [black], 0.1)
+                _, enc = cv2.imencode('.jpg', black, [cv2.IMWRITE_JPEG_QUALITY, 80])
+                cached_media[p_str] = (True, [enc.tobytes()], 0.1)
                 
     print(f"   ✅ Đã nạp xong vào RAM (Mất {time.time() - start_cache_time:.2f}s)!", flush=True)
 
@@ -1251,7 +1260,7 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
         seg = timeline[active_idx]
         p_str = seg["image_path"]
         
-        # Retrieve from RAM cache
+        # Retrieve from RAM cache & decompress JPEG bytes on the fly
         media_info = cached_media.get(p_str)
         if not media_info:
             frame_bgr = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
@@ -1259,7 +1268,10 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
         else:
             is_gif = media_info[0]
             if not is_gif:
-                frame_bgr = media_info[1]
+                jpeg_bytes = media_info[1]
+                frame_bgr = cv2.imdecode(np.frombuffer(jpeg_bytes, np.uint8), cv2.IMREAD_COLOR)
+                if frame_bgr is None:
+                    frame_bgr = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
             else:
                 gif_frames = media_info[1]
                 gif_dur = media_info[2]
@@ -1267,7 +1279,10 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
                 n_frames = len(gif_frames)
                 total_gif_dur = n_frames * gif_dur
                 f_idx = int((t_rel % total_gif_dur) / gif_dur) % n_frames
-                frame_bgr = gif_frames[f_idx]
+                jpeg_bytes = gif_frames[f_idx]
+                frame_bgr = cv2.imdecode(np.frombuffer(jpeg_bytes, np.uint8), cv2.IMREAD_COLOR)
+                if frame_bgr is None:
+                    frame_bgr = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
 
         start_t = seg["start"]
         end_t = seg["end"]
