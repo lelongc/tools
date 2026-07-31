@@ -46,7 +46,7 @@ def suggest_viral_topics(anime_name, api_key):
     print(f"🔎 [ANILIST AI] Đang cào dữ liệu Lore & Tóm tắt cho Anime '{anime_name}'...", flush=True)
     lore_info = get_anilist_anime_info(anime_name)
     
-    models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"]
+    models = ["gemini-flash-latest", "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemma-4-31b-it"]
     prompt = f"""You are a top YouTube Shorts Strategist for Anime Channels with 10M subscribers.
 Anime Name: {anime_name}
 
@@ -382,7 +382,7 @@ def clean_json_text(text):
     return text.strip()
 
 def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_style="Shocking Secret", ending_style="Viral Comment Question"):
-    models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"]
+    models = ["gemini-flash-latest", "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemma-4-31b-it"]
     chars_str = ", ".join(available_chars) if available_chars else anime_name
     
     hook_prompts = {
