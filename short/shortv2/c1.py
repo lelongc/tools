@@ -1,13 +1,17 @@
 def get_effective_gemini_key(user_key=""):
+    k_cand = ""
     if user_key and user_key.strip():
-        return user_key.strip()
-    if SETTINGS_FILE.exists():
+        k_cand = user_key.strip()
+    elif SETTINGS_FILE.exists():
         try:
             data = json.loads(SETTINGS_FILE.read_text(encoding="utf-8"))
-            k = data.get("gemini_api_key", "").strip()
-            if k: return k
+            k_cand = data.get("gemini_api_key", "").strip()
         except Exception: pass
-    return os.environ.get("GEMINI_API_KEY", "")
+    if not k_cand:
+        k_cand = os.environ.get("GEMINI_API_KEY", "").strip()
+    
+    # Clean quotes and spaces
+    return k_cand.strip('"\' \t\r\n')
 
 
 def get_anilist_anime_info(anime_name):
@@ -42,7 +46,7 @@ def suggest_viral_topics(anime_name, api_key):
     print(f"🔎 [ANILIST AI] Đang cào dữ liệu Lore & Tóm tắt cho Anime '{anime_name}'...", flush=True)
     lore_info = get_anilist_anime_info(anime_name)
     
-    models = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.6-flash", "gemini-1.5-flash"]
+    models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"]
     prompt = f"""You are a top YouTube Shorts Strategist for Anime Channels with 10M subscribers.
 Anime Name: {anime_name}
 
@@ -376,7 +380,7 @@ def clean_json_text(text):
     return text.strip()
 
 def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_style="Shocking Secret", ending_style="Viral Comment Question"):
-    models = ["gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-3.6-flash", "gemini-1.5-flash"]
+    models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-pro"]
     chars_str = ", ".join(available_chars) if available_chars else anime_name
     
     hook_prompts = {
