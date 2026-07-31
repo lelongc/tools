@@ -199,7 +199,8 @@ def get_whisper():
     global WHISPER_MODEL
     if WHISPER_MODEL is None:
         print("⏳ Đang nạp Whisper AI (tiny model) để bóc tách mốc thời gian từng từ...")
-        WHISPER_MODEL = whisper.load_model("tiny")
+        device = "cuda" if check_gpu() else "cpu"
+        WHISPER_MODEL = whisper.load_model("tiny", device=device)
     return WHISPER_MODEL
 
 
@@ -1205,13 +1206,15 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
                     tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
             except Exception:
                 tw, th = len(txt_upper) * 35, 80
+                bbox = (0, 0, tw, th)
                 
             stroke_w = 6
-            pw, ph = tw + stroke_w * 2 + 10, th + stroke_w * 2 + 10
+            pw, ph = tw + stroke_w * 2 + 20, th + stroke_w * 2 + 20
             patch_img = Image.new("RGBA", (pw, ph), (0, 0, 0, 0))
             draw = ImageDraw.Draw(patch_img)
             
-            x, y = stroke_w + 5, stroke_w + 5
+            x = stroke_w + 10 - bbox[0]
+            y = stroke_w + 10 - bbox[1]
             for dx in range(-stroke_w, stroke_w + 1):
                 for dy in range(-stroke_w, stroke_w + 1):
                     if dx != 0 or dy != 0:
