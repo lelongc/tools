@@ -1548,12 +1548,31 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
 
         # Add subtitle (On-the-fly blending using pre-rendered mini patches - extremely fast, under 0.1ms)
         active_sub_text = None
+        active_sub_start = 0
         for chunk in word_chunks:
             if chunk["start"] <= t <= chunk["end"]:
                 active_sub_text = chunk["text"]
+                active_sub_start = chunk["start"]
                 break
         if active_sub_text and active_sub_text in sub_patch_cache:
             p_bgr, p_alpha, pw, ph = sub_patch_cache[active_sub_text]
+            
+            # POP-IN ANIMATION
+            progress_frames = int((t - active_sub_start) * fps)
+            if progress_frames < 2:
+                scale = 0.8 + (progress_frames / 2.0) * 0.2
+            elif progress_frames == 2:
+                scale = 1.05
+            else:
+                scale = 1.0
+                
+            if scale != 1.0:
+                new_pw, new_ph = int(pw * scale), int(ph * scale)
+                p_bgr = cv2.resize(p_bgr, (new_pw, new_ph), interpolation=cv2.INTER_LINEAR)
+                p_alpha = cv2.resize(p_alpha, (new_pw, new_ph), interpolation=cv2.INTER_LINEAR)
+                if len(p_alpha.shape) == 2: p_alpha = p_alpha[:, :, None]
+                pw, ph = new_pw, new_ph
+
             x_start = (TARGET_W - pw) // 2
             y_start = (TARGET_H - ph) // 2
             
