@@ -44,10 +44,31 @@ def get_anilist_anime_info(anime_name):
     return f"Anime: {anime_name}"
 
 
-def fetch_deep_lore(anime_name, idea=""):
+def fetch_deep_lore(anime_name, api_key="", idea=""):
     try:
         from duckduckgo_search import DDGS
-        query = f"{anime_name} {idea} anime deep lore hidden facts reddit fandom" if idea else f"{anime_name} anime deep lore hidden facts reddit fandom"
+        
+        search_idea = idea
+        # Dịch ý tưởng sang tiếng anh để cào dữ liệu chuẩn xác nhất
+        if idea and api_key:
+            try:
+                models = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash"]
+                prompt = f"Translate the following anime short idea or topic into concise English keywords for search purposes. Output ONLY the English keywords, nothing else. Text: {idea}"
+                body = {'contents': [{'parts': [{'text': prompt}]}]}
+                
+                for model in models:
+                    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+                    r = requests.post(url, json=body, timeout=5)
+                    if r.status_code == 200:
+                        eng_kw = r.json()['candidates'][0]['content']['parts'][0]['text'].strip()
+                        if eng_kw:
+                            search_idea = eng_kw
+                            print(f"   🌐 [AUTO-TRANSLATE] '{idea}' -> '{search_idea}'", flush=True)
+                            break
+            except Exception as e:
+                print(f"⚠️ Không thể dịch idea sang tiếng Anh: {e}", flush=True)
+
+        query = f"{anime_name} {search_idea} anime deep lore hidden facts reddit fandom" if search_idea else f"{anime_name} anime deep lore hidden facts reddit fandom"
         print(f"🔎 [DEEP LORE RAG] Đang tìm kiếm thông tin sâu trên Reddit/Fandom cho: {query}", flush=True)
         results = DDGS().text(query, max_results=3)
         lore_snippets = "\n".join([f"- {r['title']}: {r['body']}" for r in results])
@@ -60,7 +81,7 @@ def suggest_viral_topics(anime_name, api_key, idea=""):
 
     print(f"🔎 [ANILIST AI] Đang cào dữ liệu Lore & Tóm tắt cho Anime '{anime_name}'...", flush=True)
     lore_info = get_anilist_anime_info(anime_name)
-    deep_lore = fetch_deep_lore(anime_name, idea)
+    deep_lore = fetch_deep_lore(anime_name, api_key, idea)
     lore_info += f"\n\nDeep Lore (Reddit/Fandom):\n{deep_lore}\n"
 
     
@@ -525,7 +546,7 @@ def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_sty
     selected_hook = hook_prompts.get(hook_style, hook_prompts["Shocking Secret"])
     selected_ending = ending_prompts.get(ending_style, ending_prompts["Viral Comment Question"])
     
-    deep_lore = fetch_deep_lore(anime_name, topic)
+    deep_lore = fetch_deep_lore(anime_name, api_key, topic)
 
 
     # CÔNG ĐOẠN 1 (STAGE 1): Tập trung 100% AI vào việc viết kịch bản hấp dẫn (Không bị áp lực JSON)
