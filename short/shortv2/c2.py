@@ -1141,7 +1141,7 @@ def build_fixed_two_second_timeline(scenes, anime_name, topic, total_duration, a
         num_chunks = max(1, round(dur / 2.0))
         chunk_dur = dur / num_chunks
         
-        assigned_char = sc.get("character_folder", "").strip()
+        assigned_char = sc.get("character_key", sc.get("character_folder", "")).strip()
         if not assigned_char or assigned_char not in available_chars:
             assigned_char = main_subject_char
             
