@@ -72,7 +72,20 @@ def fetch_deep_lore(anime_name, api_key="", idea=""):
 
         query = f"{anime_name} {search_idea} anime deep lore hidden facts reddit fandom" if search_idea else f"{anime_name} anime deep lore hidden facts reddit fandom"
         print(f"🔎 [DEEP LORE RAG] Đang tìm kiếm thông tin sâu trên Reddit/Fandom cho: {query}", flush=True)
-        results = DDGS().text(query, max_results=3)
+        
+        import concurrent.futures
+        def do_search():
+            return list(DDGS().text(query, max_results=3))
+            
+        results = []
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(do_search)
+            try:
+                results = future.result(timeout=8) # Giới hạn tối đa 8 giây
+            except concurrent.futures.TimeoutError:
+                print("⚠️ [DEEP LORE RAG] DuckDuckGo bị treo hoặc quá tải. Đang bỏ qua phần cào dữ liệu để tránh kẹt hệ thống...", flush=True)
+                return ""
+                
         lore_snippets = "\n".join([f"- {r['title']}: {r['body']}" for r in results])
         return lore_snippets
     except Exception as e:
