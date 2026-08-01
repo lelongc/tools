@@ -49,10 +49,10 @@ def fetch_deep_lore(anime_name, api_key="", idea=""):
         print(f"🔎 [DEEP LORE RAG] Đang dò tìm 'Deep Lore' trên Web bằng Google Search (Gemini Grounding) cho Anime: {anime_name}...", flush=True)
         if not api_key: return ""
         
-        prompt = f"Tìm kiếm thông tin trên web (đặc biệt là Reddit, Fandom) và đưa ra 3 facts 'deep lore' (những bí ẩn, giả thuyết, hoặc sự thật đen tối/thú vị chưa từng được giải thích rõ trên anime) về bộ anime '{anime_name}'."
+        prompt = f"Tìm kiếm thông tin trên web. Hãy ưu tiên truy xuất và kiểm chứng chéo từ các nguồn uy tín nhất, đặc biệt là TRANG WIKI/FANDOM CHÍNH THỨC của bộ anime '{anime_name}' và các bài phân tích chuyên sâu trên Reddit. Đưa ra 4-5 facts 'deep lore' (bí ẩn, thông tin Light Novel/Manga chưa lên anime, hoặc sự thật đen tối/thú vị) về '{anime_name}'."
         if idea:
-            prompt += f" Vui lòng tập trung tìm kiếm các thông tin liên quan đến ý tưởng này của tôi: '{idea}'."
-        prompt += " Chỉ xuất ra văn bản tiếng Anh (để AI khác dễ đọc), dạng gạch đầu dòng ngắn gọn."
+            prompt += f" Vui lòng tập trung ĐÀO SÂU vào các thông tin xoay quanh chủ đề/ý tưởng này: '{idea}'."
+        prompt += " Chỉ xuất ra văn bản tiếng Anh (để AI khác dễ đọc), dạng gạch đầu dòng chi tiết."
         
         body = {
             "contents": [{"parts": [{"text": prompt}]}],
