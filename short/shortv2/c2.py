@@ -51,6 +51,8 @@ def fetch_deep_lore(anime_name, api_key="", idea=""):
         search_idea = idea
         # Dịch ý tưởng sang tiếng anh để cào dữ liệu chuẩn xác nhất
         if idea and api_key:
+            import time
+            t0 = time.time()
             try:
                 models = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash"]
                 prompt = f"Translate the following anime short idea or topic into concise English keywords for search purposes. Output ONLY the English keywords, nothing else. Text: {idea}"
@@ -63,7 +65,7 @@ def fetch_deep_lore(anime_name, api_key="", idea=""):
                         eng_kw = r.json()['candidates'][0]['content']['parts'][0]['text'].strip()
                         if eng_kw:
                             search_idea = eng_kw
-                            print(f"   🌐 [AUTO-TRANSLATE] '{idea}' -> '{search_idea}'", flush=True)
+                            print(f"   🌐 [AUTO-TRANSLATE] '{idea}' -> '{search_idea}' (Đã xong trong {time.time()-t0:.1f}s)", flush=True)
                             break
             except Exception as e:
                 print(f"⚠️ Không thể dịch idea sang tiếng Anh: {e}", flush=True)
@@ -193,14 +195,23 @@ try:
             self.label = label_widget
             self.start_pct = start_pct
             self.end_pct = end_pct
+            import time
+            self.start_time = time.time()
 
         def bars_callback(self, bar, attr, value, old_value=None):
             if bar == 't':
                 total = self.bars[bar]['total']
                 if total and total > 0:
                     pct = int(self.start_pct + (value / total) * (self.end_pct - self.start_pct))
+                    import time
+                    elapsed = time.time() - self.start_time
+                    eta_str = ""
+                    if value > 0 and elapsed > 0:
+                        speed = value / elapsed
+                        rem = (total - value) / speed
+                        eta_str = f" | ⏳ ETA: {int(rem)}s"
                     if self.pbar: self.pbar.value = min(100, max(0, pct))
-                    if self.label: self.label.value = f"<b>🎥 [5/5] Đang xuất Video MP4 Dọc: {pct}%</b> (Đã xuất {value}/{total} khung hình)"
+                    if self.label: self.label.value = f"<b>🎥 [5/5] Đang xuất Video: {pct}%</b> ({value}/{total} khung hình){eta_str}"
 except Exception:
     ColabMoviePyLogger = None
 
