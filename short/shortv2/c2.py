@@ -617,6 +617,7 @@ TASK:
 1. Divide this script into sequential narrative scenes based ONLY on full sentences or clauses ending in punctuation (.,?!). NEVER cut a sentence in the middle!
 2. For EACH scene, assign a list of the most relevant character_keys from available list: [{chars_str}].
 If multiple characters are explicitly mentioned or relevant in that scene, assign all their character_keys in a JSON array. If only one is relevant, assign a JSON array with one character_key. If none, assign ['{available_chars[0] if available_chars else "Rimuru_Tempest"}'].
+*IMPORTANT*: Use your knowledge of the anime/lore to resolve aliases, titles, and color names to the correct character_key (e.g., in Tensei Slime, map 'Violet' or 'Purple' to 'Ultima', 'Blanc' or 'White' to 'Testarossa', 'Jaune' or 'Yellow' to 'Carrera', 'Rouge' or 'Red' to 'Guy_Crimson', 'Noir' or 'Black' to 'Diablo', 'Bleu' or 'Blue' to 'Rain').
 
 CRITICAL INSTRUCTION:
 - You MUST cover 100% of the original script. Do NOT shorten, summarize, paraphrase, or omit any sentences or words!
@@ -997,6 +998,7 @@ For each segment in the list, select the most relevant character folders from th
 - If multiple characters are mentioned or active in a segment, select all their exact folder names.
 - If no specific character is active, select the main topic character.
 - Ensure the folder names match EXACTLY the names in the list.
+*IMPORTANT*: Use your knowledge of the anime/lore to resolve aliases, titles, and color names to the correct character_key (e.g., in Tensei Slime, map 'Violet' or 'Purple' to 'Ultima', 'Blanc' or 'White' to 'Testarossa', 'Jaune' or 'Yellow' to 'Carrera', 'Rouge' or 'Red' to 'Guy_Crimson', 'Noir' or 'Black' to 'Diablo', 'Bleu' or 'Blue' to 'Rain').
 
 Return STRICTLY a JSON array of arrays of strings, where each inner array contains the folder names for the corresponding segment:
 [
