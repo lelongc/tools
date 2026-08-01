@@ -611,7 +611,7 @@ Output ONLY the plain text script in English."""
 "{script_text}"
 
 TASK:
-1. Divide this script into sequential narrative scenes based on LOGICAL SENTENCES or CLAUSES. DO NOT cut scenes in the middle of a sentence! A scene should focus on a specific character or idea.
+1. Divide this script into sequential narrative scenes based ONLY on full sentences or clauses ending in punctuation (.,?!). NEVER cut a sentence in the middle!
 2. For EACH scene, assign the most relevant character_key from available list: [{chars_str}].
 If a character is explicitly mentioned or relevant in that scene, assign their character_key. Otherwise, assign '{available_chars[0] if available_chars else "Rimuru_Tempest"}'.
 
