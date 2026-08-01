@@ -46,50 +46,33 @@ def get_anilist_anime_info(anime_name):
 
 def fetch_deep_lore(anime_name, api_key="", idea=""):
     try:
-        from duckduckgo_search import DDGS
+        print(f"🔎 [DEEP LORE RAG] Đang dò tìm 'Deep Lore' trên Web bằng Google Search (Gemini Grounding) cho Anime: {anime_name}...", flush=True)
+        if not api_key: return ""
         
-        search_idea = idea
-        # Dịch ý tưởng sang tiếng anh để cào dữ liệu chuẩn xác nhất
-        if idea and api_key:
-            import time
-            t0 = time.time()
-            try:
-                models = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash"]
-                prompt = f"Translate the following anime short idea or topic into concise English keywords for search purposes. Output ONLY the English keywords, nothing else. Text: {idea}"
-                body = {'contents': [{'parts': [{'text': prompt}]}]}
-                
-                for model in models:
-                    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
-                    r = requests.post(url, json=body, timeout=5)
-                    if r.status_code == 200:
-                        eng_kw = r.json()['candidates'][0]['content']['parts'][0]['text'].strip()
-                        if eng_kw:
-                            search_idea = eng_kw
-                            print(f"   🌐 [AUTO-TRANSLATE] '{idea}' -> '{search_idea}' (Đã xong trong {time.time()-t0:.1f}s)", flush=True)
-                            break
-            except Exception as e:
-                print(f"⚠️ Không thể dịch idea sang tiếng Anh: {e}", flush=True)
-
-        query = f"{anime_name} {search_idea} anime deep lore hidden facts reddit fandom" if search_idea else f"{anime_name} anime deep lore hidden facts reddit fandom"
-        print(f"🔎 [DEEP LORE RAG] Đang tìm kiếm thông tin sâu trên Reddit/Fandom cho: {query}", flush=True)
+        prompt = f"Tìm kiếm thông tin trên web (đặc biệt là Reddit, Fandom) và đưa ra 3 facts 'deep lore' (những bí ẩn, giả thuyết, hoặc sự thật đen tối/thú vị chưa từng được giải thích rõ trên anime) về bộ anime '{anime_name}'."
+        if idea:
+            prompt += f" Vui lòng tập trung tìm kiếm các thông tin liên quan đến ý tưởng này của tôi: '{idea}'."
+        prompt += " Chỉ xuất ra văn bản tiếng Anh (để AI khác dễ đọc), dạng gạch đầu dòng ngắn gọn."
         
-        import concurrent.futures
-        def do_search():
-            return list(DDGS().text(query, max_results=3))
-            
-        results = []
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future = executor.submit(do_search)
+        body = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "tools": [{"googleSearch": {}}]
+        }
+        
+        import requests
+        for model in ["gemini-1.5-pro", "gemini-1.5-flash", "gemini-2.5-flash"]:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
             try:
-                results = future.result(timeout=8) # Giới hạn tối đa 8 giây
-            except concurrent.futures.TimeoutError:
-                print("⚠️ [DEEP LORE RAG] DuckDuckGo bị treo hoặc quá tải. Đang bỏ qua phần cào dữ liệu để tránh kẹt hệ thống...", flush=True)
-                return ""
+                r = requests.post(url, json=body, timeout=12)
+                if r.status_code == 200:
+                    text = r.json()['candidates'][0]['content']['parts'][0]['text']
+                    return text
+            except Exception:
+                continue
                 
-        lore_snippets = "\n".join([f"- {r['title']}: {r['body']}" for r in results])
-        return lore_snippets
+        return ""
     except Exception as e:
-        print(f"⚠️ [DEEP LORE RAG] Không thể lấy deep lore từ DuckDuckGo: {e}", flush=True)
+        print(f"⚠️ [DEEP LORE RAG] Lỗi khi cào dữ liệu bằng Gemini Search: {e}", flush=True)
         return ""
 
 def suggest_viral_topics(anime_name, api_key, idea=""):
