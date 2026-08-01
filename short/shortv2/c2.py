@@ -1016,14 +1016,10 @@ Return STRICTLY a JSON array of strings, where each string is the folder name fo
     return scenes
 
 def build_fixed_two_second_timeline(scenes, anime_name, topic, total_duration, all_words=None):
-    segment_dur = 2.0
-    num_segments = int(total_duration // segment_dur)
-    if num_segments == 0:
-        num_segments = 1
-        
-    timeline_segments = []
+    import random
+    from pathlib import Path
     
-    anime_dir = BASE_LIBRARY_DIR / anime_name
+    anime_dir = Path("d:/folder/tools/short/shortv2") / anime_name
     available_chars = []
     if anime_dir.exists():
         for cdir in anime_dir.iterdir():
@@ -1032,54 +1028,6 @@ def build_fixed_two_second_timeline(scenes, anime_name, topic, total_duration, a
                 
     main_subject_char = available_chars[0] if available_chars else "Rimuru_Tempest"
     
-    # Check and download character assets if folder is low on images
-    for i in range(num_segments):
-        mt = (st + (st + segment_dur if i < num_segments - 1 else total_duration)) / 2.0
-        sc_idx = 0
-        
-        if all_words and total_word_chars > 0 and total_chars > 0:
-            target_w = None
-            closest_dist = 999999
-            for w in all_words:
-                if w["start"] <= mt <= w["end"]:
-                    target_w = w
-                    break
-                dist = min(abs(w["start"] - mt), abs(w["end"] - mt))
-                if dist < closest_dist:
-                    closest_dist = dist
-                    target_w = w
-                    
-            if target_w:
-                w_mid = (target_w["char_start"] + target_w["char_end"]) / 2.0
-                ratio = w_mid / total_word_chars
-                target_char_idx = ratio * total_chars
-                
-                for idx, sc_tmp in enumerate(scenes):
-                    if sc_tmp["char_start"] <= target_char_idx <= sc_tmp["char_end"]:
-                        sc_idx = idx
-                        break
-        else:
-            sc_idx = min(int((i / num_segments) * len(scenes)), len(scenes) - 1)
-            
-        sc = scenes[sc_idx]
-        cf = sc.get("character_folder", "").strip()
-        if cf in available_chars:
-            char_dir = anime_dir / cf
-            statics = list(char_dir.glob("*.jpg")) + list(char_dir.glob("*.png")) + list(char_dir.glob("*.jpeg")) + list(char_dir.glob("*.webp"))
-            gifs = list(char_dir.glob("*.gif")) + list(char_dir.glob("*.GIF"))
-            gif_subdir = char_dir / "gif"
-            if gif_subdir.exists():
-                gifs += list(gif_subdir.glob("*.gif")) + list(gif_subdir.glob("*.GIF"))
-                
-            total_files = len(statics) + len(gifs)
-            if total_files < 10:
-                print(f"⚠️ Thư mục [{cf}] thiếu ảnh ({total_files}/10). Tự động cào thêm...", flush=True)
-                try:
-                    run_fetch(anime_name, single_char=cf, target_per_char=20, source='pinterest', media_type='image')
-                    run_fetch(anime_name, single_char=cf, target_per_char=10, source='pinterest', media_type='gif')
-                except Exception as e:
-                    print(f"⚠️ Lỗi cào tự động: {e}", flush=True)
-
     char_static_map = {}
     char_gif_map = {}
     if anime_dir.exists():
@@ -1105,97 +1053,123 @@ def build_fixed_two_second_timeline(scenes, anime_name, topic, total_duration, a
     used_statics_per_char = {c: [] for c in available_chars}
     used_gifs_per_char = {c: [] for c in available_chars}
 
-    # Pre-calculate char boundaries for scenes for accurate sync
-    total_chars = sum(len(sc.get("text_snippet", "")) for sc in scenes)
+    # Pre-calculate char boundaries for scenes
+    total_chars = sum(max(1, len(sc.get("text_snippet", ""))) for sc in scenes)
     char_accum = 0
     for sc in scenes:
         sc["char_start"] = char_accum
-        char_accum += len(sc.get("text_snippet", ""))
+        char_accum += max(1, len(sc.get("text_snippet", "")))
         sc["char_end"] = char_accum
 
     if all_words:
-        total_word_chars = sum(len(w["word"]) for w in all_words)
+        total_word_chars = sum(max(1, len(w["word"])) for w in all_words)
         w_char_accum = 0
         for w in all_words:
             w["char_start"] = w_char_accum
-            w_char_accum += len(w["word"])
+            w_char_accum += max(1, len(w["word"]))
             w["char_end"] = w_char_accum
-
-    for i in range(num_segments):
-        st = i * segment_dur
-        et = (i + 1) * segment_dur if i < num_segments - 1 else total_duration
-        
-        mt = (st + (st + segment_dur if i < num_segments - 1 else total_duration)) / 2.0
-        sc_idx = 0
-        
-        if all_words and total_word_chars > 0 and total_chars > 0:
-            target_w = None
-            closest_dist = 999999
-            for w in all_words:
-                if w["start"] <= mt <= w["end"]:
-                    target_w = w
-                    break
-                dist = min(abs(w["start"] - mt), abs(w["end"] - mt))
-                if dist < closest_dist:
-                    closest_dist = dist
-                    target_w = w
-                    
-            if target_w:
-                w_mid = (target_w["char_start"] + target_w["char_end"]) / 2.0
-                ratio = w_mid / total_word_chars
-                target_char_idx = ratio * total_chars
-                
-                for idx, sc_tmp in enumerate(scenes):
-                    if sc_tmp["char_start"] <= target_char_idx <= sc_tmp["char_end"]:
-                        sc_idx = idx
-                        break
-        else:
-            sc_idx = min(int((i / num_segments) * len(scenes)), len(scenes) - 1)
             
-        sc = scenes[sc_idx]
+        for sc in scenes:
+            target_start = sc["char_start"]
+            target_end = sc["char_end"]
+            
+            sc_start_time = 0.0
+            sc_end_time = total_duration
+            
+            if total_word_chars > 0 and total_chars > 0:
+                ratio_start = target_start / total_chars
+                w_target_start = ratio_start * total_word_chars
+                for w in all_words:
+                    if w["char_start"] >= w_target_start or w["char_end"] >= w_target_start:
+                        sc_start_time = w["start"]
+                        break
+                        
+                ratio_end = target_end / total_chars
+                w_target_end = ratio_end * total_word_chars
+                for w in reversed(all_words):
+                    if w["char_end"] <= w_target_end or w["char_start"] <= w_target_end:
+                        sc_end_time = w["end"]
+                        break
+            sc["start_time"] = sc_start_time
+            sc["end_time"] = sc_end_time
+    else:
+        # Fallback if no words provided
+        for i, sc in enumerate(scenes):
+            sc["start_time"] = (i / len(scenes)) * total_duration
+            sc["end_time"] = ((i + 1) / len(scenes)) * total_duration
+
+    # Make strictly contiguous
+    for i in range(len(scenes)):
+        if i == 0:
+            scenes[i]["start_time"] = 0.0
+        else:
+            scenes[i]["start_time"] = scenes[i-1]["end_time"]
+            
+        if i == len(scenes) - 1:
+            scenes[i]["end_time"] = total_duration
+
+    timeline_segments = []
+    chunk_counter = 0
+
+    for sc in scenes:
+        st = sc["start_time"]
+        et = sc["end_time"]
+        dur = et - st
+        if dur <= 0: dur = 0.1
+        
+        num_chunks = max(1, round(dur / 2.0))
+        chunk_dur = dur / num_chunks
+        
         assigned_char = sc.get("character_folder", "").strip()
         if not assigned_char or assigned_char not in available_chars:
             assigned_char = main_subject_char
             
         snippet_text = sc.get("text_snippet", "").lower()
-        prefer_gif = (i % 2 == 1) or any(kw in snippet_text for kw in ['skill', 'fight', 'power', 'attack', 'kill', 'demon', 'slash', 'blast', 'magic', 'true', 'ultimate'])
-
-        chosen_img = None
-        if prefer_gif and assigned_char in char_gif_map:
-            gif_pool = char_gif_map[assigned_char]
-            used = used_gifs_per_char.get(assigned_char, [])
-            avail = [g for g in gif_pool if g not in used]
-            if not avail:
-                used_gifs_per_char[assigned_char] = []
-                avail = gif_pool
-            if avail:
-                chosen_img = random.choice(avail)
-                used_gifs_per_char[assigned_char].append(chosen_img)
-
-        if not chosen_img and assigned_char in char_static_map:
-            static_pool = char_static_map[assigned_char]
-            used = used_statics_per_char.get(assigned_char, [])
-            avail = [s for s in static_pool if s not in used]
-            if not avail:
-                used_statics_per_char[assigned_char] = []
-                avail = static_pool
-            if avail:
-                chosen_img = random.choice(avail)
-                used_statics_per_char[assigned_char].append(chosen_img)
-
-        if not chosen_img and all_anime_imgs:
-            chosen_img = random.choice(all_anime_imgs)
-
-        timeline_segments.append({
-            "start": st,
-            "end": et,
-            "char": assigned_char,
-            "snippet": snippet_text,
-            "image_path": str(chosen_img) if chosen_img else ""
-        })
+        prefer_gif_base = any(kw in snippet_text for kw in ['skill', 'fight', 'power', 'attack', 'kill', 'demon', 'slash', 'blast', 'magic', 'true', 'ultimate'])
         
-        img_name = Path(chosen_img).name if chosen_img else "None"
-        print(f"     🎬 Khớp ảnh [{assigned_char}] ({img_name}) cho mốc {st:.2f}s -> {et:.2f}s: \"{snippet_text}\"", flush=True)
+        for c_i in range(num_chunks):
+            c_st = st + c_i * chunk_dur
+            c_et = st + (c_i + 1) * chunk_dur if c_i < num_chunks - 1 else et
+            
+            prefer_gif = prefer_gif_base or (chunk_counter % 2 == 1)
+            
+            chosen_img = None
+            if prefer_gif and assigned_char in char_gif_map:
+                gif_pool = char_gif_map[assigned_char]
+                used = used_gifs_per_char.get(assigned_char, [])
+                avail = [g for g in gif_pool if g not in used]
+                if not avail:
+                    used_gifs_per_char[assigned_char] = []
+                    avail = gif_pool
+                if avail:
+                    chosen_img = random.choice(avail)
+                    used_gifs_per_char[assigned_char].append(chosen_img)
+
+            if not chosen_img and assigned_char in char_static_map:
+                static_pool = char_static_map[assigned_char]
+                used = used_statics_per_char.get(assigned_char, [])
+                avail = [s for s in static_pool if s not in used]
+                if not avail:
+                    used_statics_per_char[assigned_char] = []
+                    avail = static_pool
+                if avail:
+                    chosen_img = random.choice(avail)
+                    used_statics_per_char[assigned_char].append(chosen_img)
+
+            if not chosen_img and all_anime_imgs:
+                chosen_img = random.choice(all_anime_imgs)
+
+            timeline_segments.append({
+                "start": c_st,
+                "end": c_et,
+                "char": assigned_char,
+                "snippet": snippet_text,
+                "image_path": str(chosen_img) if chosen_img else ""
+            })
+            
+            img_name = Path(chosen_img).name if chosen_img else "None"
+            print(f"     🎬 Khớp ảnh [{assigned_char}] ({img_name}) cho mốc {c_st:.2f}s -> {c_et:.2f}s: \"{snippet_text}\"", flush=True)
+            chunk_counter += 1
 
     return timeline_segments
 
