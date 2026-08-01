@@ -621,7 +621,7 @@ If multiple characters are explicitly mentioned or relevant in that scene, assig
 
 CRITICAL INSTRUCTION:
 - You MUST cover 100% of the original script. Do NOT shorten, summarize, paraphrase, or omit any sentences or words!
-- The sequential concatenation of all "text_snippet" fields MUST match the original script exactly, word-for-word.
+- The sequential concatenation of all "text_snippet" fields MUST perfectly equal the original script string. Do NOT alter any words, do NOT replace aliases with real names inside the text, and do NOT change the punctuation!
 - DO NOT worry about scene length. A scene can be as long as a full sentence or two if it's about the same character(s).
 
 Return STRICTLY valid JSON:
