@@ -953,13 +953,26 @@ def analyze_character_timeline_gemini(script_text, available_chars, api_key):
     api_key = get_effective_gemini_key(api_key)
     print("\n🧠 [AI DETECTOR] Đang phân tích kịch bản và quyết định phân bổ nhân vật cho từng phân cảnh...", flush=True)
     
-    # Deterministically split script into segments of ~8 words locally
-    words = script_text.strip().split()
+    import re
+    # Split script into logical segments by punctuation
+    raw_segments = re.split(r'(?<=[.?!,])\s+', script_text.strip())
     segments = []
-    chunk_size = 8
-    for i in range(0, len(words), chunk_size):
-        chunk = words[i : i + chunk_size]
-        segments.append(" ".join(chunk))
+    current_seg = ""
+    for seg in raw_segments:
+        if not seg.strip(): continue
+        if current_seg:
+            current_seg += " " + seg.strip()
+        else:
+            current_seg = seg.strip()
+            
+        if len(current_seg.split()) >= 5 or re.search(r'[.?!]$', current_seg):
+            segments.append(current_seg)
+            current_seg = ""
+    if current_seg:
+        if segments:
+            segments[-1] += " " + current_seg
+        else:
+            segments.append(current_seg)
         
     models = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.5-pro", "gemini-1.5-pro", "gemini-flash-latest"]
     chars_str = ", ".join(available_chars)
@@ -1577,6 +1590,7 @@ def generate_video_short(anime_name, topic, api_key, voice, custom_script, custo
         if label_widget: label_widget.value = "<b>📝 [1/5] 10%</b> — Đang nạp Kịch bản Tùy Chỉnh do bạn nhập..."
         if pbar_widget: pbar_widget.value = 10
         script_text = custom_script.strip()
+        scenes = analyze_character_timeline_gemini(script_text, available_chars, api_key)
     else:
         if label_widget: label_widget.value = "<b>🚀 [1/5] 5%</b> — AI Gemini đang viết kịch bản Tiếng Anh 30 phân cảnh..."
         if pbar_widget: pbar_widget.value = 5
@@ -1585,9 +1599,11 @@ def generate_video_short(anime_name, topic, api_key, voice, custom_script, custo
             if label_widget: label_widget.value = "<b style='color:red;'>❌ LỖI: Không thể tạo kịch bản Gemini. Kiểm tra lại API Key hoặc nhập kịch bản tùy chỉnh!</b>"
             return
         script_text = script_data.get('tts_script') or script_data.get('script', '')
-    
-    # AI character timeline planner
-    scenes = analyze_character_timeline_gemini(script_text, available_chars, api_key)
+        scenes = script_data.get('scenes')
+        if not scenes:
+            scenes = analyze_character_timeline_gemini(script_text, available_chars, api_key)
+        else:
+            print("\n🧠 [AI DETECTOR] Bỏ qua vì CÔNG ĐOẠN 2 đã phân bổ nhân vật thành công!", flush=True)
     
     if label_widget: label_widget.value = "<b>🎙️ [3/5] 35%</b> — Đang tạo giọng đọc Edge-TTS Tiếng Anh (Tốc độ +15%)..."
     if pbar_widget: pbar_widget.value = 35
