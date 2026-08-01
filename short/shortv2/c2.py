@@ -916,11 +916,10 @@ def build_semantic_timeline(all_words, script_text, anime_name, topic, total_dur
             gif_pool = char_gif_map[assigned_char]
             used = used_gifs_per_char.get(assigned_char, [])
             avail = [g for g in gif_pool if g not in used]
-            if not avail:
-                used_gifs_per_char[assigned_char] = []
-                avail = gif_pool
             if avail:
                 chosen_img = random.choice(avail)
+                if assigned_char not in used_gifs_per_char:
+                    used_gifs_per_char[assigned_char] = []
                 used_gifs_per_char[assigned_char].append(chosen_img)
 
         # Fallback tự động lấy ảnh tĩnh nếu không có GIF hoặc thư mục GIF rỗng
@@ -928,16 +927,24 @@ def build_semantic_timeline(all_words, script_text, anime_name, topic, total_dur
             static_pool = char_static_map[assigned_char]
             used = used_statics_per_char.get(assigned_char, [])
             avail = [s for s in static_pool if s not in used]
-            if not avail:
-                used_statics_per_char[assigned_char] = []
-                avail = static_pool
             if avail:
                 chosen_img = random.choice(avail)
+                if assigned_char not in used_statics_per_char:
+                    used_statics_per_char[assigned_char] = []
                 used_statics_per_char[assigned_char].append(chosen_img)
 
-        # Ultimate fallback nếu thư mục ảnh tĩnh cũng rỗng
-        if not chosen_img and all_anime_imgs:
-            chosen_img = random.choice(all_anime_imgs)
+        # Ultimate fallback nếu thư mục ảnh tĩnh cũng rỗng hoặc cả 2 đã dùng hết thì reset cả 2 và random
+        if not chosen_img:
+            all_char_imgs = []
+            if assigned_char in char_gif_map: all_char_imgs.extend(char_gif_map[assigned_char])
+            if assigned_char in char_static_map: all_char_imgs.extend(char_static_map[assigned_char])
+            
+            if all_char_imgs:
+                used_gifs_per_char[assigned_char] = []
+                used_statics_per_char[assigned_char] = []
+                chosen_img = random.choice(all_char_imgs)
+            elif all_anime_imgs:
+                chosen_img = random.choice(all_anime_imgs)
 
         timeline_segments.append({
             "start": st,
@@ -1152,26 +1159,35 @@ def build_fixed_two_second_timeline(scenes, anime_name, topic, total_duration, a
                 gif_pool = char_gif_map[assigned_char]
                 used = used_gifs_per_char.get(assigned_char, [])
                 avail = [g for g in gif_pool if g not in used]
-                if not avail:
-                    used_gifs_per_char[assigned_char] = []
-                    avail = gif_pool
                 if avail:
                     chosen_img = random.choice(avail)
+                    if assigned_char not in used_gifs_per_char:
+                        used_gifs_per_char[assigned_char] = []
                     used_gifs_per_char[assigned_char].append(chosen_img)
 
             if not chosen_img and assigned_char in char_static_map:
                 static_pool = char_static_map[assigned_char]
                 used = used_statics_per_char.get(assigned_char, [])
                 avail = [s for s in static_pool if s not in used]
-                if not avail:
-                    used_statics_per_char[assigned_char] = []
-                    avail = static_pool
                 if avail:
                     chosen_img = random.choice(avail)
+                    if assigned_char not in used_statics_per_char:
+                        used_statics_per_char[assigned_char] = []
                     used_statics_per_char[assigned_char].append(chosen_img)
 
-            if not chosen_img and all_anime_imgs:
-                chosen_img = random.choice(all_anime_imgs)
+            # Fallback if both unused pools are empty: reset and recycle
+            if not chosen_img:
+                all_char_imgs = []
+                if assigned_char in char_gif_map: all_char_imgs.extend(char_gif_map[assigned_char])
+                if assigned_char in char_static_map: all_char_imgs.extend(char_static_map[assigned_char])
+                
+                if all_char_imgs:
+                    # Reset memory since we ran out of unique images
+                    used_gifs_per_char[assigned_char] = []
+                    used_statics_per_char[assigned_char] = []
+                    chosen_img = random.choice(all_char_imgs)
+                elif all_anime_imgs:
+                    chosen_img = random.choice(all_anime_imgs)
 
             timeline_segments.append({
                 "start": c_st,
