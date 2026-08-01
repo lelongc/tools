@@ -43,13 +43,30 @@ def get_anilist_anime_info(anime_name):
         print(f"⚠️ Lỗi AniList API: {e}")
     return f"Anime: {anime_name}"
 
+
+def fetch_deep_lore(anime_name, idea=""):
+    try:
+        from duckduckgo_search import DDGS
+        query = f"{anime_name} {idea} anime deep lore hidden facts reddit fandom" if idea else f"{anime_name} anime deep lore hidden facts reddit fandom"
+        print(f"🔎 [DEEP LORE RAG] Đang tìm kiếm thông tin sâu trên Reddit/Fandom cho: {query}", flush=True)
+        results = DDGS().text(query, max_results=3)
+        lore_snippets = "\n".join([f"- {r['title']}: {r['body']}" for r in results])
+        return lore_snippets
+    except Exception as e:
+        print(f"⚠️ [DEEP LORE RAG] Không thể lấy deep lore từ DuckDuckGo: {e}", flush=True)
+        return ""
+
 def suggest_viral_topics(anime_name, api_key, idea=""):
+
     print(f"🔎 [ANILIST AI] Đang cào dữ liệu Lore & Tóm tắt cho Anime '{anime_name}'...", flush=True)
     lore_info = get_anilist_anime_info(anime_name)
+    deep_lore = fetch_deep_lore(anime_name, idea)
+    lore_info += f"\n\nDeep Lore (Reddit/Fandom):\n{deep_lore}\n"
+
     
     idea_prompt = f"The user provided a specific idea or direction for the topics: '{idea}'. Ensure all 10 topics revolve around this idea while remaining highly engaging." if idea else "Generate 10 random, explosive topics based on the lore."
     
-    models = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-flash-latest", "gemma-4-31b-it"]
+    models = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.5-pro", "gemini-1.5-pro", "gemini-flash-latest"]
     prompt = f"""You are a top YouTube Shorts Strategist for Anime Channels with 10M subscribers.
 Anime Name: {anime_name}
 
@@ -489,7 +506,7 @@ def clean_json_text(text):
 def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_style="Shocking Secret", ending_style="Viral Comment Question"):
     api_key = get_effective_gemini_key(api_key)
     # Ưu tiên gemini-3.1-flash-lite cho cả 2 công đoạn
-    models = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-flash-latest", "gemma-4-31b-it"]
+    models = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.5-pro", "gemini-1.5-pro", "gemini-flash-latest"]
     chars_str = ", ".join(available_chars) if available_chars else anime_name
     
     hook_prompts = {
@@ -507,6 +524,9 @@ def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_sty
     
     selected_hook = hook_prompts.get(hook_style, hook_prompts["Shocking Secret"])
     selected_ending = ending_prompts.get(ending_style, ending_prompts["Viral Comment Question"])
+    
+    deep_lore = fetch_deep_lore(anime_name, topic)
+
 
     # CÔNG ĐOẠN 1 (STAGE 1): Tập trung 100% AI vào việc viết kịch bản hấp dẫn (Không bị áp lực JSON)
     stage1_prompt = f"""You are a YouTube Shorts Master Storyteller. Write a viral, high-retention narrative script in 100% ENGLISH about '{topic}' for anime '{anime_name}'.
@@ -523,6 +543,10 @@ CRITICAL MANDATES:
 {selected_ending}
 
 3. NARRATIVE COHESION:
+Incorporate these Deep Lore facts naturally if they fit:
+{deep_lore}
+
+4. FLOW:
 The body of the script MUST logically connect the HOOK to the ENDING. The transition from the climax of the story into the ENDING must feel completely earned and natural. Do NOT make it sound like two unrelated ideas pasted together.
 
 CRITICAL: The script MUST end with a 100% complete, standalone sentence! Ensure the ENTIRE script flows naturally like a real passionate YouTuber talking, avoiding robotic, repetitive, or forced phrasing. Use engaging, conversational English.
@@ -697,7 +721,7 @@ def refine_subtitles_gemini(word_chunks, script_text, api_key):
     if not api_key: return word_chunks
     print("✨ Gọi Gemini lần 2 để chuốt chuẩn Tên Riêng (Capitalization) trong phụ đề...")
     
-    models = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-flash-latest"]
+    models = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.5-pro", "gemini-1.5-pro", "gemini-flash-latest"]
     
     prompt = f"""Original Script with proper nouns:
 {script_text}
@@ -908,7 +932,7 @@ def analyze_character_timeline_gemini(script_text, available_chars, api_key):
         chunk = words[i : i + chunk_size]
         segments.append(" ".join(chunk))
         
-    models = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-flash-latest"]
+    models = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.5-pro", "gemini-1.5-pro", "gemini-flash-latest"]
     chars_str = ", ".join(available_chars)
     main_subject_char = available_chars[0] if available_chars else "Rimuru_Tempest"
     

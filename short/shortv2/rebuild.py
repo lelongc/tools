@@ -1,28 +1,8 @@
 import json
 import os
-import shutil
 
-# Rename c1.py to c2.py (since it contains backend logic)
-if os.path.exists('c1.py'):
-    shutil.move('c1.py', 'c2.py')
-
-# Create c1.py (Dependencies)
-c1_content = """# @title 1. Cài đặt các thư viện cần thiết (Chỉ chạy 1 lần)
-!pip install requests ipywidgets opencv-python pillow numpy nest_asyncio edge-tts moviepy whisper
-"""
-with open('c1.py', 'w', encoding='utf-8') as f:
-    f.write(c1_content)
-
-# Prepend title to c2.py
+c1_content = open('c1.py', 'r', encoding='utf-8').read()
 c2_content = open('c2.py', 'r', encoding='utf-8').read()
-if not c2_content.startswith("# @title 2."):
-    c2_content = "# @title 2. Khởi tạo Core Backend (Chạy 1 lần sau khi cài thư viện)\n" + c2_content
-    with open('c2.py', 'w', encoding='utf-8') as f:
-        f.write(c2_content)
-
-# Rename ui_code.py to c3.py
-if os.path.exists('ui_code.py'):
-    shutil.move('ui_code.py', 'c3.py')
 c3_content = open('c3.py', 'r', encoding='utf-8').read()
 
 # Rebuild notebook
