@@ -1015,7 +1015,7 @@ Return STRICTLY a JSON array of strings, where each string is the folder name fo
         
     return scenes
 
-def build_fixed_two_second_timeline(scenes, anime_name, topic, total_duration):
+def build_fixed_two_second_timeline(scenes, anime_name, topic, total_duration, all_words=None):
     segment_dur = 2.0
     num_segments = int(total_duration // segment_dur)
     if num_segments == 0:
@@ -1034,7 +1034,33 @@ def build_fixed_two_second_timeline(scenes, anime_name, topic, total_duration):
     
     # Check and download character assets if folder is low on images
     for i in range(num_segments):
-        sc_idx = min(int((i / num_segments) * len(scenes)), len(scenes) - 1)
+        mt = (st + (st + segment_dur if i < num_segments - 1 else total_duration)) / 2.0
+        sc_idx = 0
+        
+        if all_words and total_word_chars > 0 and total_chars > 0:
+            target_w = None
+            closest_dist = 999999
+            for w in all_words:
+                if w["start"] <= mt <= w["end"]:
+                    target_w = w
+                    break
+                dist = min(abs(w["start"] - mt), abs(w["end"] - mt))
+                if dist < closest_dist:
+                    closest_dist = dist
+                    target_w = w
+                    
+            if target_w:
+                w_mid = (target_w["char_start"] + target_w["char_end"]) / 2.0
+                ratio = w_mid / total_word_chars
+                target_char_idx = ratio * total_chars
+                
+                for idx, sc_tmp in enumerate(scenes):
+                    if sc_tmp["char_start"] <= target_char_idx <= sc_tmp["char_end"]:
+                        sc_idx = idx
+                        break
+        else:
+            sc_idx = min(int((i / num_segments) * len(scenes)), len(scenes) - 1)
+            
         sc = scenes[sc_idx]
         cf = sc.get("character_folder", "").strip()
         if cf in available_chars:
@@ -1079,11 +1105,53 @@ def build_fixed_two_second_timeline(scenes, anime_name, topic, total_duration):
     used_statics_per_char = {c: [] for c in available_chars}
     used_gifs_per_char = {c: [] for c in available_chars}
 
+    # Pre-calculate char boundaries for scenes for accurate sync
+    total_chars = sum(len(sc.get("text_snippet", "")) for sc in scenes)
+    char_accum = 0
+    for sc in scenes:
+        sc["char_start"] = char_accum
+        char_accum += len(sc.get("text_snippet", ""))
+        sc["char_end"] = char_accum
+
+    if all_words:
+        total_word_chars = sum(len(w["word"]) for w in all_words)
+        w_char_accum = 0
+        for w in all_words:
+            w["char_start"] = w_char_accum
+            w_char_accum += len(w["word"])
+            w["char_end"] = w_char_accum
+
     for i in range(num_segments):
         st = i * segment_dur
         et = (i + 1) * segment_dur if i < num_segments - 1 else total_duration
         
-        sc_idx = min(int((i / num_segments) * len(scenes)), len(scenes) - 1)
+        mt = (st + (st + segment_dur if i < num_segments - 1 else total_duration)) / 2.0
+        sc_idx = 0
+        
+        if all_words and total_word_chars > 0 and total_chars > 0:
+            target_w = None
+            closest_dist = 999999
+            for w in all_words:
+                if w["start"] <= mt <= w["end"]:
+                    target_w = w
+                    break
+                dist = min(abs(w["start"] - mt), abs(w["end"] - mt))
+                if dist < closest_dist:
+                    closest_dist = dist
+                    target_w = w
+                    
+            if target_w:
+                w_mid = (target_w["char_start"] + target_w["char_end"]) / 2.0
+                ratio = w_mid / total_word_chars
+                target_char_idx = ratio * total_chars
+                
+                for idx, sc_tmp in enumerate(scenes):
+                    if sc_tmp["char_start"] <= target_char_idx <= sc_tmp["char_end"]:
+                        sc_idx = idx
+                        break
+        else:
+            sc_idx = min(int((i / num_segments) * len(scenes)), len(scenes) - 1)
+            
         sc = scenes[sc_idx]
         assigned_char = sc.get("character_folder", "").strip()
         if not assigned_char or assigned_char not in available_chars:
@@ -1576,7 +1644,7 @@ def generate_video_short(anime_name, topic, api_key, voice, custom_script, custo
 
     # Build strict 2.0s duration timeline based on Gemini folder planning
     total_dur = all_words[-1]["end"] if all_words else 45.0
-    timeline = build_fixed_two_second_timeline(scenes, anime_name, topic, total_dur)
+    timeline = build_fixed_two_second_timeline(scenes, anime_name, topic, total_dur, all_words)
     
     # Render final MP4 locally, then copy to Drive
     local_mp4_path = local_temp_dir / f"_temp_video_final.mp4"
