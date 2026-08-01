@@ -42,11 +42,13 @@ def get_anilist_anime_info(anime_name):
         print(f"⚠️ Lỗi AniList API: {e}")
     return f"Anime: {anime_name}"
 
-def suggest_viral_topics(anime_name, api_key):
+def suggest_viral_topics(anime_name, api_key, idea=""):
     print(f"🔎 [ANILIST AI] Đang cào dữ liệu Lore & Tóm tắt cho Anime '{anime_name}'...", flush=True)
     lore_info = get_anilist_anime_info(anime_name)
     
-    models = ["gemini-flash-latest", "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemma-4-31b-it"]
+    idea_prompt = f"The user provided a specific idea or direction for the topics: '{idea}'. Ensure all 10 topics revolve around this idea while remaining highly engaging." if idea else "Generate 10 random, explosive topics based on the lore."
+    
+    models = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-flash-lite-latest", "gemini-flash-latest", "gemma-4-31b-it"]
     prompt = f"""You are a top YouTube Shorts Strategist for Anime Channels with 10M subscribers.
 Anime Name: {anime_name}
 
@@ -54,18 +56,19 @@ Anime Lore & Metadata from AniList:
 {lore_info}
 
 TASK:
-Analyze this anime and generate 5 EXPLOSIVE, VIRAL YouTube Short Topic Titles in ENGLISH that will:
+Analyze this anime and generate 10 EXPLOSIVE, VIRAL YouTube Short Topic Titles in ENGLISH that will:
 1. Drive high click-through rate (CTR) and initial 3-second retention.
 2. Spark massive comment section debates.
 3. Deliver high lore value to convince viewers to SUBSCRIBE immediately.
 
-Return STRICTLY a JSON array of 5 strings:
+{idea_prompt}
+
+Return STRICTLY a JSON array of 10 strings:
 [
   "Topic 1 Title...",
   "Topic 2 Title...",
-  "Topic 3 Title...",
-  "Topic 4 Title...",
-  "Topic 5 Title..."
+  ...
+  "Topic 10 Title..."
 ]"""
     body = {'contents': [{'parts': [{'text': prompt}]}], 'generationConfig': {'responseMimeType': 'application/json'}}
     for model in models:
@@ -75,13 +78,13 @@ Return STRICTLY a JSON array of 5 strings:
             if r.status_code == 200:
                 raw_txt = r.json()['candidates'][0]['content']['parts'][0]['text']
                 topics = json.loads(clean_json_text(raw_txt))
-                if isinstance(topics, list) and len(topics) >= 5:
-                    print(f"   ✅ [ANILIST AI '{model}'] Đã tạo 5 Chủ đề Viral xuất sắc!", flush=True)
-                    return topics[:5]
+                if isinstance(topics, list) and len(topics) >= 1:
+                    print(f"   ✅ [ANILIST AI '{model}'] Đã tạo {len(topics)} Chủ đề Viral xuất sắc!", flush=True)
+                    return topics[:10]
         except Exception as e:
             print(f"⚠️ Thử Gemini Suggestion {model}: {e}", flush=True)
             
-    print("⚠️ API Key chưa hợp lệ hoặc bị lỗi Status 401! Đang nạp 5 chủ đề mẫu mặc định...", flush=True)
+    print("⚠️ API Key chưa hợp lệ hoặc bị lỗi Status 401! Đang nạp chủ đề mẫu mặc định...", flush=True)
     print("👉 Hãy dán Gemini API Key chuẩn từ https://aistudio.google.com/app/apikey vào ô 'Gemini Key:'!", flush=True)
     return [
         f"The Dark Secret Behind {anime_name} That 99% Of Fans Missed",
@@ -489,16 +492,16 @@ def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_sty
     chars_str = ", ".join(available_chars) if available_chars else anime_name
     
     hook_prompts = {
-        "Shocking Secret": f"Start with an explosive 3-second hook about '{topic}': 'Did you know the dark truth about {topic} that 99% of fans completely missed?'",
-        "Power Scaling": f"Start with a mind-blowing power scaling hook: 'Think {topic} is balanced? You won't believe how insanely broken this power really is!'",
-        "Controversial Take": f"Start with a controversial, debate-triggering take about '{topic}' that forces viewers to comment immediately.",
-        "Mysterious Twist": f"Start with a mysterious question about '{topic}' that promises a mind-bending plot twist."
+        "Shocking Secret": f"Start with an explosive 3-second hook about '{topic}' revealing a dark or hidden truth that 99% of fans missed. Make it sound natural and engaging. (Vibe: 'Everyone thinks X, but the real truth is terrifying...')",
+        "Power Scaling": f"Start with a mind-blowing power scaling hook about '{topic}'. Challenge the viewer's perception of their strength. Make it sound conversational. (Vibe: 'You think X is strong? You have no idea how broken their true power is.')",
+        "Controversial Take": f"Start with a highly controversial, debate-triggering hook about '{topic}' that forces viewers to disagree or comment immediately. Keep it natural and punchy.",
+        "Mysterious Twist": f"Start with a mysterious hook about '{topic}' that sets up a mind-bending plot twist. Make the audience extremely curious but keep the dialogue natural."
     }
     
     ending_prompts = {
-        "Viral Comment Question": f"End with a complete, powerful viral question: 'What do you think about {topic}? Is it truly unmatched? Comment your opinion below!'",
-        "Seamless Loop": f"End with a complete cliffhanger sentence that connects back to the opening hook: 'And that is why the truth behind {topic} will never be forgotten.'",
-        "Deep Lore Conclusion": f"End with an epic summary statement about the legacy of {topic} in {anime_name}."
+        "Viral Comment Question": f"End with a natural, engaging question asking for the viewer's opinion on '{topic}' to drive comments. Tie it back to the narrative seamlessly. Do NOT sound like a generic robot.",
+        "Seamless Loop": f"End with a cliffhanger sentence about '{topic}' that seamlessly loops back into the opening hook, creating a perfect circle. It must sound like a natural continuation of the story's climax.",
+        "Deep Lore Conclusion": f"End with an epic, thought-provoking summary statement about the legacy of '{topic}' in the world of {anime_name}. Make it a profound, natural conclusion to the script."
     }
     
     selected_hook = hook_prompts.get(hook_style, hook_prompts["Shocking Secret"])
@@ -507,17 +510,21 @@ def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_sty
     # CÔNG ĐOẠN 1 (STAGE 1): Tập trung 100% AI vào việc viết kịch bản hấp dẫn (Không bị áp lực JSON)
     stage1_prompt = f"""You are a YouTube Shorts Master Storyteller. Write a viral, high-retention narrative script in 100% ENGLISH about '{topic}' for anime '{anime_name}'.
 
-CRITICAL MANDATE:
+CRITICAL MANDATES:
 - Script MUST BE 100% ENGLISH!
 - MUST be 100% original narrative (no generic Wikipedia summaries).
 - EXACT LENGTH: STRICTLY 195 to 215 English words (~52-59s voiceover at +10% speed).
 
-HOOK:
+1. HOOK DIRECTIVE:
 {selected_hook}
 
-ENDING:
+2. ENDING DIRECTIVE:
 {selected_ending}
-CRITICAL: The script MUST end with a 100% complete, standalone sentence! DO NOT append incomplete trailing words or cut-off fragments!
+
+3. NARRATIVE COHESION:
+The body of the script MUST logically connect the HOOK to the ENDING. The transition from the climax of the story into the ENDING must feel completely earned and natural. Do NOT make it sound like two unrelated ideas pasted together.
+
+CRITICAL: The script MUST end with a 100% complete, standalone sentence! Ensure the ENTIRE script flows naturally like a real passionate YouTuber talking, avoiding robotic, repetitive, or forced phrasing. Use engaging, conversational English.
 
 Output ONLY the plain text script in English."""
 
@@ -1088,6 +1095,36 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
     fps = 30
     total_frames = int(total_duration * fps)
 
+    def blur_background_composite(cv_img):
+        h, w, _ = cv_img.shape
+        ratio = TARGET_W / TARGET_H
+        if w / h > 0.82:  # Ảnh ngang hoặc gần vuông -> Cho phép Panning & Background mờ
+            fw = int(TARGET_W * 1.35) # 1458 pixels để chừa không gian trượt ngang
+            fh = max(1, int(fw * (h / w)))
+            fg_resized = cv2.resize(cv_img, (fw, fh), interpolation=cv2.INTER_AREA)
+            
+            # Blurred Background size: fw x TARGET_H
+            bw = max(fw, int(TARGET_H * (w / h)))
+            bg_resized = cv2.resize(cv_img, (bw, TARGET_H), interpolation=cv2.INTER_LINEAR)
+            bl = (bw - fw) // 2
+            bg_cropped = bg_resized[:, bl:bl+fw]
+            
+            small = cv2.resize(bg_cropped, (fw // 10, TARGET_H // 10), interpolation=cv2.INTER_NEAREST)
+            blurred_small = cv2.GaussianBlur(small, (15, 15), 0)
+            bg_blurred = cv2.resize(blurred_small, (fw, TARGET_H), interpolation=cv2.INTER_LINEAR)
+            
+            y_start = (TARGET_H - fh) // 2
+            if y_start >= 0:
+                bg_blurred[y_start:y_start+fh, 0:fw] = fg_resized
+            return bg_blurred
+        else:
+            # Ảnh dọc -> Crop bình thường
+            if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
+            else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
+            resized = cv2.resize(cv_img, (nw, nh), interpolation=cv2.INTER_LINEAR)
+            l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
+            return resized[t_crop:t_crop+TARGET_H, l:l+TARGET_W]
+
     # Pre-load and cache all unique images/GIFs used in the timeline to RAM (Optimized with OpenCV + Numpy slicing)
     cached_media = {}
     unique_paths = list(set(seg["image_path"] for seg in timeline if seg.get("image_path")))
@@ -1103,13 +1140,7 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
                 cv_img = cv2.imread(p_str)
                 if cv_img is None:
                     raise Exception("cv2.imread trả về None")
-                h, w, _ = cv_img.shape
-                ratio = TARGET_W / TARGET_H
-                if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
-                else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
-                cv_img = cv2.resize(cv_img, (nw, nh), interpolation=cv2.INTER_LINEAR)
-                l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
-                cv_img = cv_img[t_crop:t_crop+TARGET_H, l:l+TARGET_W]
+                cv_img = blur_background_composite(cv_img)
                 
                 # Nén JPEG byte lưu RAM
                 _, enc = cv2.imencode('.jpg', cv_img, [cv2.IMWRITE_JPEG_QUALITY, 90])
@@ -1119,14 +1150,8 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
                 try:
                     with Image.open(p) as pil_img:
                         pil_img = pil_img.convert("RGB")
-                        w, h = pil_img.size
-                        ratio = TARGET_W / TARGET_H
-                        if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
-                        else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
-                        pil_img = pil_img.resize((nw, nh), Image.BILINEAR)
-                        l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
-                        pil_img = pil_img.crop((l, t_crop, l + TARGET_W, t_crop + TARGET_H))
                         cv_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
+                        cv_img = blur_background_composite(cv_img)
                         _, enc = cv2.imencode('.jpg', cv_img, [cv2.IMWRITE_JPEG_QUALITY, 90])
                         cached_media[p_str] = (False, enc.tobytes())
                 except Exception as e2:
@@ -1153,17 +1178,10 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
                         img.seek(f_idx)
                         frame_rgb = np.array(img.convert("RGB"))
                         frame_bgr = cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2BGR)
-                        h, w, _ = frame_bgr.shape
-                        ratio = TARGET_W / TARGET_H
-                        if w/h > ratio: nh, nw = TARGET_H, int(w * (TARGET_H / h))
-                        else: nw, nh = TARGET_W, int(h * (TARGET_W / w))
-                        
-                        frame_resized = cv2.resize(frame_bgr, (nw, nh), interpolation=cv2.INTER_LINEAR)
-                        l, t_crop = (nw - TARGET_W) // 2, (nh - TARGET_H) // 2
-                        frame_cropped = frame_resized[t_crop:t_crop+TARGET_H, l:l+TARGET_W]
+                        frame_composited = blur_background_composite(frame_bgr)
                         
                         # Nén JPEG byte lưu RAM
-                        _, enc = cv2.imencode('.jpg', frame_cropped, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                        _, enc = cv2.imencode('.jpg', frame_composited, [cv2.IMWRITE_JPEG_QUALITY, 90])
                         gif_frames.append(enc.tobytes())
                 cached_media[p_str] = (True, gif_frames, gif_dur)
             except Exception as e:
@@ -1323,12 +1341,27 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
         seg_dur = max(0.1, end_t - start_t)
         progress = min(1.0, max(0.0, (t - start_t) / seg_dur))
 
-        # Zoom effect (Optimized with INTER_NEAREST for massive speedup)
-        scale = (1.0 + 0.06 * progress) if (active_idx % 2 == 0) else (1.06 - 0.06 * progress)
-        zw, zh = int(TARGET_W * scale), int(TARGET_H * scale)
-        img_zoomed = cv2.resize(frame_bgr, (zw, zh), interpolation=cv2.INTER_NEAREST)
-        zl, zt = (zw - TARGET_W) // 2, (zh - TARGET_H) // 2
-        frame_bg = img_zoomed[zt:zt+TARGET_H, zl:zl+TARGET_W]
+        # Zoom & Panning effect (Optimized with INTER_NEAREST for massive speedup)
+        h_f, w_f, _ = frame_bgr.shape
+        if w_f > TARGET_W:
+            # Có Panning ngang (ảnh đã được render ở kích thước rộng hơn)
+            max_x = w_f - TARGET_W
+            x_start = int(max_x * progress) if active_idx % 2 == 0 else int(max_x * (1.0 - progress))
+            frame_slice = frame_bgr[:, x_start:x_start+TARGET_W]
+            
+            # Kết hợp Zoom nhẹ
+            scale = (1.0 + 0.04 * progress) if (active_idx % 2 == 0) else (1.04 - 0.04 * progress)
+            zw, zh = int(TARGET_W * scale), int(TARGET_H * scale)
+            img_zoomed = cv2.resize(frame_slice, (zw, zh), interpolation=cv2.INTER_NEAREST)
+            zl, zt = (zw - TARGET_W) // 2, (zh - TARGET_H) // 2
+            frame_bg = img_zoomed[zt:zt+TARGET_H, zl:zl+TARGET_W]
+        else:
+            # Chỉ Zoom (cho ảnh dọc)
+            scale = (1.0 + 0.06 * progress) if (active_idx % 2 == 0) else (1.06 - 0.06 * progress)
+            zw, zh = int(TARGET_W * scale), int(TARGET_H * scale)
+            img_zoomed = cv2.resize(frame_bgr, (zw, zh), interpolation=cv2.INTER_NEAREST)
+            zl, zt = (zw - TARGET_W) // 2, (zh - TARGET_H) // 2
+            frame_bg = img_zoomed[zt:zt+TARGET_H, zl:zl+TARGET_W]
 
         # Transition effect (Decodes next frame bytes to numpy array properly, cached once per segment)
         if active_idx < len(timeline) - 1 and (end_t - t) < (fade_frames / fps):
@@ -1343,9 +1376,27 @@ def render_mp4_video_word_sync(timeline, word_chunks, audio_path, out_mp4_path, 
                     else:
                         jpeg_bytes_next = next_media_info[1][0]
                     
-                    current_decoded_next_frame = cv2.imdecode(np.frombuffer(jpeg_bytes_next, np.uint8), cv2.IMREAD_COLOR)
-                    if current_decoded_next_frame is None:
-                        current_decoded_next_frame = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
+                    raw_next = cv2.imdecode(np.frombuffer(jpeg_bytes_next, np.uint8), cv2.IMREAD_COLOR)
+                    if raw_next is None:
+                        raw_next = np.zeros((TARGET_H, TARGET_W, 3), dtype=np.uint8)
+                    
+                    # Apply zoom/pan for progress=0 to get a TARGET_W x TARGET_H frame for seamless blending
+                    h_n, w_n, _ = raw_next.shape
+                    if w_n > TARGET_W:
+                        x_start_n = 0 if (active_idx + 1) % 2 == 0 else (w_n - TARGET_W)
+                        next_slice = raw_next[:, x_start_n:x_start_n+TARGET_W]
+                        scale_n = 1.0 if ((active_idx + 1) % 2 == 0) else 1.04
+                        zw, zh = int(TARGET_W * scale_n), int(TARGET_H * scale_n)
+                        img_z = cv2.resize(next_slice, (zw, zh), interpolation=cv2.INTER_NEAREST)
+                        zl, zt = (zw - TARGET_W) // 2, (zh - TARGET_H) // 2
+                        current_decoded_next_frame = img_z[zt:zt+TARGET_H, zl:zl+TARGET_W]
+                    else:
+                        scale_n = 1.0 if ((active_idx + 1) % 2 == 0) else 1.06
+                        zw, zh = int(TARGET_W * scale_n), int(TARGET_H * scale_n)
+                        img_z = cv2.resize(raw_next, (zw, zh), interpolation=cv2.INTER_NEAREST)
+                        zl, zt = (zw - TARGET_W) // 2, (zh - TARGET_H) // 2
+                        current_decoded_next_frame = img_z[zt:zt+TARGET_H, zl:zl+TARGET_W]
+                        
                     current_decoded_next_seg_idx = active_idx
                 
                 if current_decoded_next_frame is not None:
