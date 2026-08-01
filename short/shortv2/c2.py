@@ -1019,7 +1019,7 @@ def build_fixed_two_second_timeline(scenes, anime_name, topic, total_duration, a
     import random
     from pathlib import Path
     
-    anime_dir = Path("d:/folder/tools/short/shortv2") / anime_name
+    anime_dir = BASE_LIBRARY_DIR / anime_name
     available_chars = []
     if anime_dir.exists():
         for cdir in anime_dir.iterdir():
