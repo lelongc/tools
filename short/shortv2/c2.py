@@ -508,16 +508,19 @@ def parse_custom_script_into_scenes(script_text, available_chars):
         snip = " ".join(words[st_idx:et_idx])
         if not snip:
             snip = f"Scene {i+1}"
-        chosen_char = available_chars[0] if available_chars else ""
+        chosen_chars = []
         for char_key in available_chars:
             char_clean = char_key.replace("_", " ").lower()
             if char_clean in snip.lower():
-                chosen_char = char_key
-                break
+                chosen_chars.append(char_key)
+        
+        if not chosen_chars:
+            chosen_chars = [available_chars[0]] if available_chars else []
+            
         scenes.append({
             "scene_index": i + 1,
             "text_snippet": snip,
-            "character_key": chosen_char
+            "character_keys": chosen_chars
         })
     return scenes, " ".join(words)
 
@@ -612,13 +615,13 @@ Output ONLY the plain text script in English."""
 
 TASK:
 1. Divide this script into sequential narrative scenes based ONLY on full sentences or clauses ending in punctuation (.,?!). NEVER cut a sentence in the middle!
-2. For EACH scene, assign the most relevant character_key from available list: [{chars_str}].
-If a character is explicitly mentioned or relevant in that scene, assign their character_key. Otherwise, assign '{available_chars[0] if available_chars else "Rimuru_Tempest"}'.
+2. For EACH scene, assign a list of the most relevant character_keys from available list: [{chars_str}].
+If multiple characters are explicitly mentioned or relevant in that scene, assign all their character_keys in a JSON array. If only one is relevant, assign a JSON array with one character_key. If none, assign ['{available_chars[0] if available_chars else "Rimuru_Tempest"}'].
 
 CRITICAL INSTRUCTION:
 - You MUST cover 100% of the original script. Do NOT shorten, summarize, paraphrase, or omit any sentences or words!
 - The sequential concatenation of all "text_snippet" fields MUST match the original script exactly, word-for-word.
-- DO NOT worry about scene length. A scene can be as long as a full sentence or two if it's about the same character.
+- DO NOT worry about scene length. A scene can be as long as a full sentence or two if it's about the same character(s).
 
 Return STRICTLY valid JSON:
 {{
@@ -626,7 +629,7 @@ Return STRICTLY valid JSON:
     {{
       "scene_index": 1,
       "text_snippet": "exact spoken text in scene 1...",
-      "character_key": "Character_Name_Key"
+      "character_keys": ["Character_Name_Key_1", "Character_Name_Key_2"]
     }}
   ]
 }}"""
@@ -990,15 +993,15 @@ Here are the sequential script segments of the video:
 {json.dumps(segments, indent=2)}
 
 TASK:
-For each segment in the list, select the most relevant character folder from the available list: [{chars_str}] that should be shown on screen.
-- If a character is mentioned or active in a segment, select their exact folder name.
+For each segment in the list, select the most relevant character folders from the available list: [{chars_str}] that should be shown on screen.
+- If multiple characters are mentioned or active in a segment, select all their exact folder names.
 - If no specific character is active, select the main topic character.
 - Ensure the folder names match EXACTLY the names in the list.
 
-Return STRICTLY a JSON array of strings, where each string is the folder name for the corresponding segment:
+Return STRICTLY a JSON array of arrays of strings, where each inner array contains the folder names for the corresponding segment:
 [
-  "Folder_For_Segment_1",
-  "Folder_For_Segment_2",
+  ["Folder_For_Segment_1_A", "Folder_For_Segment_1_B"],
+  ["Folder_For_Segment_2"],
   ...
 ]"""
 
@@ -1019,20 +1022,25 @@ Return STRICTLY a JSON array of strings, where each string is the folder name fo
             
     # Normalize list length to match segments
     while len(assigned_folders) < len(segments):
-        assigned_folders.append(main_subject_char)
+        assigned_folders.append([main_subject_char])
     assigned_folders = assigned_folders[:len(segments)]
     
     # Reconstruct scenes structure expected by caller
     scenes = []
-    for idx, (seg, folder) in enumerate(zip(segments, assigned_folders)):
-        # Validate that the folder returned is valid, otherwise fallback
-        final_folder = folder if folder in available_chars else main_subject_char
+    for idx, (seg, folders) in enumerate(zip(segments, assigned_folders)):
+        # Validate that the folders returned are valid, otherwise fallback
+        if isinstance(folders, str): folders = [folders]
+        if not isinstance(folders, list): folders = [main_subject_char]
+        
+        final_folders = [f for f in folders if f in available_chars]
+        if not final_folders: final_folders = [main_subject_char]
+        
         scenes.append({
             "segment_index": idx + 1,
             "text_snippet": seg,
-            "character_folder": final_folder
+            "character_keys": final_folders
         })
-        print(f"     🎬 Cảnh {idx+1}: [{final_folder}] -> \"{seg}\"", flush=True)
+        print(f"     🎬 Cảnh {idx+1}: {final_folders} -> \"{seg}\"", flush=True)
         
     return scenes
 
@@ -1141,9 +1149,16 @@ def build_fixed_two_second_timeline(scenes, anime_name, topic, total_duration, a
         num_chunks = max(1, round(dur / 2.0))
         chunk_dur = dur / num_chunks
         
-        assigned_char = sc.get("character_key", sc.get("character_folder", "")).strip()
-        if not assigned_char or assigned_char not in available_chars:
-            assigned_char = main_subject_char
+        char_keys = sc.get("character_keys", [])
+        if isinstance(char_keys, str):
+            char_keys = [char_keys]
+        elif not char_keys:
+            single_key = sc.get("character_key", sc.get("character_folder", "")).strip()
+            char_keys = [single_key] if single_key else []
+            
+        valid_keys = [k for k in char_keys if k in available_chars]
+        if not valid_keys:
+            valid_keys = [main_subject_char]
             
         snippet_text = sc.get("text_snippet", "").lower()
         prefer_gif_base = any(kw in snippet_text for kw in ['skill', 'fight', 'power', 'attack', 'kill', 'demon', 'slash', 'blast', 'magic', 'true', 'ultimate'])
@@ -1152,6 +1167,7 @@ def build_fixed_two_second_timeline(scenes, anime_name, topic, total_duration, a
             c_st = st + c_i * chunk_dur
             c_et = st + (c_i + 1) * chunk_dur if c_i < num_chunks - 1 else et
             
+            assigned_char = valid_keys[c_i % len(valid_keys)]
             prefer_gif = prefer_gif_base or (chunk_counter % 2 == 1)
             
             chosen_img = None
