@@ -17,15 +17,34 @@ Do các kênh cũ của bạn đã bị 0 view (shadowban), Google đã "đánh 
 
 ---
 
-## BƯỚC 2: TẠO GMAIL & KÊNH YOUTUBE MỚI
-1. **Tạo Gmail:**
-   - Truy cập `gmail.com` trên Profile Chrome mới và tạo tài khoản.
-   - **Lưu ý:** Không dùng số điện thoại đã từng đăng ký các kênh 0 view để xác minh. Hãy mượn số người nhà hoặc mua 1 sim 4G rác để xác minh. Không dùng Email khôi phục là Email cũ.
-2. **Tạo kênh YouTube:**
-   - Truy cập `youtube.com`, đăng nhập bằng Gmail vừa tạo.
-   - Bấm vào Avatar > Chọn **Tạo kênh (Create a channel)**.
-   - Đặt tên kênh (VD: `Anime Lore Shorts`, `Tensura Explored`, v.v.).
-   - Đặt tên người dùng (Handle): Càng ngắn gọn càng tốt (VD: `@animelore.official`).
+## BƯỚC 2: TẠO GMAIL & KÊNH YOUTUBE MỚI (CHI TIẾT TỪNG CLICK)
+
+**1. Tạo tài khoản Gmail:**
+   - Truy cập `gmail.com` trên Profile Chrome mới > Chọn **Tạo tài khoản (Create account)** > Chọn **Dành cho mục đích cá nhân của tôi (For my personal use)**.
+   - Điền Họ tên (Nên lấy tên Tây hợp với kênh, VD: `Ori Anime`).
+   - Ngày tháng năm sinh: Phải trên 18 tuổi.
+   - Tạo địa chỉ Email: Chọn tên dễ nhớ (VD: `orianime.contact@gmail.com`).
+   - Mật khẩu: Lưu vào file text để không bị quên.
+   - **Số điện thoại xác minh (QUAN TRỌNG):** TUYỆT ĐỐI KHÔNG dùng số điện thoại đã từng đăng ký các kênh bị 0 view/vi phạm. Hãy mượn số điện thoại của người nhà (chưa làm YouTube bao giờ) hoặc mua 1 sim 4G rác để nhận code.
+   - Email khôi phục: KHÔNG dùng email của các kênh đã "chết". Hãy bỏ trống hoặc tạo thêm 1 email rác mới tinh để làm email khôi phục.
+
+**2. Bật Bảo Mật 2 Lớp (Bắt buộc để làm YouTube):**
+   - Vào địa chỉ: `myaccount.google.com/security`
+   - Tìm mục **Xác minh 2 bước (2-Step Verification)** và bật nó lên. YouTube yêu cầu cái này để cấp quyền up nhiều video và dùng tính năng nâng cao.
+
+**3. Tạo kênh YouTube:**
+   - Truy cập `youtube.com` trên cùng trình duyệt đó.
+   - Bấm vào Avatar (Hình tròn góc phải trên cùng) > Chọn **Tạo kênh (Create a channel)**.
+   - **Tên kênh (Name):** Nhập tên ngách (VD: `Anime Lore Shorts`, `Tensura Explored`).
+   - **Tên người dùng (Handle):** Chọn 1 handle duy nhất (VD: `@animelore.official`). Handle này sẽ xuất hiện trên đường link YouTube của bạn.
+   - Nhấn **Tạo kênh (Create channel)**.
+
+**4. Xác minh Số điện thoại để mở khóa Tính năng (BẮT BUỘC):**
+   - Bấm vào Avatar > Chọn **YouTube Studio**.
+   - Nhìn sang menu bên trái, cuộn xuống dưới cùng bấm vào **Cài đặt (Settings) ⚙️**.
+   - Chọn tab **Kênh (Channel)** > Chọn tab **Điều kiện sử dụng tính năng (Feature eligibility)**.
+   - Ở mục **Tính năng bậc trung (Intermediate features)**: Bấm Xác minh qua số điện thoại (Lại dùng cái sim rác/sim người nhà lúc nãy). Việc này giúp bạn up video dài hơn 15 phút và được tùy chỉnh Thumbnail.
+   - Ở mục **Tính năng nâng cao (Advanced features)**: Chọn Xác minh bằng Giấy tờ tùy thân (CCCD) hoặc Xác minh bằng Video khuôn mặt. Đợi 24h để YouTube duyệt. Việc này cho phép bạn up nhiều Shorts mỗi ngày và chèn Link vào mô tả.
 
 ---
 
@@ -34,13 +53,15 @@ Vào **YouTube Studio** > **Tùy chỉnh (Customization)** để thiết lập:
 
 1. **Hình ảnh (Branding):**
    - **Avatar & Banner:** Sử dụng AI (như Midjourney hoặc Bing Image Creator) tạo một Avatar và Banner xịn xò mang phong cách Anime. (Hoặc dùng Canva thiết kế nhanh). Không để trống.
-2. **Thông tin cơ bản (Basic Info):**
-   - **Phần Mô tả (Description):** Bắt buộc phải có câu thần chú "Biến đổi nội dung" để lách luật Reused Content. Copy & Dán đoạn sau (sửa tên kênh của bạn vào):
+   - Chọn tab **Thông tin cơ bản (Basic info)** > Phần Mô tả (Description): Bắt buộc phải có câu thần chú "Biến đổi nội dung" để lách luật Reused Content. Copy & Dán đoạn sau (sửa tên kênh của bạn vào):
      > *"Welcome to [Tên Kênh của bạn]. We focus on original anime and light novel lore, analysis, and commentary.*
      >
      > *All videos are created with original scripting, narration, and editing, transforming scenes, panels, and community discussions into educational and analytical short-form content."*
-3. **Cài đặt kênh (Settings):**
-   - Chọn Quốc gia (Country of residence): **Hoa Kỳ (United States)** (Nếu bạn nhắm mục tiêu view ngoại để RPM cao).
+
+3. **Cài đặt hệ thống (Cấu hình ngầm):**
+   - Vẫn trong YouTube Studio, bấm vào **Cài đặt (Settings) ⚙️** góc dưới bên trái:
+   - Tại tab **Kênh (Channel) -> Thông tin cơ bản**:
+     + Chọn Quốc gia cư trú (Country of residence): **Hoa Kỳ (United States)** (Giúp định hướng thuật toán ưu tiên phân phối view US).
    - **Từ khóa kênh (Channel Keywords):** Dưới đây là bộ từ khóa gốc mà kênh Ori Anime đang dùng, bạn có thể tham khảo để copy:
      `Realm of Ori, Tensura light novel series, That time i got reincarnated as a slime Light novel, Ori Anime, Tensura LN Series, Tensura recapped, tensura slime channel, Web novel slime tensura, light novel volume slime tensura`
 
