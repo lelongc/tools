@@ -21,9 +21,9 @@ Do các kênh cũ của bạn đã bị 0 view (shadowban), Google đã "đánh 
 
 **1. Tạo tài khoản Gmail:**
    - Truy cập `gmail.com` trên Profile Chrome mới > Chọn **Tạo tài khoản (Create account)** > Chọn **Dành cho mục đích cá nhân của tôi (For my personal use)**.
-   - Điền Họ tên (Nên lấy tên Tây hợp với kênh, VD: `Ori Anime`).
+   - Điền Họ tên (Nên lấy tên thương hiệu, VD: `Shimanime`).
    - Ngày tháng năm sinh: Phải trên 18 tuổi.
-   - Tạo địa chỉ Email: Chọn tên dễ nhớ (VD: `orianime.contact@gmail.com`).
+   - Tạo địa chỉ Email: Chọn tên trùng với kênh (VD: `shimanime.contact@gmail.com` hoặc `shimanime.official@gmail.com`).
    - Mật khẩu: Lưu vào file text để không bị quên.
    - **Số điện thoại xác minh (QUAN TRỌNG):** TUYỆT ĐỐI KHÔNG dùng số điện thoại đã từng đăng ký các kênh bị 0 view/vi phạm. Hãy mượn số điện thoại của người nhà (chưa làm YouTube bao giờ) hoặc mua 1 sim 4G rác để nhận code.
    - Email khôi phục: KHÔNG dùng email của các kênh đã "chết". Hãy bỏ trống hoặc tạo thêm 1 email rác mới tinh để làm email khôi phục.
@@ -35,8 +35,8 @@ Do các kênh cũ của bạn đã bị 0 view (shadowban), Google đã "đánh 
 **3. Tạo kênh YouTube:**
    - Truy cập `youtube.com` trên cùng trình duyệt đó.
    - Bấm vào Avatar (Hình tròn góc phải trên cùng) > Chọn **Tạo kênh (Create a channel)**.
-   - **Tên kênh (Name):** Nhập tên ngách (VD: `Anime Lore Shorts`, `Tensura Explored`).
-   - **Tên người dùng (Handle):** Chọn 1 handle duy nhất (VD: `@animelore.official`). Handle này sẽ xuất hiện trên đường link YouTube của bạn.
+   - **Tên kênh (Name):** Nhập tên thương hiệu của bạn: `Shimanime`.
+   - **Tên người dùng (Handle):** Chọn 1 handle duy nhất (VD: `@shimanime` hoặc `@shimanime.official`). Handle này sẽ xuất hiện trên đường link YouTube của bạn.
    - Nhấn **Tạo kênh (Create channel)**.
 
 **4. Xác minh Số điện thoại để mở khóa Tính năng (BẮT BUỘC):**
@@ -53,8 +53,8 @@ Vào **YouTube Studio** > **Tùy chỉnh (Customization)** để thiết lập:
 
 1. **Hình ảnh (Branding):**
    - **Avatar & Banner:** Sử dụng AI (như Midjourney hoặc Bing Image Creator) tạo một Avatar và Banner xịn xò mang phong cách Anime. (Hoặc dùng Canva thiết kế nhanh). Không để trống.
-   - Chọn tab **Thông tin cơ bản (Basic info)** > Phần Mô tả (Description): Bắt buộc phải có câu thần chú "Biến đổi nội dung" để lách luật Reused Content. Copy & Dán đoạn sau (sửa tên kênh của bạn vào):
-     > *"Welcome to [Tên Kênh của bạn]. We focus on original anime and light novel lore, analysis, and commentary.*
+   - Chọn tab **Thông tin cơ bản (Basic info)** > Phần Mô tả (Description): Bắt buộc phải có câu thần chú "Biến đổi nội dung" để lách luật Reused Content. Copy & Dán đoạn sau:
+     > *"Welcome to Shimanime. We focus on original anime and light novel lore, analysis, and commentary.*
      >
      > *All videos are created with original scripting, narration, and editing, transforming scenes, panels, and community discussions into educational and analytical short-form content."*
 
