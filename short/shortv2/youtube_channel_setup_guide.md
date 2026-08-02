@@ -67,22 +67,24 @@ Vào **YouTube Studio** > **Tùy chỉnh (Customization)** để thiết lập:
 
 ---
 
-## BƯỚC 4: QUY TRÌNH SẢN XUẤT & ĐĂNG VIDEO HÀNG NGÀY
-Để duy trì độ Trust cao nhất cho kênh, hãy kết hợp sức mạnh của Tool AI và App Điện thoại.
+## BƯỚC 4: QUY TRÌNH "NGÂM KÊNH" VÀ LÊN LỊCH ĐĂNG (CỰC KỲ QUAN TRỌNG)
+Một sai lầm chí mạng của người mới là: Tạo kênh xong -> Up video lên ngay lập tức. Thuật toán của Google sẽ tự động gắn cờ (Flag) đây là hành vi của Bot Spam và bóp chết tương tác (0 view). Hãy tuân thủ Timeline "Ngâm kênh" sau đây:
 
-**1. Sản xuất (Bằng Laptop - Tool Python):**
-   - Chạy file `c1.py` và `c2.py` để sinh ra file video MP4.
-   - Chạy file `c5_metadata.py` để lấy Tiêu đề, Mô tả và Hashtag chuẩn SEO.
-   - Đồng bộ video vừa tạo lên **Google Drive**.
+**▶ NGÀY 1: KHỞI TẠO VÀ LÀM ĐẸP (Không Up Video)**
+- Thực hiện xong toàn bộ các BƯỚC 1, 2 và 3 ở trên.
+- Tạo Avatar, Banner, cập nhật Mô tả kênh và xác minh Số điện thoại xong thì DỪNG LẠI. 
+- Dành ra 15-20 phút lướt YouTube Shorts. Hãy gõ tìm kiếm các từ khóa như `Anime Shorts`, `Tensura`, `Slime Isekai`... Xem hết video, nhấn Like, thi thoảng Comment dạo như một người dùng thật. Mục đích là để YouTube gắn cho tài khoản của bạn cái nhãn "Người dùng này thích xem Anime". Sau đó tắt máy đi ngủ.
 
-**2. Làm ấm kênh (Trong 3 ngày đầu tiên):**
-   - Chưa đăng video vội. Dùng điện thoại đăng nhập Gmail mới (qua mạng 4G).
-   - Lướt YouTube Shorts, xem các video về Anime, nhấn Like, Comment dạo như một người dùng thật. Việc này giúp thuật toán gắn nhãn kênh của bạn thuộc tệp "Người xem Anime".
+**▶ NGÀY 2 & NGÀY 3: NUÔI DƯỠNG COOKIE (Không Up Video)**
+- Mỗi ngày mở máy lên lướt xem YouTube Shorts (nhớ bật 4G) khoảng 15-30 phút. 
+- Tương tác tự nhiên (Like, xem hết video, share).
+- Trong lúc này, bạn có thể chạy Tool Python (`c1.py`, `c2.py`) trên Laptop để sản xuất và tích trữ sẵn một loạt video MP4 bỏ vào thư mục chờ.
 
-**3. Đăng video (Bằng App YouTube trên Điện thoại):**
-   - Tải video từ Google Drive xuống thư viện ảnh của điện thoại.
-   - Mở app YouTube trên điện thoại > Nhấn nút **(+)** > Chọn **Tạo video ngắn (Create a Short)**.
-   - Chọn video từ thư viện > Nhấn **Tiếp tục**.
+**▶ NGÀY 4: BẮT ĐẦU ĐĂNG VIDEO ĐẦU TIÊN**
+- Lúc này độ Trust của kênh đã đủ. Bạn bắt đầu đăng video đầu tiên.
+- **Tải video từ Google Drive** xuống thư viện ảnh của điện thoại (hoặc up thẳng từ Laptop đều được).
+- Mở app YouTube trên điện thoại > Nhấn nút **(+)** > Chọn **Tạo video ngắn (Create a Short)**.
+- Chọn video từ thư viện > Nhấn **Tiếp tục**.
    - **[BÍ QUYẾT 1 - CHỌN THUMBNAIL]:** Ở màn hình điền Tiêu đề, nhấn vào **Biểu tượng cái Bút chì** góc trái trên cùng của video. Tua timeline đến đúng khung hình mà tool đã gắn Text to đùng, chọn làm Thumbnail (Hình thu nhỏ).
    - **[BÍ QUYẾT 2 - HACK NHẠC TRENDING]:** Nhấn vào phần **Âm thanh (Sound)** > Thêm một bài nhạc đang Trending trên Shorts. Sau đó vào mục **Âm lượng (Volume)** > Kéo âm lượng của bài nhạc Trending xuống mức **1%** hoặc **2%**, giữ nguyên Âm lượng video gốc (Original Audio) ở mức 100%. (Điều này giúp thuật toán đẩy video ăn theo Trend âm thanh).
    - Copy Tiêu đề và Mô tả từ file `c5_metadata.py` dán vào. Lên lịch (Schedule) hoặc Đăng ngay.
