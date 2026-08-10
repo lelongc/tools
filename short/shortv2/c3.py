@@ -72,6 +72,7 @@ anime_dropdown = widgets.Dropdown(options=animes_list, description='Chọn Anime
 new_anime_input = widgets.Text(placeholder='Nhập tên Anime mới...', layout=widgets.Layout(width='200px'))
 add_anime_btn = widgets.Button(description='➕ Thêm Anime', button_style='primary', layout=widgets.Layout(width='120px'))
 del_anime_btn = widgets.Button(description='🗑️ Xóa Anime', button_style='danger', layout=widgets.Layout(width='120px'))
+del_anime_btn.layout.display = 'none' # Hidden to prevent accidental deletion
 
 new_char_input = widgets.Text(placeholder='Nhập tên Nhân Vật mới...', layout=widgets.Layout(width='250px'))
 add_char_btn = widgets.Button(description='➕ Thêm NV', button_style='info', layout=widgets.Layout(width='110px'))
@@ -162,6 +163,11 @@ add_anime_btn.on_click(on_add_anime); del_anime_btn.on_click(on_del_anime)
 add_char_btn.on_click(on_add_char); del_char_btn.on_click(on_del_char)
 fetch_selected_btn.on_click(on_fetch_selected); fetch_all_btn.on_click(on_fetch_all)
 
+danger_box = widgets.HBox([
+    widgets.HTML("<i style='color:orange;'>Khu vực nguy hiểm (Dễ đầy bộ nhớ):</i>"),
+    fetch_all_btn
+], layout=widgets.Layout(justify_content='space-between', align_items='center', margin='10px 0 0 0'))
+
 tab1_content = widgets.VBox([
     widgets.HTML("<h3>📁 QUẢN LÝ ANIME & NHÂN VẬT (CÀO TỰ ĐỘNG THƯ MỤC GIF RIÊNG & ĐAN XEN THÔNG MINH)</h3>"),
     widgets.HBox([anime_dropdown, new_anime_input, add_anime_btn]),
@@ -169,7 +175,7 @@ tab1_content = widgets.VBox([
     widgets.HBox([source_dropdown, media_type_dropdown, target_count_slider]),
     widgets.HBox([char_multiselect, widgets.VBox([widgets.HTML("<i>💡 Giữ phím <b>Ctrl</b> hoặc <b>Shift</b> để chọn nhiều nhân vật cùng lúc!</i>"), del_char_btn])]),
     fetch_selected_btn,
-    fetch_all_btn
+    danger_box
 ])
 
 # --- TAB 2: XƯỞNG VIRAL SHORT (ANILIST LORE RESEARCH & TOPIC GENERATOR) ---
@@ -237,7 +243,6 @@ voice_dropdown = widgets.Dropdown(
     description='Giọng Đọc:', layout=widgets.Layout(width='420px')
 )
 
-
 progress_label = widgets.HTML(value="<b>Tiến độ:</b> Đang chờ...")
 progress_bar = widgets.IntProgress(value=0, min=0, max=100, description='Tiến độ:', bar_style='info', layout=widgets.Layout(width='100%'))
 progress_container = widgets.VBox([progress_label, progress_bar])
@@ -246,7 +251,6 @@ create_short_btn = widgets.Button(description='🎬 1-CLICK TẠO VIRAL SHORT MP
 
 def on_api_key_change(change):
     new_val = change['new'].strip().strip('" \t\r\n')
-
     if new_val:
         try:
             BASE_LIBRARY_DIR.mkdir(parents=True, exist_ok=True)
