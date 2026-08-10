@@ -7,28 +7,32 @@ import json
 from pathlib import Path
 
 def generate_youtube_metadata_interactive(b=None):
-    sel_anime = anime_dropdown.value if 'anime_dropdown' in globals() else "Tensei_Slime"
-    topic = topic_dropdown.value if 'topic_dropdown' in globals() and topic_dropdown.value else "Diablo vs Milim"
+    # Ưu tiên 1: Lấy kịch bản, chủ đề, tên anime của VIDEO VỪA MỚI TẠO XONG GẦN NHẤT
+    script_text = globals().get('LAST_GENERATED_SCRIPT', '')
+    topic = globals().get('LAST_GENERATED_TOPIC', topic_dropdown.value if 'topic_dropdown' in globals() and topic_dropdown.value else "Diablo vs Milim")
+    sel_anime = globals().get('LAST_GENERATED_ANIME', anime_dropdown.value if 'anime_dropdown' in globals() else "Tensei_Slime")
+    
     key = gemini_key_input.value if 'gemini_key_input' in globals() and gemini_key_input.value else os.environ.get("GEMINI_API_KEY", "")
     
     if not key:
         print("❌ LỖI: Vui lòng nhập Gemini API Key ở Cell 3!")
         return
 
-    c_script = custom_script_input.value if 'custom_script_input' in globals() and custom_script_input.value.strip() else ""
-    
-    out_dir = BASE_LIBRARY_DIR / sel_anime / "output_shorts" if 'BASE_LIBRARY_DIR' in globals() else Path("/content/drive/MyDrive/anime_library") / sel_anime / "output_shorts"
-    script_text = c_script
-    
-    if not script_text and out_dir.exists():
-        json_files = list(out_dir.glob("*.json")) + list(Path('projects').rglob("script_data.json"))
-        if json_files:
-            latest_json = max(json_files, key=lambda f: f.stat().st_mtime)
-            try:
-                data = json.loads(latest_json.read_text(encoding='utf-8'))
-                script_text = data.get('script', '')
-            except: pass
-            
+    # Dự phòng 2: Nếu chưa tạo video trong phiên này, lấy từ Custom Script hoặc file JSON mới nhất
+    if not script_text:
+        c_script = custom_script_input.value if 'custom_script_input' in globals() and custom_script_input.value.strip() else ""
+        out_dir = BASE_LIBRARY_DIR / sel_anime / "output_shorts" if 'BASE_LIBRARY_DIR' in globals() else Path("/content/drive/MyDrive/anime_library") / sel_anime / "output_shorts"
+        script_text = c_script
+        
+        if not script_text and out_dir.exists():
+            json_files = list(out_dir.glob("*.json")) + list(Path('projects').rglob("script_data.json"))
+            if json_files:
+                latest_json = max(json_files, key=lambda f: f.stat().st_mtime)
+                try:
+                    data = json.loads(latest_json.read_text(encoding='utf-8'))
+                    script_text = data.get('script', '')
+                except: pass
+                
     if not script_text:
         script_text = f"An epic lore breakdown video about {topic} in {sel_anime}."
 
@@ -37,7 +41,7 @@ def generate_youtube_metadata_interactive(b=None):
     prompt = f"""You are an elite YouTube Shorts SEO Specialist for top-tier Anime Lore channels (like Realm of Ori).
 Generates viral YouTube Shorts metadata for an anime video about '{topic}' in anime '{sel_anime}'.
 
-Script Content:
+Script Content (EXACT text of the latest generated video):
 "{script_text}"
 
 CRITICAL SEO RULES (From Channel Setup Blueprint youtube_channel_setup_guide.md):
@@ -62,7 +66,7 @@ Return STRICTLY valid JSON:
   "pinned_comment": "Who do you think has the edge in this fight? Let me know below! 👇"
 }}"""
 
-    print("✨ AI Gemini đang tạo Tiêu đề, Mô tả & Bình luận ghim chuẩn Viral YouTube Shorts...", flush=True)
+    print("✨ AI Gemini đang tạo Tiêu đề, Mô tả & Bình luận ghim chuẩn Viral YouTube Shorts cho Video Vừa Tạo...", flush=True)
     models = ['gemini-2.5-flash', 'gemini-3.1-flash-lite', 'gemini-1.5-flash', 'gemini-flash-latest']
     meta_data = None
     for m in models:
@@ -84,6 +88,7 @@ Return STRICTLY valid JSON:
 
     print("\n" + "="*60)
     print("🚀 NỘI DUNG SEO YOUTUBE SHORTS VIÊN VIÊN (1-CLICK COPY)")
+    print(f"🎬 Chủ đề Video: [{topic}] | Anime: [{sel_anime}]")
     print("="*60)
     print(f"\n📌 1. TIÊU ĐỀ (TITLE):\n{meta_data.get('title')}\n")
     print(f"📝 2. MÔ TẢ (DESCRIPTION):\n{meta_data.get('description')}\n")

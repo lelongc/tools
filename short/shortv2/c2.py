@@ -1665,6 +1665,10 @@ def generate_video_short(anime_name, topic, api_key, voice, custom_script, custo
         if label_widget: label_widget.value = "<b>📝 [1/5] 10%</b> — Đang nạp Kịch bản Tùy Chỉnh do bạn nhập..."
         if pbar_widget: pbar_widget.value = 10
         script_text = custom_script.strip()
+        global LAST_GENERATED_SCRIPT, LAST_GENERATED_TOPIC, LAST_GENERATED_ANIME
+        LAST_GENERATED_SCRIPT = script_text
+        LAST_GENERATED_TOPIC = topic
+        LAST_GENERATED_ANIME = anime_name
         scenes = analyze_character_timeline_gemini(script_text, available_chars, api_key)
     else:
         if label_widget: label_widget.value = "<b>🚀 [1/5] 5%</b> — AI Gemini đang viết kịch bản Tiếng Anh 30 phân cảnh..."
@@ -1674,6 +1678,10 @@ def generate_video_short(anime_name, topic, api_key, voice, custom_script, custo
             if label_widget: label_widget.value = "<b style='color:red;'>❌ LỖI: Không thể tạo kịch bản Gemini. Kiểm tra lại API Key hoặc nhập kịch bản tùy chỉnh!</b>"
             return
         script_text = script_data.get('tts_script') or script_data.get('script', '')
+        global LAST_GENERATED_SCRIPT, LAST_GENERATED_TOPIC, LAST_GENERATED_ANIME
+        LAST_GENERATED_SCRIPT = script_text
+        LAST_GENERATED_TOPIC = topic
+        LAST_GENERATED_ANIME = anime_name
         scenes = script_data.get('scenes')
         if not scenes:
             scenes = analyze_character_timeline_gemini(script_text, available_chars, api_key)
@@ -1722,6 +1730,12 @@ def generate_video_short(anime_name, topic, api_key, voice, custom_script, custo
     if local_mp4_path.exists():
         shutil.copy(local_mp4_path, dest_mp4_path)
         print(f"✅ TẠO VIDEO THÀNH CÔNG: {dest_mp4_path}", flush=True)
+        try:
+            from google.colab import files
+            print(f"📥 Đang tự động tải video ({dest_mp4_path.name}) về máy tính của bạn...", flush=True)
+            files.download(str(dest_mp4_path))
+        except Exception as e_dl:
+            pass
         if label_widget: label_widget.value = f"<b style='color:green;'>✅ XONG! Video đã lưu tại: {dest_mp4_path}</b>"
         if pbar_widget: pbar_widget.value = 100
         try:
