@@ -1,88 +1,82 @@
+# @title 🎬 3. ANIME SHORT STUDIO WEB APP (ANILIST LORE & VIRAL SHORT MAKER)
+import json, shutil, os, requests
 import ipywidgets as widgets
-from IPython.display import display, HTML, clear_output
-import os
-import json
-import shutil
-import time
-import random
+from IPython.display import display, clear_output
 from pathlib import Path
 
-# --- DEFENSIVE GLOBALS TO PREVENT IDE LINTER ERRORS WHEN OPENED STANDALONE ---
-if 'BASE_LIBRARY_DIR' not in globals():
-    BASE_LIBRARY_DIR = Path('/content/drive/MyDrive/anime_library') if Path('/content').exists() else Path('anime_library')
-
-if 'get_effective_gemini_key' not in globals():
-    def get_effective_gemini_key(user_key=""): return user_key or os.environ.get("GEMINI_API_KEY", "")
-
-if 'run_fetch' not in globals():
-    def run_fetch(*args, **kwargs): pass
-
-if 'suggest_viral_topics' not in globals():
-    def suggest_viral_topics(*args, **kwargs): return []
-
-if 'generate_video_short' not in globals():
-    def generate_video_short(*args, **kwargs): pass
-
-if 'save_api_key_to_drive' not in globals():
-    def save_api_key_to_drive(key):
-        if not key or len(key.strip()) < 10: return
+def get_base_library_dir():
+    drive_dir = Path('/content/drive/MyDrive/anime_library')
+    local_dir = Path('/content/anime_library')
+    if Path('/content/drive/MyDrive').exists():
         try:
-            p = BASE_LIBRARY_DIR / "gemini_api_key.txt"
-            p.write_text(key.strip(), encoding="utf-8")
+            drive_dir.mkdir(parents=True, exist_ok=True)
+            return drive_dir
         except Exception: pass
+    local_dir.mkdir(parents=True, exist_ok=True)
+    return local_dir
 
-out = widgets.Output()
+BASE_LIBRARY_DIR = get_base_library_dir()
+SETTINGS_FILE = BASE_LIBRARY_DIR / "studio_settings.json"
+
+def get_effective_gemini_key(user_key=""):
+    k_cand = ""
+    if user_key and user_key.strip():
+        k_cand = user_key.strip()
+    elif SETTINGS_FILE.exists():
+        try:
+            data = json.loads(SETTINGS_FILE.read_text(encoding="utf-8"))
+            k_cand = data.get("gemini_api_key", "").strip()
+        except Exception: pass
+    if not k_cand:
+        k_cand = os.environ.get("GEMINI_API_KEY", "").strip()
+    return k_cand.strip('" \t\r\n')
+
+
+def get_all_animes():
+    BASE_LIBRARY_DIR.mkdir(parents=True, exist_ok=True)
+    animes = [item.name for item in BASE_LIBRARY_DIR.iterdir() if item.is_dir() and not item.name.startswith('.')]
+    if not animes:
+        animes = ["Tensei_Slime"]
+        conf_path = BASE_LIBRARY_DIR / "Tensei_Slime" / "characters_config.json"
+        conf_path.parent.mkdir(parents=True, exist_ok=True)
+        if not conf_path.exists():
+            conf_path.write_text(json.dumps({
+                "Rimuru_Tempest": "Rimuru Tempest",
+                "Veldora_Tempest": "Veldora Tempest",
+                "Milim_Nava": "Milim Nava",
+                "Guy_Crimson": "Guy Crimson",
+                "Diablo": "Diablo",
+                "Benimaru": "Benimaru",
+                "Shion": "Shion"
+            }, indent=4, ensure_ascii=False), encoding="utf-8")
+    return sorted(animes)
 
 def load_conf_for_anime(anime_name):
-    anime_dir = BASE_LIBRARY_DIR / anime_name
-    conf_path = anime_dir / "characters_config.json"
+    conf_path = BASE_LIBRARY_DIR / anime_name / "characters_config.json"
     if conf_path.exists():
-        try:
-            return json.loads(conf_path.read_text(encoding="utf-8"))
-        except Exception:
-            pass
-    char_dict = {}
-    if anime_dir.exists():
-        for cdir in anime_dir.iterdir():
-            if cdir.is_dir() and cdir.name != "output_shorts":
-                char_dict[cdir.name] = cdir.name.replace("_", " ")
-    return char_dict
+        try: return json.loads(conf_path.read_text(encoding="utf-8"))
+        except Exception: pass
+    return {}
 
-def save_conf_for_anime(anime_name, char_dict):
+def save_conf_for_anime(anime_name, data):
     anime_dir = BASE_LIBRARY_DIR / anime_name
     anime_dir.mkdir(parents=True, exist_ok=True)
     conf_path = anime_dir / "characters_config.json"
-    conf_path.write_text(json.dumps(char_dict, indent=4, ensure_ascii=False), encoding="utf-8")
+    conf_path.write_text(json.dumps(data, indent=4, ensure_ascii=False), encoding="utf-8")
 
-def get_all_animes():
-    if not BASE_LIBRARY_DIR.exists():
-        return []
-    animes = []
-    for d in BASE_LIBRARY_DIR.iterdir():
-        if d.is_dir():
-            if (d / "characters_config.json").exists():
-                animes.append(d.name)
-            else:
-                has_char_subdirs = any(s.is_dir() and s.name != "output_shorts" for s in d.iterdir())
-                if has_char_subdirs:
-                    animes.append(d.name)
-    return sorted(animes)
+out = widgets.Output()
 
-# --- UI COMPONENTS ---
-all_animes = get_all_animes()
-anime_dropdown = widgets.Dropdown(options=all_animes, description='Chọn Anime:', layout=widgets.Layout(width='280px'))
-if not all_animes:
-    save_conf_for_anime("Tensei_Slime", {})
-    anime_dropdown.options = get_all_animes()
-
-new_anime_input = widgets.Text(placeholder='Tên Anime Mới...', layout=widgets.Layout(width='180px'))
-add_anime_btn = widgets.Button(description='➕ Thêm Anime', button_style='success', layout=widgets.Layout(width='120px'))
+# --- TAB 1: CẤU HÌNH ANIME & NHÂN VẬT ---
+animes_list = get_all_animes()
+anime_dropdown = widgets.Dropdown(options=animes_list, description='Chọn Anime:', layout=widgets.Layout(width='320px'))
+new_anime_input = widgets.Text(placeholder='Nhập tên Anime mới...', layout=widgets.Layout(width='200px'))
+add_anime_btn = widgets.Button(description='➕ Thêm Anime', button_style='primary', layout=widgets.Layout(width='120px'))
 del_anime_btn = widgets.Button(description='🗑️ Xóa Anime', button_style='danger', layout=widgets.Layout(width='120px'))
 del_anime_btn.layout.display = 'none' # Hidden to prevent accidental deletion
 
-new_char_input = widgets.Text(placeholder='Tên NV Mới...', layout=widgets.Layout(width='180px'))
-add_char_btn = widgets.Button(description='➕ Thêm NV', button_style='info', layout=widgets.Layout(width='100px'))
-del_char_btn = widgets.Button(description='❌ Xóa NV Chọn', button_style='warning', layout=widgets.Layout(width='130px'))
+new_char_input = widgets.Text(placeholder='Nhập tên Nhân Vật mới...', layout=widgets.Layout(width='250px'))
+add_char_btn = widgets.Button(description='➕ Thêm NV', button_style='info', layout=widgets.Layout(width='110px'))
+del_char_btn = widgets.Button(description='❌ Xóa NV Chọn', button_style='warning', layout=widgets.Layout(width='140px'))
 
 source_dropdown = widgets.Dropdown(options=[('Pinterest Web', 'pinterest'), ('Bing Images', 'bing'), ('Google Images', 'google')], description='Nguồn:', layout=widgets.Layout(width='240px'))
 media_type_dropdown = widgets.Dropdown(options=[('🖼️ Ảnh Tĩnh (JPG/PNG)', 'image'), ('🎬 Ảnh Động GIF (Thư mục /gif)', 'gif')], description='Loại File:', layout=widgets.Layout(width='280px'))
@@ -105,54 +99,46 @@ def on_anime_change(change):
 anime_dropdown.observe(on_anime_change, names='value')
 
 def on_add_anime(b):
-    with out:
-        clear_output()
-        name = new_anime_input.value.strip().replace(" ", "_")
-        if name:
-            save_conf_for_anime(name, {})
-            new_anime_input.value = ""
-            anime_dropdown.options = get_all_animes()
-            anime_dropdown.value = name
-            update_ui()
-            print(f"✅ Đã thêm Anime mới: {name}")
+    name = new_anime_input.value.strip().replace(" ", "_")
+    if name:
+        save_conf_for_anime(name, {})
+        new_anime_input.value = ""
+        anime_dropdown.options = get_all_animes()
+        anime_dropdown.value = name
+        update_ui()
+        with out: print(f"✅ Đã thêm Anime mới: {name}")
 
 def on_del_anime(b):
-    with out:
-        clear_output()
-        sel = anime_dropdown.value
-        if sel:
-            shutil.rmtree(BASE_LIBRARY_DIR / sel, ignore_errors=True)
-            anime_dropdown.options = get_all_animes()
-            if anime_dropdown.options: anime_dropdown.value = anime_dropdown.options[0]
-            update_ui()
-            print(f"🗑️ Đã xóa hoàn toàn Anime: {sel}")
+    sel = anime_dropdown.value
+    if sel:
+        shutil.rmtree(BASE_LIBRARY_DIR / sel, ignore_errors=True)
+        anime_dropdown.options = get_all_animes()
+        if anime_dropdown.options: anime_dropdown.value = anime_dropdown.options[0]
+        update_ui()
+        with out: print(f"🗑️ Đã xóa hoàn toàn Anime: {sel}")
 
 def on_add_char(b):
-    with out:
-        clear_output()
-        sel_anime = anime_dropdown.value
-        cname = new_char_input.value.strip().replace(" ", "_")
-        if sel_anime and cname:
-            char_dict = load_conf_for_anime(sel_anime)
-            char_dict[cname] = cname.replace("_", " ")
-            save_conf_for_anime(sel_anime, char_dict)
-            new_char_input.value = ""
-            update_ui()
-            print(f"✅ Đã thêm nhân vật '{cname}' vào '{sel_anime}'")
+    sel_anime = anime_dropdown.value
+    cname = new_char_input.value.strip().replace(" ", "_")
+    if sel_anime and cname:
+        char_dict = load_conf_for_anime(sel_anime)
+        char_dict[cname] = cname.replace("_", " ")
+        save_conf_for_anime(sel_anime, char_dict)
+        new_char_input.value = ""
+        update_ui()
+        with out: print(f"✅ Đã thêm nhân vật '{cname}' vào '{sel_anime}'")
 
 def on_del_char(b):
-    with out:
-        clear_output()
-        sel_anime = anime_dropdown.value
-        selected_chars = list(char_multiselect.value)
-        if sel_anime and selected_chars:
-            char_dict = load_conf_for_anime(sel_anime)
-            for cname in selected_chars:
-                if cname in char_dict: del char_dict[cname]
-                shutil.rmtree(BASE_LIBRARY_DIR / sel_anime / cname, ignore_errors=True)
-            save_conf_for_anime(sel_anime, char_dict)
-            update_ui()
-            print(f"💣 Đã xóa vĩnh viễn {len(selected_chars)} nhân vật khỏi '{sel_anime}'!")
+    sel_anime = anime_dropdown.value
+    selected_chars = list(char_multiselect.value)
+    if sel_anime and selected_chars:
+        char_dict = load_conf_for_anime(sel_anime)
+        for cname in selected_chars:
+            if cname in char_dict: del char_dict[cname]
+            shutil.rmtree(BASE_LIBRARY_DIR / sel_anime / cname, ignore_errors=True)
+        save_conf_for_anime(sel_anime, char_dict)
+        update_ui()
+        with out: print(f"💣 Đã xóa vĩnh viễn {len(selected_chars)} nhân vật khỏi '{sel_anime}'!")
 
 def on_fetch_selected(b):
     with out:
@@ -206,7 +192,7 @@ def on_suggest_topics(b):
         clear_output()
         key = get_effective_gemini_key(gemini_key_input.value.strip())
         if not key:
-            print("❌ LỖI THIẾU API KEY: Vui lòng dán Gemini API Key mới vào ô 'Gemini Key:'!", flush=True)
+            print("❌ LỖI THIẾU API KEY: Vui lòng dán Gemini API Key mới (bắt đầu bằng AIzaSy...) lấy miễn phí tại https://aistudio.google.com/app/apikey vào ô 'Gemini Key:'!", flush=True)
             return
         sel_anime = anime_dropdown.value
         user_idea = idea_input.value.strip()
@@ -266,7 +252,16 @@ create_short_btn = widgets.Button(description='🎬 1-CLICK TẠO VIRAL SHORT MP
 def on_api_key_change(change):
     new_val = change['new'].strip().strip('" \t\r\n')
     if new_val:
-        save_api_key_to_drive(new_val)
+        try:
+            BASE_LIBRARY_DIR.mkdir(parents=True, exist_ok=True)
+            curr = json.loads(SETTINGS_FILE.read_text(encoding="utf-8")) if SETTINGS_FILE.exists() else {}
+            curr["gemini_api_key"] = new_val
+            SETTINGS_FILE.write_text(json.dumps(curr, indent=4, ensure_ascii=False), encoding="utf-8")
+            with out:
+                clear_output()
+                print(f"✅ Đã tự động lưu Gemini API Key mới vào Google Drive cá nhân!", flush=True)
+        except Exception as e:
+            pass
 
 gemini_key_input.observe(on_api_key_change, names='value')
 
@@ -274,14 +269,14 @@ def on_create_short(b):
     with out:
         clear_output()
         key = get_effective_gemini_key(gemini_key_input.value.strip())
-        if not key:
-            print("❌ LỖI THIẾU API KEY: Vui lòng dán Gemini API Key mới vào ô 'Gemini Key:'!", flush=True)
+        c_script = custom_script_input.value.strip()
+        c_subs = custom_subs_input.value.strip()
+        if not c_script and not key:
+            print("❌ LỖI THIẾU API KEY: Vui lòng dán Gemini API Key mới (bắt đầu bằng AIzaSy...) lấy miễn phí tại https://aistudio.google.com/app/apikey vào ô 'Gemini Key:'!", flush=True)
             return
         sel_anime = anime_dropdown.value
         topic = topic_input.value.strip()
         voice = voice_dropdown.value
-        c_script = custom_script_input.value.strip()
-        c_subs = custom_subs_input.value.strip()
         hook = hook_dropdown.value
         ending = ending_dropdown.value
         generate_video_short(sel_anime, topic, key, voice, custom_script=c_script, custom_subs=c_subs, hook_style=hook, ending_style=ending, pbar_widget=progress_bar, label_widget=progress_label)
@@ -290,15 +285,14 @@ create_short_btn.on_click(on_create_short)
 
 tab2_content = widgets.VBox([
     widgets.HTML("<h3>🎬 XƯỞNG VIRAL SHORT MP4 (ANILIST LORE AI & CHỌN CHỦ ĐỀ GIỮ CHÂN RETENTION)</h3>"),
-    widgets.HTML("<p><i>💡 Lấy Gemini API Key miễn phí 100% tại: <a href='https://aistudio.google.com/app/apikey' target='_blank'>Google AI Studio Key Generator</a></i></p>"),
+    widgets.HTML("<i>💡 Lấy Gemini API Key miễn phí 100% tại: <a href='https://aistudio.google.com/app/apikey' target='_blank'>Google AI Studio Key Generator</a></i>"),
     gemini_key_input,
-    widgets.HTML("<hr>"),
     idea_input,
     suggest_topics_btn,
     viral_topics_dropdown,
     topic_input,
-    widgets.HBox([hook_dropdown]),
-    widgets.HBox([ending_dropdown]),
+    hook_dropdown,
+    ending_dropdown,
     custom_script_input,
     custom_subs_input,
     progress_container,
@@ -306,12 +300,15 @@ tab2_content = widgets.VBox([
     create_short_btn
 ])
 
-tab = widgets.Tab(children=[tab1_content, tab2_content])
-tab.set_title(0, '📁 1. Quản Lý Anime / NV & Cào Ảnh')
-tab.set_title(1, '🎬 2. Tạo Viral Short MP4 (YouTube Monetization)')
+tabs = widgets.Tab(children=[tab1_content, tab2_content])
+tabs.set_title(0, '📁 1. Quản Lý Anime / NV & Cào Ảnh')
+tabs.set_title(1, '🎬 2. Tạo Viral Short MP4 (YouTube Monetization)')
 
 update_ui()
 
-display(HTML("<h2 style='color:#ff4500;'>🌟 ANIME SHORT STUDIO WEB APP — ANILIST LORE RESEARCH & VIRAL TOPIC MAKER</h2>"))
-display(tab)
-display(out)
+ui = widgets.VBox([
+    widgets.HTML("<h2 style='color:#1E88E5;'>🌟 ANIME SHORT STUDIO WEB APP — ANILIST LORE RESEARCH & VIRAL TOPIC MAKER</h2>"),
+    tabs,
+    out
+])
+display(ui)
