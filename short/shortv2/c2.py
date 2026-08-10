@@ -1,4 +1,4 @@
-# @title 2. Khởi tạo Core Backend (Chạy 1 lần sau khi cài thư viện)
+# @title ⚙️ 2. Core Engine (Hỗ Trợ Tự Nhập Kịch Bản Tùy Chỉnh + AI Gemini Auto + Live Progress Bar %)
 def get_effective_gemini_key(user_key=""):
     k_cand = ""
     if user_key and user_key.strip():
@@ -131,45 +131,6 @@ Return STRICTLY a JSON array of 10 strings:
         f"The True Power Scaling Secrets Of {anime_name}"
     ]
 
-
-
-def load_conf_for_anime(anime_name):
-    anime_dir = BASE_LIBRARY_DIR / anime_name
-    anime_dir.mkdir(parents=True, exist_ok=True)
-    conf_path = anime_dir / "characters_config.json"
-    if conf_path.exists():
-        try:
-            return json.loads(conf_path.read_text(encoding="utf-8"))
-        except Exception: pass
-    return {}
-
-def save_conf_for_anime(anime_name, data):
-    anime_dir = BASE_LIBRARY_DIR / anime_name
-    anime_dir.mkdir(parents=True, exist_ok=True)
-    conf_path = anime_dir / "characters_config.json"
-    conf_path.write_text(json.dumps(data, indent=4, ensure_ascii=False), encoding="utf-8")
-
-def get_all_animes():
-    BASE_LIBRARY_DIR.mkdir(parents=True, exist_ok=True)
-    animes = []
-    for item in BASE_LIBRARY_DIR.iterdir():
-        if item.is_dir() and not item.name.startswith('.'):
-            animes.append(item.name)
-    if not animes:
-        animes = ["Tensei_Slime"]
-        save_conf_for_anime("Tensei_Slime", {
-            "Rimuru_Tempest": "Rimuru Tempest",
-            "Veldora_Tempest": "Veldora Tempest",
-            "Milim_Nava": "Milim Nava",
-            "Guy_Crimson": "Guy Crimson",
-            "Diablo": "Diablo",
-            "Benimaru": "Benimaru",
-            "Shion": "Shion"
-        })
-    return sorted(animes)
-
-
-# @title ⚙️ 2. Core Engine (Hỗ Trợ Tự Nhập Kịch Bản Tùy Chỉnh + AI Gemini Auto + Live Progress Bar %)
 import warnings
 warnings.filterwarnings('ignore')
 import os, sys, time, json, cv2, numpy as np, hashlib, re, urllib.parse, asyncio, random, shutil, subprocess
