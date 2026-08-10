@@ -84,7 +84,7 @@ target_count_slider = widgets.IntSlider(value=20, min=5, max=100, step=5, descri
 char_multiselect = widgets.SelectMultiple(options=[], description='Danh Sách NV:', layout=widgets.Layout(width='350px', height='140px'))
 
 fetch_selected_btn = widgets.Button(description='🔎 1. CÀO ẢNH / GIF CHO CÁC NHÂN VẬT ĐƯỢC CHỌN', button_style='primary', layout=widgets.Layout(width='100%', height='40px'))
-fetch_all_btn = widgets.Button(description='🚀 2. CÀO ẢNH / GIF CHO TẤT CẢ NHÂN VẬT TRONG ANIME', button_style='success', layout=widgets.Layout(width='100%', height='40px'))
+fetch_all_btn = widgets.Button(description='⚠️ TẢI TOÀN BỘ (CẨN THẬN)', button_style='danger', layout=widgets.Layout(width='auto', height='36px'))
 
 def update_ui():
     sel_anime = anime_dropdown.value
@@ -164,7 +164,7 @@ fetch_selected_btn.on_click(on_fetch_selected); fetch_all_btn.on_click(on_fetch_
 
 tab1_content = widgets.VBox([
     widgets.HTML("<h3>📁 QUẢN LÝ ANIME & NHÂN VẬT (CÀO TỰ ĐỘNG THƯ MỤC GIF RIÊNG & ĐAN XEN THÔNG MINH)</h3>"),
-    widgets.HBox([anime_dropdown, new_anime_input, add_anime_btn, del_anime_btn]),
+    widgets.HBox([anime_dropdown, new_anime_input, add_anime_btn]),
     widgets.HBox([widgets.Label("Thêm NV Mới:"), new_char_input, add_char_btn]),
     widgets.HBox([source_dropdown, media_type_dropdown, target_count_slider]),
     widgets.HBox([char_multiselect, widgets.VBox([widgets.HTML("<i>💡 Giữ phím <b>Ctrl</b> hoặc <b>Shift</b> để chọn nhiều nhân vật cùng lúc!</i>"), del_char_btn])]),
