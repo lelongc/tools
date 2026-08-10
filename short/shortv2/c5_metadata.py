@@ -10,7 +10,7 @@ def generate_youtube_metadata_interactive(b=None):
     # Lấy thông tin KỊCH BẢN và PHỤ ĐỀ XÁC THỰC CỦA VIDEO VỪA TẠO XONG
     script_text = globals().get('LAST_GENERATED_SCRIPT', '')
     subtitles_text = globals().get('LAST_GENERATED_WORDS', script_text)
-    topic = globals().get('LAST_GENERATED_TOPIC', topic_dropdown.value if 'topic_dropdown' in globals() and topic_dropdown.value else "Diablo vs Milim")
+    topic = globals().get('LAST_GENERATED_TOPIC', topic_input.value if 'topic_input' in globals() and topic_input.value else "Diablo vs Milim")
     sel_anime = globals().get('LAST_GENERATED_ANIME', anime_dropdown.value if 'anime_dropdown' in globals() else "Tensei_Slime")
     
     key = gemini_key_input.value if 'gemini_key_input' in globals() and gemini_key_input.value else os.environ.get("GEMINI_API_KEY", "")
