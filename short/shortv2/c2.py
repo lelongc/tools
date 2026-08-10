@@ -1665,7 +1665,6 @@ def generate_video_short(anime_name, topic, api_key, voice, custom_script, custo
         if label_widget: label_widget.value = "<b>📝 [1/5] 10%</b> — Đang nạp Kịch bản Tùy Chỉnh do bạn nhập..."
         if pbar_widget: pbar_widget.value = 10
         script_text = custom_script.strip()
-        global LAST_GENERATED_SCRIPT, LAST_GENERATED_WORDS, LAST_GENERATED_TOPIC, LAST_GENERATED_ANIME
         LAST_GENERATED_SCRIPT = script_text
         LAST_GENERATED_TOPIC = topic
         LAST_GENERATED_ANIME = anime_name
@@ -1678,7 +1677,6 @@ def generate_video_short(anime_name, topic, api_key, voice, custom_script, custo
             if label_widget: label_widget.value = "<b style='color:red;'>❌ LỖI: Không thể tạo kịch bản Gemini. Kiểm tra lại API Key hoặc nhập kịch bản tùy chỉnh!</b>"
             return
         script_text = script_data.get('tts_script') or script_data.get('script', '')
-        global LAST_GENERATED_SCRIPT, LAST_GENERATED_WORDS, LAST_GENERATED_TOPIC, LAST_GENERATED_ANIME
         LAST_GENERATED_SCRIPT = script_text
         LAST_GENERATED_TOPIC = topic
         LAST_GENERATED_ANIME = anime_name
@@ -1715,8 +1713,6 @@ def generate_video_short(anime_name, topic, api_key, voice, custom_script, custo
     for chunk in word_chunks:
         for k, v in corrections.items():
             chunk["text"] = re.sub(r'\b' + re.escape(k) + r'\b', v, chunk["text"].upper())
-
-    global LAST_GENERATED_WORDS
     LAST_GENERATED_WORDS = " ".join([chunk["text"] for chunk in word_chunks]) if word_chunks else script_text
 
     # Build strict 2.0s duration timeline based on Gemini folder planning
