@@ -14,11 +14,8 @@ if 'BASE_LIBRARY_DIR' not in globals():
 if 'get_effective_gemini_key' not in globals():
     def get_effective_gemini_key(user_key=""): return user_key or os.environ.get("GEMINI_API_KEY", "")
 
-if 'download_pinterest_images' not in globals():
-    def download_pinterest_images(*args, **kwargs): pass
-
-if 'download_pinterest_gifs' not in globals():
-    def download_pinterest_gifs(*args, **kwargs): pass
+if 'run_fetch' not in globals():
+    def run_fetch(*args, **kwargs): pass
 
 if 'suggest_viral_topics' not in globals():
     def suggest_viral_topics(*args, **kwargs): return []
@@ -63,42 +60,6 @@ def get_all_animes():
                 if has_char_subdirs:
                     animes.append(d.name)
     return sorted(animes)
-
-def run_fetch(anime_name, char_list=None, target_per_char=20, source="pinterest", media_type="image"):
-    char_dict = load_conf_for_anime(anime_name)
-    if not char_dict:
-        print(f"❌ Không tìm thấy thông tin nhân vật nào trong '{anime_name}'!")
-        return
-
-    targets = char_list if char_list else list(char_dict.keys())
-    print(f"🚀 Bắt đầu cào media ({media_type.upper()}) từ nguồn [{source.upper()}] cho {len(targets)} nhân vật...")
-
-    for i, c in enumerate(targets, 1):
-        keywords = char_dict.get(c, c)
-        if isinstance(keywords, list):
-            query = f"{anime_name} {keywords[0]}"
-        else:
-            query = f"{anime_name} {keywords}"
-
-        char_dir = BASE_LIBRARY_DIR / anime_name / c
-        if media_type == "gif":
-            char_dir = char_dir / "gif"
-        char_dir.mkdir(parents=True, exist_ok=True)
-
-        existing = len(list(char_dir.glob("*.gif")) if media_type == "gif" else list(char_dir.glob("*.jpg")) + list(char_dir.glob("*.png")))
-        needed = target_per_char - existing
-
-        if needed <= 0:
-            print(f"⏩ [{i}/{len(targets)}] {c}: Đã đủ chỉ tiêu ({existing}/{target_per_char} file). Bỏ qua.")
-            continue
-
-        print(f"📥 [{i}/{len(targets)}] Đang cào '{c}' (Cần thêm {needed} file)...")
-        if media_type == "gif":
-            download_pinterest_gifs(query, char_dir, needed)
-        else:
-            download_pinterest_images(query, char_dir, needed)
-
-    print("🎉 TẤT CẢ QUÁ TRÌNH CÀO ẢNH ĐÃ HOÀN TẤT!")
 
 # --- UI COMPONENTS ---
 all_animes = get_all_animes()
