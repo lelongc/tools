@@ -735,7 +735,7 @@ Return EXACTLY the same number of chunks in a valid JSON array of strings. DO NO
 def align_word_subtitles_whisper_smart(audio_path, script_text, max_words_per_chunk=2):
     w_model = get_whisper()
     print("🎙️ Whisper AI đang bóc tách mốc thời gian âm thanh từng từ...", flush=True)
-    res = w_model.transcribe(str(audio_path), word_timestamps=True, language="en")
+    res = w_model.transcribe(str(audio_path), word_timestamps=True, language="en", condition_on_previous_text=False, initial_prompt=script_text)
     
     whisper_words = []
     for segment in res.get("segments", []):
