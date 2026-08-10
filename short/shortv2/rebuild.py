@@ -4,6 +4,7 @@ import os
 c1_content = open('c1.py', 'r', encoding='utf-8').read()
 c2_content = open('c2.py', 'r', encoding='utf-8').read()
 c3_content = open('c3.py', 'r', encoding='utf-8').read()
+c5_content = open('c5_metadata.py', 'r', encoding='utf-8').read()
 
 # Rebuild notebook
 nb = {
@@ -33,6 +34,13 @@ nb = {
       'metadata': {'id': 'cell-3'},
       'outputs': [],
       'source': [line + '\n' for line in c3_content.splitlines()]
+    },
+    {
+      'cell_type': 'code',
+      'execution_count': None,
+      'metadata': {'id': 'cell-4'},
+      'outputs': [],
+      'source': [line + '\n' for line in c5_content.splitlines()]
     }
   ],
   'metadata': {
@@ -45,3 +53,5 @@ nb = {
 
 with open('anime_short.ipynb', 'w', encoding='utf-8') as f:
     json.dump(nb, f, indent=1, ensure_ascii=False)
+
+print("Rebuilt anime_short.ipynb successfully with Cell 4 Metadata Generator!")
