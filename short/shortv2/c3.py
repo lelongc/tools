@@ -7,6 +7,28 @@ import time
 import random
 from pathlib import Path
 
+# --- DEFENSIVE GLOBALS TO PREVENT IDE LINTER ERRORS WHEN OPENED STANDALONE ---
+if 'BASE_LIBRARY_DIR' not in globals():
+    BASE_LIBRARY_DIR = Path('/content/drive/MyDrive/anime_library') if Path('/content').exists() else Path('anime_library')
+
+if 'get_effective_gemini_key' not in globals():
+    def get_effective_gemini_key(user_key=""): return user_key or os.environ.get("GEMINI_API_KEY", "")
+
+if 'download_pinterest_images' not in globals():
+    def download_pinterest_images(*args, **kwargs): pass
+
+if 'download_pinterest_gifs' not in globals():
+    def download_pinterest_gifs(*args, **kwargs): pass
+
+if 'suggest_viral_topics' not in globals():
+    def suggest_viral_topics(*args, **kwargs): return []
+
+if 'generate_video_short' not in globals():
+    def generate_video_short(*args, **kwargs): pass
+
+if 'save_api_key_to_drive' not in globals():
+    def save_api_key_to_drive(*args, **kwargs): pass
+
 def load_conf_for_anime(anime_name):
     anime_dir = BASE_LIBRARY_DIR / anime_name
     conf_path = anime_dir / "characters_config.json"
@@ -208,7 +230,7 @@ def on_suggest_topics(b):
         clear_output()
         key = get_effective_gemini_key(gemini_key_input.value.strip())
         if not key:
-            print("❌ LỖI THIẾU API KEY: Vui lòng dán Gemini API Key mới (bắt đầu bằng AIzaSy...) lấy miễn phí tại https://aistudio.google.com/app/apikey vào ô 'Gemini Key:'!", flush=True)
+            print("❌ LỖI THIẾU API KEY: Vui lòng dán Gemini API Key mới vào ô 'Gemini Key:'!", flush=True)
             return
         sel_anime = anime_dropdown.value
         user_idea = idea_input.value.strip()
