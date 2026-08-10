@@ -24,7 +24,14 @@ if 'generate_video_short' not in globals():
     def generate_video_short(*args, **kwargs): pass
 
 if 'save_api_key_to_drive' not in globals():
-    def save_api_key_to_drive(*args, **kwargs): pass
+    def save_api_key_to_drive(key):
+        if not key or len(key.strip()) < 10: return
+        try:
+            p = BASE_LIBRARY_DIR / "gemini_api_key.txt"
+            p.write_text(key.strip(), encoding="utf-8")
+        except Exception: pass
+
+out = widgets.Output()
 
 def load_conf_for_anime(anime_name):
     anime_dir = BASE_LIBRARY_DIR / anime_name
@@ -98,46 +105,54 @@ def on_anime_change(change):
 anime_dropdown.observe(on_anime_change, names='value')
 
 def on_add_anime(b):
-    name = new_anime_input.value.strip().replace(" ", "_")
-    if name:
-        save_conf_for_anime(name, {})
-        new_anime_input.value = ""
-        anime_dropdown.options = get_all_animes()
-        anime_dropdown.value = name
-        update_ui()
-        with out: print(f"✅ Đã thêm Anime mới: {name}")
+    with out:
+        clear_output()
+        name = new_anime_input.value.strip().replace(" ", "_")
+        if name:
+            save_conf_for_anime(name, {})
+            new_anime_input.value = ""
+            anime_dropdown.options = get_all_animes()
+            anime_dropdown.value = name
+            update_ui()
+            print(f"✅ Đã thêm Anime mới: {name}")
 
 def on_del_anime(b):
-    sel = anime_dropdown.value
-    if sel:
-        shutil.rmtree(BASE_LIBRARY_DIR / sel, ignore_errors=True)
-        anime_dropdown.options = get_all_animes()
-        if anime_dropdown.options: anime_dropdown.value = anime_dropdown.options[0]
-        update_ui()
-        with out: print(f"🗑️ Đã xóa hoàn toàn Anime: {sel}")
+    with out:
+        clear_output()
+        sel = anime_dropdown.value
+        if sel:
+            shutil.rmtree(BASE_LIBRARY_DIR / sel, ignore_errors=True)
+            anime_dropdown.options = get_all_animes()
+            if anime_dropdown.options: anime_dropdown.value = anime_dropdown.options[0]
+            update_ui()
+            print(f"🗑️ Đã xóa hoàn toàn Anime: {sel}")
 
 def on_add_char(b):
-    sel_anime = anime_dropdown.value
-    cname = new_char_input.value.strip().replace(" ", "_")
-    if sel_anime and cname:
-        char_dict = load_conf_for_anime(sel_anime)
-        char_dict[cname] = cname.replace("_", " ")
-        save_conf_for_anime(sel_anime, char_dict)
-        new_char_input.value = ""
-        update_ui()
-        with out: print(f"✅ Đã thêm nhân vật '{cname}' vào '{sel_anime}'")
+    with out:
+        clear_output()
+        sel_anime = anime_dropdown.value
+        cname = new_char_input.value.strip().replace(" ", "_")
+        if sel_anime and cname:
+            char_dict = load_conf_for_anime(sel_anime)
+            char_dict[cname] = cname.replace("_", " ")
+            save_conf_for_anime(sel_anime, char_dict)
+            new_char_input.value = ""
+            update_ui()
+            print(f"✅ Đã thêm nhân vật '{cname}' vào '{sel_anime}'")
 
 def on_del_char(b):
-    sel_anime = anime_dropdown.value
-    selected_chars = list(char_multiselect.value)
-    if sel_anime and selected_chars:
-        char_dict = load_conf_for_anime(sel_anime)
-        for cname in selected_chars:
-            if cname in char_dict: del char_dict[cname]
-            shutil.rmtree(BASE_LIBRARY_DIR / sel_anime / cname, ignore_errors=True)
-        save_conf_for_anime(sel_anime, char_dict)
-        update_ui()
-        with out: print(f"💣 Đã xóa vĩnh viễn {len(selected_chars)} nhân vật khỏi '{sel_anime}'!")
+    with out:
+        clear_output()
+        sel_anime = anime_dropdown.value
+        selected_chars = list(char_multiselect.value)
+        if sel_anime and selected_chars:
+            char_dict = load_conf_for_anime(sel_anime)
+            for cname in selected_chars:
+                if cname in char_dict: del char_dict[cname]
+                shutil.rmtree(BASE_LIBRARY_DIR / sel_anime / cname, ignore_errors=True)
+            save_conf_for_anime(sel_anime, char_dict)
+            update_ui()
+            print(f"💣 Đã xóa vĩnh viễn {len(selected_chars)} nhân vật khỏi '{sel_anime}'!")
 
 def on_fetch_selected(b):
     with out:
@@ -296,7 +311,6 @@ tab.set_title(0, '📁 1. Quản Lý Anime / NV & Cào Ảnh')
 tab.set_title(1, '🎬 2. Tạo Viral Short MP4 (YouTube Monetization)')
 
 update_ui()
-out = widgets.Output()
 
 display(HTML("<h2 style='color:#ff4500;'>🌟 ANIME SHORT STUDIO WEB APP — ANILIST LORE RESEARCH & VIRAL TOPIC MAKER</h2>"))
 display(tab)
