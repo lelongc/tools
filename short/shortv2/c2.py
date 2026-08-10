@@ -673,30 +673,13 @@ def pick_unique_scene_images(scenes, anime_name):
 
 async def _edge_tts_save(text, voice, out_mp3):
     import edge_tts
-    communicate = edge_tts.Communicate(text, voice, rate="+10%")
-    await communicate.save(str(out_mp3))
-
-def generate_tts_robust(text, voice, out_mp3):
-    # Ensure old file is deleted to avoid reusing stale audio
-    if out_mp3.exists():
-        try:
-            out_mp3.unlink()
-        except Exception:
-            pass
-            
     try:
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            loop.create_task(_edge_tts_save(text, voice, out_mp3))
-            for _ in range(60):
-                if out_mp3.exists() and out_mp3.stat().st_size > 1000:
-                    return True
-                time.sleep(0.5)
-        else:
-            loop.run_until_complete(_edge_tts_save(text, voice, out_mp3))
+        communicate = edge_tts.Communicate(text, voice, rate="+10%")
+        await communicate.save(str(out_mp3))
+        if out_mp3.exists() and out_mp3.stat().st_size > 1000:
             return True
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"⚠️ TTS Async failed: {e}", flush=True)
     
     # Fallback to CLI edge-tts
     if out_mp3.exists():
