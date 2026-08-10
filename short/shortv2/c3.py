@@ -85,7 +85,7 @@ target_count_slider = widgets.IntSlider(value=20, min=5, max=100, step=5, descri
 char_multiselect = widgets.SelectMultiple(options=[], description='Danh Sách NV:', layout=widgets.Layout(width='350px', height='140px'))
 
 fetch_selected_btn = widgets.Button(description='🔎 1. CÀO ẢNH / GIF CHO CÁC NHÂN VẬT ĐƯỢC CHỌN', button_style='primary', layout=widgets.Layout(width='100%', height='40px'))
-fetch_all_btn = widgets.Button(description='⚠️ TẢI TOÀN BỘ (CẨN THẬN)', button_style='danger', layout=widgets.Layout(width='auto', height='36px'))
+fetch_all_btn = widgets.Button(description='⚠️ TẢI TOÀN BỘ (CẨN THẬN)', button_style='danger', layout=widgets.Layout(width='200px', height='36px'))
 
 def update_ui():
     sel_anime = anime_dropdown.value
