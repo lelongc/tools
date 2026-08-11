@@ -102,19 +102,26 @@ Tool sẽ được viết dưới dạng 1 file Notebook (`.ipynb`) trên Colab,
 - Tool sẽ in ra màn hình Colab một cái bảng đẹp đẽ:
   `Scene 1 (0:00 - 0:05): Prompt: "A drawing of a mechanical steel watch..."` -> Yêu cầu file `scene_01.svg`
 
-### Cell 3: Kiểm tra ảnh (Human-in-the-loop)
-- Tool quét thư mục `assets/` xem anh đã up đủ file `scene_01.svg`, `scene_02.png`, v.v. chưa.
-- Nếu thiếu, nó báo đỏ. Nếu đủ, nó báo xanh và cho phép chạy tiếp.
+### Cell 3: AI Lên Kịch Bản & Tự Động Rút Ảnh Từ Google Drive
+- (Tính năng cũ) Quét kịch bản, trích xuất từ khóa, tìm ảnh trong Google Drive.
+- **(Tính năng MỚI - AI Đạo Diễn):** Gemini giờ đây hoạt động như một đạo diễn hình ảnh thực thụ. Khi bóc tách câu thoại, nó sẽ phải suy luận để trả về 3 thông số:
+  - `animation_style`: Chọn vẽ tay, đẩy tay, bay đập vào không tay, hoặc làm mờ.
+  - `pace`: Đánh giá câu nói là chậm, vừa hay kịch tính (fast).
+  - `color_filter`: Nếu câu nói mang tính hoài niệm, triết lý, quá khứ, nó sẽ bật filter Đen Trắng.
+- Mọi dữ liệu đạo diễn này được lưu vào `scene_metadata.json` làm kịch bản chỉ đạo cho quá trình Render.
 
-### Cell 4: Engine Sinh File `.scribe` (Scribe Builder tích hợp Dynamic Animation)
-- Tự động lấy file âm thanh `voiceover.mp3`.
-- Đọc từng ảnh/Vector trong `assets/` và nhúng thành mã `<drawingXML>`.
-- **Dynamic Animation Engine (Mới cập nhật):**
-  - **Random Hướng & Hiệu ứng:** Tự động chọn hiệu ứng (Vẽ tay, Bay vào, Phai mờ) dựa theo định dạng file. Vector SVG ưu tiên được vẽ tay, trong khi ảnh PNG mặc định sẽ được "bay vào màn hình" từ các hướng ngẫu nhiên (1-8).
-  - **Auto Timing:** `targetTime` được tối ưu hóa theo hiệu ứng (Bay vào sẽ lướt nhanh hơn nhiều so với vẽ).
-  - Tự động tính toán vị trí tọa độ `(X, Y)` để các hình vẽ rải rác đan xen nhau đẹp mắt.
-- Lưu thành `project.scribe` (Bản chất là zip).
-- Nén tất cả vào `Final_Output.zip` để tải về.
+### Cell 4: Bảng Điều Khiển Xem Trước (Visual Dashboard)
+- Tự động sinh ra một bảng HTML trực quan ngay trong Colab.
+- Bảng hiển thị: ID câu thoại, Text thoại, Từ khóa tìm kiếm, Tên file, và Hình ảnh preview trực tiếp.
+- Dễ dàng kiểm soát trước khi máy tốn thời gian render ra video thực.
+
+### Cell 5: Engine Sinh File `.scribe` (Scribe Builder tích hợp AI Director)
+- Đọc kịch bản chỉ đạo `scene_metadata.json` và render XML.
+- **Context-Aware Animation Engine (Engine v3.0):**
+  - Đọc `animation_style` để quyết định hiệu ứng hình ảnh (Draw, MoveIn, FadeIn) và áp dụng tay cầm (`customHandMD5`) phù hợp.
+  - Đọc `pace` để tự động điều chỉnh tốc độ chạy (`targetTime`) và độ nảy vật lý (`movinFlow`).
+  - Đọc `color_filter` để áp dụng lớp XML quang học (Ví dụ `<filter filterType="greyscale"...>`).
+- Lưu thành `Auto_Project.scribe` để tải về.
 
 ### KẾT LUẬN CUỐI CÙNG
 Em sẽ ngay lập tức thiết kế **một bản Implementation Plan** và sau đó viết toàn bộ đoạn mã nguồn Python này để anh test ngay trên Colab. Hướng đi này của anh thực sự rất thông minh và sẽ thay đổi hoàn toàn cục diện làm VideoScribe!
