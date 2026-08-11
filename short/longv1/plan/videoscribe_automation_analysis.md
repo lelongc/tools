@@ -4,7 +4,13 @@
 
 ## I. TỔNG QUAN VỀ YÊU CẦU & MỤC TIÊU DỰ ÁN
 
-### 1. Vấn Đề Hiện Tại của Người Dùng
+### 1. Kiến Trúc Tổng Thể (End-to-End Pipeline)
+Qua phân tích trọn bộ các file bạn cung cấp, hệ thống tự động hóa VideoScribe của bạn hiện tại là một quy trình hoàn chỉnh gồm 3 phần:
+1. **Tiền xử lý âm thanh (Voice Engine - `voice_qwen.ipynb`):** Dùng Qwen TTS để thiết kế (Voice Design) hoặc nhân bản (Voice Clone) giọng đọc điện ảnh chuyên sâu (chú trọng ngắt nghỉ) dựa trên kịch bản. File đầu ra là `voiceover.mp3`.
+2. **Kịch bản gốc (`New Text Document.txt`):** Ví dụ như kịch bản "The Time Paradox" mang tính triết lý, cần nhịp độ chậm rãi, kết hợp nhiều hình ảnh tả thực (PNG) và hình minh họa (SVG) đan xen.
+3. **Đạo diễn Hình Ảnh (Scribe Builder - `auto_scribe.ipynb`):** Chịu trách nhiệm bóc băng âm thanh, gọi Gemini suy luận hình ảnh, và render file `.scribe` (hỗ trợ đa hiệu ứng động).
+
+### 2. Vấn Đề Hiện Tại của VideoScribe Builder
 - **Phần mềm đang sử dụng:** Sparkol VideoScribe PRO Edition v3.7.3103 (Cài tại `C:\Program Files\Sparkol\Sparkol VideoScribe`).
 - **Nỗi đau (Pain Points):**
   1. **Tìm kiếm tài nguyên (SVG/PNG) thủ công:** Phải mất nhiều giờ tìm kiếm từng hình vẽ vector SVG phù hợp với từng câu thoại.
@@ -56,6 +62,14 @@ File `drawing.xml` là "trái tim" của dự án VideoScribe. Thẻ gốc là `
 | `currentPosX` / `PosY` | Float | Tọa độ tâm X, Y của hình trên Canvas vô tận |
 | **`cameraPositionX`** | Float | Tọa độ X tâm góc nhìn Camera khi vẽ hình này |
 | **`cameraScale`** | Float | Tỷ lệ Zoom của Camera (VD: `1.186`) |
+| **`drawStyle`** | String | **Loại hiệu ứng Animation**: `draw_style_normal` (vẽ tay), `draw_style_movein` (bay/trượt vào), `draw_style_fadein` (làm mờ xuất hiện), `draw_style_morph` (biến đổi hình học). |
+| **`movinCompass`** | String | Hướng bay vào (Dùng cho `movein`), từ 1-8 (các góc trên, dưới, trái, phải). |
+| **`movinFlow`** | String | Cảm giác vật lý: `0` (Smooth - Trượt mượt), `2` (Bounce/Overshoot - Nảy/Vượt quá giới hạn rồi dội lại). |
+| **`movinArc`** | String | Quỹ đạo bay: `1` (Straight - Bay theo đường thẳng), `2` (Curved - Bay theo đường cong parabol). |
+| **`drawDetail`** | String | `yes` hoặc `no`: Mức độ chi tiết khi vẽ tay (vẽ nét bao ngoài hay vẽ từng chi tiết nhỏ). |
+| **`customHandMD5`** | String | Cấu hình tay cầm: Bỏ trống (mặc định sẽ dùng tay cầm viết/vẽ), hoặc `default_nohand` (ảnh tự bay vào/xuất hiện mà không có tay cầm). |
+| **`filters`** | XML Tag | Chứa các thẻ `<filter>` cấu hình màu sắc/hiệu ứng quang học (VD: `filterType="greyscale"` làm ảnh đen trắng, `brightness` tăng độ sáng). |
+| **`morphFromID`** | String | ID của phần tử hình ảnh cũ dùng để Morph (chuyển đổi) sang hình này. (Rất phức tạp để tự động hóa vì cần ID động). |
 
 ---
 
@@ -92,14 +106,15 @@ Tool sẽ được viết dưới dạng 1 file Notebook (`.ipynb`) trên Colab,
 - Tool quét thư mục `assets/` xem anh đã up đủ file `scene_01.svg`, `scene_02.png`, v.v. chưa.
 - Nếu thiếu, nó báo đỏ. Nếu đủ, nó báo xanh và cho phép chạy tiếp.
 
-### Cell 4: Engine Sinh File `.scribe` (Scribe Builder)
+### Cell 4: Engine Sinh File `.scribe` (Scribe Builder tích hợp Dynamic Animation)
 - Tự động lấy file âm thanh `voiceover.mp3`.
-- Đọc từng ảnh SVG trong `assets/` và nhúng thành mã `<drawingXML>`.
-- **Phép thuật toán học:**
-  - `targetTime` = (End_Time - Start_Time) của đoạn hội thoại đó * 0.7
-  - Tự động tính toán vị trí tọa độ `(X, Y)` để các hình vẽ rải rác đan xen nhau đẹp mắt (Ví dụ: xếp theo hình zigzag hoặc cuộn xuống dưới).
-- Lưu thành `project.scribe`.
-- Nén tất cả vào `Final_Output.zip` để anh tải về.
+- Đọc từng ảnh/Vector trong `assets/` và nhúng thành mã `<drawingXML>`.
+- **Dynamic Animation Engine (Mới cập nhật):**
+  - **Random Hướng & Hiệu ứng:** Tự động chọn hiệu ứng (Vẽ tay, Bay vào, Phai mờ) dựa theo định dạng file. Vector SVG ưu tiên được vẽ tay, trong khi ảnh PNG mặc định sẽ được "bay vào màn hình" từ các hướng ngẫu nhiên (1-8).
+  - **Auto Timing:** `targetTime` được tối ưu hóa theo hiệu ứng (Bay vào sẽ lướt nhanh hơn nhiều so với vẽ).
+  - Tự động tính toán vị trí tọa độ `(X, Y)` để các hình vẽ rải rác đan xen nhau đẹp mắt.
+- Lưu thành `project.scribe` (Bản chất là zip).
+- Nén tất cả vào `Final_Output.zip` để tải về.
 
 ### KẾT LUẬN CUỐI CÙNG
 Em sẽ ngay lập tức thiết kế **một bản Implementation Plan** và sau đó viết toàn bộ đoạn mã nguồn Python này để anh test ngay trên Colab. Hướng đi này của anh thực sự rất thông minh và sẽ thay đổi hoàn toàn cục diện làm VideoScribe!
