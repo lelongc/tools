@@ -1,0 +1,384 @@
+### Cell Prompt Gemini
+`python
+def search_local_svg(query, database_dir):
+    stop_words = {"vector", "illustration", "clipart", "transparent", "icon", "svg", "drawing"}
+    raw_words = re.sub(r'[^a-zA-Z0-9]', ' ', query).lower().split()
+    query_words = set([w for w in raw_words if w not in stop_words and len(w) > 1])
+    
+    if not query_words: return None
+    
+    best_match = None
+    max_score = 0
+    
+    for root, dirs, files in os.walk(database_dir):
+        for f in files:
+            if f.lower().endswith('.svg') or f.lower().endswith('.png'):
+                clean_name = re.sub(r'[^a-zA-Z0-9]', ' ', os.path.splitext(f)[0]).lower()
+                item_words = set(clean_name.split())
+                
+                score = len(query_words.intersection(item_words))
+                if score > 0:
+                    query_clean = " ".join(query_words)
+                    if query_clean in clean_name:
+                        score += 2.0
+                        
+                    if score > max_score:
+                        max_score = score
+                        best_match = os.path.join(root, f)
+                        
+    return best_match
+
+def clean_json_response(text):
+    text = text.strip()
+    if text.startswith("```json"): text = text[7:]
+    elif text.startswith("```"): text = text[3:]
+    if text.endswith("```"): text = text[:-3]
+    return text.strip()
+
+client = genai.Client(api_key=GEMINI_API_KEY)
+MODEL_ID = "gemini-3.1-flash-lite"
+BATCH_SIZE = 4
+scene_metadata = []
+
+print("🤖 Đang phân tích kịch bản bằng Gemini (Tự tính số ảnh theo độ dài thoại 3-4s/ảnh) & rút ảnh từ Drive...")
+
+if 'scenes' not in locals() and 'scenes' not in globals(): scenes = []
+if len(scenes) == 0:
+    print("⚠️ Lỗi: Không có cảnh nào.")
+else:
+    for i in range(0, len(scenes), BATCH_SIZE):
+        batch_scenes = scenes[i:i+BATCH_SIZE]
+        prompt_scenes_text = ""
+        for j, s in enumerate(batch_scenes):
+            duration = s['end'] - s['start']
+            num_images = max(1, int(round(duration / 3.5)))
+            prompt_scenes_text += f"ID: {i+j+1} | CẦN TẠO ĐÚNG {num_images} ẢNH | Thời lượng: {duration:.1f}s | Câu thoại: \"{s['text']}\"\n"
+            
+        prompt_instruction = f"""
+        Đạo diễn Whiteboard Animation. Bạn MỚI nhận được TỔNG SỐ LƯỢNG ẢNH CẦN TẠO cho mỗi câu thoại. Hãy tạo đúng số ảnh được yêu cầu cho từng câu thoại.
+        {prompt_scenes_text}
+        
+        Trả về DUY NHẤT 1 MẢNG JSON ARRAY. Mỗi phần tử:
+        - "sentence_id": ID câu thoại
+        - "images": Mảng chứa ĐÚNG SỐ LƯỢNG HÌNH ẢNH ĐƯỢC YÊU CẦU cho câu thoại đó:
+            [
+              {{
+                "visual_concept": "Ý tưởng hình (Tiếng Việt)",
+                "svg_search_prompt": "Từ khóa tìm kiếm 1-3 từ Tiếng Anh",
+                "animation_style": "draw", "movein_hand", "movein_nohand", hoặc "fadein",
+                "pace": "slow", "normal", hoặc "fast",
+                "color_filter": "normal" hoặc "greyscale"
+              }},
+              ...
+            ]
+        """
+        
+        for attempt in range(3):
+            try:
+                response = client.models.generate_content(
+                    model=MODEL_ID, contents=prompt_instruction,
+                    config=types.GenerateContentConfig(response_mime_type="application/json")
+                )
+                batch_data = json.loads(clean_json_response(response.text))
+                
+                for j, s in enumerate(batch_scenes):
+                    scene_id = i + j + 1
+                    result = next((item for item in batch_data if item.get("sentence_id") == scene_id or item.get("id") == scene_id), None)
+                    
+                    sentence_entry = {
+                        "sentence_id": scene_id,
+                        "start": s['start'], "end": s['end'], "speech_text": s['text'],
+                        "images": []
+                    }
+                    
+                    raw_images = result.get("images", []) if result else []
+                    if not raw_images:
+                        raw_images = [{"visual_concept": "Minh họa", "svg_search_prompt": "idea", "animation_style": "draw", "pace": "normal", "color_filter": "normal"}]
+                        
+                    for img_idx, img_info in enumerate(raw_images):
+                        file_base = f"sentence_{scene_id:03d}_img_{img_idx+1:02d}"
+                        prompt = img_info.get("svg_search_prompt", "icon")
+                        
+                        best_match = search_local_svg(prompt, DRIVE_IMAGE_DIR)
+                        if best_match:
+                            ext = os.path.splitext(best_match)[1]
+                            final_filename = f"{file_base}{ext}"
+                            shutil.copy(best_match, os.path.join(ASSETS_DIR, final_filename))
+                            source_str = f"✅ Bốc từ Drive: {os.path.basename(best_match)}"
+                        else:
+                            final_filename = f"{file_base}.svg"
+                            source_str = "❌ THIẾU ẢNH (Cần tự chèn)"
+                            with open(os.path.join(ASSETS_DIR, f"{file_base}_THIEU.txt"), 'w') as temp: temp.write("Thieu anh")
+                            
+                        sentence_entry["images"].append({
+                            "img_idx": img_idx + 1,
+                            "visual_concept": img_info.get("visual_concept", ""),
+                            "svg_search_prompt": prompt,
+                            "animation_style": img_info.get("animation_style", "draw"),
+                            "pace": img_info.get("pace", "normal"),
+                            "color_filter": img_info.get("color_filter", "normal"),
+                            "file_name": final_filename,
+                            "source": source_str
+                        })
+                        
+                    scene_metadata.append(sentence_entry)
+                break
+            except Exception as e:
+                print(f"Lỗi Batch {i//BATCH_SIZE+1}: {e}. Thử lại...")
+                time.sleep(5)
+        time.sleep(2)
+
+    with open("scene_metadata.json", "w", encoding="utf-8") as f:
+        json.dump(scene_metadata, f, ensure_ascii=False, indent=2)
+    print("🎉 Hoàn tất bốc 2-3 ảnh cho từng câu thoại từ Drive!")
+
+`
+
+### Cell Generate Project
+`python
+def videoscribe_escape(s):
+    """Escape for VideoScribe XML attributes. Only escape < and " and &, keep > raw."""
+    s = s.replace('&', '&amp;')
+    s = s.replace('<', '&lt;')
+    s = s.replace('"', '&quot;')
+    # DO NOT escape > - VideoScribe requires raw >
+    return s
+
+def generate_scribe_project():
+    import random
+    import shutil
+    import re
+    import os
+    import json
+    import glob
+    
+    if not os.path.exists("scene_metadata.json"): return
+    with open("scene_metadata.json", "r", encoding="utf-8") as f:
+        meta_data = json.load(f)
+
+    BUILD_DIR = "scribe_build"
+    os.makedirs(BUILD_DIR, exist_ok=True)
+    
+    for item in os.listdir(BUILD_DIR):
+        item_path = os.path.join(BUILD_DIR, item)
+        if os.path.isfile(item_path): os.remove(item_path)
+            
+    # CHUYỂN ĐỔI CHUẨN ĐỊNH DẠNG MP3 (CBR 44.1kHz) BẰNG FFMPEG ĐỂ TRÁNH LỖI ĐƠ SPINNER VIDEOSCRIBE
+    has_audio = False
+    mp3_files = glob.glob("*.mp3")
+    if mp3_files:
+        preferred = next((f for f in mp3_files if "voice" in f.lower()), mp3_files[0])
+        target_audio = os.path.join(BUILD_DIR, "voiceover.mp3")
+        
+        # Dùng ffmpeg chuẩn hóa MP3 về CBR 128kbps 44100Hz (VideoScribe bắt buộc chuẩn này để không treo)
+        cmd = f'ffmpeg -y -i "{preferred}" -ar 44100 -ac 1 -b:a 128k "{target_audio}" >/dev/null 2>&1'
+        ret = os.system(cmd)
+        
+        if ret == 0 and os.path.exists(target_audio) and os.path.getsize(target_audio) > 0:
+            has_audio = True
+            print("🔊 Đã chuẩn hóa MP3 sang chuẩn VideoScribe (CBR 44.1kHz) thành công!")
+        else:
+            shutil.copy(preferred, target_audio)
+            has_audio = True
+            print("⚠️ Copy trực tiếp file MP3.")
+        
+    xml_path = os.path.join(BUILD_DIR, "drawing.xml")
+    
+    with open(xml_path, "w", encoding="utf-8") as f:
+        audio_attr = 'voiceOver="voiceover.mp3" voiceOverVolume="1"' if has_audio else ''
+        options_val = '&lt;drawingOptions paperStyle=&quot;1&quot; paperColour=&quot;16777215&quot; threeDMode=&quot;no&quot; loopSound=&quot;no&quot; zoomAtEnd=&quot;no&quot; vignette=&quot;0&quot; xPerspective=&quot;0&quot; yPerspective=&quot;0&quot; zPerspective=&quot;0&quot;/>'
+        f.write(f'<drawing app="VideoScribe" ver="3.7.3103" filever="5" name="Auto Project" desc="" tags="" uniqueID="1048856588" isDescendedFromTemplate="not_desc" defaultHandMD5="default_right" options="{options_val}" backingTrack="" lastRenderDateTime="Invalid Date" {audio_attr}>\n')
+        
+        scene_spacing = 1500
+        element_counter = 1095000000
+        
+        # 1 CÂU THOẠI = 1 CẢNH CAMERA (MÁY QUAY KHÓA CỐ ĐỊNH TRONG SUỐT CÂU THOẠI)
+        xml_elements = []
+        visual_timeline_ms = 0
+        for sentence_idx, sentence in enumerate(meta_data):
+            scene_x = scene_spacing * (sentence_idx % 4)
+            scene_y = scene_spacing * int(sentence_idx / 4)
+            
+            raw_images = sentence.get('images', [])
+            if not raw_images: continue
+            
+            cam_scale = 0.82
+            cam_x = 448.5 - scene_x * cam_scale
+            cam_y = 252.5 - scene_y * cam_scale
+            
+            # --- TIMING SYNC LOGIC ---
+            start_ms = int(sentence['start'] * 1000)
+            if visual_timeline_ms < start_ms and len(xml_elements) > 0:
+                gap_ms = start_ms - visual_timeline_ms
+                # Find pauseTime in the last element and add gap_ms to it
+                import re as regex
+                last_elem = xml_elements[-1]
+                match = regex.search(r'pauseTime="(\d+)"', last_elem)
+                if match:
+                    old_pause = int(match.group(1))
+                    new_pause = old_pause + gap_ms
+                    xml_elements[-1] = last_elem[:match.start(1)] + str(new_pause) + last_elem[match.end(1):]
+                visual_timeline_ms += gap_ms
+            
+            sentence_duration = sentence['end'] - sentence['start']
+            n = len(raw_images)
+            duration_per_img = sentence_duration / n
+
+            # --- TIMING SYNC LOGIC ---
+            start_ms = int(sentence['start'] * 1000)
+            if visual_timeline_ms < start_ms and len(xml_elements) > 0:
+                gap_ms = start_ms - visual_timeline_ms
+                import re as regex
+                last_elem = xml_elements[-1]
+                match = regex.search(r'pauseTime="(\d+)"', last_elem)
+                if match:
+                    old_pause = int(match.group(1))
+                    new_pause = old_pause + gap_ms
+                    xml_elements[-1] = last_elem[:match.start(1)] + str(new_pause) + last_elem[match.end(1):]
+                visual_timeline_ms += gap_ms
+
+            
+            for i, img_meta in enumerate(raw_images):
+                file_path = os.path.join(ASSETS_DIR, img_meta['file_name'])
+                alt_svg = os.path.join(ASSETS_DIR, img_meta['file_name'].split('.')[0] + '.svg')
+                alt_png = os.path.join(ASSETS_DIR, img_meta['file_name'].split('.')[0] + '.png')
+                
+                if os.path.exists(alt_svg): file_path = alt_svg
+                elif os.path.exists(alt_png): file_path = alt_png
+                elif not os.path.exists(file_path): continue
+                
+                is_svg = file_path.endswith('.svg')
+                actual_filename = os.path.basename(file_path)
+                
+                if not is_svg:
+                    # Chuyển đổi ảnh bitmap thành vector SVG bằng vtracer
+                    import vtracer
+                    vectorized_svg_path = file_path + ".vectorized.svg"
+                    try:
+                        vtracer.convert_image_to_svg_py(
+                            file_path,
+                            vectorized_svg_path,
+                            colormode='color',
+                            hierarchical='stacked',
+                            mode='spline',
+                            filter_speckle=4,
+                            color_precision=6,
+                            layer_difference=16,
+                            corner_threshold=60,
+                            length_threshold=4.0,
+                            max_iterations=10,
+                            splice_threshold=45,
+                            path_precision=3
+                        )
+                        file_path = vectorized_svg_path
+                        print(f"🎨 Đã vector hóa thành công: {actual_filename}")
+                    except Exception as e:
+                        print(f"Lỗi vector hóa {actual_filename}: {e}. Dùng SVG rỗng tạm.")
+                        with open(vectorized_svg_path, "w", encoding="utf-8") as tmp_f:
+                            tmp_f.write('<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"></svg>')
+                        file_path = vectorized_svg_path
+
+                with open(file_path, "r", encoding="utf-8") as f2:
+                    raw_svg = f2.read()
+                    raw_svg = re.sub(r'<\?xml[^>]*\?>', '', raw_svg)
+                    raw_svg = re.sub(r'<!DOCTYPE[^>]*>', '', raw_svg)
+                    raw_svg = re.sub(r'<!--.*?-->', '', raw_svg, flags=re.DOTALL)
+                    content = raw_svg.replace('\n', ' ').replace('\r', '')
+                    
+                element_counter += random.randint(1000, 5000)
+                
+                if n == 1:
+                    pos_x, pos_y = scene_x, scene_y
+                    scale_val = "0.8"
+                elif n == 2:
+                    pos_x = scene_x + (-250 if i == 0 else 250)
+                    pos_y = scene_y
+                    scale_val = "0.55"
+                else:
+                    if i == 0: pos_x, pos_y = scene_x, scene_y - 120
+                    elif i == 1: pos_x, pos_y = scene_x - 220, scene_y + 120
+                    else: pos_x, pos_y = scene_x + 220, scene_y + 120
+                    scale_val = "0.45"
+
+                    
+                elem_type = 'drawing'
+                ai_style = img_meta.get('animation_style', 'draw')
+                ai_pace = img_meta.get('pace', 'normal')
+                ai_color = img_meta.get('color_filter', 'normal')
+                
+                if ai_style == 'draw': draw_style = 'draw_style_normal'
+                elif ai_style in ['movein_hand', 'movein_nohand']: draw_style = 'draw_style_movein'
+                elif ai_style == 'fadein': draw_style = 'draw_style_fadein'
+                else: draw_style = 'draw_style_normal'
+                
+                if not is_svg and ai_style == 'draw': draw_style = 'draw_style_movein'
+                
+                movin_compass = str(random.randint(1, 8))
+                draw_detail = 'yes' if draw_style == 'draw_style_normal' else 'no'
+                movin_arc = random.choice(['0', '1']) if draw_style == 'draw_style_movein' else '0'
+                
+                total_time_ms = int(duration_per_img * 1000)
+                trans_time_ms = min(800, int(total_time_ms * 0.15)) # Tối đa 0.8s chuyển cảnh
+                target_time_ms = int(total_time_ms * 0.80)          # 80% thời gian dành cho việc vẽ ảnh! Rất sinh động
+                pause_time_ms = max(0, total_time_ms - trans_time_ms - target_time_ms) # Chỉ còn ~5% thời gian nghỉ ngơi
+                
+                color_effect = '2' if ai_color == 'greyscale' else '0'
+                drawing_xml_attr = f'drawingXML="{videoscribe_escape(content)}"'
+                
+                element_xml = (
+                    f'  <element elementType="{elem_type}" descName="" elementID="{element_counter}" '
+                    f'splitTextField="no" drawingText="" fontName="null" {drawing_xml_attr} '
+                    f'customHandMD5="" colourEffect="{color_effect}" targetTime="{target_time_ms}" '
+                    f'pauseTime="{pause_time_ms}" transitionTime="{trans_time_ms}" '
+                    f'drawStyle="{draw_style}" rotation="0" visible="true" '
+                    f'currentPosX="{pos_x}" currentPosY="{pos_y}" offsetX="{pos_x}" offsetY="{pos_y}" '
+                    f'scalesX="{scale_val}" scalesY="{scale_val}" theScale="{scale_val}" targetHeight="800" '
+                    f'movinCompass="{movin_compass}" movinFlow="0" movinArc="{movin_arc}" movinAllowRotate="yes" '
+                    f'drawDetail="{draw_detail}" sketchStyle="no" brush="0" brushOptions="0" opacity="1" '
+                    f'textColour="-1" textAlign="left" textBackwards="no" rtlLanguage="no" textSpacing="0" '
+                    f'flipHoriz="no" flipVert="no" locked="no" calligraphy_angle="45" keepRunning="no" '
+                    f'loopOptions="Fit to Time" blendMode="normal" filters="&lt;filters/>" morphFromID="0" '
+                    f'morphCamera="no" morphRemoveOld="yes" cameraPositionX="{cam_x}" cameraPositionY="{cam_y}" '
+                    f'cameraScale="{cam_scale}" cameraCanvasWid="897.7777777777778" cameraCanvasHei="505" '
+                    f'availableRecolours="&lt;availableRecolours/>" recolouringSchemes="&lt;recolouringSchemes/>" '
+                    f'skinTone="-1" hairColour="-1" highlightColour="-1" customColour1="-1" customColour2="-1" '
+                    f'originalOutlineColour="0" greyscaleContrast="70" />\n'
+                )
+                xml_elements.append(element_xml)
+            
+        f.write('\n'.join(xml_elements) + '\n')
+        f.write('</drawing>')
+
+    output_filename = "Auto_Project.scribe"
+    import zipfile
+    with zipfile.ZipFile(output_filename, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(BUILD_DIR):
+            for file in files:
+                file_path = os.path.join(root, file)
+                arcname = os.path.relpath(file_path, BUILD_DIR)
+                zipf.write(file_path, arcname)
+                    
+    print(f"\n🎉 ĐÃ HOÀN TẤT! File dự án: {output_filename} (Fixed Audio Spinner Hang!)")
+
+    # === CRITICAL POST-PROCESSING: Fix &gt; -> > for VideoScribe ===
+    # VideoScribe CANNOT parse &gt; entities - it freezes/hangs!
+    # Python's xml/html libraries always escape > to &gt; which breaks VS.
+    import tempfile
+    tmp_path = output_filename + '.tmp'
+    with zipfile.ZipFile(output_filename, 'r') as zin:
+        with zipfile.ZipFile(tmp_path, 'w', zipfile.ZIP_DEFLATED) as zout:
+            for item in zin.infolist():
+                data = zin.read(item.filename)
+                if item.filename == 'drawing.xml':
+                    xml_text = data.decode('utf-8')
+                    count_before = xml_text.count('&gt;')
+                    xml_text = xml_text.replace('&gt;', '>')
+                    data = xml_text.encode('utf-8')
+                    if count_before > 0:
+                        print(f'Post-fix: replaced {count_before} &gt; entities with raw >')
+                zout.writestr(item, data)
+    os.replace(tmp_path, output_filename)
+
+generate_scribe_project()
+
+`
