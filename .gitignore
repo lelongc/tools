@@ -39,3 +39,7 @@ game
 veoup_video
 3d/all/**
 3d/texture-pack/**
+
+# Local Flow Image Temporary Directories
+short/longv1/image-temp/
+**/image-temp/
