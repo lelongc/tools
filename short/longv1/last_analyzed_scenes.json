@@ -1,0 +1,132 @@
+[
+  {
+    "sentence_id": 1,
+    "images": [
+      {
+        "visual_concept": "Minh họa câu #1 (ảnh 1)",
+        "svg_search_prompt": "thinking brain logic puzzle",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 2,
+    "images": [
+      {
+        "visual_concept": "Minh họa câu #2 (ảnh 1)",
+        "svg_search_prompt": "time management clock hourglass",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 3,
+    "images": [
+      {
+        "visual_concept": "Minh họa câu #3 (ảnh 1)",
+        "svg_search_prompt": "growth chart upward trend arrow",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 4,
+    "images": [
+      {
+        "visual_concept": "Minh họa câu #4 (ảnh 1)",
+        "svg_search_prompt": "target goal achievement bullseye",
+        "animation_style": "draw"
+      },
+      {
+        "visual_concept": "Minh họa câu #4 (ảnh 2)",
+        "svg_search_prompt": "business strategy handshake deal",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 5,
+    "images": [
+      {
+        "visual_concept": "Minh họa câu #5 (ảnh 1)",
+        "svg_search_prompt": "time management clock hourglass",
+        "animation_style": "draw"
+      },
+      {
+        "visual_concept": "Minh họa câu #5 (ảnh 2)",
+        "svg_search_prompt": "time management clock hourglass",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 6,
+    "images": [
+      {
+        "visual_concept": "Minh họa câu #6 (ảnh 1)",
+        "svg_search_prompt": "target goal achievement bullseye",
+        "animation_style": "draw"
+      },
+      {
+        "visual_concept": "Minh họa câu #6 (ảnh 2)",
+        "svg_search_prompt": "business strategy handshake deal",
+        "animation_style": "movein"
+      }
+    ]
+  },
+  {
+    "sentence_id": 7,
+    "images": [
+      {
+        "visual_concept": "Minh họa câu #7 (ảnh 1)",
+        "svg_search_prompt": "concept idea lightbulb innovation",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 8,
+    "images": [
+      {
+        "visual_concept": "Minh họa câu #8 (ảnh 1)",
+        "svg_search_prompt": "business strategy handshake deal",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 9,
+    "images": [
+      {
+        "visual_concept": "Minh họa câu #9 (ảnh 1)",
+        "svg_search_prompt": "target goal achievement bullseye",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 10,
+    "images": [
+      {
+        "visual_concept": "Minh họa câu #10 (ảnh 1)",
+        "svg_search_prompt": "brain logic puzzle thinking gears",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 11,
+    "images": [
+      {
+        "visual_concept": "Minh họa câu #11 (ảnh 1)",
+        "svg_search_prompt": "business strategy handshake deal",
+        "animation_style": "draw"
+      },
+      {
+        "visual_concept": "Minh họa câu #11 (ảnh 2)",
+        "svg_search_prompt": "thinking brain logic puzzle",
+        "animation_style": "movein"
+      }
+    ]
+  }
+]
