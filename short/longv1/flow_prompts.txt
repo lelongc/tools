@@ -1,44 +1,545 @@
-[001] (File: 001_smartphone_pocket.png)
-Minimalist black and white whiteboard doodle sketch of a glowing futuristic smartphone in a pocket, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+[001] (File: 001_person_waving_hello.png)
+Minimalist black and white whiteboard doodle sketch of person waving hello, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
 
-[002] (File: 002_atomic_clock_satellite.png)
-Minimalist whiteboard line art sketch of a precision atomic clock synchronizing with orbital satellites, clean black outline drawing, simple technical diagram style, pure solid white background, isolated on white, no frame, no shading
+[002] (File: 002_deep_breath_meditation.png)
+Minimalist black and white whiteboard doodle sketch of deep breath meditation, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
 
-[003] (File: 003_financial_market_chart.png)
-Minimalist black and white doodle drawing of a rising global stock market candlestick chart with an upward arrow, clean black pen line art, pure solid white background, isolated on white, no shading, no frame
+[003] (File: 003_stop_smartphone_scrolling.png)
+Minimalist black and white whiteboard doodle sketch of stop smartphone scrolling, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
 
-[004] (File: 004_global_network.png)
-Minimalist line art doodle of a connected world globe with digital network lines, clean black ink outline, pure solid white background, isolated on white, no shadows
+[004] (File: 004_child_thinking_memory.png)
+Minimalist black and white whiteboard doodle sketch of child thinking memory, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
 
-[005] (File: 005_open_book_knowledge.png)
-Minimalist whiteboard doodle sketch of an open glowing book of human knowledge and wisdom, clean black line art, hollow outlines, pure solid white background, isolated on white, no frame
+[005] (File: 005_summer_beach_vacation.png)
+Minimalist black and white whiteboard doodle sketch of summer beach vacation, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
 
-[006] (File: 006_human_brain_thinking.png)
-Minimalist black and white line art of a human head silhouette with an active glowing brain, clean ink pen sketch, pure solid white background, isolated on white, no shading
+[006] (File: 006_endless_timeline_horizon.png)
+Minimalist black and white whiteboard doodle sketch of endless timeline horizon, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
 
-[007] (File: 007_wallet_money_temptation.png)
-Minimalist whiteboard doodle sketch of a leather wallet with dollar bills floating out, clean black outline drawing, pure solid white background, isolated on white, no frame
+[007] (File: 007_calendar_summer_holiday.png)
+Minimalist black and white whiteboard doodle sketch of calendar summer holiday, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
 
-[008] (File: 008_cash_money_dollars.png)
-Minimalist line art sketch of neat stacks of dollar cash money with bank bands, clean black ink outline, hollow lines, pure solid white background, isolated on white, no shadows
+[008] (File: 008_child_watching_tv.png)
+Minimalist black and white whiteboard doodle sketch of child watching tv, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
 
-[009] (File: 009_mechanical_watch_gears.png)
-Minimalist whiteboard doodle drawing of intricate mechanical steel watch gears and balance wheel, clean crisp black outline sketch, hollow shapes, pure solid white background, isolated on white, no black fills, no frame
+[009] (File: 009_toy_castle_fortress.png)
+Minimalist black and white whiteboard doodle sketch of toy castle fortress, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
 
-[010] (File: 010_luxury_watch_wrist.png)
-Minimalist black and white doodle sketch of a stylish wrist wearing an elegant steel luxury wristwatch, clean black ink pen outline, pure solid white background, isolated on white, no frame, no shading
+[010] (File: 010_kid_riding_bicycle.png)
+Minimalist black and white whiteboard doodle sketch of kid riding bicycle, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
 
-[011] (File: 011_rolex_luxury_watch_crown.png)
-Minimalist line art drawing of a luxury Rolex style mechanical watch with a royal crown icon above it, clean crisp black outline sketch, hollow line art, pure solid white background, isolated on white, no black fills, no frame
+[011] (File: 011_exploring_green_forest.png)
+Minimalist black and white whiteboard doodle sketch of exploring green forest, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
 
-[012] (File: 012_eye_insight_awareness.png)
-Minimalist whiteboard doodle drawing of an open observant eye symbol of deep understanding and insight, clean black pen line art, pure solid white background, isolated on white, no frame, no shading
+[012] (File: 012_endless_road_horizon.png)
+Minimalist black and white whiteboard doodle sketch of endless road horizon, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
 
-[013] (File: 013_balance_scale_logic.png)
-Minimalist black and white line art sketch of a balanced scale of justice and truth with puzzle pieces, clean black outline drawing, pure solid white background, isolated on white, no frame
+[013] (File: 013_shining_bright_sun.png)
+Minimalist black and white whiteboard doodle sketch of shining bright sun, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
 
-[014] (File: 014_heirloom_treasure_chest.png)
-Minimalist whiteboard doodle sketch of an ancient valuable treasure chest heirloom, clean black ink line art, hollow outlines, pure solid white background, isolated on white, no frame
+[014] (File: 014_adventure_treasure_map.png)
+Minimalist black and white whiteboard doodle sketch of adventure treasure map, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
 
-[015] (File: 015_trophy_victory_success.png)
-Minimalist line art drawing of a winner champion golden trophy cup with laurel wreath milestone of success, clean crisp black outline sketch, pure solid white background, isolated on white, no frame
+[015] (File: 015_vintage_hourglass_sand.png)
+Minimalist black and white whiteboard doodle sketch of vintage hourglass sand, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[016] (File: 016_enjoying_life_moments.png)
+Minimalist black and white whiteboard doodle sketch of enjoying life moments, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[017] (File: 017_infinity_symbol_timeless.png)
+Minimalist black and white whiteboard doodle sketch of infinity symbol timeless, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[018] (File: 018_joyful_kid_jumping.png)
+Minimalist black and white whiteboard doodle sketch of joyful kid jumping, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[019] (File: 019_question_mark_turning.png)
+Minimalist black and white whiteboard doodle sketch of question mark turning, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[020] (File: 020_growing_tree_stages.png)
+Minimalist black and white whiteboard doodle sketch of growing tree stages, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[021] (File: 021_milestone_age_numbers.png)
+Minimalist black and white whiteboard doodle sketch of milestone age numbers, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[022] (File: 022_flipping_calendar_monday.png)
+Minimalist black and white whiteboard doodle sketch of flipping calendar monday, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[023] (File: 023_christmas_tree_holiday.png)
+Minimalist black and white whiteboard doodle sketch of christmas tree holiday, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[024] (File: 024_birthday_cake_candles.png)
+Minimalist black and white whiteboard doodle sketch of birthday cake candles, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[025] (File: 025_confused_adult_face.png)
+Minimalist black and white whiteboard doodle sketch of confused adult face, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[026] (File: 026_photo_frame_memories.png)
+Minimalist black and white whiteboard doodle sketch of photo frame memories, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[027] (File: 027_hourglass_running_fast.png)
+Minimalist black and white whiteboard doodle sketch of hourglass running fast, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[028] (File: 028_human_heartbeat_pulse.png)
+Minimalist black and white whiteboard doodle sketch of human heartbeat pulse, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[029] (File: 029_global_human_crowd.png)
+Minimalist black and white whiteboard doodle sketch of global human crowd, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[030] (File: 030_time_paradox_spiral.png)
+Minimalist black and white whiteboard doodle sketch of time paradox spiral, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[031] (File: 031_shrinking_time_blocks.png)
+Minimalist black and white whiteboard doodle sketch of shrinking time blocks, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[032] (File: 032_thinking_brain_mystery.png)
+Minimalist black and white whiteboard doodle sketch of thinking brain mystery, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[033] (File: 033_universe_galaxy_planets.png)
+Minimalist black and white whiteboard doodle sketch of universe galaxy planets, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[034] (File: 034_math_formula_blackboard.png)
+Minimalist black and white whiteboard doodle sketch of math formula blackboard, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[035] (File: 035_philosopher_portrait_thinking.png)
+Minimalist black and white whiteboard doodle sketch of philosopher portrait thinking, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[036] (File: 036_proportional_chart_graph.png)
+Minimalist black and white whiteboard doodle sketch of proportional chart graph, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[037] (File: 037_puzzle_pieces_connecting.png)
+Minimalist black and white whiteboard doodle sketch of puzzle pieces connecting, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[038] (File: 038_five_year_child.png)
+Minimalist black and white whiteboard doodle sketch of five year child, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[039] (File: 039_huge_mountain_year.png)
+Minimalist black and white whiteboard doodle sketch of huge mountain year, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[040] (File: 040_pie_chart_twenty_percent.png)
+Minimalist black and white whiteboard doodle sketch of pie chart twenty percent, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[041] (File: 041_lightbulb_shining_idea.png)
+Minimalist black and white whiteboard doodle sketch of lightbulb shining idea, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[042] (File: 042_one_fifth_fraction.png)
+Minimalist black and white whiteboard doodle sketch of one fifth fraction, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[043] (File: 043_kid_waiting_birthday.png)
+Minimalist black and white whiteboard doodle sketch of kid waiting birthday, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[044] (File: 044_thick_history_book.png)
+Minimalist black and white whiteboard doodle sketch of thick history book, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[045] (File: 045_fifty_year_adult.png)
+Minimalist black and white whiteboard doodle sketch of fifty year adult, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[046] (File: 046_tiny_two_percent_slice.png)
+Minimalist black and white whiteboard doodle sketch of tiny two percent slice, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[047] (File: 047_water_drop_ocean.png)
+Minimalist black and white whiteboard doodle sketch of water drop ocean, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[048] (File: 048_memory_storage_archive.png)
+Minimalist black and white whiteboard doodle sketch of memory storage archive, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[049] (File: 049_shrinking_time_segments.png)
+Minimalist black and white whiteboard doodle sketch of shrinking time segments, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[050] (File: 050_logarithmic_curve_graph.png)
+Minimalist black and white whiteboard doodle sketch of logarithmic curve graph, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[051] (File: 051_slow_motion_film_reel.png)
+Minimalist black and white whiteboard doodle sketch of slow motion film reel, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[052] (File: 052_fast_forward_video.png)
+Minimalist black and white whiteboard doodle sketch of fast forward video, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[053] (File: 053_plus_sign_unlock_door.png)
+Minimalist black and white whiteboard doodle sketch of plus sign unlock door, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[054] (File: 054_math_equation_board.png)
+Minimalist black and white whiteboard doodle sketch of math equation board, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[055] (File: 055_deep_iceberg_underwater.png)
+Minimalist black and white whiteboard doodle sketch of deep iceberg underwater, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[056] (File: 056_human_skull_brain.png)
+Minimalist black and white whiteboard doodle sketch of human skull brain, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[057] (File: 057_neuroscience_neural_network.png)
+Minimalist black and white whiteboard doodle sketch of neuroscience neural network, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[058] (File: 058_brain_gear_mechanism.png)
+Minimalist black and white whiteboard doodle sketch of brain gear mechanism, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[059] (File: 059_survival_shield_instinct.png)
+Minimalist black and white whiteboard doodle sketch of survival shield instinct, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[060] (File: 060_efficiency_energy_gears.png)
+Minimalist black and white whiteboard doodle sketch of efficiency energy gears, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[061] (File: 061_video_camera_filming.png)
+Minimalist black and white whiteboard doodle sketch of video camera filming, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[062] (File: 062_hard_drive_memory.png)
+Minimalist black and white whiteboard doodle sketch of hard drive memory, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[063] (File: 063_variable_speed_meter.png)
+Minimalist black and white whiteboard doodle sketch of variable speed meter, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[064] (File: 064_framerate_speed_gauge.png)
+Minimalist black and white whiteboard doodle sketch of framerate speed gauge, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[065] (File: 065_child_brain_development.png)
+Minimalist black and white whiteboard doodle sketch of child brain development, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[066] (File: 066_exploding_synapse_neural.png)
+Minimalist black and white whiteboard doodle sketch of exploding synapse neural, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[067] (File: 067_first_time_discovery.png)
+Minimalist black and white whiteboard doodle sketch of first time discovery, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[068] (File: 068_first_ocean_wave.png)
+Minimalist black and white whiteboard doodle sketch of first ocean wave, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[069] (File: 069_sweet_ice_cream_cone.png)
+Minimalist black and white whiteboard doodle sketch of sweet ice cream cone, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[070] (File: 070_bee_sting_insect.png)
+Minimalist black and white whiteboard doodle sketch of bee sting insect, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[071] (File: 071_first_broken_heart.png)
+Minimalist black and white whiteboard doodle sketch of first broken heart, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[072] (File: 072_hyper_aware_open_eye.png)
+Minimalist black and white whiteboard doodle sketch of hyper aware open eye, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[073] (File: 073_magnifying_glass_detail.png)
+Minimalist black and white whiteboard doodle sketch of magnifying glass detail, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[074] (File: 074_sea_salt_ocean_breeze.png)
+Minimalist black and white whiteboard doodle sketch of sea salt ocean breeze, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[075] (File: 075_buzzing_bee_sound.png)
+Minimalist black and white whiteboard doodle sketch of buzzing bee sound, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[076] (File: 076_flying_bumble_bee.png)
+Minimalist black and white whiteboard doodle sketch of flying bumble bee, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[077] (File: 077_sixty_fps_camera.png)
+Minimalist black and white whiteboard doodle sketch of sixty fps camera, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[078] (File: 078_4k_resolution_display.png)
+Minimalist black and white whiteboard doodle sketch of 4k resolution display, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[079] (File: 079_data_writing_disk.png)
+Minimalist black and white whiteboard doodle sketch of data writing disk, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[080] (File: 080_huge_file_storage_size.png)
+Minimalist black and white whiteboard doodle sketch of huge file storage size, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[081] (File: 081_long_memory_timeline.png)
+Minimalist black and white whiteboard doodle sketch of long memory timeline, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[082] (File: 082_adult_entering_routine.png)
+Minimalist black and white whiteboard doodle sketch of adult entering routine, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[083] (File: 083_settling_comfortable_chair.png)
+Minimalist black and white whiteboard doodle sketch of settling comfortable chair, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[084] (File: 084_routine_loop_cycle.png)
+Minimalist black and white whiteboard doodle sketch of routine loop cycle, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[085] (File: 085_alarm_clock_ringing.png)
+Minimalist black and white whiteboard doodle sketch of alarm clock ringing, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[086] (File: 086_toothbrush_morning_hygiene.png)
+Minimalist black and white whiteboard doodle sketch of toothbrush morning hygiene, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[087] (File: 087_car_driving_road.png)
+Minimalist black and white whiteboard doodle sketch of car driving road, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[088] (File: 088_office_chair_desk.png)
+Minimalist black and white whiteboard doodle sketch of office chair desk, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[089] (File: 089_colleagues_talking_office.png)
+Minimalist black and white whiteboard doodle sketch of colleagues talking office, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[090] (File: 090_sandwich_lunch_food.png)
+Minimalist black and white whiteboard doodle sketch of sandwich lunch food, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[091] (File: 091_watching_television_screen.png)
+Minimalist black and white whiteboard doodle sketch of watching television screen, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[092] (File: 092_smart_brain_lightbulb.png)
+Minimalist black and white whiteboard doodle sketch of smart brain lightbulb, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[093] (File: 093_realization_thinking_bubble.png)
+Minimalist black and white whiteboard doodle sketch of realization thinking bubble, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[094] (File: 094_replay_classic_movie.png)
+Minimalist black and white whiteboard doodle sketch of replay classic movie, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[095] (File: 095_known_navigation_route.png)
+Minimalist black and white whiteboard doodle sketch of known navigation route, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[096] (File: 096_familiar_food_taste.png)
+Minimalist black and white whiteboard doodle sketch of familiar food taste, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[097] (File: 097_battery_saving_mode.png)
+Minimalist black and white whiteboard doodle sketch of battery saving mode, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[098] (File: 098_dropping_frame_rate.png)
+Minimalist black and white whiteboard doodle sketch of dropping frame rate, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[099] (File: 099_low_15_fps_number.png)
+Minimalist black and white whiteboard doodle sketch of low 15 fps number, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[100] (File: 100_stop_writing_pen.png)
+Minimalist black and white whiteboard doodle sketch of stop writing pen, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[101] (File: 101_referencing_old_file.png)
+Minimalist black and white whiteboard doodle sketch of referencing old file, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[102] (File: 102_autopilot_steering_wheel.png)
+Minimalist black and white whiteboard doodle sketch of autopilot steering wheel, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[103] (File: 103_car_parked_garage.png)
+Minimalist black and white whiteboard doodle sketch of car parked garage, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[104] (File: 104_blank_memory_brain.png)
+Minimalist black and white whiteboard doodle sketch of blank memory brain, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[105] (File: 105_traffic_light_signals.png)
+Minimalist black and white whiteboard doodle sketch of traffic light signals, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[106] (File: 106_car_radio_music.png)
+Minimalist black and white whiteboard doodle sketch of car radio music, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[107] (File: 107_hands_turning_wheel.png)
+Minimalist black and white whiteboard doodle sketch of hands turning wheel, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[108] (File: 108_eraser_deleting_memory.png)
+Minimalist black and white whiteboard doodle sketch of eraser deleting memory, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[109] (File: 109_delete_trash_bin.png)
+Minimalist black and white whiteboard doodle sketch of delete trash bin, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[110] (File: 110_data_compression_zip.png)
+Minimalist black and white whiteboard doodle sketch of data compression zip, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[111] (File: 111_life_driving_highway.png)
+Minimalist black and white whiteboard doodle sketch of life driving highway, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[112] (File: 112_monday_to_tuesday_calendar.png)
+Minimalist black and white whiteboard doodle sketch of monday to tuesday calendar, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[113] (File: 113_tuesday_to_friday.png)
+Minimalist black and white whiteboard doodle sketch of tuesday to friday, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[114] (File: 114_january_to_december.png)
+Minimalist black and white whiteboard doodle sketch of january to december, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[115] (File: 115_blurry_time_light_trail.png)
+Minimalist black and white whiteboard doodle sketch of blurry time light trail, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[116] (File: 116_vacation_luggage_airplane.png)
+Minimalist black and white whiteboard doodle sketch of vacation luggage airplane, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[117] (File: 117_boring_office_cubicle.png)
+Minimalist black and white whiteboard doodle sketch of boring office cubicle, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[118] (File: 118_new_travel_discovery.png)
+Minimalist black and white whiteboard doodle sketch of new travel discovery, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[119] (File: 119_infinite_office_loop.png)
+Minimalist black and white whiteboard doodle sketch of infinite office loop, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[120] (File: 120_sad_adult_silhouette.png)
+Minimalist black and white whiteboard doodle sketch of sad adult silhouette, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[121] (File: 121_trading_comfort_zone.png)
+Minimalist black and white whiteboard doodle sketch of trading comfort zone, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[122] (File: 122_security_lock_shield.png)
+Minimalist black and white whiteboard doodle sketch of security lock shield, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[123] (File: 123_time_price_gold_coins.png)
+Minimalist black and white whiteboard doodle sketch of time price gold coins, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[124] (File: 124_destiny_question_crossroads.png)
+Minimalist black and white whiteboard doodle sketch of destiny question crossroads, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[125] (File: 125_spinning_clock_hands.png)
+Minimalist black and white whiteboard doodle sketch of spinning clock hands, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[126] (File: 126_fast_train_window_blur.png)
+Minimalist black and white whiteboard doodle sketch of fast train window blur, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[127] (File: 127_red_cross_stop_signal.png)
+Minimalist black and white whiteboard doodle sketch of red cross stop signal, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[128] (File: 128_slowing_down_clock.png)
+Minimalist black and white whiteboard doodle sketch of slowing down clock, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[129] (File: 129_hacking_brain_perception.png)
+Minimalist black and white whiteboard doodle sketch of hacking brain perception, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[130] (File: 130_reactivate_60fps_camera.png)
+Minimalist black and white whiteboard doodle sketch of reactivate 60fps camera, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[131] (File: 131_magic_wand_mystery.png)
+Minimalist black and white whiteboard doodle sketch of magic wand mystery, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[132] (File: 132_novelty_golden_key.png)
+Minimalist black and white whiteboard doodle sketch of novelty golden key, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[133] (File: 133_waking_up_brain_alert.png)
+Minimalist black and white whiteboard doodle sketch of waking up brain alert, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[134] (File: 134_focused_mind_eye.png)
+Minimalist black and white whiteboard doodle sketch of focused mind eye, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[135] (File: 135_globe_travel_suitcase.png)
+Minimalist black and white whiteboard doodle sketch of globe travel suitcase, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[136] (File: 136_today_calendar_action.png)
+Minimalist black and white whiteboard doodle sketch of today calendar action, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[137] (File: 137_small_stepping_stones.png)
+Minimalist black and white whiteboard doodle sketch of small stepping stones, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[138] (File: 138_city_bus_transport.png)
+Minimalist black and white whiteboard doodle sketch of city bus transport, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[139] (File: 139_different_scenic_route.png)
+Minimalist black and white whiteboard doodle sketch of different scenic route, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[140] (File: 140_ten_minutes_extra_clock.png)
+Minimalist black and white whiteboard doodle sketch of ten minutes extra clock, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[141] (File: 141_brain_navigation_map.png)
+Minimalist black and white whiteboard doodle sketch of brain navigation map, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[142] (File: 142_walking_outside_nature.png)
+Minimalist black and white whiteboard doodle sketch of walking outside nature, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[143] (File: 143_gentle_fresh_breeze.png)
+Minimalist black and white whiteboard doodle sketch of gentle fresh breeze, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[144] (File: 144_looking_up_blue_sky.png)
+Minimalist black and white whiteboard doodle sketch of looking up blue sky, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[145] (File: 145_reading_new_book.png)
+Minimalist black and white whiteboard doodle sketch of reading new book, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[146] (File: 146_headphones_music_notes.png)
+Minimalist black and white whiteboard doodle sketch of headphones music notes, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[147] (File: 147_rearranging_bedroom_furniture.png)
+Minimalist black and white whiteboard doodle sketch of rearranging bedroom furniture, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[148] (File: 148_left_hand_toothbrush.png)
+Minimalist black and white whiteboard doodle sketch of left hand toothbrush, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[149] (File: 149_small_electric_spark_idea.png)
+Minimalist black and white whiteboard doodle sketch of small electric spark idea, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[150] (File: 150_exit_autopilot_switch.png)
+Minimalist black and white whiteboard doodle sketch of exit autopilot switch, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[151] (File: 151_new_neural_pathways.png)
+Minimalist black and white whiteboard doodle sketch of new neural pathways, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[152] (File: 152_colorful_movie_frames.png)
+Minimalist black and white whiteboard doodle sketch of colorful movie frames, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[153] (File: 153_stretching_elastic_time.png)
+Minimalist black and white whiteboard doodle sketch of stretching elastic time, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[154] (File: 154_seneca_philosopher_scroll.png)
+Minimalist black and white whiteboard doodle sketch of seneca philosopher scroll, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[155] (File: 155_wisdom_quote_banner.png)
+Minimalist black and white whiteboard doodle sketch of wisdom quote banner, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[156] (File: 156_long_meaningful_life.png)
+Minimalist black and white whiteboard doodle sketch of long meaningful life, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[157] (File: 157_wasting_sand_time.png)
+Minimalist black and white whiteboard doodle sketch of wasting sand time, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[158] (File: 158_anxiety_worry_clouds.png)
+Minimalist black and white whiteboard doodle sketch of anxiety worry clouds, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[159] (File: 159_anger_fire_emotion.png)
+Minimalist black and white whiteboard doodle sketch of anger fire emotion, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[160] (File: 160_mindless_phone_scrolling.png)
+Minimalist black and white whiteboard doodle sketch of mindless phone scrolling, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[161] (File: 161_sleeping_while_awake.png)
+Minimalist black and white whiteboard doodle sketch of sleeping while awake, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[162] (File: 162_challenge_accepted_banner.png)
+Minimalist black and white whiteboard doodle sketch of challenge accepted banner, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[163] (File: 163_broken_routine_commute.png)
+Minimalist black and white whiteboard doodle sketch of broken routine commute, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[164] (File: 164_new_year_fresh_start.png)
+Minimalist black and white whiteboard doodle sketch of new year fresh start, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[165] (File: 165_stepping_out_comfort_zone.png)
+Minimalist black and white whiteboard doodle sketch of stepping out comfort zone, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[166] (File: 166_seeking_novelty_adventure.png)
+Minimalist black and white whiteboard doodle sketch of seeking novelty adventure, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[167] (File: 167_curious_mind_explorer.png)
+Minimalist black and white whiteboard doodle sketch of curious mind explorer, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[168] (File: 168_present_moment_mindfulness.png)
+Minimalist black and white whiteboard doodle sketch of present moment mindfulness, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[169] (File: 169_looking_loved_one.png)
+Minimalist black and white whiteboard doodle sketch of looking loved one, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[170] (File: 170_deep_loving_gaze.png)
+Minimalist black and white whiteboard doodle sketch of deep loving gaze, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[171] (File: 171_smiling_face_wrinkles.png)
+Minimalist black and white whiteboard doodle sketch of smiling face wrinkles, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[172] (File: 172_listening_warm_voice.png)
+Minimalist black and white whiteboard doodle sketch of listening warm voice, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[173] (File: 173_tasting_hot_coffee_cup.png)
+Minimalist black and white whiteboard doodle sketch of tasting hot coffee cup, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[174] (File: 174_warm_mug_hands.png)
+Minimalist black and white whiteboard doodle sketch of warm mug hands, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[175] (File: 175_time_precious_currency.png)
+Minimalist black and white whiteboard doodle sketch of time precious currency, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[176] (File: 176_cannot_save_time_safe.png)
+Minimalist black and white whiteboard doodle sketch of cannot save time safe, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[177] (File: 177_cannot_buy_time_money.png)
+Minimalist black and white whiteboard doodle sketch of cannot buy time money, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[178] (File: 178_spending_time_wisely.png)
+Minimalist black and white whiteboard doodle sketch of spending time wisely, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[179] (File: 179_memorable_moments_investment.png)
+Minimalist black and white whiteboard doodle sketch of memorable moments investment, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[180] (File: 180_slow_down_turtle_chill.png)
+Minimalist black and white whiteboard doodle sketch of slow down turtle chill, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[181] (File: 181_binoculars_observing_world.png)
+Minimalist black and white whiteboard doodle sketch of binoculars observing world, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
+
+[182] (File: 182_friendly_goodbye_wave.png)
+Minimalist black and white whiteboard doodle sketch of friendly goodbye wave, clean black ink pen outline, hollow lines, simple 2D vector icon style, pure solid white background, isolated on white, no frame, no shadows
