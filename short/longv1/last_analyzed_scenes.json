@@ -1,0 +1,165 @@
+[
+  {
+    "sentence_id": 1,
+    "start": 0.0,
+    "end": 3.72,
+    "speech_text": "You have a supercomputer in your pocket.",
+    "images": [
+      {
+        "visual_concept": "Điện thoại thông minh công nghệ cao trong túi quần",
+        "svg_search_prompt": "smartphone pocket",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 2,
+    "start": 3.72,
+    "end": 7.08,
+    "speech_text": "It synchronizes with atomic clocks.",
+    "images": [
+      {
+        "visual_concept": "Đồng hồ nguyên tử với sóng vệ tinh đồng bộ chính xác",
+        "svg_search_prompt": "atomic clock satellite",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 3,
+    "start": 7.08,
+    "end": 10.6,
+    "speech_text": "It tracks the global financial markets in real time.",
+    "images": [
+      {
+        "visual_concept": "Biểu đồ tài chính thị trường toàn cầu tăng trưởng",
+        "svg_search_prompt": "financial market chart",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 4,
+    "start": 10.6,
+    "end": 16.04,
+    "speech_text": "It connects you to every piece of human knowledge ever recorded.",
+    "images": [
+      {
+        "visual_concept": "Mạng lưới tri thức kết nối toàn cầu",
+        "svg_search_prompt": "global network",
+        "animation_style": "draw"
+      },
+      {
+        "visual_concept": "Cuốn sách mở kho tàng kiến thức nhân loại",
+        "svg_search_prompt": "open book knowledge",
+        "animation_style": "movein"
+      }
+    ]
+  },
+  {
+    "sentence_id": 5,
+    "start": 16.04,
+    "end": 21.8,
+    "speech_text": "And yet, somewhere in the back of your mind, there is a quiet, persistent desire to spend",
+    "images": [
+      {
+        "visual_concept": "Bộ não suy nghĩ với những ham muốn tiềm ẩn",
+        "svg_search_prompt": "human brain idea",
+        "animation_style": "draw"
+      },
+      {
+        "visual_concept": "Ví tiền và sự cám dỗ chi tiêu",
+        "svg_search_prompt": "wallet money",
+        "animation_style": "movein"
+      }
+    ]
+  },
+  {
+    "sentence_id": 6,
+    "start": 21.8,
+    "end": 27.8,
+    "speech_text": "ten, twenty, or fifty thousand dollars on a heavy disc of mechanical steel to",
+    "images": [
+      {
+        "visual_concept": "Xấp tiền đô la giá trị lớn 10k 20k 50k",
+        "svg_search_prompt": "cash money dollars",
+        "animation_style": "draw"
+      },
+      {
+        "visual_concept": "Bộ bánh răng cơ khí chuyển động bằng thép",
+        "svg_search_prompt": "mechanical watch gears",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 7,
+    "start": 27.8,
+    "end": 31.4,
+    "speech_text": "distract your wrist.",
+    "images": [
+      {
+        "visual_concept": "Cổ tay đeo chiếc đồng hồ cơ khí sang trọng",
+        "svg_search_prompt": "luxury watch wrist",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 8,
+    "start": 31.4,
+    "end": 34.56,
+    "speech_text": "You don't buy a Rolex to tell time.",
+    "images": [
+      {
+        "visual_concept": "Chiếc đồng hồ Rolex với vương miện quyền lực",
+        "svg_search_prompt": "rolex luxury watch crown",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 9,
+    "start": 34.56,
+    "end": 36.64,
+    "speech_text": "You know this.",
+    "images": [
+      {
+        "visual_concept": "Ánh mắt thấu hiểu chân lý ngầm",
+        "svg_search_prompt": "eye looking insight",
+        "animation_style": "fadein"
+      }
+    ]
+  },
+  {
+    "sentence_id": 10,
+    "start": 36.64,
+    "end": 40.28,
+    "speech_text": "The logic is undeniable.",
+    "images": [
+      {
+        "visual_concept": "Cán cân chân lý và mảnh ghép logic",
+        "svg_search_prompt": "balance scale logic",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 11,
+    "start": 40.28,
+    "end": 46.08,
+    "speech_text": "But you tell yourself it's an investment, an heirloom, a milestone of your success.",
+    "images": [
+      {
+        "visual_concept": "Kho báu gia bảo và tài sản đầu tư truyền đời",
+        "svg_search_prompt": "heirloom treasure chest",
+        "animation_style": "draw"
+      },
+      {
+        "visual_concept": "Chiếc cúp vàng vinh quang trên đỉnh cao thành công",
+        "svg_search_prompt": "trophy victory success",
+        "animation_style": "draw"
+      }
+    ]
+  }
+]
