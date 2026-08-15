@@ -2,9 +2,9 @@
 LOCAL BRIDGE SERVER FOR AUTO-SCRIBE (AGENT-IN-THE-LOOP)
 - Chạy trên Laptop của bạn (Siêu nhẹ ~15MB RAM)
 - Nhận danh sách câu thoại từ Colab -> Lưu thành 'pending_scenes.json'
-- Bạn bảo Antigravity (AI) trong khung chat: "Hãy phân tích kịch bản pending_scenes.json"
-- AI phân tích sâu sắc, sáng tạo và ghi file 'last_analyzed_scenes.json'
-- Colab tự động kéo file về để vẽ SVG và đóng gói VideoScribe!
+- In hướng dẫn chi tiết chuẩn format để bạn nhờ AI trong IDE phân tích
+- AI phân tích và ghi file 'last_analyzed_scenes.json'
+- Colab tự động kéo file về để vẽ SVG nét viền (outline) và đóng gói VideoScribe!
 """
 
 import os
@@ -47,7 +47,7 @@ class BridgeHandler(BaseHTTPRequestHandler):
                     data = json.load(f)
                 resp = {"status": "success", "data": data}
             else:
-                resp = {"status": "pending", "message": "Chưa có file last_analyzed_scenes.json. Hãy bảo AI trong IDE phân tích kịch bản!"}
+                resp = {"status": "pending", "message": f"Chưa có file {ANALYZED_FILE}. Hãy bảo AI trong IDE phân tích kịch bản!"}
             self.wfile.write(json.dumps(resp).encode('utf-8'))
             return
             
@@ -62,14 +62,20 @@ class BridgeHandler(BaseHTTPRequestHandler):
             req = json.loads(post_data.decode('utf-8'))
             scenes = req.get('scenes', [])
             
-            print(f"\n📩 [Colab ➔ Laptop] ĐÃ NHẬN {len(scenes)} CÂU THOẠI TỪ COLAB!")
-            
-            # Lưu ra file pending_scenes.json
             with open(PENDING_FILE, "w", encoding="utf-8") as f:
                 json.dump(scenes, f, ensure_ascii=False, indent=2)
                 
-            print(f"📁 Đã lưu danh sách câu thoại vào: {PENDING_FILE}")
-            print(f"👉 BÂY GIỜ BẠN HÃY BẢO AI TRONG IDE: 'Hãy phân tích kịch bản file {PENDING_FILE}' để AI làm việc nhé!\n")
+            print("\n" + "═"*75)
+            print(f"📩 [Colab ➔ Laptop] ĐÃ NHẬN {len(scenes)} CÂU THOẠI TỪ COLAB!")
+            print(f"📁 Đã lưu vào file: {os.path.abspath(PENDING_FILE)}")
+            print("─"*75)
+            print("👉 HÃY COPY HOẶC NHẮN VÀO KHUNG CHAT ANTIGRAVITY (AI) CÂU NÀY:")
+            print()
+            print(f"   'Hãy đọc file {PENDING_FILE} và phân tích kịch bản video Whiteboard Doodle,")
+            print("    sau đó lưu kết quả vào last_analyzed_scenes.json'")
+            print("─"*75)
+            print("💡 AI trong IDE sẽ đọc file và tạo kịch bản với đầy đủ từ khóa nét vẽ & hiệu ứng!")
+            print("═"*75 + "\n")
             
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
@@ -115,10 +121,10 @@ def run_tunnel():
         match = re.search(r'https://[a-zA-Z0-9-]+\.trycloudflare\.com', line)
         if match:
             tunnel_url = match.group(0)
-            print("\n" + "═"*70)
+            print("\n" + "═"*75)
             print(f"🎉 ĐÃ KẾT NỐI CLOUDFLARE TUNNEL THÀNH CÔNG!")
-            print(f"👉 Đường link để dán vào Colab: {tunnel_url}")
-            print("═"*70)
+            print(f"👉 Đường link dán vào Colab: {tunnel_url}")
+            print("═"*75)
             print("💡 Khi Colab gửi kịch bản, nó sẽ lưu thành 'pending_scenes.json'.")
             print("   Bạn chỉ cần bảo AI trong khung chat phân tích kịch bản đó!\n")
             break
