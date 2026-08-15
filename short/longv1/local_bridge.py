@@ -1,10 +1,9 @@
 """
-LOCAL BRIDGE SERVER FOR AUTO-SCRIBE (AGENT-IN-THE-LOOP)
+LOCAL BRIDGE SERVER FOR AUTO-SCRIBE (AGENT-IN-THE-LOOP & GOOGLE FLOW AI)
 - Chạy trên Laptop của bạn (Siêu nhẹ ~15MB RAM)
-- Nhận danh sách câu thoại từ Colab -> Lưu thành 'pending_scenes.json'
-- In hướng dẫn chi tiết chuẩn format để bạn nhờ AI trong IDE phân tích
-- AI phân tích và ghi file 'last_analyzed_scenes.json'
-- Colab tự động kéo file về để vẽ SVG nét viền (outline) và đóng gói VideoScribe!
+- Nhận câu thoại từ Colab -> Lưu 'pending_scenes.json'
+- Phục vụ kịch bản phân tích 'last_analyzed_scenes.json'
+- Phục vụ ảnh Google Flow từ thư mục 'image-temp' qua Cloudflare Tunnel lên Colab
 """
 
 import os
@@ -17,10 +16,14 @@ import subprocess
 import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import threading
+import glob
 
 PORT = 8765
 PENDING_FILE = "pending_scenes.json"
 ANALYZED_FILE = "last_analyzed_scenes.json"
+IMAGE_TEMP_DIR = "image-temp"
+
+os.makedirs(IMAGE_TEMP_DIR, exist_ok=True)
 
 class BridgeHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
@@ -34,25 +37,86 @@ class BridgeHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
+        parsed_path = urllib.parse.urlparse(self.path)
+        path = parsed_path.path
+        
+        # 1. Trả về file ảnh từ image-temp/
+        if path.startswith("/flow_images/"):
+            filename = urllib.parse.unquote(path[len("/flow_images/"):])
+            filepath = os.path.join(IMAGE_TEMP_DIR, filename)
+            if os.path.exists(filepath) and os.path.isfile(filepath):
+                self.send_response(200)
+                ext = os.path.splitext(filename)[1].lower()
+                if ext == '.svg': ctype = 'image/svg+xml'
+                elif ext in ['.jpg', '.jpeg']: ctype = 'image/jpeg'
+                elif ext == '.webp': ctype = 'image/webp'
+                else: ctype = 'image/png'
+                
+                self.send_header('Content-Type', ctype)
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header('Content-Length', str(os.path.getsize(filepath)))
+                self.end_headers()
+                
+                with open(filepath, 'rb') as f:
+                    self.wfile.write(f.read())
+                return
+            else:
+                self.send_response(404)
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(b'Image not found')
+                return
+
         self.send_response(200)
-        self.send_header('Content-Type', 'application/json')
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
         self.send_header('Access-Control-Allow-Origin', '*')
         self.end_headers()
         
-        parsed_path = urllib.parse.urlparse(self.path)
-        
-        if parsed_path.path == "/get_analyzed_scenes":
+        # 2. Danh sách ảnh Flow AI trong image-temp/
+        if path == "/get_flow_images":
+            files = [f for f in os.listdir(IMAGE_TEMP_DIR) if os.path.isfile(os.path.join(IMAGE_TEMP_DIR, f)) and f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.svg'))]
+            
+            # Sắp xếp theo số thứ tự (001, 002, 1, 2...)
+            def extract_num(fn):
+                m = re.search(r'\d+', fn)
+                return int(m.group(0)) if m else 9999
+            
+            files.sort(key=extract_num)
+            
+            image_list = []
+            for idx, fn in enumerate(files):
+                image_list.append({
+                    "order": idx + 1,
+                    "filename": fn,
+                    "download_url": f"/flow_images/{urllib.parse.quote(fn)}",
+                    "size_bytes": os.path.getsize(os.path.join(IMAGE_TEMP_DIR, fn))
+                })
+                
+            resp = {
+                "status": "success",
+                "total_images": len(image_list),
+                "images": image_list
+            }
+            self.wfile.write(json.dumps(resp, ensure_ascii=False).encode('utf-8'))
+            return
+
+        # 3. Kịch bản đã phân tích
+        if path == "/get_analyzed_scenes":
             if os.path.exists(ANALYZED_FILE):
                 with open(ANALYZED_FILE, "r", encoding="utf-8") as f:
                     data = json.load(f)
                 resp = {"status": "success", "data": data}
             else:
                 resp = {"status": "pending", "message": f"Chưa có file {ANALYZED_FILE}. Hãy bảo AI trong IDE phân tích kịch bản!"}
-            self.wfile.write(json.dumps(resp).encode('utf-8'))
+            self.wfile.write(json.dumps(resp, ensure_ascii=False).encode('utf-8'))
             return
             
-        resp = {"status": "online", "message": "Local Bridge Server is running!"}
-        self.wfile.write(json.dumps(resp).encode('utf-8'))
+        resp = {
+            "status": "online", 
+            "message": "Local Bridge Server is running!",
+            "image_temp_count": len([f for f in os.listdir(IMAGE_TEMP_DIR) if os.path.isfile(os.path.join(IMAGE_TEMP_DIR, f))])
+        }
+        self.wfile.write(json.dumps(resp, ensure_ascii=False).encode('utf-8'))
 
     def do_POST(self):
         content_length = int(self.headers.get('Content-Length', 0))
@@ -71,8 +135,7 @@ class BridgeHandler(BaseHTTPRequestHandler):
             print("─"*75)
             print("👉 HÃY COPY HOẶC NHẮN VÀO KHUNG CHAT ANTIGRAVITY (AI) CÂU NÀY:")
             print()
-            print(f"   'Hãy đọc file {PENDING_FILE} và phân tích kịch bản video Whiteboard Doodle,")
-            print("    sau đó lưu kết quả vào last_analyzed_scenes.json'")
+            print(f"   'Hãy đọc file {PENDING_FILE} và phân tích kịch bản theo Prompt 1 trong prompt.md'")
             print("─"*75)
             print("💡 AI trong IDE sẽ đọc file và tạo kịch bản với đầy đủ từ khóa nét vẽ & hiệu ứng!")
             print("═"*75 + "\n")
@@ -125,6 +188,7 @@ def run_tunnel():
             print(f"🎉 ĐÃ KẾT NỐI CLOUDFLARE TUNNEL THÀNH CÔNG!")
             print(f"👉 Đường link dán vào Colab: {tunnel_url}")
             print("═"*75)
+            print(f"📂 Thư mục chứa ảnh Flow AI trên máy: {os.path.abspath(IMAGE_TEMP_DIR)}")
             print("💡 Khi Colab gửi kịch bản, nó sẽ lưu thành 'pending_scenes.json'.")
             print("   Bạn chỉ cần bảo AI trong khung chat phân tích kịch bản đó!\n")
             break
