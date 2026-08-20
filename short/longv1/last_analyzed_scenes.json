@@ -1,0 +1,1705 @@
+[
+  {
+    "sentence_id": 1,
+    "start": 0.0,
+    "end": 3.73,
+    "speech_text": "Hey there. Grab a warm drink,",
+    "images": [
+      {
+        "visual_concept": "Tách trà ấm áp bốc khói nhẹ nhàng bên cuốn sách",
+        "svg_search_prompt": "warm tea mug steam",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 2,
+    "start": 3.73,
+    "end": 7.84,
+    "speech_text": "sit back and relax for a moment.",
+    "images": [
+      {
+        "visual_concept": "Người ngồi ngả lưng thư giãn trên ghế bành êm ái",
+        "svg_search_prompt": "person relaxing armchair",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 3,
+    "start": 7.84,
+    "end": 10.27,
+    "speech_text": "Let me ask you something honest.",
+    "images": [
+      {
+        "visual_concept": "Biểu tượng dấu hỏi lớn và lời thì thầm trung thực",
+        "svg_search_prompt": "honest question thinking",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 4,
+    "start": 10.27,
+    "end": 13.3,
+    "speech_text": "Have you ever had a completely free day?",
+    "images": [
+      {
+        "visual_concept": "Tờ lịch bàn đánh dấu ngày nghỉ hoàn toàn trống",
+        "svg_search_prompt": "empty calendar weekend",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 5,
+    "start": 13.3,
+    "end": 14.44,
+    "speech_text": "A day where you",
+    "images": [
+      {
+        "visual_concept": "Bình minh ngày nghỉ thảnh thơi không vướng bận",
+        "svg_search_prompt": "free day sunrise",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 6,
+    "start": 14.44,
+    "end": 15.81,
+    "speech_text": "did no hard labor,",
+    "images": [
+      {
+        "visual_concept": "Biểu tượng gạch chéo không làm việc nặng nhọc",
+        "svg_search_prompt": "no hard labor crossed",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 7,
+    "start": 15.81,
+    "end": 19.86,
+    "speech_text": "you lifted no heavy weights and you ran no marathons.",
+    "images": [
+      {
+        "visual_concept": "Biểu tượng tạ gym và người chạy marathon gạch chéo",
+        "svg_search_prompt": "dumbbell marathon crossed",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 8,
+    "start": 19.86,
+    "end": 21.0,
+    "speech_text": "You just stayed",
+    "images": [
+      {
+        "visual_concept": "Người ở nhà thảnh thơi trong căn phòng nhỏ",
+        "svg_search_prompt": "staying home relaxed",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 9,
+    "start": 21.0,
+    "end": 23.22,
+    "speech_text": "home. You laid on the sofa,",
+    "images": [
+      {
+        "visual_concept": "Người nằm dài trên ghế sofa lướt điện thoại",
+        "svg_search_prompt": "person lying sofa phone",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 10,
+    "start": 23.22,
+    "end": 28.0,
+    "speech_text": "scrolled your phone, watched some shows and tried to rest.",
+    "images": [
+      {
+        "visual_concept": "Màn hình điện thoại và tivi đang phát chương trình",
+        "svg_search_prompt": "phone screen tv show",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 11,
+    "start": 29.0,
+    "end": 32.5,
+    "speech_text": "And yet, by eight o'clock in the evening",
+    "images": [
+      {
+        "visual_concept": "Đồng hồ chỉ 8 giờ tối với ánh trăng ngoài cửa sổ",
+        "svg_search_prompt": "clock eight pm evening",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 12,
+    "start": 32.5,
+    "end": 36.0,
+    "speech_text": "you felt completely utterly exhausted.",
+    "images": [
+      {
+        "visual_concept": "Dáng người gục đầu hoàn toàn kiệt sức rã rời",
+        "svg_search_prompt": "exhausted person slumping",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 13,
+    "start": 38.0,
+    "end": 40.98,
+    "speech_text": "Your limbs felt heavy like lead.",
+    "images": [
+      {
+        "visual_concept": "Chân tay nặng trĩu như những khối chì đè nặng",
+        "svg_search_prompt": "heavy limbs lead weight",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 14,
+    "start": 40.98,
+    "end": 43.02,
+    "speech_text": "Your brain felt foggy.",
+    "images": [
+      {
+        "visual_concept": "Đám mây sương mù bao quanh bộ não mờ mịt",
+        "svg_search_prompt": "foggy cloud brain",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 15,
+    "start": 43.02,
+    "end": 46.0,
+    "speech_text": "Your chest felt strangely empty.",
+    "images": [
+      {
+        "visual_concept": "Lồng ngực với cảm giác trống rỗng kỳ lạ",
+        "svg_search_prompt": "empty chest silhouette",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 16,
+    "start": 46.0,
+    "end": 48.51,
+    "speech_text": "You asked yourself, why am I so",
+    "images": [
+      {
+        "visual_concept": "Người đứng gãi đầu suy nghĩ với dấu hỏi lớn",
+        "svg_search_prompt": "person asking question",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 17,
+    "start": 48.51,
+    "end": 52.0,
+    "speech_text": "tired when I literally did nothing all day?",
+    "images": [
+      {
+        "visual_concept": "Biểu tượng viên pin cạn kiệt 0% nhấp nháy đỏ",
+        "svg_search_prompt": "empty battery red icon",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 18,
+    "start": 53.0,
+    "end": 57.78,
+    "speech_text": "Most people think this is just laziness or a lack of motivation",
+    "images": [
+      {
+        "visual_concept": "Khái niệm lười biếng và thiếu động lực",
+        "svg_search_prompt": "laziness lack motivation",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 19,
+    "start": 57.78,
+    "end": 59.0,
+    "speech_text": "but it is not.",
+    "images": [
+      {
+        "visual_concept": "Dấu gạch chéo phủ định to màu đỏ",
+        "svg_search_prompt": "bold cross rejection",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 20,
+    "start": 62.0,
+    "end": 65.24,
+    "speech_text": "What you are experiencing is one of the most fascinating",
+    "images": [
+      {
+        "visual_concept": "Bức tranh cơ thể người phát sáng đầy bí ẩn",
+        "svg_search_prompt": "human body mystery glowing",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 21,
+    "start": 65.24,
+    "end": 69.0,
+    "speech_text": "invisible biological battles happening inside human physiology.",
+    "images": [
+      {
+        "visual_concept": "Trận chiến sinh học vô hình giữa các tế bào thần kinh",
+        "svg_search_prompt": "invisible biological battle neuron",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 22,
+    "start": 71.0,
+    "end": 74.65,
+    "speech_text": "It is called the paradox of mental fatigue.",
+    "images": [
+      {
+        "visual_concept": "Dòng chữ Paradox of Mental Fatigue nổi bật",
+        "svg_search_prompt": "mental fatigue paradox",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 23,
+    "start": 74.65,
+    "end": 76.43,
+    "speech_text": "And to understand it,",
+    "images": [
+      {
+        "visual_concept": "Kính lúp phóng to tìm kiếm nguyên nhân gốc rễ",
+        "svg_search_prompt": "magnifying glass root cause",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 24,
+    "start": 76.43,
+    "end": 80.0,
+    "speech_text": "we have to look at the silent energy thief",
+    "images": [
+      {
+        "visual_concept": "Bóng đen kẻ trộm năng lượng âm thầm rình rập",
+        "svg_search_prompt": "silent energy thief shadow",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 25,
+    "start": 80.0,
+    "end": 84.24,
+    "speech_text": "running in the background of your skull.",
+    "images": [
+      {
+        "visual_concept": "Hộp sọ trong suốt với mạng nơ-ron chạy ngầm",
+        "svg_search_prompt": "skull background neural network",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 26,
+    "start": 84.24,
+    "end": 87.0,
+    "speech_text": "Let's look at the numbers.",
+    "images": [
+      {
+        "visual_concept": "Các con số dữ liệu toán học và biểu đồ phát sáng",
+        "svg_search_prompt": "math numbers statistics data",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 27,
+    "start": 88.0,
+    "end": 91.16,
+    "speech_text": "Your brain weighs only about three pounds.",
+    "images": [
+      {
+        "visual_concept": "Chiếc cân cân bộ não nặng khoảng 3 pounds",
+        "svg_search_prompt": "scale brain three pounds",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 28,
+    "start": 91.16,
+    "end": 95.0,
+    "speech_text": "That is just two percent of your total body weight.",
+    "images": [
+      {
+        "visual_concept": "Biểu đồ phần trăm 2% trọng lượng cơ thể",
+        "svg_search_prompt": "two percent body weight",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 29,
+    "start": 95.0,
+    "end": 97.93,
+    "speech_text": "But that tiny clump of tissue consumes 20% of",
+    "images": [
+      {
+        "visual_concept": "Bộ não nhỏ bé tiêu thụ năng lượng khổng lồ",
+        "svg_search_prompt": "tiny brain massive energy",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 30,
+    "start": 97.93,
+    "end": 101.0,
+    "speech_text": "all the oxygen and glucose in your entire body.",
+    "images": [
+      {
+        "visual_concept": "Biểu đồ tròn 20% nạp đầy oxy và đường glucose",
+        "svg_search_prompt": "pie chart oxygen glucose",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 31,
+    "start": 101.0,
+    "end": 104.5,
+    "speech_text": "Every fifth breath you take and every fifth bite of food",
+    "images": [
+      {
+        "visual_concept": "Hơi thở và thức ăn nạp năng lượng vào cơ thể",
+        "svg_search_prompt": "breath food intake energy",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 32,
+    "start": 104.5,
+    "end": 109.0,
+    "speech_text": "you eat goes directly to powering the electrical storm inside your head.",
+    "images": [
+      {
+        "visual_concept": "Cơn bão điện sét đánh dữ dội bên trong não bộ",
+        "svg_search_prompt": "brain electrical lightning storm",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 33,
+    "start": 111.0,
+    "end": 113.64,
+    "speech_text": "Now, here is the mystery.",
+    "images": [
+      {
+        "visual_concept": "Dấu hỏi chấm bí ẩn phát sáng giữa không trung",
+        "svg_search_prompt": "glowing mystery question mark",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 34,
+    "start": 113.64,
+    "end": 116.92,
+    "speech_text": "When you sit down to do nothing",
+    "images": [
+      {
+        "visual_concept": "Người ngồi thảnh thơi không làm bất cứ việc gì",
+        "svg_search_prompt": "person sitting doing nothing",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 35,
+    "start": 116.92,
+    "end": 122.0,
+    "speech_text": "how much energy do you think your brain saves?",
+    "images": [
+      {
+        "visual_concept": "Cán cân so sánh mức năng lượng não bộ tiết kiệm",
+        "svg_search_prompt": "energy savings brain balance",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 36,
+    "start": 122.0,
+    "end": 124.97,
+    "speech_text": "Most people assume the brain drops",
+    "images": [
+      {
+        "visual_concept": "Mọi người suy đoán năng lượng não bộ sụt giảm",
+        "svg_search_prompt": "people guessing energy drop",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 37,
+    "start": 124.97,
+    "end": 127.68,
+    "speech_text": "its energy consumption by 50 or",
+    "images": [
+      {
+        "visual_concept": "Mức năng lượng giảm mạnh từ 50% đến 80%",
+        "svg_search_prompt": "fifty eighty percent drop",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 38,
+    "start": 127.68,
+    "end": 131.0,
+    "speech_text": "80% like a laptop entering sleep mode.",
+    "images": [
+      {
+        "visual_concept": "Laptop gập màn hình chuyển sang Sleep Mode",
+        "svg_search_prompt": "laptop entering sleep mode",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 39,
+    "start": 131.0,
+    "end": 135.14,
+    "speech_text": "In 1997, a groundbreaking neuroscientist named Dr.",
+    "images": [
+      {
+        "visual_concept": "Chân dung nhà thần kinh học Dr Marcus Raichle 1997",
+        "svg_search_prompt": "neuroscientist dr marcus raichle",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 40,
+    "start": 135.14,
+    "end": 143.0,
+    "speech_text": "Marcus Reichel ran brain scans to find out what he discovered shocked the scientific community.",
+    "images": [
+      {
+        "visual_concept": "Máy quét não fMRI hiện đại gây sốc giới khoa học",
+        "svg_search_prompt": "fmri brain scan laboratory",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 41,
+    "start": 145.0,
+    "end": 149.54,
+    "speech_text": "When you stop doing tasks and sit in a room doing nothing",
+    "images": [
+      {
+        "visual_concept": "Người ngồi yên tĩnh trong phòng không làm gì",
+        "svg_search_prompt": "sitting quiet room still",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 42,
+    "start": 149.54,
+    "end": 154.0,
+    "speech_text": "your brain's energy consumption drops by less than 5%.",
+    "images": [
+      {
+        "visual_concept": "Biểu đồ năng lượng chỉ giảm chưa tới 5% siêu nhỏ",
+        "svg_search_prompt": "energy drop under five",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 43,
+    "start": 154.0,
+    "end": 156.07,
+    "speech_text": "95% of your mental power",
+    "images": [
+      {
+        "visual_concept": "Con số 95% công suất tâm trí rực lửa",
+        "svg_search_prompt": "ninety five percent power",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 44,
+    "start": 156.07,
+    "end": 159.0,
+    "speech_text": "is still running at full throttle.",
+    "images": [
+      {
+        "visual_concept": "Động cơ não bộ đang hoạt động hết công suất",
+        "svg_search_prompt": "brain engine full throttle",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 45,
+    "start": 162.0,
+    "end": 166.31,
+    "speech_text": "Why? Because your brain does not have an off switch.",
+    "images": [
+      {
+        "visual_concept": "Bộ não với công tắc điện bị gạch chéo không có nút tắt",
+        "svg_search_prompt": "brain no off switch",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 46,
+    "start": 166.31,
+    "end": 169.87,
+    "speech_text": "When you stop focusing on the outside world",
+    "images": [
+      {
+        "visual_concept": "Người nhắm mắt ngừng chú ý đến thế giới bên ngoài",
+        "svg_search_prompt": "closing eyes disconnecting world",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 47,
+    "start": 169.87,
+    "end": 175.0,
+    "speech_text": "your brain boots up a massive interconnected neural network.",
+    "images": [
+      {
+        "visual_concept": "Mạng lưới nơ-ron khổng lồ DMN tự động bùng nổ",
+        "svg_search_prompt": "massive neural network booting",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 48,
+    "start": 175.0,
+    "end": 178.57,
+    "speech_text": "Neuroscientists call it",
+    "images": [
+      {
+        "visual_concept": "Các nhà khoa học thần kinh chỉ tay vào màn hình",
+        "svg_search_prompt": "neuroscientists pointing screen",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 49,
+    "start": 178.57,
+    "end": 181.05,
+    "speech_text": "the default mode",
+    "images": [
+      {
+        "visual_concept": "Mô hình mạng chế độ mặc định não bộ",
+        "svg_search_prompt": "default mode network brain",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 50,
+    "start": 181.05,
+    "end": 184.0,
+    "speech_text": "network or the DMN.",
+    "images": [
+      {
+        "visual_concept": "Dòng chữ DMN tỏa sáng rực rỡ ở trung tâm",
+        "svg_search_prompt": "dmn letters glowing center",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 51,
+    "start": 184.0,
+    "end": 188.05,
+    "speech_text": "Think of the DMN as your brain's internal time travel machine.",
+    "images": [
+      {
+        "visual_concept": "Cỗ máy du hành thời gian với các bánh răng",
+        "svg_search_prompt": "brain time travel machine",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 52,
+    "start": 188.05,
+    "end": 192.63,
+    "speech_text": "The moment you are not actively solving a puzzle or talking to someone",
+    "images": [
+      {
+        "visual_concept": "Người ngừng giải câu đố và ngừng nói chuyện",
+        "svg_search_prompt": "stopping puzzle and talk",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 53,
+    "start": 192.63,
+    "end": 194.0,
+    "speech_text": "the DMN takes over.",
+    "images": [
+      {
+        "visual_concept": "Mạng lưới DMN lập tức chiếm quyền kiểm soát",
+        "svg_search_prompt": "dmn taking full control",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 54,
+    "start": 194.0,
+    "end": 197.81,
+    "speech_text": "It starts replaying past embarrassment from five years ago.",
+    "images": [
+      {
+        "visual_concept": "Cuộn phim tua lại sự cố ngượng ngùng 5 năm trước",
+        "svg_search_prompt": "past embarrassment film reel",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 55,
+    "start": 197.81,
+    "end": 202.0,
+    "speech_text": "It starts simulating future disasters that have not happened yet.",
+    "images": [
+      {
+        "visual_concept": "Đám mây bão tương lai với viễn cảnh thảm họa",
+        "svg_search_prompt": "future disaster storm cloud",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 56,
+    "start": 202.0,
+    "end": 206.29,
+    "speech_text": "It starts comparing you to people on social media.",
+    "images": [
+      {
+        "visual_concept": "Màn hình mạng xã hội với biểu tượng so sánh đố kỵ",
+        "svg_search_prompt": "social media comparison screen",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 57,
+    "start": 206.29,
+    "end": 208.0,
+    "speech_text": "It starts wondering,",
+    "images": [
+      {
+        "visual_concept": "Dấu hỏi chấm suy tư trăn trở",
+        "svg_search_prompt": "thinking question marks bubble",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 58,
+    "start": 208.0,
+    "end": 211.27,
+    "speech_text": "did I reply to that message?",
+    "images": [
+      {
+        "visual_concept": "Bong bóng tin nhắn chưa trả lời nhấp nháy",
+        "svg_search_prompt": "unread message chat bubble",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 59,
+    "start": 211.27,
+    "end": 214.66,
+    "speech_text": "What am I doing with my life?",
+    "images": [
+      {
+        "visual_concept": "Người băn khoăn về hướng đi cuộc đời",
+        "svg_search_prompt": "person wondering life path",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 60,
+    "start": 214.66,
+    "end": 217.0,
+    "speech_text": "Am I falling behind?",
+    "images": [
+      {
+        "visual_concept": "Người chạy sau cảm giác bị tụt lại phía sau",
+        "svg_search_prompt": "falling behind runner race",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 61,
+    "start": 217.0,
+    "end": 219.47,
+    "speech_text": "Your brain is running hundreds",
+    "images": [
+      {
+        "visual_concept": "Bộ não chạy hàng trăm luồng suy nghĩ cùng lúc",
+        "svg_search_prompt": "brain running heavy simulations",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 62,
+    "start": 219.47,
+    "end": 223.0,
+    "speech_text": "of heavy psychological simulations at once.",
+    "images": [
+      {
+        "visual_concept": "Các cửa sổ tâm lý mở chồng chất quá tải",
+        "svg_search_prompt": "multiple simulation windows overload",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 63,
+    "start": 223.0,
+    "end": 225.81,
+    "speech_text": "To your body, a simulated threat feels",
+    "images": [
+      {
+        "visual_concept": "Mối đe dọa tưởng tượng trong tâm trí",
+        "svg_search_prompt": "imaginary simulated threat brain",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 64,
+    "start": 225.81,
+    "end": 229.0,
+    "speech_text": "nearly identical to a real physical threat.",
+    "images": [
+      {
+        "visual_concept": "Con thú săn mồi nguy hiểm ngoài đời thực",
+        "svg_search_prompt": "real physical threat beast",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 65,
+    "start": 229.0,
+    "end": 233.85,
+    "speech_text": "When you imagine an uncomfortable conversation or worry about tomorrow",
+    "images": [
+      {
+        "visual_concept": "Người lo lắng về cuộc nói chuyện khó khăn ngày mai",
+        "svg_search_prompt": "worrying about tomorrow conversation",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 66,
+    "start": 233.85,
+    "end": 238.0,
+    "speech_text": "your brain releases microdosis of cortisol and adrenaline.",
+    "images": [
+      {
+        "visual_concept": "Ống tiêm tiết ra hormone Cortisol và Adrenaline",
+        "svg_search_prompt": "cortisol adrenaline stress hormone",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 67,
+    "start": 238.0,
+    "end": 242.15,
+    "speech_text": "Your heart rate subtly elevates.",
+    "images": [
+      {
+        "visual_concept": "Đường điện tâm đồ nhịp tim tăng vọt",
+        "svg_search_prompt": "heart rate ekg elevating",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 68,
+    "start": 242.15,
+    "end": 245.0,
+    "speech_text": "Your muscles tense up.",
+    "images": [
+      {
+        "visual_concept": "Bó cơ bắp co rút căng thẳng",
+        "svg_search_prompt": "tense muscle fibers stress",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 69,
+    "start": 245.0,
+    "end": 249.01,
+    "speech_text": "You might be lying completely still on a soft bed.",
+    "images": [
+      {
+        "visual_concept": "Người nằm bất động trên chiếc giường êm ái",
+        "svg_search_prompt": "person lying soft bed",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 70,
+    "start": 249.01,
+    "end": 256.0,
+    "speech_text": "But biologically, your nervous system is running a marathon against imaginary phantoms.",
+    "images": [
+      {
+        "visual_concept": "Hệ thần kinh chạy marathon kiệt sức cùng bóng ma",
+        "svg_search_prompt": "nervous system running marathon",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 71,
+    "start": 256.0,
+    "end": 259.7,
+    "speech_text": "And then comes the second energy leak",
+    "images": [
+      {
+        "visual_concept": "Đường ống năng lượng bị nứt rò rỉ thứ hai",
+        "svg_search_prompt": "second energy leak crack",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 72,
+    "start": 259.7,
+    "end": 262.0,
+    "speech_text": "the illusion of rest.",
+    "images": [
+      {
+        "visual_concept": "Ảo ảnh thư giãn biến mất",
+        "svg_search_prompt": "illusion of rest fading",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 73,
+    "start": 262.0,
+    "end": 265.25,
+    "speech_text": "When we feel tired today,",
+    "images": [
+      {
+        "visual_concept": "Người mệt mỏi sau ngày dài",
+        "svg_search_prompt": "person feeling tired today",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 74,
+    "start": 265.25,
+    "end": 267.07,
+    "speech_text": "what do we do?",
+    "images": [
+      {
+        "visual_concept": "Dấu hỏi chấm về thói quen thường làm",
+        "svg_search_prompt": "question mark what we do",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 75,
+    "start": 267.07,
+    "end": 270.19,
+    "speech_text": "We reach for our phones.",
+    "images": [
+      {
+        "visual_concept": "Bàn tay với lấy chiếc điện thoại thông minh",
+        "svg_search_prompt": "hand reaching for smartphone",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 76,
+    "start": 270.19,
+    "end": 275.0,
+    "speech_text": "We tell ourselves, I'm just relaxing.",
+    "images": [
+      {
+        "visual_concept": "Người nằm lướt điện thoại tự nhủ đang thư giãn",
+        "svg_search_prompt": "scrolling phone relaxing thought",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 77,
+    "start": 275.0,
+    "end": 280.11,
+    "speech_text": "But scrolling through short-form videos and feeds is not rest.",
+    "images": [
+      {
+        "visual_concept": "Ngón tay lướt liên tục qua các video ngắn",
+        "svg_search_prompt": "scrolling short video feed",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 78,
+    "start": 280.11,
+    "end": 282.0,
+    "speech_text": "It is sensory overload.",
+    "images": [
+      {
+        "visual_concept": "Sóng âm thanh và hình ảnh gây quá tải giác quan",
+        "svg_search_prompt": "sensory overload waves storm",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 79,
+    "start": 282.0,
+    "end": 286.38,
+    "speech_text": "Every three seconds, your brain has to process a new face",
+    "images": [
+      {
+        "visual_concept": "Vòng lặp 3 giây xuất hiện gương mặt mới",
+        "svg_search_prompt": "new face three seconds",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 80,
+    "start": 286.38,
+    "end": 287.38,
+    "speech_text": "a new song,",
+    "images": [
+      {
+        "visual_concept": "Nốt nhạc giai điệu mới vang lên",
+        "svg_search_prompt": "new musical notes melody",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 81,
+    "start": 287.38,
+    "end": 290.0,
+    "speech_text": "a new emotion, a new piece of news",
+    "images": [
+      {
+        "visual_concept": "Biểu cảm cảm xúc và tin tức dồn dập",
+        "svg_search_prompt": "emotion news headlines rush",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 82,
+    "start": 290.0,
+    "end": 292.0,
+    "speech_text": "and a new advertisement.",
+    "images": [
+      {
+        "visual_concept": "Biển quảng cáo nhấp nháy lướt qua màn hình",
+        "svg_search_prompt": "advertisement billboard phone screen",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 83,
+    "start": 292.0,
+    "end": 295.98,
+    "speech_text": "Cognitive scientists call this micro-decision fatigue.",
+    "images": [
+      {
+        "visual_concept": "Bộ não choáng ngợp vì mệt mỏi vi quyết định",
+        "svg_search_prompt": "micro decision fatigue brain",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 84,
+    "start": 295.98,
+    "end": 299.0,
+    "speech_text": "Your brain has to subconsciously decide ,",
+    "images": [
+      {
+        "visual_concept": "Tiềm thức não bộ phải liên tục phân tích",
+        "svg_search_prompt": "subconscious brain deciding path",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 85,
+    "start": 299.0,
+    "end": 301.37,
+    "speech_text": "do I care about this?",
+    "images": [
+      {
+        "visual_concept": "Biểu tượng dấu hỏi có nên quan tâm",
+        "svg_search_prompt": "question do i care",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 86,
+    "start": 301.37,
+    "end": 302.61,
+    "speech_text": "Do I swipe?",
+    "images": [
+      {
+        "visual_concept": "Biểu tượng ngón tay quẹt màn hình",
+        "svg_search_prompt": "finger swiping screen icon",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 87,
+    "start": 302.61,
+    "end": 303.85,
+    "speech_text": "Do I laugh?",
+    "images": [
+      {
+        "visual_concept": "Biểu tượng mặt cười haha thả ga",
+        "svg_search_prompt": "laughing emoji reaction face",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 88,
+    "start": 303.85,
+    "end": 306.0,
+    "speech_text": "Do I keep watching?",
+    "images": [
+      {
+        "visual_concept": "Thanh tiến trình xem tiếp video",
+        "svg_search_prompt": "keep watching video progress",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 89,
+    "start": 306.0,
+    "end": 308.15,
+    "speech_text": "You are forcing your visual",
+    "images": [
+      {
+        "visual_concept": "Trung tâm thị giác mắt bốc khói vì quá tải",
+        "svg_search_prompt": "visual centers eyes smoking",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 90,
+    "start": 308.15,
+    "end": 310.46,
+    "speech_text": "and emotional centers to make",
+    "images": [
+      {
+        "visual_concept": "Trung tâm cảm xúc não bộ hoạt động liên tục",
+        "svg_search_prompt": "emotional center brain glowing",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 91,
+    "start": 310.46,
+    "end": 315.0,
+    "speech_text": "thousands of rapid micro-evaluations every single minute.",
+    "images": [
+      {
+        "visual_concept": "Hàng ngàn phép đánh giá vi mô mỗi phút",
+        "svg_search_prompt": "thousands micro evaluations minute",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 92,
+    "start": 315.0,
+    "end": 317.81,
+    "speech_text": "You are not resting your battery.",
+    "images": [
+      {
+        "visual_concept": "Biểu tượng viên pin không được nghỉ ngơi",
+        "svg_search_prompt": "battery not resting crossed",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 93,
+    "start": 317.81,
+    "end": 323.0,
+    "speech_text": "You are violently draining it while holding it in your hands.",
+    "images": [
+      {
+        "visual_concept": "Viên pin đỏ cạn kiệt bị bóp nghẹt trên tay",
+        "svg_search_prompt": "draining battery holding hand",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 94,
+    "start": 323.0,
+    "end": 326.13,
+    "speech_text": "This is the great paradox of modern life.",
+    "images": [
+      {
+        "visual_concept": "Nghịch lý lớn của thời đại hiện đại",
+        "svg_search_prompt": "great paradox modern life",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 95,
+    "start": 326.13,
+    "end": 333.0,
+    "speech_text": "We have eliminated physical exhaustion only to replace it with chronic cognitive friction.",
+    "images": [
+      {
+        "visual_concept": "Cán cân ma sát nhận thức nặng hơn mệt mỏi thể xác",
+        "svg_search_prompt": "cognitive friction balance scale",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 96,
+    "start": 333.0,
+    "end": 336.61,
+    "speech_text": "In 1670, the French philosopher Blaise Pascal wrote",
+    "images": [
+      {
+        "visual_concept": "Nhà triết học Pháp Blaise Pascal năm 1670",
+        "svg_search_prompt": "french philosopher blaise pascal",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 97,
+    "start": 336.61,
+    "end": 340.0,
+    "speech_text": "a sentence that predicted the entire modern era.",
+    "images": [
+      {
+        "visual_concept": "Trang sách cổ ghi câu nói tiên tri thời đại",
+        "svg_search_prompt": "ancient book predicted era",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 98,
+    "start": 340.0,
+    "end": 342.57,
+    "speech_text": "He said, all of humanity's",
+    "images": [
+      {
+        "visual_concept": "Chân dung Blaise Pascal phát biểu triết lý",
+        "svg_search_prompt": "blaise pascal speaking portrait",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 99,
+    "start": 342.57,
+    "end": 345.93,
+    "speech_text": "problems stem from man's inability",
+    "images": [
+      {
+        "visual_concept": "Bản chất gốc rễ của mọi rắc rối nhân loại",
+        "svg_search_prompt": "root humanity problem origin",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 100,
+    "start": 345.93,
+    "end": 349.0,
+    "speech_text": "to sit quietly in a room alone.",
+    "images": [
+      {
+        "visual_concept": "Người ngồi tĩnh lặng an yên trong phòng một mình",
+        "svg_search_prompt": "sitting quietly room alone",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 101,
+    "start": 349.0,
+    "end": 352.5,
+    "speech_text": "We have become terrified of silence.",
+    "images": [
+      {
+        "visual_concept": "Biểu tượng nỗi sợ hãi không gian im lặng",
+        "svg_search_prompt": "terrified of silence fear",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 102,
+    "start": 352.5,
+    "end": 359.0,
+    "speech_text": "We have forgotten the difference between numbing out and true rest.",
+    "images": [
+      {
+        "visual_concept": "Hai ngã rẽ giữa Trốn Tránh và Nghỉ Ngơi Thực Sự",
+        "svg_search_prompt": "numbing out versus true rest",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 103,
+    "start": 359.0,
+    "end": 361.21,
+    "speech_text": "Numbing out is passive consumption.",
+    "images": [
+      {
+        "visual_concept": "Tiêu thụ thụ động các nội dung giải trí",
+        "svg_search_prompt": "passive consumption screen media",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 104,
+    "start": 361.21,
+    "end": 366.0,
+    "speech_text": "It fills the silence with noise so you don't have to hear your own thoughts.",
+    "images": [
+      {
+        "visual_concept": "Tai nghe phát tiếng ồn lấp đầy khoảng lặng tâm trí",
+        "svg_search_prompt": "headphone noise filling silence",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 105,
+    "start": 366.0,
+    "end": 370.0,
+    "speech_text": "But it leaves you drained.",
+    "images": [
+      {
+        "visual_concept": "Cơ thể kiệt sức rỗng tuếch sau khi tắt máy",
+        "svg_search_prompt": "drained empty person silhouette",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 106,
+    "start": 370.0,
+    "end": 372.86,
+    "speech_text": "True rest is restorative stillness.",
+    "images": [
+      {
+        "visual_concept": "Sự tĩnh lặng phục hồi đầy êm dịu và tái sinh",
+        "svg_search_prompt": "restorative stillness peace calm",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 107,
+    "start": 372.86,
+    "end": 379.0,
+    "speech_text": "It is doing something that lets your nervous system finally drop its guard.",
+    "images": [
+      {
+        "visual_concept": "Lá chắn phòng thủ buông xuống cho hệ thần kinh nghỉ",
+        "svg_search_prompt": "shield dropping nervous rest",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 108,
+    "start": 379.0,
+    "end": 381.0,
+    "speech_text": "So, how do you",
+    "images": [
+      {
+        "visual_concept": "Dấu hỏi lớn làm sao để ngăn rò rỉ năng lượng",
+        "svg_search_prompt": "how to stop question mark",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 109,
+    "start": 381.0,
+    "end": 385.0,
+    "speech_text": "stop the silent energy leak?",
+    "images": [
+      {
+        "visual_concept": "Chiếc van xoay khóa chặt đường ống năng lượng",
+        "svg_search_prompt": "valve closing energy leak pipe",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 110,
+    "start": 385.0,
+    "end": 390.65,
+    "speech_text": "First, you must understand that your brain recharges through stillness",
+    "images": [
+      {
+        "visual_concept": "Bộ não phục hồi năng lượng từ sự tĩnh tại",
+        "svg_search_prompt": "brain recharging stillness nature",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 111,
+    "start": 390.65,
+    "end": 392.9,
+    "speech_text": "nature, and deep presence,",
+    "images": [
+      {
+        "visual_concept": "Cây cối thiên nhiên xanh mát và sự hiện diện sâu",
+        "svg_search_prompt": "nature greenery deep presence",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 112,
+    "start": 392.9,
+    "end": 395.0,
+    "speech_text": "not digital entertainment.",
+    "images": [
+      {
+        "visual_concept": "Biểu tượng gạch chéo thiết bị giải trí số",
+        "svg_search_prompt": "digital entertainment crossed out",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 113,
+    "start": 395.0,
+    "end": 397.0,
+    "speech_text": "Take ten minutes today to stare",
+    "images": [
+      {
+        "visual_concept": "Đồng hồ bấm giờ 10 phút tĩnh tâm",
+        "svg_search_prompt": "timer ten minutes stopwatch",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 114,
+    "start": 397.0,
+    "end": 399.0,
+    "speech_text": "at a window without your phone.",
+    "images": [
+      {
+        "visual_concept": "Người đứng ngắm mây trời qua cửa sổ không điện thoại",
+        "svg_search_prompt": "looking window without phone",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 115,
+    "start": 399.0,
+    "end": 402.5,
+    "speech_text": "Feel the weight of your feet on the floor.",
+    "images": [
+      {
+        "visual_concept": "Bàn chân chạm đất cảm nhận sức nặng vững chãi",
+        "svg_search_prompt": "feet weight ground floor",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 116,
+    "start": 402.5,
+    "end": 409.0,
+    "speech_text": "Go for a walk without headphones and listen to the ambient rhythm of the wind.",
+    "images": [
+      {
+        "visual_concept": "Đôi chân bước đi dạo giữa hàng cây và ngọn gió",
+        "svg_search_prompt": "walking nature breeze path",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 117,
+    "start": 409.0,
+    "end": 411.69,
+    "speech_text": "Let your default mode network settle",
+    "images": [
+      {
+        "visual_concept": "Mạng lưới DMN bắt đầu lắng dịu êm ái",
+        "svg_search_prompt": "default mode network calming",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 118,
+    "start": 411.69,
+    "end": 414.0,
+    "speech_text": "down like dust in a quiet room.",
+    "images": [
+      {
+        "visual_concept": "Những hạt bụi vàng lắng đọng nhẹ trong gian phòng",
+        "svg_search_prompt": "dust settling quiet room",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 119,
+    "start": 414.0,
+    "end": 418.66,
+    "speech_text": "Give your mind permission to simply exist without evaluating",
+    "images": [
+      {
+        "visual_concept": "Tâm trí thảnh thơi chỉ đơn giản là tồn tại",
+        "svg_search_prompt": "mind simply existing free",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 120,
+    "start": 418.66,
+    "end": 422.0,
+    "speech_text": "without reacting, and without performing.",
+    "images": [
+      {
+        "visual_concept": "Biểu tượng giải phóng khỏi phán xét và áp lực",
+        "svg_search_prompt": "free from evaluation pressure",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 121,
+    "start": 422.0,
+    "end": 425.11,
+    "speech_text": "So tonight, be kind to yourself.",
+    "images": [
+      {
+        "visual_concept": "Hai bàn tay ấm áp ôm lấy trái tim yêu thương",
+        "svg_search_prompt": "warm hands holding heart",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 122,
+    "start": 425.11,
+    "end": 426.96,
+    "speech_text": "You are not broken,",
+    "images": [
+      {
+        "visual_concept": "Hình người hoàn hảo không hề bị hư hỏng",
+        "svg_search_prompt": "person whole not broken",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 123,
+    "start": 426.96,
+    "end": 429.0,
+    "speech_text": "and you are not lazy.",
+    "images": [
+      {
+        "visual_concept": "Biểu tượng gạch chéo định kiến lười biếng",
+        "svg_search_prompt": "not lazy crossed out",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 124,
+    "start": 429.0,
+    "end": 432.42,
+    "speech_text": "Your mind has just been carrying the weight",
+    "images": [
+      {
+        "visual_concept": "Tâm trí đang gánh vác khối lượng nặng vô hình",
+        "svg_search_prompt": "mind carrying heavy weight",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 125,
+    "start": 432.42,
+    "end": 436.0,
+    "speech_text": "of a thousand open tabs without realizing it.",
+    "images": [
+      {
+        "visual_concept": "Hàng ngàn tab trình duyệt máy tính được đóng lại",
+        "svg_search_prompt": "thousand open browser tabs",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 126,
+    "start": 437.0,
+    "end": 439.95,
+    "speech_text": "Close the screen for a little while.",
+    "images": [
+      {
+        "visual_concept": "Màn hình máy tính và điện thoại gập tắt nhẹ nhàng",
+        "svg_search_prompt": "closing laptop screen gently",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 127,
+    "start": 439.95,
+    "end": 442.0,
+    "speech_text": "Take a slow, deep breath,",
+    "images": [
+      {
+        "visual_concept": "Luồng không khí hít thở sâu phục hồi sức sống",
+        "svg_search_prompt": "deep breathing lungs fresh air",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 128,
+    "start": 442.0,
+    "end": 447.0,
+    "speech_text": "and give your nervous system permission to rest in the quiet.",
+    "images": [
+      {
+        "visual_concept": "Hệ thần kinh an yên thư giãn hoàn toàn",
+        "svg_search_prompt": "nervous system peaceful rest",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 129,
+    "start": 447.0,
+    "end": 451.0,
+    "speech_text": "Take care of yourself out there.",
+    "images": [
+      {
+        "visual_concept": "Bàn tay vẫy chào ấm áp nhắn gửi giữ gìn sức khỏe",
+        "svg_search_prompt": "warm caring wave gesture",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 130,
+    "start": 451.0,
+    "end": 453.27,
+    "speech_text": "And as always,",
+    "images": [
+      {
+        "visual_concept": "Biểu tượng đồng hồ cát và nụ cười ấm áp",
+        "svg_search_prompt": "hourglass smile warm moment",
+        "animation_style": "draw"
+      }
+    ]
+  },
+  {
+    "sentence_id": 131,
+    "start": 453.27,
+    "end": 457.0,
+    "speech_text": "thanks for stopping by.",
+    "images": [
+      {
+        "visual_concept": "Tách cà phê thơm ngát cùng lời cảm ơn chân thành",
+        "svg_search_prompt": "coffee cup thanks goodbye",
+        "animation_style": "draw"
+      }
+    ]
+  }
+]
