@@ -674,7 +674,7 @@ def pick_unique_scene_images(scenes, anime_name):
 async def _edge_tts_save(text, voice, out_mp3):
     import edge_tts
     try:
-        communicate = edge_tts.Communicate(text, voice, rate="+10%")
+        communicate = edge_tts.Communicate(text, voice, rate="+15%")
         await communicate.save(str(out_mp3))
         if out_mp3.exists() and out_mp3.stat().st_size > 1000:
             return True
@@ -685,12 +685,74 @@ async def _edge_tts_save(text, voice, out_mp3):
     if out_mp3.exists():
         try: out_mp3.unlink()
         except: pass
-    txt_tmp = out_mp3.parent / "script_tts_tmp.txt"
+    txt_tmp = out_mp3.parent / f"_script_tts_tmp_{int(time.time())}.txt"
     txt_tmp.write_text(text, encoding="utf-8")
-    cmd = f'edge-tts --file "{txt_tmp}" --voice "{voice}" --rate="+10%" --write-media "{out_mp3}"'
+    cmd = f'edge-tts --file "{txt_tmp}" --voice "{voice}" --rate="+15%" --write-media "{out_mp3}"'
     os.system(cmd)
     txt_tmp.unlink(missing_ok=True)
     return out_mp3.exists() and out_mp3.stat().st_size > 1000
+
+
+def generate_tts_robust(text, voice, out_mp3):
+    out_mp3 = Path(out_mp3)
+    out_mp3.parent.mkdir(parents=True, exist_ok=True)
+    if out_mp3.exists():
+        try: out_mp3.unlink()
+        except: pass
+
+    # Clean markdown & special symbols that might trip TTS
+    cleaned_text = re.sub(r'[\*\_#`~]', '', text).strip()
+    if not cleaned_text:
+        cleaned_text = text.strip()
+
+    print(f"🎙️ [Edge-TTS] Đang tạo giọng đọc: {voice} (Tốc độ +15%)...", flush=True)
+
+    # 1. Async edge_tts with event loop handling
+    try:
+        import asyncio
+        try:
+            import nest_asyncio
+            nest_asyncio.apply()
+        except Exception:
+            pass
+
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        if loop.is_running():
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                future = pool.submit(asyncio.run, _edge_tts_save(cleaned_text, voice, out_mp3))
+                ok = future.result(timeout=45)
+        else:
+            ok = loop.run_until_complete(_edge_tts_save(cleaned_text, voice, out_mp3))
+
+        if ok and out_mp3.exists() and out_mp3.stat().st_size > 1000:
+            print(f"✅ Tạo giọng đọc Edge-TTS thành công ({out_mp3.stat().st_size} bytes)", flush=True)
+            return True
+    except Exception as e:
+        print(f"⚠️ Thử Async TTS gặp lỗi ({e}), chuyển sang CLI fallback...", flush=True)
+
+    # 2. CLI direct subprocess
+    try:
+        import subprocess
+        txt_tmp = out_mp3.parent / f"_script_tts_cli_{int(time.time())}.txt"
+        txt_tmp.write_text(cleaned_text, encoding="utf-8")
+        cmd = ["edge-tts", "--file", str(txt_tmp), "--voice", str(voice), "--rate=+15%", "--write-media", str(out_mp3)]
+        subprocess.run(cmd, capture_output=True, text=True, timeout=45)
+        txt_tmp.unlink(missing_ok=True)
+        if out_mp3.exists() and out_mp3.stat().st_size > 1000:
+            print(f"✅ Tạo giọng đọc qua CLI edge-tts thành công ({out_mp3.stat().st_size} bytes)", flush=True)
+            return True
+    except Exception as e:
+        print(f"⚠️ CLI fallback cũng gặp lỗi: {e}", flush=True)
+
+    # Final check
+    return out_mp3.exists() and out_mp3.stat().st_size > 1000
+
 
 
 
