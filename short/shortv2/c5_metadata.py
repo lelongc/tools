@@ -72,7 +72,7 @@ Return STRICTLY valid JSON:
 }}"""
 
     print("✨ AI Gemini đang đọc toàn bộ Phụ Đề & Kịch bản để tự động quyết định Metadata SEO chuẩn Ori Anime...", flush=True)
-    models = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-pro', 'gemini-2.5-flash', 'gemini-flash-latest']
+    models = ['gemini-3.1-flash-lite', 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-pro', 'gemini-flash-latest']
     meta_data = None
     for m in models:
         try:

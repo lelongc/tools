@@ -11,14 +11,15 @@ import nest_asyncio
 nest_asyncio.apply()
 import whisper
 
-# Danh sách Model Gemini chuẩn chính thức của Google (Ưu tiên bản 2.0 Flash siêu tốc & 1.5 Flash ổn định)
+# Danh sách Model Gemini (Mặc định gemini-3.1-flash-lite theo yêu cầu, cùng các bản 2.5, 2.0, 1.5 dự phòng)
 GEMINI_MODELS = [
+    "gemini-3.1-flash-lite",
+    "gemini-2.5-flash",
     "gemini-2.0-flash",
     "gemini-1.5-flash",
     "gemini-2.0-flash-lite",
-    "gemini-1.5-pro",
-    "gemini-2.5-flash",
     "gemini-2.5-pro",
+    "gemini-1.5-pro",
     "gemini-flash-latest"
 ]
 
@@ -96,7 +97,7 @@ def fetch_deep_lore(anime_name, api_key="", idea=""):
             "contents": [{"parts": [{"text": prompt}]}],
             "tools": [{"googleSearch": {}}]
         }
-        for model in ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]:
+        for model in ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"]:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
             try:
                 r = requests.post(url, json=body_search, timeout=20)
