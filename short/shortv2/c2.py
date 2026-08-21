@@ -1,19 +1,56 @@
 # @title ⚙️ 2. Core Engine (Hỗ Trợ Tự Nhập Kịch Bản Tùy Chỉnh + AI Gemini Auto + Live Progress Bar %)
+import warnings
+warnings.filterwarnings('ignore')
+import os, sys, time, json, cv2, numpy as np, hashlib, re, urllib.parse, asyncio, random, shutil, subprocess
+from pathlib import Path
+import requests
+from PIL import Image, ImageDraw, ImageFont
+from curl_cffi import requests as cffi_requests
+from difflib import SequenceMatcher
+import nest_asyncio
+nest_asyncio.apply()
+import whisper
+
+# Danh sách Model Gemini chuẩn chính thức của Google (Ưu tiên bản 2.0 Flash siêu tốc & 1.5 Flash ổn định)
+GEMINI_MODELS = [
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-2.0-flash-lite",
+    "gemini-1.5-pro",
+    "gemini-2.5-flash",
+    "gemini-2.5-pro",
+    "gemini-flash-latest"
+]
+
+def clean_json_text(text):
+    text = text.strip()
+    match = re.search(r'```(?:json)?\s*([\s\S]*?)\s*```', text)
+    if match:
+        return match.group(1).strip()
+    first_bracket = text.find('[')
+    first_brace = text.find('{')
+    if first_bracket != -1 and (first_brace == -1 or first_bracket < first_brace):
+        last_bracket = text.rfind(']')
+        if last_bracket != -1:
+            return text[first_bracket:last_bracket+1].strip()
+    elif first_brace != -1:
+        last_brace = text.rfind('}')
+        if last_brace != -1:
+            return text[first_brace:last_brace+1].strip()
+    return text.strip()
+
 def get_effective_gemini_key(user_key=""):
     k_cand = ""
     if user_key and user_key.strip():
         k_cand = user_key.strip()
-    elif SETTINGS_FILE.exists():
+    elif 'SETTINGS_FILE' in globals() and SETTINGS_FILE.exists():
         try:
             data = json.loads(SETTINGS_FILE.read_text(encoding="utf-8"))
             k_cand = data.get("gemini_api_key", "").strip()
         except Exception: pass
     if not k_cand:
         k_cand = os.environ.get("GEMINI_API_KEY", "").strip()
-    
-    # Clean quotes and spaces
     return k_cand.strip('"\' \t\r\n')
-
 
 def get_anilist_anime_info(anime_name):
     query = '''
@@ -43,57 +80,70 @@ def get_anilist_anime_info(anime_name):
         print(f"⚠️ Lỗi AniList API: {e}")
     return f"Anime: {anime_name}"
 
-
 def fetch_deep_lore(anime_name, api_key="", idea=""):
     try:
-        print(f"🔎 [DEEP LORE RAG] Đang dò tìm 'Deep Lore' trên Web bằng Google Search (Gemini Grounding) cho Anime: {anime_name}...", flush=True)
+        api_key = get_effective_gemini_key(api_key)
         if not api_key: return ""
+        print(f"🔎 [DEEP LORE RAG] Đang dò tìm 'Deep Lore' trên Web cho Anime: {anime_name}...", flush=True)
         
-        prompt = f"Tìm kiếm thông tin trên web. Hãy ưu tiên truy xuất và kiểm chứng chéo từ các nguồn uy tín nhất, đặc biệt là TRANG WIKI/FANDOM CHÍNH THỨC của bộ anime '{anime_name}' và các bài phân tích chuyên sâu trên Reddit. Đưa ra 4-5 facts 'deep lore' (bí ẩn, thông tin Light Novel/Manga chưa lên anime, hoặc sự thật đen tối/thú vị) về '{anime_name}'."
+        prompt = f"Tìm kiếm thông tin lore chuyên sâu. Đưa ra 4-5 facts 'deep lore' (bí ẩn, thông tin Light Novel/Manga chưa lên anime, hoặc sự thật đen tối/thú vị) về '{anime_name}'."
         if idea:
             prompt += f" Vui lòng tập trung ĐÀO SÂU vào các thông tin xoay quanh chủ đề/ý tưởng này: '{idea}'."
         prompt += " Chỉ xuất ra văn bản tiếng Anh (để AI khác dễ đọc), dạng gạch đầu dòng chi tiết."
         
-        body = {
+        # 1. Thử Google Search Grounding nếu tài khoản hỗ trợ
+        body_search = {
             "contents": [{"parts": [{"text": prompt}]}],
             "tools": [{"googleSearch": {}}]
         }
-        
-        import requests
-        for model in ["gemini-1.5-pro", "gemini-1.5-flash", "gemini-2.5-flash"]:
+        for model in ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"]:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
             try:
-                r = requests.post(url, json=body, timeout=12)
+                r = requests.post(url, json=body_search, timeout=20)
                 if r.status_code == 200:
                     text = r.json()['candidates'][0]['content']['parts'][0]['text']
-                    return text
+                    if text and len(text.strip()) > 30:
+                        return text
             except Exception:
                 continue
                 
+        # 2. Dự phòng trực tiếp không qua Search Tool (tránh bị timeout/lỗi hạn ngạch Search)
+        body_direct = {
+            "contents": [{"parts": [{"text": f"Provide 4-5 fascinating deep lore facts, light novel spoilers, and power scaling secrets about {anime_name} focusing on '{idea}'. Output as concise English bullet points."}]}]
+        }
+        for model in GEMINI_MODELS:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+            try:
+                r = requests.post(url, json=body_direct, timeout=15)
+                if r.status_code == 200:
+                    text = r.json()['candidates'][0]['content']['parts'][0]['text']
+                    if text and len(text.strip()) > 30:
+                        return text
+            except Exception:
+                continue
         return ""
     except Exception as e:
-        print(f"⚠️ [DEEP LORE RAG] Lỗi khi cào dữ liệu bằng Gemini Search: {e}", flush=True)
+        print(f"⚠️ [DEEP LORE RAG] Lỗi khi cào dữ liệu: {e}", flush=True)
         return ""
 
 def suggest_viral_topics(anime_name, api_key, idea=""):
-
+    api_key = get_effective_gemini_key(api_key)
     print(f"🔎 [ANILIST AI] Đang cào dữ liệu Lore & Tóm tắt cho Anime '{anime_name}'...", flush=True)
     lore_info = get_anilist_anime_info(anime_name)
     deep_lore = fetch_deep_lore(anime_name, api_key, idea)
-    lore_info += f"\n\nDeep Lore (Reddit/Fandom):\n{deep_lore}\n"
-
+    if deep_lore:
+        lore_info += f"\n\nDeep Lore (Reddit/Fandom):\n{deep_lore}\n"
     
-    idea_prompt = f"The user provided a specific idea or direction for the topics: '{idea}'. Ensure all 10 topics revolve around this idea while remaining highly engaging." if idea else "Generate 10 random, explosive topics based on the lore."
+    idea_prompt = f"The user provided a specific idea or direction for the topics: '{idea}'. Ensure all 10 topics revolve directly around '{idea}' while remaining explosive and engaging." if idea else "Generate 10 random, explosive topics based on the lore."
     
-    models = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.5-pro", "gemini-1.5-pro", "gemini-flash-latest"]
     prompt = f"""You are a top YouTube Shorts Strategist for Anime Channels with 10M subscribers.
 Anime Name: {anime_name}
 
-Anime Lore & Metadata from AniList:
+Anime Lore & Metadata:
 {lore_info}
 
 TASK:
-Analyze this anime and generate 10 EXPLOSIVE, VIRAL YouTube Short Topic Titles in ENGLISH that will:
+Analyze this anime and generate EXACTLY 10 EXPLOSIVE, VIRAL YouTube Short Topic Titles in ENGLISH that will:
 1. Drive high click-through rate (CTR) and initial 3-second retention.
 2. Spark massive comment section debates.
 3. Deliver high lore value to convince viewers to SUBSCRIBE immediately.
@@ -104,44 +154,66 @@ Return STRICTLY a JSON array of 10 strings:
 [
   "Topic 1 Title...",
   "Topic 2 Title...",
-  ...
+  "Topic 3 Title...",
+  "Topic 4 Title...",
+  "Topic 5 Title...",
+  "Topic 6 Title...",
+  "Topic 7 Title...",
+  "Topic 8 Title...",
+  "Topic 9 Title...",
   "Topic 10 Title..."
 ]"""
     body = {'contents': [{'parts': [{'text': prompt}]}], 'generationConfig': {'responseMimeType': 'application/json'}}
-    for model in models:
+    for model in GEMINI_MODELS:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
         try:
-            r = requests.post(url, json=body, timeout=12)
+            r = requests.post(url, json=body, timeout=25)
             if r.status_code == 200:
                 raw_txt = r.json()['candidates'][0]['content']['parts'][0]['text']
                 topics = json.loads(clean_json_text(raw_txt))
                 if isinstance(topics, list) and len(topics) >= 1:
                     print(f"   ✅ [ANILIST AI '{model}'] Đã tạo {len(topics)} Chủ đề Viral xuất sắc!", flush=True)
-                    return topics[:10]
+                    if len(topics) >= 10:
+                        return topics[:10]
+                    else:
+                        # Pad up to 10 if LLM returned fewer
+                        while len(topics) < 10:
+                            topics.append(f"The Secret Behind {topics[0] if topics else anime_name} Part {len(topics)+1}")
+                        return topics[:10]
         except Exception as e:
             print(f"⚠️ Thử Gemini Suggestion {model}: {e}", flush=True)
             
-    print("⚠️ API Key chưa hợp lệ hoặc bị lỗi Status 401! Đang nạp chủ đề mẫu mặc định...", flush=True)
-    print("👉 Hãy dán Gemini API Key chuẩn từ https://aistudio.google.com/app/apikey vào ô 'Gemini Key:'!", flush=True)
-    return [
-        f"The Dark Secret Behind {anime_name} That 99% Of Fans Missed",
-        f"Why {anime_name}'s Main Character Is Way Overpowered",
-        f"The Most Shocking Plot Twist In {anime_name} History",
-        f"Top 3 Hidden Facts About {anime_name} You Didn't Know",
-        f"The True Power Scaling Secrets Of {anime_name}"
-    ]
+    print("⚠️ API Key chưa phản hồi hoặc gặp sự cố kết nối! Đang nạp 10 chủ đề mẫu thông minh bám sát ý tưởng...", flush=True)
+    
+    # 10 fallback topics bám sát idea và anime!
+    if idea and idea.strip():
+        i_clean = idea.strip().title()
+        return [
+            f"The Terrifying Truth About {i_clean} That Everyone Missed",
+            f"Why {i_clean} Is Actually Far Stronger Than You Think",
+            f"{i_clean}: The Secret Battle That Would Break The World",
+            f"The Exact Moment {i_clean} Revealed Their True Form",
+            f"Why The Creators Had To Nerf {i_clean} In {anime_name}",
+            f"The Dark Origin Behind {i_clean} (Full Lore Explained)",
+            f"{i_clean} vs The Entire Verse: Who ACTUALLY Survives?",
+            f"Is {i_clean} Secretly Stronger? The Hidden Evidence",
+            f"The Shocking Plot Twist About {i_clean} Nobody Saw Coming",
+            f"What Happens If {i_clean} Goes 100% Full Power?"
+        ]
+    else:
+        return [
+            f"The Dark Secret Behind {anime_name} That 99% Of Fans Missed",
+            f"Why {anime_name}'s Main Character Is Way More Broken Than You Realize",
+            f"The Most Shocking Plot Twist In {anime_name} History",
+            f"Top 5 Forbidden Skills In {anime_name} That Were Banned",
+            f"The True Power Scaling Hierarchy Of {anime_name} Explained",
+            f"Why This Character In {anime_name} Is Secretly A God Tier Threat",
+            f"The Tragic Backstory In {anime_name} That Changes Everything",
+            f"Who Is ACTUALLY The Strongest Being In {anime_name}?",
+            f"The Uncensored Manga Truth About {anime_name} Left Out Of The Anime",
+            f"Why Fans Are Still Arguing Over This {anime_name} Mystery"
+        ]
 
-import warnings
-warnings.filterwarnings('ignore')
-import os, sys, time, json, cv2, numpy as np, hashlib, re, urllib.parse, asyncio, random, shutil, subprocess
-from pathlib import Path
-import requests
-from PIL import Image, ImageDraw, ImageFont
-from curl_cffi import requests as cffi_requests
-from difflib import SequenceMatcher
-import nest_asyncio
-nest_asyncio.apply()
-import whisper
 
 try:
     from proglog import ProgressBarLogger
@@ -485,20 +557,11 @@ def parse_custom_script_into_scenes(script_text, available_chars):
         })
     return scenes, " ".join(words)
 
-def clean_json_text(text):
-    text = text.strip()
-    if text.startswith("```json"):
-        text = text[7:]
-    if text.startswith("```"):
-        text = text[3:]
-    if text.endswith("```"):
-        text = text[:-3]
-    return text.strip()
+
 
 def generate_script_gemini(topic, anime_name, available_chars, api_key, hook_style="Shocking Secret", ending_style="Viral Comment Question"):
     api_key = get_effective_gemini_key(api_key)
-    # Ưu tiên gemini-3.1-flash-lite cho cả 2 công đoạn
-    models = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.5-pro", "gemini-1.5-pro", "gemini-flash-latest"]
+    models = GEMINI_MODELS
     chars_str = ", ".join(available_chars) if available_chars else anime_name
     
     hook_prompts = {
@@ -760,7 +823,7 @@ def refine_subtitles_gemini(word_chunks, script_text, api_key):
     if not api_key: return word_chunks
     print("✨ Gọi Gemini lần 2 để chuốt chuẩn Tên Riêng (Capitalization) trong phụ đề...")
     
-    models = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.5-pro", "gemini-1.5-pro", "gemini-flash-latest"]
+    models = GEMINI_MODELS
     
     prompt = f"""Original Script with proper nouns:
 {script_text}
@@ -988,7 +1051,7 @@ def analyze_character_timeline_gemini(script_text, available_chars, api_key):
         else:
             segments.append(current_seg)
         
-    models = ["gemini-3.1-flash-lite", "gemini-2.5-flash", "gemini-1.5-flash", "gemini-2.5-pro", "gemini-1.5-pro", "gemini-flash-latest"]
+    models = GEMINI_MODELS
     chars_str = ", ".join(available_chars)
     main_subject_char = available_chars[0] if available_chars else "Rimuru_Tempest"
     
