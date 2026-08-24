@@ -35,7 +35,7 @@
     "images": [
       {
         "file_name": "003_person_relaxing_armchair.png",
-        "visual_concept": "Người ngồi thư giãn trên ghế bành êm ái",
+        "visual_concept": "Người ngồi thư giãn trên ghế bành",
         "svg_search_prompt": "person relaxing armchair",
         "animation_style": "draw"
       }
@@ -49,7 +49,7 @@
     "images": [
       {
         "file_name": "004_honest_question_thinking.png",
-        "visual_concept": "Biểu tượng câu hỏi chân thành suy ngẫm",
+        "visual_concept": "Dấu hỏi suy ngẫm chân thành",
         "svg_search_prompt": "honest question thinking",
         "animation_style": "draw"
       }
@@ -76,9 +76,9 @@
     "speech_text": "A day where you did no hard labor",
     "images": [
       {
-        "file_name": "006_free_day_sunrise.png",
-        "visual_concept": "Bình minh ngày nghỉ thảnh thơi không vướng bận",
-        "svg_search_prompt": "free day sunrise",
+        "file_name": "006_no_hard_labor_crossed.png",
+        "visual_concept": "Gạch chéo không làm việc nặng nhọc",
+        "svg_search_prompt": "no hard labor crossed",
         "animation_style": "draw"
       }
     ]
@@ -90,9 +90,9 @@
     "speech_text": "you lifted no heavy weights",
     "images": [
       {
-        "file_name": "007_no_heavy_lifting_labor.png",
-        "visual_concept": "Người không mang vác nặng, từ chối việc nặng",
-        "svg_search_prompt": "no heavy lifting labor",
+        "file_name": "007_no_heavy_lifting_weights.png",
+        "visual_concept": "Gạch chéo không nâng tạ nặng",
+        "svg_search_prompt": "no heavy lifting weights",
         "animation_style": "draw"
       }
     ]
@@ -105,7 +105,7 @@
     "images": [
       {
         "file_name": "008_no_running_marathon.png",
-        "visual_concept": "Người từ chối chạy marathon mệt mỏi",
+        "visual_concept": "Gạch chéo không chạy marathon",
         "svg_search_prompt": "no running marathon",
         "animation_style": "draw"
       }
@@ -119,7 +119,7 @@
     "images": [
       {
         "file_name": "009_cozy_home_stay.png",
-        "visual_concept": "Ngôi nhà ấm cúng bình yên",
+        "visual_concept": "Ngôi nhà ấm cúng ở nhà cả ngày",
         "svg_search_prompt": "cozy home stay",
         "animation_style": "draw"
       }
@@ -133,7 +133,7 @@
     "images": [
       {
         "file_name": "010_person_lying_sofa.png",
-        "visual_concept": "Người nằm thư giãn trên sofa",
+        "visual_concept": "Người nằm dài trên ghế sofa",
         "svg_search_prompt": "person lying sofa",
         "animation_style": "draw"
       }
@@ -146,9 +146,9 @@
     "speech_text": "scrolled your phone, watched some shows",
     "images": [
       {
-        "file_name": "011_person_scrolling_smartphone.png",
-        "visual_concept": "Người lướt màn hình điện thoại",
-        "svg_search_prompt": "person scrolling smartphone",
+        "file_name": "011_person_scrolling_phone.png",
+        "visual_concept": "Lướt điện thoại xem phim",
+        "svg_search_prompt": "person scrolling phone",
         "animation_style": "draw"
       }
     ]
@@ -160,9 +160,9 @@
     "speech_text": "and tried to rest.",
     "images": [
       {
-        "file_name": "012_tv_screen_shows_watching.png",
-        "visual_concept": "Màn hình tivi chiếu phim thư giãn",
-        "svg_search_prompt": "tv screen shows watching",
+        "file_name": "012_trying_to_rest_pillow.png",
+        "visual_concept": "Cố gắng nghỉ ngơi trên gối êm",
+        "svg_search_prompt": "trying to rest pillow",
         "animation_style": "draw"
       }
     ]
@@ -174,9 +174,9 @@
     "speech_text": "And yet, by eight o'clock in the evening",
     "images": [
       {
-        "file_name": "013_trying_to_rest_pillow.png",
-        "visual_concept": "Biểu tượng cố gắng nghỉ ngơi",
-        "svg_search_prompt": "trying to rest pillow",
+        "file_name": "013_clock_eight_pm_evening.png",
+        "visual_concept": "Đồng hồ chỉ đúng 8 giờ tối",
+        "svg_search_prompt": "clock eight pm evening",
         "animation_style": "draw"
       }
     ]
@@ -188,9 +188,9 @@
     "speech_text": "you felt completely utterly exhausted.",
     "images": [
       {
-        "file_name": "014_clock_eight_evening.png",
-        "visual_concept": "Đồng hồ chỉ đúng 8 giờ tối",
-        "svg_search_prompt": "clock eight evening",
+        "file_name": "014_person_utterly_exhausted.png",
+        "visual_concept": "Người gục đầu kiệt sức rã rời",
+        "svg_search_prompt": "person utterly exhausted",
         "animation_style": "draw"
       }
     ]
@@ -202,9 +202,9 @@
     "speech_text": "Your limbs felt heavy like lead.",
     "images": [
       {
-        "file_name": "015_person_utterly_exhausted.png",
-        "visual_concept": "Người kiệt sức mệt mỏi rã rời",
-        "svg_search_prompt": "person utterly exhausted",
+        "file_name": "015_heavy_lead_limbs_weight.png",
+        "visual_concept": "Chân tay nặng trĩu như đúc bằng chì",
+        "svg_search_prompt": "heavy lead limbs weight",
         "animation_style": "draw"
       }
     ]
@@ -216,9 +216,9 @@
     "speech_text": "Your brain felt foggy.",
     "images": [
       {
-        "file_name": "016_heavy_lead_limbs.png",
-        "visual_concept": "Chân tay nặng trĩu như đúc bằng chì",
-        "svg_search_prompt": "heavy lead limbs",
+        "file_name": "016_foggy_cloud_brain.png",
+        "visual_concept": "Bộ não mịt mù sương mù u ám",
+        "svg_search_prompt": "foggy cloud brain",
         "animation_style": "draw"
       }
     ]
@@ -230,9 +230,9 @@
     "speech_text": "Your chest felt strangely empty.",
     "images": [
       {
-        "file_name": "017_foggy_cloud_brain.png",
-        "visual_concept": "Bộ não mịt mù sương mù u ám",
-        "svg_search_prompt": "foggy cloud brain",
+        "file_name": "017_empty_chest_cavity.png",
+        "visual_concept": "Lồng ngực trống rỗng kỳ lạ",
+        "svg_search_prompt": "empty chest cavity",
         "animation_style": "draw"
       }
     ]
@@ -244,9 +244,9 @@
     "speech_text": "You asked yourself, why am I so",
     "images": [
       {
-        "file_name": "018_empty_chest_cavity.png",
-        "visual_concept": "Lồng ngực trống rỗng lạc lõng",
-        "svg_search_prompt": "empty chest cavity",
+        "file_name": "018_person_asking_why_tired.png",
+        "visual_concept": "Người ôm đầu tự hỏi vì sao mệt",
+        "svg_search_prompt": "person asking why tired",
         "animation_style": "draw"
       }
     ]
@@ -258,9 +258,9 @@
     "speech_text": "tired when I literally did nothing all day?",
     "images": [
       {
-        "file_name": "019_person_asking_why_tired.png",
-        "visual_concept": "Người ôm đầu thắc mắc mệt mỏi",
-        "svg_search_prompt": "person asking why tired",
+        "file_name": "019_did_nothing_blank_list.png",
+        "visual_concept": "Lịch trống không làm gì cả ngày",
+        "svg_search_prompt": "did nothing blank list",
         "animation_style": "draw"
       }
     ]
@@ -272,9 +272,9 @@
     "speech_text": "Most people think this is just",
     "images": [
       {
-        "file_name": "020_literally_did_nothing_day.png",
-        "visual_concept": "Lịch làm việc trống không",
-        "svg_search_prompt": "literally did nothing day",
+        "file_name": "020_people_thinking_judgment.png",
+        "visual_concept": "Mọi người suy đoán phán xét",
+        "svg_search_prompt": "people thinking judgment",
         "animation_style": "draw"
       }
     ]
@@ -286,9 +286,9 @@
     "speech_text": "laziness or a lack of motivation.",
     "images": [
       {
-        "file_name": "021_lazy_label_crossed_out.png",
-        "visual_concept": "Biểu tượng nhãn dán lười biếng bị gạch chéo",
-        "svg_search_prompt": "lazy label crossed out",
+        "file_name": "021_laziness_lack_motivation.png",
+        "visual_concept": "Nhãn dán lười biếng và thiếu động lực",
+        "svg_search_prompt": "laziness lack motivation",
         "animation_style": "draw"
       }
     ]
@@ -300,9 +300,9 @@
     "speech_text": "You know this.",
     "images": [
       {
-        "file_name": "022_motivation_brain_question.png",
-        "visual_concept": "Bộ não thiếu động lực bị nghi vấn",
-        "svg_search_prompt": "motivation brain question",
+        "file_name": "022_undeniable_logic_bulb.png",
+        "visual_concept": "Biểu tượng điều hiển nhiên ai cũng biết",
+        "svg_search_prompt": "undeniable logic bulb",
         "animation_style": "draw"
       }
     ]
@@ -314,9 +314,9 @@
     "speech_text": "But the reality is far deeper.",
     "images": [
       {
-        "file_name": "023_truth_opposite_reality.png",
-        "visual_concept": "Nhưng sự thật hoàn toàn ngược lại",
-        "svg_search_prompt": "truth opposite reality",
+        "file_name": "023_magnifying_glass_deep_truth.png",
+        "visual_concept": "Kính lúp khám phá tầng sâu sự thật",
+        "svg_search_prompt": "magnifying glass deep truth",
         "animation_style": "draw"
       }
     ]
@@ -328,9 +328,9 @@
     "speech_text": "What you're experiencing is one of the most fascinating",
     "images": [
       {
-        "file_name": "024_fascinating_invisible_battle.png",
-        "visual_concept": "Trận chiến sinh học vô hình kì diệu",
-        "svg_search_prompt": "fascinating invisible battle",
+        "file_name": "024_fascinating_glowing_body.png",
+        "visual_concept": "Trải nghiệm kỳ diệu phát sáng trong cơ thể",
+        "svg_search_prompt": "fascinating glowing body",
         "animation_style": "draw"
       }
     ]
@@ -342,9 +342,9 @@
     "speech_text": "invisible biological battles",
     "images": [
       {
-        "file_name": "025_biological_physiological_battle.png",
-        "visual_concept": "Hai thế lực chiến đấu sinh lý",
-        "svg_search_prompt": "biological physiological battle",
+        "file_name": "025_invisible_biological_battle.png",
+        "visual_concept": "Trận chiến sinh học vô hình tế bào",
+        "svg_search_prompt": "invisible biological battle",
         "animation_style": "draw"
       }
     ]
@@ -357,7 +357,7 @@
     "images": [
       {
         "file_name": "026_human_physiology_inner.png",
-        "visual_concept": "Bên trong sinh lý cơ thể người",
+        "visual_concept": "Bên trong sinh lý học cơ thể người",
         "svg_search_prompt": "human physiology inner",
         "animation_style": "draw"
       }
@@ -370,9 +370,9 @@
     "speech_text": "It is called the",
     "images": [
       {
-        "file_name": "027_definition_paradox_icon.png",
-        "visual_concept": "Biểu tượng định nghĩa nghịch lý",
-        "svg_search_prompt": "definition paradox icon",
+        "file_name": "027_paradox_concept_definition.png",
+        "visual_concept": "Định nghĩa khái niệm bí ẩn",
+        "svg_search_prompt": "paradox concept definition",
         "animation_style": "draw"
       }
     ]
@@ -385,7 +385,7 @@
     "images": [
       {
         "file_name": "028_paradox_mental_fatigue.png",
-        "visual_concept": "Nghịch lý của sự mệt mỏi tinh thần",
+        "visual_concept": "Nghịch lý mệt mỏi tinh thần",
         "svg_search_prompt": "paradox mental fatigue",
         "animation_style": "draw"
       }
@@ -398,9 +398,9 @@
     "speech_text": "And to understand it,",
     "images": [
       {
-        "file_name": "029_key_to_understand_mystery.png",
-        "visual_concept": "Chìa khóa mở ra bí ẩn năng lượng",
-        "svg_search_prompt": "key to understand mystery",
+        "file_name": "029_key_unlocking_mystery.png",
+        "visual_concept": "Chìa khóa mở ra nguyên nhân gốc rễ",
+        "svg_search_prompt": "key unlocking mystery",
         "animation_style": "draw"
       }
     ]
@@ -413,7 +413,7 @@
     "images": [
       {
         "file_name": "030_silent_energy_thief_running.png",
-        "visual_concept": "Kẻ trộm năng lượng thầm lặng chạy ngầm",
+        "visual_concept": "Bóng đen kẻ trộm năng lượng chạy ngầm",
         "svg_search_prompt": "silent energy thief running",
         "animation_style": "draw"
       }
@@ -426,9 +426,9 @@
     "speech_text": "of your skull.",
     "images": [
       {
-        "file_name": "031_inside_your_skull_brain.png",
+        "file_name": "031_skull_neural_gears.png",
         "visual_concept": "Bên trong hộp sọ con người",
-        "svg_search_prompt": "inside your skull brain",
+        "svg_search_prompt": "skull neural gears",
         "animation_style": "draw"
       }
     ]
@@ -440,9 +440,9 @@
     "speech_text": "Let's look at the numbers.",
     "images": [
       {
-        "file_name": "032_looking_at_numbers_chart.png",
-        "visual_concept": "Biểu đồ và những con số thống kê",
-        "svg_search_prompt": "looking at numbers chart",
+        "file_name": "032_math_numbers_data_chart.png",
+        "visual_concept": "Bảng số liệu và đồ thị toán học",
+        "svg_search_prompt": "math numbers data chart",
         "animation_style": "draw"
       }
     ]
@@ -454,9 +454,9 @@
     "speech_text": "Your brain weighs only about three pounds.",
     "images": [
       {
-        "file_name": "033_brain_weighing_three_pounds.png",
-        "visual_concept": "Bộ não đặt trên bàn cân 3 pound",
-        "svg_search_prompt": "brain weighing three pounds",
+        "file_name": "033_scale_brain_three_pounds.png",
+        "visual_concept": "Cân đo bộ não nặng 3 pound",
+        "svg_search_prompt": "scale brain three pounds",
         "animation_style": "draw"
       }
     ]
@@ -468,9 +468,9 @@
     "speech_text": "That is just two percent",
     "images": [
       {
-        "file_name": "034_two_percent_body_weight.png",
-        "visual_concept": "Biểu đồ tỉ lệ 2 phần trăm cơ thể",
-        "svg_search_prompt": "two percent body weight",
+        "file_name": "034_two_percent_body_ratio.png",
+        "visual_concept": "Biểu đồ 2% trọng lượng cơ thể",
+        "svg_search_prompt": "two percent body ratio",
         "animation_style": "draw"
       }
     ]
@@ -482,9 +482,9 @@
     "speech_text": "of your total body weight.",
     "images": [
       {
-        "file_name": "035_total_body_weight_ratio.png",
-        "visual_concept": "So sánh tỉ lệ cân nặng toàn thân",
-        "svg_search_prompt": "total body weight ratio",
+        "file_name": "035_total_body_weight_pie.png",
+        "visual_concept": "Tỉ lệ cân nặng toàn thân",
+        "svg_search_prompt": "total body weight pie",
         "animation_style": "draw"
       }
     ]
@@ -496,9 +496,9 @@
     "speech_text": "But that tiny clump of tissue consumes 20",
     "images": [
       {
-        "file_name": "036_tiny_tissue_high_consumption.png",
-        "visual_concept": "Mô não nhỏ bé nhưng tiêu thụ lớn",
-        "svg_search_prompt": "tiny tissue high consumption",
+        "file_name": "036_tiny_tissue_high_power.png",
+        "visual_concept": "Khối mô nhỏ tiêu thụ năng lượng lớn",
+        "svg_search_prompt": "tiny tissue high power",
         "animation_style": "draw"
       }
     ]
@@ -511,7 +511,7 @@
     "images": [
       {
         "file_name": "037_twenty_percent_oxygen_glucose.png",
-        "visual_concept": "Hút 20 phần trăm oxy và glucose",
+        "visual_concept": "Hút 20% oxy và đường glucose",
         "svg_search_prompt": "twenty percent oxygen glucose",
         "animation_style": "draw"
       }
@@ -525,7 +525,7 @@
     "images": [
       {
         "file_name": "038_entire_body_fuel_stream.png",
-        "visual_concept": "Toàn bộ nguồn năng lượng cơ thể",
+        "visual_concept": "Toàn bộ nguồn nhiên liệu cơ thể",
         "svg_search_prompt": "entire body fuel stream",
         "animation_style": "draw"
       }
@@ -538,9 +538,9 @@
     "speech_text": "Every fifth breath you take,",
     "images": [
       {
-        "file_name": "039_every_fifth_breath_lungs.png",
+        "file_name": "039_fifth_breath_lungs_oxygen.png",
         "visual_concept": "Mỗi hơi thở thứ năm hít vào",
-        "svg_search_prompt": "every fifth breath lungs",
+        "svg_search_prompt": "fifth breath lungs oxygen",
         "animation_style": "draw"
       }
     ]
@@ -552,9 +552,9 @@
     "speech_text": "and every fifth bite of food you eat",
     "images": [
       {
-        "file_name": "040_every_fifth_food_bite.png",
+        "file_name": "040_fifth_food_bite_energy.png",
         "visual_concept": "Mỗi miếng thức ăn thứ năm nạp vào",
-        "svg_search_prompt": "every fifth food bite",
+        "svg_search_prompt": "fifth food bite energy",
         "animation_style": "draw"
       }
     ]
@@ -566,9 +566,9 @@
     "speech_text": "goes directly to powering",
     "images": [
       {
-        "file_name": "041_direct_power_stream_brain.png",
-        "visual_concept": "Dòng điện nạp thẳng lên não bộ",
-        "svg_search_prompt": "direct power stream brain",
+        "file_name": "041_direct_power_stream_head.png",
+        "visual_concept": "Dòng điện nạp thẳng lên đầu",
+        "svg_search_prompt": "direct power stream head",
         "animation_style": "draw"
       }
     ]
@@ -581,7 +581,7 @@
     "images": [
       {
         "file_name": "042_electrical_storm_inside_head.png",
-        "visual_concept": "Cơn bão điện từ bên trong đầu",
+        "visual_concept": "Cơn bão điện từ bên trong não bộ",
         "svg_search_prompt": "electrical storm inside head",
         "animation_style": "draw"
       }
@@ -594,9 +594,9 @@
     "speech_text": "Now, here's the mystery.",
     "images": [
       {
-        "file_name": "043_mystery_question_mark.png",
-        "visual_concept": "Dấu chấm hỏi lớn về điều bí ẩn",
-        "svg_search_prompt": "mystery question mark",
+        "file_name": "043_glowing_mystery_chest.png",
+        "visual_concept": "Dấu hỏi chấm lớn về điều bí ẩn",
+        "svg_search_prompt": "glowing mystery chest",
         "animation_style": "draw"
       }
     ]
@@ -608,9 +608,9 @@
     "speech_text": "When you sit down to do nothing",
     "images": [
       {
-        "file_name": "044_sitting_doing_nothing.png",
+        "file_name": "044_sitting_doing_nothing_stool.png",
         "visual_concept": "Người ngồi thảnh thơi không làm gì",
-        "svg_search_prompt": "sitting doing nothing",
+        "svg_search_prompt": "sitting doing nothing stool",
         "animation_style": "draw"
       }
     ]
@@ -622,9 +622,9 @@
     "speech_text": "how much energy do you think your brain's sitting?",
     "images": [
       {
-        "file_name": "045_brain_energy_saving_question.png",
-        "visual_concept": "Ước tính mức tiết kiệm năng lượng",
-        "svg_search_prompt": "brain energy saving question",
+        "file_name": "045_brain_energy_savings_meter.png",
+        "visual_concept": "Đo mức tiết kiệm năng lượng não",
+        "svg_search_prompt": "brain energy savings meter",
         "animation_style": "draw"
       }
     ]
@@ -636,9 +636,9 @@
     "speech_text": "It saves.",
     "images": [
       {
-        "file_name": "046_energy_saved_gauge.png",
+        "file_name": "046_energy_saved_balance.png",
         "visual_concept": "Năng lượng thực sự tiết kiệm được",
-        "svg_search_prompt": "energy saved gauge",
+        "svg_search_prompt": "energy saved balance",
         "animation_style": "draw"
       }
     ]
@@ -650,9 +650,9 @@
     "speech_text": "Most people assume the brain drops its energy consumption by 50 or 80 percent",
     "images": [
       {
-        "file_name": "047_assume_drops_fifty_eighty.png",
-        "visual_concept": "Mọi người tưởng tượng não giảm 50-80%",
-        "svg_search_prompt": "assume drops fifty eighty",
+        "file_name": "047_fifty_eighty_percent_drop.png",
+        "visual_concept": "Giả định não giảm 50% đến 80%",
+        "svg_search_prompt": "fifty eighty percent drop",
         "animation_style": "draw"
       }
     ]
@@ -665,7 +665,7 @@
     "images": [
       {
         "file_name": "048_modern_laptop_computer.png",
-        "visual_concept": "Hình ảnh chiếc máy tính xách tay",
+        "visual_concept": "Chiếc máy tính xách tay hiện đại",
         "svg_search_prompt": "modern laptop computer",
         "animation_style": "draw"
       }
@@ -679,7 +679,7 @@
     "images": [
       {
         "file_name": "049_laptop_sleep_mode_moon.png",
-        "visual_concept": "Laptop chuyển sang chế độ ngủ Sleep",
+        "visual_concept": "Laptop chuyển sang Sleep Mode",
         "svg_search_prompt": "laptop sleep mode moon",
         "animation_style": "draw"
       }
@@ -692,9 +692,9 @@
     "speech_text": "In 1997, a groundbreaking neuroscientist named Dr.",
     "images": [
       {
-        "file_name": "050_year_1997_calendar_retro.png",
-        "visual_concept": "Năm 1997 mốc nghiên cứu khoa học",
-        "svg_search_prompt": "year 1997 calendar retro",
+        "file_name": "050_year_1997_calendar_research.png",
+        "visual_concept": "Mốc nghiên cứu khoa học năm 1997",
+        "svg_search_prompt": "year 1997 calendar research",
         "animation_style": "draw"
       }
     ]
@@ -706,9 +706,9 @@
     "speech_text": "Marcus Reichel ran brain scans to find",
     "images": [
       {
-        "file_name": "051_neuroscientist_brain_scan_fmri.png",
-        "visual_concept": "Nhà khoa học thần kinh quét não bộ",
-        "svg_search_prompt": "neuroscientist brain scan fMRI",
+        "file_name": "051_dr_marcus_raichle_brain_scan.png",
+        "visual_concept": "Bác sĩ Marcus Raichle quét não fMRI",
+        "svg_search_prompt": "dr marcus raichle brain scan",
         "animation_style": "draw"
       }
     ]
@@ -720,9 +720,9 @@
     "speech_text": "out.",
     "images": [
       {
-        "file_name": "052_dr_marcus_raichle_research.png",
-        "visual_concept": "Bác sĩ Marcus Raichle nghiên cứu",
-        "svg_search_prompt": "Dr Marcus Raichle research",
+        "file_name": "052_scientific_discovery_lab.png",
+        "visual_concept": "Kết quả trong phòng thí nghiệm",
+        "svg_search_prompt": "scientific discovery lab",
         "animation_style": "draw"
       }
     ]
@@ -734,9 +734,9 @@
     "speech_text": "What he discovered shocked the scientific community.",
     "images": [
       {
-        "file_name": "053_shocked_scientific_community.png",
-        "visual_concept": "Kết quả chấn động giới khoa học",
-        "svg_search_prompt": "shocked scientific community",
+        "file_name": "053_shocked_scientists_community.png",
+        "visual_concept": "Giới khoa học kinh ngạc chấn động",
+        "svg_search_prompt": "shocked scientists community",
         "animation_style": "draw"
       }
     ]
@@ -748,9 +748,9 @@
     "speech_text": "When you stop doing tasks and sit in a room doing nothing",
     "images": [
       {
-        "file_name": "054_sitting_quietly_in_room.png",
-        "visual_concept": "Người ngồi trong phòng không làm việc",
-        "svg_search_prompt": "sitting quietly in room",
+        "file_name": "054_sitting_quiet_room_alone.png",
+        "visual_concept": "Ngồi trong phòng không làm việc",
+        "svg_search_prompt": "sitting quiet room alone",
         "animation_style": "draw"
       }
     ]
@@ -762,9 +762,9 @@
     "speech_text": "your brain's energy consumption",
     "images": [
       {
-        "file_name": "055_brain_consumption_meter.png",
+        "file_name": "055_brain_consumption_gauge.png",
         "visual_concept": "Mức tiêu thụ năng lượng não bộ",
-        "svg_search_prompt": "brain consumption meter",
+        "svg_search_prompt": "brain consumption gauge",
         "animation_style": "draw"
       }
     ]
@@ -776,9 +776,9 @@
     "speech_text": "drops by less than 5 percent.",
     "images": [
       {
-        "file_name": "056_drops_less_five_percent.png",
+        "file_name": "056_energy_drop_under_five.png",
         "visual_concept": "Mức giảm ít hơn 5 phần trăm",
-        "svg_search_prompt": "drops less five percent",
+        "svg_search_prompt": "energy drop under five",
         "animation_style": "draw"
       }
     ]
@@ -790,9 +790,9 @@
     "speech_text": "95 percent of your mental power",
     "images": [
       {
-        "file_name": "057_ninety_five_percent_full_power.png",
-        "visual_concept": "95 phần trăm công suất vẫn chạy",
-        "svg_search_prompt": "ninety five percent full power",
+        "file_name": "057_ninety_five_percent_power.png",
+        "visual_concept": "95% công suất tâm trí vẫn rực cháy",
+        "svg_search_prompt": "ninety five percent power",
         "animation_style": "draw"
       }
     ]
@@ -804,9 +804,9 @@
     "speech_text": "is still running at full throttle.",
     "images": [
       {
-        "file_name": "058_running_full_throttle_engine.png",
-        "visual_concept": "Bộ não chạy hết công suất tối đa",
-        "svg_search_prompt": "running full throttle engine",
+        "file_name": "058_engine_full_throttle_tachometer.png",
+        "visual_concept": "Động cơ chạy hết công suất tối đa",
+        "svg_search_prompt": "engine full throttle tachometer",
         "animation_style": "draw"
       }
     ]
@@ -832,9 +832,9 @@
     "speech_text": "Because your brain does",
     "images": [
       {
-        "file_name": "060_brain_no_off_switch.png",
-        "visual_concept": "Bộ não không hề có công tắc tắt",
-        "svg_search_prompt": "brain no off switch",
+        "file_name": "060_brain_anatomy_structure.png",
+        "visual_concept": "Cơ chế sinh học não bộ",
+        "svg_search_prompt": "brain anatomy structure",
         "animation_style": "draw"
       }
     ]
@@ -846,9 +846,9 @@
     "speech_text": "not have an off switch.",
     "images": [
       {
-        "file_name": "061_cannot_turn_off_brain.png",
-        "visual_concept": "Không thể tắt nguồn bộ não",
-        "svg_search_prompt": "cannot turn off brain",
+        "file_name": "061_brain_no_off_switch_crossed.png",
+        "visual_concept": "Bộ não không hề có công tắc tắt",
+        "svg_search_prompt": "brain no off switch crossed",
         "animation_style": "draw"
       }
     ]
@@ -860,9 +860,9 @@
     "speech_text": "When you stop focusing on the outside world",
     "images": [
       {
-        "file_name": "062_stop_focusing_outside_world.png",
+        "file_name": "062_disconnecting_outside_world.png",
         "visual_concept": "Ngừng tập trung vào thế giới bên ngoài",
-        "svg_search_prompt": "stop focusing outside world",
+        "svg_search_prompt": "disconnecting outside world",
         "animation_style": "draw"
       }
     ]
@@ -889,7 +889,7 @@
     "images": [
       {
         "file_name": "064_interconnected_neural_network.png",
-        "visual_concept": "Mạng lưới thần kinh liên kết dày đặc",
+        "visual_concept": "Mạng lưới thần kinh nơ-ron dày đặc",
         "svg_search_prompt": "interconnected neural network",
         "animation_style": "draw"
       }
@@ -902,9 +902,9 @@
     "speech_text": "Neuroscientists call it the default",
     "images": [
       {
-        "file_name": "065_neuroscientists_naming_concept.png",
-        "visual_concept": "Các nhà khoa học thần kinh đặt tên",
-        "svg_search_prompt": "neuroscientists naming concept",
+        "file_name": "065_neuroscientists_naming_dmn.png",
+        "visual_concept": "Các nhà khoa học đặt tên mạng DMN",
+        "svg_search_prompt": "neuroscientists naming dmn",
         "animation_style": "draw"
       }
     ]
@@ -918,7 +918,7 @@
       {
         "file_name": "066_default_mode_network_dmn.png",
         "visual_concept": "Mạng Chế Độ Mặc Định DMN",
-        "svg_search_prompt": "default mode network DMN",
+        "svg_search_prompt": "default mode network dmn",
         "animation_style": "draw"
       }
     ]
@@ -930,9 +930,9 @@
     "speech_text": "Think of the DMN as",
     "images": [
       {
-        "file_name": "067_brain_internal_time_machine.png",
-        "visual_concept": "Cỗ máy du hành thời gian nội tâm",
-        "svg_search_prompt": "brain internal time machine",
+        "file_name": "067_brain_gear_concept.png",
+        "visual_concept": "Bản chất của mạng DMN",
+        "svg_search_prompt": "brain gear concept",
         "animation_style": "draw"
       }
     ]
@@ -944,9 +944,9 @@
     "speech_text": "your brain's internal time travel machine.",
     "images": [
       {
-        "file_name": "068_time_travel_mental_portal.png",
-        "visual_concept": "Tâm trí du hành về quá khứ và tương lai",
-        "svg_search_prompt": "time travel mental portal",
+        "file_name": "068_brain_time_travel_machine.png",
+        "visual_concept": "Cỗ máy du hành thời gian nội tâm",
+        "svg_search_prompt": "brain time travel machine",
         "animation_style": "draw"
       }
     ]
@@ -958,9 +958,9 @@
     "speech_text": "The moment you are not actively solving a puzzle or talking to someone",
     "images": [
       {
-        "file_name": "069_not_solving_puzzle_or_talking.png",
+        "file_name": "069_stopping_puzzle_and_talk.png",
         "visual_concept": "Khi không giải đố hoặc nói chuyện",
-        "svg_search_prompt": "not solving puzzle or talking",
+        "svg_search_prompt": "stopping puzzle and talk",
         "animation_style": "draw"
       }
     ]
@@ -972,9 +972,9 @@
     "speech_text": "the DMN takes",
     "images": [
       {
-        "file_name": "070_dmn_takes_over_control.png",
-        "visual_concept": "Mạng DMN lập tức chiếm quyền kiểm soát",
-        "svg_search_prompt": "DMN takes over control",
+        "file_name": "070_dmn_activating_nodes.png",
+        "visual_concept": "Mạng DMN bắt đầu khởi động",
+        "svg_search_prompt": "dmn activating nodes",
         "animation_style": "draw"
       }
     ]
@@ -986,9 +986,9 @@
     "speech_text": "over.",
     "images": [
       {
-        "file_name": "071_activating_background_operations.png",
-        "visual_concept": "Kích hoạt toàn bộ hoạt động ngầm",
-        "svg_search_prompt": "activating background operations",
+        "file_name": "071_dmn_takes_over_control.png",
+        "visual_concept": "DMN lập tức chiếm quyền kiểm soát",
+        "svg_search_prompt": "dmn takes over control",
         "animation_style": "draw"
       }
     ]
@@ -1000,9 +1000,9 @@
     "speech_text": "It starts replaying past",
     "images": [
       {
-        "file_name": "072_replaying_past_embarrassments.png",
-        "visual_concept": "Hồi tưởng lại những chuyện ngượng ngùng",
-        "svg_search_prompt": "replaying past embarrassments",
+        "file_name": "072_replaying_past_memories.png",
+        "visual_concept": "Tua lại những ký ức quá khứ",
+        "svg_search_prompt": "replaying past memories",
         "animation_style": "draw"
       }
     ]
@@ -1014,9 +1014,9 @@
     "speech_text": "embarrassments from five years ago.",
     "images": [
       {
-        "file_name": "073_embarrassment_five_years_ago.png",
-        "visual_concept": "Chuyện xấu hổ từ 5 năm trước",
-        "svg_search_prompt": "embarrassment five years ago",
+        "file_name": "073_past_embarrassment_film_reel.png",
+        "visual_concept": "Sự việc xấu hổ từ 5 năm trước",
+        "svg_search_prompt": "past embarrassment film reel",
         "animation_style": "draw"
       }
     ]
@@ -1029,7 +1029,7 @@
     "images": [
       {
         "file_name": "074_simulating_future_disasters.png",
-        "visual_concept": "Mô phỏng những thảm họa tương lai",
+        "visual_concept": "Mô phỏng thảm họa tương lai",
         "svg_search_prompt": "simulating future disasters",
         "animation_style": "draw"
       }
@@ -1056,9 +1056,9 @@
     "speech_text": "It starts comparing you",
     "images": [
       {
-        "file_name": "076_comparing_on_social_media.png",
+        "file_name": "076_comparing_self_others.png",
         "visual_concept": "So sánh bản thân với người khác",
-        "svg_search_prompt": "comparing on social media",
+        "svg_search_prompt": "comparing self others",
         "animation_style": "draw"
       }
     ]
@@ -1070,9 +1070,9 @@
     "speech_text": "to people on social media.",
     "images": [
       {
-        "file_name": "077_social_media_feeds_glamour.png",
+        "file_name": "077_social_media_comparison_screen.png",
         "visual_concept": "Lướt mạng xã hội đầy hào nhoáng",
-        "svg_search_prompt": "social media feeds glamour",
+        "svg_search_prompt": "social media comparison screen",
         "animation_style": "draw"
       }
     ]
@@ -1098,9 +1098,9 @@
     "speech_text": "I reply to that message?",
     "images": [
       {
-        "file_name": "079_did_i_reply_message.png",
-        "visual_concept": "Lo lắng về việc chưa trả lời tin nhắn",
-        "svg_search_prompt": "did I reply message",
+        "file_name": "079_unread_message_chat_bubble.png",
+        "visual_concept": "Lo lắng về tin nhắn chưa trả lời",
+        "svg_search_prompt": "unread message chat bubble",
         "animation_style": "draw"
       }
     ]
@@ -1112,9 +1112,9 @@
     "speech_text": "What am I doing with my life?",
     "images": [
       {
-        "file_name": "080_what_doing_with_my_life.png",
+        "file_name": "080_person_wondering_life_path.png",
         "visual_concept": "Tự hỏi mình đang làm gì với cuộc đời",
-        "svg_search_prompt": "what doing with my life",
+        "svg_search_prompt": "person wondering life path",
         "animation_style": "draw"
       }
     ]
@@ -1126,9 +1126,9 @@
     "speech_text": "Am I falling behind?",
     "images": [
       {
-        "file_name": "081_falling_behind_race.png",
+        "file_name": "081_falling_behind_runner_race.png",
         "visual_concept": "Lo sợ bản thân bị tụt lại phía sau",
-        "svg_search_prompt": "falling behind race",
+        "svg_search_prompt": "falling behind runner race",
         "animation_style": "draw"
       }
     ]
@@ -1140,9 +1140,9 @@
     "speech_text": "Your brain is running hundreds",
     "images": [
       {
-        "file_name": "082_hundreds_psychological_simulations.png",
-        "visual_concept": "Não chạy hàng trăm mô phỏng tâm lý",
-        "svg_search_prompt": "hundreds psychological simulations",
+        "file_name": "082_hundreds_mental_processes.png",
+        "visual_concept": "Não chạy hàng trăm luồng suy nghĩ",
+        "svg_search_prompt": "hundreds mental processes",
         "animation_style": "draw"
       }
     ]
@@ -1154,9 +1154,9 @@
     "speech_text": "of heavy psychological simulations at once.",
     "images": [
       {
-        "file_name": "083_heavy_mental_simulations_load.png",
-        "visual_concept": "Các mô phỏng áp lực cùng lúc",
-        "svg_search_prompt": "heavy mental simulations load",
+        "file_name": "083_brain_running_heavy_simulations.png",
+        "visual_concept": "Các mô phỏng tâm lý nặng nề cùng lúc",
+        "svg_search_prompt": "brain running heavy simulations",
         "animation_style": "draw"
       }
     ]
@@ -1196,9 +1196,9 @@
     "speech_text": "When you imagine an uncomfortable conversation or worry about tomorrow",
     "images": [
       {
-        "file_name": "086_uncomfortable_conversation_imagine.png",
-        "visual_concept": "Tưởng tượng cuộc trò chuyện khó chịu",
-        "svg_search_prompt": "uncomfortable conversation imagine",
+        "file_name": "086_worrying_tomorrow_conversation.png",
+        "visual_concept": "Tưởng tượng cuộc trò chuyện căng thẳng",
+        "svg_search_prompt": "worrying tomorrow conversation",
         "animation_style": "draw"
       }
     ]
@@ -1210,9 +1210,9 @@
     "speech_text": "your brain releases",
     "images": [
       {
-        "file_name": "087_worrying_about_tomorrow.png",
-        "visual_concept": "Lo lắng về ngày mai chưa đến",
-        "svg_search_prompt": "worrying about tomorrow",
+        "file_name": "087_brain_chemical_secretion.png",
+        "visual_concept": "Tuyến não tiết ra hóa chất",
+        "svg_search_prompt": "brain chemical secretion",
         "animation_style": "draw"
       }
     ]
@@ -1224,9 +1224,9 @@
     "speech_text": "microdoses of cortisol and adrenaline.",
     "images": [
       {
-        "file_name": "088_brain_releases_cortisol_adrenaline.png",
-        "visual_concept": "Não tiết ra hormone cortisol căng thẳng",
-        "svg_search_prompt": "brain releases cortisol adrenaline",
+        "file_name": "088_cortisol_adrenaline_stress.png",
+        "visual_concept": "Hormone căng thẳng Cortisol và Adrenaline",
+        "svg_search_prompt": "cortisol adrenaline stress",
         "animation_style": "draw"
       }
     ]
@@ -1238,9 +1238,9 @@
     "speech_text": "Your heart rate subtly elevates.",
     "images": [
       {
-        "file_name": "089_heart_rate_subtly_elevates.png",
+        "file_name": "089_heart_rate_ekg_elevating.png",
         "visual_concept": "Nhịp tim tăng nhẹ âm thầm",
-        "svg_search_prompt": "heart rate subtly elevates",
+        "svg_search_prompt": "heart rate ekg elevating",
         "animation_style": "draw"
       }
     ]
@@ -1252,9 +1252,9 @@
     "speech_text": "Your muscles tense up.",
     "images": [
       {
-        "file_name": "090_muscles_tense_up_tightness.png",
+        "file_name": "090_tense_muscle_fibers_stress.png",
         "visual_concept": "Cơ bắp toàn thân căng cứng",
-        "svg_search_prompt": "muscles tense up tightness",
+        "svg_search_prompt": "tense muscle fibers stress",
         "animation_style": "draw"
       }
     ]
@@ -1280,9 +1280,9 @@
     "speech_text": "but biologically, your nervous system",
     "images": [
       {
-        "file_name": "092_nervous_system_running_internal.png",
+        "file_name": "092_internal_nervous_system_active.png",
         "visual_concept": "Hệ thần kinh bên trong gồng mình",
-        "svg_search_prompt": "nervous system running internal",
+        "svg_search_prompt": "internal nervous system active",
         "animation_style": "draw"
       }
     ]
@@ -1294,9 +1294,9 @@
     "speech_text": "is running a",
     "images": [
       {
-        "file_name": "093_running_an_inner_marathon.png",
-        "visual_concept": "Đang chạy cuộc đua marathon",
-        "svg_search_prompt": "running an inner marathon",
+        "file_name": "093_running_inner_effort.png",
+        "visual_concept": "Đang gắng sức chạy đua ngầm",
+        "svg_search_prompt": "running inner effort",
         "animation_style": "draw"
       }
     ]
@@ -1308,9 +1308,9 @@
     "speech_text": "marathon against imaginary phantoms.",
     "images": [
       {
-        "file_name": "094_fighting_imaginary_phantoms.png",
-        "visual_concept": "Chiến đấu với bóng ma tưởng tượng",
-        "svg_search_prompt": "fighting imaginary phantoms",
+        "file_name": "094_marathon_imaginary_phantoms.png",
+        "visual_concept": "Chạy marathon với bóng ma tưởng tượng",
+        "svg_search_prompt": "marathon imaginary phantoms",
         "animation_style": "draw"
       }
     ]
@@ -1365,7 +1365,7 @@
     "images": [
       {
         "file_name": "098_what_do_we_do_question.png",
-        "visual_concept": "Hành động quen thuộc khi mệt",
+        "visual_concept": "Câu hỏi chúng ta thường làm gì",
         "svg_search_prompt": "what do we do question",
         "animation_style": "draw"
       }
@@ -1378,9 +1378,9 @@
     "speech_text": "We reach for our phones.",
     "images": [
       {
-        "file_name": "099_reach_for_smartphone_hands.png",
+        "file_name": "099_hand_reaching_for_smartphone.png",
         "visual_concept": "Tay với lấy chiếc điện thoại",
-        "svg_search_prompt": "reach for smartphone hands",
+        "svg_search_prompt": "hand reaching for smartphone",
         "animation_style": "draw"
       }
     ]
@@ -1392,9 +1392,9 @@
     "speech_text": "We tell ourselves,",
     "images": [
       {
-        "file_name": "100_telling_self_just_relaxing.png",
-        "visual_concept": "Tự nhủ rằng mình đang thư giãn",
-        "svg_search_prompt": "telling self just relaxing",
+        "file_name": "100_talking_to_oneself_bubble.png",
+        "visual_concept": "Lời tự nhủ trong tâm trí",
+        "svg_search_prompt": "talking to oneself bubble",
         "animation_style": "draw"
       }
     ]
@@ -1406,9 +1406,9 @@
     "speech_text": "I'm just relaxing.",
     "images": [
       {
-        "file_name": "101_staring_at_phone_screen.png",
-        "visual_concept": "Khuôn mặt chăm chú vào màn hình",
-        "svg_search_prompt": "staring at phone screen",
+        "file_name": "101_telling_self_just_relaxing.png",
+        "visual_concept": "Tự nhủ rằng mình đang thư giãn",
+        "svg_search_prompt": "telling self just relaxing",
         "animation_style": "draw"
       }
     ]
@@ -1420,9 +1420,9 @@
     "speech_text": "But scrolling through short-form videos",
     "images": [
       {
-        "file_name": "102_scrolling_short_form_feeds.png",
-        "visual_concept": "Lướt video ngắn và bảng tin liên tục",
-        "svg_search_prompt": "scrolling short-form feeds",
+        "file_name": "102_scrolling_short_form_videos.png",
+        "visual_concept": "Lướt video ngắn liên tục",
+        "svg_search_prompt": "scrolling short form videos",
         "animation_style": "draw"
       }
     ]
@@ -1435,7 +1435,7 @@
     "images": [
       {
         "file_name": "103_scrolling_is_not_rest.png",
-        "visual_concept": "Đó không phải là nghỉ ngơi",
+        "visual_concept": "Lướt bảng tin không phải nghỉ ngơi",
         "svg_search_prompt": "scrolling is not rest",
         "animation_style": "draw"
       }
@@ -1449,7 +1449,7 @@
     "images": [
       {
         "file_name": "104_sensory_overload_explosion.png",
-        "visual_concept": "Quá tải giác quan tràn ngập",
+        "visual_concept": "Quá tải giác quan dữ dội",
         "svg_search_prompt": "sensory overload explosion",
         "animation_style": "draw"
       }
@@ -1462,9 +1462,9 @@
     "speech_text": "Every three seconds, your brain has to process a new face",
     "images": [
       {
-        "file_name": "105_every_three_seconds_clock.png",
-        "visual_concept": "Mỗi 3 giây phải xử lý thông tin mới",
-        "svg_search_prompt": "every three seconds clock",
+        "file_name": "105_processing_new_face_three_s.png",
+        "visual_concept": "Mỗi 3 giây xử lý khuôn mặt mới",
+        "svg_search_prompt": "processing new face three s",
         "animation_style": "draw"
       }
     ]
@@ -1476,9 +1476,9 @@
     "speech_text": "a new song,",
     "images": [
       {
-        "file_name": "106_processing_a_new_face.png",
-        "visual_concept": "Xử lý một khuôn mặt mới",
-        "svg_search_prompt": "processing a new face",
+        "file_name": "106_processing_a_new_song.png",
+        "visual_concept": "Xử lý một bài hát mới",
+        "svg_search_prompt": "processing a new song",
         "animation_style": "draw"
       }
     ]
@@ -1490,9 +1490,9 @@
     "speech_text": "a new emotion,",
     "images": [
       {
-        "file_name": "107_processing_a_new_song.png",
-        "visual_concept": "Xử lý một bài hát mới",
-        "svg_search_prompt": "processing a new song",
+        "file_name": "107_processing_a_new_emotion.png",
+        "visual_concept": "Xử lý một cảm xúc mới",
+        "svg_search_prompt": "processing a new emotion",
         "animation_style": "draw"
       }
     ]
@@ -1504,9 +1504,9 @@
     "speech_text": "a new piece of news,",
     "images": [
       {
-        "file_name": "108_processing_a_new_emotion.png",
-        "visual_concept": "Xử lý một cảm xúc mới",
-        "svg_search_prompt": "processing a new emotion",
+        "file_name": "108_processing_new_news_headline.png",
+        "visual_concept": "Xử lý một mẩu tin tức mới",
+        "svg_search_prompt": "processing new news headline",
         "animation_style": "draw"
       }
     ]
@@ -1518,9 +1518,9 @@
     "speech_text": "and a new advertisement.",
     "images": [
       {
-        "file_name": "109_processing_new_news_headline.png",
-        "visual_concept": "Xử lý một mẩu tin tức mới",
-        "svg_search_prompt": "processing new news headline",
+        "file_name": "109_processing_new_advertisement.png",
+        "visual_concept": "Xử lý một mẩu quảng cáo mới",
+        "svg_search_prompt": "processing new advertisement",
         "animation_style": "draw"
       }
     ]
@@ -1532,9 +1532,9 @@
     "speech_text": "Cognitive scientists call this micro-decision fatigue.",
     "images": [
       {
-        "file_name": "110_processing_new_advertisement.png",
-        "visual_concept": "Xử lý một mẩu quảng cáo mới",
-        "svg_search_prompt": "processing new advertisement",
+        "file_name": "110_micro_decision_fatigue_term.png",
+        "visual_concept": "Mệt mỏi vi quyết định",
+        "svg_search_prompt": "micro decision fatigue term",
         "animation_style": "draw"
       }
     ]
@@ -1546,9 +1546,9 @@
     "speech_text": "Your brain has to subconsciously decide",
     "images": [
       {
-        "file_name": "111_micro_decision_fatigue_term.png",
-        "visual_concept": "Nhà khoa học gọi là mệt mỏi vi quyết định",
-        "svg_search_prompt": "micro decision fatigue term",
+        "file_name": "111_brain_subconscious_decisions.png",
+        "visual_concept": "Não liên tục đưa ra quyết định vô thức",
+        "svg_search_prompt": "brain subconscious decisions",
         "animation_style": "draw"
       }
     ]
@@ -1560,9 +1560,9 @@
     "speech_text": "do I care about this?",
     "images": [
       {
-        "file_name": "112_brain_subconscious_decisions.png",
-        "visual_concept": "Não phải liên tục quyết định vô thức",
-        "svg_search_prompt": "brain subconscious decisions",
+        "file_name": "112_do_i_care_about_this.png",
+        "visual_concept": "Tự hỏi: Mình có quan tâm cái này không?",
+        "svg_search_prompt": "do i care about this",
         "animation_style": "draw"
       }
     ]
@@ -1574,9 +1574,9 @@
     "speech_text": "Do I swipe?",
     "images": [
       {
-        "file_name": "113_do_i_care_about_this.png",
-        "visual_concept": "Tự hỏi: Mình có quan tâm cái này không?",
-        "svg_search_prompt": "do I care about this",
+        "file_name": "113_do_i_swipe_finger.png",
+        "visual_concept": "Tự hỏi: Mình có nên quẹt tiếp không?",
+        "svg_search_prompt": "do i swipe finger",
         "animation_style": "draw"
       }
     ]
@@ -1588,9 +1588,9 @@
     "speech_text": "Do I laugh?",
     "images": [
       {
-        "file_name": "114_do_i_swipe_finger.png",
-        "visual_concept": "Tự hỏi: Mình có nên quẹt tiếp không?",
-        "svg_search_prompt": "do I swipe finger",
+        "file_name": "114_do_i_laugh_emoji.png",
+        "visual_concept": "Tự hỏi: Mình có nên cười không?",
+        "svg_search_prompt": "do i laugh emoji",
         "animation_style": "draw"
       }
     ]
@@ -1602,9 +1602,9 @@
     "speech_text": "Do I keep watching?",
     "images": [
       {
-        "file_name": "115_do_i_laugh_emoji.png",
-        "visual_concept": "Tự hỏi: Mình có nên cười không?",
-        "svg_search_prompt": "do I laugh emoji",
+        "file_name": "115_do_i_keep_watching_video.png",
+        "visual_concept": "Tự hỏi: Mình có nên tiếp tục xem?",
+        "svg_search_prompt": "do i keep watching video",
         "animation_style": "draw"
       }
     ]
@@ -1616,9 +1616,9 @@
     "speech_text": "You're forcing your visual and emotional",
     "images": [
       {
-        "file_name": "116_do_i_keep_watching.png",
-        "visual_concept": "Tự hỏi: Mình có nên tiếp tục xem?",
-        "svg_search_prompt": "do I keep watching",
+        "file_name": "116_forcing_visual_emotional_lobes.png",
+        "visual_concept": "Bắt ép trung tâm thị giác và cảm xúc",
+        "svg_search_prompt": "forcing visual emotional lobes",
         "animation_style": "draw"
       }
     ]
@@ -1630,9 +1630,9 @@
     "speech_text": "centers to make thousands of rapid micro-evaluations",
     "images": [
       {
-        "file_name": "117_forcing_visual_emotional_centers.png",
-        "visual_concept": "Bắt ép trung tâm thị giác và cảm xúc",
-        "svg_search_prompt": "forcing visual emotional centers",
+        "file_name": "117_thousands_micro_evaluations.png",
+        "visual_concept": "Hàng ngàn đánh giá nhỏ mỗi phút",
+        "svg_search_prompt": "thousands micro evaluations",
         "animation_style": "draw"
       }
     ]
@@ -1644,9 +1644,9 @@
     "speech_text": "every single minute.",
     "images": [
       {
-        "file_name": "118_thousands_micro_evaluations.png",
-        "visual_concept": "Hàng ngàn đánh giá nhỏ mỗi phút",
-        "svg_search_prompt": "thousands micro evaluations",
+        "file_name": "118_every_single_minute_clock.png",
+        "visual_concept": "Mỗi phút trôi qua đầy căng thẳng",
+        "svg_search_prompt": "every single minute clock",
         "animation_style": "draw"
       }
     ]
@@ -1658,9 +1658,9 @@
     "speech_text": "You're not resting your battery.",
     "images": [
       {
-        "file_name": "119_every_single_minute_clock.png",
-        "visual_concept": "Mỗi phút trôi qua đầy căng thẳng",
-        "svg_search_prompt": "every single minute clock",
+        "file_name": "119_not_resting_battery_empty.png",
+        "visual_concept": "Bạn không hề nạp lại pin cho cơ thể",
+        "svg_search_prompt": "not resting battery empty",
         "animation_style": "draw"
       }
     ]
@@ -1672,9 +1672,9 @@
     "speech_text": "You are violently draining it",
     "images": [
       {
-        "file_name": "120_not_resting_battery_empty.png",
-        "visual_concept": "Bạn không hề nạp lại pin cho cơ thể",
-        "svg_search_prompt": "not resting battery empty",
+        "file_name": "120_violently_draining_battery.png",
+        "visual_concept": "Rút cạn pin dữ dội",
+        "svg_search_prompt": "violently draining battery",
         "animation_style": "draw"
       }
     ]
@@ -1686,9 +1686,9 @@
     "speech_text": "while holding it in your hands.",
     "images": [
       {
-        "file_name": "121_violently_draining_battery.png",
-        "visual_concept": "Rút cạn pin dữ dội khi cầm trên tay",
-        "svg_search_prompt": "violently draining battery",
+        "file_name": "121_holding_phone_draining.png",
+        "visual_concept": "Cầm điện thoại vắt kiệt năng lượng",
+        "svg_search_prompt": "holding phone draining",
         "animation_style": "draw"
       }
     ]
@@ -1700,9 +1700,9 @@
     "speech_text": "This is the great paradox of modern life.",
     "images": [
       {
-        "file_name": "122_holding_phone_draining.png",
-        "visual_concept": "Cầm chiếc điện thoại vắt kiệt năng lượng",
-        "svg_search_prompt": "holding phone draining",
+        "file_name": "122_great_paradox_modern_life.png",
+        "visual_concept": "Nghịch lý lớn của cuộc sống hiện đại",
+        "svg_search_prompt": "great paradox modern life",
         "animation_style": "draw"
       }
     ]
@@ -1714,9 +1714,9 @@
     "speech_text": "We have eliminated physical exhaustion only",
     "images": [
       {
-        "file_name": "123_great_paradox_modern_life.png",
-        "visual_concept": "Nghịch lý lớn của cuộc sống hiện đại",
-        "svg_search_prompt": "great paradox modern life",
+        "file_name": "123_eliminated_physical_exhaustion.png",
+        "visual_concept": "Xóa bỏ sự kiệt sức về thể chất",
+        "svg_search_prompt": "eliminated physical exhaustion",
         "animation_style": "draw"
       }
     ]
@@ -1728,9 +1728,9 @@
     "speech_text": "to replace it with chronic cognitive friction.",
     "images": [
       {
-        "file_name": "124_eliminated_physical_exhaustion.png",
-        "visual_concept": "Xóa bỏ sự kiệt sức về thể chất",
-        "svg_search_prompt": "eliminated physical exhaustion",
+        "file_name": "124_chronic_cognitive_friction_gears.png",
+        "visual_concept": "Thay bằng ma sát nhận thức mãn tính",
+        "svg_search_prompt": "chronic cognitive friction gears",
         "animation_style": "draw"
       }
     ]
@@ -1742,9 +1742,9 @@
     "speech_text": "In 1670, the French philosopher Blaise Pascal",
     "images": [
       {
-        "file_name": "125_chronic_cognitive_friction_gears.png",
-        "visual_concept": "Thay bằng ma sát nhận thức mãn tính",
-        "svg_search_prompt": "chronic cognitive friction gears",
+        "file_name": "125_year_1670_blaise_pascal.png",
+        "visual_concept": "Năm 1670 triết gia Pháp Blaise Pascal",
+        "svg_search_prompt": "year 1670 blaise pascal",
         "animation_style": "draw"
       }
     ]
@@ -1756,9 +1756,9 @@
     "speech_text": "wrote a sentence that predicted the entire",
     "images": [
       {
-        "file_name": "126_year_1670_blaise_pascal.png",
-        "visual_concept": "Năm 1670 triết gia Pháp Blaise Pascal",
-        "svg_search_prompt": "year 1670 Blaise Pascal",
+        "file_name": "126_prophetic_sentence_written.png",
+        "visual_concept": "Viết câu văn mang tính tiên tri",
+        "svg_search_prompt": "prophetic sentence written",
         "animation_style": "draw"
       }
     ]
@@ -1770,9 +1770,9 @@
     "speech_text": "modern era.",
     "images": [
       {
-        "file_name": "127_prophetic_sentence_modern_era.png",
-        "visual_concept": "Câu nói dự đoán toàn bộ thời đại hiện đại",
-        "svg_search_prompt": "prophetic sentence modern era",
+        "file_name": "127_modern_era_skyline.png",
+        "visual_concept": "Toàn bộ thời đại hiện đại",
+        "svg_search_prompt": "modern era skyline",
         "animation_style": "draw"
       }
     ]
@@ -1784,9 +1784,9 @@
     "speech_text": "He said, all of humanity's problems stem from",
     "images": [
       {
-        "file_name": "128_blaise_pascal_quote_portrait.png",
-        "visual_concept": "Triết lý sâu sắc của Blaise Pascal",
-        "svg_search_prompt": "Blaise Pascal quote portrait",
+        "file_name": "128_all_humanity_problems_stem.png",
+        "visual_concept": "Mọi vấn đề nhân loại bắt nguồn từ một lý do",
+        "svg_search_prompt": "all humanity problems stem",
         "animation_style": "draw"
       }
     ]
@@ -1798,9 +1798,9 @@
     "speech_text": "man's inability to sit quietly in a room",
     "images": [
       {
-        "file_name": "129_all_humanity_problems_stem.png",
-        "visual_concept": "Mọi vấn đề nhân loại bắt nguồn từ một lý do",
-        "svg_search_prompt": "all humanity problems stem",
+        "file_name": "129_inability_sit_quietly_alone.png",
+        "visual_concept": "Không thể ngồi yên một mình trong phòng",
+        "svg_search_prompt": "inability sit quietly alone",
         "animation_style": "draw"
       }
     ]
@@ -1812,9 +1812,9 @@
     "speech_text": "alone.",
     "images": [
       {
-        "file_name": "130_inability_sit_quietly_alone.png",
-        "visual_concept": "Không có khả năng ngồi yên một mình trong phòng",
-        "svg_search_prompt": "inability sit quietly alone",
+        "file_name": "130_sitting_alone_peaceful_room.png",
+        "visual_concept": "Ngồi một mình trong căn phòng tĩnh lặng",
+        "svg_search_prompt": "sitting alone peaceful room",
         "animation_style": "draw"
       }
     ]
@@ -1826,9 +1826,9 @@
     "speech_text": "We have become terrified of silence.",
     "images": [
       {
-        "file_name": "131_sitting_alone_quiet_room.png",
-        "visual_concept": "Ngồi một mình trong sự cô đơn tĩnh lặng",
-        "svg_search_prompt": "sitting alone quiet room",
+        "file_name": "131_terrified_of_silence_noise.png",
+        "visual_concept": "Con người sợ hãi sự im lặng",
+        "svg_search_prompt": "terrified of silence noise",
         "animation_style": "draw"
       }
     ]
@@ -1840,9 +1840,9 @@
     "speech_text": "We have forgotten the difference",
     "images": [
       {
-        "file_name": "132_terrified_of_silence_noise.png",
-        "visual_concept": "Chúng ta trở nên sợ hãi sự im lặng",
-        "svg_search_prompt": "terrified of silence noise",
+        "file_name": "132_forgotten_difference_comparison.png",
+        "visual_concept": "Quên mất sự khác biệt giữa hai trạng thái",
+        "svg_search_prompt": "forgotten difference comparison",
         "animation_style": "draw"
       }
     ]
@@ -1854,9 +1854,9 @@
     "speech_text": "between numbing out and true rest.",
     "images": [
       {
-        "file_name": "133_forgotten_difference_comparison.png",
-        "visual_concept": "Quên mất sự khác biệt giữa hai trạng thái",
-        "svg_search_prompt": "forgotten difference comparison",
+        "file_name": "133_numbing_out_vs_true_rest.png",
+        "visual_concept": "Tê liệt cảm xúc và Nghỉ ngơi thực sự",
+        "svg_search_prompt": "numbing out vs true rest",
         "animation_style": "draw"
       }
     ]
@@ -1868,9 +1868,9 @@
     "speech_text": "Numbing out is passive consumption.",
     "images": [
       {
-        "file_name": "134_numbing_out_vs_true_rest.png",
-        "visual_concept": "Tê liệt cảm xúc và Nghỉ ngơi thực sự",
-        "svg_search_prompt": "numbing out vs true rest",
+        "file_name": "134_numbing_out_passive_consumption.png",
+        "visual_concept": "Tê liệt cảm xúc là tiêu thụ thụ động",
+        "svg_search_prompt": "numbing out passive consumption",
         "animation_style": "draw"
       }
     ]
@@ -1882,9 +1882,9 @@
     "speech_text": "It fills the silence with noise so",
     "images": [
       {
-        "file_name": "135_numbing_out_passive_consumption.png",
-        "visual_concept": "Tê liệt cảm xúc là tiêu thụ thụ động",
-        "svg_search_prompt": "numbing out passive consumption",
+        "file_name": "135_filling_silence_with_noise.png",
+        "visual_concept": "Lấp đầy sự im lặng bằng tiếng ồn",
+        "svg_search_prompt": "filling silence with noise",
         "animation_style": "draw"
       }
     ]
@@ -1896,9 +1896,9 @@
     "speech_text": "you don't have to hear your own thoughts.",
     "images": [
       {
-        "file_name": "136_filling_silence_with_noise.png",
-        "visual_concept": "Lấp đầy sự im lặng bằng tiếng ồn",
-        "svg_search_prompt": "filling silence with noise",
+        "file_name": "136_not_hearing_own_thoughts.png",
+        "visual_concept": "Để không phải nghe suy nghĩ của chính mình",
+        "svg_search_prompt": "not hearing own thoughts",
         "animation_style": "draw"
       }
     ]
@@ -1910,9 +1910,9 @@
     "speech_text": "But it leaves you drained.",
     "images": [
       {
-        "file_name": "137_not_hearing_own_thoughts.png",
-        "visual_concept": "Để không phải nghe suy nghĩ của chính mình",
-        "svg_search_prompt": "not hearing own thoughts",
+        "file_name": "137_leaves_you_completely_drained.png",
+        "visual_concept": "Hậu quả là khiến bạn kiệt quệ",
+        "svg_search_prompt": "leaves you completely drained",
         "animation_style": "draw"
       }
     ]
@@ -1924,9 +1924,9 @@
     "speech_text": "True rest is restorative stillness.",
     "images": [
       {
-        "file_name": "138_leaves_you_completely_drained.png",
-        "visual_concept": "Hậu quả là khiến bạn kiệt quệ",
-        "svg_search_prompt": "leaves you completely drained",
+        "file_name": "138_true_rest_restorative_stillness.png",
+        "visual_concept": "Nghỉ ngơi thực sự là sự tĩnh lặng phục hồi",
+        "svg_search_prompt": "true rest restorative stillness",
         "animation_style": "draw"
       }
     ]
@@ -1938,9 +1938,9 @@
     "speech_text": "It is doing something that lets",
     "images": [
       {
-        "file_name": "139_true_rest_restorative_stillness.png",
-        "visual_concept": "Nghỉ ngơi thực sự là sự tĩnh lặng phục hồi",
-        "svg_search_prompt": "true rest restorative stillness",
+        "file_name": "139_doing_restorative_activities.png",
+        "visual_concept": "Làm điều gì đó giúp hồi phục",
+        "svg_search_prompt": "doing restorative activities",
         "animation_style": "draw"
       }
     ]
@@ -1953,7 +1953,7 @@
     "images": [
       {
         "file_name": "140_let_nervous_system_drop_guard.png",
-        "visual_concept": "Làm điều gì đó giúp hệ thần kinh thư giãn",
+        "visual_concept": "Hệ thần kinh hạ thấp lớp phòng thủ",
         "svg_search_prompt": "let nervous system drop guard",
         "animation_style": "draw"
       }
@@ -1966,9 +1966,9 @@
     "speech_text": "So how do you",
     "images": [
       {
-        "file_name": "141_drop_guard_peaceful_relaxation.png",
-        "visual_concept": "Hạ thấp lớp phòng thủ để hồi phục",
-        "svg_search_prompt": "drop guard peaceful relaxation",
+        "file_name": "141_seeking_solution_question.png",
+        "visual_concept": "Làm sao để thực hiện",
+        "svg_search_prompt": "seeking solution question",
         "animation_style": "draw"
       }
     ]
@@ -1981,7 +1981,7 @@
     "images": [
       {
         "file_name": "142_how_stop_energy_leak.png",
-        "visual_concept": "Câu hỏi: Làm sao ngăn rò rỉ năng lượng?",
+        "visual_concept": "Ngăn chặn rò rỉ năng lượng thầm lặng",
         "svg_search_prompt": "how stop energy leak",
         "animation_style": "draw"
       }
@@ -1994,9 +1994,9 @@
     "speech_text": "First, you must understand that your brain recharges through stillness",
     "images": [
       {
-        "file_name": "143_seeking_energy_recovery_solution.png",
-        "visual_concept": "Tìm kiếm giải pháp lấy lại năng lượng",
-        "svg_search_prompt": "seeking energy recovery solution",
+        "file_name": "143_brain_recharges_stillness.png",
+        "visual_concept": "Não phục hồi qua tĩnh lặng",
+        "svg_search_prompt": "brain recharges stillness",
         "animation_style": "draw"
       }
     ]
@@ -2008,9 +2008,9 @@
     "speech_text": "nature, and deep",
     "images": [
       {
-        "file_name": "144_brain_recharges_stillness_nature.png",
-        "visual_concept": "Não phục hồi qua tĩnh lặng và thiên nhiên",
-        "svg_search_prompt": "brain recharges stillness nature",
+        "file_name": "144_nature_trees_river_peace.png",
+        "visual_concept": "Thiên nhiên cây cỏ thanh bình",
+        "svg_search_prompt": "nature trees river peace",
         "animation_style": "draw"
       }
     ]
@@ -2036,9 +2036,9 @@
     "speech_text": "Take ten minutes today to stare",
     "images": [
       {
-        "file_name": "146_not_digital_entertainment_crossed.png",
-        "visual_concept": "Không phải qua trò giải trí điện tử",
-        "svg_search_prompt": "not digital entertainment crossed",
+        "file_name": "146_ten_minutes_timer_stopwatch.png",
+        "visual_concept": "Dành 10 phút mỗi ngày",
+        "svg_search_prompt": "ten minutes timer stopwatch",
         "animation_style": "draw"
       }
     ]
@@ -2050,9 +2050,9 @@
     "speech_text": "at a window without your phone.",
     "images": [
       {
-        "file_name": "147_ten_minutes_staring_window.png",
-        "visual_concept": "Dành 10 phút nhìn ra ngoài cửa sổ",
-        "svg_search_prompt": "ten minutes staring window",
+        "file_name": "147_staring_out_window_clouds.png",
+        "visual_concept": "Nhìn ra ngoài cửa sổ không cầm điện thoại",
+        "svg_search_prompt": "staring out window clouds",
         "animation_style": "draw"
       }
     ]
@@ -2064,9 +2064,9 @@
     "speech_text": "Feel the weight of",
     "images": [
       {
-        "file_name": "148_without_phone_on_desk.png",
-        "visual_concept": "Bỏ lại chiếc điện thoại phía sau",
-        "svg_search_prompt": "without phone on desk",
+        "file_name": "148_feeling_body_sensations.png",
+        "visual_concept": "Cảm nhận sức nặng cơ thể",
+        "svg_search_prompt": "feeling body sensations",
         "animation_style": "draw"
       }
     ]
@@ -2078,9 +2078,9 @@
     "speech_text": "your feet on the floor.",
     "images": [
       {
-        "file_name": "149_feel_feet_on_floor.png",
-        "visual_concept": "Cảm nhận sức nặng của đôi bàn chân trên sàn",
-        "svg_search_prompt": "feel feet on floor",
+        "file_name": "149_feel_feet_on_floor_grounding.png",
+        "visual_concept": "Đôi bàn chân chạm vững trên sàn nhà",
+        "svg_search_prompt": "feel feet on floor grounding",
         "animation_style": "draw"
       }
     ]
@@ -2092,9 +2092,9 @@
     "speech_text": "Go for a walk without headphones and",
     "images": [
       {
-        "file_name": "150_grounding_body_presence.png",
-        "visual_concept": "Tiếp đất và cảm nhận cơ thể",
-        "svg_search_prompt": "grounding body presence",
+        "file_name": "150_walk_outdoors_no_headphones.png",
+        "visual_concept": "Đi dạo ngoài trời không đeo tai nghe",
+        "svg_search_prompt": "walk outdoors no headphones",
         "animation_style": "draw"
       }
     ]
@@ -2106,9 +2106,9 @@
     "speech_text": "listen to the ambient rhythm of the wind.",
     "images": [
       {
-        "file_name": "151_walk_without_headphones.png",
-        "visual_concept": "Đi dạo ngoài trời không đeo tai nghe",
-        "svg_search_prompt": "walk without headphones",
+        "file_name": "151_listen_ambient_wind_rhythm.png",
+        "visual_concept": "Lắng nghe nhịp điệu của tiếng gió",
+        "svg_search_prompt": "listen ambient wind rhythm",
         "animation_style": "draw"
       }
     ]
@@ -2120,9 +2120,9 @@
     "speech_text": "Take your default mode network,",
     "images": [
       {
-        "file_name": "152_listen_ambient_wind_rhythm.png",
-        "visual_concept": "Lắng nghe nhịp điệu của tiếng gió",
-        "svg_search_prompt": "listen ambient wind rhythm",
+        "file_name": "152_default_mode_network_settling.png",
+        "visual_concept": "Để mạng chế độ mặc định DMN",
+        "svg_search_prompt": "default mode network settling",
         "animation_style": "draw"
       }
     ]
@@ -2135,8 +2135,8 @@
     "images": [
       {
         "file_name": "153_dmn_settle_like_dust.png",
-        "visual_concept": "Để mạng DMN lắng xuống như bụi trong phòng",
-        "svg_search_prompt": "DMN settle like dust",
+        "visual_concept": "Lắng xuống như bụi trong phòng tĩnh lặng",
+        "svg_search_prompt": "dmn settle like dust",
         "animation_style": "draw"
       }
     ]
@@ -2148,9 +2148,9 @@
     "speech_text": "Give your mind permission to simply exist without evaluating",
     "images": [
       {
-        "file_name": "154_quiet_serene_room_dust_settled.png",
-        "visual_concept": "Căn phòng tĩnh lặng thanh thản",
-        "svg_search_prompt": "quiet serene room dust settled",
+        "file_name": "154_mind_permission_simply_exist.png",
+        "visual_concept": "Cho phép tâm trí chỉ đơn giản tồn tại",
+        "svg_search_prompt": "mind permission simply exist",
         "animation_style": "draw"
       }
     ]
@@ -2162,9 +2162,9 @@
     "speech_text": "without reacting, and without",
     "images": [
       {
-        "file_name": "155_mind_permission_simply_exist.png",
-        "visual_concept": "Cho phép tâm trí chỉ đơn giản tồn tại",
-        "svg_search_prompt": "mind permission simply exist",
+        "file_name": "155_without_reacting_calmness.png",
+        "visual_concept": "Không phản ứng vội vã",
+        "svg_search_prompt": "without reacting calmness",
         "animation_style": "draw"
       }
     ]
@@ -2176,9 +2176,9 @@
     "speech_text": "performing.",
     "images": [
       {
-        "file_name": "156_without_evaluating_judgment.png",
-        "visual_concept": "Không đánh giá bất cứ điều gì",
-        "svg_search_prompt": "without evaluating judgment",
+        "file_name": "156_without_performing_mask_off.png",
+        "visual_concept": "Không cần phải thể hiện với ai",
+        "svg_search_prompt": "without performing mask off",
         "animation_style": "draw"
       }
     ]
@@ -2190,9 +2190,9 @@
     "speech_text": "So tonight, be kind to yourself.",
     "images": [
       {
-        "file_name": "157_without_reacting_calmness.png",
-        "visual_concept": "Không phản ứng vội vã",
-        "svg_search_prompt": "without reacting calmness",
+        "file_name": "157_tonight_be_kind_to_yourself.png",
+        "visual_concept": "Đêm nay hãy tử tế với chính mình",
+        "svg_search_prompt": "tonight be kind to yourself",
         "animation_style": "draw"
       }
     ]
@@ -2204,9 +2204,9 @@
     "speech_text": "You are not broken,",
     "images": [
       {
-        "file_name": "158_without_performing_badge.png",
-        "visual_concept": "Không cần phải thể hiện với ai",
-        "svg_search_prompt": "without performing badge",
+        "file_name": "158_you_are_not_broken_heart.png",
+        "visual_concept": "Bạn không hề bị hỏng hóc",
+        "svg_search_prompt": "you are not broken heart",
         "animation_style": "draw"
       }
     ]
@@ -2218,9 +2218,9 @@
     "speech_text": "and you are not lazy.",
     "images": [
       {
-        "file_name": "159_tonight_be_kind_to_yourself.png",
-        "visual_concept": "Đêm nay hãy tử tế và nhẹ nhàng với chính mình",
-        "svg_search_prompt": "tonight be kind to yourself",
+        "file_name": "159_you_are_not_lazy_badge.png",
+        "visual_concept": "Và bạn không hề lười biếng",
+        "svg_search_prompt": "you are not lazy badge",
         "animation_style": "draw"
       }
     ]
@@ -2232,9 +2232,9 @@
     "speech_text": "Your mind has just been carrying the weight",
     "images": [
       {
-        "file_name": "160_you_are_not_broken_heart.png",
-        "visual_concept": "Bạn không hề bị hỏng hóc",
-        "svg_search_prompt": "you are not broken heart",
+        "file_name": "160_mind_carrying_heavy_burden.png",
+        "visual_concept": "Tâm trí chỉ đang mang gánh nặng",
+        "svg_search_prompt": "mind carrying heavy burden",
         "animation_style": "draw"
       }
     ]
@@ -2246,9 +2246,9 @@
     "speech_text": "of a thousand open tabs without realizing it.",
     "images": [
       {
-        "file_name": "161_you_are_not_lazy_badge.png",
-        "visual_concept": "Và bạn không hề lười biếng",
-        "svg_search_prompt": "you are not lazy badge",
+        "file_name": "161_thousand_open_browser_tabs.png",
+        "visual_concept": "Gánh nặng của 1000 tab mở",
+        "svg_search_prompt": "thousand open browser tabs",
         "animation_style": "draw"
       }
     ]
@@ -2260,9 +2260,9 @@
     "speech_text": "Close the screen for a little while.",
     "images": [
       {
-        "file_name": "162_mind_carrying_thousand_open_tabs.png",
-        "visual_concept": "Tâm trí chỉ đang gánh hàng ngàn tab mở",
-        "svg_search_prompt": "mind carrying thousand open tabs",
+        "file_name": "162_close_screen_laptop_lid.png",
+        "visual_concept": "Đóng màn hình lại một lúc",
+        "svg_search_prompt": "close screen laptop lid",
         "animation_style": "draw"
       }
     ]
@@ -2274,9 +2274,9 @@
     "speech_text": "Take a slow, deep breath,",
     "images": [
       {
-        "file_name": "163_carrying_invisible_heavy_tabs.png",
-        "visual_concept": "Gánh nặng vô hình bấy lâu nay",
-        "svg_search_prompt": "carrying invisible heavy tabs",
+        "file_name": "163_take_slow_deep_breath.png",
+        "visual_concept": "Hít một hơi thật sâu và chậm rãi",
+        "svg_search_prompt": "take slow deep breath",
         "animation_style": "draw"
       }
     ]
@@ -2288,9 +2288,9 @@
     "speech_text": "and give your nervous system permission to rest in the quiet.",
     "images": [
       {
-        "file_name": "164_close_screen_little_while.png",
-        "visual_concept": "Đóng màn hình lại một lúc",
-        "svg_search_prompt": "close screen little while",
+        "file_name": "164_nervous_system_rest_quiet.png",
+        "visual_concept": "Cho phép hệ thần kinh nghỉ ngơi trong tĩnh lặng",
+        "svg_search_prompt": "nervous system rest quiet",
         "animation_style": "draw"
       }
     ]
@@ -2302,9 +2302,9 @@
     "speech_text": "Take care of yourself out there.",
     "images": [
       {
-        "file_name": "165_take_slow_deep_breath.png",
-        "visual_concept": "Hít một hơi thật sâu và chậm rãi",
-        "svg_search_prompt": "take slow deep breath",
+        "file_name": "165_take_care_of_yourself.png",
+        "visual_concept": "Hãy chăm sóc bản thân thật tốt nhé",
+        "svg_search_prompt": "take care of yourself",
         "animation_style": "draw"
       }
     ]
@@ -2316,9 +2316,9 @@
     "speech_text": "And as always, thanks for stopping by.",
     "images": [
       {
-        "file_name": "166_nervous_system_rest_quiet.png",
-        "visual_concept": "Cho phép hệ thần kinh nghỉ ngơi trong tĩnh lặng",
-        "svg_search_prompt": "nervous system rest quiet",
+        "file_name": "166_thanks_for_stopping_by.png",
+        "visual_concept": "Cảm ơn bạn đã ghé thăm và lắng nghe",
+        "svg_search_prompt": "thanks for stopping by",
         "animation_style": "draw"
       }
     ]
