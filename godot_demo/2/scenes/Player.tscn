@@ -1,17 +1,15 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/Player.gd" id="1_player"]
+[ext_resource type="PackedScene" path="res://models/giraffe_body.glb" id="2_body_mesh"]
+[ext_resource type="PackedScene" path="res://models/giraffe_head.glb" id="3_head_mesh"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_body"]
-size = Vector3(1.0, 0.8, 1.2)
+size = Vector3(1.0, 0.8, 1.4)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yellow"]
-albedo_color = Color(1.0, 0.75, 0.1, 1.0)
+albedo_color = Color(1.0, 0.72, 0.1, 1.0)
 roughness = 0.3
-
-[sub_resource type="BoxMesh" id="BoxMesh_body"]
-material = SubResource("StandardMaterial3D_yellow")
-size = Vector3(1.0, 0.7, 1.2)
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_neck"]
 material = SubResource("StandardMaterial3D_yellow")
@@ -19,54 +17,31 @@ top_radius = 0.22
 bottom_radius = 0.22
 height = 1.0
 
-[sub_resource type="BoxMesh" id="BoxMesh_head"]
-material = SubResource("StandardMaterial3D_yellow")
-size = Vector3(0.75, 0.6, 0.95)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_eye"]
-albedo_color = Color(1.0, 1.0, 1.0, 1.0)
-
-[sub_resource type="SphereMesh" id="SphereMesh_eye"]
-material = SubResource("StandardMaterial3D_eye")
-radius = 0.14
-height = 0.28
-
 [sub_resource type="SphereShape3D" id="SphereShape3D_head"]
-radius = 0.55
+radius = 0.6
 
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1_player")
 
 [node name="BodyCollision" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
 shape = SubResource("BoxShape3D_body")
 
-[node name="BodyMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
-mesh = SubResource("BoxMesh_body")
+[node name="BodyMesh" parent="." instance=ExtResource("2_body_mesh")]
 
 [node name="NeckMesh" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, -0.4)
 mesh = SubResource("CylinderMesh_neck")
 
 [node name="HeadRoot" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0.3)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -0.4)
 
-[node name="HeadMesh" type="MeshInstance3D" parent="HeadRoot"]
-mesh = SubResource("BoxMesh_head")
-
-[node name="EyeLeft" type="MeshInstance3D" parent="HeadRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.28, 0.35, -0.3)
-mesh = SubResource("SphereMesh_eye")
-
-[node name="EyeRight" type="MeshInstance3D" parent="HeadRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.28, 0.35, -0.3)
-mesh = SubResource("SphereMesh_eye")
+[node name="HeadMesh" parent="HeadRoot" instance=ExtResource("3_head_mesh")]
 
 [node name="HeightLabel" type="Label3D" parent="HeadRoot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
 text = "1.5m"
-font_size = 44
+font_size = 46
 outline_size = 14
 
 [node name="HeadHitbox" type="Area3D" parent="HeadRoot"]
@@ -77,5 +52,5 @@ shape = SubResource("SphereShape3D_head")
 [node name="BodyHitbox" type="Area3D" parent="."]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="BodyHitbox"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
 shape = SubResource("BoxShape3D_body")

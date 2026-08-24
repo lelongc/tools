@@ -1,54 +1,23 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://scripts/LowObstacle.gd" id="1_low"]
+[ext_resource type="PackedScene" path="res://models/spike_trap.glb" id="2_spike_model"]
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_trap"]
-size = Vector3(7.5, 0.8, 2.5)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_spike"]
-albedo_color = Color(0.8, 0.2, 0.2, 1.0)
-metallic = 0.9
-roughness = 0.2
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_spike"]
-material = SubResource("StandardMaterial3D_spike")
-top_radius = 0.0
-bottom_radius = 0.35
-height = 0.9
-
-[sub_resource type="BoxMesh" id="BoxMesh_base"]
-size = Vector3(7.5, 0.2, 2.5)
+size = Vector3(7.5, 0.9, 2.5)
 
 [node name="LowObstacle" type="Area3D"]
 script = ExtResource("1_low")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.4, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.45, 0)
 shape = SubResource("BoxShape3D_trap")
 
-[node name="Base" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 0)
-mesh = SubResource("BoxMesh_base")
-
-[node name="Spike1" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.4, 0.45, 0)
-mesh = SubResource("CylinderMesh_spike")
-
-[node name="Spike2" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.45, 0)
-mesh = SubResource("CylinderMesh_spike")
-
-[node name="Spike3" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.45, 0)
-mesh = SubResource("CylinderMesh_spike")
-
-[node name="Spike4" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.4, 0.45, 0)
-mesh = SubResource("CylinderMesh_spike")
+[node name="SpikeModel" parent="." instance=ExtResource("2_spike_model")]
 
 [node name="SpikeLabel" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, 0)
 text = "⚠️ VƯƠN CỔ CAO LÊN! ⚠️"
-font_size = 34
-outline_size = 10
+font_size = 36
+outline_size = 12
 modulate = Color(1, 0.3, 0.3, 1)
