@@ -76,25 +76,33 @@ func update_visuals() -> void:
 		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 		glass_mesh.material_override = mat
 
-func take_hit(damage: float) -> void:
+func take_hit(_damage: float) -> void:
 	if is_activated:
 		return
 	
-	# Cơ chế Rage Bait: Bắn vào cổng để tăng chỉ số có lợi hoặc giảm bớt cổng phạt!
-	if is_positive():
-		value += 1.0
-	else:
-		value += 1.0
-		if value >= 0:
-			gate_type = GateType.FIRE_RATE_ADD
-			value = max(1.0, value)
-	
+	# Cơ chế Rage-Bait: Bắn vào cổng để tăng giá trị (được giới hạn hợp lý tránh tràn số)
+	match gate_type:
+		GateType.FIRE_RATE_ADD:
+			value = clamp(value + 0.25, 1.0, 25.0)
+		GateType.FIRE_RATE_MULT:
+			value = clamp(value + 0.05, 1.1, 2.5)
+		GateType.FIRE_RATE_SUB:
+			value += 0.5
+			if value >= 0:
+				gate_type = GateType.FIRE_RATE_ADD
+				value = max(1.0, value)
+		GateType.BULLET_COUNT_ADD:
+			value = clamp(value + 0.1, 1.0, 4.0)
+		GateType.BULLET_COUNT_MULT:
+			value = clamp(value + 0.05, 1.0, 2.0)
+		GateType.POWER_ADD:
+			value = clamp(value + 0.5, 5.0, 40.0)
+			
 	update_visuals()
 	
-	# Hiệu ứng nảy (Juice Tween)
 	var tw = create_tween()
-	tw.tween_property(self, "scale", Vector3(1.2, 1.2, 1.2), 0.05)
-	tw.tween_property(self, "scale", Vector3.ONE, 0.08)
+	tw.tween_property(self, "scale", Vector3(1.15, 1.15, 1.15), 0.04)
+	tw.tween_property(self, "scale", Vector3.ONE, 0.06)
 
 func _on_body_entered(body: Node3D) -> void:
 	if is_activated:
@@ -102,9 +110,8 @@ func _on_body_entered(body: Node3D) -> void:
 	
 	if body.has_method("apply_gate_modifier"):
 		is_activated = true
-		body.apply_gate_modifier(gate_type, value)
+		body.apply_gate_modifier(int(gate_type), value)
 		
-		# Hiệu ứng thu nhỏ và biến mất
 		var tw = create_tween()
-		tw.tween_property(self, "scale", Vector3.ZERO, 0.15)
+		tw.tween_property(self, "scale", Vector3.ZERO, 0.12)
 		tw.tween_callback(queue_free)

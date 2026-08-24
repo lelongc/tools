@@ -1,10 +1,9 @@
 extends Node
-class_name GameManager
 
 var score: int = 0
 var current_level: int = 1
 
-@onready var player: Player = get_tree().root.find_child("Player", true, false)
+@onready var player: Node3D = get_tree().root.find_child("Player", true, false)
 @onready var hud: CanvasLayer = get_tree().root.find_child("HUD", true, false)
 
 @onready var score_label: Label = get_tree().root.find_child("ScoreLabel", true, false)
@@ -29,8 +28,10 @@ func _ready() -> void:
 		revive_button.pressed.connect(revive_player)
 		
 	if player:
-		player.player_died.connect(on_player_died)
-		player.stats_changed.connect(_on_player_stats_changed)
+		if player.has_signal("player_died"):
+			player.connect("player_died", on_player_died)
+		if player.has_signal("stats_changed"):
+			player.connect("stats_changed", _on_player_stats_changed)
 
 func add_score(amount: int) -> void:
 	score += amount
@@ -54,12 +55,12 @@ func restart_game() -> void:
 	get_tree().reload_current_scene()
 
 func revive_player() -> void:
-	# Cơ chế Hồi sinh (Mô phỏng Xem quảng cáo nhận thưởng Rewarded Ads)
 	if fail_panel:
 		fail_panel.visible = false
 	if player:
-		player.is_active = true
-		player.fire_rate += 10.0
-		player.bullet_count = 3
-		player.bullet_damage += 20.0
-		player.update_gun_evolution()
+		player.set("is_active", true)
+		player.set("fire_rate", player.get("fire_rate") + 10.0)
+		player.set("bullet_count", 3)
+		player.set("bullet_damage", player.get("bullet_damage") + 20.0)
+		if player.has_method("update_gun_evolution"):
+			player.update_gun_evolution()

@@ -1,7 +1,6 @@
 extends CharacterBody3D
-class_name Player
 
-signal stats_changed(fire_rate, bullet_count, damage, level)
+signal stats_changed(fire_rate: float, bullet_count: int, damage: float, level: int)
 signal player_died
 
 @export var forward_speed: float = 13.0
@@ -20,7 +19,7 @@ var target_x: float = 0.0
 
 var fire_timer: float = 0.0
 var is_at_boss: bool = false
-var boss_target: Boss = null
+var boss_target: Node3D = null
 var boss_timer: float = 6.0
 
 @onready var gun_model_root: Node3D = $GunModelRoot
@@ -29,8 +28,7 @@ var boss_timer: float = 6.0
 @onready var barrel_right: Marker3D = $GunModelRoot/BarrelRight
 @onready var level_label: Label3D = $LevelLabel
 
-# Resource đạn nạp sẵn
-var bullet_scene = preload("res://scenes/Bullet.tscn")
+var bullet_scene: PackedScene = preload("res://scenes/Bullet.tscn")
 
 func _ready() -> void:
 	target_x = position.x
@@ -76,10 +74,11 @@ func _physics_process(delta: float) -> void:
 	else:
 		# Trong trận đánh Boss
 		boss_timer -= delta
-		if boss_timer <= 0.0 and is_instance_valid(boss_target) and not boss_target.is_dead:
+		if boss_timer <= 0.0 and is_instance_valid(boss_target) and boss_target.get("is_dead") == false:
 			# Hết thời gian mà chưa hạ được Boss -> Boss đè bẹp (Rage Fail)
 			is_active = false
-			boss_target.attack_player()
+			if boss_target.has_method("attack_player"):
+				boss_target.attack_player()
 			smash_death()
 	
 	# 3. Tự động bắn đạn
@@ -131,12 +130,10 @@ func apply_gate_modifier(type: int, val: float) -> void:
 	update_gun_evolution()
 
 func take_obstacle_damage(dmg: float) -> void:
-	# Bị phạt tụt cấp độ khi đâm phải chướng ngại vật
 	fire_rate = max(1.0, fire_rate - 2.0)
 	bullet_damage = max(5.0, bullet_damage - 2.0)
 	update_gun_evolution()
 	
-	# Hiệu ứng rung đỏ súng
 	var tw = create_tween()
 	tw.tween_property(gun_model_root, "scale", Vector3(1.3, 0.8, 1.3), 0.06)
 	tw.tween_property(gun_model_root, "scale", Vector3.ONE, 0.1)
@@ -150,19 +147,18 @@ func update_gun_evolution() -> void:
 	
 	stats_changed.emit(fire_rate, bullet_count, bullet_damage, gun_level)
 	
-	# Đổi màu sắc theo cấp độ súng
 	var mat = StandardMaterial3D.new()
 	if gun_level < 5:
-		mat.albedo_color = Color(0.2, 0.7, 1.0) # Xanh dương
+		mat.albedo_color = Color(0.2, 0.7, 1.0)
 		mat.metallic = 0.6
 	elif gun_level < 15:
-		mat.albedo_color = Color(1.0, 0.8, 0.1) # Vàng kim
+		mat.albedo_color = Color(1.0, 0.8, 0.1)
 		mat.metallic = 0.9
 		mat.emission_enabled = true
 		mat.emission = Color(0.8, 0.5, 0.0)
 		mat.emission_energy_multiplier = 1.0
 	else:
-		mat.albedo_color = Color(1.0, 0.1, 0.3) # Đỏ Cyber / Laser
+		mat.albedo_color = Color(1.0, 0.1, 0.3)
 		mat.metallic = 1.0
 		mat.emission_enabled = true
 		mat.emission = Color(1.0, 0.0, 0.2)
@@ -172,12 +168,12 @@ func update_gun_evolution() -> void:
 	if is_instance_valid(gun_mesh):
 		gun_mesh.material_override = mat
 
-func reach_boss_arena(boss: Boss) -> void:
+func reach_boss_arena(boss: Node3D) -> void:
 	is_at_boss = true
 	boss_target = boss
-	# Tăng tốc độ xả đạn cực đại ở trận Boss
 	fire_rate = max(12.0, fire_rate * 1.5)
-	boss.start_boss_fight()
+	if boss.has_method("start_boss_fight"):
+		boss.start_boss_fight()
 
 func smash_death() -> void:
 	is_active = false
