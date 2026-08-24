@@ -1,10 +1,41 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/Collectable.gd" id="1_col"]
-[ext_resource type="PackedScene" path="res://models/golden_apple.glb" id="2_mesh"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_1"]
 radius = 0.65
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gold"]
+albedo_color = Color(1.0, 0.82, 0.05, 1.0)
+metallic = 0.85
+roughness = 0.2
+emission_enabled = true
+emission = Color(1.0, 0.7, 0.0, 1.0)
+emission_energy_multiplier = 1.2
+
+[sub_resource type="SphereMesh" id="SphereMesh_apple"]
+material = SubResource("StandardMaterial3D_gold")
+radius = 0.45
+height = 0.9
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_stem"]
+albedo_color = Color(0.45, 0.25, 0.1, 1.0)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_stem"]
+material = SubResource("StandardMaterial3D_stem")
+top_radius = 0.04
+bottom_radius = 0.04
+height = 0.35
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_leaf"]
+albedo_color = Color(0.1, 0.85, 0.2, 1.0)
+emission_enabled = true
+emission = Color(0.1, 0.8, 0.2, 1.0)
+emission_energy_multiplier = 0.5
+
+[sub_resource type="BoxMesh" id="BoxMesh_leaf"]
+material = SubResource("StandardMaterial3D_leaf")
+size = Vector3(0.35, 0.06, 0.18)
 
 [node name="Collectable" type="Area3D"]
 script = ExtResource("1_col")
@@ -12,5 +43,13 @@ script = ExtResource("1_col")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("SphereShape3D_1")
 
-[node name="AppleModel" parent="." instance=ExtResource("2_mesh")]
-transform = Transform3D(1.2, 0, 0, 0, 1.2, 0, 0, 0, 1.2, 0, 0, 0)
+[node name="AppleMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("SphereMesh_apple")
+
+[node name="Stem" type="MeshInstance3D" parent="AppleMesh"]
+transform = Transform3D(1, 0, 0, 0, 0.984808, -0.173648, 0, 0.173648, 0.984808, 0, 0.5, 0)
+mesh = SubResource("CylinderMesh_stem")
+
+[node name="Leaf" type="MeshInstance3D" parent="AppleMesh/Stem"]
+transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, 0.15, 0.08, 0)
+mesh = SubResource("BoxMesh_leaf")
