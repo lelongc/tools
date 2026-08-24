@@ -2,119 +2,158 @@ import http from 'http';
 import { spawn } from 'child_process';
 import crypto from 'crypto';
 import url from 'url';
+import fs from 'fs';
+import path from 'path';
+
+// Load .env automatically
+const envPath = path.join(path.dirname(url.fileURLToPath(import.meta.url)), '.env');
+if (fs.existsSync(envPath)) {
+  const content = fs.readFileSync(envPath, 'utf8');
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+      const [k, ...v] = trimmed.split('=');
+      const val = v.join('=').trim();
+      if (!process.env[k.trim()]) {
+        process.env[k.trim()] = val;
+      }
+    }
+  }
+}
 
 const PORT = parseInt(process.env.PORT || '8080', 10);
-const COMMAND = process.argv[2] || 'node';
-const ARGS = process.argv.slice(3);
+const GODOT_SCRIPT = process.env.GODOT_MCP_SCRIPT || 'C:/Users/Acer/.gemini/antigravity-ide/mcp/godot-mcp/build/index.js';
+const BLENDER_CMD = process.env.BLENDER_MCP_CMD || 'uvx blender-mcp';
 
-// === SINGLE SHARED MCP PROCESS ===
-let mcpChild = null;
-let mcpBuffer = '';
-let nextInternalId = 100000;
-const pendingCallbacks = new Map(); // internalId -> { originalId, resolve, timer }
-const sseClients = new Map();       // sessionId -> res
+// Global session registry: sessionId -> { engine, res, heartbeat }
+const activeSessions = new Map();
 
-function ensureMcpProcess() {
-  if (mcpChild && mcpChild.exitCode === null && !mcpChild.killed) {
-    return mcpChild;
+class McpEngine {
+  constructor(name, command, args, idBase) {
+    this.name = name;
+    this.command = command;
+    this.args = args;
+    this.idBase = idBase;
+    this.nextId = idBase;
+    this.child = null;
+    this.buffer = '';
+    this.pendingCallbacks = new Map();
   }
 
-  console.log(`[MCP] Khoi tao Godot MCP process: ${COMMAND} ${ARGS.join(' ')}`);
-  mcpChild = spawn(COMMAND, ARGS, {
-    env: process.env,
-    stdio: ['pipe', 'pipe', 'inherit'],
-    shell: process.platform === 'win32'
-  });
+  ensureProcess() {
+    if (this.child && this.child.exitCode === null && !this.child.killed) {
+      return this.child;
+    }
 
-  mcpChild.stdout.on('data', chunk => {
-    mcpBuffer += chunk.toString();
-    const lines = mcpBuffer.split('\n');
-    mcpBuffer = lines.pop();
+    console.log(`[${this.name}] Đang khởi động engine: ${this.command} ${this.args.join(' ')}`);
+    this.child = spawn(this.command, this.args, {
+      env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
+      stdio: ['pipe', 'pipe', 'pipe'],
+      shell: process.platform === 'win32'
+    });
 
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
-
-      let parsed;
-      try { parsed = JSON.parse(trimmed); } catch { continue; }
-
-      const toolCount = parsed?.result?.tools?.length;
-      if (toolCount) {
-        console.log(`[MCP] Da nap ${toolCount} cong cu Godot!`);
-      }
-
-      // Route 1: Pending Direct HTTP callback (ID remapped)
-      if (parsed.id !== undefined && pendingCallbacks.has(parsed.id)) {
-        const { originalId, resolve, timer } = pendingCallbacks.get(parsed.id);
-        pendingCallbacks.delete(parsed.id);
-        clearTimeout(timer);
-        // Khoi phuc ID goc truoc khi tra ve cho Spark
-        const response = { ...parsed, id: originalId };
-        console.log(`[HTTP] Tra ket qua cho Spark (internalId=${parsed.id} -> originalId=${originalId})`);
-        resolve(response);
-        continue;
-      }
-
-      // Route 2: Broadcast to SSE clients
-      for (const [sid, sseRes] of sseClients) {
-        try {
-          sseRes.write(`event: message\ndata: ${trimmed}\n\n`);
-        } catch {
-          sseClients.delete(sid);
+    // 1. DRAIN STDERR TO PREVENT DEADLOCKS & SHOW LOGS
+    this.child.stderr.on('data', chunk => {
+      const text = chunk.toString().trim();
+      if (text) {
+        for (const line of text.split('\n')) {
+          const l = line.trim();
+          if (l) console.log(`[${this.name} LOG] ${l}`);
         }
       }
-    }
-  });
+    });
 
-  mcpChild.on('exit', (code) => {
-    console.log(`[MCP] Process thoat (code: ${code}). Tu khoi lai khi co request moi.`);
-    mcpChild = null;
-    for (const [id, { originalId, resolve, timer }] of pendingCallbacks) {
-      clearTimeout(timer);
-      resolve({ jsonrpc: '2.0', id: originalId, error: { code: -32603, message: 'MCP process exited' } });
-    }
-    pendingCallbacks.clear();
-  });
+    // 2. PARSE STDOUT JSON-RPC
+    this.child.stdout.on('data', chunk => {
+      this.buffer += chunk.toString();
+      const lines = this.buffer.split('\n');
+      this.buffer = lines.pop();
 
-  return mcpChild;
-}
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
 
-// Direct HTTP mode: Doi ID thanh internalId de tranh trung lap, cho ket qua
-function sendRpcAndWait(msg, timeoutMs = 30000) {
-  return new Promise((resolve) => {
-    const child = ensureMcpProcess();
-    const internalId = nextInternalId++;
-    const originalId = msg.id;
+        let parsed;
+        try { parsed = JSON.parse(trimmed); } catch { continue; }
 
-    const timer = setTimeout(() => {
-      if (pendingCallbacks.has(internalId)) {
-        pendingCallbacks.delete(internalId);
-        console.log(`[HTTP] Timeout cho request internalId=${internalId} (method=${msg.method})`);
-        resolve({ jsonrpc: '2.0', id: originalId, error: { code: -32000, message: 'MCP Timeout' } });
+        const toolCount = parsed?.result?.tools?.length;
+        if (toolCount) {
+          console.log(`[${this.name}] ✅ Đã nạp thành công ${toolCount} công cụ!`);
+        }
+
+        // Direct HTTP callback
+        if (parsed.id !== undefined && this.pendingCallbacks.has(parsed.id)) {
+          const { originalId, resolve, timer } = this.pendingCallbacks.get(parsed.id);
+          this.pendingCallbacks.delete(parsed.id);
+          clearTimeout(timer);
+          const response = { ...parsed, id: originalId };
+          console.log(`[${this.name} HTTP] Trả kết quả (internalId=${parsed.id} -> originalId=${originalId})`);
+          resolve(response);
+          continue;
+        }
+
+        // Broadcast to SSE clients of this engine
+        for (const [sid, session] of activeSessions) {
+          if (session.engine === this) {
+            try {
+              session.res.write(`event: message\ndata: ${trimmed}\n\n`);
+            } catch {
+              activeSessions.delete(sid);
+            }
+          }
+        }
       }
-    }, timeoutMs);
+    });
 
-    pendingCallbacks.set(internalId, { originalId, resolve, timer });
+    this.child.on('exit', (code) => {
+      console.log(`[${this.name}] Process kết thúc (code: ${code}). Sẽ tự khởi lại khi có request.`);
+      this.child = null;
+      for (const [id, { originalId, resolve, timer }] of this.pendingCallbacks) {
+        clearTimeout(timer);
+        resolve({ jsonrpc: '2.0', id: originalId, error: { code: -32603, message: 'MCP process exited' } });
+      }
+      this.pendingCallbacks.clear();
+    });
 
-    // Gui vao MCP voi internalId (khong trung)
-    const remapped = { ...msg, id: internalId };
-    child.stdin.write(JSON.stringify(remapped) + '\n');
-    console.log(`[HTTP] Gui vao MCP: ${msg.method} (originalId=${originalId} -> internalId=${internalId})`);
-  });
+    return this.child;
+  }
+
+  sendRpcAndWait(msg, timeoutMs = 30000) {
+    return new Promise((resolve) => {
+      const child = this.ensureProcess();
+      const internalId = this.nextId++;
+      const originalId = msg.id;
+
+      const timer = setTimeout(() => {
+        if (this.pendingCallbacks.has(internalId)) {
+          this.pendingCallbacks.delete(internalId);
+          console.log(`[${this.name} HTTP] Timeout cho request internalId=${internalId}`);
+          resolve({ jsonrpc: '2.0', id: originalId, error: { code: -32000, message: 'MCP Timeout' } });
+        }
+      }, timeoutMs);
+
+      this.pendingCallbacks.set(internalId, { originalId, resolve, timer });
+      const remapped = { ...msg, id: internalId };
+      child.stdin.write(JSON.stringify(remapped) + '\n');
+    });
+  }
+
+  sendToMcp(msg) {
+    const child = this.ensureProcess();
+    child.stdin.write(JSON.stringify(msg) + '\n');
+  }
 }
 
-// SSE mode: Gui truc tiep, ket qua tra qua SSE stream
-function sendToMcp(msg) {
-  const child = ensureMcpProcess();
-  child.stdin.write(JSON.stringify(msg) + '\n');
-}
+// Khởi tạo 2 engine độc lập
+const godotEngine = new McpEngine('GODOT', 'node', [GODOT_SCRIPT], 100000);
+const blenderParts = BLENDER_CMD.split(' ');
+const blenderEngine = new McpEngine('BLENDER', blenderParts[0], blenderParts.slice(1), 200000);
 
-// === HTTP SERVER ===
 const server = http.createServer((req, res) => {
   const parsed = url.parse(req.url, true);
-  const path = parsed.pathname;
+  const path = parsed.pathname || '/';
 
-  // CORS
+  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, HEAD, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', '*');
@@ -127,24 +166,30 @@ const server = http.createServer((req, res) => {
   }
 
   // Health check
-  if ((path === '/' || path === '/health' || path === '/healthz') && req.method === 'GET') {
+  if ((path === '/' || path === '/health' || path === '/healthz' || path === '/blender' || path === '/godot') && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', mcp: 'active', server: 'godot-mcp' }));
+    res.end(JSON.stringify({ status: 'ok', mcp: 'active', engines: ['godot', 'blender'] }));
     return;
   }
 
-  // OAuth probe -> 404 (No-Auth)
-  if (path && path.startsWith('/.well-known')) {
-    console.log(`[HTTP] OAuth probe -> 404: ${req.method} ${path}`);
+  // OAuth Discovery Probe → Phản hồi 404 No-Auth ngay lập tức
+  if (path.includes('.well-known')) {
+    console.log(`[HTTP] OAuth probe -> 404 No-Auth: ${req.method} ${path}`);
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'not_found' }));
     return;
   }
 
-  // === SSE STREAM: GET /mcp hoac GET /sse ===
-  if (req.method === 'GET' && (path === '/mcp' || path === '/sse')) {
+  // Phân luồng Engine
+  const isBlender = path.startsWith('/blender');
+  const engine = isBlender ? blenderEngine : godotEngine;
+  const endpointPath = isBlender ? '/blender/message' : '/message';
+
+  // ===== 1. SSE STREAM (GET) =====
+  const isSse = req.method === 'GET' && (path === '/mcp' || path === '/sse' || path === '/blender/mcp' || path === '/blender/sse' || path === '/blender');
+  if (isSse) {
     const sessionId = crypto.randomUUID();
-    console.log(`[SSE] Client ket noi! Session: ${sessionId}`);
+    console.log(`[SSE] 🟢 Client Spark kết nối vào ${engine.name}! Session: ${sessionId} (Path: ${path})`);
 
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
@@ -154,25 +199,27 @@ const server = http.createServer((req, res) => {
     });
     res.flushHeaders();
 
-    res.write(`event: endpoint\ndata: /message?sessionId=${sessionId}\n\n`);
+    // Gửi relative endpoint chuẩn
+    res.write(`event: endpoint\ndata: ${endpointPath}?sessionId=${sessionId}\n\n`);
 
-    ensureMcpProcess();
-    sseClients.set(sessionId, res);
+    engine.ensureProcess();
 
     const heartbeat = setInterval(() => {
       try { res.write(': keepalive\n\n'); } catch { clearInterval(heartbeat); }
     }, 8000);
 
+    activeSessions.set(sessionId, { engine, res, heartbeat });
+
     req.on('close', () => {
-      console.log(`[SSE] Client ngat: ${sessionId}`);
+      console.log(`[SSE] 🔴 Client ngắt kết nối ${engine.name}: ${sessionId}`);
       clearInterval(heartbeat);
-      sseClients.delete(sessionId);
+      activeSessions.delete(sessionId);
     });
 
     return;
   }
 
-  // === POST: /message, /mcp, /sse ===
+  // ===== 2. MESSAGE POST =====
   if (req.method === 'POST') {
     let body = '';
     req.on('data', chunk => { body += chunk.toString(); });
@@ -184,29 +231,31 @@ const server = http.createServer((req, res) => {
         return;
       }
 
+      // Xác định Engine qua sessionId hoặc qua URL
       const sessionId = parsed.query.sessionId;
-      const hasActiveSSE = sessionId && sseClients.has(sessionId);
+      const session = sessionId ? activeSessions.get(sessionId) : null;
+      const targetEngine = session ? session.engine : engine;
 
-      // Notification (khong co id) -> gui vao MCP va tra 202 ngay
+      // Notification (không có ID)
       if (msg.id === undefined || msg.id === null) {
-        sendToMcp(msg);
+        targetEngine.sendToMcp(msg);
         res.writeHead(202, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ status: 'accepted' }));
         return;
       }
 
-      // SSE mode: co sessionId hop le -> gui vao MCP, ket qua tra qua SSE stream
-      if (hasActiveSSE) {
-        console.log(`[SSE POST] ${msg.method} (id=${msg.id}) -> session ${sessionId}`);
-        sendToMcp(msg);
+      // SSE Mode: có active session
+      if (session) {
+        console.log(`[${targetEngine.name} SSE POST] ${msg.method} (id=${msg.id}) -> session ${sessionId}`);
+        targetEngine.sendToMcp(msg);
         res.writeHead(202, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ status: 'accepted' }));
         return;
       }
 
-      // Direct HTTP mode: Remap ID de tranh trung lap, cho ket qua truc tiep
-      console.log(`[HTTP POST] ${msg.method} (id=${msg.id}) [Direct mode]`);
-      sendRpcAndWait(msg).then(result => {
+      // Direct HTTP Mode
+      console.log(`[${targetEngine.name} HTTP POST] ${msg.method} (id=${msg.id}) [Direct mode]`);
+      targetEngine.sendRpcAndWait(msg).then(result => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(result));
       });
@@ -219,7 +268,12 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`[SERVER] MCP Universal Bridge dang lang nghe tai: http://127.0.0.1:${PORT}`);
-  console.log(`[SERVER] ID Remapping ON - Moi request duoc gan ID noi bo duy nhat, khong bao gio trung lap!`);
-  ensureMcpProcess();
+  console.log(`===========================================================================`);
+  console.log(`🚀 MASTER DUAL-ENGINE MCP SERVER ĐANG LẮNG NGHE TẠI CỔNG ${PORT}`);
+  console.log(`---------------------------------------------------------------------------`);
+  console.log(`🎮 Godot MCP  : http://127.0.0.1:${PORT}/mcp`);
+  console.log(`🎨 Blender MCP: http://127.0.0.1:${PORT}/blender/mcp`);
+  console.log(`===========================================================================`);
+  godotEngine.ensureProcess();
+  blenderEngine.ensureProcess();
 });
