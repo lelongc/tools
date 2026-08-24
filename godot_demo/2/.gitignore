@@ -1,0 +1,34 @@
+# Godot 4 - .gitignore
+
+# Import cache (Godot tu tao lai khi mo project)
+.godot/
+
+# Export builds
+*.export/
+export/
+build/
+
+# Mono/.NET
+.mono/
+data_*/
+*.csproj
+*.sln
+
+# OS generated
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backup files
+*.bak
+*.tmp
+
+# Log files
+*.log

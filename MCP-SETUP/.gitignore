@@ -1,0 +1,7 @@
+# MCP-SETUP .gitignore
+.env
+ngrok.exe
+*.log
+*.tmp
+__pycache__/
+node_modules/
