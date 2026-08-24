@@ -14,9 +14,7 @@ if (fs.existsSync(envPath)) {
     if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
       const [k, ...v] = trimmed.split('=');
       const val = v.join('=').trim();
-      if (!process.env[k.trim()]) {
-        process.env[k.trim()] = val;
-      }
+      process.env[k.trim()] = val;
     }
   }
 }
@@ -25,7 +23,6 @@ const PORT = parseInt(process.env.PORT || '8080', 10);
 const GODOT_SCRIPT = process.env.GODOT_MCP_SCRIPT || 'C:/Users/Acer/.gemini/antigravity-ide/mcp/godot-mcp/build/index.js';
 const BLENDER_CMD = process.env.BLENDER_MCP_CMD || 'uvx blender-mcp';
 
-// Danh sách nhận diện chính xác công cụ Blender
 const BLENDER_TOOLS = new Set([
   'get_addon_status', 'disable_telemetry', 'get_scene_info', 'get_object_info',
   'get_viewport_screenshot', 'execute_blender_code', 'get_polyhaven_categories',
@@ -41,15 +38,26 @@ const BLENDER_TOOLS = new Set([
 const activeSessions = new Map();
 
 class McpEngine {
-  constructor(name, command, args, idBase) {
+  constructor(name, command, args, idBase, extraEnv = {}) {
     this.name = name;
     this.command = command;
     this.args = args;
     this.idBase = idBase;
     this.nextId = idBase;
+    this.extraEnv = extraEnv;
     this.child = null;
     this.buffer = '';
     this.pendingCallbacks = new Map();
+    this.serverCapabilities = null;
+  }
+
+  restart() {
+    console.log(`[${this.name}] 🔄 Khởi động lại process để đồng bộ...`);
+    if (this.child) {
+      try { this.child.kill(); } catch {}
+      this.child = null;
+    }
+    return this.ensureProcess();
   }
 
   ensureProcess() {
@@ -59,7 +67,7 @@ class McpEngine {
 
     console.log(`[${this.name}] Khởi động engine: ${this.command} ${this.args.join(' ')}`);
     this.child = spawn(this.command, this.args, {
-      env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
+      env: { ...process.env, PYTHONIOENCODING: 'utf-8', ...this.extraEnv },
       stdio: ['pipe', 'pipe', 'pipe'],
       shell: process.platform === 'win32'
     });
@@ -85,6 +93,12 @@ class McpEngine {
 
         let parsed;
         try { parsed = JSON.parse(trimmed); } catch { continue; }
+
+        if (parsed.id === 1 && parsed.result?.serverInfo) {
+          this.serverCapabilities = parsed.result;
+          console.log(`[${this.name}] ✅ Đã handshake thành công và sẵn sàng nhận lệnh!`);
+          continue;
+        }
 
         const toolCount = parsed?.result?.tools?.length;
         if (toolCount) {
@@ -125,12 +139,34 @@ class McpEngine {
       this.pendingCallbacks.clear();
     });
 
+    // Tự động Handshake ngay khi vừa khởi tạo
+    const initPayload = {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'MasterBridge', version: '1.0' }
+      }
+    };
+    this.child.stdin.write(JSON.stringify(initPayload) + '\n');
+    this.child.stdin.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }) + '\n');
+
     return this.child;
   }
 
-  sendRpcAndWait(msg, timeoutMs = 45000) {
+  sendRpcAndWait(msg, timeoutMs = 45000, isRetry = false) {
     return new Promise((resolve) => {
       const child = this.ensureProcess();
+
+      // Nếu là request initialize từ Spark và engine đã handshake sẵn: trả về ngay lập tức
+      if (msg.method === 'initialize' && this.serverCapabilities) {
+        console.log(`[${this.name} HTTP] Trả kết quả Initialize có sẵn cho Spark (ID: ${msg.id})`);
+        resolve({ jsonrpc: '2.0', id: msg.id, result: this.serverCapabilities });
+        return;
+      }
+
       const internalId = this.nextId++;
       const originalId = msg.id;
 
@@ -142,7 +178,23 @@ class McpEngine {
         }
       }, timeoutMs);
 
-      this.pendingCallbacks.set(internalId, { originalId, resolve, timer });
+      this.pendingCallbacks.set(internalId, {
+        originalId,
+        resolve: (result) => {
+          const errorText = JSON.stringify(result);
+          if (!isRetry && this.name === 'BLENDER' && errorText.includes('Could not connect to Blender')) {
+            console.log(`[BLENDER] ⚡ Phát hiện Blender vừa mở, tự động kết nối lại...`);
+            this.restart();
+            setTimeout(() => {
+              this.sendRpcAndWait(msg, timeoutMs, true).then(resolve);
+            }, 1200);
+            return;
+          }
+          resolve(result);
+        },
+        timer
+      });
+
       const remapped = { ...msg, id: internalId };
       child.stdin.write(JSON.stringify(remapped) + '\n');
     });
@@ -154,9 +206,15 @@ class McpEngine {
   }
 }
 
+// 1. Godot Engine
 const godotEngine = new McpEngine('GODOT', 'node', [GODOT_SCRIPT], 100000);
+
+// 2. Blender Engine (ép buộc BLENDER_HOST=127.0.0.1 và BLENDER_PORT=9876 để kết nối đúng socket Blender Addon)
 const blenderParts = BLENDER_CMD.split(' ');
-const blenderEngine = new McpEngine('BLENDER', blenderParts[0], blenderParts.slice(1), 200000);
+const blenderEngine = new McpEngine('BLENDER', blenderParts[0], blenderParts.slice(1), 200000, {
+  BLENDER_HOST: '127.0.0.1',
+  BLENDER_PORT: '9876'
+});
 
 const server = http.createServer((req, res) => {
   const parsed = url.parse(req.url, true);
@@ -180,7 +238,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // OAuth Discovery Probe → Phản hồi 404 No-Auth
+  // OAuth Discovery Probe → 404 No-Auth
   if (path.includes('.well-known')) {
     console.log(`[HTTP] OAuth probe -> 404 No-Auth: ${req.method} ${path}`);
     res.writeHead(404, { 'Content-Type': 'application/json' });
@@ -202,7 +260,6 @@ const server = http.createServer((req, res) => {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache, no-transform',
       'Connection': 'keep-alive',
-      'X-Accel-Buffering': 'no',
     });
     res.flushHeaders();
 
@@ -237,10 +294,10 @@ const server = http.createServer((req, res) => {
         return;
       }
 
-      // THUẬT TOÁN ĐỊNH TUYẾN THÔNG MINH (SMART ENGINE ROUTER)
+      // THUẬT TOÁN ĐỊNH TUYẾN THÔNG MINH
       let targetEngine = null;
 
-      // 1. Nhận diện theo Tool Name (Chính xác 100%)
+      // 1. Nhận diện theo Tool Name
       if (msg.method === 'tools/call' && msg.params && msg.params.name) {
         if (BLENDER_TOOLS.has(msg.params.name)) {
           targetEngine = blenderEngine;
@@ -261,7 +318,7 @@ const server = http.createServer((req, res) => {
         targetEngine = pathEngine;
       }
 
-      // Xử lý Notification
+      // Notification
       if (msg.id === undefined || msg.id === null) {
         targetEngine.sendToMcp(msg);
         res.writeHead(202, { 'Content-Type': 'application/json' });
@@ -269,7 +326,7 @@ const server = http.createServer((req, res) => {
         return;
       }
 
-      // Xử lý SSE mode
+      // SSE Mode
       if (session) {
         console.log(`[${targetEngine.name} SSE POST] ${msg.method} (${msg.params?.name || 'req'}) (id=${msg.id}) -> session ${sessionId}`);
         targetEngine.sendToMcp(msg);
@@ -278,7 +335,7 @@ const server = http.createServer((req, res) => {
         return;
       }
 
-      // Xử lý Direct HTTP mode
+      // Direct HTTP Mode
       console.log(`[${targetEngine.name} HTTP POST] ${msg.method} (${msg.params?.name || 'req'}) (id=${msg.id}) [Direct mode]`);
       targetEngine.sendRpcAndWait(msg).then(result => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
