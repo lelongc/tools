@@ -7,9 +7,9 @@ signal player_died
 @export var swerve_speed: float = 18.0
 @export var max_x_limit: float = 3.8
 
-var fire_rate: float = 3.5          # Số phát bắn mỗi giây
-var bullet_count: int = 1           # Số tia đạn bắn cùng lúc
-var bullet_damage: float = 10.0     # Sát thương mỗi viên
+var fire_rate: float = 3.5          # Số phát bắn mỗi giây (tối đa 25.0)
+var bullet_count: int = 1           # Số tia đạn bắn cùng lúc (1 - 5)
+var bullet_damage: float = 10.0     # Sát thương mỗi viên (tối đa 100.0)
 var gun_level: int = 1              # Cấp độ tiến hóa súng
 
 var is_active: bool = true
@@ -75,7 +75,6 @@ func _physics_process(delta: float) -> void:
 		# Trong trận đánh Boss
 		boss_timer -= delta
 		if boss_timer <= 0.0 and is_instance_valid(boss_target) and boss_target.get("is_dead") == false:
-			# Hết thời gian mà chưa hạ được Boss -> Boss đè bẹp (Rage Fail)
 			is_active = false
 			if boss_target.has_method("attack_player"):
 				boss_target.attack_player()
@@ -115,9 +114,9 @@ func shoot_bullets() -> void:
 func apply_gate_modifier(type: int, val: float) -> void:
 	match type:
 		0: # FIRE_RATE_ADD
-			fire_rate += val
+			fire_rate = clamp(fire_rate + val, 1.0, 25.0)
 		1: # FIRE_RATE_MULT
-			fire_rate *= val
+			fire_rate = clamp(fire_rate * val, 1.0, 25.0)
 		2: # FIRE_RATE_SUB
 			fire_rate = max(1.0, fire_rate - abs(val))
 		3: # BULLET_COUNT_ADD
@@ -125,11 +124,11 @@ func apply_gate_modifier(type: int, val: float) -> void:
 		4: # BULLET_COUNT_MULT
 			bullet_count = clamp(bullet_count * int(val), 1, 5)
 		5: # POWER_ADD
-			bullet_damage += val
+			bullet_damage = clamp(bullet_damage + val, 5.0, 100.0)
 	
 	update_gun_evolution()
 
-func take_obstacle_damage(dmg: float) -> void:
+func take_obstacle_damage(_dmg: float) -> void:
 	fire_rate = max(1.0, fire_rate - 2.0)
 	bullet_damage = max(5.0, bullet_damage - 2.0)
 	update_gun_evolution()
@@ -139,8 +138,8 @@ func take_obstacle_damage(dmg: float) -> void:
 	tw.tween_property(gun_model_root, "scale", Vector3.ONE, 0.1)
 
 func update_gun_evolution() -> void:
-	gun_level = int(1 + (fire_rate - 3.0) / 2.0 + (bullet_count - 1) * 3 + (bullet_damage - 10.0) / 5.0)
-	gun_level = max(1, gun_level)
+	gun_level = int(1 + (fire_rate - 3.0) * 0.6 + (bullet_count - 1) * 3 + (bullet_damage - 10.0) * 0.2)
+	gun_level = clamp(gun_level, 1, 99)
 	
 	if level_label:
 		level_label.text = "SÚNG LV.%d\nTỐC ĐỘ: %.1f/s" % [gun_level, fire_rate]
