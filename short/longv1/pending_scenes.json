@@ -2,787 +2,997 @@
   {
     "sentence_id": 1,
     "start": 0.0,
-    "end": 3.73,
-    "text": "Hey there. Grab a warm drink,"
+    "end": 2.0,
+    "text": "Hey there!"
   },
   {
     "sentence_id": 2,
-    "start": 3.73,
-    "end": 7.84,
-    "text": "sit back and relax for a moment."
+    "start": 2.0,
+    "end": 4.06,
+    "text": "Grab a warm drink,"
   },
   {
     "sentence_id": 3,
-    "start": 7.84,
-    "end": 10.27,
-    "text": "Let me ask you something honest."
+    "start": 4.06,
+    "end": 7.84,
+    "text": "sit back, and relax for a moment."
   },
   {
     "sentence_id": 4,
-    "start": 10.27,
-    "end": 13.3,
-    "text": "Have you ever had a completely free day?"
+    "start": 7.84,
+    "end": 10.4,
+    "text": "Let me ask you something honest."
   },
   {
     "sentence_id": 5,
-    "start": 13.3,
-    "end": 14.44,
-    "text": "A day where you"
+    "start": 10.4,
+    "end": 12.88,
+    "text": "Have you ever had a completely free day?"
   },
   {
     "sentence_id": 6,
-    "start": 14.44,
-    "end": 15.81,
-    "text": "did no hard labor,"
+    "start": 12.88,
+    "end": 15.51,
+    "text": "A day where you did no hard labor"
   },
   {
     "sentence_id": 7,
-    "start": 15.81,
-    "end": 19.86,
-    "text": "you lifted no heavy weights and you ran no marathons."
+    "start": 15.51,
+    "end": 17.81,
+    "text": "you lifted no heavy weights"
   },
   {
     "sentence_id": 8,
-    "start": 19.86,
-    "end": 21.0,
-    "text": "You just stayed"
+    "start": 17.81,
+    "end": 19.96,
+    "text": "and you ran no marathons."
   },
   {
     "sentence_id": 9,
-    "start": 21.0,
-    "end": 23.22,
-    "text": "home. You laid on the sofa,"
+    "start": 19.96,
+    "end": 21.84,
+    "text": "You just stayed home."
   },
   {
     "sentence_id": 10,
-    "start": 23.22,
-    "end": 28.0,
-    "text": "scrolled your phone, watched some shows and tried to rest."
+    "start": 21.84,
+    "end": 23.71,
+    "text": "You laid on the sofa,"
   },
   {
     "sentence_id": 11,
-    "start": 29.0,
-    "end": 32.5,
-    "text": "And yet, by eight o'clock in the evening"
+    "start": 23.71,
+    "end": 27.18,
+    "text": "scrolled your phone, watched some shows"
   },
   {
     "sentence_id": 12,
-    "start": 32.5,
-    "end": 36.0,
-    "text": "you felt completely utterly exhausted."
+    "start": 27.18,
+    "end": 28.96,
+    "text": "and tried to rest."
   },
   {
     "sentence_id": 13,
-    "start": 38.0,
-    "end": 40.98,
-    "text": "Your limbs felt heavy like lead."
+    "start": 28.96,
+    "end": 32.62,
+    "text": "And yet, by eight o'clock in the evening"
   },
   {
     "sentence_id": 14,
-    "start": 40.98,
-    "end": 43.02,
-    "text": "Your brain felt foggy."
+    "start": 32.62,
+    "end": 36.28,
+    "text": "you felt completely utterly exhausted."
   },
   {
     "sentence_id": 15,
-    "start": 43.02,
-    "end": 46.0,
-    "text": "Your chest felt strangely empty."
+    "start": 36.28,
+    "end": 39.08,
+    "text": "Your limbs felt heavy like lead."
   },
   {
     "sentence_id": 16,
-    "start": 46.0,
-    "end": 48.51,
-    "text": "You asked yourself, why am I so"
+    "start": 39.08,
+    "end": 41.36,
+    "text": "Your brain felt foggy."
   },
   {
     "sentence_id": 17,
-    "start": 48.51,
-    "end": 52.0,
-    "text": "tired when I literally did nothing all day?"
+    "start": 41.36,
+    "end": 44.6,
+    "text": "Your chest felt strangely empty."
   },
   {
     "sentence_id": 18,
-    "start": 53.0,
-    "end": 57.78,
-    "text": "Most people think this is just laziness or a lack of motivation"
+    "start": 44.6,
+    "end": 47.58,
+    "text": "You asked yourself, why am I so"
   },
   {
     "sentence_id": 19,
-    "start": 57.78,
-    "end": 59.0,
-    "text": "but it is not."
+    "start": 47.58,
+    "end": 51.72,
+    "text": "tired when I literally did nothing all day?"
   },
   {
     "sentence_id": 20,
-    "start": 62.0,
-    "end": 65.24,
-    "text": "What you are experiencing is one of the most fascinating"
+    "start": 51.72,
+    "end": 53.85,
+    "text": "Most people think this is just"
   },
   {
     "sentence_id": 21,
-    "start": 65.24,
-    "end": 69.0,
-    "text": "invisible biological battles happening inside human physiology."
+    "start": 53.85,
+    "end": 56.2,
+    "text": "laziness or a lack of motivation."
   },
   {
     "sentence_id": 22,
-    "start": 71.0,
-    "end": 74.65,
-    "text": "It is called the paradox of mental fatigue."
+    "start": 56.2,
+    "end": 57.72,
+    "text": "You know this."
   },
   {
     "sentence_id": 23,
-    "start": 74.65,
-    "end": 76.43,
-    "text": "And to understand it,"
+    "start": 57.72,
+    "end": 61.72,
+    "text": "But the reality is far deeper."
   },
   {
     "sentence_id": 24,
-    "start": 76.43,
-    "end": 80.0,
-    "text": "we have to look at the silent energy thief"
+    "start": 61.72,
+    "end": 64.52,
+    "text": "What you're experiencing is one of the most fascinating"
   },
   {
     "sentence_id": 25,
-    "start": 80.0,
-    "end": 84.24,
-    "text": "running in the background of your skull."
+    "start": 64.52,
+    "end": 66.04,
+    "text": "invisible biological battles"
   },
   {
     "sentence_id": 26,
-    "start": 84.24,
-    "end": 87.0,
-    "text": "Let's look at the numbers."
+    "start": 66.03999999999999,
+    "end": 69.2,
+    "text": "happening inside human physiology."
   },
   {
     "sentence_id": 27,
-    "start": 88.0,
-    "end": 91.16,
-    "text": "Your brain weighs only about three pounds."
+    "start": 69.2,
+    "end": 70.92,
+    "text": "It is called the"
   },
   {
     "sentence_id": 28,
-    "start": 91.16,
-    "end": 95.0,
-    "text": "That is just two percent of your total body weight."
+    "start": 70.92,
+    "end": 73.72,
+    "text": "paradox of mental fatigue."
   },
   {
     "sentence_id": 29,
-    "start": 95.0,
-    "end": 97.93,
-    "text": "But that tiny clump of tissue consumes 20% of"
+    "start": 73.72,
+    "end": 74.66,
+    "text": "And to understand it,"
   },
   {
     "sentence_id": 30,
-    "start": 97.93,
-    "end": 101.0,
-    "text": "all the oxygen and glucose in your entire body."
+    "start": 74.66,
+    "end": 77.72,
+    "text": "we have to look at the silent energy thief running in the background"
   },
   {
     "sentence_id": 31,
-    "start": 101.0,
-    "end": 104.5,
-    "text": "Every fifth breath you take and every fifth bite of food"
+    "start": 77.72,
+    "end": 79.52,
+    "text": "of your skull."
   },
   {
     "sentence_id": 32,
-    "start": 104.5,
-    "end": 109.0,
-    "text": "you eat goes directly to powering the electrical storm inside your head."
+    "start": 79.52,
+    "end": 82.56,
+    "text": "Let's look at the numbers."
   },
   {
     "sentence_id": 33,
-    "start": 111.0,
-    "end": 113.64,
-    "text": "Now, here is the mystery."
+    "start": 82.56,
+    "end": 85.48,
+    "text": "Your brain weighs only about three pounds."
   },
   {
     "sentence_id": 34,
-    "start": 113.64,
-    "end": 116.92,
-    "text": "When you sit down to do nothing"
+    "start": 85.48,
+    "end": 87.4,
+    "text": "That is just two percent"
   },
   {
     "sentence_id": 35,
-    "start": 116.92,
-    "end": 122.0,
-    "text": "how much energy do you think your brain saves?"
+    "start": 87.4,
+    "end": 89.48,
+    "text": "of your total body weight."
   },
   {
     "sentence_id": 36,
-    "start": 122.0,
-    "end": 124.97,
-    "text": "Most people assume the brain drops"
+    "start": 89.48,
+    "end": 91.63,
+    "text": "But that tiny clump of tissue consumes 20"
   },
   {
     "sentence_id": 37,
-    "start": 124.97,
-    "end": 127.68,
-    "text": "its energy consumption by 50 or"
+    "start": 91.63,
+    "end": 94.0,
+    "text": "percent of all the oxygen and glucose in your"
   },
   {
     "sentence_id": 38,
-    "start": 127.68,
-    "end": 131.0,
-    "text": "80% like a laptop entering sleep mode."
+    "start": 94.0,
+    "end": 95.76,
+    "text": "entire body."
   },
   {
     "sentence_id": 39,
-    "start": 131.0,
-    "end": 135.14,
-    "text": "In 1997, a groundbreaking neuroscientist named Dr."
+    "start": 95.76,
+    "end": 97.37,
+    "text": "Every fifth breath you take,"
   },
   {
     "sentence_id": 40,
-    "start": 135.14,
-    "end": 143.0,
-    "text": "Marcus Reichel ran brain scans to find out what he discovered shocked the scientific community."
+    "start": 97.37,
+    "end": 99.45,
+    "text": "and every fifth bite of food you eat"
   },
   {
     "sentence_id": 41,
-    "start": 145.0,
-    "end": 149.54,
-    "text": "When you stop doing tasks and sit in a room doing nothing"
+    "start": 99.45,
+    "end": 101.0,
+    "text": "goes directly to powering"
   },
   {
     "sentence_id": 42,
-    "start": 149.54,
-    "end": 154.0,
-    "text": "your brain's energy consumption drops by less than 5%."
+    "start": 101.0,
+    "end": 104.08,
+    "text": "the electrical storm inside your head."
   },
   {
     "sentence_id": 43,
-    "start": 154.0,
-    "end": 156.07,
-    "text": "95% of your mental power"
+    "start": 104.08,
+    "end": 107.72,
+    "text": "Now, here's the mystery."
   },
   {
     "sentence_id": 44,
-    "start": 156.07,
-    "end": 159.0,
-    "text": "is still running at full throttle."
+    "start": 107.72,
+    "end": 109.51,
+    "text": "When you sit down to do nothing"
   },
   {
     "sentence_id": 45,
-    "start": 162.0,
-    "end": 166.31,
-    "text": "Why? Because your brain does not have an off switch."
+    "start": 109.51,
+    "end": 112.52,
+    "text": "how much energy do you think your brain's sitting?"
   },
   {
     "sentence_id": 46,
-    "start": 166.31,
-    "end": 169.87,
-    "text": "When you stop focusing on the outside world"
+    "start": 112.52,
+    "end": 113.92,
+    "text": "It saves."
   },
   {
     "sentence_id": 47,
-    "start": 169.87,
-    "end": 175.0,
-    "text": "your brain boots up a massive interconnected neural network."
+    "start": 113.92,
+    "end": 118.81,
+    "text": "Most people assume the brain drops its energy consumption by 50 or 80 percent"
   },
   {
     "sentence_id": 48,
-    "start": 175.0,
-    "end": 178.57,
-    "text": "Neuroscientists call it"
+    "start": 118.81,
+    "end": 119.76,
+    "text": "like a laptop"
   },
   {
     "sentence_id": 49,
-    "start": 178.57,
-    "end": 181.05,
-    "text": "the default mode"
+    "start": 119.75999999999999,
+    "end": 122.44,
+    "text": "entering sleep mode."
   },
   {
     "sentence_id": 50,
-    "start": 181.05,
-    "end": 184.0,
-    "text": "network or the DMN."
+    "start": 122.44,
+    "end": 126.6,
+    "text": "In 1997, a groundbreaking neuroscientist named Dr."
   },
   {
     "sentence_id": 51,
-    "start": 184.0,
-    "end": 188.05,
-    "text": "Think of the DMN as your brain's internal time travel machine."
+    "start": 126.6,
+    "end": 129.76,
+    "text": "Marcus Reichel ran brain scans to find"
   },
   {
     "sentence_id": 52,
-    "start": 188.05,
-    "end": 192.63,
-    "text": "The moment you are not actively solving a puzzle or talking to someone"
+    "start": 129.76,
+    "end": 130.92,
+    "text": "out."
   },
   {
     "sentence_id": 53,
-    "start": 192.63,
-    "end": 194.0,
-    "text": "the DMN takes over."
+    "start": 130.92,
+    "end": 135.32,
+    "text": "What he discovered shocked the scientific community."
   },
   {
     "sentence_id": 54,
-    "start": 194.0,
-    "end": 197.81,
-    "text": "It starts replaying past embarrassment from five years ago."
+    "start": 135.32,
+    "end": 138.49,
+    "text": "When you stop doing tasks and sit in a room doing nothing"
   },
   {
     "sentence_id": 55,
-    "start": 197.81,
-    "end": 202.0,
-    "text": "It starts simulating future disasters that have not happened yet."
+    "start": 138.49,
+    "end": 140.32,
+    "text": "your brain's energy consumption"
   },
   {
     "sentence_id": 56,
-    "start": 202.0,
-    "end": 206.29,
-    "text": "It starts comparing you to people on social media."
+    "start": 140.32,
+    "end": 143.4,
+    "text": "drops by less than 5 percent."
   },
   {
     "sentence_id": 57,
-    "start": 206.29,
-    "end": 208.0,
-    "text": "It starts wondering,"
+    "start": 143.4,
+    "end": 145.54,
+    "text": "95 percent of your mental power"
   },
   {
     "sentence_id": 58,
-    "start": 208.0,
-    "end": 211.27,
-    "text": "did I reply to that message?"
+    "start": 145.54,
+    "end": 147.88,
+    "text": "is still running at full throttle."
   },
   {
     "sentence_id": 59,
-    "start": 211.27,
-    "end": 214.66,
-    "text": "What am I doing with my life?"
+    "start": 147.88,
+    "end": 150.44,
+    "text": "Why?"
   },
   {
     "sentence_id": 60,
-    "start": 214.66,
-    "end": 217.0,
-    "text": "Am I falling behind?"
+    "start": 150.44,
+    "end": 152.16,
+    "text": "Because your brain does"
   },
   {
     "sentence_id": 61,
-    "start": 217.0,
-    "end": 219.47,
-    "text": "Your brain is running hundreds"
+    "start": 152.16,
+    "end": 153.88,
+    "text": "not have an off switch."
   },
   {
     "sentence_id": 62,
-    "start": 219.47,
-    "end": 223.0,
-    "text": "of heavy psychological simulations at once."
+    "start": 153.88,
+    "end": 156.35,
+    "text": "When you stop focusing on the outside world"
   },
   {
     "sentence_id": 63,
-    "start": 223.0,
-    "end": 225.81,
-    "text": "To your body, a simulated threat feels"
+    "start": 156.35,
+    "end": 159.0,
+    "text": "your brain boots up a massive interconnected"
   },
   {
     "sentence_id": 64,
-    "start": 225.81,
-    "end": 229.0,
-    "text": "nearly identical to a real physical threat."
+    "start": 159.0,
+    "end": 161.4,
+    "text": "neural network."
   },
   {
     "sentence_id": 65,
-    "start": 229.0,
-    "end": 233.85,
-    "text": "When you imagine an uncomfortable conversation or worry about tomorrow"
+    "start": 161.4,
+    "end": 166.38,
+    "text": "Neuroscientists call it the default"
   },
   {
     "sentence_id": 66,
-    "start": 233.85,
-    "end": 238.0,
-    "text": "your brain releases microdosis of cortisol and adrenaline."
+    "start": 166.38,
+    "end": 169.8,
+    "text": "mode network or the DMN."
   },
   {
     "sentence_id": 67,
-    "start": 238.0,
-    "end": 242.15,
-    "text": "Your heart rate subtly elevates."
+    "start": 169.8,
+    "end": 170.98,
+    "text": "Think of the DMN as"
   },
   {
     "sentence_id": 68,
-    "start": 242.15,
-    "end": 245.0,
-    "text": "Your muscles tense up."
+    "start": 170.98,
+    "end": 173.6,
+    "text": "your brain's internal time travel machine."
   },
   {
     "sentence_id": 69,
-    "start": 245.0,
-    "end": 249.01,
-    "text": "You might be lying completely still on a soft bed."
+    "start": 173.6,
+    "end": 177.59,
+    "text": "The moment you are not actively solving a puzzle or talking to someone"
   },
   {
     "sentence_id": 70,
-    "start": 249.01,
-    "end": 256.0,
-    "text": "But biologically, your nervous system is running a marathon against imaginary phantoms."
+    "start": 177.59,
+    "end": 178.44,
+    "text": "the DMN takes"
   },
   {
     "sentence_id": 71,
-    "start": 256.0,
-    "end": 259.7,
-    "text": "And then comes the second energy leak"
+    "start": 178.44,
+    "end": 180.0,
+    "text": "over."
   },
   {
     "sentence_id": 72,
-    "start": 259.7,
-    "end": 262.0,
-    "text": "the illusion of rest."
+    "start": 180.0,
+    "end": 181.66,
+    "text": "It starts replaying past"
   },
   {
     "sentence_id": 73,
-    "start": 262.0,
-    "end": 265.25,
-    "text": "When we feel tired today,"
+    "start": 181.66,
+    "end": 184.08,
+    "text": "embarrassments from five years ago."
   },
   {
     "sentence_id": 74,
-    "start": 265.25,
-    "end": 267.07,
-    "text": "what do we do?"
+    "start": 184.08,
+    "end": 186.49,
+    "text": "It starts simulating future disasters"
   },
   {
     "sentence_id": 75,
-    "start": 267.07,
-    "end": 270.19,
-    "text": "We reach for our phones."
+    "start": 186.49,
+    "end": 188.24,
+    "text": "that have not happened yet."
   },
   {
     "sentence_id": 76,
-    "start": 270.19,
-    "end": 275.0,
-    "text": "We tell ourselves, I'm just relaxing."
+    "start": 188.24,
+    "end": 189.7,
+    "text": "It starts comparing you"
   },
   {
     "sentence_id": 77,
-    "start": 275.0,
-    "end": 280.11,
-    "text": "But scrolling through short-form videos and feeds is not rest."
+    "start": 189.7,
+    "end": 191.36,
+    "text": "to people on social media."
   },
   {
     "sentence_id": 78,
-    "start": 280.11,
-    "end": 282.0,
-    "text": "It is sensory overload."
+    "start": 191.36,
+    "end": 193.52,
+    "text": "It starts wondering, did"
   },
   {
     "sentence_id": 79,
-    "start": 282.0,
-    "end": 286.38,
-    "text": "Every three seconds, your brain has to process a new face"
+    "start": 193.52,
+    "end": 195.68,
+    "text": "I reply to that message?"
   },
   {
     "sentence_id": 80,
-    "start": 286.38,
-    "end": 287.38,
-    "text": "a new song,"
+    "start": 195.68,
+    "end": 198.36,
+    "text": "What am I doing with my life?"
   },
   {
     "sentence_id": 81,
-    "start": 287.38,
-    "end": 290.0,
-    "text": "a new emotion, a new piece of news"
+    "start": 198.36,
+    "end": 201.48000000000002,
+    "text": "Am I falling behind?"
   },
   {
     "sentence_id": 82,
-    "start": 290.0,
-    "end": 292.0,
-    "text": "and a new advertisement."
+    "start": 201.48,
+    "end": 203.7,
+    "text": "Your brain is running hundreds"
   },
   {
     "sentence_id": 83,
-    "start": 292.0,
-    "end": 295.98,
-    "text": "Cognitive scientists call this micro-decision fatigue."
+    "start": 203.7,
+    "end": 206.88,
+    "text": "of heavy psychological simulations at once."
   },
   {
     "sentence_id": 84,
-    "start": 295.98,
-    "end": 299.0,
-    "text": "Your brain has to subconsciously decide ,"
+    "start": 206.88,
+    "end": 210.09,
+    "text": "To your body, a simulated threat feels"
   },
   {
     "sentence_id": 85,
-    "start": 299.0,
-    "end": 301.37,
-    "text": "do I care about this?"
+    "start": 210.09,
+    "end": 213.72,
+    "text": "nearly identical to a real physical threat."
   },
   {
     "sentence_id": 86,
-    "start": 301.37,
-    "end": 302.61,
-    "text": "Do I swipe?"
+    "start": 213.72,
+    "end": 217.29,
+    "text": "When you imagine an uncomfortable conversation or worry about tomorrow"
   },
   {
     "sentence_id": 87,
-    "start": 302.61,
-    "end": 303.85,
-    "text": "Do I laugh?"
+    "start": 217.29,
+    "end": 218.36,
+    "text": "your brain releases"
   },
   {
     "sentence_id": 88,
-    "start": 303.85,
-    "end": 306.0,
-    "text": "Do I keep watching?"
+    "start": 218.36,
+    "end": 221.84,
+    "text": "microdoses of cortisol and adrenaline."
   },
   {
     "sentence_id": 89,
-    "start": 306.0,
-    "end": 308.15,
-    "text": "You are forcing your visual"
+    "start": 221.84,
+    "end": 225.12,
+    "text": "Your heart rate subtly elevates."
   },
   {
     "sentence_id": 90,
-    "start": 308.15,
-    "end": 310.46,
-    "text": "and emotional centers to make"
+    "start": 225.12,
+    "end": 228.44,
+    "text": "Your muscles tense up."
   },
   {
     "sentence_id": 91,
-    "start": 310.46,
-    "end": 315.0,
-    "text": "thousands of rapid micro-evaluations every single minute."
+    "start": 228.44,
+    "end": 231.89,
+    "text": "You might be lying completely still on a soft bed"
   },
   {
     "sentence_id": 92,
-    "start": 315.0,
-    "end": 317.81,
-    "text": "You are not resting your battery."
+    "start": 231.89,
+    "end": 234.64,
+    "text": "but biologically, your nervous system"
   },
   {
     "sentence_id": 93,
-    "start": 317.81,
-    "end": 323.0,
-    "text": "You are violently draining it while holding it in your hands."
+    "start": 234.64,
+    "end": 235.78,
+    "text": "is running a"
   },
   {
     "sentence_id": 94,
-    "start": 323.0,
-    "end": 326.13,
-    "text": "This is the great paradox of modern life."
+    "start": 235.78,
+    "end": 239.2,
+    "text": "marathon against imaginary phantoms."
   },
   {
     "sentence_id": 95,
-    "start": 326.13,
-    "end": 333.0,
-    "text": "We have eliminated physical exhaustion only to replace it with chronic cognitive friction."
+    "start": 239.20000000000002,
+    "end": 241.76,
+    "text": "And then comes the second energy leak."
   },
   {
     "sentence_id": 96,
-    "start": 333.0,
-    "end": 336.61,
-    "text": "In 1670, the French philosopher Blaise Pascal wrote"
+    "start": 241.76,
+    "end": 243.64000000000001,
+    "text": "The illusion of rest."
   },
   {
     "sentence_id": 97,
-    "start": 336.61,
-    "end": 340.0,
-    "text": "a sentence that predicted the entire modern era."
+    "start": 243.64,
+    "end": 245.77,
+    "text": "When we feel tired today,"
   },
   {
     "sentence_id": 98,
-    "start": 340.0,
-    "end": 342.57,
-    "text": "He said, all of humanity's"
+    "start": 245.77,
+    "end": 246.96,
+    "text": "what do we do?"
   },
   {
     "sentence_id": 99,
-    "start": 342.57,
-    "end": 345.93,
-    "text": "problems stem from man's inability"
+    "start": 246.96,
+    "end": 249.20000000000002,
+    "text": "We reach for our phones."
   },
   {
     "sentence_id": 100,
-    "start": 345.93,
-    "end": 349.0,
-    "text": "to sit quietly in a room alone."
+    "start": 249.2,
+    "end": 251.52,
+    "text": "We tell ourselves,"
   },
   {
     "sentence_id": 101,
-    "start": 349.0,
-    "end": 352.5,
-    "text": "We have become terrified of silence."
+    "start": 251.52,
+    "end": 253.84,
+    "text": "I'm just relaxing."
   },
   {
     "sentence_id": 102,
-    "start": 352.5,
-    "end": 359.0,
-    "text": "We have forgotten the difference between numbing out and true rest."
+    "start": 253.84,
+    "end": 256.37,
+    "text": "But scrolling through short-form videos"
   },
   {
     "sentence_id": 103,
-    "start": 359.0,
-    "end": 361.21,
-    "text": "Numbing out is passive consumption."
+    "start": 256.37,
+    "end": 257.8,
+    "text": "and feeds is not rest."
   },
   {
     "sentence_id": 104,
-    "start": 361.21,
-    "end": 366.0,
-    "text": "It fills the silence with noise so you don't have to hear your own thoughts."
+    "start": 257.8,
+    "end": 260.44,
+    "text": "It is sensory overload."
   },
   {
     "sentence_id": 105,
-    "start": 366.0,
-    "end": 370.0,
-    "text": "But it leaves you drained."
+    "start": 260.44,
+    "end": 264.46,
+    "text": "Every three seconds, your brain has to process a new face"
   },
   {
     "sentence_id": 106,
-    "start": 370.0,
-    "end": 372.86,
-    "text": "True rest is restorative stillness."
+    "start": 264.46,
+    "end": 265.37,
+    "text": "a new song,"
   },
   {
     "sentence_id": 107,
-    "start": 372.86,
-    "end": 379.0,
-    "text": "It is doing something that lets your nervous system finally drop its guard."
+    "start": 265.37,
+    "end": 266.36,
+    "text": "a new emotion,"
   },
   {
     "sentence_id": 108,
-    "start": 379.0,
-    "end": 381.0,
-    "text": "So, how do you"
+    "start": 266.36,
+    "end": 268.83,
+    "text": "a new piece of news,"
   },
   {
     "sentence_id": 109,
-    "start": 381.0,
-    "end": 385.0,
-    "text": "stop the silent energy leak?"
+    "start": 268.83,
+    "end": 271.8,
+    "text": "and a new advertisement."
   },
   {
     "sentence_id": 110,
-    "start": 385.0,
-    "end": 390.65,
-    "text": "First, you must understand that your brain recharges through stillness"
+    "start": 271.8,
+    "end": 275.24,
+    "text": "Cognitive scientists call this micro-decision fatigue."
   },
   {
     "sentence_id": 111,
-    "start": 390.65,
-    "end": 392.9,
-    "text": "nature, and deep presence,"
+    "start": 275.24,
+    "end": 278.31,
+    "text": "Your brain has to subconsciously decide"
   },
   {
     "sentence_id": 112,
-    "start": 392.9,
-    "end": 395.0,
-    "text": "not digital entertainment."
+    "start": 278.31,
+    "end": 280.12,
+    "text": "do I care about this?"
   },
   {
     "sentence_id": 113,
-    "start": 395.0,
-    "end": 397.0,
-    "text": "Take ten minutes today to stare"
+    "start": 280.12,
+    "end": 281.6,
+    "text": "Do I swipe?"
   },
   {
     "sentence_id": 114,
-    "start": 397.0,
-    "end": 399.0,
-    "text": "at a window without your phone."
+    "start": 281.6,
+    "end": 282.96,
+    "text": "Do I laugh?"
   },
   {
     "sentence_id": 115,
-    "start": 399.0,
-    "end": 402.5,
-    "text": "Feel the weight of your feet on the floor."
+    "start": 282.96,
+    "end": 284.32,
+    "text": "Do I keep watching?"
   },
   {
     "sentence_id": 116,
-    "start": 402.5,
-    "end": 409.0,
-    "text": "Go for a walk without headphones and listen to the ambient rhythm of the wind."
+    "start": 284.32,
+    "end": 286.48,
+    "text": "You're forcing your visual and emotional"
   },
   {
     "sentence_id": 117,
-    "start": 409.0,
-    "end": 411.69,
-    "text": "Let your default mode network settle"
+    "start": 286.48,
+    "end": 289.28,
+    "text": "centers to make thousands of rapid micro-evaluations"
   },
   {
     "sentence_id": 118,
-    "start": 411.69,
-    "end": 414.0,
-    "text": "down like dust in a quiet room."
+    "start": 289.28,
+    "end": 291.4,
+    "text": "every single minute."
   },
   {
     "sentence_id": 119,
-    "start": 414.0,
-    "end": 418.66,
-    "text": "Give your mind permission to simply exist without evaluating"
+    "start": 291.4,
+    "end": 294.08,
+    "text": "You're not resting your battery."
   },
   {
     "sentence_id": 120,
-    "start": 418.66,
-    "end": 422.0,
-    "text": "without reacting, and without performing."
+    "start": 294.08,
+    "end": 296.46,
+    "text": "You are violently draining it"
   },
   {
     "sentence_id": 121,
-    "start": 422.0,
-    "end": 425.11,
-    "text": "So tonight, be kind to yourself."
+    "start": 296.46,
+    "end": 299.0,
+    "text": "while holding it in your hands."
   },
   {
     "sentence_id": 122,
-    "start": 425.11,
-    "end": 426.96,
-    "text": "You are not broken,"
+    "start": 299.0,
+    "end": 301.79999999999995,
+    "text": "This is the great paradox of modern life."
   },
   {
     "sentence_id": 123,
-    "start": 426.96,
-    "end": 429.0,
-    "text": "and you are not lazy."
+    "start": 301.8,
+    "end": 304.51,
+    "text": "We have eliminated physical exhaustion only"
   },
   {
     "sentence_id": 124,
-    "start": 429.0,
-    "end": 432.42,
-    "text": "Your mind has just been carrying the weight"
+    "start": 304.51,
+    "end": 307.4,
+    "text": "to replace it with chronic cognitive friction."
   },
   {
     "sentence_id": 125,
-    "start": 432.42,
-    "end": 436.0,
-    "text": "of a thousand open tabs without realizing it."
+    "start": 307.4,
+    "end": 310.15,
+    "text": "In 1670, the French philosopher Blaise Pascal"
   },
   {
     "sentence_id": 126,
-    "start": 437.0,
-    "end": 439.95,
-    "text": "Close the screen for a little while."
+    "start": 310.15,
+    "end": 312.72,
+    "text": "wrote a sentence that predicted the entire"
   },
   {
     "sentence_id": 127,
-    "start": 439.95,
-    "end": 442.0,
-    "text": "Take a slow, deep breath,"
+    "start": 312.72,
+    "end": 314.6,
+    "text": "modern era."
   },
   {
     "sentence_id": 128,
-    "start": 442.0,
-    "end": 447.0,
-    "text": "and give your nervous system permission to rest in the quiet."
+    "start": 314.6,
+    "end": 317.48,
+    "text": "He said, all of humanity's problems stem from"
   },
   {
     "sentence_id": 129,
-    "start": 447.0,
-    "end": 451.0,
-    "text": "Take care of yourself out there."
+    "start": 317.48,
+    "end": 320.04,
+    "text": "man's inability to sit quietly in a room"
   },
   {
     "sentence_id": 130,
-    "start": 451.0,
-    "end": 453.27,
-    "text": "And as always,"
+    "start": 320.04,
+    "end": 322.56,
+    "text": "alone."
   },
   {
     "sentence_id": 131,
-    "start": 453.27,
-    "end": 457.0,
-    "text": "thanks for stopping by."
+    "start": 322.56,
+    "end": 325.56,
+    "text": "We have become terrified of silence."
+  },
+  {
+    "sentence_id": 132,
+    "start": 325.56,
+    "end": 327.44,
+    "text": "We have forgotten the difference"
+  },
+  {
+    "sentence_id": 133,
+    "start": 327.44,
+    "end": 329.44,
+    "text": "between numbing out and true rest."
+  },
+  {
+    "sentence_id": 134,
+    "start": 329.44000000000005,
+    "end": 332.04,
+    "text": "Numbing out is passive consumption."
+  },
+  {
+    "sentence_id": 135,
+    "start": 332.04,
+    "end": 334.14,
+    "text": "It fills the silence with noise so"
+  },
+  {
+    "sentence_id": 136,
+    "start": 334.14,
+    "end": 336.68,
+    "text": "you don't have to hear your own thoughts."
+  },
+  {
+    "sentence_id": 137,
+    "start": 336.68,
+    "end": 338.68,
+    "text": "But it leaves you drained."
+  },
+  {
+    "sentence_id": 138,
+    "start": 338.68,
+    "end": 341.32000000000005,
+    "text": "True rest is restorative stillness."
+  },
+  {
+    "sentence_id": 139,
+    "start": 341.32,
+    "end": 343.6,
+    "text": "It is doing something that lets"
+  },
+  {
+    "sentence_id": 140,
+    "start": 343.6,
+    "end": 346.76,
+    "text": "your nervous system finally drop its guard."
+  },
+  {
+    "sentence_id": 141,
+    "start": 346.76,
+    "end": 348.03,
+    "text": "So how do you"
+  },
+  {
+    "sentence_id": 142,
+    "start": 348.03,
+    "end": 350.76,
+    "text": "stop the silent energy leak?"
+  },
+  {
+    "sentence_id": 143,
+    "start": 350.76,
+    "end": 354.77,
+    "text": "First, you must understand that your brain recharges through stillness"
+  },
+  {
+    "sentence_id": 144,
+    "start": 354.77,
+    "end": 355.8,
+    "text": "nature, and deep"
+  },
+  {
+    "sentence_id": 145,
+    "start": 355.8,
+    "end": 360.24,
+    "text": "presence, not digital entertainment."
+  },
+  {
+    "sentence_id": 146,
+    "start": 360.24,
+    "end": 362.14,
+    "text": "Take ten minutes today to stare"
+  },
+  {
+    "sentence_id": 147,
+    "start": 362.14,
+    "end": 364.04,
+    "text": "at a window without your phone."
+  },
+  {
+    "sentence_id": 148,
+    "start": 364.04,
+    "end": 365.06,
+    "text": "Feel the weight of"
+  },
+  {
+    "sentence_id": 149,
+    "start": 365.06,
+    "end": 366.36,
+    "text": "your feet on the floor."
+  },
+  {
+    "sentence_id": 150,
+    "start": 366.36,
+    "end": 368.34,
+    "text": "Go for a walk without headphones and"
+  },
+  {
+    "sentence_id": 151,
+    "start": 368.34,
+    "end": 370.6,
+    "text": "listen to the ambient rhythm of the wind."
+  },
+  {
+    "sentence_id": 152,
+    "start": 370.6,
+    "end": 372.56,
+    "text": "Take your default mode network,"
+  },
+  {
+    "sentence_id": 153,
+    "start": 372.56,
+    "end": 374.96,
+    "text": "settle down like dust in a quiet room."
+  },
+  {
+    "sentence_id": 154,
+    "start": 374.96,
+    "end": 377.99,
+    "text": "Give your mind permission to simply exist without evaluating"
+  },
+  {
+    "sentence_id": 155,
+    "start": 377.99,
+    "end": 379.56,
+    "text": "without reacting, and without"
+  },
+  {
+    "sentence_id": 156,
+    "start": 379.56,
+    "end": 382.20000000000005,
+    "text": "performing."
+  },
+  {
+    "sentence_id": 157,
+    "start": 382.20000000000005,
+    "end": 385.52000000000004,
+    "text": "So tonight, be kind to yourself."
+  },
+  {
+    "sentence_id": 158,
+    "start": 385.52,
+    "end": 387.15,
+    "text": "You are not broken,"
+  },
+  {
+    "sentence_id": 159,
+    "start": 387.15,
+    "end": 388.96,
+    "text": "and you are not lazy."
+  },
+  {
+    "sentence_id": 160,
+    "start": 388.96,
+    "end": 392.19,
+    "text": "Your mind has just been carrying the weight"
+  },
+  {
+    "sentence_id": 161,
+    "start": 392.19,
+    "end": 395.56,
+    "text": "of a thousand open tabs without realizing it."
+  },
+  {
+    "sentence_id": 162,
+    "start": 395.56,
+    "end": 397.68,
+    "text": "Close the screen for a little while."
+  },
+  {
+    "sentence_id": 163,
+    "start": 397.68,
+    "end": 399.45,
+    "text": "Take a slow, deep breath,"
+  },
+  {
+    "sentence_id": 164,
+    "start": 399.45,
+    "end": 403.76,
+    "text": "and give your nervous system permission to rest in the quiet."
+  },
+  {
+    "sentence_id": 165,
+    "start": 403.76,
+    "end": 406.24,
+    "text": "Take care of yourself out there."
+  },
+  {
+    "sentence_id": 166,
+    "start": 406.24,
+    "end": 408.96,
+    "text": "And as always, thanks for stopping by."
   }
 ]
