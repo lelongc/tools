@@ -5,7 +5,7 @@ import url from 'url';
 import fs from 'fs';
 import path from 'path';
 
-// Load .env automatically
+// Load .env
 const envPath = path.join(path.dirname(url.fileURLToPath(import.meta.url)), '.env');
 if (fs.existsSync(envPath)) {
   const content = fs.readFileSync(envPath, 'utf8');
@@ -25,7 +25,19 @@ const PORT = parseInt(process.env.PORT || '8080', 10);
 const GODOT_SCRIPT = process.env.GODOT_MCP_SCRIPT || 'C:/Users/Acer/.gemini/antigravity-ide/mcp/godot-mcp/build/index.js';
 const BLENDER_CMD = process.env.BLENDER_MCP_CMD || 'uvx blender-mcp';
 
-// Global session registry: sessionId -> { engine, res, heartbeat }
+// Danh sách nhận diện chính xác công cụ Blender
+const BLENDER_TOOLS = new Set([
+  'get_addon_status', 'disable_telemetry', 'get_scene_info', 'get_object_info',
+  'get_viewport_screenshot', 'execute_blender_code', 'get_polyhaven_categories',
+  'search_polyhaven_assets', 'download_polyhaven_asset', 'set_texture',
+  'get_polyhaven_status', 'get_hyper3d_status', 'get_sketchfab_status',
+  'search_sketchfab_models', 'get_sketchfab_model_preview', 'download_sketchfab_model',
+  'generate_hyper3d_model_via_text', 'generate_hyper3d_model_via_images',
+  'poll_rodin_job_status', 'import_generated_asset', 'get_hunyuan3d_status',
+  'generate_hunyuan3d_model', 'poll_hunyuan_job_status', 'import_generated_asset_hunyuan',
+  'record_trajectory_feedback'
+]);
+
 const activeSessions = new Map();
 
 class McpEngine {
@@ -45,14 +57,13 @@ class McpEngine {
       return this.child;
     }
 
-    console.log(`[${this.name}] Đang khởi động engine: ${this.command} ${this.args.join(' ')}`);
+    console.log(`[${this.name}] Khởi động engine: ${this.command} ${this.args.join(' ')}`);
     this.child = spawn(this.command, this.args, {
       env: { ...process.env, PYTHONIOENCODING: 'utf-8' },
       stdio: ['pipe', 'pipe', 'pipe'],
       shell: process.platform === 'win32'
     });
 
-    // 1. DRAIN STDERR TO PREVENT DEADLOCKS & SHOW LOGS
     this.child.stderr.on('data', chunk => {
       const text = chunk.toString().trim();
       if (text) {
@@ -63,7 +74,6 @@ class McpEngine {
       }
     });
 
-    // 2. PARSE STDOUT JSON-RPC
     this.child.stdout.on('data', chunk => {
       this.buffer += chunk.toString();
       const lines = this.buffer.split('\n');
@@ -106,7 +116,7 @@ class McpEngine {
     });
 
     this.child.on('exit', (code) => {
-      console.log(`[${this.name}] Process kết thúc (code: ${code}). Sẽ tự khởi lại khi có request.`);
+      console.log(`[${this.name}] Process kết thúc (code: ${code}). Tự khởi lại khi có request mới.`);
       this.child = null;
       for (const [id, { originalId, resolve, timer }] of this.pendingCallbacks) {
         clearTimeout(timer);
@@ -118,7 +128,7 @@ class McpEngine {
     return this.child;
   }
 
-  sendRpcAndWait(msg, timeoutMs = 30000) {
+  sendRpcAndWait(msg, timeoutMs = 45000) {
     return new Promise((resolve) => {
       const child = this.ensureProcess();
       const internalId = this.nextId++;
@@ -144,7 +154,6 @@ class McpEngine {
   }
 }
 
-// Khởi tạo 2 engine độc lập
 const godotEngine = new McpEngine('GODOT', 'node', [GODOT_SCRIPT], 100000);
 const blenderParts = BLENDER_CMD.split(' ');
 const blenderEngine = new McpEngine('BLENDER', blenderParts[0], blenderParts.slice(1), 200000);
@@ -153,7 +162,6 @@ const server = http.createServer((req, res) => {
   const parsed = url.parse(req.url, true);
   const path = parsed.pathname || '/';
 
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, HEAD, PUT, DELETE');
   res.setHeader('Access-Control-Allow-Headers', '*');
@@ -172,7 +180,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // OAuth Discovery Probe → Phản hồi 404 No-Auth ngay lập tức
+  // OAuth Discovery Probe → Phản hồi 404 No-Auth
   if (path.includes('.well-known')) {
     console.log(`[HTTP] OAuth probe -> 404 No-Auth: ${req.method} ${path}`);
     res.writeHead(404, { 'Content-Type': 'application/json' });
@@ -180,16 +188,15 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // Phân luồng Engine
-  const isBlender = path.startsWith('/blender');
-  const engine = isBlender ? blenderEngine : godotEngine;
-  const endpointPath = isBlender ? '/blender/message' : '/message';
+  const isBlenderPath = path.startsWith('/blender');
+  const pathEngine = isBlenderPath ? blenderEngine : godotEngine;
+  const endpointPath = isBlenderPath ? '/blender/message' : '/message';
 
   // ===== 1. SSE STREAM (GET) =====
   const isSse = req.method === 'GET' && (path === '/mcp' || path === '/sse' || path === '/blender/mcp' || path === '/blender/sse' || path === '/blender');
   if (isSse) {
     const sessionId = crypto.randomUUID();
-    console.log(`[SSE] 🟢 Client Spark kết nối vào ${engine.name}! Session: ${sessionId} (Path: ${path})`);
+    console.log(`[SSE] 🟢 Client Spark kết nối vào ${pathEngine.name}! Session: ${sessionId} (Path: ${path})`);
 
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
@@ -199,19 +206,18 @@ const server = http.createServer((req, res) => {
     });
     res.flushHeaders();
 
-    // Gửi relative endpoint chuẩn
     res.write(`event: endpoint\ndata: ${endpointPath}?sessionId=${sessionId}\n\n`);
 
-    engine.ensureProcess();
+    pathEngine.ensureProcess();
 
     const heartbeat = setInterval(() => {
       try { res.write(': keepalive\n\n'); } catch { clearInterval(heartbeat); }
     }, 8000);
 
-    activeSessions.set(sessionId, { engine, res, heartbeat });
+    activeSessions.set(sessionId, { engine: pathEngine, res, heartbeat });
 
     req.on('close', () => {
-      console.log(`[SSE] 🔴 Client ngắt kết nối ${engine.name}: ${sessionId}`);
+      console.log(`[SSE] 🔴 Client ngắt kết nối ${pathEngine.name}: ${sessionId}`);
       clearInterval(heartbeat);
       activeSessions.delete(sessionId);
     });
@@ -231,12 +237,31 @@ const server = http.createServer((req, res) => {
         return;
       }
 
-      // Xác định Engine qua sessionId hoặc qua URL
+      // THUẬT TOÁN ĐỊNH TUYẾN THÔNG MINH (SMART ENGINE ROUTER)
+      let targetEngine = null;
+
+      // 1. Nhận diện theo Tool Name (Chính xác 100%)
+      if (msg.method === 'tools/call' && msg.params && msg.params.name) {
+        if (BLENDER_TOOLS.has(msg.params.name)) {
+          targetEngine = blenderEngine;
+        } else {
+          targetEngine = godotEngine;
+        }
+      }
+
+      // 2. Nhận diện theo Session đã đăng ký
       const sessionId = parsed.query.sessionId;
       const session = sessionId ? activeSessions.get(sessionId) : null;
-      const targetEngine = session ? session.engine : engine;
+      if (!targetEngine && session) {
+        targetEngine = session.engine;
+      }
 
-      // Notification (không có ID)
+      // 3. Nhận diện theo URL Path
+      if (!targetEngine) {
+        targetEngine = pathEngine;
+      }
+
+      // Xử lý Notification
       if (msg.id === undefined || msg.id === null) {
         targetEngine.sendToMcp(msg);
         res.writeHead(202, { 'Content-Type': 'application/json' });
@@ -244,17 +269,17 @@ const server = http.createServer((req, res) => {
         return;
       }
 
-      // SSE Mode: có active session
+      // Xử lý SSE mode
       if (session) {
-        console.log(`[${targetEngine.name} SSE POST] ${msg.method} (id=${msg.id}) -> session ${sessionId}`);
+        console.log(`[${targetEngine.name} SSE POST] ${msg.method} (${msg.params?.name || 'req'}) (id=${msg.id}) -> session ${sessionId}`);
         targetEngine.sendToMcp(msg);
         res.writeHead(202, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ status: 'accepted' }));
         return;
       }
 
-      // Direct HTTP Mode
-      console.log(`[${targetEngine.name} HTTP POST] ${msg.method} (id=${msg.id}) [Direct mode]`);
+      // Xử lý Direct HTTP mode
+      console.log(`[${targetEngine.name} HTTP POST] ${msg.method} (${msg.params?.name || 'req'}) (id=${msg.id}) [Direct mode]`);
       targetEngine.sendRpcAndWait(msg).then(result => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(result));
