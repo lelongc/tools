@@ -27,10 +27,12 @@ def load_env(path):
     return env
 
 config = load_env(os.path.join(SCRIPT_DIR, '.env'))
-PORT = int(config.get('GODOT_PORT', '8080'))
+PORT = int(config.get('PORT', '8080'))
 GODOT_PATH = config.get('GODOT_PATH', r'D:\app\godot\Godot_v4.7.1-stable_win64.exe')
 GODOT_MCP_SCRIPT = config.get('GODOT_MCP_SCRIPT', r'C:/Users/Acer/.gemini/antigravity-ide/mcp/godot-mcp/build/index.js')
 BLENDER_MCP_CMD = config.get('BLENDER_MCP_CMD', 'uvx blender-mcp')
+BLENDER_HOST = config.get('BLENDER_HOST', '127.0.0.1')
+BLENDER_PORT = config.get('BLENDER_PORT', '9876')
 GODOT_PROJECT_PATH = config.get('GODOT_PROJECT_PATH', r'd:\folder\tools\godot_demo\2')
 GODOT_MCP_ALLOWED_DIRS = config.get('GODOT_MCP_ALLOWED_DIRS', r'd:\folder\tools;d:\folder\tools\godot_demo\2')
 
@@ -59,6 +61,8 @@ env = os.environ.copy()
 env["GODOT_PATH"] = GODOT_PATH
 env["GODOT_MCP_SCRIPT"] = GODOT_MCP_SCRIPT
 env["BLENDER_MCP_CMD"] = BLENDER_MCP_CMD
+env["BLENDER_HOST"] = BLENDER_HOST
+env["BLENDER_PORT"] = BLENDER_PORT
 env["GODOT_PROJECT_PATH"] = GODOT_PROJECT_PATH
 env["GODOT_MCP_ALLOWED_DIRS"] = GODOT_MCP_ALLOWED_DIRS
 env["PYTHONIOENCODING"] = "utf-8"
@@ -66,7 +70,7 @@ env["DEBUG"] = "true"
 env["PORT"] = str(PORT)
 
 print("=" * 75, flush=True)
-print("  🚀 MASTER MCP SERVER (GODOT + BLENDER) + NGROK LINK CỐ ĐỊNH", flush=True)
+print("  🚀 MASTER MCP HUB (GODOT + BLENDER + AI IMAGE) + NGROK LINK CỐ ĐỊNH", flush=True)
 print("=" * 75, flush=True)
 
 # === 3. Khoi dong Master MCP SSE Server ===
@@ -114,12 +118,13 @@ time.sleep(3)
 if NGROK_DOMAIN:
     public_url = f"https://{NGROK_DOMAIN}"
     print(f"\n{'=' * 75}", flush=True)
-    print("  🎉 KẾT NỐI THÀNH CÔNG! LINK CỐ ĐỊNH VĨNH VIỄN CHO SPARK:", flush=True)
+    print("  🎉 KẾT NỐI THÀNH CÔNG! BỘ 3 LINK TĨNH VĨNH VIỄN CHO SPARK:", flush=True)
     print(f"  {'-' * 71}", flush=True)
-    print(f"  🎮 LINK CHO GODOT MCP  : {public_url}/mcp", flush=True)
-    print(f"  🎨 LINK CHO BLENDER MCP: {public_url}/blender/mcp", flush=True)
+    print(f"  🎮 1. GODOT MCP     : {public_url}/mcp", flush=True)
+    print(f"  🎨 2. BLENDER MCP   : {public_url}/blender/mcp", flush=True)
+    print(f"  🖼️ 3. AI IMAGE MCP  : {public_url}/image/mcp", flush=True)
     print(f"{'=' * 75}", flush=True)
-    print("  💡 Hai link này chạy song song, không bao giờ thay đổi!", flush=True)
+    print("  💡 Cả 3 link này chạy song song, vĩnh viễn không bao giờ thay đổi!", flush=True)
     print(f"{'=' * 75}\n", flush=True)
 else:
     print("[!] Khong co NGROK_DOMAIN trong .env. Dang dung link ngau nhien.", flush=True)

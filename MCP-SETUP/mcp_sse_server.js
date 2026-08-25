@@ -22,6 +22,7 @@ if (fs.existsSync(envPath)) {
 const PORT = parseInt(process.env.PORT || '8080', 10);
 const GODOT_SCRIPT = process.env.GODOT_MCP_SCRIPT || 'C:/Users/Acer/.gemini/antigravity-ide/mcp/godot-mcp/build/index.js';
 const BLENDER_CMD = process.env.BLENDER_MCP_CMD || 'uvx blender-mcp';
+const IMAGE_SCRIPT = path.join(path.dirname(url.fileURLToPath(import.meta.url)), 'image_mcp_server.js');
 
 const BLENDER_TOOLS = new Set([
   'get_addon_status', 'disable_telemetry', 'get_scene_info', 'get_object_info',
@@ -33,6 +34,10 @@ const BLENDER_TOOLS = new Set([
   'poll_rodin_job_status', 'import_generated_asset', 'get_hunyuan3d_status',
   'generate_hunyuan3d_model', 'poll_hunyuan_job_status', 'import_generated_asset_hunyuan',
   'record_trajectory_feedback'
+]);
+
+const IMAGE_TOOLS = new Set([
+  'generate_image', 'download_image'
 ]);
 
 const activeSessions = new Map();
@@ -206,15 +211,18 @@ class McpEngine {
   }
 }
 
-// 1. Godot Engine
+// 1. Godot Engine (157 tools)
 const godotEngine = new McpEngine('GODOT', 'node', [GODOT_SCRIPT], 100000);
 
-// 2. Blender Engine (ép buộc BLENDER_HOST=127.0.0.1 và BLENDER_PORT=9876 để kết nối đúng socket Blender Addon)
+// 2. Blender Engine (25 tools)
 const blenderParts = BLENDER_CMD.split(' ');
 const blenderEngine = new McpEngine('BLENDER', blenderParts[0], blenderParts.slice(1), 200000, {
   BLENDER_HOST: '127.0.0.1',
   BLENDER_PORT: '9876'
 });
+
+// 3. Image Generator Engine (AI Text-to-Image / Game Assets)
+const imageEngine = new McpEngine('IMAGE', 'node', [IMAGE_SCRIPT], 300000);
 
 const server = http.createServer((req, res) => {
   const parsed = url.parse(req.url, true);
@@ -232,9 +240,9 @@ const server = http.createServer((req, res) => {
   }
 
   // Health check
-  if ((path === '/' || path === '/health' || path === '/healthz' || path === '/blender' || path === '/godot') && req.method === 'GET') {
+  if ((path === '/' || path === '/health' || path === '/healthz' || path === '/blender' || path === '/godot' || path === '/image') && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ status: 'ok', mcp: 'active', engines: ['godot', 'blender'] }));
+    res.end(JSON.stringify({ status: 'ok', mcp: 'active', engines: ['godot', 'blender', 'image'] }));
     return;
   }
 
@@ -246,12 +254,21 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  const isBlenderPath = path.startsWith('/blender');
-  const pathEngine = isBlenderPath ? blenderEngine : godotEngine;
-  const endpointPath = isBlenderPath ? '/blender/message' : '/message';
+  // Phân luồng Engine theo URL Path
+  let pathEngine = godotEngine;
+  let endpointPath = '/message';
+
+  if (path.startsWith('/blender')) {
+    pathEngine = blenderEngine;
+    endpointPath = '/blender/message';
+  } else if (path.startsWith('/image')) {
+    pathEngine = imageEngine;
+    endpointPath = '/image/message';
+  }
 
   // ===== 1. SSE STREAM (GET) =====
-  const isSse = req.method === 'GET' && (path === '/mcp' || path === '/sse' || path === '/blender/mcp' || path === '/blender/sse' || path === '/blender');
+  const ssePaths = ['/mcp', '/sse', '/blender/mcp', '/blender/sse', '/blender', '/image/mcp', '/image/sse', '/image'];
+  const isSse = req.method === 'GET' && ssePaths.includes(path);
   if (isSse) {
     const sessionId = crypto.randomUUID();
     console.log(`[SSE] 🟢 Client Spark kết nối vào ${pathEngine.name}! Session: ${sessionId} (Path: ${path})`);
@@ -301,6 +318,8 @@ const server = http.createServer((req, res) => {
       if (msg.method === 'tools/call' && msg.params && msg.params.name) {
         if (BLENDER_TOOLS.has(msg.params.name)) {
           targetEngine = blenderEngine;
+        } else if (IMAGE_TOOLS.has(msg.params.name)) {
+          targetEngine = imageEngine;
         } else {
           targetEngine = godotEngine;
         }
@@ -351,11 +370,13 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, () => {
   console.log(`===========================================================================`);
-  console.log(`🚀 MASTER DUAL-ENGINE MCP SERVER ĐANG LẮNG NGHE TẠI CỔNG ${PORT}`);
+  console.log(`🚀 MASTER TRI-ENGINE MCP SERVER ĐANG LẮNG NGHE TẠI CỔNG ${PORT}`);
   console.log(`---------------------------------------------------------------------------`);
-  console.log(`🎮 Godot MCP  : http://127.0.0.1:${PORT}/mcp`);
-  console.log(`🎨 Blender MCP: http://127.0.0.1:${PORT}/blender/mcp`);
+  console.log(`🎮 Godot MCP    : http://127.0.0.1:${PORT}/mcp`);
+  console.log(`🎨 Blender MCP  : http://127.0.0.1:${PORT}/blender/mcp`);
+  console.log(`🖼️ Image AI MCP : http://127.0.0.1:${PORT}/image/mcp`);
   console.log(`===========================================================================`);
   godotEngine.ensureProcess();
   blenderEngine.ensureProcess();
+  imageEngine.ensureProcess();
 });
