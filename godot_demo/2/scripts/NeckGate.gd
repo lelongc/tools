@@ -53,11 +53,18 @@ func update_visuals() -> void:
 		
 	if glass_mesh:
 		var mat = StandardMaterial3D.new()
-		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-		mat.albedo_color = Color(color.r, color.g, color.b, 0.4)
-		mat.emission_enabled = true
-		mat.emission = color
-		mat.emission_energy_multiplier = 2.0
+		if is_positive() and ResourceLoader.exists("res://textures/gate_bonus.png"):
+			mat.albedo_texture = load("res://textures/gate_bonus.png")
+			mat.albedo_color = Color(1.0, 1.0, 1.0, 0.9)
+			mat.emission_enabled = true
+			mat.emission_texture = load("res://textures/gate_bonus.png")
+			mat.emission_energy_multiplier = 1.8
+		else:
+			mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+			mat.albedo_color = Color(color.r, color.g, color.b, 0.6)
+			mat.emission_enabled = true
+			mat.emission = color
+			mat.emission_energy_multiplier = 2.5
 		mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 		glass_mesh.material_override = mat
 

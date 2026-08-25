@@ -29,7 +29,29 @@ var is_at_finish: bool = false
 
 func _ready() -> void:
 	target_x = position.x
+	setup_materials()
 	update_neck_visuals()
+
+func setup_materials() -> void:
+	var skin_tex = load_dynamic_texture("res://textures/giraffe_skin.png")
+	if skin_tex:
+		var mat = StandardMaterial3D.new()
+		mat.albedo_texture = skin_tex
+		mat.uv1_scale = Vector3(2.0, 2.0, 2.0)
+		mat.roughness = 0.35
+		if body_mesh: body_mesh.material_override = mat
+		if neck_mesh: neck_mesh.material_override = mat
+		if head_mesh: head_mesh.material_override = mat
+
+func load_dynamic_texture(res_path: String) -> Texture2D:
+	if ResourceLoader.exists(res_path):
+		return load(res_path)
+	var abs_path = ProjectSettings.globalize_path(res_path)
+	if FileAccess.file_exists(abs_path):
+		var img = Image.load_from_file(abs_path)
+		if img:
+			return ImageTexture.create_from_image(img)
+	return null
 
 func _input(event: InputEvent) -> void:
 	if not is_active or is_at_finish:

@@ -6,6 +6,30 @@ class_name HighObstacle
 func _ready() -> void:
 	area_entered.connect(_on_area_entered)
 	body_entered.connect(_on_body_entered)
+	setup_visuals()
+
+func setup_visuals() -> void:
+	var tex = load_dynamic_texture("res://textures/danger_stripes.png")
+	if tex:
+		var mat = StandardMaterial3D.new()
+		mat.albedo_texture = tex
+		mat.uv1_scale = Vector3(4.0, 1.0, 1.0)
+		mat.roughness = 0.3
+		mat.metallic = 0.5
+		var bar = get_node_or_null("Crossbar")
+		if bar: bar.material_override = mat
+		var sign_mesh = get_node_or_null("SignBoard")
+		if sign_mesh: sign_mesh.material_override = mat
+
+func load_dynamic_texture(res_path: String) -> Texture2D:
+	if ResourceLoader.exists(res_path):
+		return load(res_path)
+	var abs_path = ProjectSettings.globalize_path(res_path)
+	if FileAccess.file_exists(abs_path):
+		var img = Image.load_from_file(abs_path)
+		if img:
+			return ImageTexture.create_from_image(img)
+	return null
 
 func _on_area_entered(area: Area3D) -> void:
 	check_hit(area)

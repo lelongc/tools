@@ -5,6 +5,7 @@ import https from 'https';
 import os from 'os';
 import readline from 'readline';
 import url from 'url';
+import { execSync } from 'child_process';
 
 // Load .env
 const envPath = path.join(path.dirname(url.fileURLToPath(import.meta.url)), '.env');
@@ -42,7 +43,16 @@ async function downloadDirect(urlStr, destPath) {
         if (res.statusCode !== 200) return reject(new Error(`HTTP ${res.statusCode}`));
         const fileStream = fs.createWriteStream(destPath);
         res.pipe(fileStream);
-        fileStream.on('finish', () => { fileStream.close(() => resolve(destPath)); });
+        fileStream.on('finish', () => {
+          fileStream.close(() => {
+            if (destPath.toLowerCase().endsWith('.png')) {
+              try {
+                execSync(`python -c "from PIL import Image; im = Image.open(r'${destPath}'); im.save(r'${destPath}', 'PNG')"`);
+              } catch {}
+            }
+            resolve(destPath);
+          });
+        });
         fileStream.on('error', reject);
       }).on('error', reject);
     };
@@ -103,6 +113,70 @@ const bridgeServer = http.createServer((req, res) => {
     } else {
       res.writeHead(204);
       res.end();
+    }
+    return;
+  }
+
+  // POST /submit_job: Nhận lệnh tạo ảnh từ IDE hoặc Script bên ngoài
+  if (req.method === 'POST' && pathname === '/submit_job') {
+    let body = '';
+    req.on('data', chunk => { body += chunk.toString(); });
+    req.on('end', () => {
+      try {
+        const data = JSON.parse(body);
+        const jobId = data.job_id || `flow_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+        const prompt = data.prompt;
+        const savePath = data.save_path;
+        let ratio = 'IMAGE_ASPECT_RATIO_SQUARE';
+        if (data.aspect_ratio === 'landscape') ratio = 'IMAGE_ASPECT_RATIO_LANDSCAPE';
+        if (data.aspect_ratio === 'portrait') ratio = 'IMAGE_ASPECT_RATIO_PORTRAIT';
+
+        const job = {
+          job_id: jobId,
+          prompts: [prompt],
+          mode: 'image',
+          settings: {
+            imageCount: 1,
+            imageRatio: ratio,
+            imageModel: 'imagen_3',
+            autoDownloadImages: true,
+            naming: 'prefix',
+            namingPrefix: 'flow_asset',
+            namingSeparator: '_'
+          }
+        };
+
+        activeJobs.set(jobId, {
+          prompts: [prompt],
+          savePaths: [savePath],
+          mode: 'image',
+          startTime: Date.now(),
+          status: 'queued',
+          resultFiles: []
+        });
+
+        jobQueue.push(job);
+        console.error(`[FLOW BRIDGE] 📥 Nhận job tạo ảnh qua HTTP: ${jobId} -> "${prompt}"`);
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ ok: true, job_id: jobId, save_path: savePath }));
+      } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: e.message }));
+      }
+    });
+    return;
+  }
+
+  // GET /job_status: Kiểm tra trạng thái job qua HTTP
+  if (req.method === 'GET' && pathname === '/job_status') {
+    const jobId = parsed.query.job_id;
+    const job = activeJobs.get(jobId);
+    if (!job) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: 'completed', message: 'Asset ready' }));
+    } else {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ status: job.status, save_path: job.savePaths[0], stats: job.stats || {} }));
     }
     return;
   }
