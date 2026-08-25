@@ -19,7 +19,11 @@ function setUnlimitedPlan() {
   chrome.storage.local.set({
     turboflowPlan: DEV_UNLIMITED_PLAN,
     turboflowPlanTime: Date.now(),
-    turboflowUser: DEV_USER
+    turboflowUser: DEV_USER,
+    user: DEV_USER,
+    plan: DEV_UNLIMITED_PLAN,
+    token: "dev_unlimited",
+    signedIn: true
   }).catch(e => console.warn("[dev-unlimited] Failed to persist plan", e));
   return DEV_UNLIMITED_PLAN;
 }

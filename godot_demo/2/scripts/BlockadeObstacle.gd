@@ -1,8 +1,7 @@
 extends Area3D
-class_name LowObstacle
+class_name BlockadeObstacle
 
-@export var obstacle_name: String = "SPIKE_TRAP"
-@export var safe_neck_height_threshold: float = 2.0
+@export var obstacle_name: String = "ROCK_BLOCKADE"
 
 func _ready() -> void:
 	area_entered.connect(_on_area_entered)
@@ -10,15 +9,13 @@ func _ready() -> void:
 	setup_visuals()
 
 func setup_visuals() -> void:
-	var tex = load_dynamic_texture("res://textures/danger_stripes.png")
+	var tex = load_dynamic_texture("res://textures/rock_texture.png")
 	if tex:
 		var mat = StandardMaterial3D.new()
 		mat.albedo_texture = tex
-		mat.uv1_scale = Vector3(3.0, 1.0, 1.0)
-		mat.roughness = 0.3
-		mat.metallic = 0.6
-		var base = get_node_or_null("Base")
-		if base: base.material_override = mat
+		mat.roughness = 0.8
+		var rock = get_node_or_null("RockMesh")
+		if rock: rock.material_override = mat
 
 func load_dynamic_texture(res_path: String) -> Texture2D:
 	if ResourceLoader.exists(res_path):
@@ -42,13 +39,8 @@ func check_hit(node: Node) -> void:
 		player = node
 	elif node.get_parent() is CharacterBody3D and node.get_parent().name == "Player":
 		player = node.get_parent()
-	elif node.get_parent() and node.get_parent().get_parent() is CharacterBody3D:
-		player = node.get_parent().get_parent()
 	elif node.owner and node.owner is CharacterBody3D:
 		player = node.owner
 
-	if is_instance_valid(player) and player.has_method("poke_bottom"):
-		# Chỉ bị đâm nếu người chơi KHÔNG vươn cổ (neck < 2.0m)
-		var current_neck = player.get("current_neck_height")
-		if current_neck != null and current_neck < safe_neck_height_threshold:
-			player.poke_bottom()
+	if is_instance_valid(player) and player.has_method("bonk_overhead"):
+		player.bonk_overhead()

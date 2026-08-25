@@ -1,8 +1,38 @@
 (()=>{
-  console.log("[sidepanel-bridge] ⚡ TurboFlow Sidepanel Bridge sẵn sàng nhận lệnh từ Spark!");
+  console.log("[sidepanel-bridge] ⚡ TurboFlow Sidepanel Bridge & Auto-Login Active!");
   const BRIDGE_URL = "http://127.0.0.1:8787";
   let isExecuting = false;
 
+  // 1. Tự động bypass Auth và duy trì đăng nhập Vô hạn
+  function ensureUnlocked() {
+    try {
+      chrome.storage.local.set({
+        user: { id: "dev_unlimited_user", email: "developer@flow.local", name: "Dev Unlimited", picture: "" },
+        plan: { id: "pro", name: "Pro Plan", status: "active", is_unlimited: true, remaining: 999999 },
+        token: "dev_token_unlimited"
+      });
+    } catch(e) {}
+
+    const authScreen = document.getElementById("auth-screen");
+    const loadingScreen = document.getElementById("loading-screen");
+    const mainApp = document.getElementById("main-app");
+    
+    if (authScreen) authScreen.style.setProperty("display", "none", "important");
+    if (loadingScreen) loadingScreen.style.setProperty("display", "none", "important");
+    if (mainApp) mainApp.style.setProperty("display", "block", "important");
+
+    // Tự động bấm Re-check nếu bị ngắt kết nối với Tab Google Flow
+    const badge = document.getElementById("status-badge");
+    const recheckBtn = document.getElementById("btn-recheck");
+    if (badge && (badge.innerText.includes("Disconnected") || badge.classList.contains("badge-disconnected"))) {
+      if (recheckBtn) recheckBtn.click();
+    }
+  }
+
+  setInterval(ensureUnlocked, 1000);
+  ensureUnlocked();
+
+  // 2. Vòng lặp nhận việc từ Spark
   async function pollNext() {
     if (isExecuting) {
       setTimeout(pollNext, 2000);
@@ -53,6 +83,5 @@
     setTimeout(pollNext, 1500);
   }
 
-  // Khởi động vòng lặp kiểm tra
   setTimeout(pollNext, 1000);
 })();

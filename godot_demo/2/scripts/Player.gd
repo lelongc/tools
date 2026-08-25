@@ -4,9 +4,9 @@ signal neck_height_changed(current_height: float, max_height: float)
 signal player_died(reason_key: String)
 signal reached_finish(final_height: float)
 
-@export var forward_speed: float = 12.0
-@export var swerve_speed: float = 16.0
-@export var stretch_speed: float = 14.0
+@export var forward_speed: float = 11.0
+@export var swerve_speed: float = 18.0
+@export var stretch_speed: float = 16.0
 @export var max_x_limit: float = 3.6
 
 var min_neck_height: float = 0.7
@@ -57,6 +57,7 @@ func _input(event: InputEvent) -> void:
 	if not is_active or is_at_finish:
 		return
 		
+	# 1. Mouse Input
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			is_holding = event.pressed
@@ -64,31 +65,50 @@ func _input(event: InputEvent) -> void:
 			
 	elif event is InputEventMouseMotion and is_dragging:
 		var viewport_width = get_viewport().get_visible_rect().size.x
-		var delta_x = (event.relative.x / viewport_width) * 11.0
+		var delta_x = (event.relative.x / viewport_width) * 12.0
 		target_x = clamp(target_x + delta_x, -max_x_limit, max_x_limit)
 		
+	# 2. Touch Input
 	elif event is InputEventScreenTouch:
 		is_holding = event.pressed
 		is_dragging = event.pressed
 		
 	elif event is InputEventScreenDrag and is_dragging:
 		var viewport_width = get_viewport().get_visible_rect().size.x
-		var delta_x = (event.relative.x / viewport_width) * 11.0
+		var delta_x = (event.relative.x / viewport_width) * 12.0
 		target_x = clamp(target_x + delta_x, -max_x_limit, max_x_limit)
 
 func _physics_process(delta: float) -> void:
 	if not is_active:
 		return
 		
+	# 3. Keyboard Input (A/D, Left/Right, Space, W)
+	var kb_x = 0.0
+	if Input.is_key_pressed(KEY_A) or Input.is_key_pressed(KEY_LEFT):
+		kb_x -= 1.0
+	if Input.is_key_pressed(KEY_D) or Input.is_key_pressed(KEY_RIGHT):
+		kb_x += 1.0
+		
+	if kb_x != 0.0:
+		target_x = clamp(target_x + kb_x * 8.0 * delta, -max_x_limit, max_x_limit)
+		
+	var kb_hold = Input.is_key_pressed(KEY_SPACE) or Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_UP)
+	var holding_now = is_holding or kb_hold
+	
 	position.x = lerp(position.x, target_x, swerve_speed * delta)
 	var move_diff = target_x - position.x
 	rotation.z = lerp_angle(rotation.z, -move_diff * 0.25, 12.0 * delta)
 	
-	var target_h = current_max_height if is_holding else min_neck_height
+	var target_h = current_max_height if holding_now else min_neck_height
 	if is_at_finish:
 		target_h = current_max_height
 		
 	current_neck_height = lerp(current_neck_height, target_h, stretch_speed * delta)
+	
+	# Khi vươn cổ cao, nhấc nhẹ thân người lên một chút để bước qua bãi chông
+	var target_body_y = 0.35 + (0.35 if current_neck_height >= 2.0 else 0.0)
+	position.y = lerp(position.y, target_body_y, 10.0 * delta)
+	
 	update_neck_visuals()
 	
 	if not is_at_finish:
