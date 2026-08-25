@@ -37,7 +37,7 @@ const BLENDER_TOOLS = new Set([
 ]);
 
 const IMAGE_TOOLS = new Set([
-  'generate_image', 'download_image'
+  'start_flow_generation', 'check_flow_status', 'generate_image', 'list_project_assets'
 ]);
 
 const activeSessions = new Map();
@@ -165,7 +165,6 @@ class McpEngine {
     return new Promise((resolve) => {
       const child = this.ensureProcess();
 
-      // Nếu là request initialize từ Spark và engine đã handshake sẵn: trả về ngay lập tức
       if (msg.method === 'initialize' && this.serverCapabilities) {
         console.log(`[${this.name} HTTP] Trả kết quả Initialize có sẵn cho Spark (ID: ${msg.id})`);
         resolve({ jsonrpc: '2.0', id: msg.id, result: this.serverCapabilities });
@@ -221,12 +220,14 @@ const blenderEngine = new McpEngine('BLENDER', blenderParts[0], blenderParts.sli
   BLENDER_PORT: '9876'
 });
 
-// 3. Image Generator Engine (AI Text-to-Image / Game Assets)
+// 3. Image Generator Engine (Async Flow)
 const imageEngine = new McpEngine('IMAGE', 'node', [IMAGE_SCRIPT], 300000);
 
 const server = http.createServer((req, res) => {
   const parsed = url.parse(req.url, true);
-  const path = parsed.pathname || '/';
+  let rawPath = parsed.pathname || '/';
+  // Chuẩn hóa đường dẫn: loại bỏ dấu cách thừa hoặc encoding lỗi
+  let cleanPath = decodeURIComponent(rawPath).replace(/\s+/g, '').toLowerCase();
 
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, HEAD, PUT, DELETE');
@@ -240,15 +241,14 @@ const server = http.createServer((req, res) => {
   }
 
   // Health check
-  if ((path === '/' || path === '/health' || path === '/healthz' || path === '/blender' || path === '/godot' || path === '/image') && req.method === 'GET') {
+  if ((cleanPath === '/' || cleanPath === '/health' || cleanPath === '/healthz') && req.method === 'GET') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status: 'ok', mcp: 'active', engines: ['godot', 'blender', 'image'] }));
     return;
   }
 
   // OAuth Discovery Probe → 404 No-Auth
-  if (path.includes('.well-known')) {
-    console.log(`[HTTP] OAuth probe -> 404 No-Auth: ${req.method} ${path}`);
+  if (cleanPath.includes('.well-known')) {
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'not_found' }));
     return;
@@ -258,20 +258,27 @@ const server = http.createServer((req, res) => {
   let pathEngine = godotEngine;
   let endpointPath = '/message';
 
-  if (path.startsWith('/blender')) {
+  if (cleanPath.includes('blender')) {
     pathEngine = blenderEngine;
     endpointPath = '/blender/message';
-  } else if (path.startsWith('/image')) {
+  } else if (cleanPath.includes('image') || cleanPath.includes('flow')) {
     pathEngine = imageEngine;
     endpointPath = '/image/message';
   }
 
   // ===== 1. SSE STREAM (GET) =====
-  const ssePaths = ['/mcp', '/sse', '/blender/mcp', '/blender/sse', '/blender', '/image/mcp', '/image/sse', '/image'];
-  const isSse = req.method === 'GET' && ssePaths.includes(path);
+  const isSse = req.method === 'GET' && (
+    cleanPath.endsWith('/mcp') ||
+    cleanPath.endsWith('/sse') ||
+    cleanPath === '/mcp' ||
+    cleanPath === '/sse' ||
+    cleanPath === '/blender' ||
+    cleanPath === '/image'
+  );
+
   if (isSse) {
     const sessionId = crypto.randomUUID();
-    console.log(`[SSE] 🟢 Client Spark kết nối vào ${pathEngine.name}! Session: ${sessionId} (Path: ${path})`);
+    console.log(`[SSE] 🟢 Client Spark kết nối vào ${pathEngine.name}! Session: ${sessionId} (Path: ${cleanPath})`);
 
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
@@ -355,8 +362,9 @@ const server = http.createServer((req, res) => {
       }
 
       // Direct HTTP Mode
-      console.log(`[${targetEngine.name} HTTP POST] ${msg.method} (${msg.params?.name || 'req'}) (id=${msg.id}) [Direct mode]`);
-      targetEngine.sendRpcAndWait(msg).then(result => {
+      const timeoutMs = 45000;
+      console.log(`[${targetEngine.name} HTTP POST] ${msg.method} (${msg.params?.name || 'req'}) (id=${msg.id})`);
+      targetEngine.sendRpcAndWait(msg, timeoutMs).then(result => {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(result));
       });
@@ -372,9 +380,9 @@ server.listen(PORT, () => {
   console.log(`===========================================================================`);
   console.log(`🚀 MASTER TRI-ENGINE MCP SERVER ĐANG LẮNG NGHE TẠI CỔNG ${PORT}`);
   console.log(`---------------------------------------------------------------------------`);
-  console.log(`🎮 Godot MCP    : http://127.0.0.1:${PORT}/mcp`);
-  console.log(`🎨 Blender MCP  : http://127.0.0.1:${PORT}/blender/mcp`);
-  console.log(`🖼️ Image AI MCP : http://127.0.0.1:${PORT}/image/mcp`);
+  console.log(`🎮 Godot MCP    : http://127.0.0.1:${PORT}/mcp (157 tools)`);
+  console.log(`🎨 Blender MCP  : http://127.0.0.1:${PORT}/blender/mcp (25 tools)`);
+  console.log(`🍌 Image MCP    : http://127.0.0.1:${PORT}/image/mcp (Async Flow Suite)`);
   console.log(`===========================================================================`);
   godotEngine.ensureProcess();
   blenderEngine.ensureProcess();

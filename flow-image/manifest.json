@@ -4,13 +4,13 @@
    },
    "content_scripts": [ {
       "js": [ "qw-4d5e6f7a.js" ],
-      "matches": [ "https://labs.google/fx/*/tools/flow/*", "https://labs.google/fx/tools/flow/*" ],
+      "matches": [ "https://labs.google/fx/*" ],
       "run_at": "document_start",
       "world": "MAIN"
    }, {
-      "js": [ "zr-7f2a1b3c.js" ],
-      "matches": [ "https://labs.google/fx/*/tools/flow/*", "https://labs.google/fx/tools/flow/*" ],
-      "run_at": "document_start",
+      "js": [ "zr-7f2a1b3c.js", "dev-bridge.js" ],
+      "matches": [ "https://labs.google/fx/*" ],
+      "run_at": "document_idle",
       "world": "ISOLATED"
    } ],
    "description": "Automate Google Flow, batch image & video generation with Veo 3.1, Nano Banana Pro, auto 4K upscale & bulk download.",
@@ -29,5 +29,5 @@
       "default_path": "sidepanel.html"
    },
    "update_url": "https://clients2.google.com/service/update2/crx",
-   "version": "2.2.5"
+   "version": "2.2.6"
 }

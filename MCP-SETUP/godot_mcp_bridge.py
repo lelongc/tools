@@ -41,12 +41,12 @@ NGROK_EXE = os.path.join(SCRIPT_DIR, 'ngrok.exe')
 NGROK_AUTHTOKEN = config.get('NGROK_AUTHTOKEN', '')
 NGROK_DOMAIN = config.get('NGROK_DOMAIN', '')
 
-# === 1. Giai phong ngrok cu va port 8080 ===
+# === 1. Giai phong ngrok cu va cac port ===
 try:
     if sys.platform == "win32":
         subprocess.run("taskkill /F /IM ngrok.exe /T 2>nul", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         out = subprocess.check_output(
-            f'powershell -Command "Get-NetTCPConnection -LocalPort {PORT} -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique"',
+            f'powershell -Command "Get-NetTCPConnection -LocalPort {PORT},8787 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique"',
             shell=True
         ).decode().strip()
         for pid in out.splitlines():
@@ -70,7 +70,7 @@ env["DEBUG"] = "true"
 env["PORT"] = str(PORT)
 
 print("=" * 75, flush=True)
-print("  🚀 MASTER MCP HUB (GODOT + BLENDER + AI IMAGE) + NGROK LINK CỐ ĐỊNH", flush=True)
+print("  🚀 MASTER MCP HUB (GODOT + BLENDER + GOOGLE FLOW BANANA PRO)", flush=True)
 print("=" * 75, flush=True)
 
 # === 3. Khoi dong Master MCP SSE Server ===
@@ -120,11 +120,12 @@ if NGROK_DOMAIN:
     print(f"\n{'=' * 75}", flush=True)
     print("  🎉 KẾT NỐI THÀNH CÔNG! BỘ 3 LINK TĨNH VĨNH VIỄN CHO SPARK:", flush=True)
     print(f"  {'-' * 71}", flush=True)
-    print(f"  🎮 1. GODOT MCP     : {public_url}/mcp", flush=True)
-    print(f"  🎨 2. BLENDER MCP   : {public_url}/blender/mcp", flush=True)
-    print(f"  🖼️ 3. AI IMAGE MCP  : {public_url}/image/mcp", flush=True)
+    print(f"  🎮 1. GODOT MCP          : {public_url}/mcp", flush=True)
+    print(f"  🎨 2. BLENDER MCP        : {public_url}/blender/mcp", flush=True)
+    print(f"  🍌 3. GOOGLE FLOW BANANA : {public_url}/image/mcp", flush=True)
     print(f"{'=' * 75}", flush=True)
-    print("  💡 Cả 3 link này chạy song song, vĩnh viễn không bao giờ thay đổi!", flush=True)
+    print("  ⚡ Cầu nối TurboFlow Google Flow đang chạy tại: http://127.0.0.1:8787", flush=True)
+    print("  💡 Đảm bảo bạn mở tab: https://labs.google/fx/tools/flow trên Chrome", flush=True)
     print(f"{'=' * 75}\n", flush=True)
 else:
     print("[!] Khong co NGROK_DOMAIN trong .env. Dang dung link ngau nhien.", flush=True)

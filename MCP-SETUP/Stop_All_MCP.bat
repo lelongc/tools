@@ -1,14 +1,19 @@
 @echo off
-chcp 65001 >nul 2>&1
-title Stop MCP Servers
-echo ===========================================================================
-echo   ĐANG DỌN DẸP VÀ ĐÓNG TOÀN BỘ TIẾN TRÌNH MCP (GODOT + BLENDER + NGROK)...
-echo ===========================================================================
+chcp 65001 >nul
+echo [DANG TAT TOAN BO TIEN TRINH MCP VA NGROK...]
 
-taskkill /F /IM ngrok.exe /T >nul 2>&1
-powershell -Command "Get-NetTCPConnection -LocalPort 8080,8081 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }" >nul 2>&1
+taskkill /f /im ngrok.exe >nul 2>&1
 
-echo.
-echo ✅ ĐÃ TẮT VÀ GIẢI PHÓNG TOÀN BỘ TIẾN TRÌNH AN TOÀN 100%!
-echo.
-timeout /t 2 >nul
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr :8080') do (
+    taskkill /f /pid %%a >nul 2>&1
+)
+
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr :8081') do (
+    taskkill /f /pid %%a >nul 2>&1
+)
+
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr :8787') do (
+    taskkill /f /pid %%a >nul 2>&1
+)
+
+echo [DA TAT SACH TAT CA TIEN TRINH TRONG HE THONG!]

@@ -1,7 +1,7 @@
 extends CharacterBody3D
 
 signal neck_height_changed(current_height: float, max_height: float)
-signal player_died(reason: String)
+signal player_died(reason_key: String)
 signal reached_finish(final_height: float)
 
 @export var forward_speed: float = 12.0
@@ -9,9 +9,9 @@ signal reached_finish(final_height: float)
 @export var stretch_speed: float = 14.0
 @export var max_x_limit: float = 3.6
 
-var min_neck_height: float = 0.7       # Chiều cao khi thụt đầu xuống (né xà ngang)
-var current_max_height: float = 4.5    # Chiều cao tối đa hiện tại (tăng khi ăn táo)
-var current_neck_height: float = 1.5   # Chiều cao cổ thời gian thực
+var min_neck_height: float = 0.7
+var current_max_height: float = 4.5
+var current_neck_height: float = 1.5
 
 var is_active: bool = true
 var is_holding: bool = false
@@ -58,14 +58,10 @@ func _physics_process(delta: float) -> void:
 	if not is_active:
 		return
 		
-	# 1. Di chuyển ngang (Swerve)
 	position.x = lerp(position.x, target_x, swerve_speed * delta)
-	
-	# Nghiêng người ngộ nghĩnh khi quẹt
 	var move_diff = target_x - position.x
 	rotation.z = lerp_angle(rotation.z, -move_diff * 0.25, 12.0 * delta)
 	
-	# 2. Cơ chế vươn cổ / thụt đầu (Stretchy Neck)
 	var target_h = current_max_height if is_holding else min_neck_height
 	if is_at_finish:
 		target_h = current_max_height
@@ -73,7 +69,6 @@ func _physics_process(delta: float) -> void:
 	current_neck_height = lerp(current_neck_height, target_h, stretch_speed * delta)
 	update_neck_visuals()
 	
-	# 3. Tiến về phía trước
 	if not is_at_finish:
 		position.z -= forward_speed * delta
 
@@ -119,7 +114,7 @@ func bonk_overhead() -> void:
 	tw.tween_property(head_root, "rotation_degrees:x", -85.0, 0.1)
 	tw.tween_property(self, "rotation_degrees:z", 90.0, 0.2)
 	tw.tween_callback(func():
-		player_died.emit("💥 BONK! ĐẬP ĐẦU VÀO XÀ NGANG VÌ CỔ QUÁ CAO!")
+		player_died.emit("BONK_FAIL")
 	)
 
 func poke_bottom() -> void:
@@ -131,7 +126,7 @@ func poke_bottom() -> void:
 	tw.tween_property(self, "position:y", position.y + 2.5, 0.15)
 	tw.tween_property(self, "position:y", -0.5, 0.2)
 	tw.tween_callback(func():
-		player_died.emit("😭 Á ĐAU! BỊ CHÔNG ĐÂM VÌ KHÔNG CHỊU VƯƠN CỔ!")
+		player_died.emit("SPIKE_FAIL")
 	)
 
 func trigger_finish(tower_bonus: float) -> void:

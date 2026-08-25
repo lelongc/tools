@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://scripts/GameManager.gd" id="1_gm"]
 [ext_resource type="Script" path="res://scripts/LevelGenerator.gd" id="2_level"]
@@ -6,9 +6,10 @@
 [ext_resource type="Script" path="res://scripts/CameraController.gd" id="4_cam"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
-sky_top_color = Color(0.25, 0.55, 0.95, 1)
-sky_horizon_color = Color(0.7, 0.82, 0.95, 1)
-ground_bottom_color = Color(0.12, 0.14, 0.22, 1)
+sky_top_color = Color(0.2, 0.55, 0.95, 1.0)
+sky_horizon_color = Color(0.85, 0.78, 0.7, 1.0)
+ground_bottom_color = Color(0.12, 0.14, 0.22, 1.0)
+ground_horizon_color = Color(0.75, 0.68, 0.6, 1.0)
 
 [sub_resource type="Sky" id="Sky_1"]
 sky_material = SubResource("ProceduralSkyMaterial_1")
@@ -17,10 +18,84 @@ sky_material = SubResource("ProceduralSkyMaterial_1")
 background_mode = 2
 sky = SubResource("Sky_1")
 ambient_light_source = 3
-ambient_light_color = Color(0.85, 0.9, 1, 1)
+ambient_light_color = Color(0.95, 0.95, 1.0, 1.0)
 tonemap_mode = 2
 glow_enabled = true
-glow_intensity = 0.8
+glow_intensity = 0.6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_card"]
+bg_color = Color(0.1, 0.15, 0.25, 0.85)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+expand_margin_left = 16.0
+expand_margin_top = 10.0
+expand_margin_right = 16.0
+expand_margin_bottom = 10.0
+shadow_color = Color(0, 0, 0, 0.35)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_win_card"]
+bg_color = Color(0.08, 0.18, 0.12, 0.95)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.2, 0.9, 0.4, 1.0)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 14
+shadow_offset = Vector2(0, 8)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_green_btn"]
+bg_color = Color(0.18, 0.8, 0.35, 1.0)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0.05, 0.4, 0.15, 1.0)
+shadow_size = 0
+shadow_offset = Vector2(0, 6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fail_card"]
+bg_color = Color(0.2, 0.08, 0.08, 0.95)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(1.0, 0.3, 0.3, 1.0)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 14
+shadow_offset = Vector2(0, 8)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yellow_btn"]
+bg_color = Color(1.0, 0.78, 0.1, 1.0)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0.65, 0.45, 0.05, 1.0)
+shadow_size = 0
+shadow_offset = Vector2(0, 6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gray_btn"]
+bg_color = Color(0.35, 0.4, 0.5, 1.0)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0.2, 0.22, 0.3, 1.0)
+shadow_size = 0
+shadow_offset = Vector2(0, 5)
 
 [node name="Main" type="Node3D"]
 
@@ -57,32 +132,41 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="TopBar" type="VBoxContainer" parent="HUD/TopHUD"]
+[node name="ScoreCard" type="PanelContainer" parent="HUD/TopHUD"]
 layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 40.0
-offset_bottom = 170.0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -260.0
+offset_top = 45.0
+offset_right = 260.0
+offset_bottom = 165.0
 grow_horizontal = 2
-theme_override_constants/separation = 8
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud_card")
 
-[node name="ScoreLabel" type="Label" parent="HUD/TopHUD/TopBar"]
+[node name="TopBar" type="VBoxContainer" parent="HUD/TopHUD/ScoreCard"]
 layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ScoreLabel" type="Label" parent="HUD/TopHUD/ScoreCard/TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1.0, 0.9, 0.2, 1.0)
 theme_override_font_sizes/font_size = 32
-text = "🍎 ĐIỂM: 0"
+text = "🍎 SCORE: 0"
 horizontal_alignment = 1
 
-[node name="NeckLabelHUD" type="Label" parent="HUD/TopHUD/TopBar"]
+[node name="NeckLabelHUD" type="Label" parent="HUD/TopHUD/ScoreCard/TopBar"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.95, 0.6, 1.0)
 theme_override_font_sizes/font_size = 28
-text = "📏 CỔ: 1.5m / 4.5m"
+text = "📏 NECK: 1.5m / 4.5m"
 horizontal_alignment = 1
 
-[node name="HintLabel" type="Label" parent="HUD/TopHUD/TopBar"]
+[node name="HintLabel" type="Label" parent="HUD/TopHUD/ScoreCard/TopBar"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
-theme_override_font_sizes/font_size = 20
-text = "👆 GIỮ CHUỘT/TAY: VƯƠN CỔ CAO | THẢ RA: THỤT ĐẦU 👇"
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 0.9)
+theme_override_font_sizes/font_size = 18
+text = "👆 HOLD: STRETCH UP | RELEASE: DUCK DOWN 👇"
 horizontal_alignment = 1
 
 [node name="WinPanel" type="ColorRect" parent="HUD"]
@@ -92,42 +176,50 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.05, 0.15, 0.05, 0.88)
+color = Color(0.02, 0.05, 0.08, 0.8)
 
-[node name="VBox" type="VBoxContainer" parent="HUD/WinPanel"]
+[node name="WinCard" type="PanelContainer" parent="HUD/WinPanel"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -230.0
-offset_top = -170.0
-offset_right = 230.0
-offset_bottom = 170.0
+offset_left = -260.0
+offset_top = -190.0
+offset_right = 260.0
+offset_bottom = 190.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 22
+theme_override_styles/panel = SubResource("StyleBoxFlat_win_card")
 
-[node name="WinTitle" type="Label" parent="HUD/WinPanel/VBox"]
+[node name="VBox" type="VBoxContainer" parent="HUD/WinPanel/WinCard"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
-theme_override_font_sizes/font_size = 44
-text = "🎉 VƯƠN TỚI ĐỈNH! 🎉"
+theme_override_constants/separation = 20
+
+[node name="WinTitle" type="Label" parent="HUD/WinPanel/WinCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1.0, 0.9, 0.2, 1.0)
+theme_override_font_sizes/font_size = 40
+text = "🎉 REACHED THE TOP! 🎉"
 horizontal_alignment = 1
 
-[node name="WinSub" type="Label" parent="HUD/WinPanel/VBox"]
+[node name="WinSub" type="Label" parent="HUD/WinPanel/WinCard/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "CHIỀU CAO ĐẠT ĐƯỢC: 8.5m
-🏆 NHÂN 50x ĐIỂM THƯỞNG!"
+theme_override_colors/font_color = Color(0.9, 0.95, 1.0, 1.0)
+theme_override_font_sizes/font_size = 22
+text = "HEIGHT REACHED: 8.5m
+🏆 MULTIPLIER: 50x BONUS!
+TOTAL SCORE: 5000"
 horizontal_alignment = 1
 
-[node name="NextButton" type="Button" parent="HUD/WinPanel/VBox"]
-custom_minimum_size = Vector2(0, 65)
+[node name="NextButton" type="Button" parent="HUD/WinPanel/WinCard/VBox"]
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
-text = "CHƠI TIẾP (LEVEL 2)"
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_green_btn")
+text = "NEXT LEVEL ➔"
 
 [node name="FailPanel" type="ColorRect" parent="HUD"]
 visible = false
@@ -136,47 +228,54 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.18, 0.05, 0.05, 0.9)
+color = Color(0.08, 0.02, 0.02, 0.85)
 
-[node name="VBox" type="VBoxContainer" parent="HUD/FailPanel"]
+[node name="FailCard" type="PanelContainer" parent="HUD/FailPanel"]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -240.0
-offset_top = -180.0
-offset_right = 240.0
-offset_bottom = 180.0
+offset_left = -260.0
+offset_top = -210.0
+offset_right = 260.0
+offset_bottom = 210.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 20
+theme_override_styles/panel = SubResource("StyleBoxFlat_fail_card")
 
-[node name="FailTitle" type="Label" parent="HUD/FailPanel/VBox"]
+[node name="VBox" type="VBoxContainer" parent="HUD/FailPanel/FailCard"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 46
-text = "😭 THẤT BẠI! 😭"
+theme_override_constants/separation = 18
+
+[node name="FailTitle" type="Label" parent="HUD/FailPanel/FailCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1.0, 0.35, 0.35, 1.0)
+theme_override_font_sizes/font_size = 42
+text = "😭 FAILED! 😭"
 horizontal_alignment = 1
 
-[node name="FailRageText" type="Label" parent="HUD/FailPanel/VBox"]
+[node name="FailRageText" type="Label" parent="HUD/FailPanel/FailCard/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
-theme_override_font_sizes/font_size = 22
-text = "BONK! BẠN ĐÃ ĐẬP ĐẦU VÀO XÀ NGANG VÌ CỔ QUÁ CAO!"
+theme_override_colors/font_color = Color(1.0, 0.85, 0.3, 1.0)
+theme_override_font_sizes/font_size = 21
+text = "💥 BONK! YOU HIT THE OVERHEAD BEAM!"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="ReviveButton" type="Button" parent="HUD/FailPanel/VBox"]
-custom_minimum_size = Vector2(0, 65)
+[node name="ReviveButton" type="Button" parent="HUD/FailPanel/FailCard/VBox"]
+custom_minimum_size = Vector2(0, 62)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.95, 0.2, 1)
-theme_override_font_sizes/font_size = 24
-text = "⚡ HỒI SINH + X2 CHIỀU CAO"
+theme_override_colors/font_color = Color(0.1, 0.1, 0.1, 1.0)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxFlat_yellow_btn")
+text = "⚡ REVIVE + x2 NECK (WATCH AD)"
 
-[node name="RetryButton" type="Button" parent="HUD/FailPanel/VBox"]
-custom_minimum_size = Vector2(0, 55)
+[node name="RetryButton" type="Button" parent="HUD/FailPanel/FailCard/VBox"]
+custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
-text = "CHƠI LẠI"
+theme_override_colors/font_color = Color(1.0, 1.0, 1.0, 1.0)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("StyleBoxFlat_gray_btn")
+text = "RETRY"

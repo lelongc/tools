@@ -15,7 +15,6 @@ func _ready() -> void:
 	spawn_finish_tower()
 
 func generate_track() -> void:
-	# 1. Mat duong chay
 	var road = MeshInstance3D.new()
 	var box = BoxMesh.new()
 	box.size = Vector3(road_width, 0.4, track_length)
@@ -23,12 +22,20 @@ func generate_track() -> void:
 	road.position = Vector3(0, -0.2, -track_length / 2.0 + 10.0)
 	
 	var road_mat = StandardMaterial3D.new()
-	road_mat.albedo_color = Color(0.12, 0.14, 0.22)
-	road_mat.roughness = 0.4
+	if FileAccess.file_exists("res://textures/road_texture.png"):
+		var abs_path = ProjectSettings.globalize_path("res://textures/road_texture.png")
+		var img = Image.load_from_file(abs_path)
+		if img:
+			var tex = ImageTexture.create_from_image(img)
+			road_mat.albedo_texture = tex
+			road_mat.uv1_scale = Vector3(1.0, track_length / 8.0, 1.0)
+	else:
+		road_mat.albedo_color = Color(0.14, 0.16, 0.24)
+		
+	road_mat.roughness = 0.3
 	road.material_override = road_mat
 	add_child(road)
 	
-	# 2. Lan can da quang 2 ben
 	for side in [-1.0, 1.0]:
 		var rail = MeshInstance3D.new()
 		var r_mesh = BoxMesh.new()
@@ -45,21 +52,18 @@ func generate_track() -> void:
 		add_child(rail)
 
 func spawn_obstacles_and_apples() -> void:
-	# 1. Dat cac bay tren cao (High Obstacles - Can thut dau xuong)
 	var high_z = [-35.0, -90.0, -150.0]
 	for z in high_z:
 		var obs = high_obs_scene.instantiate()
 		add_child(obs)
 		obs.position = Vector3(0, 0, z)
 		
-	# 2. Dat cac bay duoi thap (Low Obstacles - Can vuon co len cao)
 	var low_z = [-60.0, -120.0, -180.0]
 	for z in low_z:
 		var obs = low_obs_scene.instantiate()
 		add_child(obs)
 		obs.position = Vector3(0, 0, z)
 		
-	# 3. Dat cac cong bien doi chieu dai co
 	var gate_z = [-48.0, -105.0, -165.0]
 	for i in range(gate_z.size()):
 		var z = gate_z[i]
@@ -73,19 +77,19 @@ func spawn_obstacles_and_apples() -> void:
 		right_gate.position = Vector3(2.2, 1.6, z)
 		
 		if i == 0:
-			left_gate.gate_type = 0 # ADD
+			left_gate.gate_type = 0
 			left_gate.value = 2.5
-			right_gate.gate_type = 2 # SUB
+			right_gate.gate_type = 2
 			right_gate.value = -2.0
 		elif i == 1:
-			left_gate.gate_type = 1 # MULT
+			left_gate.gate_type = 1
 			left_gate.value = 1.5
-			right_gate.gate_type = 0 # ADD
+			right_gate.gate_type = 0
 			right_gate.value = 3.0
 		else:
-			left_gate.gate_type = 0 # ADD
+			left_gate.gate_type = 0
 			left_gate.value = 4.0
-			right_gate.gate_type = 2 # SUB
+			right_gate.gate_type = 2
 			right_gate.value = -3.5
 			
 		if left_gate.has_method("update_visuals"):
@@ -93,13 +97,11 @@ func spawn_obstacles_and_apples() -> void:
 		if right_gate.has_method("update_visuals"):
 			right_gate.update_visuals()
 			
-	# 4. Sinh tao vang o cac do cao khac nhau (High & Low Apples)
 	for z in range(15, int(track_length - 25), 8):
 		var apple = apple_scene.instantiate()
 		add_child(apple)
 		
-		# Xen ke tao tren cao (Y=4.2m) va tao duoi thap (Y=1.0m)
-		var is_high = (int(z / 8) % 2 == 0)
+		var is_high = (int(z / 8.0) % 2 == 0)
 		var h = 4.2 if is_high else 1.1
 		var x = randf_range(-2.8, 2.8)
 		apple.position = Vector3(x, h, -z)
