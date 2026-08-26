@@ -5,7 +5,8 @@ enum FruitType {
 	APPLE,       # 0: Táo vàng (+0.8m, 100 điểm)
 	BANANA,      # 1: Chuối (+1.5m, 200 điểm)
 	WATERMELON,  # 2: Dưa hấu (+2.5m, 350 điểm)
-	STAR         # 3: Ngôi sao siêu cấp (+3.5m, 500 điểm)
+	STAR,        # 3: Ngôi sao siêu cấp (+3.5m, 500 điểm)
+	MAGNET       # 4: Nam châm hút quả (+1.0m, 250 điểm, kích hoạt 6s hút)
 }
 
 @export var fruit_type: FruitType = FruitType.APPLE:
@@ -18,12 +19,8 @@ enum FruitType {
 
 var is_collected: bool = false
 
-@onready var apple_mesh: MeshInstance3D = get_node_or_null("AppleMesh")
-@onready var banana_mesh: MeshInstance3D = get_node_or_null("BananaMesh")
-@onready var melon_mesh: MeshInstance3D = get_node_or_null("MelonMesh")
-@onready var star_mesh: MeshInstance3D = get_node_or_null("StarMesh")
-
 func _ready() -> void:
+	add_to_group("collectables")
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
 	setup_fruit_visuals()
@@ -41,7 +38,7 @@ func setup_fruit_visuals() -> void:
 	if a_node: a_node.visible = (fruit_type == FruitType.APPLE)
 	if b_node: b_node.visible = (fruit_type == FruitType.BANANA)
 	if m_node: m_node.visible = (fruit_type == FruitType.WATERMELON)
-	if s_node: s_node.visible = (fruit_type == FruitType.STAR)
+	if s_node: s_node.visible = (fruit_type == FruitType.STAR or fruit_type == FruitType.MAGNET)
 	
 	match fruit_type:
 		FruitType.APPLE:
@@ -59,10 +56,13 @@ func setup_fruit_visuals() -> void:
 			neck_bonus = 3.5
 			score_value = 500
 			apply_texture(s_node, "res://textures/star_item.png")
+		FruitType.MAGNET:
+			neck_bonus = 1.0
+			score_value = 250
+			apply_texture(s_node, "res://textures/star_item.png")
 
 func apply_texture(node: MeshInstance3D, path: String) -> void:
-	if not node:
-		return
+	if not node: return
 	var abs_p = ProjectSettings.globalize_path(path)
 	if FileAccess.file_exists(abs_p):
 		var img = Image.load_from_file(abs_p)
@@ -98,6 +98,9 @@ func trigger_collect(collector: Node) -> void:
 		is_collected = true
 		player.eat_fruit(neck_bonus, score_value)
 		
+		if fruit_type == FruitType.MAGNET and player.has_method("activate_magnet"):
+			player.activate_magnet(6.0)
+			
 		var tw = create_tween()
 		tw.set_parallel(true)
 		tw.tween_property(self, "scale", Vector3(1.8, 1.8, 1.8), 0.12)

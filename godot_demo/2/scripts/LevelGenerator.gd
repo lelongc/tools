@@ -1,22 +1,24 @@
 extends Node3D
 
-@export var track_length: float = 240.0
+@export var track_length: float = 260.0
 @export var road_width: float = 8.5
 
 var high_obs_scene: PackedScene = preload("res://scenes/HighObstacle.tscn")
 var low_obs_scene: PackedScene = preload("res://scenes/LowObstacle.tscn")
 var saw_obs_scene: PackedScene = preload("res://scenes/SawObstacle.tscn")
 var rock_obs_scene: PackedScene = preload("res://scenes/BlockadeObstacle.tscn")
+var axe_obs_scene: PackedScene = preload("res://scenes/PendulumAxe.tscn")
 var collectable_scene: PackedScene = preload("res://scenes/Collectable.tscn")
 var gate_scene: PackedScene = preload("res://scenes/NeckGate.tscn")
 var tower_scene: PackedScene = preload("res://scenes/FinishTower.tscn")
 
 func _ready() -> void:
-	generate_track()
-	spawn_gameplay_elements()
+	generate_track_and_environment()
+	spawn_stage_elements(SaveSystem.current_level)
 	spawn_finish_tower()
 
-func generate_track() -> void:
+func generate_track_and_environment() -> void:
+	# 1. Mặt đường đua chính
 	var road = MeshInstance3D.new()
 	var box = BoxMesh.new()
 	box.size = Vector3(road_width, 0.4, track_length)
@@ -38,12 +40,13 @@ func generate_track() -> void:
 	road.material_override = road_mat
 	add_child(road)
 	
+	# 2. Hai dải lan can phát sáng Neon
 	for side in [-1.0, 1.0]:
 		var rail = MeshInstance3D.new()
 		var r_mesh = BoxMesh.new()
-		r_mesh.size = Vector3(0.3, 0.6, track_length)
+		r_mesh.size = Vector3(0.35, 0.6, track_length)
 		rail.mesh = r_mesh
-		rail.position = Vector3(side * (road_width / 2.0 + 0.15), 0.2, -track_length / 2.0 + 10.0)
+		rail.position = Vector3(side * (road_width / 2.0 + 0.18), 0.2, -track_length / 2.0 + 10.0)
 		
 		var rail_mat = StandardMaterial3D.new()
 		rail_mat.albedo_color = Color(1.0, 0.75, 0.1)
@@ -52,45 +55,127 @@ func generate_track() -> void:
 		rail_mat.emission_energy_multiplier = 3.0
 		rail.material_override = rail_mat
 		add_child(rail)
+		
+	# 3. Cột đèn & Cây trang trí 2 bên đường (Environment Props)
+	var prop_mat = StandardMaterial3D.new()
+	prop_mat.albedo_color = Color(0.2, 0.8, 0.4)
+	prop_mat.roughness = 0.4
+	
+	var trunk_mat = StandardMaterial3D.new()
+	trunk_mat.albedo_color = Color(0.45, 0.28, 0.12)
+	
+	for z in range(15, int(track_length - 20), 16):
+		for side in [-1.0, 1.0]:
+			var tree_root = Node3D.new()
+			tree_root.position = Vector3(side * (road_width / 2.0 + 3.2), 0, -z)
+			
+			# Thân cây
+			var trunk = MeshInstance3D.new()
+			var t_mesh = CylinderMesh.new()
+			t_mesh.top_radius = 0.2
+			t_mesh.bottom_radius = 0.3
+			t_mesh.height = 3.5
+			t_mesh.material = trunk_mat
+			trunk.mesh = t_mesh
+			trunk.position.y = 1.75
+			tree_root.add_child(trunk)
+			
+			# Tán lá tròn
+			var foliage = MeshInstance3D.new()
+			var f_mesh = SphereMesh.new()
+			f_mesh.radius = 1.2
+			f_mesh.height = 2.4
+			f_mesh.material = prop_mat
+			foliage.mesh = f_mesh
+			foliage.position.y = 3.8
+			tree_root.add_child(foliage)
+			
+			add_child(tree_root)
 
-func spawn_gameplay_elements() -> void:
-	# 1. Cầu vượt xà ngang (Thụt đầu xuống)
-	var high_z = [-35.0, -115.0, -175.0]
+func spawn_stage_elements(lvl: int) -> void:
+	# Cấu trúc màn chơi theo Level
+	var high_z = []
+	var low_z = []
+	var saw_z = []
+	var rock_data = []
+	var axe_z = []
+	var gate_data = []
+	
+	if lvl == 1:
+		# Level 1: Khởi động dễ
+		high_z = [-40.0, -130.0]
+		low_z = [-75.0, -170.0]
+		gate_data = [
+			{"z": -55.0, "l_type": 0, "l_val": 3.0, "r_type": 2, "r_val": -2.0, "moving": false},
+			{"z": -110.0, "l_type": 1, "l_val": 1.5, "r_type": 0, "r_val": 2.5, "moving": false},
+			{"z": -190.0, "l_type": 0, "l_val": 4.0, "r_type": 2, "r_val": -3.0, "moving": false}
+		]
+	elif lvl == 2:
+		# Level 2: Lưỡi cưa & Cổng di động
+		high_z = [-35.0, -120.0, -180.0]
+		low_z = [-65.0]
+		saw_z = [-90.0, -150.0, -210.0]
+		gate_data = [
+			{"z": -50.0, "l_type": 0, "l_val": 3.5, "r_type": 2, "r_val": -2.5, "moving": true},
+			{"z": -105.0, "l_type": 1, "l_val": 2.0, "r_type": 0, "r_val": 3.0, "moving": true},
+			{"z": -165.0, "l_type": 0, "l_val": 5.0, "r_type": 2, "r_val": -4.0, "moving": false}
+		]
+	elif lvl == 3:
+		# Level 3: Tảng đá cản & Búa lắc tử thần
+		high_z = [-40.0, -135.0]
+		low_z = [-70.0, -165.0]
+		saw_z = [-105.0]
+		rock_data = [{"x": -2.2, "z": -85.0}, {"x": 2.2, "z": -150.0}]
+		axe_z = [-120.0, -190.0]
+		gate_data = [
+			{"z": -50.0, "l_type": 0, "l_val": 4.0, "r_type": 2, "r_val": -3.0, "moving": false},
+			{"z": -100.0, "l_type": 1, "l_val": 2.0, "r_type": 0, "r_val": 4.0, "moving": true},
+			{"z": -175.0, "l_type": 0, "l_val": 6.0, "r_type": 2, "r_val": -5.0, "moving": true}
+		]
+	else:
+		# Level 4+ (Hoặc Endless Gauntlet): Thử thách tột đỉnh
+		high_z = [-35.0, -110.0, -170.0]
+		low_z = [-60.0, -145.0]
+		saw_z = [-85.0, -195.0]
+		rock_data = [{"x": -2.4, "z": -75.0}, {"x": 2.4, "z": -135.0}, {"x": 0.0, "z": -180.0}]
+		axe_z = [-100.0, -160.0, -215.0]
+		gate_data = [
+			{"z": -48.0, "l_type": 0, "l_val": 5.0, "r_type": 2, "r_val": -4.0, "moving": true},
+			{"z": -95.0, "l_type": 1, "l_val": 2.5, "r_type": 0, "r_val": 5.0, "moving": true},
+			{"z": -155.0, "l_type": 0, "l_val": 8.0, "r_type": 2, "r_val": -6.0, "moving": true}
+		]
+		
+	# 1. Sinh cầu vượt
 	for z in high_z:
 		var obs = high_obs_scene.instantiate()
 		add_child(obs)
 		obs.position = Vector3(0, 0, z)
 		
-	# 2. Bãi chông gai (Vươn cổ bước qua)
-	var low_z = [-65.0, -150.0]
+	# 2. Sinh bãi chông
 	for z in low_z:
 		var obs = low_obs_scene.instantiate()
 		add_child(obs)
 		obs.position = Vector3(0, 0, z)
 		
-	# 3. Lưỡi cưa xoay tít trên mặt đất (Vươn cổ nhảy qua)
-	var saw_z = [-130.0, -195.0]
+	# 3. Sinh lưỡi cưa
 	for z in saw_z:
 		var saw = saw_obs_scene.instantiate()
 		add_child(saw)
 		saw.position = Vector3(0, 0, z)
 		
-	# 4. Tảng đá cản đường (Lái lượn né sang làn bên)
-	var rock_data = [
-		{"x": -2.2, "z": -80.0},
-		{"x": 2.2, "z": -140.0}
-	]
+	# 4. Sinh tảng đá
 	for rd in rock_data:
 		var rock = rock_obs_scene.instantiate()
 		add_child(rock)
 		rock.position = Vector3(rd.x, 0, rd.z)
 		
-	# 5. Cổng nhân độ dài cổ (+, x, -)
-	var gate_data = [
-		{"z": -48.0, "l_type": 0, "l_val": 2.5, "r_type": 2, "r_val": -2.0, "moving": false},
-		{"z": -95.0, "l_type": 1, "l_val": 1.5, "r_type": 0, "r_val": 3.0, "moving": true},
-		{"z": -160.0, "l_type": 0, "l_val": 4.5, "r_type": 2, "r_val": -3.5, "moving": false}
-	]
+	# 5. Sinh búa tử thần
+	for z in axe_z:
+		var axe = axe_obs_scene.instantiate()
+		add_child(axe)
+		axe.position = Vector3(0, 0, z)
+		
+	# 6. Sinh cổng nhân
 	for gd in gate_data:
 		var left_gate = gate_scene.instantiate()
 		var right_gate = gate_scene.instantiate()
@@ -110,11 +195,11 @@ func spawn_gameplay_elements() -> void:
 		if left_gate.has_method("update_visuals"): left_gate.update_visuals()
 		if right_gate.has_method("update_visuals"): right_gate.update_visuals()
 		
-	# 6. Rải trái cây & vật phẩm đa dạng (Táo, Chuối, Dưa hấu, Ngôi sao)
-	for z in range(12, int(track_length - 25), 5):
+	# 7. Sinh trái cây đa dạng (Táo, Chuối, Dưa hấu, Sao, Nam châm)
+	for z in range(12, int(track_length - 25), 4):
 		var item = collectable_scene.instantiate()
-		var step_idx = int(z / 5.0)
-		var item_type_idx = step_idx % 4
+		var step_idx = int(z / 4.0)
+		var item_type_idx = step_idx % 5
 		item.fruit_type = item_type_idx
 		add_child(item)
 		item.setup_fruit_visuals()
