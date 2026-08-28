@@ -43,3 +43,8 @@ veoup_video
 # Local Flow Image Temporary Directories
 short/longv1/image-temp/
 **/image-temp/
+
+# Large Backup & Zip Archives
+*.zip
+*.tar.gz
+*.7z
