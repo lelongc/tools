@@ -1,37 +1,9 @@
-[gd_scene load_steps=37 format=3 uid="uid://c7k9x0y1m2n3"]
+[gd_scene load_steps=24 format=3 uid="uid://c7k9x0y1m2n3"]
 
 [ext_resource type="Script" path="res://scripts/GameManager.gd" id="1_gm"]
 [ext_resource type="Script" path="res://scripts/LevelGenerator.gd" id="2_level"]
 [ext_resource type="PackedScene" path="res://scenes/Player.tscn" id="3_player"]
 [ext_resource type="Script" path="res://scripts/CameraController.gd" id="4_cam"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_green_play_normal.png" id="5_btn_green_n"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_green_play_pressed.png" id="6_btn_green_p"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_yellow_stretch_normal.png" id="7_btn_yellow_n"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_yellow_stretch_pressed.png" id="8_btn_yellow_p"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_pink_shop_normal.png" id="9_btn_pink_n"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_pink_shop_pressed.png" id="10_btn_pink_p"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_blue_sound_normal.png" id="11_btn_blue_n"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_blue_sound_pressed.png" id="12_btn_blue_p"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_orange_lang_normal.png" id="13_btn_orange_n"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_orange_lang_pressed.png" id="14_btn_orange_p"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_purple_home_normal.png" id="15_btn_purple_n"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_purple_home_pressed.png" id="16_btn_purple_p"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_red_retry_normal.png" id="17_btn_red_n"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_red_retry_pressed.png" id="18_btn_red_p"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_gold_revive_normal.png" id="19_btn_gold_n"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_gold_revive_pressed.png" id="20_btn_gold_p"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_steer_left_normal.png" id="21_steer_l_n"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_steer_left_pressed.png" id="22_steer_l_p"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_steer_right_normal.png" id="23_steer_r_n"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_steer_right_pressed.png" id="24_steer_r_p"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_pause_normal.png" id="25_pause_n"]
-[ext_resource type="Texture2D" path="res://assets/ui/btn_pause_pressed.png" id="26_pause_p"]
-[ext_resource type="Texture2D" path="res://assets/ui/panel_marshmallow.png" id="27_panel"]
-[ext_resource type="Texture2D" path="res://assets/ui/pill_badge.png" id="28_pill"]
-[ext_resource type="Texture2D" path="res://assets/ui/icon_apple.png" id="29_ic_apple"]
-[ext_resource type="Texture2D" path="res://assets/ui/icon_coin.png" id="30_ic_coin"]
-[ext_resource type="Texture2D" path="res://assets/ui/icon_trophy.png" id="31_ic_trophy"]
-[ext_resource type="Texture2D" path="res://assets/ui/icon_giraffe.png" id="32_ic_giraffe"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1"]
 sky_top_color = Color(0.38, 0.75, 1.0, 1.0)
@@ -52,131 +24,110 @@ tonemap_mode = 2
 glow_enabled = true
 glow_intensity = 0.35
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_panel"]
-texture = ExtResource("27_panel")
-texture_margin_left = 28.0
-texture_margin_top = 28.0
-texture_margin_right = 28.0
-texture_margin_bottom = 28.0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(1.0, 1.0, 1.0, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 6
+border_color = Color(1.0, 0.82, 0.25, 1.0)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0.2, 0.25, 0.4, 0.18)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_pill"]
-texture = ExtResource("28_pill")
-texture_margin_left = 18.0
-texture_margin_top = 14.0
-texture_margin_right = 18.0
-texture_margin_bottom = 14.0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pill"]
+bg_color = Color(1.0, 1.0, 1.0, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 4
+border_color = Color(0.88, 0.92, 0.98, 1.0)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0, 0, 0, 0.12)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_green_n"]
-texture = ExtResource("5_btn_green_n")
-texture_margin_left = 20.0
-texture_margin_top = 18.0
-texture_margin_right = 20.0
-texture_margin_bottom = 22.0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_green"]
+bg_color = Color(0.32, 0.88, 0.38, 1.0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 6
+border_color = Color(0.15, 0.6, 0.22, 1.0)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0.1, 0.4, 0.15, 0.35)
+shadow_size = 6
+shadow_offset = Vector2(0, 4)
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_green_p"]
-texture = ExtResource("6_btn_green_p")
-texture_margin_left = 20.0
-texture_margin_top = 22.0
-texture_margin_right = 20.0
-texture_margin_bottom = 18.0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pink"]
+bg_color = Color(1.0, 0.42, 0.72, 1.0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 5
+border_color = Color(0.78, 0.2, 0.5, 1.0)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_pink_n"]
-texture = ExtResource("9_btn_pink_n")
-texture_margin_left = 14.0
-texture_margin_top = 12.0
-texture_margin_right = 14.0
-texture_margin_bottom = 16.0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_blue"]
+bg_color = Color(0.25, 0.75, 1.0, 1.0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 5
+border_color = Color(0.1, 0.5, 0.78, 1.0)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_pink_p"]
-texture = ExtResource("10_btn_pink_p")
-texture_margin_left = 14.0
-texture_margin_top = 16.0
-texture_margin_right = 14.0
-texture_margin_bottom = 12.0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_orange"]
+bg_color = Color(1.0, 0.55, 0.2, 1.0)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 5
+border_color = Color(0.75, 0.32, 0.05, 1.0)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_blue_n"]
-texture = ExtResource("11_btn_blue_n")
-texture_margin_left = 14.0
-texture_margin_top = 12.0
-texture_margin_right = 14.0
-texture_margin_bottom = 16.0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_yellow"]
+bg_color = Color(1.0, 0.82, 0.18, 0.95)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 8
+border_color = Color(0.82, 0.55, 0.05, 1.0)
+corner_radius_top_left = 36
+corner_radius_top_right = 36
+corner_radius_bottom_right = 36
+corner_radius_bottom_left = 36
 
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_blue_p"]
-texture = ExtResource("12_btn_blue_p")
-texture_margin_left = 14.0
-texture_margin_top = 16.0
-texture_margin_right = 14.0
-texture_margin_bottom = 12.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_orange_n"]
-texture = ExtResource("13_btn_orange_n")
-texture_margin_left = 14.0
-texture_margin_top = 12.0
-texture_margin_right = 14.0
-texture_margin_bottom = 16.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_orange_p"]
-texture = ExtResource("14_btn_orange_p")
-texture_margin_left = 14.0
-texture_margin_top = 16.0
-texture_margin_right = 14.0
-texture_margin_bottom = 12.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_purple_n"]
-texture = ExtResource("15_btn_purple_n")
-texture_margin_left = 16.0
-texture_margin_top = 14.0
-texture_margin_right = 16.0
-texture_margin_bottom = 18.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_purple_p"]
-texture = ExtResource("16_btn_purple_p")
-texture_margin_left = 16.0
-texture_margin_top = 18.0
-texture_margin_right = 16.0
-texture_margin_bottom = 14.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_red_n"]
-texture = ExtResource("17_btn_red_n")
-texture_margin_left = 16.0
-texture_margin_top = 14.0
-texture_margin_right = 16.0
-texture_margin_bottom = 18.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_red_p"]
-texture = ExtResource("18_btn_red_p")
-texture_margin_left = 16.0
-texture_margin_top = 18.0
-texture_margin_right = 16.0
-texture_margin_bottom = 14.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_gold_n"]
-texture = ExtResource("19_btn_gold_n")
-texture_margin_left = 16.0
-texture_margin_top = 14.0
-texture_margin_right = 16.0
-texture_margin_bottom = 18.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_gold_p"]
-texture = ExtResource("20_btn_gold_p")
-texture_margin_left = 16.0
-texture_margin_top = 18.0
-texture_margin_right = 16.0
-texture_margin_bottom = 14.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_yellow_n"]
-texture = ExtResource("7_btn_yellow_n")
-texture_margin_left = 18.0
-texture_margin_top = 16.0
-texture_margin_right = 18.0
-texture_margin_bottom = 20.0
-
-[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_yellow_p"]
-texture = ExtResource("8_btn_yellow_p")
-texture_margin_left = 18.0
-texture_margin_top = 20.0
-texture_margin_right = 18.0
-texture_margin_bottom = 16.0
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_steer"]
+bg_color = Color(0.35, 0.75, 1.0, 0.92)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 6
+border_color = Color(0.15, 0.52, 0.82, 1.0)
+corner_radius_top_left = 36
+corner_radius_top_right = 36
+corner_radius_bottom_right = 36
+corner_radius_bottom_left = 36
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_progress_bg"]
 bg_color = Color(1.0, 1.0, 1.0, 0.8)
@@ -266,7 +217,7 @@ alignment = 1
 [node name="TitleBox" type="PanelContainer" parent="HUD/StartPanel/MainLayout/VBox"]
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="TitleInner" type="MarginContainer" parent="HUD/StartPanel/MainLayout/VBox/TitleBox"]
 layout_mode = 2
@@ -309,7 +260,7 @@ alignment = 1
 [node name="HighScoreCard" type="PanelContainer" parent="HUD/StartPanel/MainLayout/VBox/StatsBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxTexture_pill")
+theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
 
 [node name="Inner" type="HBoxContainer" parent="HUD/StartPanel/MainLayout/VBox/StatsBox/HighScoreCard"]
 layout_mode = 2
@@ -320,7 +271,6 @@ alignment = 1
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 size_flags_vertical = 4
-texture = ExtResource("31_ic_trophy")
 expand_mode = 1
 stretch_mode = 5
 
@@ -334,7 +284,7 @@ horizontal_alignment = 1
 [node name="CoinsCard" type="PanelContainer" parent="HUD/StartPanel/MainLayout/VBox/StatsBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxTexture_pill")
+theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
 
 [node name="Inner" type="HBoxContainer" parent="HUD/StartPanel/MainLayout/VBox/StatsBox/CoinsCard"]
 layout_mode = 2
@@ -345,7 +295,6 @@ alignment = 1
 custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 size_flags_vertical = 4
-texture = ExtResource("30_ic_coin")
 expand_mode = 1
 stretch_mode = 5
 
@@ -378,9 +327,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_shadow_color = Color(0.1, 0.4, 0.15, 0.8)
 theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 26
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_green_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_green_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_green_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_green")
 text = "BẮT ĐẦU CHẠY"
 
 [node name="ActionRow" type="HBoxContainer" parent="HUD/StartPanel/MainLayout/VBox"]
@@ -394,9 +341,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_pink_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_pink_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pink_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_pink")
 text = "CỬA HÀNG"
 
 [node name="SoundButton" type="Button" parent="HUD/StartPanel/MainLayout/VBox/ActionRow"]
@@ -405,9 +350,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_blue_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_blue_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_blue_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_blue")
 text = "ÂM THANH"
 
 [node name="LangButton" type="Button" parent="HUD/StartPanel/MainLayout/VBox/ActionRow"]
@@ -416,9 +359,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_orange_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_orange_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_orange_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_orange")
 text = "TIẾNG VIỆT"
 
 [node name="InGameHUD" type="Control" parent="HUD"]
@@ -456,7 +397,7 @@ alignment = 1
 [node name="ScorePill" type="PanelContainer" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxTexture_pill")
+theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
 
 [node name="ScoreInner" type="HBoxContainer" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar/ScorePill"]
 layout_mode = 2
@@ -467,7 +408,6 @@ alignment = 1
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 size_flags_vertical = 4
-texture = ExtResource("29_ic_apple")
 expand_mode = 1
 stretch_mode = 5
 
@@ -481,12 +421,19 @@ horizontal_alignment = 1
 [node name="LevelPill" type="PanelContainer" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxTexture_pill")
+theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
 
 [node name="LevelInner" type="HBoxContainer" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar/LevelPill"]
 layout_mode = 2
 theme_override_constants/separation = 6
 alignment = 1
+
+[node name="Icon" type="TextureRect" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar/LevelPill/LevelInner"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 4
+expand_mode = 1
+stretch_mode = 5
 
 [node name="LevelLabel" type="Label" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar/LevelPill/LevelInner"]
 layout_mode = 2
@@ -498,7 +445,7 @@ horizontal_alignment = 1
 [node name="NeckPill" type="PanelContainer" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxTexture_pill")
+theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
 
 [node name="NeckInner" type="HBoxContainer" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar/NeckPill"]
 layout_mode = 2
@@ -509,7 +456,6 @@ alignment = 1
 custom_minimum_size = Vector2(24, 24)
 layout_mode = 2
 size_flags_vertical = 4
-texture = ExtResource("32_ic_giraffe")
 expand_mode = 1
 stretch_mode = 5
 
@@ -520,13 +466,13 @@ theme_override_font_sizes/font_size = 18
 text = "1.5m"
 horizontal_alignment = 1
 
-[node name="BtnPause" type="TextureButton" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar"]
+[node name="BtnPause" type="Button" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar"]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
-texture_normal = ExtResource("25_pause_n")
-texture_pressed = ExtResource("26_pause_p")
-ignore_texture_size = true
-stretch_mode = 5
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_blue")
+text = ""
 
 [node name="LevelProgressBar" type="ProgressBar" parent="HUD/InGameHUD/TopMargin/TopVBox"]
 custom_minimum_size = Vector2(0, 12)
@@ -557,21 +503,17 @@ offset_bottom = -20.0
 grow_vertical = 2
 theme_override_constants/separation = 12
 
-[node name="BtnLeft" type="TextureButton" parent="HUD/InGameHUD/TouchControls/SteerBox"]
+[node name="BtnLeft" type="Button" parent="HUD/InGameHUD/TouchControls/SteerBox"]
 custom_minimum_size = Vector2(72, 72)
 layout_mode = 2
-texture_normal = ExtResource("21_steer_l_n")
-texture_pressed = ExtResource("22_steer_l_p")
-ignore_texture_size = true
-stretch_mode = 5
+theme_override_styles/normal = SubResource("StyleBoxFlat_steer")
+text = ""
 
-[node name="BtnRight" type="TextureButton" parent="HUD/InGameHUD/TouchControls/SteerBox"]
+[node name="BtnRight" type="Button" parent="HUD/InGameHUD/TouchControls/SteerBox"]
 custom_minimum_size = Vector2(72, 72)
 layout_mode = 2
-texture_normal = ExtResource("23_steer_r_n")
-texture_pressed = ExtResource("24_steer_r_p")
-ignore_texture_size = true
-stretch_mode = 5
+theme_override_styles/normal = SubResource("StyleBoxFlat_steer")
+text = ""
 
 [node name="BtnStretch" type="Button" parent="HUD/InGameHUD/TouchControls"]
 custom_minimum_size = Vector2(170, 72)
@@ -590,9 +532,7 @@ theme_override_colors/font_color = Color(0.3, 0.18, 0.02, 1)
 theme_override_colors/font_shadow_color = Color(1, 0.9, 0.6, 0.8)
 theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_yellow_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_yellow_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_yellow_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_yellow")
 text = "VƯƠN CỔ"
 
 [node name="PausePanel" type="PanelContainer" parent="HUD"]
@@ -609,7 +549,7 @@ offset_right = 180.0
 offset_bottom = 200.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="PauseInner" type="MarginContainer" parent="HUD/PausePanel"]
 layout_mode = 2
@@ -636,9 +576,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_green_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_green_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_green_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_green")
 text = "TIẾP TỤC"
 
 [node name="PauseRestartBtn" type="Button" parent="HUD/PausePanel/PauseInner/VBox"]
@@ -647,9 +585,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_blue_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_blue_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_blue_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_blue")
 text = "CHƠI LẠI"
 
 [node name="PauseSoundBtn" type="Button" parent="HUD/PausePanel/PauseInner/VBox"]
@@ -658,9 +594,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_orange_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_orange_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_orange_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_orange")
 text = "ÂM THANH: BẬT"
 
 [node name="HomeButton" type="Button" parent="HUD/PausePanel/PauseInner/VBox"]
@@ -669,9 +603,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_purple_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_purple_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_purple_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_pink")
 text = "VỀ TRANG CHỦ"
 
 [node name="WinPanel" type="PanelContainer" parent="HUD"]
@@ -688,7 +620,7 @@ offset_right = 190.0
 offset_bottom = 210.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="WinInner" type="MarginContainer" parent="HUD/WinPanel"]
 layout_mode = 2
@@ -722,9 +654,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 22
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_green_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_green_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_green_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_green")
 text = "MÀN TIẾP THEO"
 
 [node name="WinShopBtn" type="Button" parent="HUD/WinPanel/WinInner/VBox"]
@@ -733,9 +663,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_pink_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_pink_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_pink_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_pink")
 text = "ĐỔI SKIN MỚI"
 
 [node name="WinHomeBtn" type="Button" parent="HUD/WinPanel/WinInner/VBox"]
@@ -744,9 +672,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_purple_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_purple_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_purple_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_blue")
 text = "VỀ TRANG CHỦ"
 
 [node name="FailPanel" type="PanelContainer" parent="HUD"]
@@ -763,7 +689,7 @@ offset_right = 190.0
 offset_bottom = 210.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="FailInner" type="MarginContainer" parent="HUD/FailPanel"]
 layout_mode = 2
@@ -798,9 +724,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.3, 0.2, 0.02, 1)
 theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_gold_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_gold_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_gold_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_yellow")
 text = "HỒI SINH (XEM ADS)"
 
 [node name="RetryButton" type="Button" parent="HUD/FailPanel/FailInner/VBox"]
@@ -809,9 +733,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_red_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_red_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_red_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_blue")
 text = "THỬ LẠI"
 
 [node name="FailHomeBtn" type="Button" parent="HUD/FailPanel/FailInner/VBox"]
@@ -820,9 +742,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_purple_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_purple_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_purple_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_pink")
 text = "VỀ TRANG CHỦ"
 
 [node name="ShopPanel" type="PanelContainer" parent="HUD"]
@@ -839,7 +759,7 @@ offset_right = 240.0
 offset_bottom = 260.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxTexture_panel")
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="ShopInner" type="MarginContainer" parent="HUD/ShopPanel"]
 layout_mode = 2
@@ -885,7 +805,5 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_blue_n")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_blue_n")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_blue_p")
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_blue")
 text = "ĐÓNG"

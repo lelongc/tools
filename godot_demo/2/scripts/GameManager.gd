@@ -70,11 +70,128 @@ var _camera: Camera3D = null
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	load_csv_translations()
+	setup_pro_ui_textures()
 	setup_ui_state()
 	setup_combo_fever_ui()
 	connect_signals()
 	update_all_localized_text()
 	PlatformBridge.notify_game_ready()
+
+func load_ui_tex(file_name: String) -> Texture2D:
+	var abs_p = ProjectSettings.globalize_path("res://assets/ui/" + file_name)
+	if FileAccess.file_exists(abs_p):
+		var img = Image.load_from_file(abs_p)
+		if img:
+			return ImageTexture.create_from_image(img)
+	return null
+
+func make_tex_style(tex: Texture2D, margin: float = 16.0, content_top: float = 4.0, content_bottom: float = 6.0) -> StyleBoxTexture:
+	if not tex: return null
+	var st = StyleBoxTexture.new()
+	st.texture = tex
+	st.texture_margin_left = margin
+	st.texture_margin_top = margin
+	st.texture_margin_right = margin
+	st.texture_margin_bottom = margin
+	st.content_margin_left = margin
+	st.content_margin_right = margin
+	st.content_margin_top = content_top
+	st.content_margin_bottom = content_bottom
+	return st
+
+func apply_btn_style(btn: BaseButton, normal_file: String, pressed_file: String, margin: float = 16.0) -> void:
+	if not btn: return
+	var tn = load_ui_tex(normal_file)
+	var tp = load_ui_tex(pressed_file)
+	if tn:
+		var sn = make_tex_style(tn, margin, 4.0, 8.0)
+		btn.add_theme_stylebox_override("normal", sn)
+		btn.add_theme_stylebox_override("hover", sn)
+	if tp:
+		var sp = make_tex_style(tp, margin, 8.0, 4.0)
+		btn.add_theme_stylebox_override("pressed", sp)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not is_game_running and start_panel and start_panel.visible:
+		if event is InputEventKey and event.pressed:
+			if event.keycode == KEY_SPACE or event.keycode == KEY_ENTER:
+				start_gameplay()
+		elif event is InputEventMouseButton and event.pressed:
+			start_gameplay()
+
+func setup_pro_ui_textures() -> void:
+	# 1. Apply Marshmallow 9-slice Panel Backgrounds
+	var p_tex = load_ui_tex("panel_marshmallow.png")
+	if p_tex:
+		var p_style = make_tex_style(p_tex, 28.0)
+		var tb = get_tree().root.find_child("TitleBox", true, false)
+		if tb: tb.add_theme_stylebox_override("panel", p_style)
+		if pause_panel: pause_panel.add_theme_stylebox_override("panel", p_style)
+		if win_panel: win_panel.add_theme_stylebox_override("panel", p_style)
+		if fail_panel: fail_panel.add_theme_stylebox_override("panel", p_style)
+		if shop_panel: shop_panel.add_theme_stylebox_override("panel", p_style)
+		
+	# 2. Apply Pill Badge Backgrounds
+	var pill_tex = load_ui_tex("pill_badge.png")
+	if pill_tex:
+		var pill_style = make_tex_style(pill_tex, 16.0)
+		for node_name in ["HighScoreCard", "CoinsCard", "ScorePill", "LevelPill", "NeckPill"]:
+			var node = get_tree().root.find_child(node_name, true, false)
+			if node: node.add_theme_stylebox_override("panel", pill_style)
+			
+	# 3. Apply Crisp Vector Icons
+	var ic_apple = load_ui_tex("icon_apple.png")
+	var ic_coin = load_ui_tex("icon_coin.png")
+	var ic_trophy = load_ui_tex("icon_trophy.png")
+	var ic_giraffe = load_ui_tex("icon_giraffe.png")
+	
+	var hs_card = get_tree().root.find_child("HighScoreCard", true, false)
+	if hs_card and ic_trophy:
+		var ic = hs_card.find_child("Icon", true, false)
+		if ic and ic is TextureRect: ic.texture = ic_trophy
+		
+	var coins_card = get_tree().root.find_child("CoinsCard", true, false)
+	if coins_card and ic_coin:
+		var ic = coins_card.find_child("Icon", true, false)
+		if ic and ic is TextureRect: ic.texture = ic_coin
+		
+	var score_pill = get_tree().root.find_child("ScorePill", true, false)
+	if score_pill and ic_apple:
+		var ic = score_pill.find_child("Icon", true, false)
+		if ic and ic is TextureRect: ic.texture = ic_apple
+		
+	var level_pill = get_tree().root.find_child("LevelPill", true, false)
+	if level_pill and ic_trophy:
+		var ic = level_pill.find_child("Icon", true, false)
+		if ic and ic is TextureRect: ic.texture = ic_trophy
+		
+	var neck_pill = get_tree().root.find_child("NeckPill", true, false)
+	if neck_pill and ic_giraffe:
+		var ic = neck_pill.find_child("Icon", true, false)
+		if ic and ic is TextureRect: ic.texture = ic_giraffe
+		
+	# 4. Apply 3D Candy Button Textures (Normal & Pressed)
+	apply_btn_style(start_button, "btn_green_play_normal.png", "btn_green_play_pressed.png", 20.0)
+	apply_btn_style(btn_stretch, "btn_yellow_stretch_normal.png", "btn_yellow_stretch_pressed.png", 18.0)
+	apply_btn_style(shop_button, "btn_pink_shop_normal.png", "btn_pink_shop_pressed.png", 14.0)
+	apply_btn_style(sound_button, "btn_blue_sound_normal.png", "btn_blue_sound_pressed.png", 14.0)
+	apply_btn_style(lang_button, "btn_orange_lang_normal.png", "btn_orange_lang_pressed.png", 14.0)
+	apply_btn_style(next_button, "btn_green_play_normal.png", "btn_green_play_pressed.png", 20.0)
+	apply_btn_style(retry_button, "btn_red_retry_normal.png", "btn_red_retry_pressed.png", 16.0)
+	apply_btn_style(revive_button, "btn_gold_revive_normal.png", "btn_gold_revive_pressed.png", 16.0)
+	apply_btn_style(home_button, "btn_purple_home_normal.png", "btn_purple_home_pressed.png", 16.0)
+	apply_btn_style(fail_home_btn, "btn_purple_home_normal.png", "btn_purple_home_pressed.png", 16.0)
+	apply_btn_style(win_home_btn, "btn_blue_sound_normal.png", "btn_blue_sound_pressed.png", 16.0)
+	apply_btn_style(win_shop_btn, "btn_pink_shop_normal.png", "btn_pink_shop_pressed.png", 14.0)
+	apply_btn_style(pause_restart_btn, "btn_blue_sound_normal.png", "btn_blue_sound_pressed.png", 14.0)
+	apply_btn_style(pause_sound_btn, "btn_orange_lang_normal.png", "btn_orange_lang_pressed.png", 14.0)
+	apply_btn_style(resume_button, "btn_green_play_normal.png", "btn_green_play_pressed.png", 20.0)
+	apply_btn_style(shop_close_btn, "btn_blue_sound_normal.png", "btn_blue_sound_pressed.png", 14.0)
+	
+	# Steer & Pause circular icon buttons
+	apply_btn_style(btn_left, "btn_steer_left_normal.png", "btn_steer_left_pressed.png", 0.0)
+	apply_btn_style(btn_right, "btn_steer_right_normal.png", "btn_steer_right_pressed.png", 0.0)
+	apply_btn_style(btn_pause, "btn_pause_normal.png", "btn_pause_pressed.png", 0.0)
 
 func setup_ui_state() -> void:
 	if win_panel: win_panel.visible = false
@@ -413,13 +530,6 @@ func update_shop_items() -> void:
 	
 	for child in container.get_children():
 		child.queue_free()
-		
-	var skin_icons = {
-		"classic_giraffe": "🦒",
-		"cyber_brachio": "🤖🦕",
-		"pink_flamingo": "🦩",
-		"king_gold": "👑✨"
-	}
 		
 	for skin_id in SkinManager.skins_catalog:
 		var s = SkinManager.skins_catalog[skin_id]
