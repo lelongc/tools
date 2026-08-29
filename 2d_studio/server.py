@@ -2,16 +2,16 @@ import os
 import io
 import json
 import base64
-import math
 import asyncio
-from typing import List, Dict, Any, Optional
-from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
+from datetime import datetime
+from typing import Dict, List, Optional
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from PIL import Image, ImageDraw
 
-app = FastAPI(title="2D Studio & Smart Slicer Backend")
+app = FastAPI(title="2D Game Studio & Spritesheet Slicer Pro")
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,39 +21,57 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-WORKSPACE_DIR = r"d:\folder\tools\2d_studio\workspace"
-LIB_DIR = r"d:\folder\tools\2d_studio\assets_library"
+STUDIO_DIR = os.path.dirname(os.path.abspath(__file__))
+ASSETS_LIB_DIR = os.path.join(STUDIO_DIR, "assets_library")
+WORKSPACE_DIR = os.path.join(STUDIO_DIR, "workspace")
 GODOT_SPRITES_DIR = r"d:\folder\tools\godot_demo\2\assets\sprites"
-os.makedirs(WORKSPACE_DIR, exist_ok=True)
-os.makedirs(LIB_DIR, exist_ok=True)
-os.makedirs(GODOT_SPRITES_DIR, exist_ok=True)
 
-# Connected WebSocket clients
-ws_clients: List[WebSocket] = []
+os.makedirs(ASSETS_LIB_DIR, exist_ok=True)
+os.makedirs(WORKSPACE_DIR, exist_ok=True)
+for cat in ["raw_sheets", "characters", "environments", "items", "ui", "fx"]:
+    os.makedirs(os.path.join(ASSETS_LIB_DIR, cat), exist_ok=True)
+
+app.mount("/assets_library", StaticFiles(directory=ASSETS_LIB_DIR), name="assets_library")
+app.mount("/workspace", StaticFiles(directory=WORKSPACE_DIR), name="workspace")
+
+# =========================================================================
+# WEBSOCKET CONNECTION POOL
+# =========================================================================
+active_connections: List[WebSocket] = []
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    ws_clients.append(websocket)
+    active_connections.append(websocket)
     try:
         while True:
-            await websocket.receive_text()
+            data = await websocket.receive_text()
+            try:
+                msg = json.loads(data)
+                if msg.get("type") == "PING":
+                    await websocket.send_text(json.dumps({"type": "PONG"}))
+            except Exception:
+                pass
     except WebSocketDisconnect:
-        ws_clients.remove(websocket)
+        if websocket in active_connections:
+            active_connections.remove(websocket)
 
-async def broadcast_ws(message: dict):
-    for client in ws_clients:
+async def broadcast_ws(msg: dict):
+    for ws in list(active_connections):
         try:
-            await client.send_json(message)
+            await ws.send_text(json.dumps(msg))
         except Exception:
-            pass
+            if ws in active_connections:
+                active_connections.remove(ws)
 
-# Helper image functions
+# =========================================================================
+# HELPER FUNCTIONS
+# =========================================================================
 def base64_to_image(b64_str: str) -> Image.Image:
     if "," in b64_str:
         b64_str = b64_str.split(",")[1]
-    img_bytes = base64.b64decode(b64_str)
-    return Image.open(io.BytesIO(img_bytes)).convert("RGBA")
+    data = base64.b64decode(b64_str)
+    return Image.open(io.BytesIO(data)).convert("RGBA")
 
 def image_to_base64(img: Image.Image) -> str:
     buf = io.BytesIO()
@@ -65,39 +83,51 @@ def image_to_base64(img: Image.Image) -> str:
 # =========================================================================
 @app.get("/api/library/assets")
 async def get_library_assets():
-    catalog = {
+    catalog: Dict[str, List[dict]] = {
+        "all": [],
+        "raw_sheets": [],
         "characters": [],
+        "environments": [],
         "items": [],
         "ui": [],
-        "environments": [],
         "fx": []
     }
     
-    for cat in catalog.keys():
-        cat_path = os.path.join(LIB_DIR, cat)
-        if not os.path.exists(cat_path):
+    for cat in ["raw_sheets", "characters", "environments", "items", "ui", "fx"]:
+        cat_dir = os.path.join(ASSETS_LIB_DIR, cat)
+        if not os.path.exists(cat_dir):
             continue
-        for item_id in os.listdir(cat_path):
-            item_path = os.path.join(cat_path, item_id)
+            
+        for item_id in os.listdir(cat_dir):
+            item_path = os.path.join(cat_dir, item_id)
             if not os.path.isdir(item_path):
                 continue
-            meta_path = os.path.join(item_path, "meta.json")
+                
+            meta_file = os.path.join(item_path, "meta.json")
             meta = {}
-            if os.path.exists(meta_path):
+            if os.path.exists(meta_file):
                 try:
-                    with open(meta_path, "r", encoding="utf-8") as f:
+                    with open(meta_file, "r", encoding="utf-8") as f:
                         meta = json.load(f)
                 except Exception:
                     pass
             
             thumb_url = f"/assets_library/{cat}/{item_id}/thumb.png"
-            catalog[cat].append({
+            sheet_url = f"/assets_library/{cat}/{item_id}/spritesheet.png"
+            if not os.path.exists(os.path.join(item_path, "thumb.png")) and os.path.exists(os.path.join(item_path, "spritesheet.png")):
+                thumb_url = sheet_url
+
+            item_obj = {
                 "id": item_id,
                 "name": meta.get("name", item_id.replace("_", " ").title()),
                 "category": cat,
                 "thumb_url": thumb_url,
-                "description": meta.get("description", "")
-            })
+                "sheet_url": sheet_url if os.path.exists(os.path.join(item_path, "spritesheet.png")) else thumb_url,
+                "description": meta.get("description", ""),
+                "created_at": meta.get("created_at", "")
+            }
+            catalog[cat].append(item_obj)
+            catalog["all"].append(item_obj)
             
     return {"catalog": catalog}
 
@@ -110,138 +140,110 @@ class GenerateAssetReq(BaseModel):
 
 @app.post("/api/ai/generate_full_asset")
 async def generate_full_asset(req: GenerateAssetReq):
-    # Log prompt for AI co-pilot
-    log_path = os.path.join(r"d:\folder\tools\2d_studio", "user_requests.log")
-    latest_path = os.path.join(r"d:\folder\tools\2d_studio", "latest_request.json")
+    # Log prompt for AI assistant
+    log_path = os.path.join(STUDIO_DIR, "user_requests.log")
+    latest_path = os.path.join(STUDIO_DIR, "latest_request.json")
     with open(log_path, "a", encoding="utf-8") as f:
         f.write(f"[{req.category.upper()}] PROMPT: {req.prompt}\n")
     with open(latest_path, "w", encoding="utf-8") as f:
-        json.dump({"category": req.category, "prompt": req.prompt, "has_mask": False}, f, ensure_ascii=False, indent=2)
+        json.dump({
+            "category": req.category, 
+            "prompt": req.prompt, 
+            "has_mask": False,
+            "timestamp": datetime.now().isoformat()
+        }, f, ensure_ascii=False, indent=2)
 
-    # Procedurally synthesize matching spritesheet image for immediate load
-    w, h = 1024, 512
-    sheet = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    d = ImageDraw.Draw(sheet)
+    # Save request asset placeholder into Library raw_sheets
+    asset_id = f"ai_{req.category}_{int(datetime.now().timestamp())}"
+    asset_dir = os.path.join(ASSETS_LIB_DIR, "raw_sheets", asset_id)
+    os.makedirs(asset_dir, exist_ok=True)
+    
+    with open(os.path.join(asset_dir, "meta.json"), "w", encoding="utf-8") as f:
+        json.dump({
+            "name": f"AI: {req.prompt[:30]}",
+            "category": req.category,
+            "description": req.prompt,
+            "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }, f, ensure_ascii=False, indent=2)
 
-    p_lower = req.prompt.lower()
-    cols, rows = 4, 2
-    cw, rh = w // cols, h // rows
-
-    if req.category == "ui" or "nút" in p_lower or "button" in p_lower:
-        # Generate 4 distinct UI buttons (Normal, Hover, Pressed, Disabled)
-        labels = ["START GAME", "RESUME", "SKILL A", "SETTINGS", "RETRY", "INVENTORY", "ATTACK", "EXIT"]
-        for idx in range(8):
-            r, c = idx // 4, idx % 4
-            bx, by = c * cw + 20, r * rh + 20
-            bw, bh = cw - 40, rh - 40
-            
-            color = (0, 240, 255) if idx % 2 == 0 else (255, 0, 128)
-            d.rounded_rectangle([bx, by, bx + bw, by + bh], radius=12, fill=(20, 26, 40, 255), outline=color, width=4)
-            d.rounded_rectangle([bx + 4, by + 4, bx + bw - 4, by + 12], radius=4, fill=(color[0], color[1], color[2], 120))
-            d.text((bx + bw // 4, by + bh // 3), labels[idx], fill=(255, 255, 255, 255))
-            
-    elif req.category == "items" or "vật phẩm" in p_lower or "kiếm" in p_lower or "potion" in p_lower:
-        # Generate 8 distinct items
-        for idx in range(8):
-            r, c = idx // 4, idx % 4
-            cx, cy = c * cw + cw // 2, r * rh + rh // 2
-            
-            if idx == 0: # Flaming Katana
-                d.line([(cx - 40, cy + 40), (cx + 40, cy - 40)], fill=(0, 240, 255, 255), width=8)
-                d.ellipse([cx - 44, cy + 36, cx - 36, cy + 44], fill=(255, 215, 0, 255))
-            elif idx == 1: # Health Potion
-                d.rounded_rectangle([cx - 24, cy - 30, cx + 24, cy + 30], radius=8, fill=(255, 40, 60, 220), outline=(255, 255, 255, 255), width=3)
-            elif idx == 2: # Mana Crystal
-                d.polygon([(cx, cy - 40), (cx + 30, cy), (cx, cy + 40), (cx - 30, cy)], fill=(0, 240, 255, 220), outline=(255, 255, 255, 255))
-            else: # Gold Coin / Chest / Shield
-                d.ellipse([cx - 30, cy - 30, cx + 30, cy + 30], fill=(255, 215, 0, 255), outline=(180, 140, 0, 255), width=4)
-
-    else:
-        # Character 8-frame combat sequence
-        for idx in range(8):
-            r, c = idx // 4, idx % 4
-            cx, cy = c * cw + cw // 2, r * rh + rh // 2
-            # Body & Legs
-            d.rectangle([cx - 15, cy - 30, cx + 15, cy + 30], fill=(24, 28, 42, 255), outline=(0, 240, 255, 255), width=2)
-            d.ellipse([cx - 14, cy - 60, cx + 14, cy - 32], fill=(255, 220, 200, 255))
-            # Katana Slash arc
-            start_ang = (idx * 40) % 360
-            d.arc([cx - 70, cy - 70, cx + 70, cy + 70], start=start_ang, end=start_ang + 120, fill=(0, 240, 255, 255), width=8)
-
-    b64 = image_to_base64(sheet)
-    return {"success": True, "image": b64}
+    return {
+        "status": "QUEUED",
+        "message": f"Đã gửi yêu cầu tạo [{req.category.upper()}]: '{req.prompt}' đến AI Co-Pilot!",
+        "asset_id": asset_id
+    }
 
 # =========================================================================
-# AI INPAINT & CANVAS REFINEMENT
+# SAVE PROCESSED ASSET INTO LIBRARY
 # =========================================================================
-class InpaintReq(BaseModel):
-    prompt: str
-    image: str
-    mask: Optional[str] = None
+class SaveProcessedAssetReq(BaseModel):
+    name: str
+    category: str
+    frames: List[str]
+    sheet_image: Optional[str] = None
+    fps: int = 10
 
-@app.post("/api/ai/inpaint")
-async def inpaint_canvas(req: InpaintReq):
-    try:
-        img = base64_to_image(req.image)
-        mask = base64_to_image(req.mask) if req.mask else None
-        p_lower = req.prompt.lower()
+@app.post("/api/library/save_processed")
+async def save_processed_asset(req: SaveProcessedAssetReq):
+    clean_name = req.name.lower().replace(" ", "_").strip() or "custom_asset"
+    target_dir = os.path.join(ASSETS_LIB_DIR, req.category, clean_name)
+    os.makedirs(target_dir, exist_ok=True)
 
-        # Check if user requested to add new frame
-        if any(k in p_lower for k in ["thêm frame", "add frame", "tạo frame", "tiếp theo"]):
-            next_f = img.copy()
-            d = ImageDraw.Draw(next_f)
-            d.arc([20, 20, 236, 236], start=160, end=340, fill=(0, 240, 255, 255), width=16)
-            d.arc([30, 30, 226, 226], start=170, end=330, fill=(255, 255, 255, 255), width=6)
-            b64 = image_to_base64(next_f)
-            await broadcast_ws({"type": "ADD_FRAME", "imageData": b64})
-            return {"success": True, "type": "ADD_FRAME", "image": b64}
+    # Save frames
+    for idx, b64 in enumerate(req.frames):
+        img = base64_to_image(b64)
+        img.save(os.path.join(target_dir, f"frame_{idx}.png"))
+        if idx == 0:
+            thumb = img.resize((128, 128), Image.Resampling.NEAREST)
+            thumb.save(os.path.join(target_dir, "thumb.png"))
 
-        # Apply inpaint modification
-        result = img.copy()
-        draw = ImageDraw.Draw(result)
+    if req.sheet_image:
+        sheet = base64_to_image(req.sheet_image)
+        sheet.save(os.path.join(target_dir, "spritesheet.png"))
 
-        if mask:
-            # Mask bounding
-            m_data = mask.getdata()
-            pts = []
-            for y in range(img.height):
-                for x in range(img.width):
-                    if m_data[y * img.width + x][3] > 30:
-                        pts.append((x, y))
-            if pts:
-                min_x, max_x = min(p[0] for p in pts), max(p[0] for p in pts)
-                min_y, max_y = min(p[1] for p in pts), max(p[1] for p in pts)
-                cx, cy = (min_x + max_x) // 2, (min_y + max_y) // 2
+    # Save metadata
+    meta = {
+        "name": req.name,
+        "category": req.category,
+        "frames_count": len(req.frames),
+        "fps": req.fps,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    with open(os.path.join(target_dir, "meta.json"), "w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
 
-                if any(k in p_lower for k in ["cánh", "wing"]):
-                    draw.polygon([(cx, cy), (min_x - 30, min_y - 20), (min_x - 40, cy + 20)], fill=(255, 0, 128, 220), outline=(0, 240, 255, 255))
-                    draw.polygon([(cx, cy), (max_x + 30, min_y - 20), (max_x + 40, cy + 20)], fill=(255, 0, 128, 220), outline=(0, 240, 255, 255))
-                elif any(k in p_lower for k in ["kiếm", "sword", "blade"]):
-                    draw.line([(min_x, max_y), (max_x, min_y)], fill=(0, 240, 255, 255), width=10)
-                    draw.line([(min_x + 2, max_y - 2), (max_x - 2, min_y + 2)], fill=(255, 255, 255, 255), width=4)
-                elif any(k in p_lower for k in ["vàng", "gold"]):
-                    for px, py in pts: draw.point((px, py), fill=(255, 215, 0, 255))
-                elif any(k in p_lower for k in ["đỏ", "red"]):
-                    for px, py in pts: draw.point((px, py), fill=(255, 40, 60, 255))
-                else:
-                    for px, py in pts: draw.point((px, py), fill=(0, 240, 255, 255))
-
-        b64 = image_to_base64(result)
-        await broadcast_ws({"type": "APPLY_FRAME", "imageData": b64})
-        return {"success": True, "type": "APPLY_FRAME", "image": b64}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
+    return {"status": "ok", "path": target_dir}
 
 # =========================================================================
-# BROADCAST CUSTOM FRAME
+# BROADCAST CUSTOM FRAME / SPRITESHEET (FROM AI ASSISTANT)
 # =========================================================================
 class BroadcastReq(BaseModel):
     type: str = "APPLY_FRAME"
     imageData: Optional[str] = None
     clips: Optional[dict] = None
+    save_to_library: bool = True
+    category: str = "raw_sheets"
+    asset_name: str = "ai_spritesheet"
 
 @app.post("/api/ai/broadcast_frame")
 async def broadcast_frame(req: BroadcastReq):
+    if req.save_to_library and req.imageData:
+        try:
+            asset_id = f"{req.asset_name}_{int(datetime.now().timestamp())}"
+            target_dir = os.path.join(ASSETS_LIB_DIR, req.category, asset_id)
+            os.makedirs(target_dir, exist_ok=True)
+            img = base64_to_image(req.imageData)
+            img.save(os.path.join(target_dir, "spritesheet.png"))
+            thumb = img.resize((160, int(160 * img.height / img.width)), Image.Resampling.NEAREST)
+            thumb.save(os.path.join(target_dir, "thumb.png"))
+            with open(os.path.join(target_dir, "meta.json"), "w", encoding="utf-8") as f:
+                json.dump({
+                    "name": req.asset_name.replace("_", " ").title(),
+                    "category": req.category,
+                    "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                }, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print("Error auto-saving to library:", e)
+
     payload = {"type": req.type}
     if req.imageData:
         payload["imageData"] = req.imageData
@@ -251,7 +253,7 @@ async def broadcast_frame(req: BroadcastReq):
     return {"success": True}
 
 # =========================================================================
-# GODOT 2D EXPORT
+# GODOT 2D EXPORT & SYNC
 # =========================================================================
 class FullCharacterSyncReq(BaseModel):
     character_name: str
@@ -260,17 +262,29 @@ class FullCharacterSyncReq(BaseModel):
 @app.post("/api/godot/sync_full_character")
 async def sync_godot(req: FullCharacterSyncReq):
     c_name = req.character_name.lower().replace(" ", "_")
+    
+    # 1. Save to Godot Game Project
     char_dir = os.path.join(GODOT_SPRITES_DIR, "characters", c_name)
     os.makedirs(char_dir, exist_ok=True)
 
-    tres_path = os.path.join(char_dir, f"{c_name}_frames.tres")
+    # 2. Also Save to Studio Asset Library
+    lib_char_dir = os.path.join(ASSETS_LIB_DIR, "characters", c_name)
+    os.makedirs(lib_char_dir, exist_ok=True)
+
     sections = []
+    first_thumb_saved = False
     
     for clip_key, frames_b64 in req.clips.items():
         for idx, b64 in enumerate(frames_b64):
             f_img = base64_to_image(b64)
             f_path = os.path.join(char_dir, f"{clip_key}_{idx}.png")
             f_img.save(f_path)
+            f_img.save(os.path.join(lib_char_dir, f"{clip_key}_{idx}.png"))
+            
+            if not first_thumb_saved:
+                thumb = f_img.resize((128, 128), Image.Resampling.NEAREST)
+                thumb.save(os.path.join(lib_char_dir, "thumb.png"))
+                first_thumb_saved = True
             
         loop = "true" if clip_key in ["idle", "run"] else "false"
         speed = 10.0 if clip_key in ["attack", "run"] else 6.0
@@ -281,18 +295,31 @@ async def sync_godot(req: FullCharacterSyncReq):
 "speed": {speed}
 }}""")
 
-    content = f"""[gd_resource type="SpriteFrames" format=3]
+    tres_content = f"""[gd_resource type="SpriteFrames" format=3]
 
 [resource]
-animations = [{','.join(sections)}]
+animations = [{", ".join(sections)}]
 """
-    with open(tres_path, "w", encoding="utf-8") as f:
-        f.write(content)
+    with open(os.path.join(char_dir, f"{c_name}_frames.tres"), "w", encoding="utf-8") as f:
+        f.write(tres_content)
+    with open(os.path.join(lib_char_dir, f"{c_name}_frames.tres"), "w", encoding="utf-8") as f:
+        f.write(tres_content)
 
-    return {"status": "ok", "path": tres_path}
+    meta = {
+        "name": req.character_name,
+        "category": "characters",
+        "clips": list(req.clips.keys()),
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    with open(os.path.join(lib_char_dir, "meta.json"), "w", encoding="utf-8") as f:
+        json.dump(meta, f, ensure_ascii=False, indent=2)
 
-# Mount static frontend
-app.mount("/", StaticFiles(directory=r"d:\folder\tools\2d_studio", html=True), name="static")
+    return {"status": "ok", "godot_dir": char_dir, "library_dir": lib_char_dir}
+
+# =========================================================================
+# STATIC CLIENT
+# =========================================================================
+app.mount("/", StaticFiles(directory=STUDIO_DIR, html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn

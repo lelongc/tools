@@ -156,6 +156,7 @@ class StudioApp {
 
         document.getElementById('btnApplyGridSlice').addEventListener('click', () => this.applyGridSlice());
         document.getElementById('btnSendSlicesToStudio').addEventListener('click', () => this.sendSlicesToStudio());
+        document.getElementById('btnSaveSlicesToLibrary').addEventListener('click', () => this.saveSlicesToLibrary());
         document.getElementById('btnClearSlices').addEventListener('click', () => this.clearSlices());
 
         // Smart Alignment Buttons
@@ -1315,6 +1316,37 @@ class StudioApp {
         });
     }
 
+    async saveSlicesToLibrary() {
+        if (this.slicedCanvases.length === 0) {
+            this.showToast("⚠️ Chưa có khung hình nào được cắt!");
+            return;
+        }
+
+        const assetName = prompt("Nhập tên lưu cho bộ Frame này:", "character_animation") || "custom_asset";
+        const framesB64 = this.slicedCanvases.map(c => c.toDataURL());
+        const sheetB64 = this.slicerCanvas ? this.slicerCanvas.toDataURL() : null;
+
+        try {
+            const res = await fetch('http://localhost:8765/api/library/save_processed', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: assetName,
+                    category: 'characters',
+                    frames: framesB64,
+                    sheet_image: sheetB64,
+                    fps: this.slicerFps
+                })
+            });
+            const data = await res.json();
+            if (data.status === 'ok') {
+                this.showToast(`💾 Đã lưu thành công bộ ${framesB64.length} frame vào Kho Asset!`);
+            }
+        } catch (e) {
+            this.showToast("⚠️ Lỗi lưu kho: " + e.message);
+        }
+    }
+
     async loadLibraryCatalog() {
         try {
             const res = await fetch('http://localhost:8765/api/library/assets');
@@ -1329,32 +1361,62 @@ class StudioApp {
         const grid = document.getElementById('libraryCardsGrid');
         grid.innerHTML = '';
 
+        let totalItems = 0;
         for (const [catKey, items] of Object.entries(catalog)) {
+            if (catKey === 'all') continue;
             items.forEach(item => {
+                totalItems++;
                 const card = document.createElement('div');
                 card.className = 'library-card';
                 card.setAttribute('data-category', catKey);
+                
+                const isRaw = catKey === 'raw_sheets';
+                const actionButtons = isRaw ? `
+                    <button class="btn btn-primary btn-sm btn-load-slicer" style="width: 100%; justify-content: center;">
+                        ✂️ Nạp Vào Slicer Cắt Frame
+                    </button>
+                ` : `
+                    <button class="btn btn-secondary btn-sm btn-open-studio" style="flex:1;">🎨 Studio</button>
+                    <button class="btn btn-godot btn-sm btn-sync-godot">🚀 Godot</button>
+                `;
+
                 card.innerHTML = `
                     <div class="library-thumb">
-                        <img src="${item.thumb_url}" alt="${item.name}">
+                        <img src="${item.thumb_url}?t=${Date.now()}" alt="${item.name}">
                     </div>
                     <div class="library-card-info">
-                        <h4>${item.name}</h4>
-                        <p>${item.description || ''}</p>
+                        <span class="badge-cat" style="font-size: 10px; color: var(--accent-cyan); font-weight: 700; text-transform: uppercase;">[${item.category}]</span>
+                        <h4 style="margin: 4px 0;">${item.name}</h4>
+                        <p style="font-size: 11px; color: var(--text-muted);">${item.description || ''}</p>
                     </div>
                     <div class="library-actions">
-                        <button class="btn btn-primary btn-sm" style="flex:1;">✂️ Cắt Slices</button>
-                        <button class="btn btn-godot btn-sm">🚀 Godot</button>
+                        ${actionButtons}
                     </div>
                 `;
 
-                card.querySelector('.btn-primary').addEventListener('click', () => {
-                    this.loadSlicerImageSrc(item.thumb_url);
-                    this.switchTab('tab-slicer');
-                });
+                if (isRaw) {
+                    card.querySelector('.btn-load-slicer').addEventListener('click', () => {
+                        this.loadSlicerImageSrc(item.sheet_url || item.thumb_url);
+                        this.switchTab('tab-slicer');
+                    });
+                } else {
+                    card.querySelector('.btn-open-studio').addEventListener('click', () => {
+                        this.loadSlicerImageSrc(item.thumb_url);
+                        this.switchTab('tab-studio');
+                    });
+                }
 
                 grid.appendChild(card);
             });
+        }
+
+        if (totalItems === 0) {
+            grid.innerHTML = `
+                <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">
+                    <h3>📦 Kho Asset Đang Trống</h3>
+                    <p>Hãy gửi lệnh tạo ảnh cho AI hoặc cắt frame từ spritesheet và bấm "Lưu Vào Kho Asset" để bắt đầu bộ sưu tập!</p>
+                </div>
+            `;
         }
     }
 

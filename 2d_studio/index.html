@@ -134,9 +134,12 @@
                         <p class="hint-text">💡 Mẹo: Bạn có thể click chọn bất kỳ khung nào trên ảnh rồi dùng <b>phím mũi tên</b> để dịch chuyển từng pixel!</p>
                     </div>
 
-                    <div class="panel-section" style="margin-top: auto;">
+                    <div class="panel-section" style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
                         <button class="btn btn-success btn-large" id="btnSendSlicesToStudio" style="width: 100%; justify-content: center;">
                             ✨ Nạp <span id="sliceCountBadge">8</span> Frame Vào Timeline ➔
+                        </button>
+                        <button class="btn btn-primary" id="btnSaveSlicesToLibrary" style="width: 100%; justify-content: center;">
+                            💾 Lưu Frame Đã Cắt Vào Kho Asset
                         </button>
                     </div>
                 </aside>
@@ -386,7 +389,8 @@
             <div class="library-layout">
                 <div class="library-filter-bar">
                     <button class="lib-filter-btn active" data-lib-cat="all">Tất Cả</button>
-                    <button class="lib-filter-btn" data-lib-cat="characters">👤 Nhân Vật</button>
+                    <button class="lib-filter-btn" data-lib-cat="raw_sheets">📸 Bảng Ảnh AI Gốc</button>
+                    <button class="lib-filter-btn" data-lib-cat="characters">👤 Nhân Vật Hoàn Thiện</button>
                     <button class="lib-filter-btn" data-lib-cat="items">🗡️ Vật Phẩm</button>
                     <button class="lib-filter-btn" data-lib-cat="ui">🎛️ Nút Bấm & HUD</button>
                     <button class="lib-filter-btn" data-lib-cat="environments">🏰 Môi Trường</button>
