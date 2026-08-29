@@ -24,10 +24,36 @@ config/icon="res://icon.svg"
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 PlatformBridge="*res://scripts/autoload/PlatformBridge.gd"
 SaveSystem="*res://scripts/autoload/SaveSystem.gd"
 SoundManager="*res://scripts/autoload/SoundManager.gd"
 SkinManager="*res://scripts/autoload/SkinManager.gd"
+ModelLoader="*res://scripts/ModelLoader.gd"
 
 [display]
 

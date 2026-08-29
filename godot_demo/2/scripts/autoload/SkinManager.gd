@@ -1,6 +1,6 @@
 extends Node
 
-# SkinManager: Quản lý danh mục Skin và hỗ trợ đa ngôn ngữ Tiếng Việt
+# SkinManager: Quản lý danh mục Skin và áp dụng chất liệu Flat Matte hài hòa cho hươu
 
 signal skin_changed(skin_id: String)
 
@@ -9,10 +9,9 @@ var skins_catalog: Dictionary = {
 		"id": "classic_giraffe",
 		"name_key": "SKIN_1",
 		"price": 0,
-		"color_skin": Color(1.0, 0.75, 0.1),
-		"color_spots": Color(0.4, 0.2, 0.08),
+		"color_skin": Color(0.99, 0.82, 0.42),  # Soft warm yellow #FCD34D
 		"metallic": 0.0,
-		"roughness": 0.35,
+		"roughness": 0.85,
 		"emission": Color(0, 0, 0),
 		"tex_path": "res://textures/giraffe_skin.png"
 	},
@@ -20,21 +19,19 @@ var skins_catalog: Dictionary = {
 		"id": "cyber_brachio",
 		"name_key": "SKIN_2",
 		"price": 500,
-		"color_skin": Color(0.1, 0.8, 0.9),
-		"color_spots": Color(0.8, 0.1, 0.9),
-		"metallic": 0.6,
-		"roughness": 0.2,
-		"emission": Color(0.05, 0.6, 0.8),
+		"color_skin": Color(0.48, 0.82, 0.98),  # Soft pastel sky #7DD3FC
+		"metallic": 0.0,
+		"roughness": 0.85,
+		"emission": Color(0, 0, 0),
 		"tex_path": "res://textures/cyber_skin.png"
 	},
 	"pink_flamingo": {
 		"id": "pink_flamingo",
 		"name_key": "SKIN_3",
 		"price": 800,
-		"color_skin": Color(1.0, 0.4, 0.7),
-		"color_spots": Color(1.0, 0.2, 0.4),
-		"metallic": 0.1,
-		"roughness": 0.3,
+		"color_skin": Color(0.97, 0.65, 0.83),  # Soft pastel pink #F9A8D4
+		"metallic": 0.0,
+		"roughness": 0.85,
 		"emission": Color(0, 0, 0),
 		"tex_path": "res://textures/flamingo_skin.png"
 	},
@@ -42,11 +39,10 @@ var skins_catalog: Dictionary = {
 		"id": "king_gold",
 		"name_key": "SKIN_4",
 		"price": 1500,
-		"color_skin": Color(1.0, 0.84, 0.1),
-		"color_spots": Color(0.9, 0.7, 0.05),
-		"metallic": 0.95,
-		"roughness": 0.12,
-		"emission": Color(0.4, 0.3, 0.0),
+		"color_skin": Color(0.98, 0.78, 0.28),  # Soft pastel honey gold
+		"metallic": 0.0,
+		"roughness": 0.85,
+		"emission": Color(0, 0, 0),
 		"tex_path": "res://textures/gold_skin.png"
 	}
 }
@@ -69,31 +65,24 @@ func load_texture(res_path: String) -> Texture2D:
 	return null
 
 func apply_skin_to_node(target_node: Node3D, skin_id: String) -> void:
+	if not target_node: return
 	var skin = get_skin_data(skin_id)
 	var mat = StandardMaterial3D.new()
 	mat.albedo_color = skin["color_skin"]
 	mat.metallic = skin["metallic"]
 	mat.roughness = skin["roughness"]
+	mat.metallic_specular = 0.1
 	
-	if skin["emission"] != Color(0, 0, 0):
-		mat.emission_enabled = true
-		mat.emission = skin["emission"]
-		mat.emission_energy_multiplier = 1.5
-		
 	if skin["tex_path"] != "":
 		var tex = load_texture(skin["tex_path"])
 		if tex:
 			mat.albedo_texture = tex
 			mat.uv1_scale = Vector3(2.0, 2.0, 2.0)
 				
-	var body_m = target_node.get_node_or_null("BodyMesh")
-	var neck_m = target_node.get_node_or_null("NeckMesh")
-	var head_m = target_node.get_node_or_null("HeadRoot/HeadMesh")
-	
-	if body_m: body_m.material_override = mat
-	if head_m: head_m.material_override = mat
+	_apply_material_recursive(target_node, mat)
 	
 	# Neck dùng riêng một bản sao material để tự động co giãn UV theo chiều dài cổ (không kéo dãn đốm/texture)
+	var neck_m = target_node.get_node_or_null("NeckMesh")
 	if neck_m:
 		var neck_mat = mat.duplicate() as StandardMaterial3D
 		var current_h = target_node.get("current_neck_height")
@@ -102,3 +91,9 @@ func apply_skin_to_node(target_node: Node3D, skin_id: String) -> void:
 		neck_m.material_override = neck_mat
 	
 	skin_changed.emit(skin_id)
+
+func _apply_material_recursive(node: Node, mat: Material) -> void:
+	if node is MeshInstance3D and node.name != "NeckMesh":
+		node.material_override = mat
+	for child in node.get_children():
+		_apply_material_recursive(child, mat)

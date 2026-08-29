@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Asset Studio & AI Co-Pilot • Game Dev Studio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- TOP NAVBAR -->
+    <header class="navbar">
+        <div class="nav-title">
+            <span>🎨 2D ASSET STUDIO</span>
+            <span class="nav-badge">AI CO-PILOT</span>
+        </div>
+        <div class="nav-actions">
+            <button class="btn" id="btnNewCanvas">📄 Tạo Mới</button>
+            <button class="btn" id="btnImportImg">📁 Tải Ảnh</button>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            <button class="btn" id="btnToggleGrid">📐 Lưới Frame (64px)</button>
+            <button class="btn" id="btnUndo">↩️ Hoàn tác</button>
+            <button class="btn btn-primary" id="btnSyncGodot">🎮 Xuất Thẳng Vào Godot 2D</button>
+        </div>
+    </header>
+
+    <!-- MAIN WORKSPACE -->
+    <div class="workspace">
+        <!-- LEFT TOOLBAR -->
+        <aside class="sidebar-tools">
+            <button class="tool-btn active" data-tool="pen" title="Bút vẽ (P)">✏️</button>
+            <button class="tool-btn" data-tool="inpaint" title="Cọ Mask AI - Khoanh vùng để AI sửa nét (M)" style="color: #ff007f;">🖌️</button>
+            <button class="tool-btn" data-tool="eraser" title="Tẩy / Xóa nền (E)">🧽</button>
+            <button class="tool-btn" data-tool="bucket" title="Đổ màu (B)">🪣</button>
+            <button class="tool-btn" data-tool="picker" title="Hút màu (I)">💧</button>
+            <button class="tool-btn" data-tool="slice" title="Khung cắt Sprite Sheet (S)">✂️</button>
+
+            <div class="tool-divider"></div>
+
+            <div class="color-picker-box" title="Chọn màu chính" id="colorPickerWrapper" style="background-color: #00f0ff;">
+                <input type="color" id="primaryColor" value="#00f0ff">
+            </div>
+
+            <div class="tool-divider"></div>
+
+            <div style="font-size: 10px; color: var(--text-muted); font-weight: 700;">SIZE</div>
+            <input type="range" id="brushSize" min="1" max="48" value="4" style="width: 44px; accent-color: var(--accent-cyan);">
+            <span id="brushSizeVal" style="font-size: 11px; font-weight: bold; color: var(--accent-cyan);">4px</span>
+        </aside>
+
+        <!-- CENTER VIEWPORT -->
+        <main class="viewport-container" id="viewportContainer">
+            <div class="canvas-wrapper" id="canvasWrapper">
+                <!-- Multi-layer stack -->
+                <canvas id="layer0" class="canvas-layer" width="512" height="512"></canvas>
+                <canvas id="maskLayer" class="canvas-layer" width="512" height="512" style="pointer-events: none; opacity: 0.6;"></canvas>
+                <canvas id="gridCanvas" class="grid-overlay" width="512" height="512"></canvas>
+            </div>
+
+            <div class="viewport-hud">
+                <span id="hudCanvasSize">Canvas: 512 × 512 px</span>
+                <span id="hudCursorPos">X: 0, Y: 0</span>
+                <span id="hudZoom">Zoom: 100%</span>
+            </div>
+        </main>
+
+        <!-- RIGHT SIDEBAR -->
+        <aside class="sidebar-right">
+            <!-- LAYERS SECTION -->
+            <div class="panel-section">
+                <div class="panel-header">
+                    <span>📑 Quản Lý Layer</span>
+                    <button class="btn" id="btnAddLayer" style="padding: 2px 8px; font-size: 11px;">+ Thêm</button>
+                </div>
+                <div class="layers-list" id="layersList">
+                    <div class="layer-item active" data-layer-idx="0">
+                        <span>👁️ Layer 1 (Gốc)</span>
+                        <div class="layer-actions">
+                            <span title="Xóa" class="btn-del-layer">🗑️</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ANIMATION PREVIEW SECTION -->
+            <div class="panel-section">
+                <div class="panel-header">
+                    <span>🎬 Xem Trước Animation</span>
+                    <span id="animFpsLabel" style="font-size: 11px; color: var(--accent-cyan);">12 FPS</span>
+                </div>
+                <div class="anim-preview-box">
+                    <div class="anim-canvas-container">
+                        <canvas id="animPreviewCanvas" width="128" height="128"></canvas>
+                    </div>
+                    <div class="anim-controls">
+                        <button class="btn" id="btnAnimPlayPause" style="padding: 4px 10px;">▶ Phát</button>
+                        <input type="range" id="animFpsSlider" min="2" max="30" value="12">
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI CO-PILOT SECTION -->
+            <div class="ai-panel">
+                <div class="ai-status-pill">
+                    <div class="ai-status-dot"></div>
+                    <span>AI MCP BRIDGE: SẴN SÀNG</span>
+                </div>
+
+                <div class="ai-prompt-box">
+                    <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">LỆNH SỬA / TẠO ASSET:</label>
+                    <textarea class="ai-textarea" id="aiPromptInput" placeholder="Ví dụ: 'Sửa lại nét chém kiếm bén hơn', 'Khoanh vùng chiếc giáp đổi sang màu vàng kim'..."></textarea>
+                    <button class="btn btn-primary" id="btnSendAICommand" style="justify-content: center; width: 100%;">
+                        ✨ Gửi Lệnh Cho AI Co-Pilot
+                    </button>
+                </div>
+
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-top: 6px;">CÔNG CỤ TỰ ĐỘNG NHANH:</label>
+                <div class="quick-actions-grid">
+                    <button class="chip-btn" id="chipRemoveBg">✨ Tự Động Xóa Nền</button>
+                    <button class="chip-btn" id="chipSlashFx">🗡️ Tạo Vệt Chém FX</button>
+                    <button class="chip-btn" id="chipRunFrames">🏃 Tạo 4-Frame Chạy</button>
+                    <button class="chip-btn" id="chipHitSpark">💥 Tạo Nổ Tia Lửa</button>
+                    <button class="chip-btn" id="chipKnightHero">🛡️ Sinh Nhân Vật Hero</button>
+                    <button class="chip-btn" id="chipBossTitan">👑 Sinh Boss Khổng Lồ</button>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
