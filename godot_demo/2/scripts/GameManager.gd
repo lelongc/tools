@@ -26,10 +26,10 @@ var is_game_running: bool = false
 @onready var neck_label: Label = get_tree().root.find_child("NeckLabelHUD", true, false)
 @onready var level_label: Label = get_tree().root.find_child("LevelLabel", true, false)
 @onready var progress_bar: ProgressBar = get_tree().root.find_child("LevelProgressBar", true, false)
-@onready var btn_pause: Button = get_tree().root.find_child("BtnPause", true, false)
-@onready var btn_left: Button = get_tree().root.find_child("BtnLeft", true, false)
-@onready var btn_right: Button = get_tree().root.find_child("BtnRight", true, false)
-@onready var btn_stretch: Button = get_tree().root.find_child("BtnStretch", true, false)
+@onready var btn_pause: BaseButton = get_tree().root.find_child("BtnPause", true, false)
+@onready var btn_left: BaseButton = get_tree().root.find_child("BtnLeft", true, false)
+@onready var btn_right: BaseButton = get_tree().root.find_child("BtnRight", true, false)
+@onready var btn_stretch: BaseButton = get_tree().root.find_child("BtnStretch", true, false)
 
 # UI Elements - Pause Panel
 @onready var pause_panel: Control = get_tree().root.find_child("PausePanel", true, false)
@@ -513,8 +513,8 @@ func on_player_died(reason_key: String) -> void:
 				"SPIKE_FAIL": tr("SPIKE_FAIL"),
 				"ROCK_FAIL": tr("ROCK_FAIL"),
 				"AXE_FAIL": tr("AXE_FAIL"),
-				"TUNNEL_CEILING": "💥 ĐẬP TRẦN ĐƯỜNG HẦM! Giữ cổ thấp hơn!",
-				"TUNNEL_FLOOR": "⚡ ĐẠP CHÔNG SÀN! Vươn cổ lên cao hơn!",
+				"TUNNEL_CEILING": "Đập trần đường hầm! Giữ cổ thấp hơn!",
+				"TUNNEL_FLOOR": "Đạp chông sàn! Vươn cổ lên cao hơn!",
 			}
 			fail_reason_label.text = fail_messages.get(reason_key, tr("BONK_FAIL"))
 
