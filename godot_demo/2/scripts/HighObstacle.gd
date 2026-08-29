@@ -2,12 +2,13 @@ extends Area3D
 class_name HighObstacle
 
 @export var obstacle_name: String = "OVERHEAD_BEAM"
-@export var danger_neck_height_threshold: float = 1.35
+@export var bar_height: float = 3.5  # Thanh chắn ở độ cao cụ thể (cổ > bar_height → bonk)
 
 func _ready() -> void:
 	area_entered.connect(_on_area_entered)
 	body_entered.connect(_on_body_entered)
 	setup_visuals()
+	build_height_indicator()
 
 func setup_visuals() -> void:
 	if ResourceLoader.exists("res://models/overhead_gate.glb"):
@@ -24,6 +25,33 @@ func setup_visuals() -> void:
 			if rp: rp.visible = false
 			var sign_mesh = get_node_or_null("SignBoard")
 			if sign_mesh: sign_mesh.visible = false
+
+func build_height_indicator() -> void:
+	# Dải laser đỏ ngang cho thấy phải thụt cổ dưới mức nào
+	var laser = MeshInstance3D.new()
+	var l_mesh = BoxMesh.new()
+	l_mesh.size = Vector3(8.0, 0.08, 0.08)
+	laser.mesh = l_mesh
+	laser.position = Vector3(0, bar_height, 0)
+	var l_mat = StandardMaterial3D.new()
+	l_mat.albedo_color = Color(1.0, 0.1, 0.1, 0.9)
+	l_mat.emission_enabled = true
+	l_mat.emission = Color(1.0, 0.0, 0.0)
+	l_mat.emission_energy_multiplier = 5.0
+	l_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	laser.material_override = l_mat
+	add_child(laser)
+	
+	# Label hiển thị độ cao tối đa
+	var lbl = Label3D.new()
+	lbl.text = "⬇️ < %.1fm" % bar_height
+	lbl.font_size = 48
+	lbl.modulate = Color(1.0, 0.3, 0.3)
+	lbl.outline_modulate = Color(0, 0, 0)
+	lbl.outline_size = 6
+	lbl.position = Vector3(0, bar_height + 0.8, 0)
+	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	add_child(lbl)
 
 func load_dynamic_texture(res_path: String) -> Texture2D:
 	if ResourceLoader.exists(res_path):
@@ -53,8 +81,6 @@ func check_hit(node: Node) -> void:
 		player = node.owner
 
 	if is_instance_valid(player) and player.has_method("bonk_overhead"):
-		# Chỉ bị đập đầu nếu người chơi ĐANG VƯƠN CỔ CAO (neck > 1.35m)
-		# Nếu đã thả tay thụt cổ (neck <= 1.35m) thì chui lọt an toàn!
 		var current_neck = player.get("current_neck_height")
-		if current_neck != null and current_neck > danger_neck_height_threshold:
+		if current_neck != null and current_neck > bar_height:
 			player.bonk_overhead()

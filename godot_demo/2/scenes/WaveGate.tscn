@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://wave_gate"]
+
+[ext_resource type="Script" path="res://scripts/WaveGate.gd" id="1"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1"]
+size = Vector3(7.5, 7.0, 1.2)
+
+[node name="WaveGate" type="Area3D"]
+script = ExtResource("1")
+wave_amplitude = 2.5
+wave_center = 3.0
+wave_speed = 2.0
+gap_height = 2.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+shape = SubResource("BoxShape3D_1")

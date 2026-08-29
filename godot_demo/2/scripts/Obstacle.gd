@@ -50,7 +50,7 @@ func destroy_obstacle() -> void:
 	# Hieu ung vo vun
 	var tw = create_tween()
 	tw.set_parallel(true)
-	tw.tween_property(self, "scale", Vector3.ZERO, 0.12)
+	tw.tween_property(self, "scale", Vector3(0.01, 0.01, 0.01), 0.12)
 	tw.tween_property(self, "position:y", position.y + 0.8, 0.12)
 	tw.chain().tween_callback(queue_free)
 

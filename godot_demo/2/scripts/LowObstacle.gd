@@ -2,12 +2,13 @@ extends Area3D
 class_name LowObstacle
 
 @export var obstacle_name: String = "SPIKE_TRAP"
-@export var safe_neck_height_threshold: float = 2.0
+@export var spike_height: float = 2.0  # Gai cao đến mức này (cổ < spike_height → chết)
 
 func _ready() -> void:
 	area_entered.connect(_on_area_entered)
 	body_entered.connect(_on_body_entered)
 	setup_visuals()
+	build_height_indicator()
 
 func setup_visuals() -> void:
 	if ResourceLoader.exists("res://models/spike_trap.glb"):
@@ -21,6 +22,33 @@ func setup_visuals() -> void:
 			for ch in get_children():
 				if ch != inst and ch is MeshInstance3D:
 					ch.visible = false
+
+func build_height_indicator() -> void:
+	# Dải laser xanh cho thấy phải vươn cổ cao hơn mức nào
+	var laser = MeshInstance3D.new()
+	var l_mesh = BoxMesh.new()
+	l_mesh.size = Vector3(8.0, 0.08, 0.08)
+	laser.mesh = l_mesh
+	laser.position = Vector3(0, spike_height, 0)
+	var l_mat = StandardMaterial3D.new()
+	l_mat.albedo_color = Color(0.1, 1.0, 0.3, 0.9)
+	l_mat.emission_enabled = true
+	l_mat.emission = Color(0.0, 1.0, 0.2)
+	l_mat.emission_energy_multiplier = 4.0
+	l_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	laser.material_override = l_mat
+	add_child(laser)
+	
+	# Label hiển thị chiều cao cần vươn tới
+	var lbl = Label3D.new()
+	lbl.text = "⬆️ > %.1fm" % spike_height
+	lbl.font_size = 48
+	lbl.modulate = Color(0.3, 1.0, 0.5)
+	lbl.outline_modulate = Color(0, 0, 0)
+	lbl.outline_size = 6
+	lbl.position = Vector3(0, spike_height + 0.8, 0)
+	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	add_child(lbl)
 
 func load_dynamic_texture(res_path: String) -> Texture2D:
 	if ResourceLoader.exists(res_path):
@@ -50,7 +78,6 @@ func check_hit(node: Node) -> void:
 		player = node.owner
 
 	if is_instance_valid(player) and player.has_method("poke_bottom"):
-		# Chỉ bị đâm nếu người chơi KHÔNG vươn cổ (neck < 2.0m)
 		var current_neck = player.get("current_neck_height")
-		if current_neck != null and current_neck < safe_neck_height_threshold:
+		if current_neck != null and current_neck < spike_height:
 			player.poke_bottom()

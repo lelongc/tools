@@ -113,5 +113,5 @@ func _on_body_entered(body: Node3D) -> void:
 		body.apply_gate_modifier(int(gate_type), value)
 		
 		var tw = create_tween()
-		tw.tween_property(self, "scale", Vector3.ZERO, 0.12)
+		tw.tween_property(self, "scale", Vector3(0.01, 0.01, 0.01), 0.12)
 		tw.tween_callback(queue_free)

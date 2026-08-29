@@ -98,5 +98,5 @@ func trigger_gate(node: Node) -> void:
 		player.apply_neck_gate(val)
 		
 		var tw = create_tween()
-		tw.tween_property(self, "scale", Vector3.ZERO, 0.12)
+		tw.tween_property(self, "scale", Vector3(0.01, 0.01, 0.01), 0.12)
 		tw.tween_callback(queue_free)

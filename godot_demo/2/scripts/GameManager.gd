@@ -60,10 +60,18 @@ var is_game_running: bool = false
 @onready var shop_balance_label: Label = get_tree().root.find_child("ShopBalanceLabel", true, false)
 @onready var shop_close_btn: Button = get_tree().root.find_child("ShopCloseBtn", true, false)
 
+# === COMBO & FEVER UI (Created dynamically) ===
+var combo_label: Label = null
+var fever_bar: ProgressBar = null
+var fever_flash_timer: float = 0.0
+var screen_shake_intensity: float = 0.0
+var _camera: Camera3D = null
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	load_csv_translations()
 	setup_ui_state()
+	setup_combo_fever_ui()
 	connect_signals()
 	update_all_localized_text()
 	PlatformBridge.notify_game_ready()
@@ -81,6 +89,61 @@ func setup_ui_state() -> void:
 		
 	if player:
 		player.is_active = false
+
+func setup_combo_fever_ui() -> void:
+	# Tạo Combo Badge (hiển thị trên HUD khi combo > 0)
+	combo_label = Label.new()
+	combo_label.name = "ComboLabel"
+	combo_label.text = ""
+	combo_label.add_theme_font_size_override("font_size", 28)
+	combo_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2, 1.0))
+	combo_label.add_theme_color_override("font_shadow_color", Color(0.2, 0.1, 0.3, 0.7))
+	combo_label.add_theme_constant_override("shadow_offset_y", 2)
+	combo_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	combo_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	combo_label.anchor_left = 0.5
+	combo_label.anchor_right = 0.5
+	combo_label.offset_left = -180
+	combo_label.offset_right = 180
+	combo_label.offset_top = 80
+	combo_label.offset_bottom = 120
+	combo_label.visible = false
+	
+	# Tạo Fever Progress Bar
+	fever_bar = ProgressBar.new()
+	fever_bar.name = "FeverBar"
+	fever_bar.min_value = 0
+	fever_bar.max_value = 100
+	fever_bar.value = 0
+	fever_bar.custom_minimum_size = Vector2(220, 16)
+	fever_bar.anchor_left = 0.5
+	fever_bar.anchor_right = 0.5
+	fever_bar.offset_left = -110
+	fever_bar.offset_right = 110
+	fever_bar.offset_top = 122
+	fever_bar.offset_bottom = 138
+	fever_bar.show_percentage = false
+	fever_bar.visible = false
+	
+	var fb_style = StyleBoxFlat.new()
+	fb_style.bg_color = Color(1.0, 0.35, 0.75, 0.95)
+	fb_style.border_width_left = 2
+	fb_style.border_width_top = 2
+	fb_style.border_width_right = 2
+	fb_style.border_width_bottom = 2
+	fb_style.border_color = Color(1.0, 0.85, 0.95, 1.0)
+	fb_style.set_corner_radius_all(8)
+	fever_bar.add_theme_stylebox_override("fill", fb_style)
+	
+	var fb_bg = StyleBoxFlat.new()
+	fb_bg.bg_color = Color(0.9, 0.95, 1.0, 0.8)
+	fb_bg.set_corner_radius_all(8)
+	fever_bar.add_theme_stylebox_override("background", fb_bg)
+	
+	# Thêm vào HUD
+	if hud:
+		hud.add_child(combo_label)
+		hud.add_child(fever_bar)
 
 func connect_signals() -> void:
 	if tap_to_start_btn:
@@ -163,17 +226,78 @@ func connect_signals() -> void:
 			player.connect("neck_height_changed", _on_neck_height_changed)
 		if player.has_signal("reached_finish"):
 			player.connect("reached_finish", on_game_win)
+		if player.has_signal("combo_changed"):
+			player.connect("combo_changed", _on_combo_changed)
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	if is_game_running and player and progress_bar:
 		var z_dist = abs(player.global_position.z)
-		var prog = clamp((z_dist / 240.0) * 100.0, 0.0, 100.0)
+		var prog = clamp((z_dist / 260.0) * 100.0, 0.0, 100.0)
 		progress_bar.value = prog
 		
 	if start_panel and start_panel.visible and tap_hint_label:
 		var pulse = 1.0 + sin(Time.get_ticks_msec() * 0.006) * 0.06
 		tap_hint_label.scale = Vector2(pulse, pulse)
 		tap_hint_label.pivot_offset = tap_hint_label.size / 2.0
+	
+	# === FEVER FLASH EFFECT ===
+	if fever_bar and fever_bar.visible:
+		fever_flash_timer += delta
+		var flash = 0.7 + sin(fever_flash_timer * 8.0) * 0.3
+		fever_bar.modulate = Color(flash, flash, flash, 1.0)
+		
+		# Update fever bar progress
+		if player and player.get("fever_active") and player.get("fever_timer") != null:
+			var t = player.fever_timer
+			var dur = player.FEVER_DURATION
+			fever_bar.value = (t / dur) * 100.0
+	
+	# === SCREEN SHAKE ===
+	if screen_shake_intensity > 0.01:
+		screen_shake_intensity = lerp(screen_shake_intensity, 0.0, 6.0 * delta)
+		if not _camera:
+			_camera = get_viewport().get_camera_3d()
+		if _camera:
+			_camera.h_offset = randf_range(-screen_shake_intensity, screen_shake_intensity)
+			_camera.v_offset = randf_range(-screen_shake_intensity, screen_shake_intensity)
+	elif _camera:
+		_camera.h_offset = 0.0
+		_camera.v_offset = 0.0
+	
+	# === COMBO LABEL PULSE ===
+	if combo_label and combo_label.visible:
+		var cpulse = 1.0 + sin(Time.get_ticks_msec() * 0.01) * 0.08
+		combo_label.scale = Vector2(cpulse, cpulse)
+		combo_label.pivot_offset = combo_label.size / 2.0
+
+func _on_combo_changed(combo: int, is_fever: bool) -> void:
+	if combo_label:
+		if combo <= 0:
+			combo_label.visible = false
+			combo_label.text = ""
+		elif is_fever:
+			combo_label.visible = true
+			combo_label.text = "🔥 FEVER x3! 🔥 COMBO %d" % combo
+			combo_label.add_theme_color_override("font_color", Color(1.0, 0.3, 0.8, 1.0))
+			combo_label.add_theme_font_size_override("font_size", 38)
+			# Screen shake on fever start
+			screen_shake_intensity = 0.15
+		else:
+			combo_label.visible = true
+			combo_label.text = "🔗 COMBO %d" % combo
+			var t = clamp(float(combo) / 5.0, 0.0, 1.0)
+			var col = Color(1.0, 1.0 - t * 0.7, 0.1 + t * 0.7, 1.0)  # Yellow → Orange → Pink
+			combo_label.add_theme_color_override("font_color", col)
+			combo_label.add_theme_font_size_override("font_size", 28 + combo * 2)
+			# Small shake per combo hit
+			screen_shake_intensity = 0.03 + combo * 0.01
+	
+	if fever_bar:
+		if is_fever:
+			fever_bar.visible = true
+			fever_flash_timer = 0.0
+		elif combo <= 0:
+			fever_bar.visible = false
 
 func update_all_localized_text() -> void:
 	if game_title_label: game_title_label.text = tr("GAME_TITLE")
@@ -300,14 +424,14 @@ func update_shop_items() -> void:
 	for skin_id in SkinManager.skins_catalog:
 		var s = SkinManager.skins_catalog[skin_id]
 		var card = Button.new()
-		card.custom_minimum_size = Vector2(220, 135)
+		card.custom_minimum_size = Vector2(180, 110)
+		card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		
 		var is_unlocked = SaveSystem.unlocked_skins.has(skin_id)
 		var is_equipped = (SaveSystem.equipped_skin_id == skin_id)
 		
-		var icon_str = skin_icons.get(skin_id, "🦒")
 		var s_name = tr(s["name_key"])
-		var btn_txt = icon_str + " " + s_name + "\n\n"
+		var btn_txt = s_name + "\n\n"
 		if is_equipped:
 			btn_txt += tr("SKIN_EQUIPPED")
 		elif is_unlocked:
@@ -317,23 +441,26 @@ func update_shop_items() -> void:
 			
 		card.text = btn_txt
 		
-		# Style thẻ skin
+		# Style thẻ skin - Cute Marshmallow Card Theme
 		var sb = StyleBoxFlat.new()
-		sb.set_corner_radius_all(18)
+		sb.set_corner_radius_all(20)
 		sb.border_width_left = 3
 		sb.border_width_top = 3
 		sb.border_width_right = 3
-		sb.border_width_bottom = 3
+		sb.border_width_bottom = 5
 		
 		if is_equipped:
-			sb.bg_color = Color(0.08, 0.32, 0.16, 0.96)
-			sb.border_color = Color(0.3, 1.0, 0.45, 1.0)
+			sb.bg_color = Color(0.9, 1.0, 0.92, 0.98)
+			sb.border_color = Color(0.25, 0.85, 0.45, 1.0)
+			card.add_theme_color_override("font_color", Color(0.1, 0.5, 0.2, 1.0))
 		elif is_unlocked:
-			sb.bg_color = Color(0.08, 0.18, 0.36, 0.94)
-			sb.border_color = Color(0.4, 0.75, 1.0, 0.9)
+			sb.bg_color = Color(0.92, 0.97, 1.0, 0.98)
+			sb.border_color = Color(0.35, 0.75, 1.0, 1.0)
+			card.add_theme_color_override("font_color", Color(0.1, 0.4, 0.75, 1.0))
 		else:
-			sb.bg_color = Color(0.18, 0.14, 0.1, 0.92)
-			sb.border_color = Color(1.0, 0.78, 0.2, 0.85)
+			sb.bg_color = Color(1.0, 0.97, 0.92, 0.98)
+			sb.border_color = Color(1.0, 0.75, 0.2, 1.0)
+			card.add_theme_color_override("font_color", Color(0.65, 0.4, 0.05, 1.0))
 			
 		card.add_theme_stylebox_override("normal", sb)
 		card.add_theme_stylebox_override("hover", sb)
@@ -360,7 +487,7 @@ func update_shop_items() -> void:
 
 func add_score(amount: int) -> void:
 	score += amount
-	level_coins_earned += int(amount / 5.0)
+	level_coins_earned += int(float(amount) / 5.0)
 	if score_label:
 		score_label.text = tr("SCORE_LABEL") % score
 
@@ -371,23 +498,31 @@ func _on_neck_height_changed(current_h: float, max_h: float) -> void:
 func on_player_died(reason_key: String) -> void:
 	is_game_running = false
 	if ingame_hud: ingame_hud.visible = false
+	if combo_label: combo_label.visible = false
+	if fever_bar: fever_bar.visible = false
+	
+	# Screen shake on death
+	screen_shake_intensity = 0.25
+	
 	if fail_panel:
 		fail_panel.visible = true
 		if fail_reason_label:
-			if reason_key == "BONK_FAIL":
-				fail_reason_label.text = tr("BONK_FAIL")
-			elif reason_key == "SPIKE_FAIL":
-				fail_reason_label.text = tr("SPIKE_FAIL")
-			elif reason_key == "ROCK_FAIL":
-				fail_reason_label.text = tr("ROCK_FAIL")
-			elif reason_key == "AXE_FAIL":
-				fail_reason_label.text = tr("AXE_FAIL")
-			else:
-				fail_reason_label.text = tr("BONK_FAIL")
+			# Map reason keys to translated text
+			var fail_messages = {
+				"BONK_FAIL": tr("BONK_FAIL"),
+				"SPIKE_FAIL": tr("SPIKE_FAIL"),
+				"ROCK_FAIL": tr("ROCK_FAIL"),
+				"AXE_FAIL": tr("AXE_FAIL"),
+				"TUNNEL_CEILING": "💥 ĐẬP TRẦN ĐƯỜNG HẦM! Giữ cổ thấp hơn!",
+				"TUNNEL_FLOOR": "⚡ ĐẠP CHÔNG SÀN! Vươn cổ lên cao hơn!",
+			}
+			fail_reason_label.text = fail_messages.get(reason_key, tr("BONK_FAIL"))
 
 func on_game_win(final_score_mult: float) -> void:
 	is_game_running = false
 	if ingame_hud: ingame_hud.visible = false
+	if combo_label: combo_label.visible = false
+	if fever_bar: fever_bar.visible = false
 	
 	var total_win_score = int(score * (final_score_mult / 10.0 + 1.0))
 	var is_new_record = SaveSystem.update_high_score(total_win_score)

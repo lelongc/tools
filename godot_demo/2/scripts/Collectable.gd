@@ -2,11 +2,11 @@ extends Area3D
 class_name Collectable
 
 enum FruitType {
-	APPLE,       # 0: Táo vàng (+0.8m, 100 điểm)
-	BANANA,      # 1: Chuối (+1.5m, 200 điểm)
-	WATERMELON,  # 2: Dưa hấu (+2.5m, 350 điểm)
-	STAR,        # 3: Ngôi sao siêu cấp (+3.5m, 500 điểm)
-	MAGNET       # 4: Nam châm hút quả (+1.0m, 250 điểm, kích hoạt 6s hút)
+	APPLE,       # 0: Táo vàng (+0.5m, 80 điểm)
+	BANANA,      # 1: Chuối (+0.8m, 150 điểm)
+	WATERMELON,  # 2: Dưa hấu (+1.2m, 250 điểm)
+	STAR,        # 3: Ngôi sao (+1.8m, 400 điểm)
+	MAGNET       # 4: Nam châm (+0.6m, 200 điểm, kích hoạt 6s hút)
 }
 
 @export var fruit_type: FruitType = FruitType.APPLE:
@@ -14,8 +14,8 @@ enum FruitType {
 		fruit_type = val
 		setup_fruit_visuals()
 
-@export var score_value: int = 100
-@export var neck_bonus: float = 0.8
+@export var score_value: int = 80
+@export var neck_bonus: float = 0.5
 
 var is_collected: bool = false
 
@@ -28,6 +28,10 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if not is_collected:
 		rotation.y += 3.2 * delta
+		# Nhấp nháy nhẹ khi ở vị trí cao (risk bonus)
+		if position.y > 3.0:
+			var pulse = 1.0 + sin(Time.get_ticks_msec() * 0.008) * 0.15
+			scale = Vector3(pulse, pulse, pulse)
 
 func setup_fruit_visuals() -> void:
 	var dyn = get_node_or_null("DynamicModel")
@@ -46,24 +50,24 @@ func setup_fruit_visuals() -> void:
 	var glb_path = "res://models/golden_apple.glb"
 	match fruit_type:
 		FruitType.APPLE:
-			neck_bonus = 0.8
-			score_value = 100
+			neck_bonus = 0.5
+			score_value = 80
 			glb_path = "res://models/golden_apple.glb"
 		FruitType.BANANA:
-			neck_bonus = 1.5
-			score_value = 200
+			neck_bonus = 0.8
+			score_value = 150
 			glb_path = "res://models/banana_item.glb"
 		FruitType.WATERMELON:
-			neck_bonus = 2.5
-			score_value = 350
+			neck_bonus = 1.2
+			score_value = 250
 			glb_path = "res://models/watermelon_item.glb"
 		FruitType.STAR:
-			neck_bonus = 3.5
-			score_value = 500
+			neck_bonus = 1.8
+			score_value = 400
 			glb_path = "res://models/star_item.glb"
 		FruitType.MAGNET:
-			neck_bonus = 1.0
-			score_value = 250
+			neck_bonus = 0.6
+			score_value = 200
 			glb_path = "res://models/star_item.glb"
 			
 	if ResourceLoader.exists(glb_path):
@@ -108,7 +112,9 @@ func trigger_collect(collector: Node) -> void:
 
 	if is_instance_valid(player) and player.has_method("eat_fruit"):
 		is_collected = true
-		player.eat_fruit(neck_bonus, score_value)
+		# Quả ở vị trí cao hơn → bonus nhiều hơn (reward risk-taking)
+		var height_multiplier = 1.0 + clamp((position.y - 1.5) * 0.2, 0.0, 1.0)
+		player.eat_fruit(neck_bonus * height_multiplier, int(score_value * height_multiplier))
 		
 		if fruit_type == FruitType.MAGNET and player.has_method("activate_magnet"):
 			player.activate_magnet(6.0)

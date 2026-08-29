@@ -9,6 +9,15 @@ func _ready() -> void:
 	setup_visuals()
 
 func setup_visuals() -> void:
+	if ResourceLoader.exists("res://models/spiked_boulder.glb"):
+		var scn = load("res://models/spiked_boulder.glb")
+		if scn:
+			var inst = scn.instantiate()
+			inst.name = "DynamicModel"
+			add_child(inst)
+			var rock = get_node_or_null("RockMesh")
+			if rock: rock.visible = false
+			return
 	var tex = load_dynamic_texture("res://textures/rock_texture.png")
 	if tex:
 		var mat = StandardMaterial3D.new()

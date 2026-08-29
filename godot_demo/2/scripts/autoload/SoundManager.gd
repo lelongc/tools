@@ -77,12 +77,13 @@ func generate_arcade_bgm() -> void:
 		130.81, 130.81, 164.81, 196.00, 261.63, 196.00, 164.81, 130.81
 	]
 	
-	var frames_per_note = total_frames / melody_notes.size()
+	var frames_per_note: int = int(float(total_frames) / float(melody_notes.size()))
 	var phase_lead = 0.0
 	var phase_bass = 0.0
+	var half_frames: int = max(1, int(float(frames_per_note) / 2.0))
 	
 	for i in range(total_frames):
-		var note_idx = int(i / frames_per_note) % melody_notes.size()
+		var note_idx = int(float(i) / float(frames_per_note)) % melody_notes.size()
 		var freq_lead = melody_notes[note_idx]
 		var freq_bass = bass_notes[note_idx]
 		
@@ -99,7 +100,7 @@ func generate_arcade_bgm() -> void:
 		var env_bass = max(0.0, 1.0 - note_pos * 1.1)
 		
 		# Trống Hi-hat nhấp nháy trên mỗi nửa nhịp
-		var hat_pos = float(i % (frames_per_note / 2)) / float(frames_per_note / 2)
+		var hat_pos = float(i % half_frames) / float(half_frames)
 		var noise = randf_range(-1.0, 1.0) * max(0.0, 1.0 - hat_pos * 4.0) * 0.15
 		
 		var mix_sample = (lead_wave * env_lead * 0.35) + (bass_wave * env_bass * 0.22) + noise
