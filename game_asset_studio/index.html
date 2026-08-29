@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Asset & Animation Pipeline Studio PRO</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- TOP NAVIGATION BAR -->
+    <header class="top-nav">
+        <div class="nav-brand">
+            <div class="brand-icon">🎮</div>
+            <div class="brand-info">
+                <span class="brand-title">GAME ASSET STUDIO <span class="brand-badge">PIPELINE PRO</span></span>
+                <span class="brand-sub">Quản Lý Dự Án Game, Cốt Truyện & Xử Lý Video/Ảnh Thành Animation</span>
+            </div>
+        </div>
+        <nav class="nav-tabs">
+            <button class="nav-tab-btn active" data-tab="tab-planner">
+                <span class="tab-icon">📋</span> 1. Game & Kịch Bản AI
+            </button>
+            <button class="nav-tab-btn" data-tab="tab-video">
+                <span class="tab-icon">🎬</span> 2. Xử Lý Video AI
+            </button>
+            <button class="nav-tab-btn" data-tab="tab-slicer">
+                <span class="tab-icon">✂️</span> 3. Cắt Ảnh Sheet
+            </button>
+            <button class="nav-tab-btn" data-tab="tab-studio">
+                <span class="tab-icon">🎨</span> 4. Studio Animation
+            </button>
+            <button class="nav-tab-btn" data-tab="tab-library">
+                <span class="tab-icon">📚</span> 5. Kho & Godot
+            </button>
+        </nav>
+        <div class="nav-actions">
+            <div class="ai-status-pill">
+                <div class="ai-status-dot"></div>
+                <span id="wsStatusText">AI CO-PILOT: SẴN SÀNG</span>
+            </div>
+            <button class="btn btn-secondary btn-sm" id="btnUndoGlobal" title="Ctrl+Z Hoàn tác">↩️</button>
+            <button class="btn btn-secondary btn-sm" id="btnRedoGlobal" title="Ctrl+Y Làm lại">↪️</button>
+            <button class="btn btn-godot" id="btnTopSyncGodot">🚀 Xuất Godot</button>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="main-container">
+
+        <!-- ===================== TAB 1: GAME PROJECTS & ASSET PLANNER ===================== -->
+        <section class="tab-panel active" id="tab-planner">
+            <div class="planner-layout">
+                
+                <!-- GAME SELECTOR HEADER BAR -->
+                <div class="game-selector-bar">
+                    <div class="game-select-group">
+                        <span class="game-select-label">🎮 DỰ ÁN GAME:</span>
+                        <select id="gameProjectSelect" class="game-select-dropdown">
+                            <option value="">Đang tải danh sách game...</option>
+                        </select>
+                        <button class="btn btn-primary btn-sm" id="btnOpenNewGameModal">➕ Tạo Game Mới</button>
+                        <button class="btn btn-secondary btn-sm" id="btnDeleteCurrentGame" title="Xóa dự án game này">🗑️ Xóa Game</button>
+                    </div>
+                    <div class="game-meta-tags" id="gameMetaTags">
+                        <span class="meta-tag genre" id="gameGenreTag">2D Action Platformer</span>
+                        <span class="meta-tag style" id="gameStyleTag">16-Bit Pixel Art</span>
+                        <span class="meta-tag count" id="gameAssetCountTag">4 Asset</span>
+                    </div>
+                </div>
+
+                <!-- GAME STORY & LORE PANEL -->
+                <div class="game-story-panel" id="gameStoryPanel">
+                    <div class="story-panel-header">
+                        <div class="story-title-box">
+                            <h3 id="gameStoryTitle">📖 CỐT TRUYỆN GAME HOÀN CHỈNH (AI Phân Tích & Cấu Trúc)</h3>
+                            <span class="story-subtitle">Tự động cấu trúc hóa từ ý tưởng thô và sinh ra toàn bộ danh sách Asset tương ứng.</span>
+                        </div>
+                        <button class="btn btn-secondary btn-xs" id="btnToggleStoryBody">Thu gọn ▲</button>
+                    </div>
+                    <div class="story-panel-body" id="storyPanelBody">
+                        <div class="story-section">
+                            <div class="story-label">📜 Cốt Truyện Tổng Quan (Synopsis):</div>
+                            <p class="story-text" id="storySynopsisText">—</p>
+                        </div>
+                        <div class="story-details-grid">
+                            <div class="story-detail-card">
+                                <div class="story-label">🦸 Nhân Vật Chính:</div>
+                                <p class="story-text" id="storyProtagonistText">—</p>
+                            </div>
+                            <div class="story-detail-card">
+                                <div class="story-label">🦹 Kẻ Thù & Boss:</div>
+                                <p class="story-text" id="storyAntagonistsText">—</p>
+                            </div>
+                            <div class="story-detail-card">
+                                <div class="story-label">🏰 Môi Trường & Màn Chơi:</div>
+                                <p class="story-text" id="storyEnvironmentText">—</p>
+                            </div>
+                            <div class="story-detail-card">
+                                <div class="story-label">⚔️ Lối Chơi & Cơ Chế:</div>
+                                <p class="story-text" id="storyGameplayText">—</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ASSETS HEADER & FILTERS -->
+                <div class="planner-header-bar">
+                    <div class="planner-title-box">
+                        <h2>🎨 DANH SÁCH ASSET CỦA GAME NÀY (Kèm Prompt Video/Ảnh)</h2>
+                        <p>Mỗi asset đều có chỉ dẫn rõ: nên tạo dạng <b>🎬 Video (2-3s)</b> để lấy chuyển động mượt hay <b>🖼️ Ảnh Sheet</b> kèm prompt chuẩn.</p>
+                    </div>
+                    <div class="planner-actions-bar">
+                        <button class="btn btn-primary btn-sm" id="btnOpenNewPlanModal">➕ Thêm Asset Vào Game</button>
+                    </div>
+                </div>
+
+                <!-- CATEGORY & FORMAT FILTERS -->
+                <div class="planner-filter-bar">
+                    <div class="filter-group">
+                        <span class="filter-label">Danh mục:</span>
+                        <button class="filter-chip active" data-filter-cat="all">Tất cả</button>
+                        <button class="filter-chip" data-filter-cat="characters">Nhân vật</button>
+                        <button class="filter-chip" data-filter-cat="monsters">Quái / Boss</button>
+                        <button class="filter-chip" data-filter-cat="items">Vật phẩm</button>
+                        <button class="filter-chip" data-filter-cat="environments">Môi trường</button>
+                        <button class="filter-chip" data-filter-cat="vfx">Hiệu ứng VFX</button>
+                    </div>
+                    <div class="filter-group">
+                        <span class="filter-label">Định dạng:</span>
+                        <button class="filter-chip active" data-filter-fmt="all">Tất cả</button>
+                        <button class="filter-chip format-video-chip" data-filter-fmt="video">🎬 Video (2-3s)</button>
+                        <button class="filter-chip format-image-chip" data-filter-fmt="image">🖼️ Ảnh Spritesheet</button>
+                    </div>
+                </div>
+
+                <!-- PLAN CARDS GRID -->
+                <div class="planner-cards-grid" id="plannerCardsGrid">
+                    <div class="empty-state">Đang nạp danh sách asset của game...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== TAB 2: VIDEO FRAME PROCESSOR ===================== -->
+        <section class="tab-panel" id="tab-video">
+            <div class="video-processor-layout">
+                <!-- LEFT SIDEBAR CONTROLS -->
+                <aside class="video-sidebar">
+                    <div class="panel-section">
+                        <div class="section-title">🎬 NẠP VIDEO AI</div>
+                        <div class="file-drop-zone" id="videoDropZone">
+                            <input type="file" id="videoFileInput" accept="video/mp4,video/webm,image/gif,video/quicktime" style="display:none;">
+                            <div class="drop-icon">📹</div>
+                            <div class="drop-text">Kéo thả Video MP4/WebM hoặc</div>
+                            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('videoFileInput').click()">📁 Chọn File Video</button>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <div class="section-title">⏱️ THỜI GIAN CẮT CHU KỲ</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Bắt đầu (giây):</label>
+                                <input type="number" id="videoStartSec" min="0" step="0.1" value="0.0">
+                            </div>
+                            <div class="form-group">
+                                <label>Kết thúc (giây):</label>
+                                <input type="number" id="videoEndSec" min="0" step="0.1" value="1.2">
+                            </div>
+                        </div>
+                        <p class="hint-text">💡 Chu kỳ chạy/bước chân đẹp nhất thường dài khoảng 0.6s - 1.2s.</p>
+                    </div>
+
+                    <div class="panel-section">
+                        <div class="section-title">🧩 SỐ FRAME CẦN BÓC</div>
+                        <div class="btn-toggle-group">
+                            <button class="btn-toggle" data-frames="6">6 F</button>
+                            <button class="btn-toggle active" data-frames="8">8 F (Chuẩn)</button>
+                            <button class="btn-toggle" data-frames="10">10 F</button>
+                            <button class="btn-toggle" data-frames="12">12 F</button>
+                            <button class="btn-toggle" data-frames="16">16 F</button>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <div class="section-title">🟢 TÁCH PHÔNG NỀN (CHROMA KEY)</div>
+                        <div class="form-group">
+                            <label>Kiểu nền cần tách:</label>
+                            <select id="videoBgRemovalMode" class="form-select">
+                                <option value="green" selected>🟢 Phông Xanh Lá (Green Screen)</option>
+                                <option value="black">⚫ Phông Đen (Pure Black)</option>
+                                <option value="white">⚪ Phông Trắng (Pure White)</option>
+                                <option value="none">🚫 Giữ Nguyên Nền</option>
+                            </select>
+                        </div>
+                        <div class="range-group" style="margin-top:6px;">
+                            <label>Độ nhạy tách nền: <span id="bgToleranceVal">35</span></label>
+                            <input type="range" id="bgToleranceSlider" min="10" max="90" value="35">
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <div class="section-title">👾 PIXEL-ART & ĐỘ PHÂN GIẢI</div>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="chkVideoPixelate" checked>
+                            <span>Làm nét kiểu Pixel Art 2D</span>
+                        </label>
+                        <div class="form-row" style="margin-top:6px;">
+                            <div class="form-group">
+                                <label>Kích thước frame (px):</label>
+                                <select id="videoTargetSize" class="form-select">
+                                    <option value="128">128 × 128 px</option>
+                                    <option value="256" selected>256 × 256 px</option>
+                                    <option value="512">512 × 512 px</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel-section" style="margin-top:auto;">
+                        <button class="btn btn-primary btn-large" id="btnExtractVideoFrames" style="width:100%;justify-content:center;">
+                            ⚡ Bóc Tách Frame Ngay ➔
+                        </button>
+                    </div>
+                </aside>
+
+                <!-- CENTER: VIDEO PLAYER & PREVIEW -->
+                <div class="video-center-container">
+                    <div class="video-player-box">
+                        <video id="sourceVideoPlayer" controls playsinline></video>
+                        <div class="video-overlay-info" id="videoDurationInfo">Chưa nạp video</div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: EXTRACTED FRAMES & ANIMATION PREVIEW -->
+                <aside class="video-preview-sidebar">
+                    <div class="section-title">🎞️ CÁC FRAME ĐÃ BÓC TÁCH</div>
+                    <div class="extracted-frames-list" id="extractedFramesList">
+                        <div class="empty-state">Nạp video và bấm bóc tách frame!</div>
+                    </div>
+
+                    <div class="video-anim-preview-box">
+                        <div class="section-title">⚡ XEM TRƯỚC ANIMATION</div>
+                        <div class="preview-box">
+                            <canvas id="videoMiniPreviewCanvas" width="160" height="160"></canvas>
+                        </div>
+                        <div class="fps-slider-box">
+                            <span>Tốc độ: <b id="videoFpsVal">10 FPS</b></span>
+                            <input type="range" id="videoFpsSlider" min="1" max="30" value="10">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-success btn-large" id="btnSendExtractedToStudio" style="width:100%;justify-content:center;margin-top:auto;">
+                        ✨ Nạp <span id="videoExtractedCountBadge">0</span> Frame → Studio
+                    </button>
+                </aside>
+            </div>
+        </section>
+
+        <!-- ===================== TAB 3: SPRITE SLICER ===================== -->
+        <section class="tab-panel" id="tab-slicer">
+            <div class="slicer-layout">
+                <aside class="slicer-sidebar">
+                    <div class="panel-section">
+                        <div class="section-title">📂 NẠP ẢNH SPRITESHEET</div>
+                        <div class="file-drop-zone" id="slicerDropZone">
+                            <input type="file" id="slicerFileInput" accept="image/*" style="display:none;">
+                            <div class="drop-icon">🖼️</div>
+                            <div class="drop-text">Kéo thả ảnh hoặc</div>
+                            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('slicerFileInput').click()">📁 Chọn File</button>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <div class="section-title">✂️ CHẾ ĐỘ CẮT</div>
+                        <div class="slice-mode-group">
+                            <button class="slice-mode-btn active" id="modeGrid">📐 Chia Lưới</button>
+                            <button class="slice-mode-btn" id="modeAutoDetect">🪄 Tự Nhận Diện</button>
+                            <button class="slice-mode-btn" id="modeManual">🖐️ Kéo Tự Do</button>
+                        </div>
+                        <div class="grid-settings" id="gridSettings">
+                            <div class="form-row">
+                                <div class="form-group"><label>Cột:</label><input type="number" id="gridCols" min="1" max="20" value="4"></div>
+                                <div class="form-group"><label>Dòng:</label><input type="number" id="gridRows" min="1" max="20" value="2"></div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group"><label>Cắt lề dưới (%):</label><input type="number" id="gridCropBottom" min="0" max="40" value="12"></div>
+                            </div>
+                            <button class="btn btn-primary btn-sm" id="btnApplyGridSlice" style="width:100%;justify-content:center;margin-top:4px;">⚡ Chia Lưới</button>
+                        </div>
+                    </div>
+
+                    <div class="panel-section">
+                        <div class="section-title">🎯 CĂN CHỈNH & ĐỒNG BỘ</div>
+                        <div class="align-btn-grid">
+                            <button class="btn btn-secondary btn-sm" id="btnAutoAlignFeet">🦶 Căn Đáy</button>
+                            <button class="btn btn-secondary btn-sm" id="btnAutoCenterHoriz">🎯 Căn Giữa X</button>
+                            <button class="btn btn-secondary btn-sm" id="btnEqualizeBoxes">📐 Đồng Bộ Cỡ</button>
+                            <button class="btn btn-secondary btn-sm" id="btnDeleteSelectedBox">🗑️ Xóa Khung</button>
+                        </div>
+                        <div class="frame-sync-controls">
+                            <div class="section-title" style="margin-top:6px;">📏 KÍCH THƯỚC FRAME</div>
+                            <div class="form-row">
+                                <div class="form-group"><label>Rộng (W):</label><input type="number" id="frameSyncW" value="128"></div>
+                                <div class="form-group"><label>Cao (H):</label><input type="number" id="frameSyncH" value="128"></div>
+                            </div>
+                            <div class="form-row" style="gap:4px;">
+                                <button class="btn btn-secondary btn-sm" id="btnApplySizeSelected" style="flex:1;">Áp dụng chọn</button>
+                                <button class="btn btn-primary btn-sm" id="btnApplySizeAll" style="flex:1;">Áp dụng tất cả</button>
+                            </div>
+                            <label class="checkbox-label" style="margin-top:6px;">
+                                <input type="checkbox" id="chkLockRatio">
+                                <span>🔒 Khóa tỉ lệ khi kéo</span>
+                            </label>
+                        </div>
+                        <label class="checkbox-label" style="margin-top:8px;">
+                            <input type="checkbox" id="chkShowGroundLine" checked>
+                            <span>Hiện đường chân</span>
+                        </label>
+                        <div class="range-group" style="margin-top:4px;">
+                            <label>Vị trí chân: <span id="groundLineVal">85%</span></label>
+                            <input type="range" id="groundLineRange" min="50" max="100" value="85">
+                        </div>
+                    </div>
+
+                    <div class="panel-section" style="margin-top:auto;">
+                        <button class="btn btn-success btn-large" id="btnSendSlicesToStudio" style="width:100%;justify-content:center;">
+                            ✨ Nạp <span id="sliceCountBadge">0</span> Frame → Studio
+                        </button>
+                    </div>
+                </aside>
+
+                <div class="slicer-viewport-container">
+                    <div class="slicer-toolbar">
+                        <div class="toolbar-left">
+                            <span class="info-tag" id="sheetSizeInfo">Chưa nạp ảnh</span>
+                            <span class="info-tag" id="sheetFrameCountInfo">0 khung</span>
+                            <span class="info-tag accent" id="selectedBoxInfo">—</span>
+                        </div>
+                        <div class="toolbar-right">
+                            <button class="btn btn-secondary btn-sm" id="btnAddCustomBox">➕ Thêm Khung</button>
+                            <button class="btn-icon" id="btnSlicerZoomIn">🔍+</button>
+                            <button class="btn-icon" id="btnSlicerZoomOut">🔍-</button>
+                            <button class="btn-icon" id="btnSlicerResetZoom">1:1</button>
+                            <button class="btn btn-secondary btn-sm" id="btnClearSlices">🗑️ Xóa Hết</button>
+                        </div>
+                    </div>
+                    <div class="slicer-canvas-wrapper" id="slicerCanvasWrapper">
+                        <canvas id="slicerCanvas"></canvas>
+                        <canvas id="slicerOverlayCanvas"></canvas>
+                    </div>
+                </div>
+
+                <aside class="slicer-preview-sidebar">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                        <div class="section-title" style="margin-bottom:0;">🎞️ KHUNG HÌNH</div>
+                        <div style="display:flex;gap:4px;">
+                            <button class="btn btn-secondary btn-xs" id="btnSelectAllSlices">Tất cả</button>
+                            <button class="btn btn-secondary btn-xs" id="btnDeselectAllSlices">Bỏ</button>
+                        </div>
+                    </div>
+                    <div class="multi-select-hint">💡 Giữ <b>Ctrl</b> + click để chọn nhiều frame</div>
+                    <div class="sliced-frames-list" id="slicedFramesList">
+                        <div class="empty-state">Chưa có khung hình.</div>
+                    </div>
+
+                    <div class="slicer-anim-preview">
+                        <div class="section-title">⚡ XEM TRƯỚC</div>
+                        <div class="preview-box">
+                            <canvas id="slicerMiniPreview" width="160" height="160"></canvas>
+                        </div>
+                        <div class="fps-slider-box">
+                            <span>Tốc độ: <b id="slicerFpsVal">10 FPS</b></span>
+                            <input type="range" id="slicerFpsSlider" min="1" max="30" value="10">
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <!-- ===================== TAB 4: STUDIO ===================== -->
+        <section class="tab-panel" id="tab-studio">
+            <div class="studio-layout">
+                <aside class="studio-tools-sidebar">
+                    <div class="section-title">🛠️ DỤNG CỤ</div>
+                    <div class="tools-grid">
+                        <button class="tool-btn active" data-tool="pen">✏️ Bút</button>
+                        <button class="tool-btn" data-tool="eraser">🧹 Tẩy</button>
+                        <button class="tool-btn" data-tool="bucket">🪣 Đổ</button>
+                        <button class="tool-btn" data-tool="eyedropper">🧪 Hút</button>
+                        <button class="tool-btn tool-ai" data-tool="inpaint_marker">🟣 AI</button>
+                    </div>
+                    <div class="section-title" style="margin-top:10px;">🎨 MÀU SẮC</div>
+                    <div class="color-picker-box">
+                        <input type="color" id="studioColorPicker" value="#00f0ff">
+                        <div class="palette-swatches">
+                            <div class="swatch" style="background:#00f0ff;" data-col="#00f0ff"></div>
+                            <div class="swatch" style="background:#ff007f;" data-col="#ff007f"></div>
+                            <div class="swatch" style="background:#ffd700;" data-col="#ffd700"></div>
+                            <div class="swatch" style="background:#00ff66;" data-col="#00ff66"></div>
+                            <div class="swatch" style="background:#ffffff;" data-col="#ffffff"></div>
+                            <div class="swatch" style="background:#181c2b;" data-col="#181c2b"></div>
+                        </div>
+                    </div>
+                    <div class="section-title" style="margin-top:10px;">🎯 NUDGE</div>
+                    <div class="nudge-pad">
+                        <button class="btn btn-secondary btn-sm" id="btnNudgeUp">⬆️</button>
+                        <div style="display:flex;gap:4px;">
+                            <button class="btn btn-secondary btn-sm" id="btnNudgeLeft">⬅️</button>
+                            <span class="nudge-info">1px</span>
+                            <button class="btn btn-secondary btn-sm" id="btnNudgeRight">➡️</button>
+                        </div>
+                        <button class="btn btn-secondary btn-sm" id="btnNudgeDown">⬇️</button>
+                    </div>
+                    <div class="section-title" style="margin-top:10px;">🧅 HIỂN THỊ</div>
+                    <label class="checkbox-label"><input type="checkbox" id="chkOnionSkin" checked><span>Onion Skin</span></label>
+                    <label class="checkbox-label" style="margin-top:2px;"><input type="checkbox" id="chkStudioGrid" checked><span>Lưới tọa độ</span></label>
+                </aside>
+
+                <div class="studio-center-area">
+                    <div class="studio-canvas-container">
+                        <div class="canvas-wrapper" id="studioCanvasWrapper">
+                            <canvas id="layerOnion" width="256" height="256"></canvas>
+                            <canvas id="layerBase" width="256" height="256"></canvas>
+                            <canvas id="layerMask" width="256" height="256"></canvas>
+                            <canvas id="layerGrid" width="256" height="256"></canvas>
+                        </div>
+                    </div>
+                    <div class="studio-timeline-bar">
+                        <div class="timeline-header">
+                            <div class="timeline-title">
+                                🎞️ TIMELINE:
+                                <select id="clipSelect" class="clip-dropdown">
+                                    <option value="idle">🧘 Idle</option>
+                                    <option value="run">🏃 Run</option>
+                                    <option value="attack" selected>🗡️ Attack</option>
+                                    <option value="hurt">💥 Hurt</option>
+                                    <option value="death">💀 Death</option>
+                                    <option value="jump">🦘 Jump</option>
+                                    <option value="fall">⬇️ Fall</option>
+                                    <option value="walk">🚶 Walk</option>
+                                </select>
+                            </div>
+                            <div class="timeline-controls">
+                                <button class="btn btn-secondary btn-sm" id="btnTimelineAddFrame">➕ Thêm</button>
+                                <button class="btn btn-secondary btn-sm" id="btnTimelineDelFrame">❌ Xóa</button>
+                            </div>
+                        </div>
+                        <div class="timeline-filmstrip" id="timelineFilmstrip"></div>
+                    </div>
+                </div>
+
+                <aside class="studio-right-sidebar">
+                    <div class="section-title">⚡ XEM TRƯỚC</div>
+                    <div class="studio-preview-box">
+                        <canvas id="studioAnimCanvas" width="180" height="180"></canvas>
+                    </div>
+                    <div class="preview-controls-row">
+                        <button class="btn btn-primary btn-sm" id="btnPlayPause">⏸️ Dừng</button>
+                        <span id="animFpsText">10 FPS</span>
+                        <input type="range" id="animFpsSlider" min="1" max="30" value="10">
+                    </div>
+                    <div class="panel-section" style="margin-top:auto;">
+                        <button class="btn btn-godot" id="btnStudioSyncGodot" style="width:100%;justify-content:center;">🚀 Xuất Godot</button>
+                    </div>
+                </aside>
+            </div>
+        </section>
+
+        <!-- ===================== TAB 5: LIBRARY & GODOT ===================== -->
+        <section class="tab-panel" id="tab-library">
+            <div class="library-layout">
+                <div class="library-header">
+                    <h2>📚 KHO ASSET GAME & XUẤT GODOT</h2>
+                    <div class="lib-filters">
+                        <button class="filter-chip active" data-lib-cat="all">Tất cả</button>
+                        <button class="filter-chip" data-lib-cat="characters">Nhân vật</button>
+                        <button class="filter-chip" data-lib-cat="monsters">Quái vật</button>
+                        <button class="filter-chip" data-lib-cat="items">Vật phẩm</button>
+                        <button class="filter-chip" data-lib-cat="environments">Môi trường</button>
+                        <button class="filter-chip" data-lib-cat="vfx">Hiệu ứng</button>
+                    </div>
+                </div>
+                <div class="library-grid" id="libraryGrid">
+                    <div class="empty-state">Đang tải kho asset...</div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- NEW GAME SCENARIO MODAL -->
+    <div class="modal-backdrop" id="newGameModal" style="display:none;">
+        <div class="modal-card modal-lg">
+            <div class="modal-header">
+                <h3>🎮 TẠO DỰ ÁN GAME MỚI & PHÂN TÍCH CỐT TRUYỆN AI</h3>
+                <button class="modal-close-btn" id="btnCloseGameModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Tên Dự Án Game:</label>
+                    <input type="text" id="modalGameTitle" placeholder="VD: Ninja Mèo Cyberpunk, Hiệp Sĩ Rồng Lửa..." class="form-input">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Thể loại Game:</label>
+                        <select id="modalGameGenre" class="form-select">
+                            <option value="2D Action Platformer">2D Action Platformer (Đi Cảnh Hành Động)</option>
+                            <option value="2D Roguelike Dungeon">2D Roguelike Hầm Ngục</option>
+                            <option value="2D Metroidvania">2D Metroidvania (Khám Phá Bản Đồ)</option>
+                            <option value="2D Hack and Slash">2D Hack & Slash (Chặt Chém)</option>
+                            <option value="2D Top-Down RPG">2D Top-Down RPG (Nhập Vai)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Phong cách mỹ thuật:</label>
+                        <select id="modalGameArtStyle" class="form-select">
+                            <option value="16-Bit Dark Fantasy Pixel Art, Gothic, Glowing Neon">16-Bit Dark Fantasy Pixel Art</option>
+                            <option value="16-Bit Cyberpunk Pixel Art, High Contrast Neon">16-Bit Cyberpunk Pixel Art</option>
+                            <option value="Chibi Anime Pixel Art, Cute & Vibrant">Chibi Anime Pixel Art</option>
+                            <option value="Retro 8-Bit Arcade Pixel Art">Retro 8-Bit Arcade Pixel Art</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>📝 Nhập Ý Tưởng / Cốt Truyện Sơ Khai Của Game:</label>
+                    <textarea id="modalGameRawStory" class="form-textarea" rows="4" placeholder="Ví dụ: Một hiệp sĩ mèo máy bị lưu đày dưới thành phố ngầm, phải thu thập các viên ngọc năng lượng và chiến đấu với lũ chuột biến dị và trùm cơ giới để giải phóng thành phố..."></textarea>
+                    <p class="hint-text">💡 AI sẽ tự động phân tích cốt truyện này, viết lại hoàn chỉnh bối cảnh, và <b>tự động tạo toàn bộ danh sách Asset (Hero, Quái, Boss, Item, Map, VFX)</b> kèm prompt Video/Ảnh phù hợp!</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm" id="btnCancelGameModal">Hủy</button>
+                <button class="btn btn-primary btn-large" id="btnAnalyzeAndCreateGame">🪄 AI Phân Tích Cốt Truyện & Tạo Toàn Bộ Asset Plan ➔</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW ASSET MODAL -->
+    <div class="modal-backdrop" id="newPlanModal" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>➕ THÊM ASSET MỚI VÀO GAME HIỆN TẠI</h3>
+                <button class="modal-close-btn" id="btnClosePlanModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Tên Asset / Nhân vật / Quái:</label>
+                    <input type="text" id="modalPlanName" placeholder="VD: Rồng Lửa Biến Hình, Ninja Đao..." class="form-input">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Danh mục:</label>
+                        <select id="modalPlanCategory" class="form-select">
+                            <option value="characters">Nhân vật (Characters)</option>
+                            <option value="monsters">Quái vật / Boss</option>
+                            <option value="items">Vật phẩm (Items)</option>
+                            <option value="environments">Môi trường (Environments)</option>
+                            <option value="vfx">Hiệu ứng (VFX)</option>
+                            <option value="ui">Giao diện (UI)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Khuyến nghị định dạng:</label>
+                        <select id="modalPlanFormat" class="form-select">
+                            <option value="video">🎬 Video AI (2-3s) - Cử động mượt</option>
+                            <option value="image">🖼️ Ảnh Spritesheet - Tĩnh / Đơn giản</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Lý do chọn Video hoặc Ảnh:</label>
+                    <input type="text" id="modalPlanReason" placeholder="VD: Chuyển động chém liên hoàn cần mượt mà..." class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Prompt Video AI (nếu tạo video):</label>
+                    <textarea id="modalPlanPromptVideo" class="form-textarea" rows="2" placeholder="2D game animation of character running, green screen background..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Prompt Ảnh AI (nếu tạo ảnh):</label>
+                    <textarea id="modalPlanPromptImage" class="form-textarea" rows="2" placeholder="2D pixel art character spritesheet, transparent background..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm" id="btnCancelPlanModal">Hủy</button>
+                <button class="btn btn-primary btn-sm" id="btnSaveNewPlan">💾 Lưu Asset Vào Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

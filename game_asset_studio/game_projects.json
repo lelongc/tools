@@ -1,0 +1,198 @@
+{
+  "active_game_id": "game_1788001507",
+  "games": [
+    {
+      "id": "game_1788001507",
+      "title": "Ninja Mèo: Bóng Đêm Cyberpunk",
+      "genre": "2D Cyberpunk Action Platformer",
+      "art_style": "16-Bit Cyberpunk Pixel Art, High Contrast Neon",
+      "raw_input_story": "Một ninja mèo cyborg bị truy đuổi trong thành phố ngầm Neo-Kyoto, phải chiến đấu với binh đoàn chuột đột biến và trùm mafia rồng máy để tìm lại thanh kiếm ánh sáng.",
+      "full_story": {
+        "synopsis": "Trong thế giới 2D Cyberpunk Action Platformer với phong cách 16-Bit Cyberpunk Pixel Art, High Contrast Neon: Một ninja mèo cyborg bị truy đuổi trong thành phố ngầm Neo-Kyoto, phải chiến đấu với binh đoàn chuột đột biến và trùm mafia rồng máy để tìm lại thanh kiếm ánh sáng. Cuộc phiêu lưu đưa người chơi qua nhiều màn chơi thách thức với các boss hiểm ác và những bí mật cổ xưa đang chờ giải mã.",
+        "protagonist": "Nhân vật chính của Ninja Mèo: Bóng Đêm Cyberpunk, mang sức mạnh đặc trưng để vượt qua thử thách.",
+        "antagonists": "Thế lực quái vật hắc ám và các trùm khu vực canh giữ cánh cổng.",
+        "environment": "Các khu vực màn chơi đa dạng theo phong cách 16-Bit Cyberpunk Pixel Art, High Contrast Neon.",
+        "gameplay_elements": "Hành động chiến đấu, tích lũy bảo vật, né tránh bẫy và hạ gục trùm cuối."
+      },
+      "assets": [
+        {
+          "id": "asset_hero_1788001507",
+          "name": "Nhân Vật Chính (Ninja Mèo: Bóng Đêm Cyberpunk Hero)",
+          "category": "characters",
+          "format": "video",
+          "format_reason": "Chuyển động chạy, nhảy, vung vũ khí nhiều khớp -> Dùng Video AI 2-3s để bóc 8 frame cực mượt",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D game character animation running in place, 8-frame seamless run cycle, 16-Bit Cyberpunk Pixel Art, High Contrast Neon, main hero of Ninja Mèo: Bóng Đêm Cyberpunk, side view, crisp outlines, solid bright green screen background, game sprite animation",
+          "prompt_image": "2D pixel art character spritesheet of main hero from Ninja Mèo: Bóng Đêm Cyberpunk, 8 distinct action poses in clean grid, 16-Bit Cyberpunk Pixel Art, High Contrast Neon, solid background",
+          "animations": [
+            "idle",
+            "run",
+            "jump",
+            "attack_combo",
+            "hurt",
+            "death"
+          ]
+        },
+        {
+          "id": "asset_minion_1788001507",
+          "name": "Quái Vật Thường (Dungeon Minion)",
+          "category": "monsters",
+          "format": "video",
+          "format_reason": "Cử động tuần tra, lao vào tấn công nhịp nhàng -> Dùng Video AI 2-3s",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D monster character walking and lunging attack animation, 8 frames seamless loop, 16-Bit Cyberpunk Pixel Art, High Contrast Neon, dark fantasy side view, solid bright green screen background",
+          "prompt_image": "2D monster spritesheet for game, 8 poses, 16-Bit Cyberpunk Pixel Art, High Contrast Neon, green screen",
+          "animations": [
+            "idle",
+            "walk",
+            "attack",
+            "hurt",
+            "death"
+          ]
+        },
+        {
+          "id": "asset_boss_1788001507",
+          "name": "Trùm Cuối (Epic Final Boss)",
+          "category": "monsters",
+          "format": "video",
+          "format_reason": "Kích thước lớn, đòn đánh dội lửa/năng lượng -> Dạng Video tạo hiệu ứng biến hình & vung chiêu hoành tráng",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D gigantic boss monster executing special ultimate attack animation, dramatic glowing visual aura, 8 frames loop, 16-Bit Cyberpunk Pixel Art, High Contrast Neon, solid bright green screen background",
+          "prompt_image": "2D giant boss spritesheet, multiple attack phases, 16-Bit Cyberpunk Pixel Art, High Contrast Neon, transparent background",
+          "animations": [
+            "idle_phase1",
+            "rage_attack",
+            "ultimate_cast",
+            "stagger_hurt",
+            "death_explosion"
+          ]
+        },
+        {
+          "id": "asset_item_1788001507",
+          "name": "Bảo Vật / Bình Năng Lượng (Artifact Powerup)",
+          "category": "items",
+          "format": "image",
+          "format_reason": "Vật phẩm tĩnh / icon giao diện -> Dạng Ảnh Spritesheet sắc nét 100%",
+          "priority": "Trung bình",
+          "status": "pending",
+          "prompt_image": "2D game item icon set of glowing magical powerups, potions, and crystals, 16-Bit Cyberpunk Pixel Art, High Contrast Neon, isolated on transparent background",
+          "animations": [
+            "idle_sparkle"
+          ]
+        },
+        {
+          "id": "asset_tile_1788001507",
+          "name": "Tileset Môi Trường Màn Chơi (Stage Tileset)",
+          "category": "environments",
+          "format": "image",
+          "format_reason": "Gạch nền, vách tường, chướng ngại vật cần thẳng hàng pixel chuẩn lưới -> Dạng Ảnh",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D platformer game environment tileset, ground blocks, wall platforms, traps, hazards, seamless repeatable tiles, 16-Bit Cyberpunk Pixel Art, High Contrast Neon",
+          "animations": [
+            "static"
+          ]
+        },
+        {
+          "id": "asset_vfx_1788001507",
+          "name": "Hiệu Ứng Tuyệt Chiêu (Skill Slash VFX)",
+          "category": "vfx",
+          "format": "video",
+          "format_reason": "Vệt chém tia sáng / chưởng lửa cần độ mượt từng mili-giây -> Dạng Video",
+          "priority": "Trung bình",
+          "status": "pending",
+          "prompt_video": "2D elemental energy slash wave effect expanding and bursting, glowing neon particles, solid black background, side view, VFX animation",
+          "prompt_image": "2D sprite animation sheet of sword energy slash wave, solid black background",
+          "animations": [
+            "slash_burst"
+          ]
+        }
+      ],
+      "created_at": "2026-08-29 18:05"
+    },
+    {
+      "id": "game_rooster_dark_fantasy",
+      "title": "Huyền Thoại Gà Chọi: Đấu Trường Bóng Tối",
+      "genre": "2D Action Roguelike / Platformer",
+      "art_style": "16-Bit Dark Fantasy Pixel Art, Gothic, Crimson Neon Accent",
+      "raw_input_story": "Một chú gà chọi dũng mãnh với mào lửa bị bắt cóc vào hầm ngục bóng tối của các pháp sư cơ giới, phải chiến đấu với quái vật máy móc và sói bóng đêm để giải cứu đồng loại.",
+      "full_story": {
+        "synopsis": "Vùng đất lông vũ Avia ngập chìm trong bóng đêm khi Giáo phái Cơ Giới Malakar xâm chiếm. Chú gà chiến Roosterius sở hữu dòng máu chiến kê thượng cổ thức tỉnh, mang theo cựa sắt phong ấn ma thuật dấn thân vào hầm ngục vô tận.",
+        "protagonist": "Roosterius - Chiến Binh Gà Chọi (Mào đỏ rực lửa, cựa sắt bọc lôi điện, thân đen tuyền dũng mãnh).",
+        "antagonists": "Sói Bóng Đêm Vorash (Thú săn mồi hắc ám) & Chúa Tể Cơ Giới Malakar (Boss trùm nửa máy nửa ma).",
+        "environment": "Hầm Ngục Đá Cổ (Dungeon), Đấu Trường Cơ Giới Rực Lửa, Rừng Nấm Độc Biến Dị.",
+        "gameplay_elements": "Tốc độ di chuyển cao, combo đá cựa trên không, lướt né đòn, nhặt Bình Lửa Inferno để tăng sát thương."
+      },
+      "assets": [
+        {
+          "id": "asset_hero_rooster",
+          "name": "Chiến Binh Gà Chọi (Roosterius)",
+          "category": "characters",
+          "format": "video",
+          "format_reason": "Cử động chạy, nhấp gối, vung cựa đá liên hoàn nhiều khớp -> Tạo Video 2-3s bóc 8 frame cực mượt",
+          "priority": "Cao",
+          "status": "ready",
+          "prompt_video": "2D game animation of a fierce battle rooster running in place, 8-frame seamless run cycle, dark fantasy gothic aesthetic, crimson comb, armored talons, solid bright green screen background, crisp outlines, side-view 2D game asset",
+          "prompt_image": "2D pixel art spritesheet of battle rooster character, 8 action poses, solid neutral background",
+          "animations": [
+            "idle",
+            "run",
+            "jump",
+            "attack_kick",
+            "hurt",
+            "death"
+          ]
+        },
+        {
+          "id": "asset_shadow_wolf",
+          "name": "Sói Bóng Đêm (Shadow Wolf Mini-Boss)",
+          "category": "monsters",
+          "format": "video",
+          "format_reason": "Chuyển động vồ mồi và bờm phát sáng liên tục -> Dạng Video cho chuyển động khói bóng mượt",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D dark fantasy shadow wolf monster running and lunging attack cycle, glowing purple spectral eyes, solid bright green screen background, side view, game sprite animation",
+          "prompt_image": "2D pixel art monster spritesheet of shadow wolf, clean 2x4 grid, transparent background",
+          "animations": [
+            "idle",
+            "run",
+            "bite_attack",
+            "howl",
+            "death"
+          ]
+        },
+        {
+          "id": "asset_fire_potion",
+          "name": "Bình Thuốc Lửa (Inferno Flask)",
+          "category": "items",
+          "format": "image",
+          "format_reason": "Vật phẩm tĩnh / icon giao diện -> Dạng Ảnh Spritesheet nhanh & sắc nét 100%",
+          "priority": "Trung bình",
+          "status": "pending",
+          "prompt_video": "2D glowing potion bottle with boiling lava liquid inside, subtle looping glow, green screen",
+          "prompt_image": "2D game item icon set of magical fire potion flasks, glowing glass bottle with molten amber liquid, 16-bit pixel art, isolated transparent background",
+          "animations": [
+            "idle_glow"
+          ]
+        },
+        {
+          "id": "asset_dungeon_tileset",
+          "name": "Tileset Hầm Ngục Cổ (Gothic Stone Dungeon)",
+          "category": "environments",
+          "format": "image",
+          "format_reason": "Gạch nền, tường, cột đá cần thẳng hàng pixel chuẩn lưới -> Dạng Ảnh Spritesheet",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D pixel art platformer tileset of dark gothic castle dungeon, stone brick floor, spikes, chains, torches, seamless repeatable tiles, 16-bit style",
+          "animations": [
+            "static"
+          ]
+        }
+      ],
+      "created_at": "2026-08-29 18:04"
+    }
+  ]
+}

@@ -1,0 +1,212 @@
+[
+  {
+    "id": "plan_1788001220_13",
+    "name": "Kiếm Ánh Sáng Cổ Đại (Sunblade Artifact)",
+    "category": "items",
+    "format": "image",
+    "format_reason": "Vũ khí / Icon giao diện -> Dạng Ảnh sắc nét 100%",
+    "priority": "Cao",
+    "status": "pending",
+    "prompt_video": "",
+    "prompt_image": "2D game item icon of golden legendary sunblade glowing sword, 16-bit pixel art, transparent background",
+    "animations": [
+      "idle_sparkle"
+    ],
+    "created_at": "2026-08-29 18:00"
+  },
+  {
+    "id": "plan_1788001220_11",
+    "name": "Quái Độc Rừng Rậm (Poison Shroom Monster)",
+    "category": "monsters",
+    "format": "video",
+    "format_reason": "Chuyển động nhún nhảy và phun khói độc -> Dạng Video tạo hiệu ứng hạt mượt",
+    "priority": "Cao",
+    "status": "pending",
+    "prompt_video": "2D dark fantasy mushroom monster bouncing and emitting purple spore gas attack, solid green screen background",
+    "prompt_image": "2D monster spritesheet of mushroom creature, transparent background",
+    "animations": [
+      "idle_bounce",
+      "spore_attack",
+      "hurt",
+      "explode_death"
+    ],
+    "created_at": "2026-08-29 18:00"
+  },
+  {
+    "id": "plan_1788001220_9",
+    "name": "Hiệp Sĩ Rồng Lửa (Dragon Knight)",
+    "category": "characters",
+    "format": "video",
+    "format_reason": "Đòn chém quét lửa và áo choàng vẫy -> Tạo Video 2s bóc 8 frame cực đẹp",
+    "priority": "Cao",
+    "status": "pending",
+    "prompt_video": "2D game animation of armored dragon knight slashing broadsword with flame trail, solid green screen background, side view, pixel art game asset",
+    "prompt_image": "2D game spritesheet of dragon knight sword attack sequence, green screen",
+    "animations": [
+      "idle",
+      "run",
+      "sword_slash",
+      "flame_burst",
+      "death"
+    ],
+    "created_at": "2026-08-29 18:00"
+  },
+  {
+    "id": "plan_1788001219_10",
+    "name": "Kiếm Ánh Sáng Cổ Đại (Sunblade Artifact)",
+    "category": "items",
+    "format": "image",
+    "format_reason": "Vũ khí / Icon giao diện -> Dạng Ảnh sắc nét 100%",
+    "priority": "Cao",
+    "status": "pending",
+    "prompt_video": "",
+    "prompt_image": "2D game item icon of golden legendary sunblade glowing sword, 16-bit pixel art, transparent background",
+    "animations": [
+      "idle_sparkle"
+    ],
+    "created_at": "2026-08-29 18:00"
+  },
+  {
+    "id": "plan_1788001219_8",
+    "name": "Quái Độc Rừng Rậm (Poison Shroom Monster)",
+    "category": "monsters",
+    "format": "video",
+    "format_reason": "Chuyển động nhún nhảy và phun khói độc -> Dạng Video tạo hiệu ứng hạt mượt",
+    "priority": "Cao",
+    "status": "pending",
+    "prompt_video": "2D dark fantasy mushroom monster bouncing and emitting purple spore gas attack, solid green screen background",
+    "prompt_image": "2D monster spritesheet of mushroom creature, transparent background",
+    "animations": [
+      "idle_bounce",
+      "spore_attack",
+      "hurt",
+      "explode_death"
+    ],
+    "created_at": "2026-08-29 18:00"
+  },
+  {
+    "id": "plan_1788001219_6",
+    "name": "Hiệp Sĩ Rồng Lửa (Dragon Knight)",
+    "category": "characters",
+    "format": "video",
+    "format_reason": "Đòn chém quét lửa và áo choàng vẫy -> Tạo Video 2s bóc 8 frame cực đẹp",
+    "priority": "Cao",
+    "status": "pending",
+    "prompt_video": "2D game animation of armored dragon knight slashing broadsword with flame trail, solid green screen background, side view, pixel art game asset",
+    "prompt_image": "2D game spritesheet of dragon knight sword attack sequence, green screen",
+    "animations": [
+      "idle",
+      "run",
+      "sword_slash",
+      "flame_burst",
+      "death"
+    ],
+    "created_at": "2026-08-29 18:00"
+  },
+  {
+    "id": "plan_1788001002_7",
+    "name": "Kiếm Ánh Sáng Cổ Đại (Sunblade Artifact)",
+    "category": "items",
+    "format": "image",
+    "format_reason": "Vũ khí / Icon giao diện -> Dạng Ảnh sắc nét 100%",
+    "priority": "Cao",
+    "status": "pending",
+    "prompt_video": "",
+    "prompt_image": "2D game item icon of golden legendary sunblade glowing sword, 16-bit pixel art, transparent background",
+    "animations": [
+      "idle_sparkle"
+    ],
+    "created_at": "2026-08-29 17:56"
+  },
+  {
+    "id": "plan_1788001002_5",
+    "name": "Quái Độc Rừng Rậm (Poison Shroom Monster)",
+    "category": "monsters",
+    "format": "video",
+    "format_reason": "Chuyển động nhún nhảy và phun khói độc -> Dạng Video tạo hiệu ứng hạt mượt",
+    "priority": "Cao",
+    "status": "pending",
+    "prompt_video": "2D dark fantasy mushroom monster bouncing and emitting purple spore gas attack, solid green screen background",
+    "prompt_image": "2D monster spritesheet of mushroom creature, transparent background",
+    "animations": [
+      "idle_bounce",
+      "spore_attack",
+      "hurt",
+      "explode_death"
+    ],
+    "created_at": "2026-08-29 17:56"
+  },
+  {
+    "id": "plan_1788001002_3",
+    "name": "Hiệp Sĩ Rồng Lửa (Dragon Knight)",
+    "category": "characters",
+    "format": "video",
+    "format_reason": "Đòn chém quét lửa và áo choàng vẫy -> Tạo Video 2s bóc 8 frame cực đẹp",
+    "priority": "Cao",
+    "status": "pending",
+    "prompt_video": "2D game animation of armored dragon knight slashing broadsword with flame trail, solid green screen background, side view, pixel art game asset",
+    "prompt_image": "2D game spritesheet of dragon knight sword attack sequence, green screen",
+    "animations": [
+      "idle",
+      "run",
+      "sword_slash",
+      "flame_burst",
+      "death"
+    ],
+    "created_at": "2026-08-29 17:56"
+  },
+  {
+    "id": "plan_hero_rooster",
+    "name": "Chiến Binh Gà Chọi (Battle Rooster)",
+    "category": "characters",
+    "format": "video",
+    "format_reason": "Cử động chạy/nhảy/đá nhiều khớp phức tạp -> Tạo Video 2-3s bóc 8 frame cực mượt",
+    "priority": "Cao",
+    "status": "ready",
+    "prompt_video": "2D game animation of a fierce battle rooster running in place, 8-frame seamless run cycle, dark fantasy gothic aesthetic, crimson comb, armored talons, solid bright green screen background, crisp outlines, side-view 2D game asset",
+    "prompt_image": "2D pixel art spritesheet of battle rooster character, 8 action poses, solid neutral background",
+    "animations": [
+      "idle",
+      "run",
+      "jump",
+      "attack_kick",
+      "hurt",
+      "death"
+    ],
+    "created_at": "2026-08-29 17:55"
+  },
+  {
+    "id": "plan_shadow_wolf",
+    "name": "Sói Bóng Đêm (Shadow Wolf Boss)",
+    "category": "monsters",
+    "format": "video",
+    "format_reason": "Chuyển động vồ mồi và bờm phát sáng -> Dạng Video tạo hiệu ứng khói bóng mượt",
+    "priority": "Cao",
+    "status": "pending",
+    "prompt_video": "2D dark fantasy shadow wolf monster running and lunging attack cycle, glowing purple spectral eyes, solid bright green screen background, side view, game sprite animation",
+    "prompt_image": "2D pixel art monster spritesheet of shadow wolf, clean 2x4 grid, transparent background",
+    "animations": [
+      "idle",
+      "run",
+      "bite_attack",
+      "howl",
+      "death"
+    ],
+    "created_at": "2026-08-29 17:55"
+  },
+  {
+    "id": "plan_fire_potion",
+    "name": "Bình Thuốc Lửa (Inferno Flask)",
+    "category": "items",
+    "format": "image",
+    "format_reason": "Vật phẩm tĩnh / icon -> Dạng Ảnh Spritesheet nhanh & sắc nét 100%",
+    "priority": "Trung bình",
+    "status": "pending",
+    "prompt_video": "2D glowing potion bottle with boiling lava liquid inside, subtle looping glow, green screen",
+    "prompt_image": "2D game item icon set of magical fire potion flasks, glowing glass bottle with molten amber liquid, 16-bit pixel art, isolated transparent background",
+    "animations": [
+      "idle_glow"
+    ],
+    "created_at": "2026-08-29 17:55"
+  }
+]
