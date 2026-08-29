@@ -1,0 +1,39 @@
+[gd_scene load_steps=6 format=3 uid="uid://enemy2d_scn"]
+
+[ext_resource type="Script" path="res://scripts/entities/Enemy2D.gd" id="1_e2d"]
+[ext_resource type="Script" path="res://scripts/combat/Hitbox2D.gd" id="2_hit"]
+[ext_resource type="Script" path="res://scripts/combat/Hurtbox2D.gd" id="3_hurt"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_1"]
+radius = 16.0
+height = 40.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 22.0
+
+[node name="Enemy2D" type="CharacterBody2D"]
+collision_layer = 1
+collision_mask = 1
+script = ExtResource("1_e2d")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_1")
+
+[node name="Hitbox2D" type="Area2D" parent="."]
+position = Vector2(-24, 0)
+script = ExtResource("2_hit")
+damage = 15.0
+knockback_force = Vector2(-200, -50)
+is_player_hitbox = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hitbox2D"]
+shape = SubResource("CircleShape2D_1")
+
+[node name="Hurtbox2D" type="Area2D" parent="."]
+script = ExtResource("3_hurt")
+is_player_hurtbox = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox2D"]
+shape = SubResource("CapsuleShape2D_1")

@@ -6,54 +6,16 @@ config_version=5
 
 [application]
 
-config/name="Long Neck Rush 3D"
-run/main_scene="res://scenes/Main.tscn"
+config/name="2D Beat 'Em Up Hero"
+run/main_scene="res://scenes/Main2D.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 PlatformBridge="*res://scripts/autoload/PlatformBridge.gd"
 SaveSystem="*res://scripts/autoload/SaveSystem.gd"
 SoundManager="*res://scripts/autoload/SoundManager.gd"
-SkinManager="*res://scripts/autoload/SkinManager.gd"
-ModelLoader="*res://scripts/ModelLoader.gd"
 
 [display]
 

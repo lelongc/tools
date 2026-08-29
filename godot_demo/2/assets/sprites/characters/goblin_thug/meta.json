@@ -1,0 +1,14 @@
+{
+  "id": "goblin_thug",
+  "name": "Quái Vật Côn Đồ",
+  "category": "characters",
+  "role": "Enemy",
+  "clips": [
+    "idle",
+    "run",
+    "attack",
+    "hurt",
+    "death"
+  ],
+  "description": "Bộ animation hoàn chỉnh 5 clips cho Quái Vật Côn Đồ."
+}

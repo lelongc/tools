@@ -1,0 +1,14 @@
+{
+  "id": "cyber_ninja",
+  "name": "Ninja Công Nghệ Song Kiếm",
+  "category": "characters",
+  "role": "Hero",
+  "clips": [
+    "idle",
+    "run",
+    "attack",
+    "hurt",
+    "death"
+  ],
+  "description": "Bộ animation hoàn chỉnh 5 clips cho Ninja Công Nghệ Song Kiếm."
+}

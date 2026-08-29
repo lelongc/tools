@@ -1,0 +1,14 @@
+{
+  "id": "female_swordmaster",
+  "name": "Nữ Kiếm Sĩ Anime Pixel Art",
+  "category": "characters",
+  "role": "Hero",
+  "clips": [
+    "idle",
+    "run",
+    "attack",
+    "hurt",
+    "death"
+  ],
+  "description": "Nữ kiếm sĩ anime phong cách Pixel Art sắc nét tuyệt đẹp với thanh katana dạ quang."
+}

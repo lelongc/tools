@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2D Asset Studio & AI Co-Pilot • Game Dev Studio</title>
+    <title>2D Asset Studio & AI Animation Engine • Game Dev Studio</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,15 +11,31 @@
     <header class="navbar">
         <div class="nav-title">
             <span>🎨 2D ASSET STUDIO</span>
-            <span class="nav-badge">AI CO-PILOT</span>
+            <span class="nav-badge">PRO ANIMATION ENGINE</span>
         </div>
+
+        <!-- ANIMATION CLIP SELECTOR -->
+        <div class="clip-selector-group">
+            <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">CLIP ĐANG CHỌN:</label>
+            <select id="clipSelect" class="clip-dropdown">
+                <option value="attack">🗡️ Attack_Combo (4 frames)</option>
+                <option value="run">🏃 Run_Cycle (4 frames)</option>
+                <option value="idle">🧘 Idle_Stance (4 frames)</option>
+                <option value="hurt">💥 Hurt_React (2 frames)</option>
+                <option value="death">💀 Death_Knockout (4 frames)</option>
+            </select>
+            <button class="btn" id="btnAddClip" title="Tạo Animation Clip Mới">+ Clip</button>
+        </div>
+
         <div class="nav-actions">
-            <button class="btn" id="btnNewCanvas">📄 Tạo Mới</button>
-            <button class="btn" id="btnImportImg">📁 Tải Ảnh</button>
-            <input type="file" id="fileInput" accept="image/*" style="display: none;">
-            <button class="btn" id="btnToggleGrid">📐 Lưới Frame (64px)</button>
-            <button class="btn" id="btnUndo">↩️ Hoàn tác</button>
-            <button class="btn btn-primary" id="btnSyncGodot">🎮 Xuất Thẳng Vào Godot 2D</button>
+            <button class="btn" id="btnHelpGuide" style="background: rgba(255, 184, 0, 0.15); border-color: var(--accent-gold); color: var(--accent-gold);">❓ Hướng Dẫn Dùng</button>
+            <button class="btn btn-primary" id="btnOpenLibrary">📚 Kho Asset 2D Đầy Đủ</button>
+            <button class="btn" id="btnUndo" title="Hoàn tác nét vẽ (Ctrl + Z)">↩️ Hoàn tác (Ctrl+Z)</button>
+            <button class="btn" id="btnRedo" title="Làm lại nét vẽ (Ctrl + Y)">↪️ Làm lại (Ctrl+Y)</button>
+            <button class="btn" id="btnToggleOnion" title="Bật/Tắt bóng ma khung hình trước">🧅 Onion Skin (TẮT)</button>
+            <button class="btn" id="btnToggleHitbox" title="Bật chế độ vẽ Hitbox/Hurtbox đòn đánh">🎯 Hitbox Editor</button>
+            <button class="btn" id="btnToggleGrid">📐 Lưới</button>
+            <button class="btn btn-primary" id="btnSyncGodot">🎮 Xuất Full Vào Godot 2D</button>
         </div>
     </header>
 
@@ -32,7 +48,8 @@
             <button class="tool-btn" data-tool="eraser" title="Tẩy / Xóa nền (E)">🧽</button>
             <button class="tool-btn" data-tool="bucket" title="Đổ màu (B)">🪣</button>
             <button class="tool-btn" data-tool="picker" title="Hút màu (I)">💧</button>
-            <button class="tool-btn" data-tool="slice" title="Khung cắt Sprite Sheet (S)">✂️</button>
+            <button class="tool-btn" data-tool="hitbox_box" title="Vẽ vùng Hitbox đòn đánh (H)" style="color: #ff3344;">🟥</button>
+            <button class="tool-btn" data-tool="hurtbox_box" title="Vẽ vùng Hurtbox thân người (G)" style="color: #00e676;">🟩</button>
 
             <div class="tool-divider"></div>
 
@@ -47,23 +64,54 @@
             <span id="brushSizeVal" style="font-size: 11px; font-weight: bold; color: var(--accent-cyan);">4px</span>
         </aside>
 
-        <!-- CENTER VIEWPORT -->
-        <main class="viewport-container" id="viewportContainer">
-            <div class="canvas-wrapper" id="canvasWrapper">
-                <!-- Multi-layer stack -->
-                <canvas id="layer0" class="canvas-layer" width="512" height="512"></canvas>
-                <canvas id="maskLayer" class="canvas-layer" width="512" height="512" style="pointer-events: none; opacity: 0.6;"></canvas>
-                <canvas id="gridCanvas" class="grid-overlay" width="512" height="512"></canvas>
-            </div>
+        <!-- CENTER VIEWPORT & BOTTOM TIMELINE -->
+        <div class="viewport-and-timeline">
+            <!-- CANVAS VIEWPORT -->
+            <main class="viewport-container" id="viewportContainer">
+                <div class="canvas-wrapper" id="canvasWrapper">
+                    <!-- Onion skin layer -->
+                    <canvas id="onionCanvas" class="canvas-layer" width="256" height="256" style="pointer-events: none; opacity: 0.35;"></canvas>
+                    <!-- Multi-layer stack -->
+                    <canvas id="layer0" class="canvas-layer" width="256" height="256"></canvas>
+                    <!-- Inpaint mask layer -->
+                    <canvas id="maskLayer" class="canvas-layer" width="256" height="256" style="pointer-events: none; opacity: 0.6;"></canvas>
+                    <!-- Hitbox / Hurtbox vector overlay -->
+                    <canvas id="hitboxCanvas" class="canvas-layer" width="256" height="256" style="pointer-events: none;"></canvas>
+                    <!-- Grid overlay -->
+                    <canvas id="gridCanvas" class="grid-overlay" width="256" height="256"></canvas>
+                </div>
 
-            <div class="viewport-hud">
-                <span id="hudCanvasSize">Canvas: 512 × 512 px</span>
-                <span id="hudCursorPos">X: 0, Y: 0</span>
-                <span id="hudZoom">Zoom: 100%</span>
-            </div>
-        </main>
+                <div class="viewport-hud">
+                    <span id="hudCanvasSize">Canvas: 256 × 256 px</span>
+                    <span id="hudCursorPos">X: 0, Y: 0</span>
+                    <span id="hudFrameIndex">Frame: 1 / 4</span>
+                </div>
+            </main>
 
-        <!-- RIGHT SIDEBAR -->
+            <!-- BOTTOM ANIMATION TIMELINE -->
+            <footer class="bottom-timeline">
+                <div class="timeline-controls">
+                    <button class="btn" id="btnTimelinePlay">▶ Phát</button>
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span style="font-size: 11px; color: var(--text-muted);">Tốc độ:</span>
+                        <input type="range" id="timelineFpsSlider" min="2" max="30" value="10" style="width: 70px; accent-color: var(--accent-cyan);">
+                        <span id="timelineFpsVal" style="font-size: 11px; color: var(--accent-cyan); font-weight: bold;">10 FPS</span>
+                    </div>
+                    <div class="tool-divider" style="height: 20px; width: 1px; margin: 0 4px;"></div>
+                    <button class="btn" id="btnAddFrame" title="Thêm Frame trống mới">+ Frame</button>
+                    <button class="btn" id="btnDuplicateFrame" title="Nhân bản Frame hiện tại">📋 Nhân Bản</button>
+                    <button class="btn" id="btnFlipH" title="Lật ngang hình">↔️ Lật Ngang</button>
+                    <button class="btn" id="btnDeleteFrame" title="Xóa Frame này">🗑️ Xóa</button>
+                </div>
+
+                <!-- Frame Filmstrip -->
+                <div class="timeline-filmstrip" id="timelineFilmstrip">
+                    <!-- Dynamic Frame cards loaded via JS -->
+                </div>
+            </footer>
+        </div>
+
+        <!-- RIGHT SIDEBAR (LAYERS, PREVIEW, AI CO-PILOT) -->
         <aside class="sidebar-right">
             <!-- LAYERS SECTION -->
             <div class="panel-section">
@@ -73,7 +121,7 @@
                 </div>
                 <div class="layers-list" id="layersList">
                     <div class="layer-item active" data-layer-idx="0">
-                        <span>👁️ Layer 1 (Gốc)</span>
+                        <span>👁️ Layer 1 (Nét chính)</span>
                         <div class="layer-actions">
                             <span title="Xóa" class="btn-del-layer">🗑️</span>
                         </div>
@@ -85,46 +133,109 @@
             <div class="panel-section">
                 <div class="panel-header">
                     <span>🎬 Xem Trước Animation</span>
-                    <span id="animFpsLabel" style="font-size: 11px; color: var(--accent-cyan);">12 FPS</span>
+                    <span id="animPreviewClipName" style="font-size: 11px; color: var(--accent-cyan);">Attack (4f)</span>
                 </div>
                 <div class="anim-preview-box">
                     <div class="anim-canvas-container">
                         <canvas id="animPreviewCanvas" width="128" height="128"></canvas>
                     </div>
-                    <div class="anim-controls">
-                        <button class="btn" id="btnAnimPlayPause" style="padding: 4px 10px;">▶ Phát</button>
-                        <input type="range" id="animFpsSlider" min="2" max="30" value="12">
-                    </div>
                 </div>
             </div>
 
-            <!-- AI CO-PILOT SECTION -->
+            <!-- AI CO-PILOT POWER SUITE -->
             <div class="ai-panel">
                 <div class="ai-status-pill">
                     <div class="ai-status-dot"></div>
-                    <span>AI MCP BRIDGE: SẴN SÀNG</span>
+                    <span>AI TWO-WAY CO-PILOT: SẴN SÀNG</span>
                 </div>
 
                 <div class="ai-prompt-box">
-                    <label style="font-size: 12px; font-weight: 700; color: var(--text-muted);">LỆNH SỬA / TẠO ASSET:</label>
-                    <textarea class="ai-textarea" id="aiPromptInput" placeholder="Ví dụ: 'Sửa lại nét chém kiếm bén hơn', 'Khoanh vùng chiếc giáp đổi sang màu vàng kim'..."></textarea>
+                    <label style="font-size: 11px; font-weight: 700; color: var(--text-muted);">LỆNH SỬA / RA LỆNH CHO AI:</label>
+                    <textarea class="ai-textarea" id="aiPromptInput" placeholder="Ví dụ: 'Sửa frame này cho tay giơ kiếm cao hơn', 'Render nét vẽ phác thảo này thành hiệp sĩ anime xịn', 'Khoanh vùng chiếc giáp đổi sang vàng kim'..."></textarea>
                     <button class="btn btn-primary" id="btnSendAICommand" style="justify-content: center; width: 100%;">
-                        ✨ Gửi Lệnh Cho AI Co-Pilot
+                        ✨ Gửi Lệnh Cho AI Thực Hiện
                     </button>
                 </div>
 
-                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-top: 6px;">CÔNG CỤ TỰ ĐỘNG NHANH:</label>
+                <label style="font-size: 11px; font-weight: 700; color: var(--text-muted); margin-top: 4px;">BỘ CÔNG CỤ TẠO ASSET TỰ ĐỘNG:</label>
                 <div class="quick-actions-grid">
-                    <button class="chip-btn" id="chipRemoveBg">✨ Tự Động Xóa Nền</button>
-                    <button class="chip-btn" id="chipSlashFx">🗡️ Tạo Vệt Chém FX</button>
-                    <button class="chip-btn" id="chipRunFrames">🏃 Tạo 4-Frame Chạy</button>
-                    <button class="chip-btn" id="chipHitSpark">💥 Tạo Nổ Tia Lửa</button>
-                    <button class="chip-btn" id="chipKnightHero">🛡️ Sinh Nhân Vật Hero</button>
-                    <button class="chip-btn" id="chipBossTitan">👑 Sinh Boss Khổng Lồ</button>
+                    <button class="chip-btn" id="chipSwordmaster" style="grid-column: span 2; background: linear-gradient(135deg, rgba(255,0,128,0.25), rgba(0,240,255,0.25)); border-color: var(--accent-pink); color: #fff; font-weight: 800;">
+                        🌸 Nữ Kiếm Sĩ Anime Pixel Art (5 Clips)
+                    </button>
+                    <button class="chip-btn" id="chipFullHero" style="grid-column: span 2; background: linear-gradient(135deg, rgba(0,240,255,0.15), rgba(255,0,128,0.15)); border-color: var(--accent-cyan); color: #fff;">
+                        🌟 Sinh Trọn Bộ 5 Animation (Hero Pack)
+                    </button>
+                    <button class="chip-btn" id="chipFullBoss" style="grid-column: span 2; background: linear-gradient(135deg, rgba(255,184,0,0.15), rgba(255,50,50,0.15)); border-color: var(--accent-gold); color: #fff;">
+                        👑 Sinh Trọn Bộ 5 Animation (Boss Pack)
+                    </button>
+                    <button class="chip-btn" id="chipRenderSketch">🎨 Render Phác Thảo</button>
+                    <button class="chip-btn" id="chipInbetween">🧅 Sinh Frame Giữa (AI)</button>
+                    <button class="chip-btn" id="chipSlashTrail">🗡️ Thêm Vệt Chém FX</button>
+                    <button class="chip-btn" id="chipCleanAlpha">✨ Xóa Phông Chuẩn</button>
                 </div>
             </div>
         </aside>
     </div>
+
+    <!-- ASSET LIBRARY MODAL DIALOG -->
+    <div class="modal-backdrop" id="libraryModal" style="display: none;">
+        <div class="library-dialog">
+            <div class="library-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 18px; font-weight: 800; color: var(--accent-cyan);">📚 KHO ASSET 2D TỔNG HỢP (ĐẦY ĐỦ THỂ LOẠI)</span>
+                    <span class="nav-badge">READY-TO-USE & EDITABLE</span>
+                </div>
+                <button class="btn" id="btnCloseLibrary" style="font-size: 14px; padding: 4px 10px;">✕ Đóng</button>
+            </div>
+
+            <!-- CATEGORY TABS -->
+            <div class="lib-category-tabs">
+                <button class="lib-tab-btn active" data-cat="characters">👤 Nhân Vật & Quái (6)</button>
+                <button class="lib-tab-btn" data-cat="fx">💥 Hiệu Ứng Chiêu Thức VFX (6)</button>
+                <button class="lib-tab-btn" data-cat="environments">🏰 Map & Môi Trường (6)</button>
+                <button class="lib-tab-btn" data-cat="items">💎 Vật Phẩm & Rương (5)</button>
+                <button class="lib-tab-btn" data-cat="ui">🎮 Giao Diện & HUD (4)</button>
+            </div>
+
+            <!-- ASSET CARDS GRID -->
+            <div class="lib-cards-grid" id="libraryGrid">
+                <!-- Dynamically loaded -->
+            </div>
+        </div>
+    </div>
+
+    <!-- HELP GUIDE MODAL -->
+    <div class="modal-backdrop" id="helpModal" style="display: none;">
+        <div class="library-dialog" style="max-width: 680px; height: auto;">
+            <div class="library-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 16px; font-weight: 800; color: var(--accent-gold);">💡 HƯỚNG DẪN 3 BƯỚC CỰC DỄ DÙNG 2D STUDIO</span>
+                </div>
+                <button class="btn" id="btnCloseHelp" style="font-size: 13px; padding: 3px 8px;">✕ Đóng</button>
+            </div>
+            <div style="padding: 20px; display: flex; flex-direction: column; gap: 16px; font-size: 13px; line-height: 1.5; color: #cfd8dc;">
+                <div style="background: #191e2b; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+                    <strong style="color: var(--accent-cyan); font-size: 14px;">1️⃣ Bước 1: Chọn Mẫu Hoặc Nhờ AI Tạo</strong><br>
+                    - Bấm nút <strong>📚 Kho Asset 2D Đầy Đủ</strong> ➔ Chọn nhân vật/quái/hiệu ứng rồi bấm <strong>✏️ Nạp Vào Sửa</strong>.<br>
+                    - Hoặc gõ lệnh vào ô AI bên phải (ví dụ: <em>"Tạo nhân vật hiệp sĩ giáp vàng"</em>) rồi bấm Gửi.
+                </div>
+                <div style="background: #191e2b; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+                    <strong style="color: var(--accent-green); font-size: 14px;">2️⃣ Bước 2: Chỉnh Sửa Nét Vẽ & Canh Animation</strong><br>
+                    - Nhìn thanh <strong>khung hình ở dưới đáy</strong>: Bấm vào từng Frame để vẽ thêm tóc, kiếm, khiên.<br>
+                    - Dùng phím tắt: <strong>Ctrl + Z</strong> (Hoàn tác), <strong>Ctrl + Y</strong> (Làm lại), <strong>P</strong> (Bút), <strong>E</strong> (Tẩy), <strong>B</strong> (Đổ màu).<br>
+                    - Bật <strong>🧅 Onion Skin</strong> để xem bóng mờ frame trước giúp vẽ animation mượt hơn.
+                </div>
+                <div style="background: #191e2b; border: 1px solid var(--border-color); border-radius: 8px; padding: 12px;">
+                    <strong style="color: var(--accent-pink); font-size: 14px;">3️⃣ Bước 3: Xem Trước & Xuất Vào Game</strong><br>
+                    - Nhìn sang góc phải xem animation chuyển động mượt mà thời gian thực.<br>
+                    - Bấm <strong>🎮 Xuất Full Vào Godot 2D</strong> để đưa thẳng vào dự án game trong 1 giây!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATIONS CONTAINER -->
+    <div id="toastContainer" class="toast-container"></div>
 
     <script src="app.js"></script>
 </body>

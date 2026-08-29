@@ -1,0 +1,14 @@
+{
+  "id": "brawler_girl",
+  "name": "Nữ Võ Sĩ Đường Phố",
+  "category": "characters",
+  "role": "Hero",
+  "clips": [
+    "idle",
+    "run",
+    "attack",
+    "hurt",
+    "death"
+  ],
+  "description": "Bộ animation hoàn chỉnh 5 clips cho Nữ Võ Sĩ Đường Phố."
+}

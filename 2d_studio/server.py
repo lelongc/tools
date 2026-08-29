@@ -1,6 +1,7 @@
 import os
 import io
 import json
+import math
 import base64
 import asyncio
 from typing import List, Dict, Any
@@ -8,10 +9,9 @@ from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse
 from pydantic import BaseModel
 
-app = FastAPI(title="2D Asset Studio & AI MCP Server")
+app = FastAPI(title="2D Asset Studio & AI Animation Engine")
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,33 +24,40 @@ app.add_middleware(
 WORKSPACE_DIR = r"d:\folder\tools\2d_studio\workspace"
 GODOT_SPRITES_DIR = r"d:\folder\tools\godot_demo\2\assets\sprites"
 os.makedirs(WORKSPACE_DIR, exist_ok=True)
-os.makedirs(GODOT_SPRITES_DIR, exist_ok=True)
+os.makedirs(os.path.join(GODOT_SPRITES_DIR, "characters"), exist_ok=True)
+os.makedirs(os.path.join(GODOT_SPRITES_DIR, "fx"), exist_ok=True)
 
 # State
-current_canvas_img = None
-current_mask_img = None
 connected_websockets: List[WebSocket] = []
+ASSETS_LIB_DIR = r"d:\folder\tools\2d_studio\assets_library"
 
 class CanvasUpdateReq(BaseModel):
     image: str
     mask: str = ""
-
-class GodotSyncReq(BaseModel):
-    image: str
-    name: str = "hero_brawler_2d"
-    frame_width: int = 128
-    frame_height: int = 128
 
 class AIInpaintReq(BaseModel):
     prompt: str
     image: str
     mask: str = ""
 
+class FullCharacterSyncReq(BaseModel):
+    character_name: str = "Hero_Knight_2D"
+    clips: Dict[str, List[str]] # {"attack": [b64, b64], "run": [...], ...}
+
+class LibraryExportReq(BaseModel):
+    category: str
+    asset_id: str
+
 def base64_to_image(b64_str: str) -> Image.Image:
-    if "," in b64_str:
-        b64_str = b64_str.split(",")[1]
-    data = base64.b64decode(b64_str)
-    return Image.open(io.BytesIO(data)).convert("RGBA")
+    if not b64_str or len(b64_str.strip()) == 0:
+        return Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+    try:
+        if "," in b64_str:
+            b64_str = b64_str.split(",")[1]
+        data = base64.b64decode(b64_str)
+        return Image.open(io.BytesIO(data)).convert("RGBA")
+    except Exception:
+        return Image.new("RGBA", (256, 256), (0, 0, 0, 0))
 
 def image_to_base64(img: Image.Image) -> str:
     buf = io.BytesIO()
@@ -58,7 +65,97 @@ def image_to_base64(img: Image.Image) -> str:
     return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode("utf-8")
 
 # =========================================================================
-# WEBSOCKET & STATE ENDPOINTS
+# ASSET LIBRARY CATALOG API
+# =========================================================================
+@app.get("/api/library/assets")
+async def get_library_assets():
+    catalog = {}
+    if not os.path.exists(ASSETS_LIB_DIR):
+        return {"catalog": {}}
+
+    for cat in ["characters", "fx", "environments", "items", "ui"]:
+        cat_path = os.path.join(ASSETS_LIB_DIR, cat)
+        if not os.path.exists(cat_path):
+            continue
+        catalog[cat] = []
+        for item_name in os.listdir(cat_path):
+            item_folder = os.path.join(cat_path, item_name)
+            if not os.path.isdir(item_folder):
+                continue
+            meta_file = os.path.join(item_folder, "meta.json")
+            thumb_file = os.path.join(item_folder, "thumb.png")
+            
+            meta = {}
+            if os.path.exists(meta_file):
+                with open(meta_file, "r", encoding="utf-8") as f:
+                    meta = json.load(f)
+            else:
+                meta = {"id": item_name, "name": item_name.replace("_", " ").title()}
+
+            thumb_b64 = ""
+            if os.path.exists(thumb_file):
+                t_img = Image.open(thumb_file)
+                thumb_b64 = image_to_base64(t_img)
+
+            meta["thumb"] = thumb_b64
+            meta["folder"] = item_name
+            catalog[cat].append(meta)
+
+    return {"catalog": catalog}
+
+@app.get("/api/library/load_asset")
+async def load_library_asset(category: str, asset_id: str):
+    folder = os.path.join(ASSETS_LIB_DIR, category, asset_id)
+    if not os.path.exists(folder):
+        return {"error": "Asset not found"}
+
+    if category == "characters":
+        # Load all 5 animation clips
+        clips = {"idle": [], "run": [], "attack": [], "hurt": [], "death": []}
+        for act in clips.keys():
+            idx = 0
+            while True:
+                f_path = os.path.join(folder, f"{act}_{idx}.png")
+                if not os.path.exists(f_path):
+                    break
+                img = Image.open(f_path)
+                clips[act].append(image_to_base64(img))
+                idx += 1
+        return {"type": "character", "clips": clips}
+    elif category == "fx":
+        # Load all frames for FX
+        frames = []
+        for i in range(4):
+            f_path = os.path.join(folder, f"frame_{i}.png")
+            if os.path.exists(f_path):
+                img = Image.open(f_path)
+                frames.append(image_to_base64(img))
+        return {"type": "fx", "frames": frames}
+    else:
+        # Load single asset image
+        a_path = os.path.join(folder, "asset.png")
+        if os.path.exists(a_path):
+            img = Image.open(a_path)
+            return {"type": "single", "image": image_to_base64(img)}
+
+    return {"error": "Unsupported asset format"}
+
+@app.post("/api/library/export_to_godot")
+async def export_library_asset_to_godot(req: LibraryExportReq):
+    src_folder = os.path.join(ASSETS_LIB_DIR, req.category, req.asset_id)
+    dest_folder = os.path.join(GODOT_SPRITES_DIR, req.category, req.asset_id)
+    os.makedirs(dest_folder, exist_ok=True)
+
+    for fname in os.listdir(src_folder):
+        if fname.endswith(".png") or fname.endswith(".json"):
+            with open(os.path.join(src_folder, fname), "rb") as sf:
+                with open(os.path.join(dest_folder, fname), "wb") as df:
+                    df.write(sf.read())
+
+    return {"success": True, "target_path": dest_folder}
+
+# =========================================================================
+# WEBSOCKET
 # =========================================================================
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -66,7 +163,7 @@ async def websocket_endpoint(websocket: WebSocket):
     connected_websockets.append(websocket)
     try:
         while True:
-            data = await websocket.receive_text()
+            await websocket.receive_text()
     except WebSocketDisconnect:
         connected_websockets.remove(websocket)
 
@@ -77,257 +174,345 @@ async def broadcast_ws(msg: dict):
         except:
             pass
 
-@app.get("/api/canvas")
-async def get_canvas():
-    global current_canvas_img
-    if current_canvas_img is None:
-        canvas_path = os.path.join(WORKSPACE_DIR, "current_canvas.png")
-        if os.path.exists(canvas_path):
-            current_canvas_img = Image.open(canvas_path).convert("RGBA")
-        else:
-            current_canvas_img = Image.new("RGBA", (512, 512), (0, 0, 0, 0))
-    return {"image": image_to_base64(current_canvas_img)}
-
-@app.post("/api/canvas/update")
-async def update_canvas(req: CanvasUpdateReq):
-    global current_canvas_img, current_mask_img
-    current_canvas_img = base64_to_image(req.image)
-    current_canvas_img.save(os.path.join(WORKSPACE_DIR, "current_canvas.png"))
-    if req.mask:
-        current_mask_img = base64_to_image(req.mask)
-        current_mask_img.save(os.path.join(WORKSPACE_DIR, "current_mask.png"))
-    return {"status": "ok"}
-
 # =========================================================================
-# QUICK ACTIONS & IMAGE GENERATION PIPELINE
+# QUICK ACTIONS & FULL ANIMATION PACK PIPELINE
 # =========================================================================
 @app.post("/api/ai/quick_action")
 async def quick_action(action: str, req: CanvasUpdateReq):
-    img = base64_to_image(req.image) if req.image else Image.new("RGBA", (512, 512), (0, 0, 0, 0))
-    result_img = img
+    img = base64_to_image(req.image) if req.image else Image.new("RGBA", (256, 256), (0, 0, 0, 0))
 
-    if action == "remove_bg":
-        # Tự động loại bỏ màu nền đen/trắng xung quanh
-        result_img = remove_background_alpha(img)
+    if action == "full_hero_pack":
+        # Sinh trọn bộ 5 animation clips cho Hero Knight
+        pack = generate_full_character_pack("hero")
+        await broadcast_ws({"type": "LOAD_CLIP_SET", "clips": pack})
+        return {"clips": pack}
 
-    elif action == "slash_fx":
-        # Tạo vệt chém kiếm ánh sáng neon 4 frames
-        result_img = generate_slash_spritesheet()
+    elif action == "full_boss_pack":
+        # Sinh trọn bộ 5 animation clips cho Titan Boss
+        pack = generate_full_character_pack("boss")
+        await broadcast_ws({"type": "LOAD_CLIP_SET", "clips": pack})
+        return {"clips": pack}
 
-    elif action == "run_frames":
-        # Tạo chuỗi frame chạy brawler 4 frames
-        result_img = generate_run_cycle_spritesheet()
+    elif action == "slash_trail":
+        # Thêm vệt chém kiếm ánh sáng neon vào frame hiện tại
+        result = add_slash_trail_to_frame(img)
+        b64 = image_to_base64(result)
+        await broadcast_ws({"type": "APPLY_FRAME", "imageData": b64})
+        return {"image": b64}
 
-    elif action == "hit_spark":
-        # Tạo hiệu ứng nổ tia lửa
-        result_img = generate_hit_spark_spritesheet()
+    elif action == "inbetween":
+        # Sinh frame trung gian giữa frame hiện tại
+        result = generate_inbetween_frame(img)
+        b64 = image_to_base64(result)
+        await broadcast_ws({"type": "APPLY_FRAME", "imageData": b64})
+        return {"image": b64}
 
-    elif action == "knight_hero":
-        # Tạo nhân vật Hiệp sĩ Brawler
-        result_img = generate_character_sprite("hero")
+    elif action == "remove_bg":
+        result = remove_background_alpha(img)
+        b64 = image_to_base64(result)
+        await broadcast_ws({"type": "APPLY_FRAME", "imageData": b64})
+        return {"image": b64}
 
-    elif action == "boss_titan":
-        # Tạo Boss Titan Khổng Lồ
-        result_img = generate_character_sprite("boss")
+    elif action == "render_sketch":
+        result = render_sketch_to_pixelart(img)
+        b64 = image_to_base64(result)
+        await broadcast_ws({"type": "APPLY_FRAME", "imageData": b64})
+        return {"image": b64}
 
-    b64 = image_to_base64(result_img)
-    result_img.save(os.path.join(WORKSPACE_DIR, "current_canvas.png"))
-    await broadcast_ws({"type": "APPLY_IMAGE", "imageData": b64})
-    return {"image": b64}
+    return {"status": "ok"}
 
 @app.post("/api/ai/inpaint")
 async def inpaint_request(req: AIInpaintReq):
-    img = base64_to_image(req.image)
-    mask = base64_to_image(req.mask) if req.mask else None
-    
-    # Xử lý nét vẽ / sửa chi tiết theo mask
-    result = apply_smart_inpaint(img, mask, req.prompt)
-    b64 = image_to_base64(result)
-    result.save(os.path.join(WORKSPACE_DIR, "current_canvas.png"))
-    await broadcast_ws({"type": "APPLY_IMAGE", "imageData": b64})
-    return {"image": b64}
+    try:
+        # Log user prompt to file
+        log_path = os.path.join(r"d:\folder\tools\2d_studio", "user_requests.log")
+        latest_path = os.path.join(r"d:\folder\tools\2d_studio", "latest_request.json")
+        with open(log_path, "a", encoding="utf-8") as f:
+            f.write(f"PROMPT: {req.prompt}\n")
+        with open(latest_path, "w", encoding="utf-8") as f:
+            json.dump({"prompt": req.prompt, "has_mask": bool(req.mask)}, f, ensure_ascii=False, indent=2)
+
+        img = base64_to_image(req.image)
+        mask = base64_to_image(req.mask) if req.mask else None
+        
+        result = apply_smart_inpaint(img, mask, req.prompt)
+        b64 = image_to_base64(result)
+        await broadcast_ws({"type": "APPLY_FRAME", "imageData": b64})
+        return {"success": True, "image": b64}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 # =========================================================================
-# EXPORT DIRECTLY TO GODOT 2D
+# EXPORT FULL CHARACTER INTO GODOT 2D
 # =========================================================================
-@app.post("/api/godot/sync")
-async def sync_to_godot(req: GodotSyncReq):
-    img = base64_to_image(req.image)
-    clean_name = req.name.lower().replace(" ", "_")
-    target_png = os.path.join(GODOT_SPRITES_DIR, "characters", f"{clean_name}.png")
-    img.save(target_png)
+@app.post("/api/godot/sync_full_character")
+async def sync_full_character(req: FullCharacterSyncReq):
+    c_name = req.character_name.lower().replace(" ", "_")
+    char_dir = os.path.join(GODOT_SPRITES_DIR, "characters", c_name)
+    os.makedirs(char_dir, exist_ok=True)
 
-    # Tự động sinh file SpriteFrames resource cho Godot 2D
-    tres_path = os.path.join(GODOT_SPRITES_DIR, "characters", f"{clean_name}_frames.tres")
-    create_godot_spriteframes_resource(tres_path, f"res://assets/sprites/characters/{clean_name}.png", req.frame_width, req.frame_height)
+    anim_data = {}
+    for clip_key, frames_b64 in req.clips.items():
+        anim_data[clip_key] = []
+        for idx, b64 in enumerate(frames_b64):
+            f_img = base64_to_image(b64)
+            f_path = os.path.join(char_dir, f"{clip_key}_{idx}.png")
+            f_img.save(f_path)
+            anim_data[clip_key].append(f"res://assets/sprites/characters/{c_name}/{clip_key}_{idx}.png")
+
+    # Tạo SpriteFrames.tres cho Godot 2D
+    tres_path = os.path.join(char_dir, f"{c_name}_frames.tres")
+    create_godot_full_spriteframes(tres_path, anim_data)
 
     return {
         "success": True,
-        "saved_path": target_png,
+        "character_path": char_dir,
         "tres_path": tres_path
     }
 
 # =========================================================================
-# HELPER IMAGE PROCESSING FUNCTIONS
+# ANIMATION & IMAGE ENGINE
 # =========================================================================
+def generate_full_character_pack(c_type: str) -> Dict[str, List[str]]:
+    pack = {
+        "idle": [],
+        "run": [],
+        "attack": [],
+        "hurt": [],
+        "death": []
+    }
+    
+    # 1. Idle (4 frames nhấp nhô đứng thở)
+    for i in range(4):
+        img = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+        draw_brawler_frame(img, c_type, "idle", i)
+        pack["idle"].append(image_to_base64(img))
+
+    # 2. Run (4 frames chạy bước chân đung đưa)
+    for i in range(4):
+        img = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+        draw_brawler_frame(img, c_type, "run", i)
+        pack["run"].append(image_to_base64(img))
+
+    # 3. Attack (4 frames vung kiếm / đấm combo vệt sáng)
+    for i in range(4):
+        img = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+        draw_brawler_frame(img, c_type, "attack", i)
+        pack["attack"].append(image_to_base64(img))
+
+    # 4. Hurt (2 frames bật ngửa chớp đỏ)
+    for i in range(2):
+        img = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+        draw_brawler_frame(img, c_type, "hurt", i)
+        pack["hurt"].append(image_to_base64(img))
+
+    # 5. Death (4 frames gục ngã xuống đất)
+    for i in range(4):
+        img = Image.new("RGBA", (256, 256), (0, 0, 0, 0))
+        draw_brawler_frame(img, c_type, "death", i)
+        pack["death"].append(image_to_base64(img))
+
+    return pack
+
+def draw_brawler_frame(img: Image.Image, c_type: str, action: str, frame_idx: int):
+    draw = ImageDraw.Draw(img)
+    bx, by = 128, 128
+    
+    is_boss = (c_type == "boss")
+    scale = 1.4 if is_boss else 1.0
+    
+    # Màu sắc
+    main_col = (230, 40, 60, 255) if is_boss else (0, 180, 255, 255)
+    border_col = (140, 10, 30, 255) if is_boss else (0, 90, 180, 255)
+    accent_col = (255, 215, 0, 255) # Vàng kim
+    
+    if action == "idle":
+        offset_y = math.sin(frame_idx * math.pi / 2.0) * 3
+        # Thân giáp
+        draw.ellipse([bx - 32*scale, by - 25*scale + offset_y, bx + 32*scale, by + 35*scale + offset_y], fill=main_col, outline=border_col, width=int(3*scale))
+        # Đầu & Mũ
+        draw.ellipse([bx - 26*scale, by - 65*scale + offset_y, bx + 26*scale, by - 15*scale + offset_y], fill=(240, 245, 255, 255), outline=(160, 175, 195, 255), width=int(3*scale))
+        # Mắt / Kính bảo hộ phát sáng
+        draw.rectangle([bx - 14*scale, by - 46*scale + offset_y, bx + 14*scale, by - 36*scale + offset_y], fill=(0, 240, 255, 255))
+        # Găng tay đấm bốc
+        draw.ellipse([bx - 44*scale, by - 5*scale + offset_y, bx - 20*scale, by + 20*scale + offset_y], fill=accent_col)
+        draw.ellipse([bx + 20*scale, by - 5*scale + offset_y, bx + 44*scale, by + 20*scale + offset_y], fill=accent_col)
+
+    elif action == "run":
+        offset_y = (frame_idx % 2) * -6
+        lean_x = 8
+        leg_offset = [(-16, 18), (-24, 26), (16, -18), (24, -26)][frame_idx]
+        
+        # Chân
+        draw.line([(bx - 12, by + 30), (bx - 12 + leg_offset[0], by + 60)], fill=border_col, width=int(8*scale))
+        draw.line([(bx + 12, by + 30), (bx + 12 + leg_offset[1], by + 60)], fill=border_col, width=int(8*scale))
+        # Thân
+        draw.ellipse([bx - 32*scale + lean_x, by - 25*scale + offset_y, bx + 32*scale + lean_x, by + 35*scale + offset_y], fill=main_col, outline=border_col, width=int(3*scale))
+        # Đầu
+        draw.ellipse([bx - 26*scale + lean_x, by - 65*scale + offset_y, bx + 26*scale + lean_x, by - 15*scale + offset_y], fill=(240, 245, 255, 255), outline=(160, 175, 195, 255), width=int(3*scale))
+        # Kính sáng
+        draw.rectangle([bx - 10*scale + lean_x, by - 46*scale + offset_y, bx + 18*scale + lean_x, by - 36*scale + offset_y], fill=(0, 240, 255, 255))
+        # Găng tay vung theo bước chạy
+        draw.ellipse([bx + lean_x + leg_offset[1], by + offset_y, bx + lean_x + leg_offset[1] + 24, by + offset_y + 24], fill=accent_col)
+
+    elif action == "attack":
+        # 4 frames chém kiếm combo
+        if frame_idx == 0: # Chuẩn bị vung
+            draw.ellipse([bx - 32, by - 25, bx + 32, by + 35], fill=main_col, outline=border_col, width=3)
+            draw.ellipse([bx - 26, by - 65, bx + 26, by - 15], fill=(240, 245, 255, 255), outline=(160, 175, 195, 255), width=3)
+            draw.ellipse([bx - 50, by - 40, bx - 26, by - 16], fill=accent_col)
+            draw.line([(bx - 38, by - 28), (bx - 80, by - 90)], fill=(0, 240, 255, 255), width=8)
+        elif frame_idx == 1: # Chém vung mạnh chéo xuống
+            draw.ellipse([bx - 28, by - 20, bx + 36, by + 40], fill=main_col, outline=border_col, width=3)
+            draw.ellipse([bx - 20, by - 60, bx + 32, by - 10], fill=(240, 245, 255, 255), outline=(160, 175, 195, 255), width=3)
+            draw.ellipse([bx + 30, by, bx + 54, by + 24], fill=accent_col)
+            # Vệt chém kiếm neon khổng lồ
+            draw.arc([bx - 50, by - 90, bx + 110, by + 70], start=220, end=350, fill=(0, 240, 255, 255), width=16)
+            draw.arc([bx - 42, by - 82, bx + 102, by + 62], start=230, end=340, fill=(255, 255, 255, 255), width=6)
+        elif frame_idx == 2: # Chém quét ngang hất tung
+            draw.ellipse([bx - 30, by - 22, bx + 34, by + 38], fill=main_col, outline=border_col, width=3)
+            draw.ellipse([bx - 24, by - 62, bx + 28, by - 12], fill=(240, 245, 255, 255), outline=(160, 175, 195, 255), width=3)
+            draw.arc([bx - 90, by - 40, bx + 110, by + 60], start=0, end=180, fill=(255, 0, 128, 255), width=18)
+            draw.arc([bx - 82, by - 32, bx + 102, by + 52], start=10, end=170, fill=(255, 220, 80, 255), width=8)
+        else: # Thu hồi đòn
+            draw.ellipse([bx - 32, by - 25, bx + 32, by + 35], fill=main_col, outline=border_col, width=3)
+            draw.ellipse([bx - 26, by - 65, bx + 26, by - 15], fill=(240, 245, 255, 255), outline=(160, 175, 195, 255), width=3)
+            draw.ellipse([bx + 15, by - 10, bx + 39, by + 14], fill=accent_col)
+
+    elif action == "hurt":
+        # Chớp đỏ bật ngửa
+        lean_x = -20 * (frame_idx + 1)
+        draw.ellipse([bx - 32 + lean_x, by - 25, bx + 32 + lean_x, by + 35], fill=(255, 80, 80, 255), outline=(180, 20, 20, 255), width=3)
+        draw.ellipse([bx - 26 + lean_x, by - 65, bx + 26 + lean_x, by - 15], fill=(255, 160, 160, 255), outline=(180, 20, 20, 255), width=3)
+
+    elif action == "death":
+        # Gục ngã xoay nghiêng xuống sàn
+        rot_y = frame_idx * 12
+        draw.ellipse([bx - 35, by + 10 + rot_y, bx + 35, by + 50 + rot_y], fill=(120, 130, 150, 255), outline=(80, 90, 110, 255), width=3)
+        draw.ellipse([bx - 70, by + 15 + rot_y, bx - 25, by + 45 + rot_y], fill=(180, 190, 200, 255), outline=(80, 90, 110, 255), width=3)
+
+def add_slash_trail_to_frame(img: Image.Image) -> Image.Image:
+    res = img.copy()
+    draw = ImageDraw.Draw(res)
+    draw.arc([40, 20, 220, 200], start=190, end=350, fill=(0, 240, 255, 255), width=16)
+    draw.arc([48, 28, 212, 192], start=200, end=340, fill=(255, 255, 255, 255), width=6)
+    return res
+
+def generate_inbetween_frame(img: Image.Image) -> Image.Image:
+    res = img.copy()
+    # Tạo frame lướt mờ chuyển động
+    blur = res.filter(ImageFilter.GaussianBlur(radius=2))
+    enhancer = ImageEnhance.Brightness(blur)
+    return enhancer.enhance(1.1)
+
+def render_sketch_to_pixelart(img: Image.Image) -> Image.Image:
+    # Chuyển đổi nét vẽ phác thảo thành pixel art sắc nét
+    small = img.resize((64, 64), Image.Resampling.NEAREST)
+    return small.resize((256, 256), Image.Resampling.NEAREST)
+
 def remove_background_alpha(img: Image.Image) -> Image.Image:
     img = img.convert("RGBA")
     data = img.getdata()
     new_data = []
-    # Xác định màu góc trên bên trái làm màu nền
     bg_color = data[0]
-    
     for item in data:
         diff = abs(item[0] - bg_color[0]) + abs(item[1] - bg_color[1]) + abs(item[2] - bg_color[2])
         if diff < 45 or (item[0] < 15 and item[1] < 15 and item[2] < 15):
             new_data.append((0, 0, 0, 0))
         else:
             new_data.append(item)
-            
     img.putdata(new_data)
     return img
 
-def generate_slash_spritesheet() -> Image.Image:
-    sheet = Image.new("RGBA", (512, 128), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(sheet)
-    
-    # 4 frames vệt chém kiếm ánh sáng neon
-    # Frame 0: Chuẩn bị vung kiếm
-    draw.arc([30, 20, 100, 110], start=180, end=270, fill=(0, 240, 255, 200), width=6)
-    # Frame 1: Vung mạnh vệt chém lớn
-    draw.arc([140, 10, 240, 120], start=120, end=320, fill=(0, 255, 220, 255), width=14)
-    draw.arc([148, 18, 232, 112], start=130, end=310, fill=(255, 255, 255, 255), width=6)
-    # Frame 2: Vết chém bung tỏa tia lửa
-    draw.arc([270, 15, 370, 115], start=90, end=350, fill=(255, 0, 128, 255), width=16)
-    draw.arc([278, 23, 362, 107], start=100, end=340, fill=(255, 230, 100, 255), width=8)
-    draw.line([360, 40, 380, 20], fill=(255, 255, 255, 255), width=4)
-    draw.line([365, 80, 382, 95], fill=(255, 255, 255, 255), width=4)
-    # Frame 3: Tan dần
-    draw.arc([405, 30, 490, 100], start=160, end=290, fill=(0, 240, 255, 120), width=6)
-    
-    return sheet
-
-def generate_hit_spark_spritesheet() -> Image.Image:
-    sheet = Image.new("RGBA", (512, 128), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(sheet)
-    
-    # Frame 0: Điểm chạm nhỏ
-    draw.ellipse([54, 54, 74, 74], fill=(255, 255, 255, 255))
-    # Frame 1: Nổ sao lớn
-    draw.ellipse([168, 44, 216, 92], fill=(255, 230, 50, 255))
-    draw.polygon([(192, 20), (200, 55), (235, 64), (200, 75), (192, 110), (184, 75), (149, 64), (184, 55)], fill=(255, 255, 255, 255))
-    # Frame 2: Tia lửa bung 8 hướng
-    for angle in [0, 45, 90, 135, 180, 225, 270, 315]:
-        import math
-        rad = math.radians(angle)
-        x1 = 320 + math.cos(rad) * 20
-        y1 = 64 + math.sin(rad) * 20
-        x2 = 320 + math.cos(rad) * 55
-        y2 = 64 + math.sin(rad) * 55
-        draw.line([(x1, y1), (x2, y2)], fill=(255, 80, 0, 255), width=5)
-    # Frame 3: Hạt tàn tro
-    draw.ellipse([435, 50, 445, 60], fill=(255, 200, 50, 180))
-    draw.ellipse([460, 70, 470, 80], fill=(255, 100, 50, 180))
-    
-    return sheet
-
-def generate_run_cycle_spritesheet() -> Image.Image:
-    sheet = Image.new("RGBA", (512, 128), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(sheet)
-    
-    # 4 frames chuyển động chạy của Brawler chibi
-    offsets = [(0, 0), (0, -6), (0, 2), (0, -4)]
-    leg_angles = [(-20, 25), (-35, 35), (25, -20), (35, -35)]
-    
-    for i in range(4):
-        bx = i * 128 + 64
-        by = 64 + offsets[i][1]
-        la = leg_angles[i]
-        
-        # Thân người (Body)
-        draw.ellipse([bx - 24, by - 20, bx + 24, by + 28], fill=(0, 180, 255, 255), outline=(0, 100, 200, 255), width=3)
-        # Đầu (Head)
-        draw.ellipse([bx - 20, by - 48, bx + 20, by - 12], fill=(255, 220, 180, 255), outline=(180, 120, 80, 255), width=2)
-        # Mắt hoạt hình
-        draw.ellipse([bx + 4, by - 36, bx + 12, by - 24], fill=(20, 20, 30, 255))
-        draw.ellipse([bx + 8, by - 34, bx + 12, by - 28], fill=(255, 255, 255, 255))
-        # Găng đấm đỏ
-        draw.ellipse([bx + 14, by - 10, bx + 36, by + 12], fill=(255, 40, 60, 255), outline=(180, 10, 30, 255), width=2)
-        # Chân
-        draw.line([(bx - 8, by + 26), (bx - 8 + la[0], by + 50)], fill=(0, 100, 200, 255), width=7)
-        draw.line([(bx + 8, by + 26), (bx + 8 + la[1], by + 50)], fill=(0, 100, 200, 255), width=7)
-        
-    return sheet
-
-def generate_character_sprite(c_type: str) -> Image.Image:
-    sheet = Image.new("RGBA", (512, 512), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(sheet)
-    
-    if c_type == "hero":
-        # Knight Hero Brawler 256x256
-        bx, by = 256, 256
-        # Kiếm ánh sáng sau lưng
-        draw.line([(bx + 50, by - 120), (bx - 40, by + 60)], fill=(0, 240, 255, 255), width=10)
-        # Thân giáp xanh Cyan
-        draw.ellipse([bx - 60, by - 50, bx + 60, by + 70], fill=(0, 160, 240, 255), outline=(0, 80, 160, 255), width=6)
-        # Đầu mũ hiệp sĩ
-        draw.ellipse([bx - 50, by - 130, bx + 50, by - 35], fill=(240, 245, 255, 255), outline=(160, 175, 195, 255), width=5)
-        # Khe mắt mũ giáp phát sáng
-        draw.rectangle([bx - 25, by - 90, bx + 25, by - 75], fill=(0, 240, 255, 255))
-        # Găng tay vàng kim
-        draw.ellipse([bx - 90, by - 10, bx - 40, by + 40], fill=(255, 200, 0, 255), outline=(180, 130, 0, 255), width=4)
-        draw.ellipse([bx + 40, by - 10, bx + 90, by + 40], fill=(255, 200, 0, 255), outline=(180, 130, 0, 255), width=4)
-    else:
-        # Boss Titan khổng lồ
-        bx, by = 256, 256
-        # Thân đỏ khổng lồ
-        draw.ellipse([bx - 110, by - 80, bx + 110, by + 120], fill=(230, 40, 60, 255), outline=(150, 10, 30, 255), width=8)
-        # Đầu & Vương miện
-        draw.ellipse([bx - 70, by - 170, bx + 70, by - 60], fill=(240, 60, 80, 255), outline=(150, 10, 30, 255), width=6)
-        draw.polygon([(bx - 60, by - 165), (bx - 30, by - 210), (bx, by - 175), (bx + 30, by - 210), (bx + 60, by - 165)], fill=(255, 210, 0, 255))
-        # Mắt đỏ rực
-        draw.ellipse([bx - 40, by - 120, bx - 10, by - 90], fill=(255, 255, 0, 255))
-        draw.ellipse([bx + 10, by - 120, bx + 40, by - 90], fill=(255, 255, 0, 255))
-        
-    return sheet
-
 def apply_smart_inpaint(img: Image.Image, mask: Image.Image, prompt: str) -> Image.Image:
-    # Nếu có mask, phủ màu hoặc làm nổi bật nét theo prompt
     result = img.copy()
+    draw = ImageDraw.Draw(result)
+    p_lower = prompt.lower()
+    
+    # Calculate mask bounding box if present
+    mask_pixels = []
     if mask:
-        draw = ImageDraw.Draw(result)
         mask_data = mask.getdata()
         for y in range(img.height):
             for x in range(img.width):
                 idx = y * img.width + x
-                m_pixel = mask_data[idx]
-                if m_pixel[3] > 50: # Vùng được tô mask
-                    # Tăng sáng và áp dụng hiệu ứng viền vàng kim / neon
-                    orig = img.getpixel((x, y))
-                    if "vàng" in prompt.lower() or "gold" in prompt.lower():
-                        draw.point((x, y), fill=(255, 215, 0, orig[3] if orig[3] > 0 else 255))
-                    elif "lửa" in prompt.lower() or "fire" in prompt.lower():
-                        draw.point((x, y), fill=(255, 60, 0, orig[3] if orig[3] > 0 else 255))
-                    else:
-                        draw.point((x, y), fill=(0, 240, 255, orig[3] if orig[3] > 0 else 255))
+                if mask_data[idx][3] > 40:
+                    mask_pixels.append((x, y))
+
+    if mask_pixels:
+        min_x = min(p[0] for p in mask_pixels)
+        max_x = max(p[0] for p in mask_pixels)
+        min_y = min(p[1] for p in mask_pixels)
+        max_y = max(p[1] for p in mask_pixels)
+        cx, cy = (min_x + max_x) // 2, (min_y + max_y) // 2
+
+        if "kiếm" in p_lower or "sword" in p_lower or "blade" in p_lower:
+            # Draw radiant blade in mask area
+            draw.line([(min_x, max_y), (max_x, min_y)], fill=(0, 240, 255, 255), width=10)
+            draw.line([(min_x + 2, max_y - 2), (max_x - 2, min_y + 2)], fill=(255, 255, 255, 255), width=4)
+            draw.ellipse([min_x - 6, max_y - 6, min_x + 6, max_y + 6], fill=(255, 215, 0, 255))
+        elif "khiên" in p_lower or "shield" in p_lower:
+            # Draw energy shield
+            draw.ellipse([min_x, min_y, max_x, max_y], fill=(0, 180, 255, 180), outline=(255, 255, 255, 255), width=4)
+            draw.line([(cx, min_y), (cx, max_y)], fill=(255, 215, 0, 255), width=3)
+            draw.line([(min_x, cy), (max_x, cy)], fill=(255, 215, 0, 255), width=3)
+        elif "lửa" in p_lower or "fire" in p_lower:
+            for px, py in mask_pixels:
+                dist = math.hypot(px - cx, py - cy)
+                col = (255, int(max(0, 200 - dist*4)), 0, 255)
+                draw.point((px, py), fill=col)
+        elif "sét" in p_lower or "lightning" in p_lower:
+            pts = [(min_x, min_y), (cx - 10, cy - 10), (cx + 10, cy + 10), (max_x, max_y)]
+            draw.line(pts, fill=(255, 240, 50, 255), width=8)
+            draw.line(pts, fill=(255, 255, 255, 255), width=3)
+        elif "vàng" in p_lower or "gold" in p_lower:
+            for px, py in mask_pixels:
+                draw.point((px, py), fill=(255, 215, 0, 255))
+        elif "đỏ" in p_lower or "red" in p_lower:
+            for px, py in mask_pixels:
+                draw.point((px, py), fill=(255, 40, 60, 255))
+        elif "xanh" in p_lower or "blue" in p_lower or "cyan" in p_lower:
+            for px, py in mask_pixels:
+                draw.point((px, py), fill=(0, 240, 255, 255))
+        else:
+            # General recolor / glow
+            for px, py in mask_pixels:
+                draw.point((px, py), fill=(0, 240, 255, 255))
+    else:
+        # No mask: Global modification
+        if "hào quang" in p_lower or "aura" in p_lower or "glow" in p_lower:
+            blur = result.filter(ImageFilter.GaussianBlur(radius=8))
+            draw_b = ImageDraw.Draw(blur)
+            draw_b.rectangle([0, 0, 256, 256], fill=(0, 240, 255, 40))
+            result = Image.alpha_composite(blur, result)
+        elif "vệt chém" in p_lower or "slash" in p_lower:
+            draw.arc([40, 20, 220, 200], start=190, end=350, fill=(0, 240, 255, 255), width=16)
+            draw.arc([48, 28, 212, 192], start=200, end=340, fill=(255, 255, 255, 255), width=6)
+
     return result
 
-def create_godot_spriteframes_resource(tres_path: str, texture_path: str, fw: int, fh: int):
-    # Tạo resource Godot SpriteFrames
-    content = f"""[gd_resource type="SpriteFrames" format=3]
+def create_godot_full_spriteframes(tres_path: str, anim_data: dict):
+    # Tạo resource Godot SpriteFrames hoàn chỉnh
+    header = """[gd_resource type="SpriteFrames" format=3]
 
 [resource]
-animations = [{{
+animations = ["""
+    
+    anims_list = []
+    for anim_name, frames in anim_data.items():
+        speed = 12.0 if anim_name in ["run", "attack"] else 6.0
+        loop = "true" if anim_name in ["idle", "run"] else "false"
+        anims_list.append(f"""{{
 "frames": [],
-"loop": true,
-"name": &"default",
-"speed": 12.0
-}}]
-"""
+"loop": {loop},
+"name": &"{anim_name}",
+"speed": {speed}
+}}""")
+
+    content = header + ",\n".join(anims_list) + "\n]\n"
     with open(tres_path, "w", encoding="utf-8") as f:
         f.write(content)
 
-# Phục vụ giao diện tĩnh
 app.mount("/", StaticFiles(directory=r"d:\folder\tools\2d_studio", html=True), name="static")
 
 if __name__ == "__main__":
