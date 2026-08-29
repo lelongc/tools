@@ -217,6 +217,15 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="TapToStartBtn" type="Button" parent="HUD/StartPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+flat = true
+
 [node name="TitleBox" type="PanelContainer" parent="HUD/StartPanel"]
 layout_mode = 1
 anchors_preset = 5
@@ -257,9 +266,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -200.0
-offset_top = -60.0
+offset_top = -80.0
 offset_right = 200.0
-offset_bottom = -10.0
+offset_bottom = -30.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
@@ -275,14 +284,32 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -200.0
-offset_top = -10.0
+offset_top = -30.0
 offset_right = 200.0
-offset_bottom = 40.0
+offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
 theme_override_font_sizes/font_size = 26
 text = "💰 VÀNG: 0"
+horizontal_alignment = 1
+
+[node name="TapHintLabel" type="Label" parent="HUD/StartPanel"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -240.0
+offset_top = 25.0
+offset_right = 240.0
+offset_bottom = 75.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.3, 1)
+theme_override_font_sizes/font_size = 24
+text = "👆 CHẠM BẤT KỲ ĐÂU ĐỂ CHẠY 👆"
 horizontal_alignment = 1
 
 [node name="StartButton" type="Button" parent="HUD/StartPanel"]
@@ -586,6 +613,27 @@ theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_green_btn")
 text = "CHƠI TIẾP (MÀN TIẾP) ➔"
 
+[node name="WinActions" type="HBoxContainer" parent="HUD/WinPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="WinShopBtn" type="Button" parent="HUD/WinPanel/VBox/WinActions"]
+custom_minimum_size = Vector2(130, 50)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_purple_btn")
+text = "🛍️ SHOP"
+
+[node name="WinHomeBtn" type="Button" parent="HUD/WinPanel/VBox/WinActions"]
+custom_minimum_size = Vector2(130, 50)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_blue_btn")
+text = "🏠 TRANG CHỦ"
+
 [node name="FailPanel" type="PanelContainer" parent="HUD"]
 visible = false
 layout_mode = 1
@@ -595,16 +643,16 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -260.0
-offset_top = -240.0
+offset_top = -250.0
 offset_right = 260.0
-offset_bottom = 240.0
+offset_bottom = 250.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_fail_card")
 
 [node name="VBox" type="VBoxContainer" parent="HUD/FailPanel"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 alignment = 1
 
 [node name="FailTitle" type="Label" parent="HUD/FailPanel/VBox"]
@@ -632,13 +680,22 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_yellow_btn")
 text = "📺 HỒI SINH (XEM ADS)"
 
 [node name="RetryButton" type="Button" parent="HUD/FailPanel/VBox"]
-custom_minimum_size = Vector2(240, 55)
+custom_minimum_size = Vector2(240, 52)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBoxFlat_blue_btn")
 text = "🔄 CHƠI LẠI TỪ ĐẦU"
+
+[node name="FailHomeBtn" type="Button" parent="HUD/FailPanel/VBox"]
+custom_minimum_size = Vector2(240, 50)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_purple_btn")
+text = "🏠 VỀ TRANG CHỦ"
 
 [node name="ShopPanel" type="PanelContainer" parent="HUD"]
 visible = false
@@ -649,23 +706,30 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -280.0
-offset_top = -300.0
+offset_top = -310.0
 offset_right = 280.0
-offset_bottom = 300.0
+offset_bottom = 310.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_shop_card")
 
 [node name="VBox" type="VBoxContainer" parent="HUD/ShopPanel"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 alignment = 1
 
 [node name="ShopTitle" type="Label" parent="HUD/ShopPanel/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.1, 1)
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 30
 text = "🛍️ CỬA HÀNG TRANG PHỤC HƯƠU 🦒"
+horizontal_alignment = 1
+
+[node name="ShopBalanceLabel" type="Label" parent="HUD/ShopPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "💰 VÀNG CỦA BẠN: 0"
 horizontal_alignment = 1
 
 [node name="Scroll" type="ScrollContainer" parent="HUD/ShopPanel/VBox"]

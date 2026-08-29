@@ -52,6 +52,8 @@ func _input(event: InputEvent) -> void:
 			is_dragging = event.pressed
 			if event.pressed:
 				SoundManager.play_stretch(1.1)
+			else:
+				SoundManager.play_duck()
 			
 	elif event is InputEventMouseMotion and is_dragging:
 		var viewport_width = get_viewport().get_visible_rect().size.x
@@ -64,6 +66,8 @@ func _input(event: InputEvent) -> void:
 		is_dragging = event.pressed
 		if event.pressed:
 			SoundManager.play_stretch(1.1)
+		else:
+			SoundManager.play_duck()
 		
 	elif event is InputEventScreenDrag and is_dragging:
 		var viewport_width = get_viewport().get_visible_rect().size.x
@@ -126,6 +130,13 @@ func update_neck_visuals() -> void:
 	if neck_mesh:
 		neck_mesh.position.y = current_neck_height / 2.0
 		neck_mesh.scale.y = max(0.1, current_neck_height)
+		
+		# Khử hoàn toàn hiện tượng kéo dãn hoa văn khi cổ dài ra:
+		# Tự động điều chỉnh UV Tiling theo tỷ lệ 1:1 trong không gian 3D (World-Space Density)
+		if neck_mesh.material_override and neck_mesh.material_override is StandardMaterial3D:
+			var n_mat = neck_mesh.material_override as StandardMaterial3D
+			n_mat.uv1_scale = Vector3(2.0, max(0.1, current_neck_height) * 2.0, 2.0)
+			
 	if height_label:
 		height_label.text = "%.1fm" % current_neck_height
 		

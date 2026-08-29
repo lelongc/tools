@@ -9,6 +9,8 @@ var is_game_running: bool = false
 
 # UI Elements - Start Lobby
 @onready var start_panel: Control = get_tree().root.find_child("StartPanel", true, false)
+@onready var tap_to_start_btn: Button = get_tree().root.find_child("TapToStartBtn", true, false)
+@onready var tap_hint_label: Label = get_tree().root.find_child("TapHintLabel", true, false)
 @onready var game_title_label: Label = get_tree().root.find_child("GameTitle", true, false)
 @onready var game_sub_label: Label = get_tree().root.find_child("GameSubTitle", true, false)
 @onready var start_button: Button = get_tree().root.find_child("StartButton", true, false)
@@ -42,15 +44,20 @@ var is_game_running: bool = false
 @onready var win_title: Label = get_tree().root.find_child("WinTitle", true, false)
 @onready var win_score_text: Label = get_tree().root.find_child("WinSub", true, false)
 @onready var next_button: Button = get_tree().root.find_child("NextButton", true, false)
+@onready var win_shop_btn: Button = get_tree().root.find_child("WinShopBtn", true, false)
+@onready var win_home_btn: Button = get_tree().root.find_child("WinHomeBtn", true, false)
+
 @onready var fail_panel: Control = get_tree().root.find_child("FailPanel", true, false)
 @onready var fail_title: Label = get_tree().root.find_child("FailTitle", true, false)
 @onready var fail_reason_label: Label = get_tree().root.find_child("FailRageText", true, false)
 @onready var retry_button: Button = get_tree().root.find_child("RetryButton", true, false)
 @onready var revive_button: Button = get_tree().root.find_child("ReviveButton", true, false)
+@onready var fail_home_btn: Button = get_tree().root.find_child("FailHomeBtn", true, false)
 
 # UI Elements - Shop Panel
 @onready var shop_panel: Control = get_tree().root.find_child("ShopPanel", true, false)
 @onready var shop_title_label: Label = get_tree().root.find_child("ShopTitle", true, false)
+@onready var shop_balance_label: Label = get_tree().root.find_child("ShopBalanceLabel", true, false)
 @onready var shop_close_btn: Button = get_tree().root.find_child("ShopCloseBtn", true, false)
 
 func _ready() -> void:
@@ -76,6 +83,8 @@ func setup_ui_state() -> void:
 		player.is_active = false
 
 func connect_signals() -> void:
+	if tap_to_start_btn:
+		tap_to_start_btn.pressed.connect(start_gameplay)
 	if start_button:
 		start_button.pressed.connect(start_gameplay)
 	if shop_button:
@@ -88,10 +97,23 @@ func connect_signals() -> void:
 		lang_button.pressed.connect(_on_lang_toggle)
 	if next_button:
 		next_button.pressed.connect(next_level)
+	if win_shop_btn:
+		win_shop_btn.pressed.connect(func():
+			if win_panel: win_panel.visible = false
+			open_shop()
+		)
+	if win_home_btn:
+		win_home_btn.pressed.connect(func():
+			get_tree().reload_current_scene()
+		)
 	if retry_button:
 		retry_button.pressed.connect(restart_game)
 	if revive_button:
 		revive_button.pressed.connect(revive_player)
+	if fail_home_btn:
+		fail_home_btn.pressed.connect(func():
+			get_tree().reload_current_scene()
+		)
 		
 	# Nút Tạm Dừng & Menu Pause
 	if btn_pause:
@@ -147,10 +169,16 @@ func _process(_delta: float) -> void:
 		var z_dist = abs(player.global_position.z)
 		var prog = clamp((z_dist / 240.0) * 100.0, 0.0, 100.0)
 		progress_bar.value = prog
+		
+	if start_panel and start_panel.visible and tap_hint_label:
+		var pulse = 1.0 + sin(Time.get_ticks_msec() * 0.006) * 0.06
+		tap_hint_label.scale = Vector2(pulse, pulse)
+		tap_hint_label.pivot_offset = tap_hint_label.size / 2.0
 
 func update_all_localized_text() -> void:
 	if game_title_label: game_title_label.text = tr("GAME_TITLE")
 	if game_sub_label: game_sub_label.text = tr("GAME_SUBTITLE")
+	if tap_hint_label: tap_hint_label.text = tr("TAP_TO_START")
 	if start_button: start_button.text = tr("PLAY_BTN")
 	if shop_button: shop_button.text = tr("SHOP_BTN")
 	if high_score_label: high_score_label.text = tr("HIGH_SCORE") % SaveSystem.high_score
@@ -165,18 +193,26 @@ func update_all_localized_text() -> void:
 		score_label.text = tr("SCORE_LABEL") % score
 	if shop_title_label:
 		shop_title_label.text = tr("SHOP_TITLE")
+	if shop_balance_label:
+		shop_balance_label.text = tr("SHOP_BALANCE") % SaveSystem.total_coins
 	if shop_close_btn:
 		shop_close_btn.text = tr("SHOP_CLOSE")
 	if win_title:
 		win_title.text = tr("WIN_TITLE")
 	if next_button:
 		next_button.text = tr("NEXT_BTN")
+	if win_shop_btn:
+		win_shop_btn.text = tr("WIN_SHOP_BTN")
+	if win_home_btn:
+		win_home_btn.text = tr("HOME_BTN")
 	if fail_title:
 		fail_title.text = tr("FAIL_TITLE")
 	if retry_button:
 		retry_button.text = tr("RETRY_BTN")
 	if revive_button:
 		revive_button.text = tr("REVIVE_BTN")
+	if fail_home_btn:
+		fail_home_btn.text = tr("HOME_BTN")
 	if pause_title:
 		pause_title.text = tr("PAUSE_TITLE")
 	if resume_button:
@@ -245,6 +281,9 @@ func close_shop() -> void:
 		SkinManager.apply_skin_to_node(player, SaveSystem.equipped_skin_id)
 
 func update_shop_items() -> void:
+	if shop_balance_label:
+		shop_balance_label.text = tr("SHOP_BALANCE") % SaveSystem.total_coins
+		
 	var container = shop_panel.find_child("SkinGrid", true, false)
 	if not container: return
 	
@@ -254,13 +293,13 @@ func update_shop_items() -> void:
 	for skin_id in SkinManager.skins_catalog:
 		var s = SkinManager.skins_catalog[skin_id]
 		var card = Button.new()
-		card.custom_minimum_size = Vector2(200, 115)
+		card.custom_minimum_size = Vector2(215, 125)
 		
 		var is_unlocked = SaveSystem.unlocked_skins.has(skin_id)
 		var is_equipped = (SaveSystem.equipped_skin_id == skin_id)
 		
 		var s_name = tr(s["name_key"])
-		var btn_txt = s_name + "\n"
+		var btn_txt = s_name + "\n\n"
 		if is_equipped:
 			btn_txt += tr("SKIN_EQUIPPED")
 		elif is_unlocked:
@@ -269,6 +308,30 @@ func update_shop_items() -> void:
 			btn_txt += tr("SKIN_BUY") % s["price"]
 			
 		card.text = btn_txt
+		
+		# Style thẻ skin
+		var sb = StyleBoxFlat.new()
+		sb.set_corner_radius_all(16)
+		sb.border_width_left = 3
+		sb.border_width_top = 3
+		sb.border_width_right = 3
+		sb.border_width_bottom = 3
+		
+		if is_equipped:
+			sb.bg_color = Color(0.1, 0.35, 0.15, 0.95)
+			sb.border_color = Color(0.3, 1.0, 0.4, 1.0)
+		elif is_unlocked:
+			sb.bg_color = Color(0.1, 0.2, 0.4, 0.9)
+			sb.border_color = Color(0.4, 0.7, 1.0, 0.9)
+		else:
+			sb.bg_color = Color(0.2, 0.15, 0.1, 0.9)
+			sb.border_color = Color(1.0, 0.75, 0.2, 0.8)
+			
+		card.add_theme_stylebox_override("normal", sb)
+		card.add_theme_stylebox_override("hover", sb)
+		card.add_theme_stylebox_override("pressed", sb)
+		card.add_theme_font_size_override("font_size", 16)
+		
 		card.pressed.connect(func():
 			if is_unlocked:
 				SaveSystem.equip_skin(skin_id)
