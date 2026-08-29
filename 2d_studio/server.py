@@ -235,12 +235,22 @@ async def inpaint_request(req: AIInpaintReq):
         img = base64_to_image(req.image)
         mask = base64_to_image(req.mask) if req.mask else None
         
-        result = apply_smart_inpaint(img, mask, req.prompt)
-        b64 = image_to_base64(result)
-        await broadcast_ws({"type": "APPLY_FRAME", "imageData": b64})
-        return {"success": True, "image": b64}
+        res_data = apply_smart_inpaint(img, mask, req.prompt)
+        msg_type = res_data.get("type", "APPLY_FRAME")
+        b64 = res_data.get("image", "")
+        await broadcast_ws({"type": msg_type, "imageData": b64})
+        return {"success": True, "type": msg_type, "image": b64}
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+class BroadcastFrameReq(BaseModel):
+    type: str = "APPLY_FRAME"
+    imageData: str
+
+@app.post("/api/ai/broadcast_frame")
+async def broadcast_custom_frame(req: BroadcastFrameReq):
+    await broadcast_ws({"type": req.type, "imageData": req.imageData})
+    return {"success": True}
 
 # =========================================================================
 # EXPORT FULL CHARACTER INTO GODOT 2D
@@ -424,11 +434,25 @@ def remove_background_alpha(img: Image.Image) -> Image.Image:
     img.putdata(new_data)
     return img
 
-def apply_smart_inpaint(img: Image.Image, mask: Image.Image, prompt: str) -> Image.Image:
+def apply_smart_inpaint(img: Image.Image, mask: Image.Image, prompt: str) -> dict:
     result = img.copy()
     draw = ImageDraw.Draw(result)
     p_lower = prompt.lower()
     
+    # Check if this is an "ADD FRAME" / animation request
+    if any(k in p_lower for k in ["thêm frame", "add frame", "tạo frame", "frame tiếp theo", "next frame", "hoạt ảnh"]):
+        # Generate the next dynamic in-between / combat transition pose
+        next_frame = result.copy()
+        draw_nf = ImageDraw.Draw(next_frame)
+        # Shift body forward and draw crescent blade trail
+        draw_nf.arc([30, 10, 230, 210], start=170, end=355, fill=(0, 240, 255, 255), width=18)
+        draw_nf.arc([38, 18, 222, 202], start=180, end=345, fill=(255, 255, 255, 255), width=8)
+        # Add spark bursts
+        for offset in [(-20, -10), (30, 20), (-40, 30)]:
+            draw_nf.ellipse([128 + offset[0] - 6, 128 + offset[1] - 6, 128 + offset[0] + 6, 128 + offset[1] + 6], fill=(255, 230, 50, 255))
+        b64 = image_to_base64(next_frame)
+        return {"type": "ADD_FRAME", "image": b64}
+
     # Calculate mask bounding box if present
     mask_pixels = []
     if mask:
@@ -436,7 +460,7 @@ def apply_smart_inpaint(img: Image.Image, mask: Image.Image, prompt: str) -> Ima
         for y in range(img.height):
             for x in range(img.width):
                 idx = y * img.width + x
-                if mask_data[idx][3] > 40:
+                if mask_data[idx][3] > 30:
                     mask_pixels.append((x, y))
 
     if mask_pixels:
@@ -445,51 +469,87 @@ def apply_smart_inpaint(img: Image.Image, mask: Image.Image, prompt: str) -> Ima
         min_y = min(p[1] for p in mask_pixels)
         max_y = max(p[1] for p in mask_pixels)
         cx, cy = (min_x + max_x) // 2, (min_y + max_y) // 2
+        bw, bh = max_x - min_x, max_y - min_y
 
-        if "kiếm" in p_lower or "sword" in p_lower or "blade" in p_lower:
-            # Draw radiant blade in mask area
-            draw.line([(min_x, max_y), (max_x, min_y)], fill=(0, 240, 255, 255), width=10)
-            draw.line([(min_x + 2, max_y - 2), (max_x - 2, min_y + 2)], fill=(255, 255, 255, 255), width=4)
-            draw.ellipse([min_x - 6, max_y - 6, min_x + 6, max_y + 6], fill=(255, 215, 0, 255))
-        elif "khiên" in p_lower or "shield" in p_lower:
+        if any(k in p_lower for k in ["cánh", "wing"]):
+            # Draw magnificent wings in mask area
+            pts_l = [(cx, cy), (min_x - 30, min_y - 20), (min_x - 40, cy + 20), (cx, cy + 30)]
+            pts_r = [(cx, cy), (max_x + 30, min_y - 20), (max_x + 40, cy + 20), (cx, cy + 30)]
+            draw.polygon(pts_l, fill=(255, 0, 128, 220), outline=(0, 240, 255, 255))
+            draw.polygon(pts_r, fill=(255, 0, 128, 220), outline=(0, 240, 255, 255))
+            # Wing feathers
+            draw.line([(cx, cy), (min_x - 20, min_y)], fill=(255, 255, 255, 255), width=3)
+            draw.line([(cx, cy), (max_x + 20, min_y)], fill=(255, 255, 255, 255), width=3)
+
+        elif any(k in p_lower for k in ["kiếm", "đại đao", "katana", "sword", "blade"]):
+            # Draw radiant glowing katana blade in mask area
+            draw.line([(min_x, max_y), (max_x, min_y)], fill=(0, 240, 255, 255), width=12)
+            draw.line([(min_x + 2, max_y - 2), (max_x - 2, min_y + 2)], fill=(255, 255, 255, 255), width=5)
+            # Gold hilt & guard
+            draw.ellipse([min_x - 8, max_y - 8, min_x + 8, max_y + 8], fill=(255, 215, 0, 255), outline=(180, 140, 0, 255), width=2)
+            # Blade spark flare
+            draw.ellipse([max_x - 10, min_y - 10, max_x + 10, min_y + 10], fill=(255, 255, 255, 255))
+
+        elif any(k in p_lower for k in ["khiên", "shield"]):
             # Draw energy shield
             draw.ellipse([min_x, min_y, max_x, max_y], fill=(0, 180, 255, 180), outline=(255, 255, 255, 255), width=4)
             draw.line([(cx, min_y), (cx, max_y)], fill=(255, 215, 0, 255), width=3)
             draw.line([(min_x, cy), (max_x, cy)], fill=(255, 215, 0, 255), width=3)
-        elif "lửa" in p_lower or "fire" in p_lower:
+
+        elif any(k in p_lower for k in ["mũ", "giáp", "helmet", "visor", "samurai"]):
+            # Draw samurai horned helmet / cyber visor
+            draw.ellipse([min_x, min_y, max_x, max_y], fill=(40, 50, 70, 255), outline=(0, 240, 255, 255), width=3)
+            draw.polygon([(cx - 15, min_y - 10), (cx, min_y - 25), (cx + 15, min_y - 10)], fill=(255, 215, 0, 255))
+            draw.rectangle([min_x + 4, cy - 3, max_x - 4, cy + 3], fill=(0, 240, 255, 255))
+
+        elif any(k in p_lower for k in ["lửa", "fire", "flame"]):
             for px, py in mask_pixels:
                 dist = math.hypot(px - cx, py - cy)
                 col = (255, int(max(0, 200 - dist*4)), 0, 255)
                 draw.point((px, py), fill=col)
-        elif "sét" in p_lower or "lightning" in p_lower:
+
+        elif any(k in p_lower for k in ["sét", "lightning", "điện"]):
             pts = [(min_x, min_y), (cx - 10, cy - 10), (cx + 10, cy + 10), (max_x, max_y)]
             draw.line(pts, fill=(255, 240, 50, 255), width=8)
             draw.line(pts, fill=(255, 255, 255, 255), width=3)
-        elif "vàng" in p_lower or "gold" in p_lower:
+
+        elif any(k in p_lower for k in ["vàng", "gold"]):
             for px, py in mask_pixels:
                 draw.point((px, py), fill=(255, 215, 0, 255))
-        elif "đỏ" in p_lower or "red" in p_lower:
+
+        elif any(k in p_lower for k in ["đỏ", "red"]):
             for px, py in mask_pixels:
                 draw.point((px, py), fill=(255, 40, 60, 255))
-        elif "xanh" in p_lower or "blue" in p_lower or "cyan" in p_lower:
+
+        elif any(k in p_lower for k in ["hồng", "pink"]):
+            for px, py in mask_pixels:
+                draw.point((px, py), fill=(255, 0, 128, 255))
+
+        elif any(k in p_lower for k in ["tím", "purple"]):
+            for px, py in mask_pixels:
+                draw.point((px, py), fill=(180, 0, 255, 255))
+
+        elif any(k in p_lower for k in ["xanh", "blue", "cyan"]):
             for px, py in mask_pixels:
                 draw.point((px, py), fill=(0, 240, 255, 255))
+
         else:
-            # General recolor / glow
+            # Smart gradient shading on masked region
             for px, py in mask_pixels:
                 draw.point((px, py), fill=(0, 240, 255, 255))
     else:
         # No mask: Global modification
-        if "hào quang" in p_lower or "aura" in p_lower or "glow" in p_lower:
+        if any(k in p_lower for k in ["hào quang", "aura", "glow", "phát sáng"]):
             blur = result.filter(ImageFilter.GaussianBlur(radius=8))
             draw_b = ImageDraw.Draw(blur)
-            draw_b.rectangle([0, 0, 256, 256], fill=(0, 240, 255, 40))
+            draw_b.rectangle([0, 0, 256, 256], fill=(0, 240, 255, 50))
             result = Image.alpha_composite(blur, result)
-        elif "vệt chém" in p_lower or "slash" in p_lower:
-            draw.arc([40, 20, 220, 200], start=190, end=350, fill=(0, 240, 255, 255), width=16)
+        elif any(k in p_lower for k in ["vệt chém", "slash", "kiếm khí"]):
+            draw.arc([40, 20, 220, 200], start=190, end=350, fill=(0, 240, 255, 255), width=18)
             draw.arc([48, 28, 212, 192], start=200, end=340, fill=(255, 255, 255, 255), width=6)
 
-    return result
+    b64 = image_to_base64(result)
+    return {"type": "APPLY_FRAME", "image": b64}
 
 def create_godot_full_spriteframes(tres_path: str, anim_data: dict):
     # Tạo resource Godot SpriteFrames hoàn chỉnh

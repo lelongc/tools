@@ -40,7 +40,21 @@ def sync_full_character_to_godot(character_name: str, clips: dict):
         "clips": clips
     })
 
+def get_latest_request():
+    try:
+        with open(r"d:\folder\tools\2d_studio\latest_request.json", "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        return {"error": str(e)}
+
+def push_custom_frame(image_b64: str, is_new_frame: bool = False):
+    msg_type = "ADD_FRAME" if is_new_frame else "APPLY_FRAME"
+    return send_request("/api/ai/broadcast_frame", method="POST", data={
+        "type": msg_type,
+        "imageData": image_b64
+    })
+
 if __name__ == "__main__":
     print("Testing 2D Studio Bridge...")
-    res = generate_hero_pack()
-    print("Hero Pack status:", "OK" if "clips" in res else res)
+    req = get_latest_request()
+    print("Latest User Request on Tool:", req)

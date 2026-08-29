@@ -1,0 +1,15 @@
+{
+  "id": "cyber_valkyrie_8f",
+  "name": "Nữ Kiếm Sĩ Cyber 8 Frames Siêu Mượt (AI Generated)",
+  "category": "characters",
+  "role": "Hero",
+  "clips": [
+    "attack",
+    "idle",
+    "run",
+    "hurt",
+    "death"
+  ],
+  "frames_count": 8,
+  "description": "Chuỗi hoạt ảnh 8 khung hình siêu mượt (Combo 8 bước: Đâm, Chém vòng cung, Xoay 360, Bổ đất bão kích, Tra kiếm)."
+}

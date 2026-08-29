@@ -1,0 +1,14 @@
+{
+  "id": "cyber_valkyrie",
+  "name": "Nữ Kiếm Sĩ Cyber Valkyrie (AI Generated)",
+  "category": "characters",
+  "role": "Hero",
+  "clips": [
+    "attack",
+    "idle",
+    "run",
+    "hurt",
+    "death"
+  ],
+  "description": "Nữ kiếm sĩ Cyber Valkyrie được AI tạo ảnh và tự động chuyển đổi thành Pixel Art 4-frame combat slash."
+}

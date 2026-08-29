@@ -225,6 +225,8 @@ class StudioApp {
 
         // AI Buttons
         document.getElementById('btnSendAICommand').addEventListener('click', () => this.sendAICommand());
+        const chipV8 = document.getElementById('chipValkyrie8F');
+        if (chipV8) chipV8.addEventListener('click', () => this.loadAssetFromLibrary('characters', 'cyber_valkyrie_8f'));
         const chipSM = document.getElementById('chipSwordmaster');
         if (chipSM) chipSM.addEventListener('click', () => this.loadAssetFromLibrary('characters', 'female_swordmaster'));
         document.getElementById('chipFullHero').addEventListener('click', () => this.executeQuickAction('full_hero_pack'));
@@ -763,6 +765,8 @@ class StudioApp {
                 const msg = JSON.parse(event.data);
                 if (msg.type === 'APPLY_FRAME') {
                     this.applyRemoteFrame(msg.imageData);
+                } else if (msg.type === 'ADD_FRAME') {
+                    this.addRemoteFrame(msg.imageData);
                 } else if (msg.type === 'LOAD_CLIP_SET') {
                     this.loadFullClipSet(msg.clips);
                 }
@@ -782,6 +786,24 @@ class StudioApp {
             this.saveCurrentFrameCanvas();
             this.maskCtx.clearRect(0, 0, this.canvasSize, this.canvasSize);
             this.renderTimeline();
+        };
+        img.src = base64Data;
+    }
+
+    addRemoteFrame(base64Data) {
+        this.saveCurrentFrameCanvas();
+        const clip = this.clips[this.currentClipName];
+        const c = document.createElement('canvas');
+        c.width = this.canvasSize;
+        c.height = this.canvasSize;
+        const ctx = c.getContext('2d');
+        const img = new Image();
+        img.onload = () => {
+            ctx.drawImage(img, 0, 0);
+            clip.frames.push({ canvas: c, hitbox: null, hurtbox: null });
+            this.activeFrameIndex = clip.frames.length - 1;
+            this.loadCurrentFrame();
+            this.showToast(`✨ Đã thêm Frame mới (Tổng: ${clip.frames.length} frames)!`);
         };
         img.src = base64Data;
     }
@@ -810,7 +832,9 @@ class StudioApp {
                 })
             });
             const data = await res.json();
-            if (data.image) {
+            if (data.type === 'ADD_FRAME') {
+                this.addRemoteFrame(data.image);
+            } else if (data.image) {
                 this.pushUndoState();
                 this.applyRemoteFrame(data.image);
                 this.showToast("✨ AI đã xử lý yêu cầu thành công!");
