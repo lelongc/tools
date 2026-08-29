@@ -10,15 +10,17 @@ func _ready() -> void:
 	setup_visuals()
 
 func setup_visuals() -> void:
-	var tex = load_dynamic_texture("res://textures/danger_stripes.png")
-	if tex:
-		var mat = StandardMaterial3D.new()
-		mat.albedo_texture = tex
-		mat.uv1_scale = Vector3(3.0, 1.0, 1.0)
-		mat.roughness = 0.3
-		mat.metallic = 0.6
-		var base = get_node_or_null("Base")
-		if base: base.material_override = mat
+	if ResourceLoader.exists("res://models/spike_trap.glb"):
+		var scn = load("res://models/spike_trap.glb")
+		if scn:
+			var inst = scn.instantiate()
+			inst.name = "DynamicModel"
+			add_child(inst)
+			var base = get_node_or_null("Base")
+			if base: base.visible = false
+			for ch in get_children():
+				if ch != inst and ch is MeshInstance3D:
+					ch.visible = false
 
 func load_dynamic_texture(res_path: String) -> Texture2D:
 	if ResourceLoader.exists(res_path):

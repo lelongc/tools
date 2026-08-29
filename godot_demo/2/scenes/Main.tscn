@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=24 format=3 uid="uid://c7k9x0y1m2n3"]
 
 [ext_resource type="Script" path="res://scripts/GameManager.gd" id="1_gm"]
 [ext_resource type="Script" path="res://scripts/LevelGenerator.gd" id="2_level"]
@@ -23,55 +23,82 @@ tonemap_mode = 2
 glow_enabled = true
 glow_intensity = 0.6
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_card"]
-bg_color = Color(0.1, 0.15, 0.25, 0.85)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_glass_card"]
+bg_color = Color(0.08, 0.12, 0.2, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.5, 0.8, 0.6)
 corner_radius_top_left = 20
 corner_radius_top_right = 20
 corner_radius_bottom_right = 20
 corner_radius_bottom_left = 20
-shadow_color = Color(0, 0, 0, 0.35)
-shadow_size = 8
-shadow_offset = Vector2(0, 4)
+shadow_color = Color(0, 0, 0, 0.45)
+shadow_size = 10
+shadow_offset = Vector2(0, 5)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_win_card"]
-bg_color = Color(0.08, 0.18, 0.12, 0.95)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.2, 0.9, 0.4, 1.0)
+bg_color = Color(0.06, 0.16, 0.1, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.25, 0.9, 0.45, 1.0)
 corner_radius_top_left = 24
 corner_radius_top_right = 24
 corner_radius_bottom_right = 24
 corner_radius_bottom_left = 24
-shadow_color = Color(0, 0, 0, 0.5)
-shadow_size = 14
+shadow_color = Color(0, 0, 0, 0.55)
+shadow_size = 16
 shadow_offset = Vector2(0, 8)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_green_btn"]
-bg_color = Color(0.18, 0.8, 0.35, 1.0)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
-shadow_color = Color(0.05, 0.4, 0.15, 1.0)
-shadow_size = 0
-shadow_offset = Vector2(0, 6)
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fail_card"]
-bg_color = Color(0.2, 0.08, 0.08, 0.95)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
+bg_color = Color(0.18, 0.06, 0.06, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
 border_color = Color(1.0, 0.3, 0.3, 1.0)
 corner_radius_top_left = 24
 corner_radius_top_right = 24
 corner_radius_bottom_right = 24
 corner_radius_bottom_left = 24
-shadow_color = Color(0, 0, 0, 0.5)
-shadow_size = 14
+shadow_color = Color(0, 0, 0, 0.55)
+shadow_size = 16
 shadow_offset = Vector2(0, 8)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shop_card"]
+bg_color = Color(0.07, 0.09, 0.15, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.4, 0.65, 1.0, 0.9)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 18
+shadow_offset = Vector2(0, 8)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_green_btn"]
+bg_color = Color(0.18, 0.8, 0.35, 1.0)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0.05, 0.45, 0.15, 1.0)
+shadow_size = 0
+shadow_offset = Vector2(0, 6)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_green_btn_pressed"]
+bg_color = Color(0.14, 0.65, 0.28, 1.0)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yellow_btn"]
 bg_color = Color(1.0, 0.78, 0.1, 1.0)
@@ -81,66 +108,54 @@ corner_radius_bottom_right = 18
 corner_radius_bottom_left = 18
 shadow_color = Color(0.65, 0.45, 0.05, 1.0)
 shadow_size = 0
-shadow_offset = Vector2(0, 6)
+shadow_offset = Vector2(0, 5)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_blue_btn"]
 bg_color = Color(0.15, 0.55, 0.95, 1.0)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 shadow_color = Color(0.05, 0.25, 0.5, 1.0)
 shadow_size = 0
-shadow_offset = Vector2(0, 6)
+shadow_offset = Vector2(0, 5)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_purple_btn"]
 bg_color = Color(0.6, 0.2, 0.85, 1.0)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 shadow_color = Color(0.3, 0.05, 0.45, 1.0)
 shadow_size = 0
-shadow_offset = Vector2(0, 6)
+shadow_offset = Vector2(0, 5)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_orange_btn"]
 bg_color = Color(0.95, 0.45, 0.1, 1.0)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
 shadow_color = Color(0.5, 0.2, 0.05, 1.0)
 shadow_size = 0
-shadow_offset = Vector2(0, 6)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shop_card"]
-bg_color = Color(0.08, 0.1, 0.16, 0.96)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.4, 0.7, 1.0, 1.0)
-corner_radius_top_left = 22
-corner_radius_top_right = 22
-corner_radius_bottom_right = 22
-corner_radius_bottom_left = 22
+shadow_offset = Vector2(0, 5)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_progress_bg"]
-bg_color = Color(0.1, 0.15, 0.25, 0.7)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
+bg_color = Color(0.08, 0.12, 0.2, 0.8)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_progress_fill"]
-bg_color = Color(0.2, 0.85, 0.4, 1.0)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
+bg_color = Color(0.2, 0.85, 0.45, 1.0)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_touch_steer"]
-bg_color = Color(0.12, 0.5, 0.9, 0.75)
+bg_color = Color(0.1, 0.45, 0.85, 0.8)
 border_width_left = 3
 border_width_top = 3
 border_width_right = 3
@@ -150,36 +165,24 @@ corner_radius_top_left = 45
 corner_radius_top_right = 45
 corner_radius_bottom_right = 45
 corner_radius_bottom_left = 45
-shadow_color = Color(0, 0, 0, 0.4)
+shadow_color = Color(0, 0, 0, 0.45)
 shadow_size = 6
+shadow_offset = Vector2(0, 4)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_touch_stretch"]
-bg_color = Color(1.0, 0.75, 0.1, 0.85)
+bg_color = Color(1.0, 0.75, 0.1, 0.9)
 border_width_left = 4
 border_width_top = 4
 border_width_right = 4
 border_width_bottom = 4
 border_color = Color(1.0, 0.95, 0.6, 1.0)
-corner_radius_top_left = 55
-corner_radius_top_right = 55
-corner_radius_bottom_right = 55
-corner_radius_bottom_left = 55
-shadow_color = Color(0.8, 0.5, 0.0, 0.5)
+corner_radius_top_left = 50
+corner_radius_top_right = 50
+corner_radius_bottom_right = 50
+corner_radius_bottom_left = 50
+shadow_color = Color(0.8, 0.5, 0.0, 0.55)
 shadow_size = 10
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pause_card"]
-bg_color = Color(0.1, 0.12, 0.18, 0.96)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.3, 0.6, 0.9, 1.0)
-corner_radius_top_left = 24
-corner_radius_top_right = 24
-corner_radius_bottom_right = 24
-corner_radius_bottom_left = 24
-shadow_color = Color(0, 0, 0, 0.6)
-shadow_size = 16
+shadow_offset = Vector2(0, 5)
 
 [node name="Main" type="Node3D"]
 
@@ -226,162 +229,150 @@ grow_horizontal = 2
 grow_vertical = 2
 flat = true
 
-[node name="TitleBox" type="PanelContainer" parent="HUD/StartPanel"]
+[node name="MainLayout" type="MarginContainer" parent="HUD/StartPanel"]
 layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -280.0
-offset_top = 80.0
-offset_right = 280.0
-offset_bottom = 240.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_hud_card")
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 30
 
-[node name="VBox" type="VBoxContainer" parent="HUD/StartPanel/TitleBox"]
+[node name="VBox" type="VBoxContainer" parent="HUD/StartPanel/MainLayout"]
 layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 16
 alignment = 1
 
-[node name="GameTitle" type="Label" parent="HUD/StartPanel/TitleBox/VBox"]
+[node name="TitleBox" type="PanelContainer" parent="HUD/StartPanel/MainLayout/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.1, 1)
+theme_override_styles/panel = SubResource("StyleBoxFlat_glass_card")
+
+[node name="TitleInner" type="MarginContainer" parent="HUD/StartPanel/MainLayout/VBox/TitleBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 18
+
+[node name="TitleVBox" type="VBoxContainer" parent="HUD/StartPanel/MainLayout/VBox/TitleBox/TitleInner"]
+layout_mode = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="GameTitle" type="Label" parent="HUD/StartPanel/MainLayout/VBox/TitleBox/TitleInner/TitleVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.15, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_y = 4
-theme_override_font_sizes/font_size = 44
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 40
 text = "🦒 CỔ HƯƠU CAO SU 3D"
 horizontal_alignment = 1
 
-[node name="GameSubTitle" type="Label" parent="HUD/StartPanel/TitleBox/VBox"]
+[node name="GameSubTitle" type="Label" parent="HUD/StartPanel/MainLayout/VBox/TitleBox/TitleInner/TitleVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_colors/font_color = Color(0.85, 0.92, 1, 1)
 theme_override_font_sizes/font_size = 20
-text = "Vươn Cổ Húp Táo • Sải Bước Vượt Gai"
+text = "Vươn Cổ Húp Trái Cây • Né Bẫy Chông Về Đích"
 horizontal_alignment = 1
 
-[node name="HighScoreLabel" type="Label" parent="HUD/StartPanel"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -80.0
-offset_right = 200.0
-offset_bottom = -30.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="SpacerTop" type="Control" parent="HUD/StartPanel/MainLayout/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="StatsBox" type="PanelContainer" parent="HUD/StartPanel/MainLayout/VBox"]
+custom_minimum_size = Vector2(340, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_glass_card")
+
+[node name="StatsInner" type="MarginContainer" parent="HUD/StartPanel/MainLayout/VBox/StatsBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 16
+
+[node name="StatsVBox" type="VBoxContainer" parent="HUD/StartPanel/MainLayout/VBox/StatsBox/StatsInner"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="HighScoreLabel" type="Label" parent="HUD/StartPanel/MainLayout/VBox/StatsBox/StatsInner/StatsVBox"]
+layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 26
 text = "🏆 KỶ LỤC: 0"
 horizontal_alignment = 1
 
-[node name="TotalCoinsLabel" type="Label" parent="HUD/StartPanel"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -200.0
-offset_top = -30.0
-offset_right = 200.0
-offset_bottom = 20.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 26
+[node name="TotalCoinsLabel" type="Label" parent="HUD/StartPanel/MainLayout/VBox/StatsBox/StatsInner/StatsVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 24
 text = "💰 VÀNG: 0"
 horizontal_alignment = 1
 
-[node name="TapHintLabel" type="Label" parent="HUD/StartPanel"]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -240.0
-offset_top = 25.0
-offset_right = 240.0
-offset_bottom = 75.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(1, 0.95, 0.3, 1)
-theme_override_font_sizes/font_size = 24
+[node name="TapHintLabel" type="Label" parent="HUD/StartPanel/MainLayout/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.35, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.7)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 22
 text = "👆 CHẠM BẤT KỲ ĐÂU ĐỂ CHẠY 👆"
 horizontal_alignment = 1
 
-[node name="StartButton" type="Button" parent="HUD/StartPanel"]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -180.0
-offset_top = -370.0
-offset_right = 180.0
-offset_bottom = -285.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_colors/font_color = Color(0.05, 0.2, 0.05, 1)
-theme_override_font_sizes/font_size = 32
+[node name="SpacerBottom" type="Control" parent="HUD/StartPanel/MainLayout/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="StartButton" type="Button" parent="HUD/StartPanel/MainLayout/VBox"]
+custom_minimum_size = Vector2(340, 72)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.05, 0.22, 0.05, 1)
+theme_override_colors/font_pressed_color = Color(0.02, 0.12, 0.02, 1)
+theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_green_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_green_btn")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_green_btn_pressed")
 text = "▶️ BẮT ĐẦU CHẠY"
 
-[node name="ShopButton" type="Button" parent="HUD/StartPanel"]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -160.0
-offset_top = -270.0
-offset_right = 160.0
-offset_bottom = -205.0
-grow_horizontal = 2
-grow_vertical = 0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 24
-theme_override_styles/normal = SubResource("StyleBoxFlat_purple_btn")
-text = "🛍️ CỬA HÀNG SKIN"
+[node name="ActionRow" type="HBoxContainer" parent="HUD/StartPanel/MainLayout/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
 
-[node name="SoundButton" type="Button" parent="HUD/StartPanel"]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -140.0
-offset_top = -190.0
-offset_right = 140.0
-offset_bottom = -135.0
-grow_horizontal = 2
-grow_vertical = 0
+[node name="ShopButton" type="Button" parent="HUD/StartPanel/MainLayout/VBox/ActionRow"]
+custom_minimum_size = Vector2(160, 54)
+layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_purple_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_purple_btn")
+text = "🛍️ CỬA HÀNG"
+
+[node name="SoundButton" type="Button" parent="HUD/StartPanel/MainLayout/VBox/ActionRow"]
+custom_minimum_size = Vector2(150, 54)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_blue_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_blue_btn")
 text = "🔊 ÂM THANH: BẬT"
 
-[node name="LangButton" type="Button" parent="HUD/StartPanel"]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -140.0
-offset_top = -120.0
-offset_right = 140.0
-offset_bottom = -65.0
-grow_horizontal = 2
-grow_vertical = 0
+[node name="LangButton" type="Button" parent="HUD/StartPanel/MainLayout/VBox/ActionRow"]
+custom_minimum_size = Vector2(150, 54)
+layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_orange_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_orange_btn")
 text = "🇻🇳 TIẾNG VIỆT"
 
 [node name="InGameHUD" type="Control" parent="HUD"]
@@ -394,115 +385,132 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="TopCard" type="PanelContainer" parent="HUD/InGameHUD"]
+[node name="TopMargin" type="MarginContainer" parent="HUD/InGameHUD"]
 layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -260.0
-offset_top = 35.0
-offset_right = 260.0
-offset_bottom = 125.0
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 150.0
 grow_horizontal = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_hud_card")
+mouse_filter = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
 
-[node name="HBox" type="HBoxContainer" parent="HUD/InGameHUD/TopCard"]
+[node name="TopVBox" type="VBoxContainer" parent="HUD/InGameHUD/TopMargin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="TopBar" type="HBoxContainer" parent="HUD/InGameHUD/TopMargin/TopVBox"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="TopCard" type="PanelContainer" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_glass_card")
+
+[node name="TopCardInner" type="MarginContainer" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar/TopCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 10
+
+[node name="HBox" type="HBoxContainer" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar/TopCard/TopCardInner"]
 layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="ScoreLabel" type="Label" parent="HUD/InGameHUD/TopCard/HBox"]
+[node name="ScoreLabel" type="Label" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar/TopCard/TopCardInner/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 26
+theme_override_font_sizes/font_size = 24
 text = "🍎 ĐIỂM: 0"
 
-[node name="LevelLabel" type="Label" parent="HUD/InGameHUD/TopCard/HBox"]
+[node name="LevelLabel" type="Label" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar/TopCard/TopCardInner/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 22
 text = "MÀN 1"
 
-[node name="NeckLabelHUD" type="Label" parent="HUD/InGameHUD/TopCard/HBox"]
+[node name="NeckLabelHUD" type="Label" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar/TopCard/TopCardInner/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.2, 0.95, 0.5, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 22
 text = "📏 CỔ: 1.5m / 4.5m"
 
-[node name="LevelProgressBar" type="ProgressBar" parent="HUD/InGameHUD"]
-layout_mode = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -220.0
-offset_top = 135.0
-offset_right = 220.0
-offset_bottom = 155.0
-grow_horizontal = 2
+[node name="BtnPause" type="Button" parent="HUD/InGameHUD/TopMargin/TopVBox/TopBar"]
+custom_minimum_size = Vector2(60, 60)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_blue_btn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_blue_btn")
+text = "⏸️"
+
+[node name="LevelProgressBar" type="ProgressBar" parent="HUD/InGameHUD/TopMargin/TopVBox"]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
 theme_override_styles/background = SubResource("StyleBoxFlat_progress_bg")
 theme_override_styles/fill = SubResource("StyleBoxFlat_progress_fill")
 show_percentage = false
 
-[node name="BtnPause" type="Button" parent="HUD/InGameHUD"]
+[node name="BottomMargin" type="MarginContainer" parent="HUD/InGameHUD"]
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -80.0
-offset_top = 35.0
-offset_right = -20.0
-offset_bottom = 95.0
-grow_horizontal = 0
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 26
-theme_override_styles/normal = SubResource("StyleBoxFlat_blue_btn")
-text = "⏸️"
-
-[node name="SteerBox" type="HBoxContainer" parent="HUD/InGameHUD"]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 30.0
-offset_top = -140.0
-offset_right = 240.0
-offset_bottom = -30.0
-grow_vertical = 0
-theme_override_constants/separation = 20
-
-[node name="BtnLeft" type="Button" parent="HUD/InGameHUD/SteerBox"]
-custom_minimum_size = Vector2(95, 95)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 38
-theme_override_styles/normal = SubResource("StyleBoxFlat_touch_steer")
-text = "⬅️"
-
-[node name="BtnRight" type="Button" parent="HUD/InGameHUD/SteerBox"]
-custom_minimum_size = Vector2(95, 95)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 38
-theme_override_styles/normal = SubResource("StyleBoxFlat_touch_steer")
-text = "➡️"
-
-[node name="BtnStretch" type="Button" parent="HUD/InGameHUD"]
-custom_minimum_size = Vector2(160, 110)
-layout_mode = 1
-anchors_preset = 3
-anchor_left = 1.0
+anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -190.0
-offset_top = -145.0
-offset_right = -30.0
-offset_bottom = -35.0
-grow_horizontal = 0
+offset_top = -160.0
+grow_horizontal = 2
 grow_vertical = 0
-theme_override_colors/font_color = Color(0.1, 0.05, 0, 1)
+mouse_filter = 2
+theme_override_constants/margin_left = 25
+theme_override_constants/margin_right = 25
+theme_override_constants/margin_bottom = 30
+
+[node name="BottomHBox" type="HBoxContainer" parent="HUD/InGameHUD/BottomMargin"]
+layout_mode = 2
+mouse_filter = 2
+alignment = 1
+
+[node name="SteerBox" type="HBoxContainer" parent="HUD/InGameHUD/BottomMargin/BottomHBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="BtnLeft" type="Button" parent="HUD/InGameHUD/BottomMargin/BottomHBox/SteerBox"]
+custom_minimum_size = Vector2(90, 90)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 36
+theme_override_styles/normal = SubResource("StyleBoxFlat_touch_steer")
+theme_override_styles/hover = SubResource("StyleBoxFlat_touch_steer")
+text = "◀️"
+
+[node name="BtnRight" type="Button" parent="HUD/InGameHUD/BottomMargin/BottomHBox/SteerBox"]
+custom_minimum_size = Vector2(90, 90)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 36
+theme_override_styles/normal = SubResource("StyleBoxFlat_touch_steer")
+theme_override_styles/hover = SubResource("StyleBoxFlat_touch_steer")
+text = "▶️"
+
+[node name="SpacerBottom" type="Control" parent="HUD/InGameHUD/BottomMargin/BottomHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="BtnStretch" type="Button" parent="HUD/InGameHUD/BottomMargin/BottomHBox"]
+custom_minimum_size = Vector2(170, 100)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.12, 0.06, 0, 1)
 theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_touch_stretch")
+theme_override_styles/hover = SubResource("StyleBoxFlat_touch_stretch")
 text = "🦒 VƯƠN CỔ"
 
 [node name="PausePanel" type="PanelContainer" parent="HUD"]
@@ -519,53 +527,60 @@ offset_right = 260.0
 offset_bottom = 240.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_pause_card")
+theme_override_styles/panel = SubResource("StyleBoxFlat_glass_card")
 
-[node name="VBox" type="VBoxContainer" parent="HUD/PausePanel"]
+[node name="PauseInner" type="MarginContainer" parent="HUD/PausePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="HUD/PausePanel/PauseInner"]
 layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="PauseTitle" type="Label" parent="HUD/PausePanel/VBox"]
+[node name="PauseTitle" type="Label" parent="HUD/PausePanel/PauseInner/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 34
 text = "⏸️ TẠM DỪNG GAME"
 horizontal_alignment = 1
 
-[node name="ResumeButton" type="Button" parent="HUD/PausePanel/VBox"]
-custom_minimum_size = Vector2(250, 60)
+[node name="ResumeButton" type="Button" parent="HUD/PausePanel/PauseInner/VBox"]
+custom_minimum_size = Vector2(280, 58)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.05, 0.2, 0.05, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBoxFlat_green_btn")
 text = "▶️ TIẾP TỤC CHƠI"
 
-[node name="PauseRestartBtn" type="Button" parent="HUD/PausePanel/VBox"]
-custom_minimum_size = Vector2(250, 55)
+[node name="PauseRestartBtn" type="Button" parent="HUD/PausePanel/PauseInner/VBox"]
+custom_minimum_size = Vector2(280, 54)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_blue_btn")
 text = "🔄 CHƠI LẠI TỪ ĐẦU"
 
-[node name="PauseSoundBtn" type="Button" parent="HUD/PausePanel/VBox"]
-custom_minimum_size = Vector2(250, 55)
+[node name="PauseSoundBtn" type="Button" parent="HUD/PausePanel/PauseInner/VBox"]
+custom_minimum_size = Vector2(280, 54)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_orange_btn")
 text = "🔊 ÂM THANH: BẬT"
 
-[node name="HomeButton" type="Button" parent="HUD/PausePanel/VBox"]
-custom_minimum_size = Vector2(250, 55)
+[node name="HomeButton" type="Button" parent="HUD/PausePanel/PauseInner/VBox"]
+custom_minimum_size = Vector2(280, 54)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_purple_btn")
 text = "🏠 VỀ TRANG CHỦ"
 
@@ -585,27 +600,34 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_win_card")
 
-[node name="VBox" type="VBoxContainer" parent="HUD/WinPanel"]
+[node name="WinInner" type="MarginContainer" parent="HUD/WinPanel"]
 layout_mode = 2
-theme_override_constants/separation = 20
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="VBox" type="VBoxContainer" parent="HUD/WinPanel/WinInner"]
+layout_mode = 2
+theme_override_constants/separation = 18
 alignment = 1
 
-[node name="WinTitle" type="Label" parent="HUD/WinPanel/VBox"]
+[node name="WinTitle" type="Label" parent="HUD/WinPanel/WinInner/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 1, 0.4, 1)
-theme_override_font_sizes/font_size = 40
+theme_override_font_sizes/font_size = 36
 text = "🎉 CHIẾN THẮNG XUẤT SẮC! 🎉"
 horizontal_alignment = 1
 
-[node name="WinSub" type="Label" parent="HUD/WinPanel/VBox"]
+[node name="WinSub" type="Label" parent="HUD/WinPanel/WinInner/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
 theme_override_font_sizes/font_size = 22
 text = "TỔNG ĐIỂM: 5,400\nCỔ VƯƠN CAO: 14.5m"
 horizontal_alignment = 1
 
-[node name="NextButton" type="Button" parent="HUD/WinPanel/VBox"]
-custom_minimum_size = Vector2(260, 65)
+[node name="NextButton" type="Button" parent="HUD/WinPanel/WinInner/VBox"]
+custom_minimum_size = Vector2(280, 64)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.05, 0.2, 0.05, 1)
@@ -613,12 +635,12 @@ theme_override_font_sizes/font_size = 24
 theme_override_styles/normal = SubResource("StyleBoxFlat_green_btn")
 text = "CHƠI TIẾP (MÀN TIẾP) ➔"
 
-[node name="WinActions" type="HBoxContainer" parent="HUD/WinPanel/VBox"]
+[node name="WinActions" type="HBoxContainer" parent="HUD/WinPanel/WinInner/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 14
 alignment = 1
 
-[node name="WinShopBtn" type="Button" parent="HUD/WinPanel/VBox/WinActions"]
+[node name="WinShopBtn" type="Button" parent="HUD/WinPanel/WinInner/VBox/WinActions"]
 custom_minimum_size = Vector2(130, 50)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -626,7 +648,7 @@ theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_purple_btn")
 text = "🛍️ SHOP"
 
-[node name="WinHomeBtn" type="Button" parent="HUD/WinPanel/VBox/WinActions"]
+[node name="WinHomeBtn" type="Button" parent="HUD/WinPanel/WinInner/VBox/WinActions"]
 custom_minimum_size = Vector2(130, 50)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -643,57 +665,64 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -260.0
-offset_top = -250.0
+offset_top = -240.0
 offset_right = 260.0
-offset_bottom = 250.0
+offset_bottom = 240.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_fail_card")
 
-[node name="VBox" type="VBoxContainer" parent="HUD/FailPanel"]
+[node name="FailInner" type="MarginContainer" parent="HUD/FailPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 22
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 22
+
+[node name="VBox" type="VBoxContainer" parent="HUD/FailPanel/FailInner"]
 layout_mode = 2
 theme_override_constants/separation = 14
 alignment = 1
 
-[node name="FailTitle" type="Label" parent="HUD/FailPanel/VBox"]
+[node name="FailTitle" type="Label" parent="HUD/FailPanel/FailInner/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 38
+theme_override_colors/font_color = Color(1, 0.35, 0.35, 1)
+theme_override_font_sizes/font_size = 36
 text = "😭 THẤT BẠI! 😭"
 horizontal_alignment = 1
 
-[node name="FailRageText" type="Label" parent="HUD/FailPanel/VBox"]
+[node name="FailRageText" type="Label" parent="HUD/FailPanel/FailInner/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.85, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
 text = "ĐẬP ĐẦU VÀO XÀ NGANG! HÃY THẢ TAY ĐỂ THỤT CỔ!"
 horizontal_alignment = 1
 autowrap_mode = 2
 
-[node name="ReviveButton" type="Button" parent="HUD/FailPanel/VBox"]
-custom_minimum_size = Vector2(250, 60)
+[node name="ReviveButton" type="Button" parent="HUD/FailPanel/FailInner/VBox"]
+custom_minimum_size = Vector2(260, 58)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.2, 0.1, 0, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBoxFlat_yellow_btn")
 text = "📺 HỒI SINH (XEM ADS)"
 
-[node name="RetryButton" type="Button" parent="HUD/FailPanel/VBox"]
-custom_minimum_size = Vector2(240, 52)
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
-theme_override_styles/normal = SubResource("StyleBoxFlat_blue_btn")
-text = "🔄 CHƠI LẠI TỪ ĐẦU"
-
-[node name="FailHomeBtn" type="Button" parent="HUD/FailPanel/VBox"]
-custom_minimum_size = Vector2(240, 50)
+[node name="RetryButton" type="Button" parent="HUD/FailPanel/FailInner/VBox"]
+custom_minimum_size = Vector2(260, 52)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_blue_btn")
+text = "🔄 CHƠI LẠI TỪ ĐẦU"
+
+[node name="FailHomeBtn" type="Button" parent="HUD/FailPanel/FailInner/VBox"]
+custom_minimum_size = Vector2(260, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_purple_btn")
 text = "🏠 VỀ TRANG CHỦ"
 
@@ -706,48 +735,56 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -280.0
-offset_top = -310.0
+offset_top = -320.0
 offset_right = 280.0
-offset_bottom = 310.0
+offset_bottom = 320.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_shop_card")
 
-[node name="VBox" type="VBoxContainer" parent="HUD/ShopPanel"]
+[node name="ShopInner" type="MarginContainer" parent="HUD/ShopPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="HUD/ShopPanel/ShopInner"]
 layout_mode = 2
 theme_override_constants/separation = 14
 alignment = 1
 
-[node name="ShopTitle" type="Label" parent="HUD/ShopPanel/VBox"]
+[node name="ShopTitle" type="Label" parent="HUD/ShopPanel/ShopInner/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.1, 1)
-theme_override_font_sizes/font_size = 30
+theme_override_font_sizes/font_size = 28
 text = "🛍️ CỬA HÀNG TRANG PHỤC HƯƠU 🦒"
 horizontal_alignment = 1
 
-[node name="ShopBalanceLabel" type="Label" parent="HUD/ShopPanel/VBox"]
+[node name="ShopBalanceLabel" type="Label" parent="HUD/ShopPanel/ShopInner/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.9, 1, 1)
 theme_override_font_sizes/font_size = 22
 text = "💰 VÀNG CỦA BẠN: 0"
 horizontal_alignment = 1
 
-[node name="Scroll" type="ScrollContainer" parent="HUD/ShopPanel/VBox"]
-custom_minimum_size = Vector2(500, 360)
+[node name="Scroll" type="ScrollContainer" parent="HUD/ShopPanel/ShopInner/VBox"]
+custom_minimum_size = Vector2(480, 370)
 layout_mode = 2
+size_flags_horizontal = 4
 
-[node name="SkinGrid" type="GridContainer" parent="HUD/ShopPanel/VBox/Scroll"]
+[node name="SkinGrid" type="GridContainer" parent="HUD/ShopPanel/ShopInner/VBox/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/h_separation = 14
-theme_override_constants/v_separation = 14
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 16
 columns = 2
 
-[node name="ShopCloseBtn" type="Button" parent="HUD/ShopPanel/VBox"]
-custom_minimum_size = Vector2(200, 50)
+[node name="ShopCloseBtn" type="Button" parent="HUD/ShopPanel/ShopInner/VBox"]
+custom_minimum_size = Vector2(220, 52)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_blue_btn")
 text = "✖️ ĐÓNG CỬA HÀNG"

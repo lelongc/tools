@@ -30,36 +30,48 @@ func _process(delta: float) -> void:
 		rotation.y += 3.2 * delta
 
 func setup_fruit_visuals() -> void:
+	var dyn = get_node_or_null("DynamicModel")
+	if dyn: dyn.queue_free()
+	
 	var a_node = get_node_or_null("AppleMesh")
 	var b_node = get_node_or_null("BananaMesh")
 	var m_node = get_node_or_null("MelonMesh")
 	var s_node = get_node_or_null("StarMesh")
 	
-	if a_node: a_node.visible = (fruit_type == FruitType.APPLE)
-	if b_node: b_node.visible = (fruit_type == FruitType.BANANA)
-	if m_node: m_node.visible = (fruit_type == FruitType.WATERMELON)
-	if s_node: s_node.visible = (fruit_type == FruitType.STAR or fruit_type == FruitType.MAGNET)
+	if a_node: a_node.visible = false
+	if b_node: b_node.visible = false
+	if m_node: m_node.visible = false
+	if s_node: s_node.visible = false
 	
+	var glb_path = "res://models/golden_apple.glb"
 	match fruit_type:
 		FruitType.APPLE:
 			neck_bonus = 0.8
 			score_value = 100
+			glb_path = "res://models/golden_apple.glb"
 		FruitType.BANANA:
 			neck_bonus = 1.5
 			score_value = 200
-			apply_texture(b_node, "res://textures/banana_item.png")
+			glb_path = "res://models/banana_item.glb"
 		FruitType.WATERMELON:
 			neck_bonus = 2.5
 			score_value = 350
-			apply_texture(m_node, "res://textures/watermelon_item.png")
+			glb_path = "res://models/watermelon_item.glb"
 		FruitType.STAR:
 			neck_bonus = 3.5
 			score_value = 500
-			apply_texture(s_node, "res://textures/star_item.png")
+			glb_path = "res://models/star_item.glb"
 		FruitType.MAGNET:
 			neck_bonus = 1.0
 			score_value = 250
-			apply_texture(s_node, "res://textures/star_item.png")
+			glb_path = "res://models/star_item.glb"
+			
+	if ResourceLoader.exists(glb_path):
+		var scn = load(glb_path)
+		if scn:
+			var inst = scn.instantiate()
+			inst.name = "DynamicModel"
+			add_child(inst)
 
 func apply_texture(node: MeshInstance3D, path: String) -> void:
 	if not node: return

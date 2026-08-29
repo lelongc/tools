@@ -24,7 +24,7 @@ func _ready() -> void:
 	# Tổng hợp bản nhạc nền vui nhộn dạng Looping Arcade
 	generate_arcade_bgm()
 	
-	if SaveSystem.sound_enabled:
+	if SaveSystem.sound_enabled and SaveSystem.music_enabled:
 		start_bgm()
 
 func mute_all(mute: bool) -> void:
@@ -35,7 +35,7 @@ func toggle_sound() -> bool:
 	SaveSystem.sound_enabled = not SaveSystem.sound_enabled
 	mute_all(not SaveSystem.sound_enabled)
 	SaveSystem.save_game()
-	if SaveSystem.sound_enabled:
+	if SaveSystem.sound_enabled and SaveSystem.music_enabled:
 		start_bgm()
 	else:
 		stop_bgm()

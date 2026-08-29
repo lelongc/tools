@@ -10,7 +10,7 @@ var current_level: int = 1
 var equipped_skin_id: String = "classic_giraffe"
 var unlocked_skins: Array = ["classic_giraffe"]
 var sound_enabled: bool = true
-var music_enabled: bool = true
+var music_enabled: bool = false
 var current_locale: String = "vi"
 
 func _ready() -> void:
@@ -64,7 +64,7 @@ func load_game() -> void:
 		equipped_skin_id = d.get("equipped_skin_id", "classic_giraffe")
 		unlocked_skins = d.get("unlocked_skins", ["classic_giraffe"])
 		sound_enabled = d.get("sound_enabled", true)
-		music_enabled = d.get("music_enabled", true)
+		music_enabled = d.get("music_enabled", false)
 		current_locale = d.get("current_locale", "vi")
 		TranslationServer.set_locale(current_locale)
 

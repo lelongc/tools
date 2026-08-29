@@ -10,17 +10,20 @@ func _ready() -> void:
 	setup_visuals()
 
 func setup_visuals() -> void:
-	var tex = load_dynamic_texture("res://textures/danger_stripes.png")
-	if tex:
-		var mat = StandardMaterial3D.new()
-		mat.albedo_texture = tex
-		mat.uv1_scale = Vector3(4.0, 1.0, 1.0)
-		mat.roughness = 0.3
-		mat.metallic = 0.5
-		var bar = get_node_or_null("Crossbar")
-		if bar: bar.material_override = mat
-		var sign_mesh = get_node_or_null("SignBoard")
-		if sign_mesh: sign_mesh.material_override = mat
+	if ResourceLoader.exists("res://models/overhead_gate.glb"):
+		var scn = load("res://models/overhead_gate.glb")
+		if scn:
+			var inst = scn.instantiate()
+			inst.name = "DynamicModel"
+			add_child(inst)
+			var bar = get_node_or_null("Crossbar")
+			if bar: bar.visible = false
+			var lp = get_node_or_null("LeftPillar")
+			if lp: lp.visible = false
+			var rp = get_node_or_null("RightPillar")
+			if rp: rp.visible = false
+			var sign_mesh = get_node_or_null("SignBoard")
+			if sign_mesh: sign_mesh.visible = false
 
 func load_dynamic_texture(res_path: String) -> Texture2D:
 	if ResourceLoader.exists(res_path):

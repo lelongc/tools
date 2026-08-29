@@ -145,6 +145,14 @@ func spawn_stage_elements(lvl: int) -> void:
 			{"z": -155.0, "l_type": 0, "l_val": 8.0, "r_type": 2, "r_val": -6.0, "moving": true}
 		]
 		
+	var all_obstacle_z: Array[float] = []
+	for z in high_z: all_obstacle_z.append(z)
+	for z in low_z: all_obstacle_z.append(z)
+	for z in saw_z: all_obstacle_z.append(z)
+	for rd in rock_data: all_obstacle_z.append(rd.z)
+	for z in axe_z: all_obstacle_z.append(z)
+	for gd in gate_data: all_obstacle_z.append(gd.z)
+
 	# 1. Sinh cầu vượt
 	for z in high_z:
 		var obs = high_obs_scene.instantiate()
@@ -195,8 +203,19 @@ func spawn_stage_elements(lvl: int) -> void:
 		if left_gate.has_method("update_visuals"): left_gate.update_visuals()
 		if right_gate.has_method("update_visuals"): right_gate.update_visuals()
 		
-	# 7. Sinh trái cây đa dạng (Táo, Chuối, Dưa hấu, Sao, Nam châm)
-	for z in range(12, int(track_length - 25), 4):
+	# 7. Sinh trái cây thông minh (không kẹt trong chướng ngại vật, hướng dẫn người chơi)
+	for z in range(14, int(track_length - 25), 4):
+		var target_z = -float(z)
+		
+		# Kiểm tra xem có quá sát chướng ngại vật nào không
+		var is_near_obstacle = false
+		for obs_z in all_obstacle_z:
+			if abs(target_z - obs_z) < 2.5:
+				is_near_obstacle = true
+				break
+		if is_near_obstacle:
+			continue
+			
 		var item = collectable_scene.instantiate()
 		var step_idx = int(z / 4.0)
 		var item_type_idx = step_idx % 5
@@ -205,9 +224,9 @@ func spawn_stage_elements(lvl: int) -> void:
 		item.setup_fruit_visuals()
 		
 		var is_high = (step_idx % 2 == 0)
-		var h = 3.8 if is_high else 1.1
-		var x = randf_range(-2.6, 2.6)
-		item.position = Vector3(x, h, -z)
+		var h = 3.6 if is_high else 1.1
+		var x = randf_range(-2.4, 2.4)
+		item.position = Vector3(x, h, target_z)
 
 func spawn_finish_tower() -> void:
 	var tower_z = -track_length + 15.0

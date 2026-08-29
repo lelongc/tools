@@ -17,16 +17,18 @@ func _process(delta: float) -> void:
 		saw_mesh.rotation.y += spin_speed * delta
 
 func setup_visuals() -> void:
-	var tex = load_dynamic_texture("res://textures/saw_blade.png")
-	if tex and saw_mesh:
-		var mat = StandardMaterial3D.new()
-		mat.albedo_texture = tex
-		mat.metallic = 0.95
-		mat.roughness = 0.15
-		mat.emission_enabled = true
-		mat.emission = Color(1.0, 0.2, 0.1)
-		mat.emission_energy_multiplier = 2.0
-		saw_mesh.material_override = mat
+	if ResourceLoader.exists("res://models/saw_hazard.glb"):
+		var scn = load("res://models/saw_hazard.glb")
+		if scn:
+			var inst = scn.instantiate()
+			inst.name = "DynamicModel"
+			add_child(inst)
+			var sm = inst.find_child("SawBladeMesh", true, false)
+			if sm: saw_mesh = sm
+			var old_saw = get_node_or_null("SawBladeMesh")
+			if old_saw and old_saw != saw_mesh: old_saw.visible = false
+			var shaft = get_node_or_null("Shaft")
+			if shaft: shaft.visible = false
 
 func load_dynamic_texture(res_path: String) -> Texture2D:
 	if ResourceLoader.exists(res_path):

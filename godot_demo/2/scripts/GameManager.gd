@@ -290,16 +290,24 @@ func update_shop_items() -> void:
 	for child in container.get_children():
 		child.queue_free()
 		
+	var skin_icons = {
+		"classic_giraffe": "🦒",
+		"cyber_brachio": "🤖🦕",
+		"pink_flamingo": "🦩",
+		"king_gold": "👑✨"
+	}
+		
 	for skin_id in SkinManager.skins_catalog:
 		var s = SkinManager.skins_catalog[skin_id]
 		var card = Button.new()
-		card.custom_minimum_size = Vector2(215, 125)
+		card.custom_minimum_size = Vector2(220, 135)
 		
 		var is_unlocked = SaveSystem.unlocked_skins.has(skin_id)
 		var is_equipped = (SaveSystem.equipped_skin_id == skin_id)
 		
+		var icon_str = skin_icons.get(skin_id, "🦒")
 		var s_name = tr(s["name_key"])
-		var btn_txt = s_name + "\n\n"
+		var btn_txt = icon_str + " " + s_name + "\n\n"
 		if is_equipped:
 			btn_txt += tr("SKIN_EQUIPPED")
 		elif is_unlocked:
@@ -311,21 +319,21 @@ func update_shop_items() -> void:
 		
 		# Style thẻ skin
 		var sb = StyleBoxFlat.new()
-		sb.set_corner_radius_all(16)
+		sb.set_corner_radius_all(18)
 		sb.border_width_left = 3
 		sb.border_width_top = 3
 		sb.border_width_right = 3
 		sb.border_width_bottom = 3
 		
 		if is_equipped:
-			sb.bg_color = Color(0.1, 0.35, 0.15, 0.95)
-			sb.border_color = Color(0.3, 1.0, 0.4, 1.0)
+			sb.bg_color = Color(0.08, 0.32, 0.16, 0.96)
+			sb.border_color = Color(0.3, 1.0, 0.45, 1.0)
 		elif is_unlocked:
-			sb.bg_color = Color(0.1, 0.2, 0.4, 0.9)
-			sb.border_color = Color(0.4, 0.7, 1.0, 0.9)
+			sb.bg_color = Color(0.08, 0.18, 0.36, 0.94)
+			sb.border_color = Color(0.4, 0.75, 1.0, 0.9)
 		else:
-			sb.bg_color = Color(0.2, 0.15, 0.1, 0.9)
-			sb.border_color = Color(1.0, 0.75, 0.2, 0.8)
+			sb.bg_color = Color(0.18, 0.14, 0.1, 0.92)
+			sb.border_color = Color(1.0, 0.78, 0.2, 0.85)
 			
 		card.add_theme_stylebox_override("normal", sb)
 		card.add_theme_stylebox_override("hover", sb)
