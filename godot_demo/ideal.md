@@ -10,5 +10,5 @@ do có thói quen chơi đá gà , nên ông cũng hay vô chuồng bắt gà đ
 sau đó về nhà thấy cô con gái nằm dưới trời xanh nhìn trời , chú gà đến nằm bên mà nhớ về quá khứ của mình , cô con gái nhỏ tuổi y hệt con mình lúc chết . vì muốn gọi là trả thù quá khứ mà con gà cố cách cứu đứa con gái
 sau đó chia thành các route khác nhau
 gồm 3 router chính, nhưng lại đi theo tuần tự nha , bằng cách thêm yếu tố ()return by death kiểu quay ngược thời gian hoặc giống subaru hay gì đó )
-router 1 là sau khi điên quá giết ông bố , bà mẹ đau lòng cũng qua đời ngay sau đó , cô con gái bơ vơ nhìn ba mẹ chết mà cũng tự vẫn theo , gà nhìn thấy cảnh tượng chết tùm lum giữa mẹ ôm ba , con gái treo cổ ,gà trở nên điên loạn đi giết hết đám gà khác và cuối cùng bị hội đồng mà chết mất xác , end route 1(sức mạnh trở về quá khứ này có thể nói là sức mạnh mong muốn )
-sang route 2 trở về lúc khi mà
+route 1 là sau khi nhìn bà vợ cảnh bà vợ nằm ngã giống cảnh bà vợ   điên quá giết ông bố , bà mẹ đau lòng cũng qua đời ngay sau đó , cô con gái bơ vơ nhìn ba mẹ chết mà cũng tự vẫn theo , gà nhìn thấy cảnh tượng chết tùm lum giữa mẹ ôm ba , con gái treo cổ ,gà trở nên điên loạn đi giết hết đám gà khác và cuối cùng bị hội đồng mà chết mất xác , end route 1(sức mạnh trở về quá khứ này có thể nói là sức mạnh mong muốn )
+sang route 2 trở về lúc khi mà quay về lúc trước khi có ý định giết ông chồng , con gà đến kéo chốt c
