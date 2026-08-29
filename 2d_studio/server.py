@@ -4,9 +4,9 @@ import json
 import math
 import base64
 import asyncio
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from PIL import Image, ImageDraw, ImageFilter, ImageEnhance
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -245,11 +245,17 @@ async def inpaint_request(req: AIInpaintReq):
 
 class BroadcastFrameReq(BaseModel):
     type: str = "APPLY_FRAME"
-    imageData: str
+    imageData: Optional[str] = None
+    clips: Optional[dict] = None
 
 @app.post("/api/ai/broadcast_frame")
 async def broadcast_custom_frame(req: BroadcastFrameReq):
-    await broadcast_ws({"type": req.type, "imageData": req.imageData})
+    payload = {"type": req.type}
+    if req.imageData:
+        payload["imageData"] = req.imageData
+    if req.clips:
+        payload["clips"] = req.clips
+    await broadcast_ws(payload)
     return {"success": True}
 
 # =========================================================================
