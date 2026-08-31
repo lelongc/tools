@@ -1,0 +1,14 @@
+{
+  "name": "1. Chiến Kê Tổ Lái (Main Hero Rooster)",
+  "category": "characters",
+  "clips": [
+    "hop_forward",
+    "idle",
+    "run",
+    "squashed_death",
+    "talon_kick",
+    "victory_dance",
+    "walk"
+  ],
+  "created_at": "2026-08-31 15:25:48"
+}

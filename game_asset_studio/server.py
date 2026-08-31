@@ -1,8 +1,10 @@
 import os
 import io
+import re
 import json
 import base64
 import asyncio
+import unicodedata
 import numpy as np
 from datetime import datetime
 from typing import Dict, List, Optional
@@ -911,6 +913,38 @@ async def process_video_file(
         "duration": duration if 'duration' in locals() else 0.0
     }
 
+def slugify_to_english(text: str) -> str:
+    if not text:
+        return "asset"
+    eng_match = re.search(r'\(([^)]+)\)', text)
+    if eng_match:
+        cand = eng_match.group(1).strip()
+        if all(ord(c) < 128 for c in cand):
+            text = cand
+
+    viet_map = {
+        'à':'a', 'á':'a', 'ả':'a', 'ã':'a', 'ạ':'a', 'ă':'a', 'ắ':'a', 'ằ':'a', 'ẳ':'a', 'ẵ':'a', 'ặ':'a',
+        'â':'a', 'ấ':'a', 'ầ':'a', 'ẩ':'a', 'ẫ':'a', 'ậ':'a', 'đ':'d', 'è':'e', 'é':'e', 'ẻ':'e', 'ẽ':'e',
+        'ẹ':'e', 'ê':'e', 'ế':'e', 'ề':'e', 'ể':'e', 'ễ':'e', 'ệ':'e', 'ì':'i', 'í':'i', 'ỉ':'i', 'ĩ':'i',
+        'ị':'i', 'ò':'o', 'ó':'o', 'ỏ':'o', 'õ':'o', 'ọ':'o', 'ô':'o', 'ố':'o', 'ồ':'o', 'ổ':'o', 'ỗ':'o',
+        'ộ':'o', 'ơ':'o', 'ớ':'o', 'ờ':'o', 'ở':'o', 'ỡ':'o', 'ợ':'o', 'ù':'u', 'ú':'u', 'ủ':'u', 'ũ':'u',
+        'ụ':'u', 'ư':'u', 'ứ':'u', 'ừ':'u', 'ử':'u', 'ữ':'u', 'ự':'u', 'ỳ':'y', 'ý':'y', 'ỷ':'y', 'ỹ':'y', 'ỵ':'y',
+        'À':'a', 'Á':'a', 'Ả':'a', 'Ã':'a', 'Ạ':'a', 'Ă':'a', 'Ắ':'a', 'Ằ':'a', 'Ẳ':'a', 'Ẵ':'a', 'Ặ':'a',
+        'Â':'a', 'Ấ':'a', 'Ầ':'a', 'Ẩ':'a', 'Ẫ':'a', 'Ậ':'a', 'Đ':'d', 'È':'e', 'É':'e', 'Ẻ':'e', 'Ẽ':'e',
+        'Ẹ':'e', 'Ê':'e', 'Ế':'e', 'Ề':'e', 'Ể':'e', 'Ễ':'e', 'Ệ':'e', 'Ì':'i', 'Í':'i', 'Ỉ':'i', 'Ĩ':'i',
+        'Ị':'i', 'Ò':'o', 'Ó':'o', 'Ỏ':'o', 'Õ':'o', 'Ọ':'o', 'Ô':'o', 'Ố':'o', 'Ồ':'o', 'Ổ':'o', 'Ỗ':'o',
+        'Ộ':'o', 'Ơ':'o', 'Ớ':'o', 'Ờ':'o', 'Ở':'o', 'Ỡ':'o', 'Ợ':'o', 'Ù':'u', 'Ú':'u', 'Ủ':'u', 'Ũ':'u',
+        'Ụ':'u', 'Ư':'u', 'Ứ':'u', 'Ừ':'u', 'Ử':'u', 'Ữ':'u', 'Ự':'u', 'Ỳ':'y', 'Ý':'y', 'Ỷ':'y', 'Ỹ':'y', 'Ỵ':'y'
+    }
+    for k, v in viet_map.items():
+        text = text.replace(k, v)
+        
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
+    text = text.lower()
+    text = re.sub(r'[^a-z0-9]+', '_', text).strip('_')
+    clean = re.sub(r'^\d+_', '', text)
+    return clean if clean else text
+
 # =========================================================================
 # 3. GODOT EXPORT API
 # =========================================================================
@@ -921,7 +955,7 @@ class GodotExportRequest(BaseModel):
 
 @app.post("/api/godot/export")
 async def export_to_godot(req: GodotExportRequest):
-    c_name = "".join(c if c.isalnum() or c == "_" else "_" for c in req.asset_name.lower().strip())
+    c_name = slugify_to_english(req.asset_name)
     
     godot_target_dir = os.path.join(GODOT_SPRITES_DIR, req.category, c_name)
     os.makedirs(godot_target_dir, exist_ok=True)
@@ -1118,8 +1152,8 @@ async def adjust_clip(req: ClipAdjustRequest):
     godot_target_dir = os.path.join(GODOT_SPRITES_DIR, req.category, c_name)
     
     if not os.path.exists(lib_target_dir):
-        # Try sanitized lookup
-        c_sanitized = "".join(c if c.isalnum() or c == "_" else "_" for c in req.asset_id.lower().strip())
+        # Try english slugified lookup
+        c_sanitized = slugify_to_english(req.asset_id)
         lib_target_dir = os.path.join(ASSETS_LIB_DIR, req.category, c_sanitized)
         godot_target_dir = os.path.join(GODOT_SPRITES_DIR, req.category, c_sanitized)
         if not os.path.exists(lib_target_dir):

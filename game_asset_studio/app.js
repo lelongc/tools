@@ -1420,6 +1420,13 @@ class AssetStudioApp {
                         clips: clipsToExport
                     })
                 });
+                if (!res.ok) {
+                    const errText = await res.text();
+                    let errDetail = errText;
+                    try { errDetail = JSON.parse(errText).detail || errText; } catch(e){}
+                    this.showToast("⚠️ Lỗi xuất Godot: " + errDetail);
+                    return;
+                }
                 const data = await res.json();
                 if (data.status === 'ok') {
                     this.showToast(`🚀 Đã xuất trọn bộ ${Object.keys(clipsToExport).length} animations sang Godot: res://assets/sprites/${assetObj.category}/${data.godot_dir.split('\\').pop()}/`);
