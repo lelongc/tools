@@ -1080,6 +1080,40 @@ class AssetStudioApp {
             inp.value = (parseFloat(inp.value) + 0.10).toFixed(2);
         });
 
+
+
+        // Frame Count Input & Quick Pills
+        this.videoFrameCount = 8;
+        const frameInput = document.getElementById('videoFrameCountInput');
+        const framePills = document.querySelectorAll('.frame-pill');
+
+        const setFrameCount = (cnt) => {
+            this.videoFrameCount = Math.max(2, Math.min(32, parseInt(cnt) || 8));
+            if (frameInput) frameInput.value = this.videoFrameCount;
+            framePills.forEach(p => {
+                const pCnt = parseInt(p.dataset.frames);
+                if (pCnt === this.videoFrameCount) {
+                    p.classList.add('active');
+                    p.style.fontWeight = '800';
+                    p.style.borderColor = 'var(--accent-cyan)';
+                } else {
+                    p.classList.remove('active');
+                    p.style.fontWeight = 'normal';
+                    p.style.borderColor = '';
+                }
+            });
+        };
+
+        frameInput?.addEventListener('input', (e) => {
+            setFrameCount(e.target.value);
+        });
+
+        framePills.forEach(p => {
+            p.addEventListener('click', () => {
+                setFrameCount(p.dataset.frames);
+            });
+        });
+
         // Current Timestamp Grabbers
         document.getElementById('btnSetStartFromCurrent')?.addEventListener('click', () => {
             if (!player.src) { this.showToast("⚠️ Hãy nạp video trước!"); return; }
