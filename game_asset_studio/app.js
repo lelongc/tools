@@ -294,38 +294,248 @@ class AssetStudioApp {
             const card = document.createElement('div');
             card.className = 'plan-card';
 
-            const animsHtml = (p.animations || []).map(a => `<span class="anim-tag-pill">${a}</span>`).join('');
-            const promptText = isVideo ? (p.prompt_video || p.prompt_image || '') : (p.prompt_image || p.prompt_video || '');
+            const steps = p.pipeline_steps && p.pipeline_steps.length ? p.pipeline_steps : [
+                {
+                    step_name: isVideo ? "🎬 Video AI Prompt (I2V)" : "🖼️ Spritesheet Prompt",
+                    tool_recommended: isVideo ? "Tencent HY Video 1.5 / Kling" : "ChatGPT / Midjourney",
+                    purpose: p.format_reason || "Tạo asset chuẩn cho game",
+                    prompt: isVideo ? (p.prompt_video || p.prompt_image || '') : (p.prompt_image || p.prompt_video || ''),
+                    completed: false
+                }
+            ];
+
+            const totalSteps = steps.length;
+            const doneSteps = steps.filter(s => s.completed).length;
+            const percent = totalSteps > 0 ? Math.round((doneSteps / totalSteps) * 100) : 0;
+
+            let statusBadgeHtml = `<span class="asset-status-badge status-pending">⚪ Chưa Có File (0/${totalSteps})</span>`;
+            if (p.status === 'exported') {
+                statusBadgeHtml = `<span class="asset-status-badge status-exported">🚀 Đã Xuất Godot</span>`;
+            } else if (percent === 100) {
+                statusBadgeHtml = `<span class="asset-status-badge status-ready">🟢 Sẵn Sàng (${doneSteps}/${totalSteps})</span>`;
+            } else if (doneSteps > 0) {
+                statusBadgeHtml = `<span class="asset-status-badge status-progress">🟡 Đang Làm (${doneSteps}/${totalSteps})</span>`;
+            }
+
+            let allPromptsJoined = steps.map((s, idx) => `--- ${s.step_name} ---\nTool: ${s.tool_recommended}\nPrompt: ${s.prompt}`).join('\n\n');
+
+            let stepsHtml = steps.map((step, idx) => {
+                const isStepVideo = step.step_name.includes('🎬') || step.step_name.toLowerCase().includes('video');
+                const isStepBaseImg = step.step_name.includes('📸') || step.step_name.toLowerCase().includes('ảnh gốc') || step.step_name.toLowerCase().includes('base');
+                const isPanorama = step.step_name.toLowerCase().includes('parallax') || step.step_name.toLowerCase().includes('tileset') || step.step_name.toLowerCase().includes('bối cảnh');
+                
+                let badgeClass = 'badge-sheet-step';
+                let badgeText = '🖼️ ẢNH SHEET';
+                let ratioBadge = `<span class="ratio-pill ratio-image">📐 1:1 (Vuông - 1024x1024)</span>`;
+                
+                if (isStepVideo) {
+                    badgeClass = 'badge-video-step';
+                    badgeText = '🎬 PROMPT VIDEO AI (I2V)';
+                    ratioBadge = `<span class="ratio-pill ratio-video">📐 Video 16:9 (Ngang) | ⏱️ 2-3s</span>`;
+                } else if (isStepBaseImg) {
+                    badgeClass = 'badge-image-step';
+                    badgeText = '📸 PROMPT ẢNH GỐC (T2I)';
+                    ratioBadge = `<span class="ratio-pill ratio-image">📐 Ảnh 1:1 (Vuông - 1024x1024)</span>`;
+                } else if (isPanorama) {
+                    ratioBadge = `<span class="ratio-pill ratio-panorama">📐 Ảnh 16:9 (Panorama 1920x1080)</span>`;
+                }
+
+                return `
+                <div class="pipeline-step-item ${step.completed ? 'completed' : ''}" data-step-index="${idx}">
+                    <div class="step-top-row">
+                        <label class="step-chk-label">
+                            <input type="checkbox" class="step-checkbox" ${step.completed ? 'checked' : ''} data-step-idx="${idx}">
+                            <span class="step-title-text">${step.step_name}</span>
+                        </label>
+                        <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                            <span class="step-type-badge ${badgeClass}">${badgeText}</span>
+                            ${ratioBadge}
+                            <span class="tool-tag-pill">${step.tool_recommended}</span>
+                        </div>
+                    </div>
+                    <div class="step-purpose-text">🎯 <i>${step.purpose}</i></div>
+                    ${isStepVideo ? `
+                    <div class="step-instruction-box">
+                        💡 <b>Cách Tạo Video:</b> Tải ảnh từ <i>Bước 1</i> lên công cụ <b>${step.tool_recommended}</b> ➔ Chọn tỉ lệ <b>16:9 (Ngang)</b>, thời lượng <b>2-3s</b> ➔ Dán prompt bên dưới ➔ Tải MP4 về nạp vào Tab 2!
+                    </div>` : (isStepBaseImg ? `
+                    <div class="step-instruction-box" style="border-left-color:var(--accent-cyan);background:rgba(0,240,255,0.06);color:#a5f3fc;">
+                        💡 <b>Cách Tạo Ảnh Gốc:</b> Chọn tỉ lệ <b>1:1 (Vuông - 1024x1024)</b> trên <b>${step.tool_recommended}</b> ➔ Dán prompt để nhân vật nằm giữa nền xanh lá!
+                    </div>` : '')}
+                    <div class="step-prompt-row">
+                        <div class="step-prompt-code">${step.prompt}</div>
+                        <button class="btn btn-secondary btn-xs btn-copy-step-prompt" data-prompt="${encodeURIComponent(step.prompt)}" title="Copy Prompt Bước Này">
+                            📋 Copy ${isStepVideo ? 'Video Prompt' : 'Prompt'}
+                        </button>
+                    </div>
+                    <div class="step-raw-row">
+                        <div class="raw-status-chip ${step.raw_file_name ? 'has-file' : 'no-file'}">
+                            ${step.raw_file_name ? `🟢 <b>Raw File:</b> ${step.raw_file_name}` : `⚪ <i>Chưa nạp file raw</i>`}
+                        </div>
+                        <div class="raw-action-buttons">
+                            <input type="file" class="step-file-input" data-step-idx="${idx}" data-asset-id="${p.id}" accept="${isStepVideo ? 'video/*' : 'image/*'}" style="display:none;">
+                            <button class="btn-upload-raw-step" data-step-idx="${idx}" title="Lưu file tải từ AI vào godot_demo/2/raw_assets/">
+                                📁 ${step.raw_file_name ? 'Đổi File Raw' : 'Nạp File Raw'}
+                            </button>
+                            ${step.raw_file_url ? `
+                            <button class="btn-process-raw-direct" data-url="${step.raw_file_url}" data-name="${p.name}" data-is-video="${isStepVideo}">
+                                ⚡ ${isStepVideo ? 'Nạp Tab 2 (Video)' : 'Nạp Tab 3 (Cắt Ảnh)'} ➔
+                            </button>` : ''}
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
 
             card.innerHTML = `
                 <div class="plan-card-header">
                     <div>
                         <div class="plan-card-title">${p.name}</div>
-                        <span style="font-size:10px; color:var(--text-muted); text-transform:uppercase;">${p.category}</span>
+                        <span class="plan-cat-label">${p.category}</span>
                     </div>
                     <span class="plan-format-badge ${isVideo ? 'badge-video' : 'badge-image'}">
-                        ${isVideo ? '🎬 VIDEO AI (2-3s)' : '🖼️ ẢNH SHEET'}
+                        ${isVideo ? '🎬 VIDEO AI (I2V)' : '🖼️ ẢNH SHEET'}
                     </span>
                 </div>
-                <div class="plan-reason-box">
-                    💡 <b>Lý do chọn:</b> ${p.format_reason || (isVideo ? 'Cần chuyển động liên tục mượt mà' : 'Hình ảnh tĩnh / icon rõ nét')}
+                
+                <div class="plan-status-row">
+                    ${statusBadgeHtml}
+                    <div class="asset-progress-track" title="Tiến độ: ${percent}%">
+                        <div class="asset-progress-fill" style="width: ${percent}%;"></div>
+                    </div>
+                    <span style="font-size:10px;font-weight:800;color:var(--accent-cyan);font-family:monospace;">${percent}%</span>
                 </div>
-                <div style="font-size:10px; font-weight:700; color:var(--text-muted);">CÁC ANIMATION CẦN CÓ:</div>
-                <div class="plan-anims-row">${animsHtml}</div>
-                <div style="font-size:10px; font-weight:700; color:var(--text-muted);">PROMPT AI KHUYẾN NGHỊ:</div>
-                <div class="plan-prompt-box">${promptText}</div>
+
+                <div class="plan-reason-box">
+                    💡 <b>Quy Trình:</b> ${p.format_reason || (isVideo ? 'Tạo ảnh phông xanh ➔ Tạo video I2V ➔ Bóc 8 frame' : 'Tạo ảnh lưới ➔ Cắt frame')}
+                </div>
+                <div class="pipeline-steps-container">
+                    <div class="pipeline-header-title">
+                        <span>📋 QUY TRÌNH PROMPT & RAW FILES (${totalSteps} BƯỚC):</span>
+                        <span style="font-size:9px;color:var(--text-muted);">${doneSteps}/${totalSteps} Bước Xong</span>
+                    </div>
+                    ${stepsHtml}
+                </div>
                 <div class="plan-card-footer">
-                    <button class="btn btn-secondary btn-xs btn-copy-prompt">📋 Copy Prompt</button>
-                    <button class="btn btn-primary btn-xs btn-use-plan">⚡ Dùng Trong Tool ➔</button>
+                    <button class="btn btn-secondary btn-xs btn-copy-all-prompts">📑 Copy Trọn Bộ Prompt</button>
+                    <button class="btn btn-primary btn-xs btn-use-plan">${isVideo ? '🎬 Sang Tab Video ➔' : '✂️ Sang Tab Cắt Ảnh ➔'}</button>
                     <button class="btn btn-secondary btn-xs btn-delete-asset" title="Xóa Asset">🗑️</button>
                 </div>
             `;
 
-            card.querySelector('.btn-copy-prompt').addEventListener('click', () => {
-                navigator.clipboard.writeText(promptText);
-                this.showToast(`📋 Đã copy prompt: ${p.name}!`);
+            // Copy Step Prompt Events
+            card.querySelectorAll('.btn-copy-step-prompt').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const promptText = decodeURIComponent(btn.getAttribute('data-prompt'));
+                    navigator.clipboard.writeText(promptText);
+                    this.showToast(`📋 Đã copy prompt bước này!`);
+                });
             });
 
+            // Checkbox Events
+            card.querySelectorAll('.step-checkbox').forEach(chk => {
+                chk.addEventListener('change', async (e) => {
+                    const stepIdx = parseInt(e.target.getAttribute('data-step-idx'));
+                    const stepItem = card.querySelectorAll('.pipeline-step-item')[stepIdx];
+                    if (stepItem) {
+                        stepItem.classList.toggle('completed', e.target.checked);
+                    }
+                    if (p.pipeline_steps && p.pipeline_steps[stepIdx]) {
+                        p.pipeline_steps[stepIdx].completed = e.target.checked;
+                    }
+                    const formData = new FormData();
+                    formData.append('game_id', this.activeGame.id);
+                    formData.append('asset_id', p.id);
+                    formData.append('step_index', stepIdx);
+                    formData.append('completed', e.target.checked);
+                    await fetch('/api/assets/toggle_step', { method: 'POST', body: formData });
+                });
+            });
+
+            // Raw File Upload Buttons
+            card.querySelectorAll('.btn-upload-raw-step').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const stepIdx = btn.getAttribute('data-step-idx');
+                    const fileInput = card.querySelector(`.step-file-input[data-step-idx="${stepIdx}"]`);
+                    if (fileInput) fileInput.click();
+                });
+            });
+
+            // Handle File Input Change (Upload Raw File)
+            card.querySelectorAll('.step-file-input').forEach(input => {
+                input.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const stepIdx = e.target.getAttribute('data-step-idx');
+                    
+                    const formData = new FormData();
+                    formData.append('game_id', this.activeGame.id);
+                    formData.append('asset_id', p.id);
+                    formData.append('step_index', stepIdx);
+                    formData.append('file', file);
+
+                    this.showToast(`⏳ Đang lưu file raw "${file.name}" vào godot_demo/2/raw_assets/...`);
+                    try {
+                        const res = await fetch('/api/assets/upload_raw', { method: 'POST', body: formData });
+                        const data = await res.json();
+                        if (data.status === 'ok') {
+                            this.showToast(`✅ Đã lưu file raw vào Git thư mục: raw_assets/!`);
+                            this.loadGamesFromServer();
+                        }
+                    } catch(err) {
+                        this.showToast(`⚠️ Lỗi upload raw file: ` + err.message);
+                    }
+                });
+            });
+
+            // Direct Process Button (Send to Tab 2 or Tab 3)
+            card.querySelectorAll('.btn-process-raw-direct').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const url = btn.getAttribute('data-url');
+                    const isVid = btn.getAttribute('data-is-video') === 'true';
+                    
+                    if (isVid) {
+                        this.switchTab('tab-video');
+                        this.showToast(`🎬 Đang nạp video raw vào bộ xử lý...`);
+                        try {
+                            const res = await fetch(url);
+                            const blob = await res.blob();
+                            const file = new File([blob], url.split('/').pop(), { type: blob.type || 'video/mp4' });
+                            this.selectedVideoFile = file;
+                            
+                            const player = document.getElementById('sourceVideoPlayer');
+                            if (player) {
+                                player.src = URL.createObjectURL(file);
+                                player.load();
+                            }
+                            this.showToast(`🎬 Đã nạp video vào Tab 2! Chọn số frame và bấm Bóc Tách.`);
+                        } catch(err) {
+                            this.showToast(`⚠️ Không thể nạp video: ` + err.message);
+                        }
+                    } else {
+                        this.switchTab('tab-slicer');
+                        this.showToast(`✂️ Đang nạp ảnh raw vào bộ cắt sheet...`);
+                        const img = new Image();
+                        img.crossOrigin = 'anonymous';
+                        img.onload = () => {
+                            this.slicerImg = img;
+                            this.renderSlicerCanvas();
+                            this.showToast(`✂️ Đã nạp ảnh vào Tab 3! Bấm Chia Lưới để cắt.`);
+                        };
+                        img.src = url;
+                    }
+                });
+            });
+
+            // Copy All Prompts
+            card.querySelector('.btn-copy-all-prompts').addEventListener('click', () => {
+                navigator.clipboard.writeText(allPromptsJoined);
+                this.showToast(`📑 Đã copy trọn bộ ${totalSteps} prompt của "${p.name}"!`);
+            });
+
+            // Navigate to Tab
             card.querySelector('.btn-use-plan').addEventListener('click', () => {
                 if (isVideo) {
                     this.switchTab('tab-video');
@@ -336,6 +546,7 @@ class AssetStudioApp {
                 }
             });
 
+            // Delete Asset
             card.querySelector('.btn-delete-asset').addEventListener('click', async () => {
                 if (confirm(`Xóa Asset "${p.name}" khỏi game?`)) {
                     await fetch(`/api/games/${this.activeGame.id}/asset/${p.id}`, { method: 'DELETE' });

@@ -33,9 +33,11 @@ ASSETS_LIB_DIR = os.path.join(STUDIO_DIR, "assets_library")
 WORKSPACE_DIR = os.path.join(STUDIO_DIR, "workspace")
 GAMES_DB_FILE = os.path.join(STUDIO_DIR, "game_projects.json")
 GODOT_SPRITES_DIR = r"d:\folder\tools\godot_demo\2\assets\sprites"
+RAW_ASSETS_DIR = r"d:\folder\tools\godot_demo\2\raw_assets"
 
 os.makedirs(ASSETS_LIB_DIR, exist_ok=True)
 os.makedirs(WORKSPACE_DIR, exist_ok=True)
+os.makedirs(RAW_ASSETS_DIR, exist_ok=True)
 for cat in ["characters", "monsters", "items", "environments", "vfx", "ui", "raw_videos", "raw_sheets"]:
     os.makedirs(os.path.join(ASSETS_LIB_DIR, cat), exist_ok=True)
 
@@ -261,7 +263,7 @@ async def analyze_and_create_game(req: StoryAnalysisRequest):
     # AI Heuristic Story Analysis & Structuring
     full_synopsis = f"Trong thế giới {req.genre} với phong cách {req.art_style}: {req.raw_story.strip()} Cuộc phiêu lưu đưa người chơi qua nhiều màn chơi thách thức với các boss hiểm ác và những bí mật cổ xưa đang chờ giải mã."
     
-    # Synthesize Asset Proposals automatically based on story keywords
+    # Synthesize Asset Proposals automatically based on story keywords with full multi-step prompt pipeline
     assets_proposals = []
     
     # 1. Main Hero
@@ -273,9 +275,51 @@ async def analyze_and_create_game(req: StoryAnalysisRequest):
         "format_reason": "Chuyển động chạy, nhảy, vung vũ khí nhiều khớp -> Dùng Video AI 2-3s để bóc 8 frame cực mượt",
         "priority": "Cao",
         "status": "pending",
-        "prompt_video": f"2D game character animation running in place, 8-frame seamless run cycle, {req.art_style}, main hero of {req.title}, side view, crisp outlines, solid bright green screen background, game sprite animation",
-        "prompt_image": f"2D pixel art character spritesheet of main hero from {req.title}, 8 distinct action poses in clean grid, {req.art_style}, solid background",
-        "animations": ["idle", "run", "jump", "attack_combo", "hurt", "death"]
+        "animations": ["idle", "run", "jump", "attack_combo", "hurt", "death"],
+        "pipeline_steps": [
+            {
+                "step_name": "📸 Bước 1: Tạo Ảnh Dáng Gốc (Base Character Pose)",
+                "tool_recommended": "ChatGPT / Midjourney",
+                "purpose": "Tạo 1 ảnh nhân vật góc nhìn ngang chuẩn nét trên phông xanh lá để làm ảnh gốc nạp vào Video AI (I2V)",
+                "prompt": f"2D side-view character full body pose of {req.title} main hero, {req.art_style}, clean outlines, centered, solid bright green chroma key background --ar 1:1",
+                "completed": false
+            },
+            {
+                "step_name": "🎬 Bước 2.1: Video Hoạt Ảnh [idle] (Đứng Thở)",
+                "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+                "purpose": "Nạp ảnh Bước 1 vào I2V tạo chuyển động đứng thở nhịp nhàng",
+                "prompt": "Full body character idle breathing animation, subtle weapon movement, 8 frames seamless loop, fixed side profile view, solid bright green screen background",
+                "completed": false
+            },
+            {
+                "step_name": "🎬 Bước 2.2: Video Hoạt Ảnh [run] (Chạy Lướt)",
+                "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+                "purpose": "Nạp ảnh Bước 1 vào I2V tạo bước chạy liên tục 8 frame",
+                "prompt": "Full body character running forward in place, 8 frames continuous run cycle, fixed side profile view, moving right, solid bright green screen background",
+                "completed": false
+            },
+            {
+                "step_name": "🎬 Bước 2.3: Video Hoạt Ảnh [attack_combo] (Tấn Công)",
+                "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+                "purpose": "Nạp ảnh Bước 1 vào I2V tạo đòn đánh vung chiêu",
+                "prompt": "Full body character performing dynamic weapon attack slash combo, dramatic action motion, 8 frames loop, fixed side view, solid bright green screen background",
+                "completed": false
+            },
+            {
+                "step_name": "🎬 Bước 2.4: Video Hoạt Ảnh [death] (Gục Ngã / Thất Bại)",
+                "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+                "purpose": "Nạp ảnh Bước 1 vào I2V tạo cảnh bị hạ gục",
+                "prompt": "Full body character taking critical hit and collapsing in defeat, 6 frames animation, fixed side view, solid bright green screen background",
+                "completed": false
+            },
+            {
+                "step_name": "🖼️ Bước 3: Spritesheet Trọn Bộ (Dự phòng & Icon UI)",
+                "tool_recommended": "ChatGPT / Midjourney",
+                "purpose": "Ảnh lưới tổng hợp các tư thế để dùng làm icon và cắt ảnh tĩnh",
+                "prompt": f"2D pixel art character spritesheet of {req.title} hero: idle, run, attack, hurt, death, {req.art_style}, 3x2 grid, solid bright green screen background",
+                "completed": false
+            }
+        ]
     })
     
     # 2. Regular Monster / Minion
@@ -287,9 +331,37 @@ async def analyze_and_create_game(req: StoryAnalysisRequest):
         "format_reason": "Cử động tuần tra, lao vào tấn công nhịp nhàng -> Dùng Video AI 2-3s",
         "priority": "Cao",
         "status": "pending",
-        "prompt_video": f"2D monster character walking and lunging attack animation, 8 frames seamless loop, {req.art_style}, dark fantasy side view, solid bright green screen background",
-        "prompt_image": f"2D monster spritesheet for game, 8 poses, {req.art_style}, green screen",
-        "animations": ["idle", "walk", "attack", "hurt", "death"]
+        "animations": ["idle", "walk", "attack", "hurt", "death"],
+        "pipeline_steps": [
+            {
+                "step_name": "📸 Bước 1: Tạo Ảnh Dáng Quái Gốc",
+                "tool_recommended": "ChatGPT / Midjourney",
+                "purpose": "Tạo 1 ảnh quái vật góc nhìn ngang trên phông xanh",
+                "prompt": f"2D side-view monster creature, menacing stance, {req.art_style}, clean outlines, solid bright green chroma key background",
+                "completed": false
+            },
+            {
+                "step_name": "🎬 Bước 2.1: Video [walk] (Bò / Đi Tuần Tra)",
+                "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+                "purpose": "Nạp ảnh Bước 1 tạo chuyển động di chuyển",
+                "prompt": "2D monster walking forward animation, 8 frames seamless loop, fixed side view, solid bright green screen background",
+                "completed": false
+            },
+            {
+                "step_name": "🎬 Bước 2.2: Video [attack] (Lao Đánh)",
+                "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+                "purpose": "Nạp ảnh Bước 1 tạo đòn cắn / vồ",
+                "prompt": "2D monster lunging forward with fierce bite attack, 6 frames animation, fixed side view, solid bright green screen background",
+                "completed": false
+            },
+            {
+                "step_name": "🖼️ Bước 3: Spritesheet Quái Vật Lưới",
+                "tool_recommended": "ChatGPT / Midjourney",
+                "purpose": "Ảnh lưới tổng hợp",
+                "prompt": f"2D monster spritesheet for game, 6 action poses in clean grid, {req.art_style}, solid green screen background",
+                "completed": false
+            }
+        ]
     })
     
     # 3. Epic Boss
@@ -301,9 +373,30 @@ async def analyze_and_create_game(req: StoryAnalysisRequest):
         "format_reason": "Kích thước lớn, đòn đánh dội lửa/năng lượng -> Dạng Video tạo hiệu ứng biến hình & vung chiêu hoành tráng",
         "priority": "Cao",
         "status": "pending",
-        "prompt_video": f"2D gigantic boss monster executing special ultimate attack animation, dramatic glowing visual aura, 8 frames loop, {req.art_style}, solid bright green screen background",
-        "prompt_image": f"2D giant boss spritesheet, multiple attack phases, {req.art_style}, transparent background",
-        "animations": ["idle_phase1", "rage_attack", "ultimate_cast", "stagger_hurt", "death_explosion"]
+        "animations": ["idle_phase1", "rage_attack", "ultimate_cast", "stagger_hurt", "death_explosion"],
+        "pipeline_steps": [
+            {
+                "step_name": "📸 Bước 1: Tạo Ảnh Dáng Boss Khổng Lồ",
+                "tool_recommended": "ChatGPT / Midjourney",
+                "purpose": "Ảnh boss oai vệ trên phông xanh",
+                "prompt": f"2D giant epic boss monster, imposing dark armor, glowing aura, {req.art_style}, side view, centered, solid bright green screen background",
+                "completed": false
+            },
+            {
+                "step_name": "🎬 Bước 2.1: Video [rage_attack] (Tuyệt Kỹ Nộ)",
+                "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+                "purpose": "Nạp ảnh Bước 1 tạo đòn nộ hoành tráng",
+                "prompt": "2D gigantic boss monster executing special ultimate slam attack with ground impact shockwave, 8 frames loop, fixed side view, solid green screen",
+                "completed": false
+            },
+            {
+                "step_name": "🖼️ Bước 3: Spritesheet Boss",
+                "tool_recommended": "ChatGPT / Midjourney",
+                "purpose": "Spritesheet tổng hợp",
+                "prompt": f"2D giant boss spritesheet, multiple attack phases, {req.art_style}, transparent background",
+                "completed": false
+            }
+        ]
     })
 
     # 4. Item / Powerup
@@ -315,8 +408,16 @@ async def analyze_and_create_game(req: StoryAnalysisRequest):
         "format_reason": "Vật phẩm tĩnh / icon giao diện -> Dạng Ảnh Spritesheet sắc nét 100%",
         "priority": "Trung bình",
         "status": "pending",
-        "prompt_image": f"2D game item icon set of glowing magical powerups, potions, and crystals, {req.art_style}, isolated on transparent background",
-        "animations": ["idle_sparkle"]
+        "animations": ["idle_sparkle"],
+        "pipeline_steps": [
+            {
+                "step_name": "🖼️ Bước 1: Spritesheet Bộ Vật Phẩm & Icon",
+                "tool_recommended": "ChatGPT / Midjourney",
+                "purpose": "Tạo bộ icon các vật phẩm nổi bồng bềnh",
+                "prompt": f"2D game item icon set of glowing magical powerups, potions, and crystals, {req.art_style}, isolated on transparent background",
+                "completed": false
+            }
+        ]
     })
 
     # 5. Environment Tileset
@@ -328,8 +429,23 @@ async def analyze_and_create_game(req: StoryAnalysisRequest):
         "format_reason": "Gạch nền, vách tường, chướng ngại vật cần thẳng hàng pixel chuẩn lưới -> Dạng Ảnh",
         "priority": "Cao",
         "status": "pending",
-        "prompt_image": f"2D platformer game environment tileset, ground blocks, wall platforms, traps, hazards, seamless repeatable tiles, {req.art_style}",
-        "animations": ["static"]
+        "animations": ["static"],
+        "pipeline_steps": [
+            {
+                "step_name": "🖼️ Bước 1: Tileset Gạch Nền Chuẩn Lưới (Modular Tileset)",
+                "tool_recommended": "ChatGPT / Midjourney",
+                "purpose": "Tạo mặt sàn gạch, nền đất, chướng ngại vật ghép nối liền mạch",
+                "prompt": f"2D platformer game environment tileset, ground blocks, wall platforms, traps, hazards, seamless repeatable tiles, {req.art_style}",
+                "completed": false
+            },
+            {
+                "step_name": "🖼️ Bước 2: Parallax Background (3 Lớp Chiều Sâu)",
+                "tool_recommended": "ChatGPT / Midjourney",
+                "purpose": "Cảnh nền cuộn phía sau (Trời xa, Đồi núi giữa, Cây cỏ gần)",
+                "prompt": f"2D side-scrolling parallax background depth layers: layer 1 distant sky, layer 2 mountains, layer 3 foreground props, {req.art_style}, seamless loop",
+                "completed": false
+            }
+        ]
     })
 
     # 6. VFX Skill Effect
@@ -341,9 +457,16 @@ async def analyze_and_create_game(req: StoryAnalysisRequest):
         "format_reason": "Vệt chém tia sáng / chưởng lửa cần độ mượt từng mili-giây -> Dạng Video",
         "priority": "Trung bình",
         "status": "pending",
-        "prompt_video": f"2D elemental energy slash wave effect expanding and bursting, glowing neon particles, solid black background, side view, VFX animation",
-        "prompt_image": f"2D sprite animation sheet of sword energy slash wave, solid black background",
-        "animations": ["slash_burst"]
+        "animations": ["slash_burst"],
+        "pipeline_steps": [
+            {
+                "step_name": "🎬 Bước 1: Video Hiệu Ứng Vệt Chém / Nổ Năng Lượng",
+                "tool_recommended": "Tencent HY Video 1.5 / Runway",
+                "purpose": "Tạo luồng năng lượng bùng nổ trên nền đen",
+                "prompt": "2D elemental energy slash wave effect expanding and bursting, glowing neon particles, solid black background, side view, VFX animation",
+                "completed": false
+            }
+        ]
     })
 
     game_entry = {
@@ -414,6 +537,111 @@ async def delete_game_asset(game_id: str, asset_id: str):
             await broadcast_ws({"type": "GAME_ASSET_DELETED", "game_id": game_id, "asset_id": asset_id})
             return {"status": "ok"}
     raise HTTPException(status_code=404, detail="Game not found")
+
+@app.post("/api/assets/upload_raw")
+async def upload_asset_raw_file(
+    game_id: str = Form(...),
+    asset_id: str = Form(...),
+    step_index: int = Form(...),
+    file: UploadFile = File(...)
+):
+    """
+    Tự động lưu trữ file raw (video mp4 hoặc ảnh png/jpg) tải từ AI về vào đúng thư mục game & asset:
+    godot_demo/2/raw_assets/<game_id>/<asset_id>/<filename>
+    để commit lên Git an toàn và có thể chuyển ngay sang tab xử lý!
+    """
+    db = load_games_db()
+    game = None
+    asset = None
+    for g in db.get("games", []):
+        if g.get("id") == game_id:
+            game = g
+            for a in g.get("assets", []):
+                if a.get("id") == asset_id:
+                    asset = a
+                    break
+            break
+            
+    if not game or not asset:
+        raise HTTPException(status_code=404, detail="Game or Asset not found")
+
+    clean_game = "".join(c if c.isalnum() or c == "_" else "_" for c in game_id.lower())
+    clean_asset = "".join(c if c.isalnum() or c == "_" else "_" for c in asset_id.lower())
+    
+    target_dir = os.path.join(RAW_ASSETS_DIR, clean_game, clean_asset)
+    os.makedirs(target_dir, exist_ok=True)
+    
+    ext = os.path.splitext(file.filename)[1].lower() or ".png"
+    clean_filename = f"step_{step_index}_{int(datetime.now().timestamp())}{ext}"
+    target_file_path = os.path.join(target_dir, clean_filename)
+    
+    with open(target_file_path, "wb") as f:
+        f.write(await file.read())
+
+    relative_url = f"/raw_assets/{clean_game}/{clean_asset}/{clean_filename}"
+    if "pipeline_steps" in asset and 0 <= step_index < len(asset["pipeline_steps"]):
+        step = asset["pipeline_steps"][step_index]
+        step["raw_file_name"] = file.filename
+        step["raw_file_path"] = target_file_path
+        step["raw_file_url"] = relative_url
+        step["completed"] = True
+        step["uploaded_at"] = datetime.now().strftime("%Y-%m-%d %H:%M")
+        
+    total_steps = len(asset.get("pipeline_steps", []))
+    done_steps = sum(1 for s in asset.get("pipeline_steps", []) if s.get("completed"))
+    if done_steps == total_steps and total_steps > 0:
+        asset["status"] = "ready_to_export"
+    elif done_steps > 0:
+        asset["status"] = "in_progress"
+    else:
+        asset["status"] = "pending"
+
+    save_games_db(db)
+    
+    await broadcast_ws({
+        "type": "RAW_FILE_UPLOADED",
+        "game_id": game_id,
+        "asset_id": asset_id,
+        "step_index": step_index,
+        "file_url": relative_url,
+        "file_name": file.filename
+    })
+    
+    return {
+        "status": "ok",
+        "raw_file_path": target_file_path,
+        "raw_file_url": relative_url,
+        "file_name": file.filename,
+        "asset": asset
+    }
+
+@app.post("/api/assets/toggle_step")
+async def toggle_asset_step(
+    game_id: str = Form(...),
+    asset_id: str = Form(...),
+    step_index: int = Form(...),
+    completed: bool = Form(...)
+):
+    db = load_games_db()
+    for g in db.get("games", []):
+        if g.get("id") == game_id:
+            for a in g.get("assets", []):
+                if a.get("id") == asset_id:
+                    if "pipeline_steps" in a and 0 <= step_index < len(a["pipeline_steps"]):
+                        a["pipeline_steps"][step_index]["completed"] = completed
+                        
+                        total_steps = len(a["pipeline_steps"])
+                        done_steps = sum(1 for s in a["pipeline_steps"] if s.get("completed"))
+                        if done_steps == total_steps and total_steps > 0:
+                            a["status"] = "ready_to_export"
+                        elif done_steps > 0:
+                            a["status"] = "in_progress"
+                        else:
+                            a["status"] = "pending"
+                            
+                        save_games_db(db)
+                        return {"status": "ok", "completed": completed, "status_text": a["status"]}
+    raise HTTPException(status_code=404, detail="Asset not found")
 
 # =========================================================================
 # 2. VIDEO & IMAGE FRAME PROCESSOR API
@@ -610,6 +838,8 @@ async def get_library_assets():
                 
     return catalog
 
+app.mount("/assets_library", StaticFiles(directory=ASSETS_LIB_DIR), name="assets_library")
+app.mount("/raw_assets", StaticFiles(directory=RAW_ASSETS_DIR), name="raw_assets")
 app.mount("/", StaticFiles(directory=STUDIO_DIR, html=True), name="static")
 
 if __name__ == "__main__":

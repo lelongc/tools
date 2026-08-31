@@ -99,9 +99,7 @@
           "format": "video",
           "format_reason": "Cử động nhảy lò cò 4 hướng, đá cựa trên không, bẹp dí khi va chạm -> Video AI 2-3s bóc 8 frame",
           "priority": "Cao",
-          "status": "pending",
-          "prompt_video": "2D pixel art white battle rooster jumping forward and kicking with sharp talons, 8 frames animation loop, vibrant arcade retro style, crisp black outlines, solid bright green screen background",
-          "prompt_image": "2D pixel art rooster hero spritesheet: idle stance, hop forward, hop side, flying talon kick, squashed pancake death, feather explosion, solid green screen background",
+          "status": "in_progress",
           "animations": [
             "idle",
             "hop_forward",
@@ -109,6 +107,54 @@
             "talon_kick",
             "squashed_death",
             "feather_splat"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "📸 Bước 1: Tạo Dáng Nhân Vật Gốc Trên Phông Xanh (Base Image)",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo 1 ảnh nhân vật góc nhìn ngang chuẩn 16-bit retro arcade trên nền xanh lá để làm ảnh gốc nạp vào Video AI (I2V)",
+              "prompt": "2D side-view character full body pose of a badass white battle rooster with bright red comb, yellow beak, sharp talons, clean pixel outlines, vibrant 16-bit arcade retro style, centered, solid bright green chroma key background --ar 1:1",
+              "completed": true,
+              "raw_file_name": "Battle_rooster_full_body_pose_202608310949.jpeg",
+              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_0_1788145013.jpeg",
+              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_0_1788145013.jpeg",
+              "uploaded_at": "2026-08-31 09:56"
+            },
+            {
+              "step_name": "🎬 Bước 2.1: Video Hoạt Ảnh [hop_forward] (Nhảy Tiến)",
+              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+              "purpose": "Nạp ảnh Bước 1 vào I2V tạo chu kỳ nhảy lò cò tiến lên phía trước",
+              "prompt": "Full body character jumping and hopping forward rhythmically in place, 8 frames continuous animation loop, fixed side profile view, moving to the right, solid bright green screen background",
+              "completed": false
+            },
+            {
+              "step_name": "🎬 Bước 2.2: Video Hoạt Ảnh [talon_kick] (Đá Cựa Càn Quét)",
+              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+              "purpose": "Nạp ảnh Bước 1 vào I2V tạo cú đá cựa bay trên không hất văng xe cộ",
+              "prompt": "Full body character leaping in mid-air and performing fierce martial arts flying talon kick forward, dynamic attack pose, 8 frames animation loop, fixed side profile view, solid bright green screen background",
+              "completed": false
+            },
+            {
+              "step_name": "🎬 Bước 2.3: Video Hoạt Ảnh [squashed_death] (Bẹp Dí Như Bánh Tráng)",
+              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+              "purpose": "Nạp ảnh Bước 1 vào I2V tạo cảnh va chạm bị xe đè bẹp dí hài hước",
+              "prompt": "Full body character getting squashed flat vertically into a pancake shape with dizzy stars, hilarious cartoon death animation, 6 frames, fixed side view, solid bright green screen background",
+              "completed": false
+            },
+            {
+              "step_name": "🎬 Bước 2.4: Video Hoạt Ảnh [idle] (Đứng Nhìn Ngơ Ngác)",
+              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+              "purpose": "Nạp ảnh Bước 1 tạo chuyển động đứng thở, chớp mắt nhẹ",
+              "prompt": "Full body character standing idle, breathing slightly and blinking eyes, 6 frames seamless loop, fixed side view, solid bright green screen background",
+              "completed": false
+            },
+            {
+              "step_name": "🖼️ Bước 3: Spritesheet Trọn Bộ (Dự Phòng & Icon UI)",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo ảnh spritesheet dạng lưới 3x2 tổng hợp tất cả các tư thế để dùng làm icon chọn nhân vật và cắt ảnh",
+              "prompt": "2D pixel art character spritesheet of heroic white rooster: idle stance, hop forward, hop side, flying talon kick, squashed pancake death, feather explosion, organized 3x2 grid, solid bright green screen background",
+              "completed": false
+            }
           ]
         },
         {
@@ -119,13 +165,34 @@
           "format_reason": "Skin hài hước đeo kính râm ngậm xì gà, nhảy nhót siêu ngầu -> Video AI 2-3s",
           "priority": "Trung bình",
           "status": "pending",
-          "prompt_video": "2D pixel art cool thug life chicken wearing black pixel sunglasses jumping forward with swagger, 8 frames loop, solid bright green screen background",
-          "prompt_image": "2D pixel art cool chicken spritesheet with thug life shades, gold chain, swagger hop, drop shades pose, solid green screen background",
           "animations": [
             "idle_swagger",
             "hop_forward",
             "kick_kick",
             "victory_pose"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "📸 Bước 1: Tạo Dáng Gà Thug Life Phông Xanh",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo ảnh gà ngậm xì gà đeo kính đen Thug Life trên phông xanh",
+              "prompt": "2D side-view pixel art thug life chicken wearing black pixel sunglasses, gold chain necklace, cigar smoke, clean outlines, solid bright green chroma key background",
+              "completed": false
+            },
+            {
+              "step_name": "🎬 Bước 2.1: Video [hop_forward] (Nhảy Lả Lướt Swagger)",
+              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+              "purpose": "Nạp ảnh Bước 1 tạo bước nhảy swagger cực ngầu",
+              "prompt": "Full body character hopping forward with cool swagger motion, pixel shades gleaming, 8 frames animation loop, fixed side view, solid bright green screen background",
+              "completed": false
+            },
+            {
+              "step_name": "🖼️ Bước 3: Spritesheet Skin Thug Life",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Ảnh lưới các tư thế ăn mừng và nhảy",
+              "prompt": "2D pixel art cool chicken spritesheet with thug life shades, gold chain, swagger hop, drop shades pose, solid green screen background",
+              "completed": false
+            }
           ]
         },
         {
@@ -136,13 +203,34 @@
           "format_reason": "Gà mặc giáp kim loại, gắn động cơ phản lực sau lưng -> Video AI 2-3s",
           "priority": "Trung bình",
           "status": "pending",
-          "prompt_video": "2D cyberpunk armored robot rooster with glowing blue visor boosting forward with mini thruster, 8 frames animation loop, pixel art, solid green screen background",
-          "prompt_image": "2D pixel art mecha cyborg rooster spritesheet, laser eyes, rocket dash, metal talon slash, transparent background",
           "animations": [
             "idle_hover",
             "hop_boost",
             "laser_kick",
             "overload_death"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "📸 Bước 1: Tạo Dáng Gà Robot Mecha",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo ảnh gà robot giáp titan, kính ngắm laser xanh trên phông xanh",
+              "prompt": "2D side-view cyberpunk armored robot rooster with glowing blue visor, chrome metal feathers, mini rocket thrusters on back, solid bright green screen background",
+              "completed": false
+            },
+            {
+              "step_name": "🎬 Bước 2.1: Video [hop_boost] (Nhảy Phun Lửa Phản Lực)",
+              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+              "purpose": "Nạp ảnh Bước 1 tạo cử động nhảy lướt kèm vệt lửa phản lực",
+              "prompt": "Full body armored robot rooster boosting forward with blue rocket flame bursts, 8 frames loop, fixed side profile view, solid bright green screen background",
+              "completed": false
+            },
+            {
+              "step_name": "🖼️ Bước 3: Spritesheet Gà Mecha",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Spritesheet lưới chuẩn 2D",
+              "prompt": "2D pixel art mecha cyborg rooster spritesheet, laser eyes, rocket dash, metal talon slash, transparent background",
+              "completed": false
+            }
           ]
         },
         {
@@ -153,13 +241,34 @@
           "format_reason": "Gà con lông vàng lon ton chạy nối đuôi nhau -> Video AI 2-3s bóc 6 frame",
           "priority": "Cao",
           "status": "pending",
-          "prompt_video": "2D cute tiny fluffy yellow baby chicks waddling and hopping forward in line, 6 frames continuous loop, cartoon pixel art, solid bright green screen background",
-          "prompt_image": "2D pixel art baby chick spritesheet: waddle run, cheerful hop, scared trembling, rescue heart emote, solid green screen background",
           "animations": [
             "waddle_run",
             "hop_happy",
             "scared_idle",
             "cheer_saved"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "📸 Bước 1: Tạo Dáng Gà Con Vàng Lông Xù",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo ảnh chú gà con vàng siêu cute trên phông xanh",
+              "prompt": "2D side-view cute tiny fluffy yellow baby chick with big expressive eyes, adorable pixel art, clean outlines, solid bright green chroma key background",
+              "completed": false
+            },
+            {
+              "step_name": "🎬 Bước 2.1: Video [waddle_run] (Chạy Lon Ton Nối Đuôi)",
+              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+              "purpose": "Nạp ảnh Bước 1 tạo chuyển động lon ton theo hàng",
+              "prompt": "Cute tiny yellow baby chick waddling and running enthusiastically forward, 6 frames continuous loop, fixed side view, solid bright green screen background",
+              "completed": false
+            },
+            {
+              "step_name": "🖼️ Bước 3: Spritesheet Gà Con Nhiều Cảm Xúc",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Spritesheet gà con chạy, run sợ, nhảy ăn mừng khi được cứu",
+              "prompt": "2D pixel art baby chick spritesheet: waddle run, cheerful hop, scared trembling, rescue heart emote, solid green screen background",
+              "completed": false
+            }
           ]
         },
         {
@@ -170,11 +279,19 @@
           "format_reason": "Xe hơi chạy ngang các làn đường, có nóc xe để nhảy lên -> Dạng Ảnh Spritesheet",
           "priority": "Cao",
           "status": "pending",
-          "prompt_image": "2D pixel art top-down/side arcade vehicles sprite pack: yellow taxi cab, red sports car, blue police cruiser with flashing roof lights, green sedan, transparent background",
           "animations": [
             "drive_left",
             "drive_right",
             "roof_standable"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "🖼️ Bước 1: Spritesheet Bộ Xe Đô Thị (Side & Top View)",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo các loại xe taxi vàng, xe thể thao đỏ, xe cảnh sát nhấp nháy đèn trên nền trong suốt",
+              "prompt": "2D pixel art arcade vehicles sprite pack: yellow taxi cab, red sports car, blue police cruiser with flashing roof lights, green sedan, clean flat top roofs for jumping on, transparent background",
+              "completed": false
+            }
           ]
         },
         {
@@ -185,10 +302,18 @@
           "format_reason": "Xe tải dài 3-4 ô để gà nhảy lên cưỡi nhặt bắp vàng -> Dạng Ảnh Spritesheet",
           "priority": "Cao",
           "status": "pending",
-          "prompt_image": "2D pixel art long heavy cargo truck, yellow school bus, cement mixer truck, flatbed trailer with corn crates, modular vehicle sprites, transparent background",
           "animations": [
             "drive_left",
             "drive_right"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "🖼️ Bước 1: Spritesheet Xe Tải Thân Dài & Xe Bus",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo xe tải container, xe bus vàng dài 3 ô để người chơi nhảy lên cưỡi",
+              "prompt": "2D pixel art long heavy cargo truck, yellow school bus, cement mixer truck, flatbed trailer with corn crates, modular vehicle sprites, transparent background",
+              "completed": false
+            }
           ]
         },
         {
@@ -199,9 +324,17 @@
           "format_reason": "Đoàn tàu hỏa dài lao vun vút qua đường ray -> Dạng Ảnh ghép toa",
           "priority": "Cao",
           "status": "pending",
-          "prompt_image": "2D pixel art high speed aerodynamic bullet train engine and passenger wagons, red warning roof lights, side/top-down view, transparent background",
           "animations": [
             "speed_rush"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "🖼️ Bước 1: Spritesheet Đầu Tàu & Toa Tàu Hỏa",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo đầu tàu cao tốc màu đỏ trắng và các toa hàng nối dài",
+              "prompt": "2D pixel art high speed aerodynamic bullet train engine and passenger wagons, red warning roof lights, side/top-down view, transparent background",
+              "completed": false
+            }
           ]
         },
         {
@@ -212,11 +345,19 @@
           "format_reason": "Chướng ngại vật vượt sông: Khúc gỗ nổi, cá sấu chớp mắt lặn mở miệng -> Dạng Ảnh Spritesheet",
           "priority": "Cao",
           "status": "pending",
-          "prompt_image": "2D pixel art river obstacles pack: floating wooden logs (small, medium, large), green crocodile swimming with eyes blinking and snapping jaws, transparent background",
           "animations": [
             "float_idle",
             "croc_submerge",
             "croc_snap"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "🖼️ Bước 1: Spritesheet Khúc Gỗ Nổi & Cá Sấu",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo khúc gỗ trôi sông 3 kích thước và hoạt ảnh cá sấu mở miệng",
+              "prompt": "2D pixel art river obstacles pack: floating wooden logs (small, medium, large), green crocodile swimming with eyes blinking and snapping jaws, transparent background",
+              "completed": false
+            }
           ]
         },
         {
@@ -227,13 +368,34 @@
           "format_reason": "Trùm rượt đuổi sau lưng có miệng lò lửa và lưỡi cưa quay tít -> Video AI 2-3s",
           "priority": "Cao",
           "status": "pending",
-          "prompt_video": "2D menacing giant food truck monster with roaring flaming grill mouth and spinning circular saw blade chasing forward, 8 frames animation loop, pixel art, solid green screen background",
-          "prompt_image": "2D pixel art boss truck spritesheet: raging grill fire, spinning saw attack, oil splash cannon, smoke exhaust, transparent background",
           "animations": [
             "chase_rush",
             "fire_breath",
             "saw_spin",
             "crash_defeat"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "📸 Bước 1: Tạo Dáng Boss Xe Tải Bếp Rán Phông Xanh",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo ảnh đầu xe tải quái vật có răng cưa sắt và miệng lò nướng rực lửa",
+              "prompt": "2D side-view menacing giant food truck monster with glowing red grill mouth, spinning circular saw on front bumper, black smoke exhaust stacks, solid bright green screen background",
+              "completed": false
+            },
+            {
+              "step_name": "🎬 Bước 2.1: Video [chase_rush] (Xe Tải Rượt Đuổi Phun Lửa)",
+              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+              "purpose": "Nạp ảnh Bước 1 tạo hoạt ảnh xe lao ầm ầm phụt lửa",
+              "prompt": "Giant monster food truck speeding forward aggressively with roaring flaming grill mouth and spinning circular saw blade, 8 frames loop, fixed side view, solid green screen background",
+              "completed": false
+            },
+            {
+              "step_name": "🖼️ Bước 3: Spritesheet Boss & Các Đòn Đánh",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Spritesheet chi tiết đòn phun lửa và lưỡi cưa",
+              "prompt": "2D pixel art boss truck spritesheet: raging grill fire, spinning saw attack, oil splash cannon, smoke exhaust, transparent background",
+              "completed": false
+            }
           ]
         },
         {
@@ -244,12 +406,33 @@
           "format_reason": "Lao bổ từ trên trời xuống quắp gà nếu đứng yên >3 giây -> Video AI 2-3s bóc 6 frame",
           "priority": "Cao",
           "status": "pending",
-          "prompt_video": "2D predatory eagle diving down rapidly from the sky with sharp outstretched talons, 6 frames animation loop, pixel art, solid bright green screen background",
-          "prompt_image": "2D pixel art hunting eagle spritesheet: soaring shadow, dive attack, snatching rooster in claws, fly away, solid green screen background",
           "animations": [
             "shadow_circle",
             "dive_attack",
             "snatch_grab"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "📸 Bước 1: Tạo Dáng Đại Bàng Dang Cánh Phông Xanh",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo ảnh chim đại bàng dang rộng cánh, mắt sắc bén trên phông xanh",
+              "prompt": "2D predatory eagle soaring with large brown wings, sharp yellow talons ready to grab prey, pixel art, solid bright green chroma key background",
+              "completed": false
+            },
+            {
+              "step_name": "🎬 Bước 2.1: Video [dive_attack] (Lao Bổ Xuống Quắp Mồi)",
+              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+              "purpose": "Nạp ảnh Bước 1 tạo đòn lao bổ xuống quắp gà mang đi",
+              "prompt": "Predatory eagle diving down rapidly with outstretched talons grasping motion, 6 frames animation loop, fixed side view, solid bright green screen background",
+              "completed": false
+            },
+            {
+              "step_name": "🖼️ Bước 3: Spritesheet Đại Bàng & Bóng Râm (Shadow)",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Spritesheet bóng râm tròn báo hiệu và chim đại bàng",
+              "prompt": "2D pixel art hunting eagle spritesheet: circular warning shadow, dive attack, snatching rooster in claws, fly away, solid green screen background",
+              "completed": false
+            }
           ]
         },
         {
@@ -260,12 +443,33 @@
           "format_reason": "Đậu trên dải phân cách mổ cản đường, có thể bị gà đá văng -> Video AI",
           "priority": "Trung bình",
           "status": "pending",
-          "prompt_video": "2D chubby city pigeon wearing tiny beanie hat pecking and flapping wings aggressively, 6 frames loop, pixel art, solid bright green screen background",
-          "prompt_image": "2D pixel art gangster pigeon spritesheet: pecking ground, flap peck attack, knocked flying away hurt, transparent background",
           "animations": [
             "idle_peck",
             "peck_strike",
             "knockback_fly"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "📸 Bước 1: Tạo Dáng Bồ Câu Béo Phông Xanh",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Ảnh chú bồ câu phố béo tròn đội mũ len beanie ngổ ngáo trên phông xanh",
+              "prompt": "2D side-view chubby city pigeon wearing tiny black beanie hat, tough gangster attitude, pixel art, solid bright green screen background",
+              "completed": false
+            },
+            {
+              "step_name": "🎬 Bước 2.1: Video [peck_strike] (Mổ Cản Đường)",
+              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+              "purpose": "Nạp ảnh Bước 1 tạo cử động mổ và vỗ cánh hung hăng",
+              "prompt": "Chubby city pigeon pecking forward and flapping wings aggressively, 6 frames animation loop, fixed side view, solid bright green screen background",
+              "completed": false
+            },
+            {
+              "step_name": "🖼️ Bước 3: Spritesheet Bồ Câu & Bị Đá Bay",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Spritesheet mổ và bị đá bay quay mòng mòng",
+              "prompt": "2D pixel art gangster pigeon spritesheet: pecking ground, flap peck attack, knocked flying away hurt, transparent background",
+              "completed": false
+            }
           ]
         },
         {
@@ -276,10 +480,18 @@
           "format_reason": "Icon vật phẩm nổi bồng bềnh trên đường nhặt ăn điểm -> Dạng Ảnh Spritesheet",
           "priority": "Cao",
           "status": "pending",
-          "prompt_image": "2D pixel art game collectibles pack: glowing red rocket chili pepper, armored rice cooker helmet, horseshoe magnet attracting yellow corn coins, green skateboard with spinning wheels, shiny golden egg trophy, glowing mystery prize box, transparent background",
           "animations": [
             "floating_bob",
             "pickup_sparkle"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "🖼️ Bước 1: Spritesheet Trọn Bộ 6 Power-up (Icons & Pickups)",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo bộ 6 vật phẩm: Ớt Hỏa Tiễn đỏ rực, Nồi Cơm Điện giáp, Nam Châm hút vàng, Ván Trượt xanh, Hạt Bắp Vàng lấp lánh, Hộp Quà Bí Ẩn",
+              "prompt": "2D pixel art game collectibles pack: glowing red rocket chili pepper with flames, armored silver rice cooker helmet, horseshoe magnet attracting yellow corn coins, green skateboard with spinning wheels, shiny golden egg trophy, glowing mystery prize box, transparent background",
+              "completed": false
+            }
           ]
         },
         {
@@ -290,10 +502,18 @@
           "format_reason": "Toàn bộ gạch nền mặt đường, vạch kẻ, ray tàu, sông nước ghép map vô tận -> Dạng Ảnh chuẩn lưới",
           "priority": "Cao",
           "status": "pending",
-          "prompt_image": "2D modular pixel art crossy platformer tileset: asphalt road strips with white dashed lines, railroad tracks with flashing red signal poles, animated blue water canal tiles, green grass median strips with yellow wild flowers, sidewalk curb tiles, seamless grid",
           "animations": [
             "static_tiles",
             "water_flow_4f"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "🖼️ Bước 1: Tileset Mặt Đường Nhựa, Ray Tàu & Nước Sông",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo các dải mặt đường nhựa vạch kẻ trắng, đường ray tàu sắt, dòng nước sông cuộn sóng, dải phân cách cỏ hoa ghép nối liền mạch",
+              "prompt": "2D modular pixel art crossy platformer tileset: asphalt road strips with white dashed lines, railroad tracks with flashing red signal poles, animated blue water canal tiles, green grass median strips with yellow wild flowers, sidewalk curb tiles, seamless grid",
+              "completed": false
+            }
           ]
         },
         {
@@ -304,9 +524,17 @@
           "format_reason": "Cảnh nền phía sau tạo chiều sâu 3 lớp (Trời & Mây, Nhà cao tầng xa, Cột đèn gần) -> Dạng Ảnh tách lớp",
           "priority": "Cao",
           "status": "pending",
-          "prompt_image": "2D side-scrolling parallax background layers for crossy arcade game: layer 1 clear blue sky with fluffy white clouds, layer 2 distant purple city skyscrapers skyline and bridge silhouette, layer 3 roadside green trees and streetlamps, seamless loop",
           "animations": [
             "static_layers"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "🖼️ Bước 1: Parallax 3 Lớp Cảnh Nền Chiều Sâu",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo 3 lớp ảnh: Lớp 1 (Bầu trời trong xanh và mây trắng), Lớp 2 (Đường chân trời các tòa nhà chọc trời tím mờ xa), Lớp 3 (Rặng cây xanh và cột đèn đường)",
+              "prompt": "2D side-scrolling parallax background layers for crossy arcade game: layer 1 clear blue sky with fluffy white clouds, layer 2 distant purple city skyscrapers skyline and bridge silhouette, layer 3 roadside green trees and streetlamps, seamless loop",
+              "completed": false
+            }
           ]
         },
         {
@@ -317,12 +545,26 @@
           "format_reason": "Luồng lửa phản lực phụt sau đít gà và hiệu ứng nổ tung tóe khi húc xe -> Video AI 2-3s bóc 8 frame",
           "priority": "Cao",
           "status": "pending",
-          "prompt_video": "2D pixel art roaring rocket jet flame blast shooting out backward with burning sparks, and big retro arcade smoke explosion bursting outward, solid black background, VFX sprite animation",
-          "prompt_image": "2D pixel art VFX spritesheet: rocket flame jet stream, circular car crash explosion with orange fireball, white feather cloud burst, yellow impact stars, solid black background",
           "animations": [
             "rocket_flame_loop",
             "car_crash_burst",
             "feather_splat_fx"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "🎬 Bước 1: Video Hiệu Ứng Phụt Lửa Hỏa Tiễn (Rocket Flame VFX)",
+              "tool_recommended": "Tencent HY Video 1.5 / Runway",
+              "purpose": "Tạo luồng lửa phản lực phụt sau lưng gà khi ăn Ớt Hiểm trên nền đen",
+              "prompt": "2D pixel art roaring rocket jet flame blast shooting out backward with intense burning sparks, continuous propulsion fire, solid black background, VFX sprite animation",
+              "completed": false
+            },
+            {
+              "step_name": "🖼️ Bước 2: Spritesheet Vụ Nổ Xe Nát Vụn & Lông Gà Bay",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Ảnh nổ quả cầu lửa cam, tia lửa điện và đám mây lông gà trắng tung tóe",
+              "prompt": "2D pixel art VFX spritesheet: circular car crash explosion with orange fireball, white feather cloud burst, yellow impact stars, solid black background",
+              "completed": false
+            }
           ]
         },
         {
@@ -333,10 +575,18 @@
           "format_reason": "Nút bấm, đồng hồ đếm số bước, thanh đo nộ ớt, bảng tổng kết điểm, popup gacha -> Dạng Ảnh Spritesheet",
           "priority": "Cao",
           "status": "pending",
-          "prompt_image": "2D pixel art arcade game UI kit: digital step counter frame, fiery chili turbo meter bar, golden coin counter icon, shiny golden replay button, game over skull banner, prize gacha egg machine window, high score badge, transparent background",
           "animations": [
             "static_ui",
             "button_press"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "🖼️ Bước 1: Bộ UI Kit Arcade Chuẩn Pixel",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo khung đếm bước nhảy, thanh đo lửa ớt hiểm, nút Replay vàng bóng, bảng Game Over đầu lâu, khung máy quay trứng may mắn",
+              "prompt": "2D pixel art arcade game UI kit: digital step counter frame, fiery chili turbo meter bar, golden coin counter icon, shiny golden replay button, game over skull banner, prize gacha egg machine window, high score badge, transparent background",
+              "completed": false
+            }
           ]
         }
       ],
