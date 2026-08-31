@@ -116,6 +116,7 @@ class AssetStudioApp {
             p.classList.toggle('active', p.id === tabId);
         });
 
+        if (tabId === 'tab-video') this.updateTab2RefClipsList();
         if (tabId === 'tab-library') this.loadLibraryAssets();
         if (tabId === 'tab-studio') this.renderStudio();
     }
@@ -1152,6 +1153,57 @@ class AssetStudioApp {
             this.showToast("🔄 Đã đảo ngược thứ tự frames!");
         });
 
+        // LOOP REFINEMENT & DIRECTION TOOLKIT HANDLERS
+        document.getElementById('btnFlipHorizontalFrames')?.addEventListener('click', async () => {
+            if (!this.extractedFrames || !this.extractedFrames.length) return;
+            const flipped = await Promise.all(this.extractedFrames.map(b64 => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const c = document.createElement('canvas');
+                        c.width = img.width;
+                        c.height = img.height;
+                        const ctx = c.getContext('2d');
+                        ctx.imageSmoothingEnabled = false;
+                        ctx.translate(c.width, 0);
+                        ctx.scale(-1, 1);
+                        ctx.drawImage(img, 0, 0);
+                        resolve(c.toDataURL('image/png'));
+                    };
+                    img.src = b64;
+                });
+            }));
+            this.extractedFrames = flipped;
+            this.renderExtractedVideoFrames();
+            this.startVideoAnimationPreview();
+            this.showToast("↔️ Đã lật ngang toàn bộ các frame (Đổi hướng Trái ↔ Phải)!");
+        });
+
+        document.getElementById('btnFlipVideoPlayer')?.addEventListener('click', () => {
+            const player = document.getElementById('sourceVideoPlayer');
+            if (!player) return;
+            this.videoPlayerFlipped = !this.videoPlayerFlipped;
+            player.style.transform = this.videoPlayerFlipped ? 'scaleX(-1)' : 'none';
+            this.showToast(this.videoPlayerFlipped ? "↔️ Đã lật gương trình chiếu Video!" : "↔️ Đã trả về hướng video gốc!");
+        });
+
+        document.getElementById('btnInvertFrames')?.addEventListener('click', () => {
+            if (!this.extractedFrames || !this.extractedFrames.length) return;
+            this.extractedFrames.reverse();
+            this.renderExtractedVideoFrames();
+            this.startVideoAnimationPreview();
+            this.showToast("🔄 Đã đảo ngược thứ tự các frame chuyển động (Chạy lùi)!");
+        });
+
+        document.getElementById('btnMakePingPongLoop')?.addEventListener('click', () => {
+            if (!this.extractedFrames || this.extractedFrames.length <= 2) return;
+            const rev = this.extractedFrames.slice(1, -1).reverse();
+            this.extractedFrames = [...this.extractedFrames, ...rev];
+            this.renderExtractedVideoFrames();
+            this.startVideoAnimationPreview();
+            this.showToast(`🪃 Đã tạo Ping-Pong Loop 2 chiều (${this.extractedFrames.length} frames)!`);
+        });
+
         document.getElementById('btnDupLastFrame')?.addEventListener('click', () => {
             if (!this.extractedFrames.length) return;
             this.extractedFrames.push(this.extractedFrames[this.extractedFrames.length - 1]);
@@ -1236,6 +1288,29 @@ class AssetStudioApp {
 
         document.getElementById('videoTargetAssetSelect')?.addEventListener('change', () => {
             this.renderSavedClipsSummary();
+            this.updateTab2RefClipsList();
+        });
+
+        // Tab 2 Live Reference Comparison
+        document.getElementById('videoRefClipSelect')?.addEventListener('change', (e) => {
+            const clipKey = e.target.value;
+            const compareBox = document.getElementById('videoDualCompareBox');
+            if (!clipKey) {
+                if (compareBox) compareBox.style.display = 'none';
+                if (this.tab2CompareInterval) clearInterval(this.tab2CompareInterval);
+                return;
+            }
+            if (compareBox) compareBox.style.display = 'block';
+            this.startTab2DualCompareLoop(clipKey);
+        });
+
+        this.tab2CompareGhost = false;
+        document.getElementById('btnToggleGhostPreview')?.addEventListener('click', (e) => {
+            this.tab2CompareGhost = !this.tab2CompareGhost;
+            e.target.classList.toggle('active', this.tab2CompareGhost);
+            e.target.innerText = this.tab2CompareGhost ? '🔲 Song Song' : '🧅 Lồng Mờ';
+            const clipKey = document.getElementById('videoRefClipSelect')?.value;
+            if (clipKey) this.startTab2DualCompareLoop(clipKey);
         });
 
         // Save Current Clip to Asset
@@ -1272,14 +1347,25 @@ class AssetStudioApp {
             const assetId = assetSelect ? assetSelect.value : '';
             const assetObj = (this.activeGame?.assets || []).find(a => a.id === assetId) || { name: 'character', category: 'characters' };
 
+            // Auto sync active extracted frames into assetClips
+            const currentClipName = (document.getElementById('videoCustomClipName')?.value || 'action').trim().toLowerCase().replace(/\s+/g, '_');
+            if (this.extractedFrames && this.extractedFrames.length > 0) {
+                if (!this.assetClips) this.assetClips = {};
+                if (!this.assetClips[assetId]) this.assetClips[assetId] = {};
+                this.assetClips[assetId][currentClipName] = {
+                    frames: [...this.extractedFrames],
+                    loop: document.getElementById('chkVideoClipLoop')?.checked || false,
+                    speed: this.videoFps || 10
+                };
+            }
+
             let clipsToExport = {};
             if (this.assetClips && this.assetClips[assetId] && Object.keys(this.assetClips[assetId]).length > 0) {
                 for (const [cName, cData] of Object.entries(this.assetClips[assetId])) {
                     clipsToExport[cName] = cData.frames;
                 }
             } else if (this.extractedFrames && this.extractedFrames.length > 0) {
-                const clipName = (document.getElementById('videoCustomClipName')?.value || 'idle').trim().toLowerCase().replace(/\s+/g, '_');
-                clipsToExport[clipName] = this.extractedFrames;
+                clipsToExport[currentClipName] = this.extractedFrames;
             }
 
             if (Object.keys(clipsToExport).length === 0) {
@@ -1410,6 +1496,7 @@ class AssetStudioApp {
         const offsetY = parseInt(document.getElementById('videoCharOffsetYSlider')?.value) || 0;
         const targetSize = parseInt(document.getElementById('videoTargetSize').value) || 256;
         const pixelate = document.getElementById('chkVideoPixelate').checked;
+        const flipH = document.getElementById('chkVideoFlipH')?.checked || false;
 
         const btn = document.getElementById('btnExtractVideoFrames');
         btn.innerText = "⏳ Đang Bóc Frame..."; btn.disabled = true;
@@ -1426,6 +1513,7 @@ class AssetStudioApp {
         formData.append('offset_y', offsetY);
         formData.append('target_size', targetSize);
         formData.append('pixelate', pixelate);
+        formData.append('flip_h', flipH);
 
         try {
             const res = await fetch('/api/process/video_file', {
@@ -1436,9 +1524,40 @@ class AssetStudioApp {
             if (data.status === 'ok' && data.frames) {
                 this.extractedFrames = data.frames;
                 this.rawExtractedBackup = [...data.frames];
+
+                if (document.getElementById('chkVideoReverseExtract')?.checked) {
+                    this.extractedFrames.reverse();
+                    this.rawExtractedBackup.reverse();
+                }
+
                 this.renderExtractedVideoFrames();
                 this.startVideoAnimationPreview();
-                this.showToast(`✨ Đã bóc tách thành công ${data.frames.length} frame từ video! Dùng Trợ Lý Loop bên phải để chỉnh mượt.`);
+
+                // Auto update assetClips cache with latest frames
+                const assetSelect = document.getElementById('videoTargetAssetSelect');
+                const assetId = assetSelect ? assetSelect.value : '';
+                const clipName = (document.getElementById('videoCustomClipName')?.value || 'action').trim().toLowerCase().replace(/\s+/g, '_');
+                if (assetId) {
+                    if (!this.assetClips) this.assetClips = {};
+                    if (!this.assetClips[assetId]) this.assetClips[assetId] = {};
+                    this.assetClips[assetId][clipName] = {
+                        frames: [...this.extractedFrames],
+                        loop: document.getElementById('chkVideoClipLoop')?.checked || false,
+                        speed: this.videoFps || 10
+                    };
+                    this.renderSavedClipsSummary();
+                }
+
+                // Auto update reference comparison list and live compare loop
+                await this.updateTab2RefClipsList();
+                const refVal = document.getElementById('videoRefClipSelect')?.value;
+                if (refVal) {
+                    const compareBox = document.getElementById('videoDualCompareBox');
+                    if (compareBox) compareBox.style.display = 'block';
+                    this.startTab2DualCompareLoop(refVal);
+                }
+
+                this.showToast(`✨ Đã bóc tách thành công ${data.frames.length} frame (Scale: ${charScale}%)!`);
             } else {
                 this.showToast("⚠️ " + (data.detail || "Lỗi xử lý video"));
             }
@@ -2127,16 +2246,50 @@ class AssetStudioApp {
         // Inspector Tabs
         document.getElementById('tabBtnLibFrames')?.addEventListener('click', () => {
             document.getElementById('tabBtnLibFrames').classList.add('active');
+            document.getElementById('tabBtnLibCompare')?.classList.remove('active');
             document.getElementById('tabBtnLibGodotTres').classList.remove('active');
             document.getElementById('libViewFrames').style.display = 'grid';
+            document.getElementById('libViewCompare').style.display = 'none';
             document.getElementById('libViewGodotTres').style.display = 'none';
+            if (this.libCompareInterval) clearInterval(this.libCompareInterval);
         });
+
+        document.getElementById('tabBtnLibCompare')?.addEventListener('click', () => {
+            document.getElementById('tabBtnLibCompare').classList.add('active');
+            document.getElementById('tabBtnLibFrames').classList.remove('active');
+            document.getElementById('tabBtnLibGodotTres').classList.remove('active');
+            document.getElementById('libViewFrames').style.display = 'none';
+            document.getElementById('libViewCompare').style.display = 'flex';
+            document.getElementById('libViewGodotTres').style.display = 'none';
+            this.setupLibCompareTab();
+        });
+
+        this.libCompareGhost = false;
+        document.getElementById('btnLibCompareSideBySide')?.addEventListener('click', () => {
+            this.libCompareGhost = false;
+            document.getElementById('btnLibCompareSideBySide').classList.add('active');
+            document.getElementById('btnLibCompareGhost').classList.remove('active');
+            this.startLibDualCompareLoop();
+        });
+
+        document.getElementById('btnLibCompareGhost')?.addEventListener('click', () => {
+            this.libCompareGhost = true;
+            document.getElementById('btnLibCompareGhost').classList.add('active');
+            document.getElementById('btnLibCompareSideBySide').classList.remove('active');
+            this.startLibDualCompareLoop();
+        });
+
+        document.getElementById('libCompareClipA')?.addEventListener('change', () => this.startLibDualCompareLoop());
+        document.getElementById('libCompareClipB')?.addEventListener('change', () => this.startLibDualCompareLoop());
 
         document.getElementById('tabBtnLibGodotTres')?.addEventListener('click', () => {
             document.getElementById('tabBtnLibGodotTres').classList.add('active');
             document.getElementById('tabBtnLibFrames').classList.remove('active');
+            document.getElementById('tabBtnLibCompare')?.classList.remove('active');
             document.getElementById('libViewFrames').style.display = 'none';
+            document.getElementById('libViewCompare').style.display = 'none';
             document.getElementById('libViewGodotTres').style.display = 'flex';
+            if (this.libCompareInterval) clearInterval(this.libCompareInterval);
         });
 
         // Copy Buttons
@@ -2185,6 +2338,43 @@ class AssetStudioApp {
                 this.startLibAnimationLoop();
             }
         });
+
+        // Clip Alignment & Ground Baseline Sliders
+        const updateClipTransform = () => {
+            const scale = document.getElementById('libClipScaleSlider')?.value || 100;
+            const offY = document.getElementById('libClipOffsetYSlider')?.value || 0;
+            const offX = document.getElementById('libClipOffsetXSlider')?.value || 0;
+            const headY = document.getElementById('libHeadGuideYSlider')?.value || 60;
+            const scaleVal = document.getElementById('libClipScaleVal');
+            const offYVal = document.getElementById('libClipOffsetYVal');
+            const offXVal = document.getElementById('libClipOffsetXVal');
+            const headYVal = document.getElementById('libHeadGuideYVal');
+            if (scaleVal) scaleVal.innerText = `${scale}%`;
+            if (offYVal) offYVal.innerText = `${offY}px`;
+            if (offXVal) offXVal.innerText = `${offX}px`;
+            if (headYVal) headYVal.innerText = `${headY}px`;
+            this.drawLibAnimationFrame(this.libCurrentFrameIdx);
+        };
+
+        document.getElementById('libClipScaleSlider')?.addEventListener('input', updateClipTransform);
+        document.getElementById('libClipOffsetYSlider')?.addEventListener('input', updateClipTransform);
+        document.getElementById('libClipOffsetXSlider')?.addEventListener('input', updateClipTransform);
+        document.getElementById('libHeadGuideYSlider')?.addEventListener('input', updateClipTransform);
+        document.getElementById('chkLibShowGuides')?.addEventListener('change', () => this.drawLibAnimationFrame(this.libCurrentFrameIdx));
+
+        document.getElementById('btnResetClipTransform')?.addEventListener('click', () => {
+            const sc = document.getElementById('libClipScaleSlider');
+            const oy = document.getElementById('libClipOffsetYSlider');
+            const ox = document.getElementById('libClipOffsetXSlider');
+            const hy = document.getElementById('libHeadGuideYSlider');
+            if (sc) sc.value = 100;
+            if (oy) oy.value = 0;
+            if (ox) ox.value = 0;
+            if (hy) hy.value = 60;
+            updateClipTransform();
+        });
+
+        document.getElementById('btnSaveClipTransform')?.addEventListener('click', () => this.saveCurrentClipAdjustment());
     }
 
     async loadLibraryAssets(cat = 'all') {
@@ -2299,6 +2489,20 @@ class AssetStudioApp {
         if (slider) slider.value = this.libAnimFps;
         document.getElementById('libFpsVal').innerText = `${this.libAnimFps} FPS`;
 
+        // Reset transform sliders for new clip
+        const sc = document.getElementById('libClipScaleSlider');
+        const oy = document.getElementById('libClipOffsetYSlider');
+        const ox = document.getElementById('libClipOffsetXSlider');
+        if (sc) sc.value = 100;
+        if (oy) oy.value = 0;
+        if (ox) ox.value = 0;
+        const scaleVal = document.getElementById('libClipScaleVal');
+        const offYVal = document.getElementById('libClipOffsetYVal');
+        const offXVal = document.getElementById('libClipOffsetXVal');
+        if (scaleVal) scaleVal.innerText = `100%`;
+        if (offYVal) offYVal.innerText = `0px`;
+        if (offXVal) offXVal.innerText = `0px`;
+
         if (this.libCurrentClipFrames.length) {
             const dur = (this.libCurrentClipFrames.length / this.libAnimFps).toFixed(2);
             document.getElementById('libDurationVal').innerText = `${dur}s`;
@@ -2351,8 +2555,64 @@ class AssetStudioApp {
         const ctx = canvas.getContext('2d');
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.imageSmoothingEnabled = false;
+
+        const scale = (parseFloat(document.getElementById('libClipScaleSlider')?.value) || 100) / 100;
+        const offX = parseInt(document.getElementById('libClipOffsetXSlider')?.value) || 0;
+        const offY = parseInt(document.getElementById('libClipOffsetYSlider')?.value) || 0;
+        const showGuides = document.getElementById('chkLibShowGuides')?.checked ?? true;
+
         const img = this.libCurrentClipFrames[idx];
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        if (img && img.complete) {
+            const dw = canvas.width * scale;
+            const dh = canvas.height * scale;
+            const dx = (canvas.width - dw) / 2 + offX;
+            const dy = (canvas.height - dh) / 2 + offY;
+            ctx.drawImage(img, dx, dy, dw, dh);
+        }
+
+        if (showGuides) {
+            const headY = parseInt(document.getElementById('libHeadGuideYSlider')?.value) || 60;
+            const bobRange = 18; // Head bobbing amplitude (Vùng nhấp nhô)
+
+            // 1. Shaded Head Bobbing Zone
+            ctx.fillStyle = 'rgba(74, 222, 128, 0.12)';
+            ctx.fillRect(0, headY, canvas.width, bobRange);
+
+            // 2. Top Peak Head Line (Green dashed)
+            ctx.strokeStyle = '#4ade80';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(0, headY); ctx.lineTo(canvas.width, headY);
+            ctx.stroke();
+
+            // 3. Lower Bobbing Bound (Green dotted)
+            ctx.strokeStyle = 'rgba(74, 222, 128, 0.6)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([2, 2]);
+            ctx.beginPath();
+            ctx.moveTo(0, headY + bobRange); ctx.lineTo(canvas.width, headY + bobRange);
+            ctx.stroke();
+
+            // 4. Ground Line at y = 215px (Red dashed)
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(0, 215); ctx.lineTo(canvas.width, 215);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Labels
+            ctx.fillStyle = '#ef4444';
+            ctx.font = '8px sans-serif';
+            ctx.fillText('🔴 Chân tiếp đất (y=215)', 6, 211);
+
+            ctx.fillStyle = '#4ade80';
+            ctx.fillText(`🟢 Đỉnh cao (y=${headY})`, 6, headY - 4);
+            ctx.fillStyle = 'rgba(74, 222, 128, 0.85)';
+            ctx.fillText(`🌱 Vùng nhấp nhô (${headY}-${headY + bobRange}px)`, 6, headY + bobRange + 10);
+        }
 
         const info = document.getElementById('libAnimInfo');
         if (info) {
@@ -2360,11 +2620,416 @@ class AssetStudioApp {
         }
     }
 
+    async saveCurrentClipAdjustment() {
+        if (!this.currentInspectedAsset || !this.activeLibClipKey) return;
+        const scale = (parseFloat(document.getElementById('libClipScaleSlider')?.value) || 100) / 100;
+        const offX = parseInt(document.getElementById('libClipOffsetXSlider')?.value) || 0;
+        const offY = parseInt(document.getElementById('libClipOffsetYSlider')?.value) || 0;
+
+        if (scale === 1.0 && offX === 0 && offY === 0) {
+            this.showToast("ℹ️ Tỉ lệ và vị trí chưa thay đổi (Scale: 100%, Offset: 0px).");
+            return;
+        }
+
+        const btn = document.getElementById('btnSaveClipTransform');
+        btn.innerText = "⏳ Đang Lưu..."; btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/library/adjust_clip', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    category: this.currentInspectedAsset.category || 'characters',
+                    asset_id: this.currentInspectedAsset.id,
+                    clip_key: this.activeLibClipKey,
+                    scale: scale,
+                    offset_x: offX,
+                    offset_y: offY
+                })
+            });
+            const data = await res.json();
+            if (data.status === 'ok') {
+                // Reload images with new baked frames
+                this.libLoadedClipImages[this.activeLibClipKey] = await Promise.all(data.frames.map(url => {
+                    return new Promise((resolve) => {
+                        const img = new Image();
+                        img.onload = () => resolve(img);
+                        img.onerror = () => resolve(img);
+                        img.src = url;
+                    });
+                }));
+                this.libCurrentClipFrames = this.libLoadedClipImages[this.activeLibClipKey];
+
+                // Reset sliders to 100% since new frames are now baked at 100%
+                const sc = document.getElementById('libClipScaleSlider');
+                const oy = document.getElementById('libClipOffsetYSlider');
+                const ox = document.getElementById('libClipOffsetXSlider');
+                if (sc) sc.value = 100;
+                if (oy) oy.value = 0;
+                if (ox) ox.value = 0;
+                const scaleVal = document.getElementById('libClipScaleVal');
+                const offYVal = document.getElementById('libClipOffsetYVal');
+                const offXVal = document.getElementById('libClipOffsetXVal');
+                if (scaleVal) scaleVal.innerText = `100%`;
+                if (offYVal) offYVal.innerText = `0px`;
+                if (offXVal) offXVal.innerText = `0px`;
+
+                this.selectLibClip(this.activeLibClipKey);
+                this.showToast(`✨ Đã lưu thành công tỉ lệ & chân tiếp đất mới cho [${this.activeLibClipKey}] sang Godot!`);
+            } else {
+                this.showToast("⚠️ " + (data.detail || "Lỗi lưu chỉnh sửa clip"));
+            }
+        } catch(e) {
+            this.showToast("⚠️ Lỗi: " + e.message);
+        } finally {
+            btn.innerText = "💾 Lưu Đè Clip Này ➔"; btn.disabled = false;
+        }
+    }
+
     closeLibraryAssetInspector() {
         if (this.libAnimInterval) clearInterval(this.libAnimInterval);
+        if (this.libCompareInterval) clearInterval(this.libCompareInterval);
         this.libAnimPlaying = false;
         const modal = document.getElementById('libAssetModal');
         if (modal) modal.style.display = 'none';
+    }
+
+    setupLibCompareTab() {
+        if (!this.currentInspectedAsset) return;
+        const clips = this.currentInspectedAsset.clips || {};
+        const clipKeys = Object.keys(clips);
+        const selA = document.getElementById('libCompareClipA');
+        const selB = document.getElementById('libCompareClipB');
+        if (!selA || !selB) return;
+
+        selA.innerHTML = '';
+        selB.innerHTML = '';
+        clipKeys.forEach((k, idx) => {
+            const optA = document.createElement('option');
+            optA.value = k; optA.innerText = `🎬 ${k} (${clips[k].length}F)`;
+            if (idx === 0) optA.selected = true;
+            selA.appendChild(optA);
+
+            const optB = document.createElement('option');
+            optB.value = k; optB.innerText = `🎬 ${k} (${clips[k].length}F)`;
+            if (idx === Math.min(1, clipKeys.length - 1)) optB.selected = true;
+            selB.appendChild(optB);
+        });
+
+        this.startLibDualCompareLoop();
+    }
+
+    startLibDualCompareLoop() {
+        if (this.libCompareInterval) clearInterval(this.libCompareInterval);
+        const selA = document.getElementById('libCompareClipA');
+        const selB = document.getElementById('libCompareClipB');
+        if (!selA || !selB) return;
+
+        const keyA = selA.value;
+        const keyB = selB.value;
+        const framesA = this.libLoadedClipImages[keyA] || [];
+        const framesB = this.libLoadedClipImages[keyB] || [];
+
+        const canvas = document.getElementById('libCompareCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+
+        let idx = 0;
+        this.libCompareInterval = setInterval(() => {
+            if (!framesA.length || !framesB.length) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const fA = framesA[idx % framesA.length];
+            const fB = framesB[idx % framesB.length];
+
+            const imgSize = 180;
+            const imgY = 10;
+            const headY = parseInt(document.getElementById('libHeadGuideYSlider')?.value) || 60;
+            const groundY = imgY + imgSize * (215.0 / 256.0);  // = matching 215px on 256 frame
+            const headPeakY = imgY + imgSize * (headY / 256.0); // = matching dynamic headY on 256 frame
+            const headDipY = imgY + imgSize * ((headY + 18) / 256.0);  // = matching head bob dip on 256 frame
+
+            // 1. Draw Shaded Head Bobbing Zone
+            ctx.fillStyle = 'rgba(74, 222, 128, 0.12)';
+            ctx.fillRect(0, headPeakY, canvas.width, headDipY - headPeakY);
+
+            // 2. Draw Top Peak Head Line (Green dashed)
+            ctx.strokeStyle = '#4ade80';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(0, headPeakY); ctx.lineTo(canvas.width, headPeakY);
+            ctx.stroke();
+
+            // 3. Draw Lower Bobbing Line (Green dotted)
+            ctx.strokeStyle = 'rgba(74, 222, 128, 0.6)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([2, 2]);
+            ctx.beginPath();
+            ctx.moveTo(0, headDipY); ctx.lineTo(canvas.width, headDipY);
+            ctx.stroke();
+
+            // 4. Draw Ground Line (Red dashed)
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(0, groundY); ctx.lineTo(canvas.width, groundY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Labels
+            ctx.fillStyle = '#ef4444';
+            ctx.font = '8px sans-serif';
+            ctx.fillText('🔴 Chân tiếp đất', 8, groundY - 3);
+
+            ctx.fillStyle = '#4ade80';
+            ctx.fillText('🟢 Đỉnh đầu', 8, headPeakY - 3);
+
+            if (this.libCompareGhost) {
+                // Ghost Overlay Mode
+                const cx = (canvas.width - imgSize) / 2;
+                if (fA && fA.complete) {
+                    ctx.globalAlpha = 0.7;
+                    ctx.drawImage(fA, cx, imgY, imgSize, imgSize);
+                }
+                if (fB && fB.complete) {
+                    ctx.globalAlpha = 0.7;
+                    ctx.drawImage(fB, cx, imgY, imgSize, imgSize);
+                }
+                ctx.globalAlpha = 1.0;
+            } else {
+                // Side by Side Mode
+                const leftX = (canvas.width / 2 - imgSize) / 2;
+                const rightX = canvas.width / 2 + (canvas.width / 2 - imgSize) / 2;
+
+                // Left: Clip A
+                if (fA && fA.complete) {
+                    ctx.drawImage(fA, leftX, imgY, imgSize, imgSize);
+                }
+                // Middle Divider
+                ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(canvas.width / 2, 0); ctx.lineTo(canvas.width / 2, canvas.height);
+                ctx.stroke();
+
+                // Right: Clip B
+                if (fB && fB.complete) {
+                    ctx.drawImage(fB, rightX, imgY, imgSize, imgSize);
+                }
+            }
+
+            const rulerInfo = document.getElementById('libCompareRulerInfo');
+            if (rulerInfo) {
+                rulerInfo.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span>📊 <b>[Clip A: ${keyA}]</b> vs <b>[Clip B: ${keyB}]</b></span>
+                        <span>🔴 Đường đỏ: Vạch chân tiếp đất | 🟢 Đường xanh: Đỉnh đầu</span>
+                    </div>
+                    <div style="margin-top:3px;color:var(--text-muted);font-size:9.5px;">
+                        💡 <b>Mẹo Cân Kích Thước:</b> Nếu thấy <b>${keyB}</b> bé hơn hoặc to hơn <b>${keyA}</b>, bạn chỉ cần vào lại <b>Tab 2 (Video)</b>, chỉnh thanh trượt <i>"Tỉ Lệ Thân Người (Scale)"</i> (ví dụ tăng lên 115% hoặc giảm xuống 85%) và bóc lại frame là 2 animation sẽ khít đều 100%!
+                    </div>
+                `;
+            }
+
+            idx++;
+        }, 1000 / (this.libAnimFps || 8));
+    }
+
+    async updateTab2RefClipsList() {
+        const select = document.getElementById('videoRefClipSelect');
+        if (!select) return;
+        
+        const currentVal = select.value;
+        select.innerHTML = '<option value="">(Chọn Clip để so kích thước)</option>';
+        
+        // 1. Fetch from server library
+        try {
+            const res = await fetch('/api/library/assets');
+            const data = await res.json();
+            const allItems = data.all || [];
+            
+            allItems.forEach(item => {
+                const clips = item.clips || {};
+                const clipKeys = Object.keys(clips);
+                if (clipKeys.length > 0) {
+                    const grp = document.createElement('optgroup');
+                    grp.label = `📁 ${item.name}`;
+                    clipKeys.forEach(cName => {
+                        const opt = document.createElement('option');
+                        opt.value = `server:${item.id}:${cName}`;
+                        opt.innerText = `🎬 ${cName} (${clips[cName].length}F)`;
+                        grp.appendChild(opt);
+                    });
+                    select.appendChild(grp);
+                }
+            });
+        } catch(e) {
+            console.error("Error fetching library clips for Tab 2 ref:", e);
+        }
+
+        // 2. Also add any local unsaved/saved clips in this.assetClips
+        if (this.assetClips) {
+            for (const [aId, clipsMap] of Object.entries(this.assetClips)) {
+                const cKeys = Object.keys(clipsMap);
+                if (cKeys.length > 0) {
+                    const grp = document.createElement('optgroup');
+                    grp.label = `💾 Đã lưu tạm: ${aId}`;
+                    cKeys.forEach(cName => {
+                        const opt = document.createElement('option');
+                        opt.value = `local:${aId}:${cName}`;
+                        opt.innerText = `⚡ ${cName} (${clipsMap[cName].frames.length}F)`;
+                        grp.appendChild(opt);
+                    });
+                    select.appendChild(grp);
+                }
+            }
+        }
+
+        // Restore selection or auto-select 'walk' or first available clip
+        if (currentVal && select.querySelector(`option[value="${currentVal}"]`)) {
+            select.value = currentVal;
+        } else {
+            const defaultOpt = Array.from(select.querySelectorAll('option')).find(o => o.value.includes('walk') || o.value.includes('idle') || o.value.includes('hop'));
+            if (defaultOpt) {
+                select.value = defaultOpt.value;
+                const compareBox = document.getElementById('videoDualCompareBox');
+                if (compareBox) compareBox.style.display = 'block';
+                this.startTab2DualCompareLoop(defaultOpt.value);
+            }
+        }
+    }
+
+    async startTab2DualCompareLoop(clipVal) {
+        if (this.tab2CompareInterval) clearInterval(this.tab2CompareInterval);
+        const canvas = document.getElementById('videoDualCompareCanvas');
+        if (!canvas || !clipVal) return;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = false;
+
+        let refFrames = [];
+        try {
+            if (clipVal.startsWith('local:')) {
+                const parts = clipVal.split(':');
+                const aId = parts[1];
+                const cName = parts[2];
+                const b64List = (this.assetClips[aId] && this.assetClips[aId][cName]) ? this.assetClips[aId][cName].frames : [];
+                refFrames = await Promise.all(b64List.map(b64 => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(i); i.src = b64; })));
+            } else if (clipVal.startsWith('server:')) {
+                const parts = clipVal.split(':');
+                const aId = parts[1];
+                const cName = parts[2];
+                const res = await fetch('/api/library/assets');
+                const data = await res.json();
+                const allItems = data.all || [];
+                const targetObj = allItems.find(a => a.id === aId || a.name === aId);
+                const urls = (targetObj && targetObj.clips && targetObj.clips[cName]) ? targetObj.clips[cName] : [];
+                refFrames = await Promise.all(urls.map(u => new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(i); i.src = u; })));
+            }
+        } catch(e) {
+            console.error("Error loading refFrames for Tab 2 compare:", e);
+        }
+
+        if (!refFrames.length) {
+            const infoEl = document.getElementById('videoDualCompareInfo');
+            if (infoEl) infoEl.innerText = `⚠️ Chưa tải được frame mẫu`;
+            return;
+        }
+
+        let curExtractedImgs = (this.extractedFrames || []).map(b64 => {
+            const i = new Image(); i.src = b64; return i;
+        });
+
+        let idx = 0;
+        this.tab2CompareInterval = setInterval(() => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const fExt = curExtractedImgs.length > 0 ? curExtractedImgs[idx % curExtractedImgs.length] : null;
+            const fRef = refFrames[idx % refFrames.length];
+
+            const imgSize = 110;
+            const imgY = 8;
+            const groundY = imgY + imgSize * (215.0 / 256.0);  // = 100.4px (matching 215px on 256 frame)
+            const headPeakY = imgY + imgSize * (60.0 / 256.0); // = 33.8px (matching 60px on 256 frame)
+            const headDipY = imgY + imgSize * (78.0 / 256.0);  // = 41.5px (matching 78px on 256 frame)
+
+            // 1. Draw Head Bobbing Range (Vùng nhấp nhô đầu)
+            ctx.fillStyle = 'rgba(74, 222, 128, 0.12)';
+            ctx.fillRect(0, headPeakY, canvas.width, headDipY - headPeakY);
+
+            // 2. Draw Top Peak Head Line (Green dashed)
+            ctx.strokeStyle = '#4ade80';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(0, headPeakY); ctx.lineTo(canvas.width, headPeakY);
+            ctx.stroke();
+
+            // 3. Draw Lower Bobbing Line (Green dotted)
+            ctx.strokeStyle = 'rgba(74, 222, 128, 0.6)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([2, 2]);
+            ctx.beginPath();
+            ctx.moveTo(0, headDipY); ctx.lineTo(canvas.width, headDipY);
+            ctx.stroke();
+
+            // 4. Draw Ground Line (Red dashed)
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(0, groundY); ctx.lineTo(canvas.width, groundY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            if (this.tab2CompareGhost) {
+                // Ghost Overlay: Ref frame normal, Extracted frame tinted
+                const cx = (canvas.width - imgSize) / 2;
+                if (fRef && fRef.complete) {
+                    ctx.globalAlpha = 0.6;
+                    ctx.drawImage(fRef, cx, imgY, imgSize, imgSize);
+                }
+                if (fExt && fExt.complete) {
+                    ctx.globalAlpha = 0.8;
+                    ctx.drawImage(fExt, cx, imgY, imgSize, imgSize);
+                }
+                ctx.globalAlpha = 1.0;
+            } else {
+                // Side by Side
+                const leftX = (128 - imgSize) / 2;
+                const rightX = 128 + (128 - imgSize) / 2;
+
+                // Left: Reference Frame (Clip đã có)
+                if (fRef && fRef.complete) {
+                    ctx.drawImage(fRef, leftX, imgY, imgSize, imgSize);
+                }
+                // Middle Divider
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(128, 0); ctx.lineTo(128, canvas.height);
+                ctx.stroke();
+
+                // Right: Extracted Frame (Đang bóc tách)
+                if (fExt && fExt.complete) {
+                    ctx.drawImage(fExt, rightX, imgY, imgSize, imgSize);
+                } else {
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.font = '10px sans-serif';
+                    ctx.fillText('(Chưa bóc frame)', 140, 60);
+                }
+            }
+
+            const infoEl = document.getElementById('videoDualCompareInfo');
+            if (infoEl) {
+                const cLabel = clipVal.split(':').pop();
+                infoEl.innerHTML = `◀ Mẫu: <b>${cLabel}</b> | Đang bóc: <b>${this.extractedFrames ? this.extractedFrames.length : 0}F</b> ▶`;
+            }
+
+            idx++;
+        }, 1000 / (this.videoFps || 10));
     }
 
     async exportStudioToGodot() {

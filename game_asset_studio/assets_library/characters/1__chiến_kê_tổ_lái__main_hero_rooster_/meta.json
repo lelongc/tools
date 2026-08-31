@@ -3,8 +3,10 @@
   "category": "characters",
   "clips": [
     "hop_forward",
+    "squashed_death",
+    "talon_kick",
     "walk",
-    "talon_kick"
+    "idle"
   ],
-  "created_at": "2026-08-31 11:35:39"
+  "created_at": "2026-08-31 13:57:41"
 }

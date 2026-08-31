@@ -159,7 +159,11 @@
               "action_description_vi": "Gà bị lực ép từ trên giáng xuống ➔ Thân người xẹp lép theo chiều dọc dẹt ra 2 bên như chiếc bánh tráng ➔ Mắt hóa thành 2 dấu X và có vòng sao xoay tít trên đầu.",
               "cut_guide_vi": "Bắt đầu từ tư thế đứng bình thường trước va chạm (0.0s) ➔ Kết thúc khi thân gà bẹp phẳng hoàn toàn và bất động (khoảng 0.65s - 0.85s). Bỏ cờ 'Loop' vì đây là hoạt ảnh tử trận.",
               "negative_prompt": "blood, gore, realistic violence, disappearing body, camera shaking",
-              "completed": false
+              "completed": true,
+              "raw_file_name": "White_rooster_squashed_flat_vert…_202608311338.mp4",
+              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_3_1788158468.mp4",
+              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_3_1788158468.mp4",
+              "uploaded_at": "2026-08-31 13:41"
             },
             {
               "step_name": "🎬 Bước 2.4: Video Hoạt Ảnh [idle] (Đứng Nhìn Ngơ Ngác)",
@@ -169,7 +173,11 @@
               "action_description_vi": "Gà đứng yên tại chỗ, ngực phập phồng nhẹ theo nhịp thở, chiếc mào đỏ hơi đung đưa, đầu hơi nghiêng quan sát và chớp mắt 1 nhịp.",
               "cut_guide_vi": "Cắt 1 chu kỳ thở trọn vẹn: Từ lúc ngực bắt đầu nâng lên hít vào (khoảng 0.2s) ➔ Đến khi ngực hạ xuống thở ra và trở về vị trí cũ (khoảng 1.0s - 1.2s). Bật nút [🪃 Ping-Pong Loop] trong Tab 2 để thở mượt 100%.",
               "negative_prompt": "running, walking away, jumping, extreme movement, camera pan",
-              "completed": false
+              "completed": true,
+              "raw_file_name": "Pixel_rooster_standing_idle_202608311351.mp4",
+              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_4_1788159125.mp4",
+              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_4_1788159125.mp4",
+              "uploaded_at": "2026-08-31 13:52"
             },
             {
               "step_name": "🎬 Bước 2.5: Video Hoạt Ảnh [walk] (Đi Bộ Thong Thả)",

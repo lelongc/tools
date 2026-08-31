@@ -1,4 +1,4 @@
-[gd_resource type="SpriteFrames" load_steps=31 format=3]
+[gd_resource type="SpriteFrames" load_steps=41 format=3]
 
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/hop_forward_0.png" id="1_hop_forward_0"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/hop_forward_1.png" id="2_hop_forward_1"]
@@ -8,14 +8,14 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/hop_forward_5.png" id="6_hop_forward_5"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/hop_forward_6.png" id="7_hop_forward_6"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/hop_forward_7.png" id="8_hop_forward_7"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_0.png" id="9_walk_0"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_1.png" id="10_walk_1"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_2.png" id="11_walk_2"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_3.png" id="12_walk_3"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_4.png" id="13_walk_4"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_5.png" id="14_walk_5"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_6.png" id="15_walk_6"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_7.png" id="16_walk_7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/squashed_death_0.png" id="9_squashed_death_0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/squashed_death_1.png" id="10_squashed_death_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/squashed_death_2.png" id="11_squashed_death_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/squashed_death_3.png" id="12_squashed_death_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/squashed_death_4.png" id="13_squashed_death_4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/squashed_death_5.png" id="14_squashed_death_5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/squashed_death_6.png" id="15_squashed_death_6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/squashed_death_7.png" id="16_squashed_death_7"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_0.png" id="17_talon_kick_0"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_1.png" id="18_talon_kick_1"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_2.png" id="19_talon_kick_2"]
@@ -24,12 +24,22 @@
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_5.png" id="22_talon_kick_5"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_6.png" id="23_talon_kick_6"]
 [ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_7.png" id="24_talon_kick_7"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_8.png" id="25_talon_kick_8"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_9.png" id="26_talon_kick_9"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_10.png" id="27_talon_kick_10"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_11.png" id="28_talon_kick_11"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_12.png" id="29_talon_kick_12"]
-[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_13.png" id="30_talon_kick_13"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_0.png" id="25_walk_0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_1.png" id="26_walk_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_2.png" id="27_walk_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_3.png" id="28_walk_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_4.png" id="29_walk_4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_5.png" id="30_walk_5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_6.png" id="31_walk_6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_7.png" id="32_walk_7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/idle_0.png" id="33_idle_0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/idle_1.png" id="34_idle_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/idle_2.png" id="35_idle_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/idle_3.png" id="36_idle_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/idle_4.png" id="37_idle_4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/idle_5.png" id="38_idle_5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/idle_6.png" id="39_idle_6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/idle_7.png" id="40_idle_7"]
 
 [resource]
 animations = [{
@@ -64,31 +74,31 @@ animations = [{
 }, {
 "frames": [{
 "duration": 1.0,
-"texture": ExtResource("9_walk_0")
+"texture": ExtResource("9_squashed_death_0")
 }, {
 "duration": 1.0,
-"texture": ExtResource("10_walk_1")
+"texture": ExtResource("10_squashed_death_1")
 }, {
 "duration": 1.0,
-"texture": ExtResource("11_walk_2")
+"texture": ExtResource("11_squashed_death_2")
 }, {
 "duration": 1.0,
-"texture": ExtResource("12_walk_3")
+"texture": ExtResource("12_squashed_death_3")
 }, {
 "duration": 1.0,
-"texture": ExtResource("13_walk_4")
+"texture": ExtResource("13_squashed_death_4")
 }, {
 "duration": 1.0,
-"texture": ExtResource("14_walk_5")
+"texture": ExtResource("14_squashed_death_5")
 }, {
 "duration": 1.0,
-"texture": ExtResource("15_walk_6")
+"texture": ExtResource("15_squashed_death_6")
 }, {
 "duration": 1.0,
-"texture": ExtResource("16_walk_7")
+"texture": ExtResource("16_squashed_death_7")
 }],
-"loop": true,
-"name": &"walk",
+"loop": false,
+"name": &"squashed_death",
 "speed": 8.0
 }, {
 "frames": [{
@@ -115,26 +125,66 @@ animations = [{
 }, {
 "duration": 1.0,
 "texture": ExtResource("24_talon_kick_7")
-}, {
-"duration": 1.0,
-"texture": ExtResource("25_talon_kick_8")
-}, {
-"duration": 1.0,
-"texture": ExtResource("26_talon_kick_9")
-}, {
-"duration": 1.0,
-"texture": ExtResource("27_talon_kick_10")
-}, {
-"duration": 1.0,
-"texture": ExtResource("28_talon_kick_11")
-}, {
-"duration": 1.0,
-"texture": ExtResource("29_talon_kick_12")
-}, {
-"duration": 1.0,
-"texture": ExtResource("30_talon_kick_13")
 }],
 "loop": false,
 "name": &"talon_kick",
 "speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("25_walk_0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_walk_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_walk_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_walk_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_walk_4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30_walk_5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("31_walk_6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("32_walk_7")
+}],
+"loop": true,
+"name": &"walk",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("33_idle_0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("34_idle_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("35_idle_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("36_idle_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("37_idle_4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("38_idle_5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("39_idle_6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("40_idle_7")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 8.0
 }]

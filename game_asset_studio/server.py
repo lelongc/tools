@@ -761,7 +761,8 @@ async def process_video_file(
     char_scale: float = Form(100.0),
     offset_y: int = Form(0),
     target_size: int = Form(256),
-    pixelate: bool = Form(True)
+    pixelate: bool = Form(True),
+    flip_h: bool = Form(False)
 ):
     temp_video_path = os.path.join(WORKSPACE_DIR, f"temp_{int(datetime.now().timestamp())}_{video.filename}")
     with open(temp_video_path, "wb") as f:
@@ -805,8 +806,8 @@ async def process_video_file(
         if not raw_frames_rgba:
             raise HTTPException(status_code=400, detail="Không thể đọc frame nào từ video.")
 
-        # 1. AUTO-CROP UNIFIED BOUNDING BOX (Prevents 16:9 Distortion & Synchronizes Scale)
-        if aspect_mode == "crop_character" and bg_removal != "none":
+        # 1. AUTO-CROP IN-PLACE / UNIFIED BOUNDING BOX (Prevents 16:9 Distortion & Synchronizes Scale)
+        if aspect_mode in ["crop_character", "crop_center_inplace"] and bg_removal != "none":
             all_bboxes = [f.getbbox() for f in raw_frames_rgba if f.getbbox() is not None]
             if all_bboxes:
                 min_x = min(b[0] for b in all_bboxes)
@@ -817,29 +818,47 @@ async def process_video_file(
                 bw = max(10, max_x - min_x)
                 bh = max(10, max_y - min_y)
                 
-                # Make square bounding box with padding
-                max_dim = max(bw, bh)
+                # Height-based sizing ensures consistent character body size across walk, run, attack
+                max_dim = max(bw, bh) if aspect_mode == "crop_character" else int(bh * 1.25)
                 pad = int(max_dim * 0.12)
                 base_dim = max_dim + pad * 2
                 
-                # Apply character scale multiplier
-                scale_factor = max(0.4, char_scale / 100.0)
+                # Apply character scale multiplier (Supports 50% to 250%)
+                scale_factor = max(0.3, char_scale / 100.0)
                 final_dim = max(20, int(base_dim / scale_factor))
                 
-                cx = (min_x + max_x) // 2
-                cy = (min_y + max_y) // 2
-                
-                # Apply Y offset
-                crop_x1 = cx - final_dim // 2
-                crop_y1 = (cy - final_dim // 2) - int(offset_y * (final_dim / 256.0))
-                
                 resample = Image.Resampling.NEAREST if pixelate else Image.Resampling.BICUBIC
-                for raw_f in raw_frames_rgba:
-                    sq_canvas = Image.new("RGBA", (final_dim, final_dim), (0, 0, 0, 0))
-                    sq_canvas.paste(raw_f, (-crop_x1, -crop_y1))
-                    f_final = sq_canvas.resize((target_size, target_size), resample)
-                    frames_pil.append(f_final)
-                    frames_b64.append(image_to_base64(f_final))
+                
+                if aspect_mode == "crop_center_inplace":
+                    # Center each frame individually so character stays in-place (ideal for 2D game controllers)
+                    for raw_f in raw_frames_rgba:
+                        f_box = raw_f.getbbox() or (min_x, min_y, max_x, max_y)
+                        fcx = (f_box[0] + f_box[2]) // 2
+                        fcy = (f_box[1] + f_box[3]) // 2
+                        crop_x1 = fcx - final_dim // 2
+                        crop_y1 = (fcy - final_dim // 2) - int(offset_y * (final_dim / 256.0))
+                        
+                        sq_canvas = Image.new("RGBA", (final_dim, final_dim), (0, 0, 0, 0))
+                        sq_canvas.paste(raw_f, (-crop_x1, -crop_y1))
+                        f_final = sq_canvas.resize((target_size, target_size), resample)
+                        if flip_h:
+                            f_final = f_final.transpose(Image.FLIP_LEFT_RIGHT)
+                        frames_pil.append(f_final)
+                        frames_b64.append(image_to_base64(f_final))
+                else:
+                    cx = (min_x + max_x) // 2
+                    cy = (min_y + max_y) // 2
+                    crop_x1 = cx - final_dim // 2
+                    crop_y1 = (cy - final_dim // 2) - int(offset_y * (final_dim / 256.0))
+                    
+                    for raw_f in raw_frames_rgba:
+                        sq_canvas = Image.new("RGBA", (final_dim, final_dim), (0, 0, 0, 0))
+                        sq_canvas.paste(raw_f, (-crop_x1, -crop_y1))
+                        f_final = sq_canvas.resize((target_size, target_size), resample)
+                        if flip_h:
+                            f_final = f_final.transpose(Image.FLIP_LEFT_RIGHT)
+                        frames_pil.append(f_final)
+                        frames_b64.append(image_to_base64(f_final))
             else:
                 aspect_mode = "fit_letterbox"
 
@@ -856,6 +875,8 @@ async def process_video_file(
                     
                     canvas = Image.new("RGBA", (target_size, target_size), (0, 0, 0, 0))
                     canvas.paste(resized, ((target_size - nw) // 2, (target_size - nh) // 2))
+                    if flip_h:
+                        canvas = canvas.transpose(Image.FLIP_LEFT_RIGHT)
                     frames_pil.append(canvas)
                     frames_b64.append(image_to_base64(canvas))
             else:
@@ -863,6 +884,8 @@ async def process_video_file(
                 resample = Image.Resampling.NEAREST if pixelate else Image.Resampling.BICUBIC
                 for raw_f in raw_frames_rgba:
                     f_final = raw_f.resize((target_size, target_size), resample)
+                    if flip_h:
+                        f_final = f_final.transpose(Image.FLIP_LEFT_RIGHT)
                     frames_pil.append(f_final)
                     frames_b64.append(image_to_base64(f_final))
     else:
@@ -906,7 +929,6 @@ async def export_to_godot(req: GodotExportRequest):
     lib_target_dir = os.path.join(ASSETS_LIB_DIR, req.category, c_name)
     os.makedirs(lib_target_dir, exist_ok=True)
 
-    first_thumb_saved = os.path.exists(os.path.join(lib_target_dir, "thumb.png"))
     all_clips_frames = {}
 
     # Scan existing frames in library folder
@@ -920,10 +942,21 @@ async def export_to_godot(req: GodotExportRequest):
                         all_clips_frames[c_key] = {}
                     all_clips_frames[c_key][f_idx] = f_name
 
-    # Save newly exported frames
+    # Save newly exported frames (clean old frames for updated clips first)
     for clip_key, frames_b64 in req.clips.items():
-        if clip_key not in all_clips_frames:
-            all_clips_frames[clip_key] = {}
+        # Clear out previous files for this specific clip to prevent leftover frames
+        if os.path.exists(lib_target_dir):
+            for old_f in list(os.listdir(lib_target_dir)):
+                if old_f.startswith(f"{clip_key}_") and old_f.endswith(".png"):
+                    try: os.remove(os.path.join(lib_target_dir, old_f))
+                    except Exception: pass
+        if os.path.exists(godot_target_dir):
+            for old_f in list(os.listdir(godot_target_dir)):
+                if old_f.startswith(f"{clip_key}_") and old_f.endswith(".png"):
+                    try: os.remove(os.path.join(godot_target_dir, old_f))
+                    except Exception: pass
+                    
+        all_clips_frames[clip_key] = {}
         for idx, b64 in enumerate(frames_b64):
             f_img = base64_to_image(b64)
             f_path = os.path.join(godot_target_dir, f"{clip_key}_{idx}.png")
@@ -931,10 +964,9 @@ async def export_to_godot(req: GodotExportRequest):
             f_img.save(os.path.join(lib_target_dir, f"{clip_key}_{idx}.png"))
             all_clips_frames[clip_key][idx] = f"{clip_key}_{idx}.png"
             
-            if not first_thumb_saved:
+            if idx == 0 and (clip_key in ["idle", "walk", "hop_forward"] or not os.path.exists(os.path.join(lib_target_dir, "thumb.png"))):
                 thumb = f_img.resize((128, 128), Image.Resampling.NEAREST)
                 thumb.save(os.path.join(lib_target_dir, "thumb.png"))
-                first_thumb_saved = True
 
     # Generate standard Godot 4 SpriteFrames (.tres) with full Texture2D references
     ext_resources = []
@@ -1020,7 +1052,7 @@ async def get_library_assets():
                     except Exception:
                         pass
                 
-                # Scan all clips and frame files
+                # Scan all clips and frame files with cache-busting timestamps
                 clips_data: Dict[str, List[str]] = {}
                 for f_name in sorted(os.listdir(item_path)):
                     if f_name.endswith(".png") and "_" in f_name and not f_name.startswith("thumb") and not f_name.startswith("spritesheet"):
@@ -1029,7 +1061,9 @@ async def get_library_assets():
                             c_key = parts[0]
                             if c_key not in clips_data:
                                 clips_data[c_key] = []
-                            clips_data[c_key].append(f"/assets_library/{cat}/{item_name}/{f_name}")
+                            f_full = os.path.join(item_path, f_name)
+                            mtime = int(os.path.getmtime(f_full))
+                            clips_data[c_key].append(f"/assets_library/{cat}/{item_name}/{f_name}?v={mtime}")
                 
                 tres_file_path = os.path.join(item_path, f"{item_name}_frames.tres")
                 tres_code = ""
@@ -1065,6 +1099,61 @@ async def get_library_assets():
                 catalog["all"].append(entry)
                 
     return catalog
+
+# =========================================================================
+# 5. ADJUST & ALIGN CLIP DIRECTLY IN LIBRARY (SCALE & GROUND BASELINE)
+# =========================================================================
+class ClipAdjustRequest(BaseModel):
+    category: str = "characters"
+    asset_id: str
+    clip_key: str
+    scale: float = 1.0
+    offset_x: int = 0
+    offset_y: int = 0
+
+@app.post("/api/library/adjust_clip")
+async def adjust_clip(req: ClipAdjustRequest):
+    c_name = req.asset_id
+    lib_target_dir = os.path.join(ASSETS_LIB_DIR, req.category, c_name)
+    godot_target_dir = os.path.join(GODOT_SPRITES_DIR, req.category, c_name)
+    
+    if not os.path.exists(lib_target_dir):
+        # Try sanitized lookup
+        c_sanitized = "".join(c if c.isalnum() or c == "_" else "_" for c in req.asset_id.lower().strip())
+        lib_target_dir = os.path.join(ASSETS_LIB_DIR, req.category, c_sanitized)
+        godot_target_dir = os.path.join(GODOT_SPRITES_DIR, req.category, c_sanitized)
+        if not os.path.exists(lib_target_dir):
+            raise HTTPException(status_code=404, detail="Không tìm thấy thư mục của Asset.")
+            
+    frame_files = [f for f in sorted(os.listdir(lib_target_dir)) if f.startswith(f"{req.clip_key}_") and f.endswith(".png")]
+    if not frame_files:
+        raise HTTPException(status_code=404, detail=f"Không tìm thấy frame nào của clip {req.clip_key}.")
+        
+    updated_urls = []
+    for f_name in frame_files:
+        f_path = os.path.join(lib_target_dir, f_name)
+        img = Image.open(f_path).convert("RGBA")
+        w, h = img.size
+        
+        # Apply scale & offset transform with clean pixel art interpolation
+        nw = max(1, int(w * req.scale))
+        nh = max(1, int(h * req.scale))
+        resized = img.resize((nw, nh), Image.Resampling.NEAREST)
+        
+        new_canvas = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        paste_x = (w - nw) // 2 + req.offset_x
+        paste_y = (h - nh) // 2 + req.offset_y
+        new_canvas.paste(resized, (paste_x, paste_y))
+        
+        # Overwrite PNG in library and godot folder
+        new_canvas.save(f_path)
+        if os.path.exists(godot_target_dir):
+            new_canvas.save(os.path.join(godot_target_dir, f_name))
+            
+        mtime = int(os.path.getmtime(f_path))
+        updated_urls.append(f"/assets_library/{req.category}/{os.path.basename(lib_target_dir)}/{f_name}?v={mtime}")
+        
+    return {"status": "ok", "clip_key": req.clip_key, "frames": updated_urls}
 
 app.mount("/assets_library", StaticFiles(directory=ASSETS_LIB_DIR), name="assets_library")
 app.mount("/raw_assets", StaticFiles(directory=RAW_ASSETS_DIR), name="raw_assets")
