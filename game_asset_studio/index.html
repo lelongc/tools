@@ -159,24 +159,62 @@
                         </div>
                     </div>
 
+                    <!-- DYNAMIC STEP ACTION & CUTTING GUIDE IN TAB 2 -->
+                    <div class="panel-section" id="videoStepGuideSection" style="display:none;background:rgba(0,240,255,0.05);border:1px solid var(--accent-cyan);border-radius:4px;padding:8px;">
+                        <div class="section-title" style="color:var(--accent-cyan);margin-bottom:4px;display:flex;align-items:center;gap:4px;">
+                            💡 MẸO BÓC 1 CHU KỲ CHUẨN:
+                        </div>
+                        <div id="videoStepGuideContent" style="font-size:10px;color:#e2e8f0;line-height:1.4;"></div>
+                    </div>
+
                     <div class="panel-section">
-                        <div class="section-title">⏱️ THỜI GIAN CẮT CHU KỲ</div>
-                        <div class="form-row">
+                        <div class="section-title">⏱️ THỜI GIAN CẮT & CĂN CHỈNH LOOP</div>
+                        
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                            <!-- START TIME -->
                             <div class="form-group">
-                                <label>Bắt đầu (giây):</label>
-                                <input type="number" id="videoStartSec" min="0" step="0.1" value="0.0">
+                                <div style="display:flex;justify-content:space-between;align-items:center;">
+                                    <label style="font-size:10px;font-weight:700;color:var(--accent-cyan);">🟢 Bắt đầu (giây):</label>
+                                    <button class="btn btn-secondary btn-xs" id="btnSetStartFromCurrent" style="padding:1px 5px;font-size:9px;" title="Lấy mốc thời gian video đang tạm dừng">⏱ Lấy Giờ Hiện Tại</button>
+                                </div>
+                                <div class="stepper-input-group">
+                                    <button class="btn btn-secondary btn-xs" id="btnStartMinus10" title="Lùi 0.1s">-0.1</button>
+                                    <button class="btn btn-secondary btn-xs" id="btnStartMinus" title="Lùi 0.05s">-0.05</button>
+                                    <input type="number" id="videoStartSec" min="0" step="0.01" value="0.00" class="form-input time-num-input">
+                                    <button class="btn btn-secondary btn-xs" id="btnStartPlus" title="Tiến 0.05s">+0.05</button>
+                                    <button class="btn btn-secondary btn-xs" id="btnStartPlus10" title="Tiến 0.1s">+0.1</button>
+                                </div>
                             </div>
+
+                            <!-- END TIME -->
                             <div class="form-group">
-                                <label>Kết thúc (giây):</label>
-                                <input type="number" id="videoEndSec" min="0" step="0.1" value="1.2">
+                                <div style="display:flex;justify-content:space-between;align-items:center;">
+                                    <label style="font-size:10px;font-weight:700;color:var(--accent-gold);">🔴 Kết thúc (giây):</label>
+                                    <button class="btn btn-secondary btn-xs" id="btnSetEndFromCurrent" style="padding:1px 5px;font-size:9px;" title="Lấy mốc thời gian video đang tạm dừng">⏱ Lấy Giờ Hiện Tại</button>
+                                </div>
+                                <div class="stepper-input-group">
+                                    <button class="btn btn-secondary btn-xs" id="btnEndMinus10" title="Lùi 0.1s">-0.1</button>
+                                    <button class="btn btn-secondary btn-xs" id="btnEndMinus" title="Lùi 0.05s">-0.05</button>
+                                    <input type="number" id="videoEndSec" min="0" step="0.01" value="1.20" class="form-input time-num-input">
+                                    <button class="btn btn-secondary btn-xs" id="btnEndPlus" title="Tiến 0.05s">+0.05</button>
+                                    <button class="btn btn-secondary btn-xs" id="btnEndPlus10" title="Tiến 0.1s">+0.1</button>
+                                </div>
                             </div>
                         </div>
-                        <p class="hint-text">💡 Chu kỳ chạy/bước chân đẹp nhất thường dài khoảng 0.6s - 1.2s.</p>
+
+                        <div style="display:flex;gap:4px;margin-top:4px;">
+                            <button class="btn btn-secondary btn-xs" id="btnTestVideoLoop" style="flex:1;justify-content:center;font-weight:800;">
+                                ▶ Chạy Thử Loop Trên Video
+                            </button>
+                            <button class="btn btn-secondary btn-xs" id="btnStopVideoLoop" style="padding:2px 8px;font-weight:800;" title="Dừng chạy thử">⏸</button>
+                        </div>
+                        <p class="hint-text" style="margin-top:2px;">💡 Kéo thanh trượt video ➔ Bấm <b>⏱ Lấy Giờ Hiện Tại</b> để khóa nhịp loop chuẩn xác!</p>
                     </div>
 
                     <div class="panel-section">
                         <div class="section-title">🧩 SỐ FRAME CẦN BÓC</div>
                         <div class="btn-toggle-group">
+                            <button class="btn-toggle" data-frames="4">4 F</button>
                             <button class="btn-toggle" data-frames="6">6 F</button>
                             <button class="btn-toggle active" data-frames="8">8 F (Chuẩn)</button>
                             <button class="btn-toggle" data-frames="10">10 F</button>
@@ -203,14 +241,21 @@
                     </div>
 
                     <div class="panel-section">
-                        <div class="section-title">👾 PIXEL-ART & ĐỘ PHÂN GIẢI</div>
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="chkVideoPixelate" checked>
-                            <span>Làm nét kiểu Pixel Art 2D</span>
-                        </label>
+                        <div class="section-title">👾 TỈ LỆ & ĐỘ PHÂN GIẢI FRAME</div>
+                        
+                        <div class="form-group">
+                            <label style="font-size:10px;font-weight:700;color:var(--accent-cyan);">📐 Chống Bóp Méo Video 16:9:</label>
+                            <select id="videoAspectMode" class="form-select">
+                                <option value="crop_character" selected>🎯 Tự Động Gom Nhân Vật (Auto-Crop Bounding Box - Khuyên Dùng)</option>
+                                <option value="fit_letterbox">📐 Giữ Tỉ Lệ Gốc 16:9 & Bù Nền Trong Suốt (Fit Center)</option>
+                                <option value="stretch">⚠️ Kéo Giãn Ép Vuông (Stretch)</option>
+                            </select>
+                            <p class="hint-text" style="margin-top:2px;">💡 Chế độ <b>Auto-Crop</b> tự động nhận diện nhân vật sau khi xóa nền xanh, cắt sát và căn giữa khung vuông, không bao giờ bị méo!</p>
+                        </div>
+
                         <div class="form-row" style="margin-top:6px;">
                             <div class="form-group">
-                                <label>Kích thước frame (px):</label>
+                                <label>Kích thước frame xuất:</label>
                                 <select id="videoTargetSize" class="form-select">
                                     <option value="128">128 × 128 px</option>
                                     <option value="256" selected>256 × 256 px</option>
@@ -218,6 +263,11 @@
                                 </select>
                             </div>
                         </div>
+
+                        <label class="checkbox-label" style="margin-top:6px;">
+                            <input type="checkbox" id="chkVideoPixelate" checked>
+                            <span>Làm nét chuẩn Pixel Art 2D (Nearest Neighbor)</span>
+                        </label>
                     </div>
 
                     <div class="panel-section" style="margin-top:auto;">
@@ -237,7 +287,24 @@
 
                 <!-- RIGHT: EXTRACTED FRAMES & ANIMATION PREVIEW -->
                 <aside class="video-preview-sidebar">
-                    <div class="section-title">🎞️ CÁC FRAME ĐÃ BÓC TÁCH</div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div class="section-title" style="margin:0;">🎞️ CÁC FRAME ĐÃ BÓC TÁCH</div>
+                        <span style="font-size:10px;color:var(--accent-cyan);font-weight:800;" id="videoFrameCountLabel">0 frame</span>
+                    </div>
+
+                    <!-- LOOP REFINEMENT TOOLBAR -->
+                    <div class="loop-toolkit-box">
+                        <div style="font-size:9px;font-weight:900;color:var(--accent-gold);text-transform:uppercase;margin-bottom:4px;">🪃 TRỢ LÝ TẠO LOOP MƯỢT 100%:</div>
+                        <div class="loop-btn-grid">
+                            <button class="btn btn-secondary btn-xs" id="btnMakePingPongLoop" title="Tự động lặp 2 chiều (1->N->2) để hoạt ảnh mượt không bị giật khi hết video!">🪃 Ping-Pong Loop</button>
+                            <button class="btn btn-secondary btn-xs" id="btnInvertFrames" title="Đảo ngược thứ tự chuyển động">🔄 Đảo Ngược</button>
+                            <button class="btn btn-secondary btn-xs" id="btnDupLastFrame" title="Nhân đôi frame cuối để giữ thế">📋 Giữ Thế</button>
+                            <button class="btn btn-secondary btn-xs" id="btnDeleteFirstFrame" title="Xóa frame 0 nếu video chưa bắt đầu chạy">❌ Bỏ Frame 0</button>
+                            <button class="btn btn-secondary btn-xs" id="btnDeleteLastFrame" title="Xóa frame cuối nếu bị lỗi">❌ Bỏ Frame Cuối</button>
+                            <button class="btn btn-secondary btn-xs" id="btnResetExtractedFrames" title="Khôi phục lại frame gốc ban đầu">🔄 Khôi Phục</button>
+                        </div>
+                    </div>
+
                     <div class="extracted-frames-list" id="extractedFramesList">
                         <div class="empty-state">Nạp video và bấm bóc tách frame!</div>
                     </div>
@@ -253,9 +320,98 @@
                         </div>
                     </div>
 
-                    <button class="btn btn-success btn-large" id="btnSendExtractedToStudio" style="width:100%;justify-content:center;margin-top:auto;">
-                        ✨ Nạp <span id="videoExtractedCountBadge">0</span> Frame → Studio
-                    </button>
+                    <!-- ANIMATION CLASSIFICATION & GODOT EXPORT -->
+                    <div class="anim-classification-box">
+                        <div class="section-title" style="margin:0;color:var(--accent-cyan);">🏷️ PHÂN LOẠI & XUẤT GODOT</div>
+                        
+                        <div class="form-group">
+                            <label style="font-size:10px;">1. Chọn Nhân Vật / Asset Đích:</label>
+                            <select id="videoTargetAssetSelect" class="form-select" style="padding:4px 6px;font-size:11px;">
+                                <option value="">-- Đang nạp asset --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="margin-top:2px;">
+                            <label style="font-size:10px;">2. Chọn / Đặt Tên Animation:</label>
+                            
+                            <!-- CATEGORIZED PRESET CHIPS -->
+                            <div style="font-size:9px;color:var(--accent-gold);font-weight:800;margin:3px 0 2px;">🏃 DI CHUYỂN CƠ BẢN:</div>
+                            <div class="anim-chip-presets" id="videoAnimChipPresetsMove">
+                                <button class="chip-preset-btn active" data-clip="idle">idle (Đứng thở)</button>
+                                <button class="chip-preset-btn" data-clip="walk">walk (Đi bộ)</button>
+                                <button class="chip-preset-btn" data-clip="run">run (Chạy nhanh)</button>
+                                <button class="chip-preset-btn" data-clip="hop_forward">hop_forward (Nhảy)</button>
+                                <button class="chip-preset-btn" data-clip="hop_side">hop_side (Né ngang)</button>
+                                <button class="chip-preset-btn" data-clip="jump_up">jump_up (Nhảy cao)</button>
+                                <button class="chip-preset-btn" data-clip="fall_down">fall_down (Rơi)</button>
+                                <button class="chip-preset-btn" data-clip="land">land (Tiếp đất)</button>
+                                <button class="chip-preset-btn" data-clip="crouch">crouch (Ngồi né)</button>
+                                <button class="chip-preset-btn" data-clip="slide">slide (Trượt/Lướt)</button>
+                            </div>
+
+                            <div style="font-size:9px;color:var(--accent-gold);font-weight:800;margin:5px 0 2px;">⚔️ TẤN CÔNG & TUNG CHIÊU:</div>
+                            <div class="anim-chip-presets" id="videoAnimChipPresetsAttack">
+                                <button class="chip-preset-btn" data-clip="attack_light">attack_light (Mổ/Đánh nhẹ)</button>
+                                <button class="chip-preset-btn" data-clip="talon_kick">talon_kick (Đá cựa bay)</button>
+                                <button class="chip-preset-btn" data-clip="attack_heavy">attack_heavy (Đòn nặng)</button>
+                                <button class="chip-preset-btn" data-clip="skill_special">skill_special (Phun lửa/Ớt)</button>
+                                <button class="chip-preset-btn" data-clip="cast_spell">cast_spell (Niệm chú)</button>
+                                <button class="chip-preset-btn" data-clip="block_guard">block_guard (Đỡ đòn)</button>
+                            </div>
+
+                            <div style="font-size:9px;color:var(--accent-gold);font-weight:800;margin:5px 0 2px;">💥 TRÚNG ĐÒN & TỬ TRẬN:</div>
+                            <div class="anim-chip-presets" id="videoAnimChipPresetsHurt">
+                                <button class="chip-preset-btn" data-clip="hurt">hurt (Trúng đòn chớp đỏ)</button>
+                                <button class="chip-preset-btn" data-clip="stunned_dizzy">stunned_dizzy (Choáng váng)</button>
+                                <button class="chip-preset-btn" data-clip="squashed_death">squashed_death (Bẹp dí)</button>
+                                <button class="chip-preset-btn" data-clip="explode_death">explode_death (Nổ văng lông)</button>
+                            </div>
+
+                            <div style="font-size:9px;color:var(--accent-gold);font-weight:800;margin:5px 0 2px;">🎉 ĂN MỪNG & KHUNG CẢNH ANIMATED:</div>
+                            <div class="anim-chip-presets" id="videoAnimChipPresetsProps">
+                                <button class="chip-preset-btn" data-clip="victory_dance">victory_dance (Ăn mừng)</button>
+                                <button class="chip-preset-btn" data-clip="taunt">taunt (Gáy khiêu khích)</button>
+                                <button class="chip-preset-btn" data-clip="prop_animated">prop_animated (Cảnh động)</button>
+                                <button class="chip-preset-btn" data-clip="water_flow">water_flow (Sóng nước)</button>
+                                <button class="chip-preset-btn" data-clip="traffic_light">traffic_light (Đèn hiệu)</button>
+                            </div>
+
+                            <input type="text" id="videoCustomClipName" class="form-input" placeholder="Hoặc tự gõ tên animation tùy biến bất kỳ..." value="idle" style="margin-top:5px;font-size:11px;padding:4px 6px;">
+                        </div>
+
+                        <div class="form-row" style="margin-top:2px;display:flex;justify-content:space-between;align-items:center;">
+                            <label class="checkbox-label" style="font-size:10px;">
+                                <input type="checkbox" id="chkVideoClipLoop" checked>
+                                <span>Lặp vô tận (Loop)</span>
+                            </label>
+                            <span style="font-size:10px;color:var(--accent-gold);font-family:monospace;" id="videoClipFpsLabel">10 FPS</span>
+                        </div>
+
+                        <!-- SAVED CLIPS OF THIS CHARACTER -->
+                        <div class="saved-clips-summary" id="savedClipsSummary" style="margin-top:4px;">
+                            <div style="font-size:9px;font-weight:900;color:var(--accent-gold);margin-bottom:3px;">
+                                📦 CÁC CLIP ĐÃ GOM CỦA ASSET NÀY:
+                            </div>
+                            <div class="saved-clips-list" id="savedClipsList">
+                                <span style="font-size:10px;color:var(--text-muted);font-style:italic;">Chưa lưu clip nào</span>
+                            </div>
+                        </div>
+
+                        <!-- ACTION BUTTONS -->
+                        <div style="display:flex;flex-direction:column;gap:5px;margin-top:6px;">
+                            <button class="btn btn-primary btn-sm" id="btnSaveCurrentClip" style="width:100%;justify-content:center;font-size:11px;">
+                                💾 Lưu Vào Animation [<span id="btnSaveClipNameLabel">idle</span>]
+                            </button>
+                            <div style="display:flex;gap:4px;">
+                                <button class="btn btn-success btn-sm" id="btnExportGodotDirect" style="flex:1;justify-content:center;font-size:10px;">
+                                    🚀 Xuất Sang Godot (.tres)
+                                </button>
+                                <button class="btn btn-secondary btn-sm" id="btnSendExtractedToStudio" style="flex:1;justify-content:center;font-size:10px;">
+                                    🎨 Mở Studio
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </aside>
             </div>
         </section>
@@ -586,6 +742,95 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary btn-sm" id="btnCancelPlanModal">Hủy</button>
                 <button class="btn btn-primary btn-sm" id="btnSaveNewPlan">💾 Lưu Asset Vào Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT ASSET MODAL -->
+    <div class="modal-backdrop" id="editAssetModal" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>✏️ Chỉnh Sửa Asset</h3>
+                <button class="modal-close-btn" id="btnCloseEditAssetModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editAssetId">
+                <div class="form-group">
+                    <label>Tên Asset:</label>
+                    <input type="text" id="editAssetName" class="form-input">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Danh mục:</label>
+                        <select id="editAssetCategory" class="form-select">
+                            <option value="characters">Nhân vật (Characters)</option>
+                            <option value="monsters">Quái vật / Boss</option>
+                            <option value="items">Vật phẩm (Items)</option>
+                            <option value="environments">Môi trường (Environments)</option>
+                            <option value="vfx">Hiệu ứng (VFX)</option>
+                            <option value="ui">Giao diện (UI)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Định dạng:</label>
+                        <select id="editAssetFormat" class="form-select">
+                            <option value="video">🎬 Video AI (2-3s)</option>
+                            <option value="image">🖼️ Ảnh Spritesheet</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Quy trình / Lý do:</label>
+                    <input type="text" id="editAssetReason" class="form-input">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm" id="btnCancelEditAssetModal">Hủy</button>
+                <button class="btn btn-primary btn-sm" id="btnSaveEditAsset">💾 Cập Nhật Asset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW / EDIT STEP MODAL -->
+    <div class="modal-backdrop" id="stepModal" style="display:none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="stepModalTitle">➕ Thêm Bước Prompt / Video Mới</h3>
+                <button class="modal-close-btn" id="btnCloseStepModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="stepModalAssetId">
+                <input type="hidden" id="stepModalIndex" value="-1">
+                <div class="form-group">
+                    <label>Tên bước (VD: 🎬 Bước 2.5: Video Chiêu Nộ Lửa):</label>
+                    <input type="text" id="stepModalName" class="form-input" placeholder="🎬 Bước ...">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Công cụ AI:</label>
+                        <input type="text" id="stepModalTool" class="form-input" placeholder="Tencent HY Video 1.5 / Kling / ChatGPT">
+                    </div>
+                    <div class="form-group">
+                        <label>Tỉ lệ & Thời lượng:</label>
+                        <select id="stepModalRatio" class="form-select">
+                            <option value="video_16_9">📐 Video 16:9 (2-3s)</option>
+                            <option value="image_1_1">📐 Ảnh 1:1 (Vuông 1024x1024)</option>
+                            <option value="image_16_9">📐 Ảnh 16:9 (Panorama 1920x1080)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Mục đích bước này:</label>
+                    <input type="text" id="stepModalPurpose" class="form-input" placeholder="VD: Tạo cú đá cựa bay lông gà...">
+                </div>
+                <div class="form-group">
+                    <label>Nội dung Prompt Tiếng Anh chuẩn:</label>
+                    <textarea id="stepModalPrompt" class="form-textarea" rows="3" placeholder="2D pixel art character animation..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm" id="btnCancelStepModal">Hủy</button>
+                <button class="btn btn-primary btn-sm" id="btnSaveStepModal">💾 Lưu Bước Này</button>
             </div>
         </div>
     </div>

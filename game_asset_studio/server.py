@@ -538,6 +538,109 @@ async def delete_game_asset(game_id: str, asset_id: str):
             return {"status": "ok"}
     raise HTTPException(status_code=404, detail="Game not found")
 
+@app.post("/api/games/update_asset")
+async def update_game_asset(game_id: str = Form(...), asset_id: str = Form(...), asset_json: str = Form(...)):
+    db = load_games_db()
+    data = json.loads(asset_json)
+    for g in db.get("games", []):
+        if g.get("id") == game_id:
+            for idx, a in enumerate(g.get("assets", [])):
+                if a.get("id") == asset_id:
+                    # Update fields while preserving existing steps/raw files if not provided
+                    for k, v in data.items():
+                        a[k] = v
+                    save_games_db(db)
+                    await broadcast_ws({"type": "ASSET_UPDATED", "game_id": game_id, "asset": a})
+                    return {"status": "ok", "asset": a}
+    raise HTTPException(status_code=404, detail="Asset not found")
+
+@app.post("/api/games/clone_asset")
+async def clone_game_asset(game_id: str = Form(...), asset_id: str = Form(...)):
+    db = load_games_db()
+    import copy
+    for g in db.get("games", []):
+        if g.get("id") == game_id:
+            for idx, a in enumerate(g.get("assets", [])):
+                if a.get("id") == asset_id:
+                    cloned = copy.deepcopy(a)
+                    cloned["id"] = f"{a['id']}_copy_{int(datetime.now().timestamp())}"
+                    cloned["name"] = f"{a['name']} (Bản Sao)"
+                    cloned["status"] = "pending"
+                    if "pipeline_steps" in cloned:
+                        for s in cloned["pipeline_steps"]:
+                            s["completed"] = False
+                            s.pop("raw_file_name", None)
+                            s.pop("raw_file_path", None)
+                            s.pop("raw_file_url", None)
+                    g["assets"].insert(idx + 1, cloned)
+                    save_games_db(db)
+                    await broadcast_ws({"type": "ASSET_CLONED", "game_id": game_id, "asset": cloned})
+                    return {"status": "ok", "asset": cloned}
+    raise HTTPException(status_code=404, detail="Asset not found")
+
+@app.post("/api/games/add_step")
+async def add_step_to_asset(game_id: str = Form(...), asset_id: str = Form(...), step_json: str = Form(...)):
+    db = load_games_db()
+    step_data = json.loads(step_json)
+    for g in db.get("games", []):
+        if g.get("id") == game_id:
+            for a in g.get("assets", []):
+                if a.get("id") == asset_id:
+                    if "pipeline_steps" not in a:
+                        a["pipeline_steps"] = []
+                    a["pipeline_steps"].append(step_data)
+                    save_games_db(db)
+                    await broadcast_ws({"type": "STEP_ADDED", "game_id": game_id, "asset_id": asset_id})
+                    return {"status": "ok", "asset": a}
+    raise HTTPException(status_code=404, detail="Asset not found")
+
+@app.post("/api/games/update_step")
+async def update_asset_step(game_id: str = Form(...), asset_id: str = Form(...), step_index: int = Form(...), step_json: str = Form(...)):
+    db = load_games_db()
+    step_data = json.loads(step_json)
+    for g in db.get("games", []):
+        if g.get("id") == game_id:
+            for a in g.get("assets", []):
+                if a.get("id") == asset_id:
+                    if "pipeline_steps" in a and 0 <= step_index < len(a["pipeline_steps"]):
+                        for k, v in step_data.items():
+                            a["pipeline_steps"][step_index][k] = v
+                        save_games_db(db)
+                        await broadcast_ws({"type": "STEP_UPDATED", "game_id": game_id, "asset_id": asset_id})
+                        return {"status": "ok", "asset": a}
+    raise HTTPException(status_code=404, detail="Step not found")
+
+@app.post("/api/games/delete_step")
+async def delete_asset_step(game_id: str = Form(...), asset_id: str = Form(...), step_index: int = Form(...)):
+    db = load_games_db()
+    for g in db.get("games", []):
+        if g.get("id") == game_id:
+            for a in g.get("assets", []):
+                if a.get("id") == asset_id:
+                    if "pipeline_steps" in a and 0 <= step_index < len(a["pipeline_steps"]):
+                        a["pipeline_steps"].pop(step_index)
+                        save_games_db(db)
+                        await broadcast_ws({"type": "STEP_DELETED", "game_id": game_id, "asset_id": asset_id})
+                        return {"status": "ok", "asset": a}
+    raise HTTPException(status_code=404, detail="Step not found")
+
+@app.post("/api/games/reorder_step")
+async def reorder_asset_step(game_id: str = Form(...), asset_id: str = Form(...), step_index: int = Form(...), direction: str = Form(...)): # 'up' or 'down'
+    db = load_games_db()
+    for g in db.get("games", []):
+        if g.get("id") == game_id:
+            for a in g.get("assets", []):
+                if a.get("id") == asset_id:
+                    steps = a.get("pipeline_steps", [])
+                    if direction == "up" and step_index > 0:
+                        steps[step_index], steps[step_index - 1] = steps[step_index - 1], steps[step_index]
+                    elif direction == "down" and step_index < len(steps) - 1:
+                        steps[step_index], steps[step_index + 1] = steps[step_index + 1], steps[step_index]
+                    save_games_db(db)
+                    await broadcast_ws({"type": "STEP_REORDERED", "game_id": game_id, "asset_id": asset_id})
+                    return {"status": "ok", "asset": a}
+    raise HTTPException(status_code=404, detail="Step not found")
+
 @app.post("/api/assets/upload_raw")
 async def upload_asset_raw_file(
     game_id: str = Form(...),
@@ -654,6 +757,7 @@ async def process_video_file(
     frame_count: int = Form(8),
     bg_removal: str = Form("green"),  # green, black, white, none
     tolerance: int = Form(35),
+    aspect_mode: str = Form("crop_character"),  # crop_character, fit_letterbox, stretch
     target_size: int = Form(256),
     pixelate: bool = Form(True)
 ):
@@ -680,6 +784,7 @@ async def process_video_file(
             end_frame = total_frames - 1
             
         frame_indices = np.linspace(start_frame, end_frame, frame_count, dtype=int)
+        raw_frames_rgba = []
         
         for f_idx in frame_indices:
             cap.set(cv2.CAP_PROP_POS_FRAMES, f_idx)
@@ -691,15 +796,68 @@ async def process_video_file(
                 if bg_removal != "none":
                     img = remove_chroma_key(img, mode=bg_removal, tolerance=tolerance)
                 
-                if pixelate and target_size < img.width:
-                    img = img.resize((target_size, target_size), Image.Resampling.NEAREST)
-                else:
-                    img = img.resize((target_size, target_size), Image.Resampling.BICUBIC)
-                    
-                frames_pil.append(img)
-                frames_b64.append(image_to_base64(img))
+                raw_frames_rgba.append(img)
                 
         cap.release()
+
+        if not raw_frames_rgba:
+            raise HTTPException(status_code=400, detail="Không thể đọc frame nào từ video.")
+
+        # 1. AUTO-CROP UNIFIED BOUNDING BOX (Prevents 16:9 Distortion & Sprite Jitter)
+        if aspect_mode == "crop_character" and bg_removal != "none":
+            all_bboxes = [f.getbbox() for f in raw_frames_rgba if f.getbbox() is not None]
+            if all_bboxes:
+                min_x = min(b[0] for b in all_bboxes)
+                min_y = min(b[1] for b in all_bboxes)
+                max_x = max(b[2] for b in all_bboxes)
+                max_y = max(b[3] for b in all_bboxes)
+                
+                bw = max(10, max_x - min_x)
+                bh = max(10, max_y - min_y)
+                
+                # Make square bounding box with 10% padding
+                max_dim = max(bw, bh)
+                pad = int(max_dim * 0.12)
+                final_dim = max_dim + pad * 2
+                
+                cx = (min_x + max_x) // 2
+                cy = (min_y + max_y) // 2
+                
+                crop_x1 = cx - final_dim // 2
+                crop_y1 = cy - final_dim // 2
+                
+                resample = Image.Resampling.NEAREST if pixelate else Image.Resampling.BICUBIC
+                for raw_f in raw_frames_rgba:
+                    sq_canvas = Image.new("RGBA", (final_dim, final_dim), (0, 0, 0, 0))
+                    sq_canvas.paste(raw_f, (-crop_x1, -crop_y1))
+                    f_final = sq_canvas.resize((target_size, target_size), resample)
+                    frames_pil.append(f_final)
+                    frames_b64.append(image_to_base64(f_final))
+            else:
+                aspect_mode = "fit_letterbox"
+
+        # 2. FIT LETTERBOX / PILLARBOX (Preserves exact aspect ratio with transparent padding)
+        if not frames_pil:
+            if aspect_mode == "fit_letterbox":
+                resample = Image.Resampling.NEAREST if pixelate else Image.Resampling.BICUBIC
+                for raw_f in raw_frames_rgba:
+                    w, h = raw_f.size
+                    scale = min(target_size / w, target_size / h)
+                    nw = max(1, int(w * scale))
+                    nh = max(1, int(h * scale))
+                    resized = raw_f.resize((nw, nh), resample)
+                    
+                    canvas = Image.new("RGBA", (target_size, target_size), (0, 0, 0, 0))
+                    canvas.paste(resized, ((target_size - nw) // 2, (target_size - nh) // 2))
+                    frames_pil.append(canvas)
+                    frames_b64.append(image_to_base64(canvas))
+            else:
+                # 3. STRETCH
+                resample = Image.Resampling.NEAREST if pixelate else Image.Resampling.BICUBIC
+                for raw_f in raw_frames_rgba:
+                    f_final = raw_f.resize((target_size, target_size), resample)
+                    frames_pil.append(f_final)
+                    frames_b64.append(image_to_base64(f_final))
     else:
         raise HTTPException(status_code=500, detail="OpenCV (cv2) not available on server.")
 

@@ -114,6 +114,9 @@
               "tool_recommended": "ChatGPT / Midjourney",
               "purpose": "Tạo 1 ảnh nhân vật góc nhìn ngang chuẩn 16-bit retro arcade trên nền xanh lá để làm ảnh gốc nạp vào Video AI (I2V)",
               "prompt": "2D side-view character full body pose of a badass white battle rooster with bright red comb, yellow beak, sharp talons, clean pixel outlines, vibrant 16-bit arcade retro style, centered, solid bright green chroma key background --ar 1:1",
+              "action_description_vi": "Ảnh tĩnh góc nhìn ngang (Side-view) của chú gà chiến lông trắng, mào đỏ tươi, chân có cựa vàng sắc nhọn. Nhân vật đứng thẳng toàn thân chính giữa khung hình trên nền xanh lá cây thuần nhất (#00FF00).",
+              "cut_guide_vi": "Lưu file này dưới dạng .PNG hoặc .JPG để làm ảnh đầu vào (Image Input) nạp vào các công cụ Video AI (I2V) ở tất cả các bước tiếp theo.",
+              "negative_prompt": "blurry, low quality, human, realistic 3D, cropped legs, multi characters, gradient background",
               "completed": true,
               "raw_file_name": "Battle_rooster_full_body_pose_202608310949.jpeg",
               "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_0_1788145013.jpeg",
@@ -125,13 +128,23 @@
               "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
               "purpose": "Nạp ảnh Bước 1 vào I2V tạo chu kỳ nhảy lò cò tiến lên phía trước",
               "prompt": "Full body character jumping and hopping forward rhythmically in place, 8 frames continuous animation loop, fixed side profile view, moving to the right, solid bright green screen background",
-              "completed": false
+              "action_description_vi": "Gà chùng 2 chân xuống lấy đà ➔ Bật bổng người lên cao về phía trước ➔ Đập nhẹ 2 cánh giữ thăng bằng trên không ➔ Tiếp đất bằng 2 chân và thu người về tư thế ban đầu.",
+              "cut_guide_vi": "Kéo video đến khoảnh khắc gà vừa chùng chân chuẩn bị nhảy (thường ở 0.15s - 0.25s) bấm [⏱ Lấy Bắt Đầu] ➔ Kéo đến lúc gà vừa chạm đất khép cánh lại (thường ở 0.95s - 1.15s) bấm [⏱ Lấy Kết Thúc]. Tránh lấy đoạn đầu/cuối video khi gà đứng im.",
+              "negative_prompt": "camera zoom, camera pan, character walking away, background deformation, extra limbs, human legs",
+              "completed": true,
+              "raw_file_name": "Rooster_performing_martial_arts_…_202608311038.mp4",
+              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_1_1788147526.mp4",
+              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_1_1788147526.mp4",
+              "uploaded_at": "2026-08-31 10:38"
             },
             {
               "step_name": "🎬 Bước 2.2: Video Hoạt Ảnh [talon_kick] (Đá Cựa Càn Quét)",
               "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
               "purpose": "Nạp ảnh Bước 1 vào I2V tạo cú đá cựa bay trên không hất văng xe cộ",
               "prompt": "Full body character leaping in mid-air and performing fierce martial arts flying talon kick forward, dynamic attack pose, 8 frames animation loop, fixed side profile view, solid bright green screen background",
+              "action_description_vi": "Gà nhảy vọt lên không trung ➔ Co 1 chân sau và duỗi thẳng 1 chân cựa nhọn hoắt đá mạnh về phía trước kèm vệt gió ➔ Rút chân về và đáp đất.",
+              "cut_guide_vi": "Bắt đầu từ lúc gà co chân chuẩn bị tung cước (khoảng 0.10s) ➔ Kết thúc ngay sau khi chân cựa vung hết biên độ và bắt đầu thu về (khoảng 0.85s - 1.05s). Bỏ cờ 'Loop' khi xuất Godot vì đây là đòn đánh 1 lần.",
+              "negative_prompt": "flying away offscreen, camera moving, rotating angle, multiple chickens, green screen artifacts",
               "completed": false
             },
             {
@@ -139,6 +152,9 @@
               "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
               "purpose": "Nạp ảnh Bước 1 vào I2V tạo cảnh va chạm bị xe đè bẹp dí hài hước",
               "prompt": "Full body character getting squashed flat vertically into a pancake shape with dizzy stars, hilarious cartoon death animation, 6 frames, fixed side view, solid bright green screen background",
+              "action_description_vi": "Gà bị lực ép từ trên giáng xuống ➔ Thân người xẹp lép theo chiều dọc dẹt ra 2 bên như chiếc bánh tráng ➔ Mắt hóa thành 2 dấu X và có vòng sao xoay tít trên đầu.",
+              "cut_guide_vi": "Bắt đầu từ tư thế đứng bình thường trước va chạm (0.0s) ➔ Kết thúc khi thân gà bẹp phẳng hoàn toàn và bất động (khoảng 0.65s - 0.85s). Bỏ cờ 'Loop' vì đây là hoạt ảnh tử trận.",
+              "negative_prompt": "blood, gore, realistic violence, disappearing body, camera shaking",
               "completed": false
             },
             {
@@ -146,6 +162,43 @@
               "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
               "purpose": "Nạp ảnh Bước 1 tạo chuyển động đứng thở, chớp mắt nhẹ",
               "prompt": "Full body character standing idle, breathing slightly and blinking eyes, 6 frames seamless loop, fixed side view, solid bright green screen background",
+              "action_description_vi": "Gà đứng yên tại chỗ, ngực phập phồng nhẹ theo nhịp thở, chiếc mào đỏ hơi đung đưa, đầu hơi nghiêng quan sát và chớp mắt 1 nhịp.",
+              "cut_guide_vi": "Cắt 1 chu kỳ thở trọn vẹn: Từ lúc ngực bắt đầu nâng lên hít vào (khoảng 0.2s) ➔ Đến khi ngực hạ xuống thở ra và trở về vị trí cũ (khoảng 1.0s - 1.2s). Bật nút [🪃 Ping-Pong Loop] trong Tab 2 để thở mượt 100%.",
+              "negative_prompt": "running, walking away, jumping, extreme movement, camera pan",
+              "completed": false
+            },
+            {
+              "step_name": "🎬 Bước 2.5: Video Hoạt Ảnh [walk] (Đi Bộ Thong Thả)",
+              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+              "purpose": "Nạp ảnh Bước 1 tạo chuyển động đi bộ bước chân đều đặn",
+              "prompt": "Full body character walking forward at steady relaxed pace, continuous walking cycle, 8 frames animation loop, fixed side profile view, moving right, solid bright green screen background",
+              "action_description_vi": "Gà bước đi đều đặn: Chân phải bước lên chạm đất ➔ Thân người hơi nhấp nhô ➔ Chân trái bước lên chạm đất ➔ Đầu gật gù nhẹ theo từng bước chân.",
+              "cut_guide_vi": "Bắt đầu đúng lúc bàn chân phải chạm đất (khoảng 0.1s - 0.2s) ➔ Kết thúc khi bàn chân phải chạm đất lần thứ 2 (khoảng 0.9s - 1.1s).",
+              "negative_prompt": "running sprint, hopping, camera tracking, turning around, background scrolling",
+              "completed": true,
+              "raw_file_name": "White_rooster_walking_animation_202608311027.mp4",
+              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_5_1788147415.mp4",
+              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_5_1788147415.mp4",
+              "uploaded_at": "2026-08-31 10:36"
+            },
+            {
+              "step_name": "🎬 Bước 2.6: Video Hoạt Ảnh [run] (Chạy Nước Rút Siêu Tốc)",
+              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+              "purpose": "Nạp ảnh Bước 1 tạo cử động chạy nghiêng người bứt tốc qua đường",
+              "prompt": "Full body character running fast forward with head leaning forward, intense dash sprint animation, 8 frames continuous loop, fixed side view, solid bright green screen background",
+              "action_description_vi": "Thân gà ngả mạnh về phía trước, 2 chân guồng nhanh liên tục, cánh mở hé ra sau giữ gió, chiếc mào dạt ra sau theo tốc độ.",
+              "cut_guide_vi": "Chọn đoạn video khi gà đã đạt tốc độ guồng chân ổn định (bỏ 0.3s đầu khởi động) ➔ Cắt 1 chu kỳ 2 sải chân nhanh (khoảng 0.6s - 0.8s).",
+              "negative_prompt": "slow walk, stopping, camera moving, blurred background, human legs",
+              "completed": false
+            },
+            {
+              "step_name": "🎬 Bước 2.7: Video Hoạt Ảnh [victory_dance] (Nhảy Ăn Mừng Qua Đường)",
+              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+              "purpose": "Nạp ảnh Bước 1 tạo vũ điệu ăn mừng vỗ cánh gáy to",
+              "prompt": "Full body character jumping up excitedly, flapping wings and doing funny victory celebration dance, 8 frames loop, fixed side view, solid bright green screen background",
+              "action_description_vi": "Gà nhảy cẫng lên ăn mừng, 2 cánh đập liên hồi vui sướng, mỏ há to gáy 'ò ó o', xoay nhẹ hông theo điệu nhảy chiến thắng.",
+              "cut_guide_vi": "Bắt đầu từ lúc gà chuẩn bị bật nhảy vỗ cánh ➔ Kết thúc khi hoàn thành 1 nhịp nhảy đập cánh (khoảng 0.8s - 1.2s).",
+              "negative_prompt": "crying, dying, realistic wings, leaving camera frame",
               "completed": false
             },
             {
@@ -153,6 +206,8 @@
               "tool_recommended": "ChatGPT / Midjourney",
               "purpose": "Tạo ảnh spritesheet dạng lưới 3x2 tổng hợp tất cả các tư thế để dùng làm icon chọn nhân vật và cắt ảnh",
               "prompt": "2D pixel art character spritesheet of heroic white rooster: idle stance, hop forward, hop side, flying talon kick, squashed pancake death, feather explosion, organized 3x2 grid, solid bright green screen background",
+              "action_description_vi": "Bức ảnh chứa lưới 6 khung hình gồm đủ các dáng: Đứng thở, Nhảy tiến, Đá cựa, Bẹp dí, Văng lông, Ăn mừng để làm ảnh cắt dự phòng.",
+              "cut_guide_vi": "Nạp vào Tab 3 (Cắt Ảnh Sheet) ➔ Chọn Chia Lưới 3 Cột × 2 Dòng để tự động cắt thành 6 frame riêng biệt.",
               "completed": false
             }
           ]
@@ -585,6 +640,122 @@
               "tool_recommended": "ChatGPT / Midjourney",
               "purpose": "Tạo khung đếm bước nhảy, thanh đo lửa ớt hiểm, nút Replay vàng bóng, bảng Game Over đầu lâu, khung máy quay trứng may mắn",
               "prompt": "2D pixel art arcade game UI kit: digital step counter frame, fiery chili turbo meter bar, golden coin counter icon, shiny golden replay button, game over skull banner, prize gacha egg machine window, high score badge, transparent background",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "id": "cr_animated_traffic_neon",
+          "name": "17. Đèn Giao Thông & Biển Hiệu Neon Nhấp Nháy (Animated Traffic Lights & Neon Signs)",
+          "category": "environments",
+          "format": "video",
+          "format_reason": "Cột đèn giao thông chuyển màu Đỏ-Vàng-Xanh và biển hiệu neon chớp sáng -> Video AI 2-3s bóc 6 frame",
+          "priority": "Cao",
+          "status": "pending",
+          "animations": [
+            "traffic_light_loop",
+            "neon_sign_flicker"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "📸 Bước 1: Tạo Dáng Cột Đèn & Biển Hiệu Neon",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo cột đèn giao thông và biển hiệu KFC Fastfood neon pixel art trên phông xanh",
+              "prompt": "2D pixel art traffic light signal pole with illuminated red light and glowing neon billboard sign, clean outlines, solid bright green screen background",
+              "completed": false
+            },
+            {
+              "step_name": "🎬 Bước 2.1: Video [traffic_light_loop] (Đèn Nhấp Nháy Chuyển Màu)",
+              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+              "purpose": "Nạp ảnh Bước 1 tạo chu kỳ đèn giao thông chuyển Xanh ➔ Vàng ➔ Đỏ và biển neon chớp sáng",
+              "prompt": "Traffic light signal pole with lights cycling sequentially from green to yellow to red with glowing bloom effect, 6 frames seamless loop, solid bright green screen background",
+              "completed": false
+            },
+            {
+              "step_name": "🖼️ Bước 3: Spritesheet Biển Hiệu Neon Đô Thị",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Các biển hiệu motel, diner, garage neon chuẩn pixel",
+              "prompt": "2D pixel art animated neon city signs spritesheet: glowing diner rooster sign, blinking motel arrow, flashing caution lights, transparent background",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "id": "cr_animated_river_waves",
+          "name": "18. Làn Sóng Nước & Bọt Nước Sông Cuộn Chảy (Animated River Waves & Rapids)",
+          "category": "environments",
+          "format": "video",
+          "format_reason": "Mặt nước sông cuộn sóng nhấp nhô lặp vô tận -> Video AI 2-3s bóc 8 frame",
+          "priority": "Cao",
+          "status": "pending",
+          "animations": [
+            "water_rapids_loop",
+            "water_splash_drop"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "📸 Bước 1: Tạo Mặt Nước Sông Xanh Biếc",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Ảnh mảng nước sông xanh biếc có bọt sóng trắng",
+              "prompt": "2D top-down pixel art river water texture surface with white foam crests and sparkling ripples, vibrant arcade blue, clean repeating tile, solid background",
+              "completed": false
+            },
+            {
+              "step_name": "🎬 Bước 2.1: Video [water_rapids_loop] (Dòng Nước Cuộn Chảy Mượt Mà)",
+              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
+              "purpose": "Nạp ảnh Bước 1 tạo dòng nước chảy xiết lặp vô tận",
+              "prompt": "2D pixel art top-down river water rapids flowing smoothly to the right with rolling white foam waves and glistening sparkles, 8 frames continuous seamless loop, fixed camera",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "id": "cr_animated_exhaust_smoke",
+          "name": "19. Khói Xe & Vết Phanh Lốp Bốc Cháy (Animated Exhaust Smoke & Tire Skids)",
+          "category": "vfx",
+          "format": "video",
+          "format_reason": "Khói xả phụt từ ống pô xe tải và vết lốp trượt ma sát -> Video AI",
+          "priority": "Trung bình",
+          "status": "pending",
+          "animations": [
+            "exhaust_puff_loop",
+            "tire_skid_smoke"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "🎬 Bước 1: Video [exhaust_puff_loop] (Khói Xe Phụt Đen)",
+              "tool_recommended": "Tencent HY Video 1.5 / Runway",
+              "purpose": "Tạo đám khói xả cuộn tròn phụt ra từ ống bô xe",
+              "prompt": "2D pixel art puffy black and gray exhaust smoke clouds billowing out backward continuously, 6 frames animation loop, solid black background, VFX sprite",
+              "completed": false
+            },
+            {
+              "step_name": "🖼️ Bước 2: Spritesheet Vết Lốp Xe Đen Kịt & Bụi Đất",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Vết lốp phanh gấp trên đường nhựa",
+              "prompt": "2D pixel art tire skid marks on asphalt, screeching friction smoke, roadside dust particles, transparent background",
+              "completed": false
+            }
+          ]
+        },
+        {
+          "id": "cr_menu_shop_screens",
+          "name": "20. Màn Hình Menu Chọn Gà, Shop & Bảng Xếp Hạng (Full Menu & Shop UI Screens)",
+          "category": "ui",
+          "format": "image",
+          "format_reason": "Toàn bộ giao diện Menu chính, Màn hình mở khóa nhân vật, Bảng thành tích -> Dạng Ảnh giao diện",
+          "priority": "Cao",
+          "status": "pending",
+          "animations": [
+            "static_screen",
+            "shop_card_select"
+          ],
+          "pipeline_steps": [
+            {
+              "step_name": "🖼️ Bước 1: Giao Diện Màn Hình Chọn Tướng & Shop Đổi Skin",
+              "tool_recommended": "ChatGPT / Midjourney",
+              "purpose": "Tạo giao diện chọn các nhân vật: Chiến Kê Tổ Lái, Gà Thug Life, Gà Mecha, Đàn Gà Con kèm nút Select & Buy",
+              "prompt": "2D retro pixel art arcade character select screen UI: 4 character showcase pedestal cards with white rooster, thug life chicken, cyber mecha rooster, baby chick, gold coin cost labels, SELECT green button, SHOP header banner, transparent background",
               "completed": false
             }
           ]
