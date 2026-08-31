@@ -1,9 +1,140 @@
-[gd_resource type="SpriteFrames" format=3]
+[gd_resource type="SpriteFrames" load_steps=31 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/hop_forward_0.png" id="1_hop_forward_0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/hop_forward_1.png" id="2_hop_forward_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/hop_forward_2.png" id="3_hop_forward_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/hop_forward_3.png" id="4_hop_forward_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/hop_forward_4.png" id="5_hop_forward_4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/hop_forward_5.png" id="6_hop_forward_5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/hop_forward_6.png" id="7_hop_forward_6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/hop_forward_7.png" id="8_hop_forward_7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_0.png" id="9_walk_0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_1.png" id="10_walk_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_2.png" id="11_walk_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_3.png" id="12_walk_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_4.png" id="13_walk_4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_5.png" id="14_walk_5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_6.png" id="15_walk_6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/walk_7.png" id="16_walk_7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_0.png" id="17_talon_kick_0"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_1.png" id="18_talon_kick_1"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_2.png" id="19_talon_kick_2"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_3.png" id="20_talon_kick_3"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_4.png" id="21_talon_kick_4"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_5.png" id="22_talon_kick_5"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_6.png" id="23_talon_kick_6"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_7.png" id="24_talon_kick_7"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_8.png" id="25_talon_kick_8"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_9.png" id="26_talon_kick_9"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_10.png" id="27_talon_kick_10"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_11.png" id="28_talon_kick_11"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_12.png" id="29_talon_kick_12"]
+[ext_resource type="Texture2D" path="res://assets/sprites/characters/1__chiến_kê_tổ_lái__main_hero_rooster_/talon_kick_13.png" id="30_talon_kick_13"]
 
 [resource]
 animations = [{
-"frames": [],
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_hop_forward_0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_hop_forward_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_hop_forward_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_hop_forward_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_hop_forward_4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_hop_forward_5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_hop_forward_6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_hop_forward_7")
+}],
+"loop": true,
+"name": &"hop_forward",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("9_walk_0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_walk_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_walk_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_walk_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_walk_4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_walk_5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_walk_6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_walk_7")
+}],
 "loop": true,
 "name": &"walk",
-"speed": 6.0
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_talon_kick_0")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_talon_kick_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_talon_kick_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_talon_kick_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("21_talon_kick_4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_talon_kick_5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_talon_kick_6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_talon_kick_7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("25_talon_kick_8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_talon_kick_9")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_talon_kick_10")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_talon_kick_11")
+}, {
+"duration": 1.0,
+"texture": ExtResource("29_talon_kick_12")
+}, {
+"duration": 1.0,
+"texture": ExtResource("30_talon_kick_13")
+}],
+"loop": false,
+"name": &"talon_kick",
+"speed": 10.0
 }]

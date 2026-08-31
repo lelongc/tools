@@ -184,6 +184,17 @@ class AssetStudioApp {
             }
         });
 
+        // Global Collapse / Expand All Guides
+        document.getElementById('btnCollapseAllSteps')?.addEventListener('click', () => {
+            document.querySelectorAll('.step-guide-accordion').forEach(el => { el.open = false; });
+            this.showToast('🔼 Đã gập toàn bộ hướng dẫn dài lại cho gọn!');
+        });
+
+        document.getElementById('btnExpandAllSteps')?.addEventListener('click', () => {
+            document.querySelectorAll('.step-guide-accordion').forEach(el => { el.open = true; });
+            this.showToast('🔽 Đã mở rộng toàn bộ hướng dẫn & thông số!');
+        });
+
         // Category Filters
         document.querySelectorAll('[data-filter-cat]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -348,6 +359,7 @@ class AssetStudioApp {
 
                 let badgeClass = 'badge-sheet-step';
                 let badgeText = '🖼️ ẢNH SHEET (T2I)';
+                let ratioClass = 'ratio-image';
                 let ratioText = '1:1 (Vuông - 1024x1024)';
                 let durationText = 'Tĩnh (Ảnh)';
                 let cameraText = 'Chính diện / Lưới 2D';
@@ -356,6 +368,7 @@ class AssetStudioApp {
                 if (isStepVideo) {
                     badgeClass = 'badge-video-step';
                     badgeText = '🎬 VIDEO AI (I2V)';
+                    ratioClass = 'ratio-video';
                     ratioText = '16:9 (Ngang - Chuẩn Video)';
                     durationText = '2.0s - 3.0s (1 chu kỳ)';
                     cameraText = 'Cố định góc ngang (Side View)';
@@ -363,17 +376,20 @@ class AssetStudioApp {
                 } else if (isStepBaseImg) {
                     badgeClass = 'badge-image-step';
                     badgeText = '📸 ẢNH GỐC (T2I)';
+                    ratioClass = 'ratio-image';
                     ratioText = '1:1 (Vuông - 1024x1024)';
                     durationText = 'Tĩnh (1 Dáng Duy Nhất)';
                     cameraText = 'Góc ngang toàn thân (Side Profile)';
                     bgText = '🟢 Phông Xanh Lá (Chroma Key)';
                 } else if (isPanorama) {
+                    ratioClass = 'ratio-panorama';
                     ratioText = '16:9 (Panorama 1920x1080)';
                     durationText = 'Tĩnh (Ghép Lớp Parallax)';
                 }
 
                 return `
                 <div class="pipeline-step-item ${step.completed ? 'completed' : ''}" data-step-index="${idx}">
+                    <!-- STEP HEADER ROW -->
                     <div class="step-top-row">
                         <label class="step-chk-label">
                             <input type="checkbox" class="step-checkbox" ${step.completed ? 'checked' : ''} data-step-idx="${idx}">
@@ -381,6 +397,8 @@ class AssetStudioApp {
                         </label>
                         <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
                             <span class="step-type-badge ${badgeClass}">${badgeText}</span>
+                            <span class="ratio-pill ${ratioClass}">${ratioText.split(' ')[0]}</span>
+                            <span class="tool-tag-pill">${step.tool_recommended}</span>
                             <div style="display:flex;align-items:center;gap:2px;margin-left:auto;">
                                 <button class="btn btn-secondary btn-xs btn-step-up" data-step-idx="${idx}" data-asset-id="${p.id}" title="Chuyển Lên Trên" ${idx === 0 ? 'disabled' : ''} style="padding:1px 4px;">⬆️</button>
                                 <button class="btn btn-secondary btn-xs btn-step-down" data-step-idx="${idx}" data-asset-id="${p.id}" title="Chuyển Xuống Dưới" ${idx === totalSteps - 1 ? 'disabled' : ''} style="padding:1px 4px;">⬇️</button>
@@ -390,87 +408,91 @@ class AssetStudioApp {
                         </div>
                     </div>
 
-                    <!-- DETAILED SPECIFICATION GRID -->
-                    <div class="step-spec-grid">
-                        <div class="step-spec-item">
-                            <span class="step-spec-label">🎯 Clip Godot:</span>
-                            <span class="step-spec-value highlight-cyan">${clipName}</span>
-                        </div>
-                        <div class="step-spec-item">
-                            <span class="step-spec-label">🛠️ Công Cụ AI:</span>
-                            <span class="step-spec-value highlight-gold">${step.tool_recommended}</span>
-                        </div>
-                        <div class="step-spec-item">
-                            <span class="step-spec-label">📐 Tỉ Lệ:</span>
-                            <span class="step-spec-value">${ratioText}</span>
-                        </div>
-                        <div class="step-spec-item">
-                            <span class="step-spec-label">⏱️ Thời Lượng:</span>
-                            <span class="step-spec-value highlight-purple">${durationText}</span>
-                        </div>
-                        <div class="step-spec-item">
-                            <span class="step-spec-label">🎥 Góc Máy:</span>
-                            <span class="step-spec-value">${cameraText}</span>
-                        </div>
-                        <div class="step-spec-item">
-                            <span class="step-spec-label">🟢 Phông Nền:</span>
-                            <span class="step-spec-value highlight-green">${bgText}</span>
-                        </div>
+                    <!-- VIETNAMESE ACTION SUMMARY -->
+                    <div style="font-size:10px;color:#e2e8f0;background:rgba(0,0,0,0.25);border-left:2px solid var(--accent-cyan);padding:4px 8px;border-radius:2px;">
+                        🎭 <b>Hành động:</b> ${step.action_description_vi ? step.action_description_vi : step.purpose}
                     </div>
 
-                    <!-- MOTION SCRIPT & CUTTING GUIDE (VIETNAMESE) -->
-                    <div class="motion-guide-box">
-                        <div class="motion-guide-header">
-                            <span>🎭 CHI TIẾT HÀNH ĐỘNG CỦA ANIMATION (TIẾNG VIỆT):</span>
-                        </div>
-                        <div class="motion-desc-text">
-                            ${step.action_description_vi ? step.action_description_vi : step.purpose}
-                        </div>
-                        <div class="motion-cut-tip">
-                            ✂️ <b>Cách Cắt Frame Chuẩn (Tránh Video Thừa):</b> ${step.cut_guide_vi ? step.cut_guide_vi : 'Tua video đến đúng khoảnh khắc nhân vật bắt đầu thế (0.15s - 0.25s) ➔ Kết thúc khi hoàn thành động tác (0.9s - 1.2s).'}
-                        </div>
-                        ${step.negative_prompt ? `
-                        <div class="negative-prompt-row">
-                            <span>🚫 <b>Negative Prompt:</b> <code>${step.negative_prompt}</code></span>
-                            <button class="btn btn-secondary btn-xs btn-copy-neg" data-neg="${encodeURIComponent(step.negative_prompt)}" title="Copy Negative Prompt">📋 Copy</button>
-                        </div>` : ''}
-                    </div>
-
-                    <!-- STEP-BY-STEP RECIPE INSTRUCTION -->
-                    <div class="step-recipe-box">
-                        <div class="step-recipe-title">
-                            💡 <b>QUY TRÌNH THỰC HIỆN BƯỚC NÀY:</b>
-                        </div>
-                        <ol class="step-recipe-steps">
-                            ${isStepVideo ? `
-                            <li><b>1. Ảnh Đầu Vào:</b> Lưu file ảnh từ <i>Bước 1 (Ảnh Gốc Phông Xanh)</i> về máy.</li>
-                            <li><b>2. Mở Công Cụ:</b> Vào <b>${step.tool_recommended}</b>, chọn chế độ <b>Image-to-Video (I2V)</b> ➔ Tải ảnh Bước 1 lên.</li>
-                            <li><b>3. Cài Đặt:</b> Chọn tỉ lệ <b>16:9 (Ngang)</b>, thời lượng <b>2-3s</b>, mức độ chuyển động vừa phải.</li>
-                            <li><b>4. Dán Prompt:</b> Copy đoạn Prompt tiếng Anh bên dưới dán vào ô mô tả ➔ Bấm Generate Video.</li>
-                            <li><b>5. Nạp Tool:</b> Tải video <code>.mp4</code> về ➔ Bấm <b>Nạp File Raw</b> bên dưới ➔ Bấm <b>⚡ Nạp Tab 2</b> để bóc 8 frame và xuất sang Godot!</li>
-                            ` : (isStepBaseImg ? `
-                            <li><b>1. Mở Công Cụ:</b> Mở <b>${step.tool_recommended}</b> (ChatGPT / Midjourney).</li>
-                            <li><b>2. Cài Đặt:</b> Chọn tỉ lệ <b>1:1 (Vuông - 1024x1024)</b>.</li>
-                            <li><b>3. Dán Prompt:</b> Copy Prompt bên dưới để AI sinh ảnh nhân vật toàn thân nằm chính giữa trên nền xanh lá đồng màu.</li>
-                            <li><b>4. Lưu File:</b> Tải ảnh về ➔ Nạp vào ô <b>Nạp File Raw</b> bên dưới để làm ảnh gốc cho tất cả các bước Video tiếp theo.</li>
-                            ` : `
-                            <li><b>1. Mở Công Cụ:</b> Mở <b>${step.tool_recommended}</b>.</li>
-                            <li><b>2. Dán Prompt:</b> Copy Prompt bên dưới để tạo ảnh spritesheet hoặc texture bối cảnh.</li>
-                            <li><b>3. Nạp Tool:</b> Tải ảnh về ➔ Bấm <b>⚡ Nạp Tab 3 (Cắt Ảnh)</b> để chia lưới frame!</li>
-                            `)}
-                        </ol>
-                    </div>
-
-                    <!-- PROMPT SECTION -->
+                    <!-- PROMPT SECTION (ALWAYS VISIBLE & PROMINENT) -->
                     <div class="step-prompt-row">
                         <div class="step-prompt-header">
-                            <span style="font-size:9px;font-weight:900;color:var(--accent-cyan);letter-spacing:0.5px;">📋 PROMPT TẠO AI (COPY DÁN VÀO CÔNG CỤ):</span>
-                            <button class="btn btn-secondary btn-xs btn-copy-step-prompt" data-prompt="${encodeURIComponent(step.prompt)}" title="Copy Prompt Bước Này">
+                            <span style="font-size:9.5px;font-weight:900;color:var(--accent-cyan);letter-spacing:0.5px;">📋 PROMPT TẠO AI (${step.tool_recommended}):</span>
+                            <button class="btn btn-secondary btn-xs btn-copy-step-prompt" data-prompt="${encodeURIComponent(step.prompt)}" title="Copy Prompt Bước Này" style="font-weight:800;background:var(--accent-cyan);color:#000;">
                                 📋 Copy ${isStepVideo ? 'Video Prompt' : 'Prompt'}
                             </button>
                         </div>
                         <div class="step-prompt-code">${step.prompt}</div>
                     </div>
+
+                    <!-- COLLAPSIBLE GUIDE: SPECS, RECIPE & CUT TIPS -->
+                    <details class="step-guide-accordion">
+                        <summary>💡 Xem Quy Trình 5 Bước & Mẹo Cắt Khung Hình Chuẩn</summary>
+                        
+                        <!-- DETAILED SPECIFICATION GRID -->
+                        <div class="step-spec-grid" style="margin-top:6px;">
+                            <div class="step-spec-item">
+                                <span class="step-spec-label">🎯 Clip Godot:</span>
+                                <span class="step-spec-value highlight-cyan">${clipName}</span>
+                            </div>
+                            <div class="step-spec-item">
+                                <span class="step-spec-label">🛠️ Công Cụ AI:</span>
+                                <span class="step-spec-value highlight-gold">${step.tool_recommended}</span>
+                            </div>
+                            <div class="step-spec-item">
+                                <span class="step-spec-label">📐 Tỉ Lệ:</span>
+                                <span class="step-spec-value">${ratioText}</span>
+                            </div>
+                            <div class="step-spec-item">
+                                <span class="step-spec-label">⏱️ Thời Lượng:</span>
+                                <span class="step-spec-value highlight-purple">${durationText}</span>
+                            </div>
+                            <div class="step-spec-item">
+                                <span class="step-spec-label">🎥 Góc Máy:</span>
+                                <span class="step-spec-value">${cameraText}</span>
+                            </div>
+                            <div class="step-spec-item">
+                                <span class="step-spec-label">🟢 Phông Nền:</span>
+                                <span class="step-spec-value highlight-green">${bgText}</span>
+                            </div>
+                        </div>
+
+                        <!-- MOTION SCRIPT & CUTTING GUIDE -->
+                        <div class="motion-guide-box" style="margin-top:6px;">
+                            <div class="motion-cut-tip">
+                                ✂️ <b>Cách Cắt Frame Chuẩn:</b> ${step.cut_guide_vi ? step.cut_guide_vi : 'Tua video đến đúng khoảnh khắc nhân vật bắt đầu thế (0.15s - 0.25s) ➔ Kết thúc khi hoàn thành động tác (0.9s - 1.2s).'}
+                            </div>
+                            ${step.negative_prompt ? `
+                            <div class="negative-prompt-row">
+                                <span>🚫 <b>Negative Prompt:</b> <code>${step.negative_prompt}</code></span>
+                                <button class="btn btn-secondary btn-xs btn-copy-neg" data-neg="${encodeURIComponent(step.negative_prompt)}" title="Copy Negative Prompt">📋 Copy</button>
+                            </div>` : ''}
+                        </div>
+
+                        <!-- STEP-BY-STEP RECIPE INSTRUCTION -->
+                        <div class="step-recipe-box" style="margin-top:6px;">
+                            <div class="step-recipe-title">
+                                💡 <b>HƯỚNG DẪN THỰC HIỆN:</b>
+                            </div>
+                            <ol class="step-recipe-steps">
+                                ${isStepVideo ? `
+                                <li><b>1. Ảnh Đầu Vào:</b> Lưu file ảnh từ <i>Bước 1 (Ảnh Gốc Phông Xanh)</i> về máy.</li>
+                                <li><b>2. Mở Công Cụ:</b> Vào <b>${step.tool_recommended}</b>, chọn chế độ <b>Image-to-Video (I2V)</b> ➔ Tải ảnh Bước 1 lên.</li>
+                                <li><b>3. Cài Đặt:</b> Chọn tỉ lệ <b>16:9 (Ngang)</b>, thời lượng <b>2-3s</b>, mức độ chuyển động vừa phải.</li>
+                                <li><b>4. Dán Prompt:</b> Copy đoạn Prompt tiếng Anh bên trên dán vào ô mô tả ➔ Bấm Generate Video.</li>
+                                <li><b>5. Nạp Tool:</b> Tải video <code>.mp4</code> về ➔ Bấm <b>Nạp File Raw</b> bên dưới ➔ Bấm <b>⚡ Nạp Tab 2</b> để bóc 8 frame và xuất sang Godot!</li>
+                                ` : (isStepBaseImg ? `
+                                <li><b>1. Mở Công Cụ:</b> Mở <b>${step.tool_recommended}</b> (ChatGPT / Midjourney).</li>
+                                <li><b>2. Cài Đặt:</b> Chọn tỉ lệ <b>1:1 (Vuông - 1024x1024)</b>.</li>
+                                <li><b>3. Dán Prompt:</b> Copy Prompt bên trên để AI sinh ảnh nhân vật toàn thân nằm chính giữa trên nền xanh lá đồng màu.</li>
+                                <li><b>4. Lưu File:</b> Tải ảnh về ➔ Nạp vào ô <b>Nạp File Raw</b> bên dưới để làm ảnh gốc cho tất cả các bước Video tiếp theo.</li>
+                                ` : `
+                                <li><b>1. Mở Công Cụ:</b> Mở <b>${step.tool_recommended}</b>.</li>
+                                <li><b>2. Dán Prompt:</b> Copy Prompt bên trên để tạo ảnh spritesheet hoặc texture bối cảnh.</li>
+                                <li><b>3. Nạp Tool:</b> Tải ảnh về ➔ Bấm <b>⚡ Nạp Tab 3 (Cắt Ảnh)</b> để chia lưới frame!</li>
+                                `)}
+                            </ol>
+                        </div>
+                    </details>
 
                     <!-- RAW ASSET UPLOAD & PROCESSING ROW -->
                     <div class="step-raw-row">
@@ -502,6 +524,7 @@ class AssetStudioApp {
                         <span class="plan-format-badge ${isVideo ? 'badge-video' : 'badge-image'}">
                             ${isVideo ? '🎬 VIDEO AI (I2V)' : '🖼️ ẢNH SHEET'}
                         </span>
+                        <button class="btn-toggle-card-collapse" data-asset-id="${p.id}" title="Thu gọn / Mở rộng Asset này">▲ Thu Gọn</button>
                         <button class="btn btn-secondary btn-xs btn-edit-asset" data-asset-id="${p.id}" title="Sửa thông tin Asset">✏️ Sửa</button>
                         <button class="btn btn-secondary btn-xs btn-clone-asset" data-asset-id="${p.id}" title="Nhân bản Asset (Tạo Skin/Biến thể)">📋 Nhân Bản</button>
                     </div>
@@ -534,6 +557,28 @@ class AssetStudioApp {
                     <button class="btn btn-secondary btn-xs btn-delete-asset" title="Xóa Asset">🗑️</button>
                 </div>
             `;
+
+            // Toggle Single Step Collapse
+            card.querySelectorAll('.btn-toggle-step-collapse').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const stepItem = btn.closest('.pipeline-step-item');
+                    if (stepItem) {
+                        stepItem.classList.toggle('collapsed');
+                        const isCol = stepItem.classList.contains('collapsed');
+                        const icon = btn.querySelector('.collapse-icon');
+                        if (icon) icon.innerText = isCol ? '▶ Mở Rộng' : '▼ Thu Gọn';
+                    }
+                });
+            });
+
+            // Toggle Card-Level Collapse (Asset Card)
+            card.querySelector('.btn-toggle-card-collapse')?.addEventListener('click', (e) => {
+                e.stopPropagation();
+                card.classList.toggle('card-collapsed');
+                const isCol = card.classList.contains('card-collapsed');
+                e.target.innerText = isCol ? '▶ Mở Rộng' : '▲ Thu Gọn';
+            });
 
             // Copy Step Prompt Events
             card.querySelectorAll('.btn-copy-step-prompt').forEach(btn => {
@@ -739,10 +784,12 @@ class AssetStudioApp {
 
                         try {
                             const res = await fetch(url);
+                            if (!res.ok) throw new Error(`HTTP ${res.status}`);
                             const blob = await res.blob();
-                            const file = new File([blob], url.split('/').pop(), { type: blob.type || 'video/mp4' });
+                            const fileName = url.split('/').pop() || 'raw_video.mp4';
+                            const file = new File([blob], fileName, { type: blob.type || 'video/mp4' });
                             this.loadVideoFile(file);
-                            this.showToast(`🎬 Đã nạp video vào Tab 2! Đọc Mẹo Bóc Frame ở cột bên trái để lấy nhịp chuẩn.`);
+                            this.showToast(`🎬 Đã nạp video [${clipName}] vào Tab 2! Đọc Mẹo Bóc Frame để lấy nhịp chuẩn.`);
                         } catch(err) {
                             this.showToast(`⚠️ Không thể nạp video: ` + err.message);
                         }
@@ -975,6 +1022,16 @@ class AssetStudioApp {
             if (e.dataTransfer.files.length) this.loadVideoFile(e.dataTransfer.files[0]);
         });
 
+        // Collapsible Sidebar Sections
+        document.querySelectorAll('.panel-section.collapsible-section .section-title').forEach(title => {
+            title.addEventListener('click', () => {
+                const section = title.closest('.panel-section');
+                if (section) {
+                    section.classList.toggle('section-collapsed');
+                }
+            });
+        });
+
         fileInput.addEventListener('change', (e) => {
             if (e.target.files.length) this.loadVideoFile(e.target.files[0]);
         });
@@ -1140,6 +1197,15 @@ class AssetStudioApp {
             this.startVideoAnimationPreview();
         });
 
+        // Scale & Offset Controls
+        document.getElementById('videoCharScaleSlider')?.addEventListener('input', (e) => {
+            document.getElementById('videoCharScaleVal').innerText = `${e.target.value}%`;
+        });
+
+        document.getElementById('videoCharOffsetYSlider')?.addEventListener('input', (e) => {
+            document.getElementById('videoCharOffsetYVal').innerText = `${e.target.value}px`;
+        });
+
         // ANIMATION CLASSIFICATION & GODOT EXPORT CONTROLS
         document.querySelectorAll('.anim-chip-presets .chip-preset-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1290,10 +1356,22 @@ class AssetStudioApp {
     }
 
     loadVideoFile(file) {
+        if (!file) return;
         this.selectedVideoFile = file;
         const player = document.getElementById('sourceVideoPlayer');
+        if (!player) return;
+
         const url = URL.createObjectURL(file);
         player.src = url;
+        player.muted = true;
+        player.loop = true;
+        player.playsInline = true;
+
+        player.onerror = (e) => {
+            console.error("Video player error:", e);
+            this.showToast(`⚠️ Không thể mở video "${file.name}".`);
+        };
+
         player.onloadedmetadata = () => {
             const dur = player.duration || 0;
             const durStr = dur.toFixed(2);
@@ -1311,6 +1389,7 @@ class AssetStudioApp {
                 endInp.max = dur;
             }
 
+            player.play().catch(() => {});
             this.showToast(`🎬 Đã nạp video: ${file.name} (${durStr}s)`);
         };
         player.load();
@@ -1327,6 +1406,8 @@ class AssetStudioApp {
         const bgRemoval = document.getElementById('videoBgRemovalMode').value;
         const tolerance = parseInt(document.getElementById('bgToleranceSlider').value) || 35;
         const aspectMode = document.getElementById('videoAspectMode')?.value || 'crop_character';
+        const charScale = parseFloat(document.getElementById('videoCharScaleSlider')?.value) || 100.0;
+        const offsetY = parseInt(document.getElementById('videoCharOffsetYSlider')?.value) || 0;
         const targetSize = parseInt(document.getElementById('videoTargetSize').value) || 256;
         const pixelate = document.getElementById('chkVideoPixelate').checked;
 
@@ -1341,6 +1422,8 @@ class AssetStudioApp {
         formData.append('bg_removal', bgRemoval);
         formData.append('tolerance', tolerance);
         formData.append('aspect_mode', aspectMode);
+        formData.append('char_scale', charScale);
+        formData.append('offset_y', offsetY);
         formData.append('target_size', targetSize);
         formData.append('pixelate', pixelate);
 
@@ -2036,6 +2119,72 @@ class AssetStudioApp {
                 this.loadLibraryAssets(btn.getAttribute('data-lib-cat'));
             });
         });
+
+        // Close Modal
+        document.getElementById('btnCloseLibModal')?.addEventListener('click', () => this.closeLibraryAssetInspector());
+        document.getElementById('btnCloseLibModalBtn')?.addEventListener('click', () => this.closeLibraryAssetInspector());
+
+        // Inspector Tabs
+        document.getElementById('tabBtnLibFrames')?.addEventListener('click', () => {
+            document.getElementById('tabBtnLibFrames').classList.add('active');
+            document.getElementById('tabBtnLibGodotTres').classList.remove('active');
+            document.getElementById('libViewFrames').style.display = 'grid';
+            document.getElementById('libViewGodotTres').style.display = 'none';
+        });
+
+        document.getElementById('tabBtnLibGodotTres')?.addEventListener('click', () => {
+            document.getElementById('tabBtnLibGodotTres').classList.add('active');
+            document.getElementById('tabBtnLibFrames').classList.remove('active');
+            document.getElementById('libViewFrames').style.display = 'none';
+            document.getElementById('libViewGodotTres').style.display = 'flex';
+        });
+
+        // Copy Buttons
+        document.getElementById('btnCopyGodotPath')?.addEventListener('click', () => {
+            const p = document.getElementById('libGodotResPath')?.innerText || '';
+            navigator.clipboard.writeText(p);
+            this.showToast(`📋 Đã copy đường dẫn Godot: ${p}`);
+        });
+
+        document.getElementById('btnCopyTresCode')?.addEventListener('click', () => {
+            const code = document.getElementById('libTresCodeContent')?.innerText || '';
+            navigator.clipboard.writeText(code);
+            this.showToast(`📋 Đã copy mã nguồn file SpriteFrames (.tres)!`);
+        });
+
+        // Player Controls
+        document.getElementById('btnLibPlayPause')?.addEventListener('click', () => {
+            this.libAnimPlaying = !this.libAnimPlaying;
+            document.getElementById('btnLibPlayPause').innerText = this.libAnimPlaying ? '⏸ Tạm Dừng' : '▶️ Phát';
+        });
+
+        document.getElementById('btnLibPrevFrame')?.addEventListener('click', () => {
+            if (!this.libCurrentClipFrames || !this.libCurrentClipFrames.length) return;
+            this.libAnimPlaying = false;
+            document.getElementById('btnLibPlayPause').innerText = '▶️ Phát';
+            this.libCurrentFrameIdx = (this.libCurrentFrameIdx - 1 + this.libCurrentClipFrames.length) % this.libCurrentClipFrames.length;
+            this.drawLibAnimationFrame(this.libCurrentFrameIdx);
+        });
+
+        document.getElementById('btnLibNextFrame')?.addEventListener('click', () => {
+            if (!this.libCurrentClipFrames || !this.libCurrentClipFrames.length) return;
+            this.libAnimPlaying = false;
+            document.getElementById('btnLibPlayPause').innerText = '▶️ Phát';
+            this.libCurrentFrameIdx = (this.libCurrentFrameIdx + 1) % this.libCurrentClipFrames.length;
+            this.drawLibAnimationFrame(this.libCurrentFrameIdx);
+        });
+
+        document.getElementById('libFpsSlider')?.addEventListener('input', (e) => {
+            this.libAnimFps = parseInt(e.target.value) || 8;
+            document.getElementById('libFpsVal').innerText = `${this.libAnimFps} FPS`;
+            if (this.libCurrentClipFrames && this.libCurrentClipFrames.length) {
+                const dur = (this.libCurrentClipFrames.length / this.libAnimFps).toFixed(2);
+                document.getElementById('libDurationVal').innerText = `${dur}s`;
+            }
+            if (this.libAnimPlaying) {
+                this.startLibAnimationLoop();
+            }
+        });
     }
 
     async loadLibraryAssets(cat = 'all') {
@@ -2046,30 +2195,176 @@ class AssetStudioApp {
             const data = await res.json();
             const list = data[cat] || [];
             if (!list.length) {
-                grid.innerHTML = '<div class="empty-state">Kho asset trống.</div>';
+                grid.innerHTML = '<div class="empty-state">Kho asset trống. Hãy xuất asset từ Tab 2 hoặc Tab 4!</div>';
                 return;
             }
             grid.innerHTML = '';
             list.forEach(item => {
                 const card = document.createElement('div');
                 card.className = 'lib-asset-card';
+                
+                const clipKeys = Object.keys(item.clips || {});
+                const clipPillsHtml = clipKeys.map(k => `<span class="lib-clip-pill">🎬 ${k} (${item.clips[k].length}F)</span>`).join('');
+
                 card.innerHTML = `
-                    <img src="${item.thumb || item.spritesheet}" onerror="this.src='/favicon.ico'">
-                    <div class="lib-asset-name">${item.name}</div>
-                    <span style="font-size:9px;color:var(--text-muted);">${item.category}</span>
+                    <div class="lib-asset-thumb-box">
+                        <img src="${item.thumb || item.spritesheet || '/favicon.ico'}" onerror="this.src='/favicon.ico'">
+                        <div class="lib-hover-overlay">
+                            <span>🔍 Xem & Chạy Thử Animation</span>
+                        </div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:4px;">
+                        <div class="lib-asset-name">${item.name}</div>
+                        <span class="plan-cat-label" style="font-size:9px;">${item.category}</span>
+                    </div>
+                    <div class="lib-clip-pills-row">
+                        ${clipPillsHtml || '<span style="font-size:9px;color:var(--text-muted);">Chưa có clip</span>'}
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:4px;border-top:1px solid var(--border-color);font-size:9px;color:var(--text-muted);">
+                        <span>🚀 Godot Ready</span>
+                        <span>${item.total_frames || 0} Frames</span>
+                    </div>
                 `;
+
                 card.addEventListener('click', () => {
-                    if (item.spritesheet) {
-                        this.loadSlicerImageSrc(item.spritesheet);
-                        this.switchTab('tab-slicer');
-                        this.showToast(`📂 Đã nạp ${item.name} vào Bàn Cắt!`);
-                    }
+                    this.openLibraryAssetInspector(item);
                 });
                 grid.appendChild(card);
             });
         } catch(e) {
             console.error("Error loading library assets:", e);
         }
+    }
+
+    async openLibraryAssetInspector(item) {
+        this.currentInspectedAsset = item;
+        const modal = document.getElementById('libAssetModal');
+        if (!modal) return;
+
+        document.getElementById('libModalTitle').innerText = `🎬 ${item.name}`;
+        document.getElementById('libModalCategory').innerText = item.category;
+        document.getElementById('libModalFramesCount').innerText = `${item.total_frames || 0} Frames`;
+        document.getElementById('libGodotResPath').innerText = item.godot_path || `res://assets/sprites/${item.category}/${item.id}/`;
+        document.getElementById('libTresCodeContent').innerText = item.tres_code || '// Chưa có mã .tres';
+        document.getElementById('libCreatedDate').innerText = `Xuất lúc: ${item.created_at || 'Mới xuất'}`;
+
+        const clipButtonsList = document.getElementById('libClipButtonsList');
+        clipButtonsList.innerHTML = '';
+
+        const clips = item.clips || {};
+        const clipKeys = Object.keys(clips);
+        this.libLoadedClipImages = {};
+
+        if (clipKeys.length === 0) {
+            clipButtonsList.innerHTML = '<span style="font-size:10px;color:var(--text-muted);font-style:italic;">Chưa có animation clip nào</span>';
+            modal.style.display = 'flex';
+            return;
+        }
+
+        // Preload images for all clips
+        for (const k of clipKeys) {
+            this.libLoadedClipImages[k] = await Promise.all(clips[k].map(url => {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = () => resolve(img);
+                    img.src = url;
+                });
+            }));
+
+            const btn = document.createElement('button');
+            btn.className = `btn btn-secondary btn-xs ${k === clipKeys[0] ? 'active' : ''}`;
+            btn.style.fontWeight = '800';
+            btn.innerText = `🎬 ${k} (${clips[k].length}F)`;
+            btn.addEventListener('click', () => {
+                clipButtonsList.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                this.selectLibClip(k);
+            });
+            clipButtonsList.appendChild(btn);
+        }
+
+        modal.style.display = 'flex';
+        this.selectLibClip(clipKeys[0]);
+    }
+
+    selectLibClip(clipKey) {
+        this.activeLibClipKey = clipKey;
+        this.libCurrentClipFrames = this.libLoadedClipImages[clipKey] || [];
+        this.libCurrentFrameIdx = 0;
+        this.libAnimPlaying = true;
+        this.libAnimFps = (clipKey === 'attack' || clipKey === 'run' || clipKey === 'talon_kick') ? 10 : 8;
+        
+        const slider = document.getElementById('libFpsSlider');
+        if (slider) slider.value = this.libAnimFps;
+        document.getElementById('libFpsVal').innerText = `${this.libAnimFps} FPS`;
+
+        if (this.libCurrentClipFrames.length) {
+            const dur = (this.libCurrentClipFrames.length / this.libAnimFps).toFixed(2);
+            document.getElementById('libDurationVal').innerText = `${dur}s`;
+        }
+
+        document.getElementById('btnLibPlayPause').innerText = '⏸ Tạm Dừng';
+
+        // Render Frame Filmstrip on right
+        const frameList = document.getElementById('libViewFrames');
+        frameList.innerHTML = '';
+        document.getElementById('libFrameListCount').innerText = this.libCurrentClipFrames.length;
+
+        this.libCurrentClipFrames.forEach((img, idx) => {
+            const fCard = document.createElement('div');
+            fCard.style.cssText = `
+                background: #000; border: 1px solid var(--border-color); border-radius: 4px; padding: 4px;
+                display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; transition: all 0.15s;
+            `;
+            fCard.innerHTML = `
+                <img src="${img.src}" style="width: 100%; height: 60px; object-fit: contain; image-rendering: pixelated;">
+                <div style="display: flex; justify-content: space-between; width: 100%; font-size: 8.5px; color: var(--text-muted); font-family: monospace;">
+                    <span>#${idx}</span>
+                    <a href="${img.src}" download="${clipKey}_${idx}.png" onclick="event.stopPropagation();" style="color: var(--accent-cyan);" title="Tải ảnh này">💾</a>
+                </div>
+            `;
+            fCard.addEventListener('click', () => {
+                this.libAnimPlaying = false;
+                document.getElementById('btnLibPlayPause').innerText = '▶️ Phát';
+                this.libCurrentFrameIdx = idx;
+                this.drawLibAnimationFrame(idx);
+            });
+            frameList.appendChild(fCard);
+        });
+
+        this.startLibAnimationLoop();
+    }
+
+    startLibAnimationLoop() {
+        if (this.libAnimInterval) clearInterval(this.libAnimInterval);
+        this.libAnimInterval = setInterval(() => {
+            if (!this.libAnimPlaying || !this.libCurrentClipFrames || !this.libCurrentClipFrames.length) return;
+            this.drawLibAnimationFrame(this.libCurrentFrameIdx);
+            this.libCurrentFrameIdx = (this.libCurrentFrameIdx + 1) % this.libCurrentClipFrames.length;
+        }, 1000 / (this.libAnimFps || 8));
+    }
+
+    drawLibAnimationFrame(idx) {
+        const canvas = document.getElementById('libAnimCanvas');
+        if (!canvas || !this.libCurrentClipFrames || !this.libCurrentClipFrames[idx]) return;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.imageSmoothingEnabled = false;
+        const img = this.libCurrentClipFrames[idx];
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        const info = document.getElementById('libAnimInfo');
+        if (info) {
+            info.innerText = `Frame ${idx + 1}/${this.libCurrentClipFrames.length} (${this.activeLibClipKey})`;
+        }
+    }
+
+    closeLibraryAssetInspector() {
+        if (this.libAnimInterval) clearInterval(this.libAnimInterval);
+        this.libAnimPlaying = false;
+        const modal = document.getElementById('libAssetModal');
+        if (modal) modal.style.display = 'none';
     }
 
     async exportStudioToGodot() {

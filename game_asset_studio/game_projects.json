@@ -132,10 +132,10 @@
               "cut_guide_vi": "Kéo video đến khoảnh khắc gà vừa chùng chân chuẩn bị nhảy (thường ở 0.15s - 0.25s) bấm [⏱ Lấy Bắt Đầu] ➔ Kéo đến lúc gà vừa chạm đất khép cánh lại (thường ở 0.95s - 1.15s) bấm [⏱ Lấy Kết Thúc]. Tránh lấy đoạn đầu/cuối video khi gà đứng im.",
               "negative_prompt": "camera zoom, camera pan, character walking away, background deformation, extra limbs, human legs",
               "completed": true,
-              "raw_file_name": "Rooster_performing_martial_arts_…_202608311038.mp4",
-              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_1_1788147526.mp4",
-              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_1_1788147526.mp4",
-              "uploaded_at": "2026-08-31 10:38"
+              "raw_file_name": "White_rooster_jumping_forward_an…_202608311124.mp4",
+              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_1_1788150291.mp4",
+              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_1_1788150291.mp4",
+              "uploaded_at": "2026-08-31 11:24"
             },
             {
               "step_name": "🎬 Bước 2.2: Video Hoạt Ảnh [talon_kick] (Đá Cựa Càn Quét)",
@@ -145,7 +145,11 @@
               "action_description_vi": "Gà nhảy vọt lên không trung ➔ Co 1 chân sau và duỗi thẳng 1 chân cựa nhọn hoắt đá mạnh về phía trước kèm vệt gió ➔ Rút chân về và đáp đất.",
               "cut_guide_vi": "Bắt đầu từ lúc gà co chân chuẩn bị tung cước (khoảng 0.10s) ➔ Kết thúc ngay sau khi chân cựa vung hết biên độ và bắt đầu thu về (khoảng 0.85s - 1.05s). Bỏ cờ 'Loop' khi xuất Godot vì đây là đòn đánh 1 lần.",
               "negative_prompt": "flying away offscreen, camera moving, rotating angle, multiple chickens, green screen artifacts",
-              "completed": false
+              "completed": true,
+              "raw_file_name": "Rooster_performing_martial_arts_…_202608311038.mp4",
+              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_2_1788153255.mp4",
+              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_2_1788153255.mp4",
+              "uploaded_at": "2026-08-31 12:14"
             },
             {
               "step_name": "🎬 Bước 2.3: Video Hoạt Ảnh [squashed_death] (Bẹp Dí Như Bánh Tráng)",

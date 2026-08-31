@@ -758,6 +758,8 @@ async def process_video_file(
     bg_removal: str = Form("green"),  # green, black, white, none
     tolerance: int = Form(35),
     aspect_mode: str = Form("crop_character"),  # crop_character, fit_letterbox, stretch
+    char_scale: float = Form(100.0),
+    offset_y: int = Form(0),
     target_size: int = Form(256),
     pixelate: bool = Form(True)
 ):
@@ -803,7 +805,7 @@ async def process_video_file(
         if not raw_frames_rgba:
             raise HTTPException(status_code=400, detail="Không thể đọc frame nào từ video.")
 
-        # 1. AUTO-CROP UNIFIED BOUNDING BOX (Prevents 16:9 Distortion & Sprite Jitter)
+        # 1. AUTO-CROP UNIFIED BOUNDING BOX (Prevents 16:9 Distortion & Synchronizes Scale)
         if aspect_mode == "crop_character" and bg_removal != "none":
             all_bboxes = [f.getbbox() for f in raw_frames_rgba if f.getbbox() is not None]
             if all_bboxes:
@@ -815,16 +817,21 @@ async def process_video_file(
                 bw = max(10, max_x - min_x)
                 bh = max(10, max_y - min_y)
                 
-                # Make square bounding box with 10% padding
+                # Make square bounding box with padding
                 max_dim = max(bw, bh)
                 pad = int(max_dim * 0.12)
-                final_dim = max_dim + pad * 2
+                base_dim = max_dim + pad * 2
+                
+                # Apply character scale multiplier
+                scale_factor = max(0.4, char_scale / 100.0)
+                final_dim = max(20, int(base_dim / scale_factor))
                 
                 cx = (min_x + max_x) // 2
                 cy = (min_y + max_y) // 2
                 
+                # Apply Y offset
                 crop_x1 = cx - final_dim // 2
-                crop_y1 = cy - final_dim // 2
+                crop_y1 = (cy - final_dim // 2) - int(offset_y * (final_dim / 256.0))
                 
                 resample = Image.Resampling.NEAREST if pixelate else Image.Resampling.BICUBIC
                 for raw_f in raw_frames_rgba:
@@ -899,34 +906,67 @@ async def export_to_godot(req: GodotExportRequest):
     lib_target_dir = os.path.join(ASSETS_LIB_DIR, req.category, c_name)
     os.makedirs(lib_target_dir, exist_ok=True)
 
-    sections = []
-    first_thumb_saved = False
-    
+    first_thumb_saved = os.path.exists(os.path.join(lib_target_dir, "thumb.png"))
+    all_clips_frames = {}
+
+    # Scan existing frames in library folder
+    if os.path.exists(lib_target_dir):
+        for f_name in sorted(os.listdir(lib_target_dir)):
+            if f_name.endswith(".png") and "_" in f_name and not f_name.startswith("thumb") and not f_name.startswith("spritesheet"):
+                parts = f_name.rsplit(".", 1)[0].rsplit("_", 1)
+                if len(parts) == 2 and parts[1].isdigit():
+                    c_key, f_idx = parts[0], int(parts[1])
+                    if c_key not in all_clips_frames:
+                        all_clips_frames[c_key] = {}
+                    all_clips_frames[c_key][f_idx] = f_name
+
+    # Save newly exported frames
     for clip_key, frames_b64 in req.clips.items():
+        if clip_key not in all_clips_frames:
+            all_clips_frames[clip_key] = {}
         for idx, b64 in enumerate(frames_b64):
             f_img = base64_to_image(b64)
             f_path = os.path.join(godot_target_dir, f"{clip_key}_{idx}.png")
             f_img.save(f_path)
             f_img.save(os.path.join(lib_target_dir, f"{clip_key}_{idx}.png"))
+            all_clips_frames[clip_key][idx] = f"{clip_key}_{idx}.png"
             
             if not first_thumb_saved:
                 thumb = f_img.resize((128, 128), Image.Resampling.NEAREST)
                 thumb.save(os.path.join(lib_target_dir, "thumb.png"))
                 first_thumb_saved = True
-            
-        loop = "true" if clip_key in ["idle", "run", "walk"] else "false"
-        speed = 10.0 if clip_key in ["attack", "run"] else 6.0
-        sections.append(f"""{{
-"frames": [],
+
+    # Generate standard Godot 4 SpriteFrames (.tres) with full Texture2D references
+    ext_resources = []
+    animations_sections = []
+    ext_id = 1
+
+    for clip_key, frames_dict in all_clips_frames.items():
+        frame_entries = []
+        sorted_indices = sorted(frames_dict.keys())
+        for f_idx in sorted_indices:
+            f_name = frames_dict[f_idx]
+            res_id = f"{ext_id}_{clip_key}_{f_idx}"
+            godot_res_path = f"res://assets/sprites/{req.category}/{c_name}/{f_name}"
+            ext_resources.append(f'[ext_resource type="Texture2D" path="{godot_res_path}" id="{res_id}"]')
+            frame_entries.append(f'{{\n"duration": 1.0,\n"texture": ExtResource("{res_id}")\n}}')
+            ext_id += 1
+        
+        loop = "true" if clip_key in ["idle", "run", "walk", "hop_forward"] else "false"
+        speed = 10.0 if clip_key in ["attack", "run", "talon_kick"] else 8.0
+        animations_sections.append(f"""{{
+"frames": [{", ".join(frame_entries)}],
 "loop": {loop},
 "name": &"{clip_key}",
 "speed": {speed}
 }}""")
 
-    tres_content = f"""[gd_resource type="SpriteFrames" format=3]
+    tres_content = f"""[gd_resource type="SpriteFrames" load_steps={ext_id} format=3]
+
+{"\n".join(ext_resources)}
 
 [resource]
-animations = [{", ".join(sections)}]
+animations = [{", ".join(animations_sections)}]
 """
     with open(os.path.join(godot_target_dir, f"{c_name}_frames.tres"), "w", encoding="utf-8") as f:
         f.write(tres_content)
@@ -936,7 +976,7 @@ animations = [{", ".join(sections)}]
     meta = {
         "name": req.asset_name,
         "category": req.category,
-        "clips": list(req.clips.keys()),
+        "clips": list(all_clips_frames.keys()),
         "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
     with open(os.path.join(lib_target_dir, "meta.json"), "w", encoding="utf-8") as f:
@@ -980,8 +1020,33 @@ async def get_library_assets():
                     except Exception:
                         pass
                 
-                thumb_url = f"/assets_library/{cat}/{item_name}/thumb.png"
-                sheet_url = f"/assets_library/{cat}/{item_name}/spritesheet.png"
+                # Scan all clips and frame files
+                clips_data: Dict[str, List[str]] = {}
+                for f_name in sorted(os.listdir(item_path)):
+                    if f_name.endswith(".png") and "_" in f_name and not f_name.startswith("thumb") and not f_name.startswith("spritesheet"):
+                        parts = f_name.rsplit(".", 1)[0].rsplit("_", 1)
+                        if len(parts) == 2 and parts[1].isdigit():
+                            c_key = parts[0]
+                            if c_key not in clips_data:
+                                clips_data[c_key] = []
+                            clips_data[c_key].append(f"/assets_library/{cat}/{item_name}/{f_name}")
+                
+                tres_file_path = os.path.join(item_path, f"{item_name}_frames.tres")
+                tres_code = ""
+                if os.path.exists(tres_file_path):
+                    try:
+                        with open(tres_file_path, "r", encoding="utf-8") as f:
+                            tres_code = f.read()
+                    except Exception:
+                        pass
+
+                thumb_url = f"/assets_library/{cat}/{item_name}/thumb.png" if os.path.exists(os.path.join(item_path, "thumb.png")) else None
+                if not thumb_url and clips_data:
+                    first_clip = list(clips_data.values())[0]
+                    if first_clip:
+                        thumb_url = first_clip[0]
+
+                sheet_url = f"/assets_library/{cat}/{item_name}/spritesheet.png" if os.path.exists(os.path.join(item_path, "spritesheet.png")) else None
                 
                 entry = {
                     "id": item_name,
@@ -989,6 +1054,11 @@ async def get_library_assets():
                     "category": cat,
                     "thumb": thumb_url,
                     "spritesheet": sheet_url,
+                    "clips": clips_data,
+                    "tres_file": f"/assets_library/{cat}/{item_name}/{item_name}_frames.tres" if os.path.exists(tres_file_path) else None,
+                    "tres_code": tres_code,
+                    "godot_path": f"res://assets/sprites/{cat}/{item_name}/",
+                    "total_frames": sum(len(f_list) for f_list in clips_data.values()),
                     "created_at": meta_data.get("created_at", "")
                 }
                 catalog[cat].append(entry)

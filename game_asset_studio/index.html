@@ -113,7 +113,9 @@
                         <h2>🎨 DANH SÁCH ASSET CỦA GAME NÀY (Kèm Prompt Video/Ảnh)</h2>
                         <p>Mỗi asset đều có chỉ dẫn rõ: nên tạo dạng <b>🎬 Video (2-3s)</b> để lấy chuyển động mượt hay <b>🖼️ Ảnh Sheet</b> kèm prompt chuẩn.</p>
                     </div>
-                    <div class="planner-actions-bar">
+                    <div class="planner-actions-bar" style="display:flex;gap:6px;align-items:center;">
+                        <button class="btn btn-secondary btn-xs" id="btnCollapseAllSteps" title="Thu gọn chi tiết tất cả các bước cho đỡ rối">🔼 Thu Gọn Tất Cả</button>
+                        <button class="btn btn-secondary btn-xs" id="btnExpandAllSteps" title="Mở rộng chi tiết tất cả các bước">🔽 Mở Rộng Tất Cả</button>
                         <button class="btn btn-primary btn-sm" id="btnOpenNewPlanModal">➕ Thêm Asset Vào Game</button>
                     </div>
                 </div>
@@ -149,125 +151,158 @@
             <div class="video-processor-layout">
                 <!-- LEFT SIDEBAR CONTROLS -->
                 <aside class="video-sidebar">
-                    <div class="panel-section">
-                        <div class="section-title">🎬 NẠP VIDEO AI</div>
-                        <div class="file-drop-zone" id="videoDropZone">
-                            <input type="file" id="videoFileInput" accept="video/mp4,video/webm,image/gif,video/quicktime" style="display:none;">
-                            <div class="drop-icon">📹</div>
-                            <div class="drop-text">Kéo thả Video MP4/WebM hoặc</div>
-                            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('videoFileInput').click()">📁 Chọn File Video</button>
+                    <!-- SECTION 1: NẠP VIDEO -->
+                    <div class="panel-section collapsible-section">
+                        <div class="section-title">
+                            <span>🎬 1. NẠP VIDEO AI</span>
+                            <span class="section-collapse-arrow">▼</span>
+                        </div>
+                        <div class="section-content">
+                            <div class="file-drop-zone" id="videoDropZone">
+                                <input type="file" id="videoFileInput" accept="video/mp4,video/webm,image/gif,video/quicktime" style="display:none;">
+                                <div class="drop-icon">📹</div>
+                                <div class="drop-text">Kéo thả Video MP4/WebM hoặc</div>
+                                <button class="btn btn-secondary btn-sm" onclick="document.getElementById('videoFileInput').click()">📁 Chọn File Video</button>
+                            </div>
                         </div>
                     </div>
 
                     <!-- DYNAMIC STEP ACTION & CUTTING GUIDE IN TAB 2 -->
-                    <div class="panel-section" id="videoStepGuideSection" style="display:none;background:rgba(0,240,255,0.05);border:1px solid var(--accent-cyan);border-radius:4px;padding:8px;">
-                        <div class="section-title" style="color:var(--accent-cyan);margin-bottom:4px;display:flex;align-items:center;gap:4px;">
-                            💡 MẸO BÓC 1 CHU KỲ CHUẨN:
+                    <div class="panel-section collapsible-section" id="videoStepGuideSection" style="display:none;background:rgba(0,240,255,0.05);border:1px solid var(--accent-cyan);border-radius:4px;padding:8px;">
+                        <div class="section-title" style="color:var(--accent-cyan);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;">
+                            <span>💡 MẸO BÓC 1 CHU KỲ CHUẨN:</span>
+                            <span class="section-collapse-arrow">▼</span>
                         </div>
-                        <div id="videoStepGuideContent" style="font-size:10px;color:#e2e8f0;line-height:1.4;"></div>
+                        <div class="section-content" id="videoStepGuideContent" style="font-size:10px;color:#e2e8f0;line-height:1.4;"></div>
                     </div>
 
-                    <div class="panel-section">
-                        <div class="section-title">⏱️ THỜI GIAN CẮT & CĂN CHỈNH LOOP</div>
+                    <!-- SECTION 2: THỜI GIAN CẮT -->
+                    <div class="panel-section collapsible-section">
+                        <div class="section-title">
+                            <span>⏱️ 2. THỜI GIAN CẮT & CĂN LOOP</span>
+                            <span class="section-collapse-arrow">▼</span>
+                        </div>
                         
-                        <div style="display:flex;flex-direction:column;gap:6px;">
-                            <!-- START TIME -->
-                            <div class="form-group">
-                                <div style="display:flex;justify-content:space-between;align-items:center;">
-                                    <label style="font-size:10px;font-weight:700;color:var(--accent-cyan);">🟢 Bắt đầu (giây):</label>
-                                    <button class="btn btn-secondary btn-xs" id="btnSetStartFromCurrent" style="padding:1px 5px;font-size:9px;" title="Lấy mốc thời gian video đang tạm dừng">⏱ Lấy Giờ Hiện Tại</button>
+                        <div class="section-content">
+                            <div style="display:flex;flex-direction:column;gap:6px;">
+                                <!-- START TIME -->
+                                <div class="form-group">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                                        <label style="font-size:10px;font-weight:700;color:var(--accent-cyan);">🟢 Bắt đầu (giây):</label>
+                                        <button class="btn btn-secondary btn-xs" id="btnSetStartFromCurrent" style="padding:1px 5px;font-size:9px;" title="Lấy mốc thời gian video đang tạm dừng">⏱ Lấy Giờ Hiện Tại</button>
+                                    </div>
+                                    <div class="stepper-input-group">
+                                        <button class="btn btn-secondary btn-xs" id="btnStartMinus10" title="Lùi 0.1s">-0.1</button>
+                                        <button class="btn btn-secondary btn-xs" id="btnStartMinus" title="Lùi 0.05s">-0.05</button>
+                                        <input type="number" id="videoStartSec" min="0" step="0.01" value="0.00" class="form-input time-num-input">
+                                        <button class="btn btn-secondary btn-xs" id="btnStartPlus" title="Tiến 0.05s">+0.05</button>
+                                        <button class="btn btn-secondary btn-xs" id="btnStartPlus10" title="Tiến 0.1s">+0.1</button>
+                                    </div>
                                 </div>
-                                <div class="stepper-input-group">
-                                    <button class="btn btn-secondary btn-xs" id="btnStartMinus10" title="Lùi 0.1s">-0.1</button>
-                                    <button class="btn btn-secondary btn-xs" id="btnStartMinus" title="Lùi 0.05s">-0.05</button>
-                                    <input type="number" id="videoStartSec" min="0" step="0.01" value="0.00" class="form-input time-num-input">
-                                    <button class="btn btn-secondary btn-xs" id="btnStartPlus" title="Tiến 0.05s">+0.05</button>
-                                    <button class="btn btn-secondary btn-xs" id="btnStartPlus10" title="Tiến 0.1s">+0.1</button>
+
+                                <!-- END TIME -->
+                                <div class="form-group">
+                                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                                        <label style="font-size:10px;font-weight:700;color:var(--accent-gold);">🔴 Kết thúc (giây):</label>
+                                        <button class="btn btn-secondary btn-xs" id="btnSetEndFromCurrent" style="padding:1px 5px;font-size:9px;" title="Lấy mốc thời gian video đang tạm dừng">⏱ Lấy Giờ Hiện Tại</button>
+                                    </div>
+                                    <div class="stepper-input-group">
+                                        <button class="btn btn-secondary btn-xs" id="btnEndMinus10" title="Lùi 0.1s">-0.1</button>
+                                        <button class="btn btn-secondary btn-xs" id="btnEndMinus" title="Lùi 0.05s">-0.05</button>
+                                        <input type="number" id="videoEndSec" min="0" step="0.01" value="1.20" class="form-input time-num-input">
+                                        <button class="btn btn-secondary btn-xs" id="btnEndPlus" title="Tiến 0.05s">+0.05</button>
+                                        <button class="btn btn-secondary btn-xs" id="btnEndPlus10" title="Tiến 0.1s">+0.1</button>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- END TIME -->
-                            <div class="form-group">
-                                <div style="display:flex;justify-content:space-between;align-items:center;">
-                                    <label style="font-size:10px;font-weight:700;color:var(--accent-gold);">🔴 Kết thúc (giây):</label>
-                                    <button class="btn btn-secondary btn-xs" id="btnSetEndFromCurrent" style="padding:1px 5px;font-size:9px;" title="Lấy mốc thời gian video đang tạm dừng">⏱ Lấy Giờ Hiện Tại</button>
-                                </div>
-                                <div class="stepper-input-group">
-                                    <button class="btn btn-secondary btn-xs" id="btnEndMinus10" title="Lùi 0.1s">-0.1</button>
-                                    <button class="btn btn-secondary btn-xs" id="btnEndMinus" title="Lùi 0.05s">-0.05</button>
-                                    <input type="number" id="videoEndSec" min="0" step="0.01" value="1.20" class="form-input time-num-input">
-                                    <button class="btn btn-secondary btn-xs" id="btnEndPlus" title="Tiến 0.05s">+0.05</button>
-                                    <button class="btn btn-secondary btn-xs" id="btnEndPlus10" title="Tiến 0.1s">+0.1</button>
-                                </div>
+                            <div style="display:flex;gap:4px;margin-top:6px;">
+                                <button class="btn btn-secondary btn-xs" id="btnTestVideoLoop" style="flex:1;justify-content:center;font-weight:800;">
+                                    ▶ Chạy Thử Loop Trên Video
+                                </button>
+                                <button class="btn btn-secondary btn-xs" id="btnStopVideoLoop" style="padding:2px 8px;font-weight:800;" title="Dừng chạy thử">⏸</button>
                             </div>
-                        </div>
-
-                        <div style="display:flex;gap:4px;margin-top:4px;">
-                            <button class="btn btn-secondary btn-xs" id="btnTestVideoLoop" style="flex:1;justify-content:center;font-weight:800;">
-                                ▶ Chạy Thử Loop Trên Video
-                            </button>
-                            <button class="btn btn-secondary btn-xs" id="btnStopVideoLoop" style="padding:2px 8px;font-weight:800;" title="Dừng chạy thử">⏸</button>
-                        </div>
-                        <p class="hint-text" style="margin-top:2px;">💡 Kéo thanh trượt video ➔ Bấm <b>⏱ Lấy Giờ Hiện Tại</b> để khóa nhịp loop chuẩn xác!</p>
-                    </div>
-
-                    <div class="panel-section">
-                        <div class="section-title">🧩 SỐ FRAME CẦN BÓC</div>
-                        <div class="btn-toggle-group">
-                            <button class="btn-toggle" data-frames="4">4 F</button>
-                            <button class="btn-toggle" data-frames="6">6 F</button>
-                            <button class="btn-toggle active" data-frames="8">8 F (Chuẩn)</button>
-                            <button class="btn-toggle" data-frames="10">10 F</button>
-                            <button class="btn-toggle" data-frames="12">12 F</button>
-                            <button class="btn-toggle" data-frames="16">16 F</button>
+                            <p class="hint-text" style="margin-top:4px;">💡 Kéo thanh trượt video ➔ Bấm <b>⏱ Lấy Giờ Hiện Tại</b> để khóa nhịp loop chuẩn xác!</p>
                         </div>
                     </div>
 
-                    <div class="panel-section">
-                        <div class="section-title">🟢 TÁCH PHÔNG NỀN (CHROMA KEY)</div>
-                        <div class="form-group">
-                            <label>Kiểu nền cần tách:</label>
-                            <select id="videoBgRemovalMode" class="form-select">
-                                <option value="green" selected>🟢 Phông Xanh Lá (Green Screen)</option>
-                                <option value="black">⚫ Phông Đen (Pure Black)</option>
-                                <option value="white">⚪ Phông Trắng (Pure White)</option>
-                                <option value="none">🚫 Giữ Nguyên Nền</option>
-                            </select>
+                    <!-- SECTION 3: TÁCH PHÔNG NỀN -->
+                    <div class="panel-section collapsible-section">
+                        <div class="section-title">
+                            <span>🟢 3. TÁCH PHÔNG NỀN (CHROMA KEY)</span>
+                            <span class="section-collapse-arrow">▼</span>
                         </div>
-                        <div class="range-group" style="margin-top:6px;">
-                            <label>Độ nhạy tách nền: <span id="bgToleranceVal">35</span></label>
-                            <input type="range" id="bgToleranceSlider" min="10" max="90" value="35">
-                        </div>
-                    </div>
-
-                    <div class="panel-section">
-                        <div class="section-title">👾 TỈ LỆ & ĐỘ PHÂN GIẢI FRAME</div>
-                        
-                        <div class="form-group">
-                            <label style="font-size:10px;font-weight:700;color:var(--accent-cyan);">📐 Chống Bóp Méo Video 16:9:</label>
-                            <select id="videoAspectMode" class="form-select">
-                                <option value="crop_character" selected>🎯 Tự Động Gom Nhân Vật (Auto-Crop Bounding Box - Khuyên Dùng)</option>
-                                <option value="fit_letterbox">📐 Giữ Tỉ Lệ Gốc 16:9 & Bù Nền Trong Suốt (Fit Center)</option>
-                                <option value="stretch">⚠️ Kéo Giãn Ép Vuông (Stretch)</option>
-                            </select>
-                            <p class="hint-text" style="margin-top:2px;">💡 Chế độ <b>Auto-Crop</b> tự động nhận diện nhân vật sau khi xóa nền xanh, cắt sát và căn giữa khung vuông, không bao giờ bị méo!</p>
-                        </div>
-
-                        <div class="form-row" style="margin-top:6px;">
+                        <div class="section-content">
                             <div class="form-group">
-                                <label>Kích thước frame xuất:</label>
-                                <select id="videoTargetSize" class="form-select">
-                                    <option value="128">128 × 128 px</option>
-                                    <option value="256" selected>256 × 256 px</option>
-                                    <option value="512">512 × 512 px</option>
+                                <label>Kiểu nền cần tách:</label>
+                                <select id="videoBgRemovalMode" class="form-select">
+                                    <option value="green" selected>🟢 Phông Xanh Lá (Green Screen)</option>
+                                    <option value="black">⚫ Phông Đen (Pure Black)</option>
+                                    <option value="white">⚪ Phông Trắng (Pure White)</option>
+                                    <option value="none">🚫 Giữ Nguyên Nền</option>
                                 </select>
                             </div>
+                            <div class="range-group" style="margin-top:6px;">
+                                <label>Độ nhạy tách nền: <span id="bgToleranceVal">35</span></label>
+                                <input type="range" id="bgToleranceSlider" min="10" max="90" value="35">
+                            </div>
                         </div>
+                    </div>
 
-                        <label class="checkbox-label" style="margin-top:6px;">
-                            <input type="checkbox" id="chkVideoPixelate" checked>
-                            <span>Làm nét chuẩn Pixel Art 2D (Nearest Neighbor)</span>
-                        </label>
+                    <!-- SECTION 4: TỈ LỆ & SCALE -->
+                    <div class="panel-section collapsible-section">
+                        <div class="section-title">
+                            <span>👾 4. TỈ LỆ & ĐỘ PHÂN GIẢI FRAME</span>
+                            <span class="section-collapse-arrow">▼</span>
+                        </div>
+                        
+                        <div class="section-content">
+                            <div class="form-group">
+                                <label style="font-size:10px;font-weight:700;color:var(--accent-cyan);">📐 Chống Bóp Méo Video 16:9:</label>
+                                <select id="videoAspectMode" class="form-select">
+                                    <option value="crop_character" selected>🎯 Tự Động Gom Nhân Vật (Auto-Crop Bounding Box - Khuyên Dùng)</option>
+                                    <option value="fit_letterbox">📐 Giữ Tỉ Lệ Gốc 16:9 & Bù Nền Trong Suốt (Fit Center)</option>
+                                    <option value="stretch">⚠️ Kéo Giãn Ép Vuông (Stretch)</option>
+                                </select>
+                            </div>
+
+                            <div class="form-row" style="margin-top:6px;">
+                                <div class="form-group">
+                                    <label>Kích thước frame xuất:</label>
+                                    <select id="videoTargetSize" class="form-select">
+                                        <option value="128">128 × 128 px</option>
+                                        <option value="256" selected>256 × 256 px</option>
+                                        <option value="512">512 × 512 px</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- CHARACTER SCALE & ANCHOR OFFSET (Sync size across animations) -->
+                            <div class="form-row" style="margin-top:6px;">
+                                <div class="form-group">
+                                    <label style="display:flex;justify-content:space-between;font-size:9.5px;">
+                                        <span>🔍 Tỉ Lệ Thân Người (Scale):</span>
+                                        <b id="videoCharScaleVal" style="color:var(--accent-cyan);">100%</b>
+                                    </label>
+                                    <input type="range" id="videoCharScaleSlider" min="60" max="160" value="100">
+                                </div>
+                            </div>
+
+                            <div class="form-row" style="margin-top:4px;">
+                                <div class="form-group">
+                                    <label style="display:flex;justify-content:space-between;font-size:9.5px;">
+                                        <span>📍 Dịch Chuyển Y (Lên/Xuống):</span>
+                                        <b id="videoCharOffsetYVal" style="color:var(--accent-gold);">0px</b>
+                                    </label>
+                                    <input type="range" id="videoCharOffsetYSlider" min="-60" max="60" value="0">
+                                </div>
+                            </div>
+
+                            <label class="checkbox-label" style="margin-top:6px;">
+                                <input type="checkbox" id="chkVideoPixelate" checked>
+                                <span>Làm nét chuẩn Pixel Art 2D (Nearest Neighbor)</span>
+                            </label>
+                        </div>
                     </div>
 
                     <div class="panel-section" style="margin-top:auto;">
@@ -955,6 +990,93 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-primary btn-sm" id="btnCloseGuideModalFooter">Đã Hiểu ➔ Bắt Đầu Làm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ASSET LIBRARY INSPECTOR & ANIMATION PREVIEW MODAL -->
+    <div class="modal-backdrop" id="libAssetModal" style="display:none;">
+        <div class="modal-card" style="width:960px;max-width:95vw;">
+            <div class="modal-header">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <h3 id="libModalTitle" style="margin:0;">🎬 Xem Chi Tiết Asset & Animation</h3>
+                    <span id="libModalCategory" class="plan-cat-label">characters</span>
+                    <span id="libModalFramesCount" class="step-type-badge badge-video-step">0 Frame</span>
+                </div>
+                <button class="modal-close-btn" id="btnCloseLibModal">&times;</button>
+            </div>
+            <div class="modal-body" style="padding:14px;">
+                <div style="display:grid;grid-template-columns:360px 1fr;gap:14px;">
+                    <!-- LEFT COLUMN: LIVE ANIMATION PLAYER -->
+                    <div style="display:flex;flex-direction:column;gap:8px;background:#05070a;border:1px solid var(--border-color);border-radius:6px;padding:12px;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:11px;font-weight:900;color:var(--accent-cyan);">🎬 TRÌNH CHẠY THỬ ANIMATION</span>
+                            <span id="libAnimInfo" style="font-size:10px;font-family:monospace;color:var(--text-muted);">Frame 1/8</span>
+                        </div>
+
+                        <!-- LIVE CANVAS -->
+                        <div style="width:100%;height:240px;background:#000;background-image:linear-gradient(45deg,#111 25%,transparent 25%),linear-gradient(-45deg,#111 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#111 75%),linear-gradient(-45deg,transparent 75%,#111 75%);background-size:14px 14px;background-position:0 0,0 7px,7px -7px,-7px 0;border:1px solid var(--border-highlight);border-radius:4px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
+                            <canvas id="libAnimCanvas" width="256" height="256" style="max-width:100%;max-height:100%;image-rendering:pixelated;"></canvas>
+                        </div>
+
+                        <!-- CLIP SELECTOR BUTTONS -->
+                        <div>
+                            <label style="font-size:10px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px;">CHỌN ANIMATION ĐỂ XEM:</label>
+                            <div id="libClipButtonsList" style="display:flex;gap:4px;flex-wrap:wrap;"></div>
+                        </div>
+
+                        <!-- PLAYER CONTROLS -->
+                        <div style="display:flex;gap:6px;align-items:center;margin-top:2px;">
+                            <button class="btn btn-secondary btn-sm" id="btnLibPlayPause" style="flex:1;justify-content:center;font-weight:800;">⏸ Tạm Dừng</button>
+                            <button class="btn btn-secondary btn-xs" id="btnLibPrevFrame" title="Frame trước">⏮</button>
+                            <button class="btn btn-secondary btn-xs" id="btnLibNextFrame" title="Frame sau">⏭</button>
+                        </div>
+
+                        <div class="range-group">
+                            <label style="display:flex;justify-content:space-between;font-size:10px;">
+                                <span>Tốc độ: <b id="libFpsVal" style="color:var(--accent-gold);">8 FPS</b></span>
+                                <span>Thời lượng: <b id="libDurationVal" style="color:var(--accent-cyan);">1.00s</b></span>
+                            </label>
+                            <input type="range" id="libFpsSlider" min="1" max="24" value="8">
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN: GODOT CODE & FRAME FILMSTRIP -->
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+                        <!-- GODOT PATH INFO BOX -->
+                        <div style="background:rgba(0,240,255,0.05);border:1px solid var(--accent-cyan);border-radius:6px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <span style="font-size:9px;color:var(--text-muted);text-transform:uppercase;font-weight:700;display:block;">📁 VỊ TRÍ RES:// TRONG GODOT:</span>
+                                <code id="libGodotResPath" style="font-size:11px;font-family:monospace;color:#fff;font-weight:800;">res://assets/sprites/characters/...</code>
+                            </div>
+                            <button class="btn btn-secondary btn-xs" id="btnCopyGodotPath" style="font-weight:800;">📋 Copy Path</button>
+                        </div>
+
+                        <!-- TABS: FRAMES vs GODOT CODE -->
+                        <div style="display:flex;gap:6px;border-bottom:1px solid var(--border-color);padding-bottom:6px;">
+                            <button class="btn btn-secondary btn-xs active" id="tabBtnLibFrames" style="font-weight:800;">🎞️ Từng Frame PNG (<span id="libFrameListCount">0</span>)</button>
+                            <button class="btn btn-secondary btn-xs" id="tabBtnLibGodotTres" style="font-weight:800;">📦 File Godot SpriteFrames (.tres)</button>
+                        </div>
+
+                        <!-- TAB VIEW 1: FRAME FILMSTRIP -->
+                        <div id="libViewFrames" style="flex:1;overflow-y:auto;max-height:280px;display:grid;grid-template-columns:repeat(auto-fill, minmax(85px, 1fr));gap:6px;padding:2px;"></div>
+
+                        <!-- TAB VIEW 2: GODOT TRES CODE -->
+                        <div id="libViewGodotTres" style="display:none;flex:1;flex-direction:column;gap:6px;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <span style="font-size:10px;color:var(--text-muted);">Tệp <code>SpriteFrames</code> Godot 4 tự động tạo:</span>
+                                <button class="btn btn-secondary btn-xs" id="btnCopyTresCode" style="font-weight:800;">📋 Copy .tres Code</button>
+                            </div>
+                            <pre id="libTresCodeContent" style="background:#030508;border:1px solid var(--border-color);border-radius:4px;padding:10px;font-size:10px;font-family:monospace;color:#a5f3fc;max-height:260px;overflow-y:auto;line-height:1.4;margin:0;"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;">
+                <span id="libCreatedDate" style="font-size:10px;color:var(--text-muted);">Xuất lúc: ---</span>
+                <div style="display:flex;gap:6px;">
+                    <button class="btn btn-primary btn-sm" id="btnCloseLibModalBtn">Đóng</button>
+                </div>
             </div>
         </div>
     </div>
