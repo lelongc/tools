@@ -2,154 +2,226 @@ extends CharacterBody2D
 class_name Player2D
 
 signal hp_changed(current: float, max_hp: float)
-signal fury_changed(current: float, max_fury: float)
 signal combo_scored(count: int)
+signal pogo_landed()
+signal player_died()
 
-@export var move_speed: float = 260.0
+@export var move_speed: float = 280.0
+@export var jump_velocity: float = -460.0
+@export var double_jump_velocity: float = -400.0
+@export var gravity: float = 1100.0
 @export var max_hp: float = 100.0
-@export var max_fury: float = 100.0
 
 var current_hp: float = 100.0
-var current_fury: float = 0.0
-
-var is_attacking: bool = false
-var is_dashing: bool = false
-var is_invulnerable: bool = false
 var facing_direction: int = 1 # 1: Right, -1: Left
 
-var combo_step: int = 0
-var combo_reset_timer: float = 0.0
+var can_double_jump: bool = true
+var is_dashing: bool = false
+var dash_timer: float = 0.0
 var dash_cooldown: float = 0.0
-var combo_count: int = 0
+var dash_speed: float = 580.0
 
-@onready var sprite: Sprite2D = $Sprite2D
+var is_attacking: bool = false
+var attack_timer: float = 0.0
+var is_down_slashing: bool = false
+
+var coyote_timer: float = 0.0
+var jump_buffer_timer: float = 0.0
+
+var is_dead: bool = false
+var is_invulnerable: bool = false
+var invuln_timer: float = 0.0
+
+@onready var anim_sprite: AnimatedSprite2D = $AnimatedSprite2D
 @onready var hitbox: Hitbox2D = $Hitbox2D
 @onready var hurtbox: Hurtbox2D = $Hurtbox2D
-@onready var anim_player: AnimationPlayer = $AnimationPlayer
+@onready var attack_shape: CollisionShape2D = $Hitbox2D/CollisionShape2D
 
 func _ready() -> void:
 	current_hp = max_hp
-	current_fury = 0.0
+	hp_changed.emit(current_hp, max_hp)
 	if hurtbox:
 		hurtbox.damage_taken.connect(_on_damage_taken)
 	if hitbox:
+		hitbox.hit_landed.connect(_on_hitbox_hit_landed)
 		hitbox.monitoring = false
 
 func _physics_process(delta: float) -> void:
+	if is_dead:
+		velocity.y += gravity * delta
+		move_and_slide()
+		return
+
+	# Timers
 	if dash_cooldown > 0.0: dash_cooldown -= delta
-	
-	if combo_reset_timer > 0.0:
-		combo_reset_timer -= delta
-		if combo_reset_timer <= 0.0:
-			combo_step = 0
-			
+	if jump_buffer_timer > 0.0: jump_buffer_timer -= delta
+	if invuln_timer > 0.0:
+		invuln_timer -= delta
+		if invuln_timer <= 0.0:
+			is_invulnerable = false
+			modulate.a = 1.0
+
+	# 1. Xử lý Dash
 	if is_dashing:
+		dash_timer -= delta
+		velocity.x = facing_direction * dash_speed
+		velocity.y = 0.0
+		if dash_timer <= 0.0:
+			is_dashing = false
 		move_and_slide()
 		return
-		
+
+	# 2. Xử lý Attack Timer
 	if is_attacking:
-		velocity = velocity.move_toward(Vector2.ZERO, 800.0 * delta)
-		move_and_slide()
-		return
-		
-	# 1. Di chuyển 8 hướng (Beat 'em Up)
-	var dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
-	if Input.is_key_pressed(KEY_A): dir.x -= 1.0
-	if Input.is_key_pressed(KEY_D): dir.x += 1.0
-	if Input.is_key_pressed(KEY_W): dir.y -= 1.0
-	if Input.is_key_pressed(KEY_S): dir.y += 1.0
-	dir = dir.normalized()
-	
-	if dir.length_squared() > 0.01:
-		velocity = dir * move_speed
-		if dir.x > 0.05:
-			_set_facing(1)
-		elif dir.x < -0.05:
-			_set_facing(-1)
+		attack_timer -= delta
+		if attack_timer <= 0.0:
+			is_attacking = false
+			is_down_slashing = false
+			if hitbox:
+				hitbox.monitoring = false
+
+	# 3. Trọng lực & Coyote Time
+	if is_on_floor():
+		coyote_timer = 0.12
+		can_double_jump = true
 	else:
-		velocity = velocity.move_toward(Vector2.ZERO, 1200.0 * delta)
-		
-	move_and_slide()
-	
-	# 2. Xử lý nút bấm tấn công / lướt
-	if Input.is_action_just_pressed("ui_accept") or Input.is_key_pressed(KEY_J) or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		_perform_attack()
-	elif Input.is_key_pressed(KEY_K) or Input.is_key_pressed(KEY_SPACE):
+		coyote_timer -= delta
+		velocity.y += gravity * delta
+		if velocity.y > 700.0: velocity.y = 700.0 # Terminal velocity
+
+	# 4. Nhập phím Nhảy (Jump & Jump Buffer)
+	if Input.is_action_just_pressed("ui_up") or Input.is_key_pressed(KEY_W) or Input.is_key_pressed(KEY_SPACE):
+		jump_buffer_timer = 0.12
+
+	if jump_buffer_timer > 0.0:
+		if is_on_floor() or coyote_timer > 0.0:
+			velocity.y = jump_velocity
+			coyote_timer = 0.0
+			jump_buffer_timer = 0.0
+			_create_jump_feathers()
+		elif can_double_jump and not is_on_floor():
+			velocity.y = double_jump_velocity
+			can_double_jump = false
+			jump_buffer_timer = 0.0
+			_create_jump_feathers()
+
+	# 5. Di chuyển Trái / Phải
+	var input_x: float = 0.0
+	if Input.is_action_pressed("ui_left") or Input.is_key_pressed(KEY_A):
+		input_x -= 1.0
+	if Input.is_action_pressed("ui_right") or Input.is_key_pressed(KEY_D):
+		input_x += 1.0
+
+	if input_x != 0.0:
+		facing_direction = 1 if input_x > 0 else -1
+		velocity.x = move_toward(velocity.x, input_x * move_speed, 1800.0 * delta)
+		if anim_sprite:
+			anim_sprite.flip_h = (facing_direction == -1)
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, 1500.0 * delta)
+
+	# 6. Tấn công (Attack / Pogo Down Slash)
+	if Input.is_key_pressed(KEY_J) or Input.is_key_pressed(KEY_Z) or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		var holding_down = Input.is_action_pressed("ui_down") or Input.is_key_pressed(KEY_S)
+		_perform_attack(holding_down and not is_on_floor())
+
+	# 7. Lướt Dash (Shift / K / Right Click)
+	if (Input.is_key_pressed(KEY_K) or Input.is_key_pressed(KEY_SHIFT) or Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)) and dash_cooldown <= 0.0 and not is_dashing:
 		_perform_dash()
 
-func _set_facing(dir: int) -> void:
-	facing_direction = dir
-	if sprite:
-		sprite.flip_h = (dir == -1)
-	if hitbox:
-		hitbox.position.x = abs(hitbox.position.x) * dir
+	# 8. Cập nhật Animation
+	_update_animation()
 
-func _perform_attack() -> void:
+	move_and_slide()
+
+func _update_animation() -> void:
+	if not anim_sprite or is_dead: return
+
+	if is_attacking:
+		if anim_sprite.animation != "talon_kick":
+			anim_sprite.play("talon_kick")
+		return
+
+	if is_on_floor():
+		if abs(velocity.x) > 20.0:
+			if anim_sprite.animation != "run":
+				anim_sprite.play("run")
+		else:
+			if anim_sprite.animation != "idle":
+				anim_sprite.play("idle")
+	else:
+		if anim_sprite.animation != "hop_forward":
+			anim_sprite.play("hop_forward")
+
+func _perform_attack(is_down: bool) -> void:
 	if is_attacking or is_dashing: return
 	is_attacking = true
-	combo_step = (combo_step % 3) + 1
-	combo_reset_timer = 0.65
-	
-	# Tính lực sát thương và hất văng theo combo
-	var dmg = 20.0 * combo_step
-	var kb_x = (250.0 + combo_step * 100.0) * facing_direction
-	var kb_y = -80.0 if combo_step < 3 else -220.0 # Đòn 3 hất tung lên trời
-	
+	is_down_slashing = is_down
+	attack_timer = 0.25
+
 	if hitbox:
-		hitbox.damage = dmg
-		hitbox.knockback_force = Vector2(kb_x, kb_y)
+		hitbox.is_down_slash = is_down
+		hitbox.damage = 30.0 if not is_down else 35.0
 		hitbox.monitoring = true
-		
-	# Animation vung đòn và hiệu ứng chém
-	var tw = create_tween()
-	if sprite:
-		var target_rot = 0.25 * facing_direction * combo_step
-		tw.tween_property(sprite, "rotation", target_rot, 0.08)
-		tw.tween_property(sprite, "rotation", 0.0, 0.12)
-		
-	velocity = Vector2(facing_direction * 180.0, 0)
-	SoundManager.play_punch()
-	
-	await get_tree().create_timer(0.2).timeout
-	if hitbox: hitbox.monitoring = false
-	is_attacking = false
+		if is_down:
+			hitbox.position = Vector2(0, 32)
+			hitbox.knockback_force = Vector2(0, 200)
+		else:
+			hitbox.position = Vector2(36 * facing_direction, 0)
+			hitbox.knockback_force = Vector2(250 * facing_direction, -80)
+
+	if anim_sprite:
+		anim_sprite.play("talon_kick")
 
 func _perform_dash() -> void:
-	if is_dashing or dash_cooldown > 0.0: return
 	is_dashing = true
+	dash_timer = 0.18
+	dash_cooldown = 0.55
 	is_invulnerable = true
-	dash_cooldown = 0.8
-	
-	velocity = Vector2(facing_direction * 650.0, 0)
-	SoundManager.play_whoosh()
-	
-	# Hiệu ứng mờ bóng ma
-	if sprite:
-		sprite.modulate = Color(0.2, 0.85, 1.0, 0.6)
-		
-	await get_tree().create_timer(0.22).timeout
-	if sprite: sprite.modulate = Color.WHITE
-	is_dashing = false
-	is_invulnerable = false
+	invuln_timer = 0.22
+	modulate.a = 0.6
+	_create_dash_particles()
 
-func _on_damage_taken(amount: float, kb: Vector2) -> void:
-	if is_invulnerable: return
+func _on_hitbox_hit_landed(_target: Node2D, is_down: bool) -> void:
+	combo_scored.emit(1)
+	if is_down and not is_on_floor():
+		# POGO BOUNCE!
+		velocity.y = -440.0
+		can_double_jump = true
+		pogo_landed.emit()
+		_create_pogo_sparks()
+
+func _on_damage_taken(amount: float, knockback: Vector2) -> void:
+	if is_dead or is_invulnerable: return
+
 	current_hp = max(0.0, current_hp - amount)
 	hp_changed.emit(current_hp, max_hp)
-	
-	velocity = kb
-	move_and_slide()
-	
-	# Chớp đỏ khi bị đánh
-	if sprite:
-		var tw = create_tween()
-		tw.tween_property(sprite, "modulate", Color(1.0, 0.2, 0.2), 0.06)
-		tw.tween_property(sprite, "modulate", Color.WHITE, 0.1)
-		
-	SoundManager.play_heavy_hit()
+
+	# Bị đẩy lùi
+	velocity = knockback
+	is_invulnerable = true
+	invuln_timer = 0.65
+	modulate = Color(1.0, 0.3, 0.3, 0.7)
+
+	# Chết
 	if current_hp <= 0.0:
 		_die()
 
 func _die() -> void:
-	SoundManager.play_game_over()
-	# Game over logic
+	is_dead = true
+	velocity = Vector2(0, -250)
+	if anim_sprite:
+		anim_sprite.play("squashed_death")
+	player_died.emit()
+
+func _create_jump_feathers() -> void:
+	# Visual effect
+	pass
+
+func _create_dash_particles() -> void:
+	# Visual effect
+	pass
+
+func _create_pogo_sparks() -> void:
+	# Visual effect
+	pass

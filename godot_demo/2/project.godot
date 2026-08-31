@@ -6,7 +6,7 @@ config_version=5
 
 [application]
 
-config/name="2D Beat 'Em Up Hero"
+config/name="The Bleeding Comb: Obscure Resurrection"
 run/main_scene="res://scenes/Main2D.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 config/icon="res://icon.svg"
@@ -19,13 +19,12 @@ SoundManager="*res://scripts/autoload/SoundManager.gd"
 
 [display]
 
-window/size/viewport_width=720
-window/size/viewport_height=1280
-window/size/window_width_override=450
-window/size/window_height_override=800
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
 window/stretch/mode="canvas_items"
-window/stretch/aspect="expand"
-window/handheld/orientation=1
+window/stretch/aspect="keep_width"
 
 [input_devices]
 
