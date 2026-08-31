@@ -1,4 +1,589 @@
 {
-  "active_game_id": "game_rooster_dark_fantasy",
-  "games": []
+  "active_game_id": "game_crossy_rooster",
+  "games": [
+    {
+      "id": "game_rooster_survivor",
+      "title": "Rooster Survivor: Đại Chiến Nông Trại (1-Thumb Roguelite)",
+      "genre": "2D Roguelite Survivor (1 Ngón Tay)",
+      "art_style": "16-Bit Vibrant & Punchy Pixel Art, Dark Fantasy Farm",
+      "raw_input_story": "Game sinh tồn xả stress 1 ngón tay: Chú gà chiến đơn độc chống lại hàng nghìn quái vật bọ hung, cáo đói và chuột đột biến. Tự động xả chiêu bắn bắp rang bơ, thả trứng nổ và lốc xoáy lông gà.",
+      "full_story": {
+        "synopsis": "Chiến trường nông trại vô tận: Người chơi điều khiển gà di chuyển bằng 1 ngón tay. Mỗi khi lên cấp chọn nâng cấp kỹ năng bắp nổ, trứng nổ hạt nhân, cựa sét lôi điện để quét sạch hàng nghìn quái vật tràn vào.",
+        "protagonist": "Chiến Kê Sinh Tồn (Đeo kính râm, giáp cựa sấm sét, vỗ cánh tạo lốc).",
+        "antagonists": "Bầy Sâu Độc Béo Nhung Nhúc, Cáo Tốc Độ, Quạ Đen Cảm Tử, Trùm Heo Rừng Húc Điên.",
+        "environment": "Cánh đồng bắp rực lửa, Vườn rau đột biến, Đầm lầy bóng tối.",
+        "gameplay_elements": "Tự động bắn (Auto-shoot), Lên cấp chọn 1 trong 3 kỹ năng ngẫu nhiên, Thu thập hạt bắp vàng, Mở khóa hòm báu bí mật."
+      },
+      "assets": [
+        {
+          "id": "asset_survivor_rooster",
+          "name": "Gà Chiến Sinh Tồn (Survivor Hero)",
+          "category": "characters",
+          "format": "video",
+          "format_reason": "Cử động chạy lướt và vung cựa 8 hướng liên tục -> Dùng Video AI 2-3s bóc 8 frame",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D pixel art character animation of a badass battle rooster running forward in action pose, 8 frames continuous run cycle, solid bright green screen background, side view game sprite",
+          "prompt_image": "2D pixel art rooster hero spritesheet, action running poses, victory crowing, hurt flash, transparent background",
+          "animations": [
+            "idle",
+            "run",
+            "attack_burst",
+            "hurt",
+            "death"
+          ]
+        },
+        {
+          "id": "asset_bug_minion",
+          "name": "Bầy Sâu Béo Đột Biến (Swarm Bug Minion)",
+          "category": "monsters",
+          "format": "video",
+          "format_reason": "Cử động bò nhung nhúc theo đàn -> Dùng Video AI",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D pixel art crawling plump green beetle monster walking animation, 6 frames seamless loop, solid bright green screen background",
+          "prompt_image": "2D pixel art beetle bug monster spritesheet, walking, squish death, transparent background",
+          "animations": [
+            "walk",
+            "death_squish"
+          ]
+        },
+        {
+          "id": "asset_popcorn_vfx",
+          "name": "Kỹ Năng Súng Bắp Nổ (Popcorn Cannon Burst VFX)",
+          "category": "vfx",
+          "format": "video",
+          "format_reason": "Vệt bắn hạt bắp nở bung thành bỏng ngô vàng rực -> Dùng Video AI",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D golden glowing corn kernels shooting forward and exploding into big crispy popcorn particles, solid black background, VFX animation",
+          "prompt_image": "2D sprite animation of popcorn blast explosion, solid black background",
+          "animations": [
+            "pop_explode"
+          ]
+        },
+        {
+          "id": "asset_farm_tileset",
+          "name": "Tileset Nông Trại Vườn Rau (Farm Survivor Arena Tileset)",
+          "category": "environments",
+          "format": "image",
+          "format_reason": "Mặt đất bãi cỏ, luống rau, rào gỗ, thùng bắp -> Dạng Ảnh Spritesheet chuẩn lưới",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D pixel art top-down farm tileset, lush green grass ground, corn patch tiles, wooden fences, hay bales, seamless repeatable texture",
+          "animations": [
+            "static"
+          ]
+        }
+      ],
+      "created_at": "2026-08-31 08:53"
+    },
+    {
+      "id": "game_crossy_rooster",
+      "title": "Crossy Rooster: Chiến Binh Phá Đường (Crossy Combat & Ride)",
+      "genre": "2D Action-Arcade Dodger & Combat (Tap, Ride, Kick & Dash)",
+      "art_style": "16-Bit Vibrant Retro Arcade Pixel Art, High Contrast, Punchy FX",
+      "raw_input_story": "Game arcade hành động một chạm siêu gây nghiện: Dẫn dắt chú gà chiến nhảy qua cao tốc, cưỡi nóc xe tải, ăn ớt hỏa tiễn húc bay ô tô, đá văng xe máy tạo chuỗi nổ liên hoàn và giải cứu đàn gà con khỏi xe tải bếp rán khổng lồ.",
+      "full_story": {
+        "synopsis": "Vượt qua 5 chặng đường cao tốc tử thần: Đường Phố Đô Thị, Tuyến Tàu Cao Tốc, Sông Cá Sấu, Đại Lộ Xe Tải Quái Vật và Đường Đua Bếp Lửa KFC. Nhặt Ớt Hiểm để hóa xe tăng càn quét, căn nhịp đá cựa hất văng xe cộ, cứu đàn gà con và chạy trốn Xe Tải Bếp Rán Rượt Đuổi!",
+        "protagonist": "Chiến Kê Tổ Lái (Mặc định), Gà Thug Life Kính Đen, Gà Mecha Giáp Sắt, Đàn Gà Con Nối Đuôi.",
+        "antagonists": "Xe Tải Bếp Rán Rượt Đuổi (Boss), Đại Bàng Bắt Trộm Gà, Bồ Câu Côn Đồ Cản Đường, Xe Tải Quái Vật, Tàu Hỏa Siêu Tốc.",
+        "environment": "Đại lộ 8 làn xe nhựa đen vạch trắng, Đường ray tàu hỏa đèn chớp, Dòng sông nước chảy xiết có cá sấu & khúc gỗ, Dải phân cách cỏ hoa.",
+        "gameplay_elements": "1-Tap Nhảy / Cưỡi nóc xe, Vuốt Đá Cựa tạo tai nạn liên hoàn, Ăn Ớt Tăng Tốc càn quét 4s, Dắt đàn gà con về trạm an toàn, Tránh Đại Bàng nếu đứng yên >3s."
+      },
+      "assets": [
+        {
+          "id": "cr_hero_rooster",
+          "name": "1. Chiến Kê Tổ Lái (Main Hero Rooster)",
+          "category": "characters",
+          "format": "video",
+          "format_reason": "Cử động nhảy lò cò 4 hướng, đá cựa trên không, bẹp dí khi va chạm -> Video AI 2-3s bóc 8 frame",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D pixel art white battle rooster jumping forward and kicking with sharp talons, 8 frames animation loop, vibrant arcade retro style, crisp black outlines, solid bright green screen background",
+          "prompt_image": "2D pixel art rooster hero spritesheet: idle stance, hop forward, hop side, flying talon kick, squashed pancake death, feather explosion, solid green screen background",
+          "animations": [
+            "idle",
+            "hop_forward",
+            "hop_side",
+            "talon_kick",
+            "squashed_death",
+            "feather_splat"
+          ]
+        },
+        {
+          "id": "cr_skin_thug_life",
+          "name": "2. Gà Thug Life Kính Đen (Thug Life Skin)",
+          "category": "characters",
+          "format": "video",
+          "format_reason": "Skin hài hước đeo kính râm ngậm xì gà, nhảy nhót siêu ngầu -> Video AI 2-3s",
+          "priority": "Trung bình",
+          "status": "pending",
+          "prompt_video": "2D pixel art cool thug life chicken wearing black pixel sunglasses jumping forward with swagger, 8 frames loop, solid bright green screen background",
+          "prompt_image": "2D pixel art cool chicken spritesheet with thug life shades, gold chain, swagger hop, drop shades pose, solid green screen background",
+          "animations": [
+            "idle_swagger",
+            "hop_forward",
+            "kick_kick",
+            "victory_pose"
+          ]
+        },
+        {
+          "id": "cr_skin_mecha_rooster",
+          "name": "3. Gà Mecha Giáp Sắt Cyber (Mecha Rooster Skin)",
+          "category": "characters",
+          "format": "video",
+          "format_reason": "Gà mặc giáp kim loại, gắn động cơ phản lực sau lưng -> Video AI 2-3s",
+          "priority": "Trung bình",
+          "status": "pending",
+          "prompt_video": "2D cyberpunk armored robot rooster with glowing blue visor boosting forward with mini thruster, 8 frames animation loop, pixel art, solid green screen background",
+          "prompt_image": "2D pixel art mecha cyborg rooster spritesheet, laser eyes, rocket dash, metal talon slash, transparent background",
+          "animations": [
+            "idle_hover",
+            "hop_boost",
+            "laser_kick",
+            "overload_death"
+          ]
+        },
+        {
+          "id": "cr_baby_chicks_swarm",
+          "name": "4. Đàn Gà Con Cần Giải Cứu (Baby Chicks Follower)",
+          "category": "characters",
+          "format": "video",
+          "format_reason": "Gà con lông vàng lon ton chạy nối đuôi nhau -> Video AI 2-3s bóc 6 frame",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D cute tiny fluffy yellow baby chicks waddling and hopping forward in line, 6 frames continuous loop, cartoon pixel art, solid bright green screen background",
+          "prompt_image": "2D pixel art baby chick spritesheet: waddle run, cheerful hop, scared trembling, rescue heart emote, solid green screen background",
+          "animations": [
+            "waddle_run",
+            "hop_happy",
+            "scared_idle",
+            "cheer_saved"
+          ]
+        },
+        {
+          "id": "cr_vehicles_sedan_taxi",
+          "name": "5. Xe Con & Taxi Đô Thị (Sedan, Taxi, Police Car)",
+          "category": "items",
+          "format": "image",
+          "format_reason": "Xe hơi chạy ngang các làn đường, có nóc xe để nhảy lên -> Dạng Ảnh Spritesheet",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D pixel art top-down/side arcade vehicles sprite pack: yellow taxi cab, red sports car, blue police cruiser with flashing roof lights, green sedan, transparent background",
+          "animations": [
+            "drive_left",
+            "drive_right",
+            "roof_standable"
+          ]
+        },
+        {
+          "id": "cr_vehicles_heavy_truck",
+          "name": "6. Xe Tải Khổng Lồ & Xe Buýt (Heavy Delivery Truck & Bus)",
+          "category": "items",
+          "format": "image",
+          "format_reason": "Xe tải dài 3-4 ô để gà nhảy lên cưỡi nhặt bắp vàng -> Dạng Ảnh Spritesheet",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D pixel art long heavy cargo truck, yellow school bus, cement mixer truck, flatbed trailer with corn crates, modular vehicle sprites, transparent background",
+          "animations": [
+            "drive_left",
+            "drive_right"
+          ]
+        },
+        {
+          "id": "cr_bullet_train",
+          "name": "7. Đoàn Tàu Hỏa Siêu Tốc (Bullet Train & Cargo Freight)",
+          "category": "items",
+          "format": "image",
+          "format_reason": "Đoàn tàu hỏa dài lao vun vút qua đường ray -> Dạng Ảnh ghép toa",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D pixel art high speed aerodynamic bullet train engine and passenger wagons, red warning roof lights, side/top-down view, transparent background",
+          "animations": [
+            "speed_rush"
+          ]
+        },
+        {
+          "id": "cr_river_logs_crocodiles",
+          "name": "8. Khúc Gỗ Trôi Sông & Cá Sấu (River Logs & Crocodiles)",
+          "category": "items",
+          "format": "image",
+          "format_reason": "Chướng ngại vật vượt sông: Khúc gỗ nổi, cá sấu chớp mắt lặn mở miệng -> Dạng Ảnh Spritesheet",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D pixel art river obstacles pack: floating wooden logs (small, medium, large), green crocodile swimming with eyes blinking and snapping jaws, transparent background",
+          "animations": [
+            "float_idle",
+            "croc_submerge",
+            "croc_snap"
+          ]
+        },
+        {
+          "id": "cr_boss_fryer_truck",
+          "name": "9. Xe Tải Bếp Rán Gà Khổng Lồ (Giant KFC Fryer Boss Truck)",
+          "category": "monsters",
+          "format": "video",
+          "format_reason": "Trùm rượt đuổi sau lưng có miệng lò lửa và lưỡi cưa quay tít -> Video AI 2-3s",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D menacing giant food truck monster with roaring flaming grill mouth and spinning circular saw blade chasing forward, 8 frames animation loop, pixel art, solid green screen background",
+          "prompt_image": "2D pixel art boss truck spritesheet: raging grill fire, spinning saw attack, oil splash cannon, smoke exhaust, transparent background",
+          "animations": [
+            "chase_rush",
+            "fire_breath",
+            "saw_spin",
+            "crash_defeat"
+          ]
+        },
+        {
+          "id": "cr_enemy_eagle",
+          "name": "10. Đại Bàng Săn Mồi Bắt Gà (Hunting Swoop Eagle)",
+          "category": "monsters",
+          "format": "video",
+          "format_reason": "Lao bổ từ trên trời xuống quắp gà nếu đứng yên >3 giây -> Video AI 2-3s bóc 6 frame",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D predatory eagle diving down rapidly from the sky with sharp outstretched talons, 6 frames animation loop, pixel art, solid bright green screen background",
+          "prompt_image": "2D pixel art hunting eagle spritesheet: soaring shadow, dive attack, snatching rooster in claws, fly away, solid green screen background",
+          "animations": [
+            "shadow_circle",
+            "dive_attack",
+            "snatch_grab"
+          ]
+        },
+        {
+          "id": "cr_enemy_pigeon_bully",
+          "name": "11. Bồ Câu Côn Đồ Cản Đường (Pigeon Gangster Obstacle)",
+          "category": "monsters",
+          "format": "video",
+          "format_reason": "Đậu trên dải phân cách mổ cản đường, có thể bị gà đá văng -> Video AI",
+          "priority": "Trung bình",
+          "status": "pending",
+          "prompt_video": "2D chubby city pigeon wearing tiny beanie hat pecking and flapping wings aggressively, 6 frames loop, pixel art, solid bright green screen background",
+          "prompt_image": "2D pixel art gangster pigeon spritesheet: pecking ground, flap peck attack, knocked flying away hurt, transparent background",
+          "animations": [
+            "idle_peck",
+            "peck_strike",
+            "knockback_fly"
+          ]
+        },
+        {
+          "id": "cr_powerups_pack",
+          "name": "12. Bộ Vật Phẩm Tăng Lực & Tiền Vàng (Power-ups & Collectibles Pack)",
+          "category": "items",
+          "format": "image",
+          "format_reason": "Icon vật phẩm nổi bồng bềnh trên đường nhặt ăn điểm -> Dạng Ảnh Spritesheet",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D pixel art game collectibles pack: glowing red rocket chili pepper, armored rice cooker helmet, horseshoe magnet attracting yellow corn coins, green skateboard with spinning wheels, shiny golden egg trophy, glowing mystery prize box, transparent background",
+          "animations": [
+            "floating_bob",
+            "pickup_sparkle"
+          ]
+        },
+        {
+          "id": "cr_modular_highway_tileset",
+          "name": "13. Tileset Cao Tốc, Đường Ray & Bờ Sông (Modular Highway & River Tileset)",
+          "category": "environments",
+          "format": "image",
+          "format_reason": "Toàn bộ gạch nền mặt đường, vạch kẻ, ray tàu, sông nước ghép map vô tận -> Dạng Ảnh chuẩn lưới",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D modular pixel art crossy platformer tileset: asphalt road strips with white dashed lines, railroad tracks with flashing red signal poles, animated blue water canal tiles, green grass median strips with yellow wild flowers, sidewalk curb tiles, seamless grid",
+          "animations": [
+            "static_tiles",
+            "water_flow_4f"
+          ]
+        },
+        {
+          "id": "cr_parallax_city_layers",
+          "name": "14. Parallax Background Đô Thị & Rừng Cây (3 Depth Parallax Layers)",
+          "category": "environments",
+          "format": "image",
+          "format_reason": "Cảnh nền phía sau tạo chiều sâu 3 lớp (Trời & Mây, Nhà cao tầng xa, Cột đèn gần) -> Dạng Ảnh tách lớp",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D side-scrolling parallax background layers for crossy arcade game: layer 1 clear blue sky with fluffy white clouds, layer 2 distant purple city skyscrapers skyline and bridge silhouette, layer 3 roadside green trees and streetlamps, seamless loop",
+          "animations": [
+            "static_layers"
+          ]
+        },
+        {
+          "id": "cr_vfx_chili_fire_explosion",
+          "name": "15. VFX Phụt Lửa Ớt Hiểm & Nổ Xe Cộ (Chili Rocket Fire & Car Crash FX)",
+          "category": "vfx",
+          "format": "video",
+          "format_reason": "Luồng lửa phản lực phụt sau đít gà và hiệu ứng nổ tung tóe khi húc xe -> Video AI 2-3s bóc 8 frame",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D pixel art roaring rocket jet flame blast shooting out backward with burning sparks, and big retro arcade smoke explosion bursting outward, solid black background, VFX sprite animation",
+          "prompt_image": "2D pixel art VFX spritesheet: rocket flame jet stream, circular car crash explosion with orange fireball, white feather cloud burst, yellow impact stars, solid black background",
+          "animations": [
+            "rocket_flame_loop",
+            "car_crash_burst",
+            "feather_splat_fx"
+          ]
+        },
+        {
+          "id": "cr_ui_hud_pack",
+          "name": "16. Bộ Giao Diện Arcade & Bảng Điểm (Arcade HUD & UI Pack)",
+          "category": "ui",
+          "format": "image",
+          "format_reason": "Nút bấm, đồng hồ đếm số bước, thanh đo nộ ớt, bảng tổng kết điểm, popup gacha -> Dạng Ảnh Spritesheet",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D pixel art arcade game UI kit: digital step counter frame, fiery chili turbo meter bar, golden coin counter icon, shiny golden replay button, game over skull banner, prize gacha egg machine window, high score badge, transparent background",
+          "animations": [
+            "static_ui",
+            "button_press"
+          ]
+        }
+      ],
+      "created_at": "2026-08-31 08:53"
+    },
+    {
+      "id": "game_ragdoll_chicken_duel",
+      "title": "Gà Chọi Vật Lý: Cú Đá Lắc Lư (1-Button Physics Brawler)",
+      "genre": "2D Physics Ragdoll (1 Nút Bấm / 2 Người)",
+      "art_style": "16-Bit Cartoon Physics Pixel Art, Hilarious & Bouncy",
+      "raw_input_story": "Game đối kháng vật lý lắc lư 1 nút bấm: Bấm để đập cánh bay và duỗi chân đá văng đối thủ ra khỏi võ đài. Cực kỳ dễ viral TikTok & Shorts.",
+      "full_story": {
+        "synopsis": "2 chú gà chọi lắc lư theo vật lý Ragdoll trên võ đài hẹp. Người chơi chỉ cần căn đúng thời điểm bấm nút để gà tung cánh bay lên, đạp cựa vào đầu đối thủ để ghi điểm.",
+        "protagonist": "Chiến Kê Đỏ (P1) vs Chiến Kê Xanh (P2) với chiếc mào lắc lư hài hước.",
+        "antagonists": "Gà Máy Đấu Bot, Gà Lực Sĩ Boss.",
+        "environment": "Võ đài nóc chuồng gà, Bàn ăn bấp bênh, Cành cây đung đưa.",
+        "gameplay_elements": "Chơi 1 người hoặc 2 người chung màn hình điện thoại, Vật lý Ragdoll tấu hài, Thắng 3 hiệp ăn cúp."
+      },
+      "assets": [
+        {
+          "id": "asset_ragdoll_rooster",
+          "name": "Gà Chọi Lắc Lư Ragdoll (Ragdoll Fighter Rooster)",
+          "category": "characters",
+          "format": "video",
+          "format_reason": "Động tác đập cánh bay lên và duỗi chân đá quán tính -> Dùng Video AI",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D pixel art funny fighting rooster flapping wings upward and kicking feet out in mid-air, floppy ragdoll physics movement, 8 frames loop, solid bright green screen background",
+          "prompt_image": "2D pixel art ragdoll rooster parts: body with head, separate flapping wing, kicking leg with spur, dizzy stars, transparent background",
+          "animations": [
+            "wing_flap",
+            "air_kick",
+            "dizzy_spin",
+            "celebrate"
+          ]
+        }
+      ],
+      "created_at": "2026-08-31 08:53"
+    },
+    {
+      "id": "game_cockfight_brawler",
+      "title": "Cựa Sắt Bá Vương: Sới Gà Ngầm",
+      "genre": "2D Beat Em Up / Arena Roguelite",
+      "art_style": "16-Bit Dark Fantasy & Underground Neon Pixel Art",
+      "raw_input_story": "Chú gà chiến Roosterius dấn thân vào các sới gà ngầm bất hợp pháp của thế giới ngầm để cày tiền chuộc lại giấy tờ nhà và bảo vệ cô bé khỏi bọn đòi nợ.",
+      "full_story": {
+        "synopsis": "Hành trình vượt qua 5 đấu trường ngầm từ Sới Cát Bờ Bụi, Hầm Ngục Casino, Đấu Trường Lồng Sắt đến Sào Huyệt Chúa Tể Cờ Bạc để giành lấy tự do và tiền thưởng.",
+        "protagonist": "Roosterius - Chiến Kê Cựa Sắt Sấm Sét (Đeo giáp chân, mào lửa rực sáng).",
+        "antagonists": "Gà Tre Cuồng Sát (Tốc độ), Gà Nồi Hộ Pháp (Trâu bò), Trùm Chủ Sới Cờ Bạc Ba Búa.",
+        "environment": "Sới gà rào lưới mắt cáo, Sàn đấu ngầm ánh đèn neon, Kho bãi cờ bạc.",
+        "gameplay_elements": "Đá cựa combo 3 hit, Tung cánh bão lốc, Đập đất nổ sét, Nâng cấp Cựa Sắt Vàng & Bùa Hộ Thân."
+      },
+      "assets": [
+        {
+          "id": "asset_brawler_rooster",
+          "name": "Chiến Kê Roosterius (Combat Rooster Hero)",
+          "category": "characters",
+          "format": "video",
+          "format_reason": "Chuỗi đòn đánh đá cựa 3 hit, né lướt, vung cánh tạo lốc -> Dùng Video AI 2-3s",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D game character animation of a fierce battle rooster performing flying kick martial arts combo, 8 frames loop, dark fantasy pixel art, solid green screen background",
+          "prompt_image": "2D pixel art spritesheet of martial arts combat rooster, idle stance, running dash, flying talon kick, thunder wing slash, hurt, victory crow",
+          "animations": [
+            "idle",
+            "run",
+            "kick_combo",
+            "tornado_wing",
+            "hurt",
+            "victory"
+          ]
+        },
+        {
+          "id": "asset_enemy_ninja_rooster",
+          "name": "Gà Tre Đao Phủ (Ninja Rooster Enemy)",
+          "category": "monsters",
+          "format": "video",
+          "format_reason": "Tấn công lướt chém nhanh thoăn thoắt -> Dùng Video AI",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D agile ninja fighting rooster lunging with swift steel spurs, 8 frames animation loop, dark pixel art, solid green screen background",
+          "prompt_image": "2D monster spritesheet of slender black ninja fighting rooster, fast attack, dash, hurt, transparent background",
+          "animations": [
+            "idle",
+            "dash",
+            "slash_kick",
+            "hurt",
+            "death"
+          ]
+        },
+        {
+          "id": "asset_boss_gambler_king",
+          "name": "Trùm Mafia Cờ Bạc (Gambling Syndicate Boss)",
+          "category": "monsters",
+          "format": "video",
+          "format_reason": "Trùm to lớn vung gậy ba toong và ném xúc xắc nổ -> Dùng Video AI",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D menacing crime boss in dark suit swinging heavy cane attack animation, 8 frames loop, pixel art, solid green screen background",
+          "prompt_image": "2D giant crime boss spritesheet, heavy cane slam, cigar smoke, rage phase, defeat explosion",
+          "animations": [
+            "idle",
+            "cane_smash",
+            "toss_bomb",
+            "hurt",
+            "death"
+          ]
+        },
+        {
+          "id": "asset_lightning_slash_vfx",
+          "name": "Hiệu Ứng Cựa Sắt Lôi Điện (Lightning Talon Slash VFX)",
+          "category": "vfx",
+          "format": "video",
+          "format_reason": "Vệt chém tia điện màu vàng kim xé toạc không khí -> Dùng Video AI",
+          "priority": "Trung bình",
+          "status": "pending",
+          "prompt_video": "2D electric golden lightning crescent slash wave effect bursting, glowing particle trails, solid black background, VFX animation",
+          "prompt_image": "2D lightning slash sprite frames, energy burst, solid black background",
+          "animations": [
+            "slash_burst"
+          ]
+        },
+        {
+          "id": "asset_arena_tileset",
+          "name": "Tileset Sới Gà Ngầm & Lồng Sắt (Underground Arena Tileset)",
+          "category": "environments",
+          "format": "image",
+          "format_reason": "Sàn cát, rào lưới thép, thùng gỗ, cọc đèn neon -> Dạng Ảnh Spritesheet",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D pixel art combat arena tileset, dirt and sand floor, wire mesh cage fence, wooden betting barrels, hanging incandescent lamps, seamless tiles",
+          "animations": [
+            "static"
+          ]
+        }
+      ],
+      "created_at": "2026-08-31 08:49"
+    },
+    {
+      "id": "game_rooster_loop_60s",
+      "title": "Rooster Loop: 60 Giây Cứu Cô Chủ",
+      "genre": "2D Time-Loop Stealth & Puzzle Platformer",
+      "art_style": "16-Bit Storybook Pixel Art, Cozy Rural with Dark Mood Accents",
+      "raw_input_story": "Một hiệp sĩ chuyển sinh thành chú gà trống ở nông thôn, sở hữu năng lực Return by Death (vòng lặp 60 giây khi chết) để tìm mọi cách ngăn chặn bi kịch bạo lực gia đình và cứu cô bé cùng người mẹ.",
+      "full_story": {
+        "synopsis": "Mỗi vòng lặp kéo dài đúng 60 giây tại khuôn viên trang trại trước khi ông bố say xỉn về đập phá đòi tiền. Chú gà phải tương tác với môi trường (kéo then cửa, gáy báo động, đánh lạc hướng chó canh, mổ đứt dây điện) để thay đổi số phận.",
+        "protagonist": "Gà Trống Hiệp Sĩ (Mào đỏ, cựa phong ấn ký ức, ánh mắt kiên định).",
+        "antagonists": "Bóng Ma Nghiện Ngập & Bạo Lực (Hiện thân của ông bố say xỉn), Chó Canh 1 Mắt (Ban đầu cản đường, sau trở thành đồng minh).",
+        "environment": "Sân gạch nông thôn Việt Nam, Chuồng gà gỗ, Gian bếp củi, Đường đất bờ tre.",
+        "gameplay_elements": "Giải đố tương tác thời gian thực 60s, Vòng lặp Return by Death mở khóa manh mối mới, Lựa chọn nhiều nhánh kết thúc (Multi-Endings)."
+      },
+      "assets": [
+        {
+          "id": "asset_loop_rooster",
+          "name": "Gà Trống Hiệp Sĩ (Loop Rooster Main)",
+          "category": "characters",
+          "format": "video",
+          "format_reason": "Cử động chạy, mổ đồ vật, gáy báo động nhiều khớp -> Dùng Video AI 2-3s bóc 8 frame cực mượt",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D game animation of a stylized cartoon rooster walking and pecking interactive objects, 8 frames seamless loop, warm rural aesthetic, crisp pixel outlines, solid bright green screen background, side view game asset",
+          "prompt_image": "2D pixel art character spritesheet of heroic rooster, actions: idle, walk, peck, crow alarm, death loop reset, green screen background",
+          "animations": [
+            "idle",
+            "walk",
+            "run",
+            "peck_interact",
+            "crow_alarm",
+            "death_reset"
+          ]
+        },
+        {
+          "id": "asset_loop_daughter",
+          "name": "Cô Con Gái Nhỏ (Little Daughter NPC)",
+          "category": "characters",
+          "format": "video",
+          "format_reason": "Cử động ôm cặp đi học, ôm gà, trốn chạy -> Dùng Video AI",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D cute pixel art young girl holding school backpack walking happily, 8 frames loop, whimsical storybook style, solid green screen background",
+          "prompt_image": "2D pixel art girl spritesheet, school outfit, crying, hugging chicken poses, transparent background",
+          "animations": [
+            "idle_read",
+            "walk_school",
+            "hug_rooster",
+            "hide_fear"
+          ]
+        },
+        {
+          "id": "asset_loop_guard_dog",
+          "name": "Chú Chó Canh Một Mắt (One-Eyed Dog Ally)",
+          "category": "characters",
+          "format": "video",
+          "format_reason": "Cử động sủa canh gác, nằm nghỉ, lao vào cản đường -> Dùng Video AI",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "2D rustic village guard dog with one bandage eye patch lying down and barking, 8 frames loop, pixel art, solid green screen background",
+          "prompt_image": "2D pixel art dog spritesheet, injured paw, alert bark, friendly tail wag, transparent background",
+          "animations": [
+            "idle_sleep",
+            "bark_alert",
+            "pounce",
+            "ally_sit"
+          ]
+        },
+        {
+          "id": "asset_farm_props",
+          "name": "Bộ Đồ Vật Tương Tác (Farm Interactive Props)",
+          "category": "items",
+          "format": "image",
+          "format_reason": "Đồ vật tĩnh trong nhà (Bình rượu, then cửa gỗ, túi tiền, chổi, rổ trứng) -> Dạng Ảnh Spritesheet",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D pixel art game item pack of rustic farm props: wooden door latch, money bag, wine bottle shattering into pieces, egg basket, rope, lantern, transparent background",
+          "animations": [
+            "intact",
+            "broken_shatter"
+          ]
+        },
+        {
+          "id": "asset_rural_tileset",
+          "name": "Tileset Nhà Nông Thôn & Chuồng Gà (Rural Homestead Tileset)",
+          "category": "environments",
+          "format": "image",
+          "format_reason": "Sân gạch đỏ, tường vách đất, hàng rào tre, mái ngói cổ -> Dạng Ảnh chuẩn pixel lưới",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D pixel art platformer tileset of traditional Asian countryside homestead, red brick floor, wooden coop, bamboo fence, clay brick wall, seamless modular tiles",
+          "animations": [
+            "static"
+          ]
+        },
+        {
+          "id": "asset_parallax_bg",
+          "name": "Parallax Background Nông Thôn Hoàng Hôn (3 Depth Layers)",
+          "category": "environments",
+          "format": "image",
+          "format_reason": "Các lớp cảnh nền chiều sâu (Núi xa, lũy tre giữa, sân nhà gần) -> Dạng Ảnh tách lớp",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D side-scrolling parallax background layers of peaceful countryside sunset, layer 1 distant purple mountains and warm dusk sky, layer 2 green bamboo grove and village trees, layer 3 rural house silhouette",
+          "animations": [
+            "static"
+          ]
+        }
+      ],
+      "created_at": "2026-08-31 08:49"
+    }
+  ]
 }

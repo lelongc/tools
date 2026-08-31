@@ -37,6 +37,7 @@
             </button>
         </nav>
         <div class="nav-actions">
+            <button class="btn btn-primary btn-sm" id="btnOpenGuideModal" style="background: linear-gradient(135deg, #00f0ff, #9d4edd); color: #fff; font-weight: 800; border: none; box-shadow: 0 0 10px rgba(0,240,255,0.4);">📖 Hướng Dẫn Quy Trình</button>
             <div class="ai-status-pill">
                 <div class="ai-status-dot"></div>
                 <span id="wsStatusText">AI CO-PILOT: SẴN SÀNG</span>
@@ -585,6 +586,130 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary btn-sm" id="btnCancelPlanModal">Hủy</button>
                 <button class="btn btn-primary btn-sm" id="btnSaveNewPlan">💾 Lưu Asset Vào Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FULL INTERACTIVE GUIDE MODAL -->
+    <div class="modal-backdrop" id="guideModal" style="display:none;">
+        <div class="modal-card modal-xl">
+            <div class="modal-header">
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <span style="font-size:24px;">📖</span>
+                    <div>
+                        <h3 style="font-size:16px;font-weight:900;background:linear-gradient(135deg,var(--accent-cyan),var(--accent-purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;">HƯỚNG DẪN QUY TRÌNH TẠO ASSET & ANIMATION GAME VỚI AI</h3>
+                        <span style="font-size:11px;color:var(--text-muted);">Quy trình hoàn chỉnh từ Prompt ➔ Video/Ảnh AI ➔ Tách nền tự động ➔ Xuất sang Godot</span>
+                    </div>
+                </div>
+                <button class="modal-close-btn" id="btnCloseGuideModal">&times;</button>
+            </div>
+            <div class="guide-tabs-header">
+                <button class="guide-tab-btn active" data-guide-tab="guide-video">🎬 1. Video AI ➔ Frame Animation</button>
+                <button class="guide-tab-btn" data-guide-tab="guide-image">🖼️ 2. Spritesheet & Gạch Map</button>
+                <button class="guide-tab-btn" data-guide-tab="guide-prompts">💡 3. Từ Khóa Prompt Chuẩn</button>
+                <button class="guide-tab-btn" data-guide-tab="guide-godot">🚀 4. Nạp & Chạy Trong Godot 4</button>
+            </div>
+            <div class="modal-body guide-modal-body">
+                
+                <!-- GUIDE TAB 1: VIDEO TO ANIMATION -->
+                <div class="guide-tab-content active" id="guide-video">
+                    <div class="guide-step-card">
+                        <div class="step-badge">BƯỚC 1</div>
+                        <div class="step-info">
+                            <h4>Tạo Dáng Nhân Vật Ban Đầu Trên Phông Xanh (Green Screen)</h4>
+                            <p>Dùng <b>ChatGPT / Midjourney</b> tạo 1 ảnh nhân vật góc nhìn ngang (Side-view) đứng chính giữa trên nền xanh lá cây.</p>
+                            <div class="code-box">Prompt mẫu: "2D side-view character pose of a cartoon hero, centered, clean outlines, solid bright green chroma key background --ar 1:1"</div>
+                        </div>
+                    </div>
+
+                    <div class="guide-step-card">
+                        <div class="step-badge">BƯỚC 2</div>
+                        <div class="step-info">
+                            <h4>Tạo Video Chuyển Động (Image-to-Video - I2V)</h4>
+                            <p>Truy cập <b>Tencent AI Studio (HY Video 1.5 I2V)</b> hoặc <b>Kling AI / Runway / Luma / HaiLuo</b>:</p>
+                            <ul class="guide-bullets">
+                                <li>Nạp ảnh nhân vật phông xanh vừa tạo ở Bước 1 vào mục Image-to-Video.</li>
+                                <li>Nhập prompt: <code>Full body character run cycle, fixed side profile view, running to the right, solid green screen background</code></li>
+                                <li>Tải file video <b>MP4</b> (dài khoảng 2–3 giây) về máy tính.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="guide-step-card">
+                        <div class="step-badge">BƯỚC 3</div>
+                        <div class="step-info">
+                            <h4>Kéo Thả Video Vào Tab 2 ("Xử Lý Video AI")</h4>
+                            <p>Tool sẽ thay thế hoàn toàn Blender để tự động xử lý chỉ trong 1 nốt nhạc:</p>
+                            <ul class="guide-bullets">
+                                <li><b>Tự Xóa Phông Xanh</b>: Chọn <code>🟢 Phông Xanh Lá</code> ➔ Tool tự bóc tách nền trong suốt 100%.</li>
+                                <li><b>Cắt Chu Kỳ Loop</b>: Chỉnh thanh <code>Start (s)</code> và <code>End (s)</code> (thường từ 0.2s đến 1.0s là vừa tròn 1 bước chạy).</li>
+                                <li><b>Chọn Số Frame</b>: Bấm chọn <b>8 Frame</b> (hoặc 6, 10, 12 frame) ➔ Bấm <b>⚡ Bóc Tách Frame Ngay</b>.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="guide-step-card">
+                        <div class="step-badge">BƯỚC 4</div>
+                        <div class="step-info">
+                            <h4>Nạp Vào Studio & Xuất Sang Godot</h4>
+                            <p>Bấm nút <b>✨ Nạp Frame → Studio</b> ➔ Xem trước chuyển động tại Tab 4 ➔ Bấm <b>🚀 Xuất Godot</b> để tạo file SpriteFrames (.tres) tự động!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GUIDE TAB 2: SPRITESHEET & TILES -->
+                <div class="guide-tab-content" id="guide-image">
+                    <div class="guide-step-card">
+                        <div class="step-badge">ẢNH SHEET</div>
+                        <div class="step-info">
+                            <h4>Dành Cho Vật Phẩm, Icon, Tileset Gạch Nền & Môi Trường</h4>
+                            <p>Đối với các asset tĩnh hoặc ít chuyển động (bình thuốc, vũ khí, rương báu, gạch nền sàn đấu):</p>
+                            <ul class="guide-bullets">
+                                <li>Dùng ChatGPT / Midjourney tạo ảnh Spritesheet dạng lưới (2x2, 2x4 hoặc 4x4) trên nền trong suốt hoặc phông trơn.</li>
+                                <li>Kéo thả ảnh vào <b>Tab 3 (Cắt Ảnh Sheet)</b>.</li>
+                                <li>Chỉnh số Cột/Dòng ➔ Bấm <b>⚡ Chia Lưới</b> ➔ Dùng các nút <b>🦶 Căn Đáy</b>, <b>🎯 Căn Giữa X</b>, <b>📐 Đồng Bộ Cỡ</b> để căn chuẩn pixel.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GUIDE TAB 3: PROMPT CHEATSHEET -->
+                <div class="guide-tab-content" id="guide-prompts">
+                    <div class="guide-step-card">
+                        <div class="step-badge">TỪ KHÓA</div>
+                        <div class="step-info">
+                            <h4>Bộ Từ Khóa "Vàng" Để AI Sinh Asset Game 2D Chuẩn Xác Nhất</h4>
+                            <div class="kw-grid">
+                                <div class="kw-item"><b>solid bright green screen background</b>: Phông xanh lá cây để tách nền 100%.</div>
+                                <div class="kw-item"><b>fixed side profile view</b>: Khóa góc nhìn ngang chuẩn 2D, tránh AI xoay camera.</div>
+                                <div class="kw-item"><b>8-frame seamless loop</b>: Chuyển động lặp mượt mà không bị khựng.</div>
+                                <div class="kw-item"><b>16-bit pixel art style, crisp outlines</b>: Giữ viền nét chuẩn pixel retro.</div>
+                                <div class="kw-item"><b>running in place (run cycle)</b>: Chạy tại chỗ để bóc sprite.</div>
+                                <div class="kw-item"><b>modular seamless repeatable tileset</b>: Gạch nền ghép nối liền mạch không lộ vết cắt.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- GUIDE TAB 4: GODOT INTEGRATION -->
+                <div class="guide-tab-content" id="guide-godot">
+                    <div class="guide-step-card">
+                        <div class="step-badge">GODOT 4</div>
+                        <div class="step-info">
+                            <h4>Cách Dùng Asset Đã Xuất Trong Dự Án Godot (<code>d:\folder\tools\godot_demo\2\</code>)</h4>
+                            <ul class="guide-bullets">
+                                <li>Khi bấm <b>🚀 Xuất Godot</b> trong tool, toàn bộ file PNG và file <code>.tres</code> sẽ được lưu vào: <code>res://assets/sprites/characters/&lt;tên_nhân_vật&gt;/</code>.</li>
+                                <li>Trong Godot, mở Scene nhân vật (ví dụ <code>Player2D.tscn</code>).</li>
+                                <li>Chọn Node <b>AnimatedSprite2D</b> ➔ Kéo thả file <code>&lt;tên&gt;_frames.tres</code> vào mục <b>Sprite Frames</b> ở khung Inspector bên phải.</li>
+                                <li>Chọn Animation cần phát (<code>run</code>, <code>idle</code>, <code>attack</code>) ➔ Bấm Play để chạy game!</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary btn-sm" id="btnCloseGuideModalFooter">Đã Hiểu ➔ Bắt Đầu Làm</button>
             </div>
         </div>
     </div>

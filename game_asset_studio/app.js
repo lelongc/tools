@@ -86,6 +86,25 @@ class AssetStudioApp {
         });
 
         document.getElementById('btnTopSyncGodot')?.addEventListener('click', () => this.exportStudioToGodot());
+
+        // Guide Modal Events
+        const guideModal = document.getElementById('guideModal');
+        const openGuide = () => { if (guideModal) guideModal.style.display = 'flex'; };
+        const closeGuide = () => { if (guideModal) guideModal.style.display = 'none'; };
+
+        document.getElementById('btnOpenGuideModal')?.addEventListener('click', openGuide);
+        document.getElementById('btnQuickOpenGuide')?.addEventListener('click', openGuide);
+        document.getElementById('btnCloseGuideModal')?.addEventListener('click', closeGuide);
+        document.getElementById('btnCloseGuideModalFooter')?.addEventListener('click', closeGuide);
+
+        // Guide Sub-Tabs Switcher
+        document.querySelectorAll('.guide-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const target = btn.getAttribute('data-guide-tab');
+                document.querySelectorAll('.guide-tab-btn').forEach(b => b.classList.toggle('active', b === btn));
+                document.querySelectorAll('.guide-tab-content').forEach(c => c.classList.toggle('active', c.id === target));
+            });
+        });
     }
 
     switchTab(tabId) {
