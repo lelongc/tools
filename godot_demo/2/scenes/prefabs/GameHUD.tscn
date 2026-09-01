@@ -2,6 +2,11 @@
 
 [ext_resource type="Script" path="res://scripts/ui/GameHUD.gd" id="1_hud"]
 [ext_resource type="Script" path="res://scripts/ui/JuicyButton.gd" id="2_btn"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/btn_pause.svg" id="3_pause_ico"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/btn_replay.svg" id="4_replay_ico"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/btn_level_select.svg" id="5_lvl_ico"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/btn_play.svg" id="6_play_ico"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/btn_next.svg" id="7_next_ico"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_TopBar"]
 bg_color = Color(0.11, 0.03, 0.21, 0.88)
@@ -75,8 +80,8 @@ theme_override_constants/separation = 10
 [node name="BtnPause" type="Button" parent="TopBar/Margin/HBox"]
 custom_minimum_size = Vector2(46, 40)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "⏸️"
+icon = ExtResource("3_pause_ico")
+expand_icon = true
 script = ExtResource("2_btn")
 is_wood_brown = true
 
@@ -118,8 +123,8 @@ vertical_alignment = 1
 [node name="BtnRestart" type="Button" parent="TopBar/Margin/HBox"]
 custom_minimum_size = Vector2(46, 40)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "🔄"
+icon = ExtResource("4_replay_ico")
+expand_icon = true
 script = ExtResource("2_btn")
 is_wood_brown = true
 
@@ -194,7 +199,9 @@ custom_minimum_size = Vector2(240, 52)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 20
-text = "NEXT LEVEL ▶"
+text = " NEXT LEVEL"
+icon = ExtResource("7_next_ico")
+expand_icon = true
 script = ExtResource("2_btn")
 is_primary_green = true
 
@@ -203,7 +210,9 @@ custom_minimum_size = Vector2(240, 44)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 16
-text = "🗺️ SELECT LEVEL"
+text = " SELECT LEVEL"
+icon = ExtResource("5_lvl_ico")
+expand_icon = true
 script = ExtResource("2_btn")
 is_wood_brown = true
 
@@ -252,7 +261,9 @@ custom_minimum_size = Vector2(260, 46)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 17
-text = "🔄 RETRY"
+text = " RETRY"
+icon = ExtResource("4_replay_ico")
+expand_icon = true
 script = ExtResource("2_btn")
 is_wood_brown = true
 
@@ -261,7 +272,9 @@ custom_minimum_size = Vector2(260, 42)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 15
-text = "🗺️ SELECT LEVEL"
+text = " SELECT LEVEL"
+icon = ExtResource("5_lvl_ico")
+expand_icon = true
 script = ExtResource("2_btn")
 is_wood_brown = true
 
@@ -298,7 +311,9 @@ custom_minimum_size = Vector2(230, 48)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
-text = "RESUME ▶"
+text = " RESUME"
+icon = ExtResource("6_play_ico")
+expand_icon = true
 script = ExtResource("2_btn")
 is_primary_green = true
 
@@ -307,7 +322,9 @@ custom_minimum_size = Vector2(230, 44)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 16
-text = "🔄 RETRY"
+text = " RETRY"
+icon = ExtResource("4_replay_ico")
+expand_icon = true
 script = ExtResource("2_btn")
 is_wood_brown = true
 
@@ -316,6 +333,8 @@ custom_minimum_size = Vector2(230, 44)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 16
-text = "🗺️ SELECT LEVEL"
+text = " SELECT LEVEL"
+icon = ExtResource("5_lvl_ico")
+expand_icon = true
 script = ExtResource("2_btn")
 is_wood_brown = true

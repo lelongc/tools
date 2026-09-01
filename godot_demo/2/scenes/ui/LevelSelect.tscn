@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/ui/LevelSelect.gd" id="1_script"]
 [ext_resource type="Script" path="res://scripts/ui/JuicyButton.gd" id="2_btn"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/btn_home.svg" id="3_home_ico"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_TopBar"]
 bg_color = Color(0.11, 0.03, 0.21, 0.85)
@@ -70,10 +71,12 @@ layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="BtnBack" type="Button" parent="TopBar/Margin/HBox"]
-custom_minimum_size = Vector2(85, 40)
+custom_minimum_size = Vector2(95, 40)
 layout_mode = 2
-theme_override_font_sizes/font_size = 15
-text = "◀ MENU"
+theme_override_font_sizes/font_size = 14
+text = " MENU"
+icon = ExtResource("3_home_ico")
+expand_icon = true
 script = ExtResource("2_btn")
 is_wood_brown = true
 

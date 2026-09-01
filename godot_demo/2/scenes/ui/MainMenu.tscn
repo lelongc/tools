@@ -2,6 +2,10 @@
 
 [ext_resource type="Script" path="res://scripts/ui/MainMenu.gd" id="1_script"]
 [ext_resource type="Script" path="res://scripts/ui/JuicyButton.gd" id="2_btn"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/btn_play.svg" id="3_play_ico"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/btn_level_select.svg" id="4_lvl_ico"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/btn_sound_on.svg" id="5_snd_ico"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/icon_star.svg" id="6_star_ico"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_TopBar"]
 bg_color = Color(0.11, 0.03, 0.21, 0.85)
@@ -108,10 +112,12 @@ text = "🇺🇸 English"
 script = ExtResource("2_btn")
 
 [node name="BtnSound" type="Button" parent="TopBar/Margin/HBox"]
-custom_minimum_size = Vector2(85, 38)
+custom_minimum_size = Vector2(90, 38)
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "🔊 BẬT"
+icon = ExtResource("5_snd_ico")
+expand_icon = true
 script = ExtResource("2_btn")
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
@@ -161,8 +167,10 @@ layout_mode = 2
 custom_minimum_size = Vector2(290, 68)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 26
-text = "▶ CHƠI NGAY"
+theme_override_font_sizes/font_size = 24
+text = "  CHƠI NGAY"
+icon = ExtResource("3_play_ico")
+expand_icon = true
 script = ExtResource("2_btn")
 is_primary_green = true
 
@@ -171,7 +179,9 @@ custom_minimum_size = Vector2(290, 56)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 20
-text = "🗺️ CHỌN MÀN"
+text = "  CHỌN MÀN"
+icon = ExtResource("4_lvl_ico")
+expand_icon = true
 script = ExtResource("2_btn")
 is_wood_brown = true
 

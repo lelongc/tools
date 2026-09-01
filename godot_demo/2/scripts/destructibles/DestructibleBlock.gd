@@ -110,7 +110,8 @@ func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
 	if visual_mesh:
 		var prev_c = visual_mesh.color
 		visual_mesh.color = Color(1.0, 1.0, 1.0, 1.0)
-		get_tree().create_timer(0.04).timeout.connect(func(): if is_instance_valid(visual_mesh): visual_mesh.color = prev_c)
+		var flash_tween = create_tween()
+		flash_tween.tween_property(visual_mesh, "color", prev_c, 0.05)
 
 	if current_health <= 0.0:
 		_fracture_block()

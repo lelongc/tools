@@ -90,11 +90,7 @@ func _trigger_victory_delay() -> void:
 
 func load_level(level_id: int) -> void:
 	current_level = clamp(level_id, 1, total_levels)
-	var path = "res://scenes/levels/Level_%d.tscn" % current_level
-	if ResourceLoader.exists(path):
-		get_tree().change_scene_to_file(path)
-	else:
-		get_tree().change_scene_to_file("res://scenes/levels/CampaignLevel.tscn")
+	get_tree().change_scene_to_file("res://scenes/levels/CampaignLevel.tscn")
 
 func next_level() -> void:
 	if current_level < total_levels:

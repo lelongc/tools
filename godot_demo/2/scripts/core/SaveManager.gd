@@ -13,6 +13,16 @@ var save_data: Dictionary = {
 func _ready() -> void:
 	load_game()
 
+func reset_save() -> void:
+	save_data = {
+		"highest_unlocked_level": 1,
+		"level_stars": {},
+		"level_scores": {},
+		"sound_enabled": true,
+		"total_stars": 0
+	}
+	save_game()
+
 func save_game() -> void:
 	# Tính toán tổng số sao
 	var total = 0

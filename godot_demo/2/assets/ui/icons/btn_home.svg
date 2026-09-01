@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg_blue2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4dc9ff"/>
+      <stop offset="100%" stop-color="#1886df"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <circle cx="64" cy="64" r="54" fill="url(#bg_blue2)" stroke="#0d5494" stroke-width="6" filter="url(#shadow)"/>
+  <ellipse cx="64" cy="30" rx="36" ry="14" fill="#ffffff" fill-opacity="0.25"/>
+  <!-- House shape -->
+  <path d="M64 34 L36 58 L44 58 L44 88 C44 91 47 94 50 94 L78 94 C81 94 84 91 84 88 L84 58 L92 58 Z" fill="#ffffff" stroke="#0d5494" stroke-width="3" stroke-linejoin="round"/>
+  <rect x="56" y="66" width="16" height="28" rx="4" fill="#1886df"/>
+</svg>

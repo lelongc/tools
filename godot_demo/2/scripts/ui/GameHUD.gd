@@ -1,10 +1,10 @@
 extends CanvasLayer
 
-@onready var score_label: Label = $TopBar/HBox/ScoreBox/Margin/ScoreLabel
-@onready var level_label: Label = $TopBar/HBox/LevelBox/Margin/LevelLabel
+@onready var score_label: Label = $TopBar/Margin/HBox/ScoreBox/Margin/ScoreLabel
+@onready var level_label: Label = $TopBar/Margin/HBox/LevelBox/Margin/LevelLabel
 @onready var egg_container: HBoxContainer = $EggShelf/Margin/EggIcons
-@onready var btn_pause: Button = $TopBar/HBox/BtnPause
-@onready var btn_restart: Button = $TopBar/HBox/BtnRestart
+@onready var btn_pause: Button = $TopBar/Margin/HBox/BtnPause
+@onready var btn_restart: Button = $TopBar/Margin/HBox/BtnRestart
 
 # Modals
 @onready var victory_modal: PanelContainer = $VictoryModal

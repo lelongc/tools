@@ -69,7 +69,7 @@ func _process(delta: float) -> void:
 	_handle_aim_input()
 
 func _handle_aim_input() -> void:
-	if CameraShake.instance and CameraShake.instance.is_intro_playing:
+	if (CameraShake.instance and CameraShake.instance.is_intro_playing) or GameManager.is_game_over:
 		if is_aiming:
 			is_aiming = false
 			if trajectory_line: trajectory_line.visible = false
@@ -77,9 +77,11 @@ func _handle_aim_input() -> void:
 
 	var mouse_pos = get_global_mouse_position()
 
-	# Bắt đầu chạm / click chuột để ngắm
+	# Bắt đầu chạm / click chuột để ngắm (bỏ qua vùng TopBar và khay đạn)
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		if not is_aiming:
+			if mouse_pos.y < 75.0 or mouse_pos.y > 880.0:
+				return
 			is_aiming = true
 			aim_start_pos = mouse_pos
 

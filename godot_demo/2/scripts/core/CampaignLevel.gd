@@ -10,21 +10,6 @@ const BoulderScene = preload("res://scenes/prefabs/RollingBoulder.tscn")
 const RescueCageScene = preload("res://scenes/prefabs/RescueCage.tscn")
 const UpdraftVentScene = preload("res://scenes/prefabs/UpdraftVent.tscn")
 
-enum Archetype {
-	HIGHRISE_TOWER,       # 0: Tháp cao 3-4 tầng chân kính
-	PYRAMID_DEFLECTOR,    # 1: Mái dốc tam giác chống bom
-	DUAL_FORTRESS,        # 2: Hai lô cốt độc lập Trái - Phải
-	SEESAW_CATAPULT,      # 3: Đòn bẩy bập bênh tảng đá
-	ROLLING_RAMP_MAZE,    # 4: Mê cung dốc đá lăn kích nổ chuỗi
-	WIND_UPDRAFT_CHAOS,   # 5: Quạt gió lốc xoáy uốn cong quỹ đạo
-	BARRICADED_VAULT,     # 6: Két sắt bọc thép/obsidian chống bom
-	SUSPENSION_BRIDGE,    # 7: Cầu treo sập hầm
-	HOSTAGE_DILEMMA,      # 8: Lồng cứu gà con treo hiểm hóc
-	ZIGZAG_CATACOMBS,     # 9: Hầm ngoằn ngoèo ziczac 3 tầng
-	NARROW_DRILL_SHAFT,   # 10: Khe hẹp đục mũi khoan
-	GRAND_BOSS_CITADEL    # 11: Đại pháo đài Boss 4 tầng
-}
-
 @export var level_id: int = 1
 @export var intro_target_y: float = 680.0
 
@@ -43,7 +28,7 @@ func _setup_level() -> void:
 	var world_id = int((level_id - 1) / 15) + 1
 	var egg_loadout: Array[String] = []
 
-	# 1. Bảng màu mỹ thuật theo từng Thế Giới
+	# 1. Bảng màu mỹ thuật phong phú theo từng Thế Giới
 	match world_id:
 		1: # World 1: Farm Cavern (Xanh trời / Nâu đất nông trại)
 			bg_sky.color = Color(0.48, 0.78, 0.96)
@@ -62,12 +47,36 @@ func _setup_level() -> void:
 			bg_dirt.color = Color(0.18, 0.06, 0.08)
 			bg_cavern.color = Color(0.08, 0.03, 0.05)
 
-	# 2. Xác định Kiến Trúc Màn Chơi (Archetype)
-	var arch_type: int = (level_id - 1) % 11
-	if level_id % 15 == 0:
-		arch_type = Archetype.GRAND_BOSS_CITADEL
+	# 2. Tính toán Độ Rộng (Width) và Quy Mô theo Cấp Độ (Progression Scaling)
+	var cavern_half_width = clamp(130.0 + (level_id * 2.2), 130.0, 245.0)
+	var cavern_top_y = clamp(520.0 - (level_id * 3.5), 320.0, 520.0)
+	intro_target_y = (880.0 + cavern_top_y) * 0.5
 
-	# 3. Tạo vật liệu & quái phù hợp theo World
+	# Cập nhật kích thước hang động theo độ to rộng của hầm
+	var cx = 270.0
+	if bg_cavern:
+		bg_cavern.polygon = PackedVector2Array([
+			Vector2(cx - cavern_half_width, cavern_top_y),
+			Vector2(cx + cavern_half_width, cavern_top_y),
+			Vector2(cx + cavern_half_width, 890),
+			Vector2(cx - cavern_half_width, 890)
+		])
+
+	# Cập nhật tường biên vật lý theo độ rộng của hầm
+	var col_wall_l = get_node_or_null("BunkerBoundaries/ColWallL")
+	var col_wall_r = get_node_or_null("BunkerBoundaries/ColWallR")
+	var col_floor = get_node_or_null("BunkerBoundaries/ColFloor")
+
+	if col_wall_l:
+		col_wall_l.position.x = cx - cavern_half_width - 15.0
+	if col_wall_r:
+		col_wall_r.position.x = cx + cavern_half_width + 15.0
+	if col_floor and col_floor.shape is RectangleShape2D:
+		var floor_shape = RectangleShape2D.new()
+		floor_shape.size = Vector2(cavern_half_width * 2.0 + 80.0, 40.0)
+		col_floor.shape = floor_shape
+
+	# 3. Phân bổ vật liệu & quái theo Thế Giới
 	var primary_mat = "wood"
 	var secondary_mat = "glass"
 	var heavy_mat = "stone"
@@ -93,8 +102,8 @@ func _setup_level() -> void:
 		enemy_grunt = "imperial_boar"
 		enemy_elite = "imperial_boar"
 
-	# 4. Xây dựng hầm theo từng Archetype cụ thể
-	egg_loadout = _build_archetype_level(arch_type, world_id, primary_mat, secondary_mat, heavy_mat, enemy_grunt, enemy_elite)
+	# 4. Xây dựng hầm theo thuật toán quy mô tiến hóa
+	egg_loadout = _generate_progressive_bunker(level_id, world_id, cavern_half_width, primary_mat, secondary_mat, heavy_mat, enemy_grunt, enemy_elite)
 
 	# 5. Khởi chạy màn chơi và đếm quái
 	var enemies = get_tree().get_nodes_in_group("Enemies")
@@ -104,274 +113,144 @@ func _setup_level() -> void:
 	if CameraShake.instance:
 		CameraShake.instance.play_intro_pan(intro_target_y)
 
-func _build_archetype_level(arch: int, world: int, mat1: String, mat2: String, mat_heavy: String, e_grunt: String, e_elite: String) -> Array[String]:
-	var floor_y = 870.0
+func _generate_progressive_bunker(lvl: int, world: int, half_w: float, mat1: String, mat2: String, mat_heavy: String, e_grunt: String, e_elite: String) -> Array[String]:
+	var floor_y = 880.0
+	var cx = 270.0
 	var loadout: Array[String] = []
 
-	match arch:
-		Archetype.HIGHRISE_TOWER:
-			# === THÁP CHỌC TRỜI 4 TẦNG: Chân kính giòn nâng đỡ 3 tầng nặng ===
-			var p_h = 80.0
-			var cur_y = floor_y - p_h * 0.5
-			# Tầng 1: Kính giòn
-			_spawn_block(Vector2(180, cur_y), Vector2(20, p_h), "glass")
-			_spawn_block(Vector2(360, cur_y), Vector2(20, p_h), "glass")
-			_spawn_enemy(Vector2(270, floor_y - 18), e_grunt)
-			_spawn_tnt(Vector2(215, floor_y - 20), world == 4)
-			_spawn_tnt(Vector2(325, floor_y - 20), world == 4)
+	# Xác định số tầng theo độ khó (1 tầng -> 2 tầng -> 3 tầng -> 4 tầng)
+	var num_stories = 1
+	if lvl >= 6: num_stories = 2
+	if lvl >= 16: num_stories = 3
+	if lvl >= 36: num_stories = 4
 
-			# Tầng 2: Sàn & Cột Gỗ/Đá
-			var beam1_y = floor_y - p_h - 10
-			_spawn_block(Vector2(270, beam1_y), Vector2(240, 20), mat1)
-			var y2 = beam1_y - 10 - p_h * 0.5
-			_spawn_block(Vector2(190, y2), Vector2(22, p_h), mat1)
-			_spawn_block(Vector2(350, y2), Vector2(22, p_h), mat1)
-			_spawn_enemy(Vector2(270, beam1_y - 28), e_elite)
+	var is_boss_level = (lvl % 15 == 0)
 
-			# Tầng 3: Sàn & Cột Nặng
-			var beam2_y = beam1_y - 20 - p_h
-			_spawn_block(Vector2(270, beam2_y), Vector2(200, 20), mat_heavy)
-			var y3 = beam2_y - 10 - p_h * 0.5
-			_spawn_block(Vector2(205, y3), Vector2(24, p_h), mat_heavy)
-			_spawn_block(Vector2(335, y3), Vector2(24, p_h), mat_heavy)
-			_spawn_enemy(Vector2(270, beam2_y - 28), e_grunt)
+	# ==========================================
+	# TẦNG 1 (ĐÁY HẦM): Rộng từ 220px -> 450px
+	# ==========================================
+	var span_1 = half_w * 1.8
+	var p1_h = 100.0 + min(lvl * 0.8, 40.0)
+	var p1_y = floor_y - p1_h * 0.5
+	var p1_left_x = cx - span_1 * 0.5 + 16.0
+	var p1_right_x = cx + span_1 * 0.5 - 16.0
 
-			# Mái: Tảng đá lăn trên nóc tháp
-			var roof_y = beam2_y - 20 - p_h
-			_spawn_block(Vector2(270, roof_y), Vector2(180, 20), mat_heavy)
-			_spawn_boulder(Vector2(270, roof_y - 30))
+	_spawn_block(Vector2(p1_left_x, p1_y), Vector2(26, p1_h), mat_heavy if lvl > 15 else mat1)
+	_spawn_block(Vector2(p1_right_x, p1_y), Vector2(26, p1_h), mat_heavy if lvl > 15 else mat1)
 
-			loadout = ["normal", "bomb", "drill"]
+	# Nếu hầm rộng trên 300px, thêm cột trụ phụ ở giữa
+	if span_1 > 300.0:
+		_spawn_block(Vector2(cx, p1_y), Vector2(20, p1_h), mat2)
 
-		Archetype.PYRAMID_DEFLECTOR:
-			# === MÁI CHỮ A TAM GIÁC CHỐNG BOM ===
-			var p_h = 130.0
-			var p_y = floor_y - p_h * 0.5
-			_spawn_block(Vector2(160, p_y), Vector2(28, p_h), mat_heavy)
-			_spawn_block(Vector2(380, p_y), Vector2(28, p_h), mat_heavy)
-			_spawn_enemy(Vector2(220, floor_y - 18), e_grunt)
-			_spawn_enemy(Vector2(320, floor_y - 18), e_grunt)
-			_spawn_tnt(Vector2(270, floor_y - 20), world == 4)
+	# Bố trí quái & TNT Tầng 1
+	if is_boss_level:
+		var boss_name = "boss_baron_pig" if world == 4 else ("imperial_boar" if world == 3 else ("mine_wolf" if world == 2 else "fox_guard"))
+		_spawn_enemy(Vector2(cx, floor_y - 32), boss_name)
+		_spawn_tnt(Vector2(cx - 80, floor_y - 20), world == 4)
+		_spawn_tnt(Vector2(cx + 80, floor_y - 20), world == 4)
+	else:
+		_spawn_tnt(Vector2(cx, floor_y - 20), world == 4)
+		_spawn_enemy(Vector2(p1_left_x + 45, floor_y - 18), e_grunt)
+		if lvl >= 4:
+			_spawn_enemy(Vector2(p1_right_x - 45, floor_y - 18), e_grunt)
 
-			var beam_y = floor_y - p_h - 12
-			_spawn_block(Vector2(270, beam_y), Vector2(280, 24), mat_heavy)
+	# Sàn Tầng 1 (Trần ngăn cách Tầng 1 và 2)
+	var beam1_y = floor_y - p1_h - 11.0
+	_spawn_block(Vector2(cx, beam1_y), Vector2(span_1 + 10, 22), mat1)
+	var cur_top_y = beam1_y - 11.0
 
-			# 2 dầm xiên 45 độ tạo mái chữ A
-			var roof_left = _spawn_block(Vector2(205, beam_y - 65), Vector2(24, 150), mat_heavy)
-			roof_left.rotation = deg_to_rad(35)
-			var roof_right = _spawn_block(Vector2(335, beam_y - 65), Vector2(24, 150), mat_heavy)
-			roof_right.rotation = deg_to_rad(-35)
+	# ==========================================
+	# TẦNG 2 (NẾU CÓ): Thu hẹp 15-20%
+	# ==========================================
+	if num_stories >= 2:
+		var span_2 = span_1 * 0.82
+		var p2_h = 90.0
+		var p2_y = cur_top_y - p2_h * 0.5
+		var p2_left_x = cx - span_2 * 0.5 + 14.0
+		var p2_right_x = cx + span_2 * 0.5 - 14.0
 
-			_spawn_enemy(Vector2(270, beam_y - 30), e_elite)
+		_spawn_block(Vector2(p2_left_x, p2_y), Vector2(22, p2_h), mat2 if lvl < 30 else mat1)
+		_spawn_block(Vector2(p2_right_x, p2_y), Vector2(22, p2_h), mat2 if lvl < 30 else mat1)
+
+		_spawn_enemy(Vector2(cx, cur_top_y - 18), e_elite)
+		if lvl % 2 == 0:
+			_spawn_tnt(Vector2(cx - 50, cur_top_y - 20), world == 4)
+
+		var beam2_y = cur_top_y - p2_h - 10.0
+		_spawn_block(Vector2(cx, beam2_y), Vector2(span_2 + 8, 20), mat1)
+		cur_top_y = beam2_y - 10.0
+
+	# ==========================================
+	# TẦNG 3 (NẾU CÓ): Tháp canh / Cầu treo
+	# ==========================================
+	if num_stories >= 3:
+		var span_3 = span_1 * 0.65
+		var p3_h = 80.0
+		var p3_y = cur_top_y - p3_h * 0.5
+		var p3_left_x = cx - span_3 * 0.5 + 12.0
+		var p3_right_x = cx + span_3 * 0.5 - 12.0
+
+		_spawn_block(Vector2(p3_left_x, p3_y), Vector2(20, p3_h), "glass" if lvl % 3 == 0 else mat1)
+		_spawn_block(Vector2(p3_right_x, p3_y), Vector2(20, p3_h), "glass" if lvl % 3 == 0 else mat1)
+
+		if lvl % 3 == 0:
+			_spawn_rescue_cage(Vector2(cx, cur_top_y - 26))
+		else:
+			_spawn_enemy(Vector2(cx, cur_top_y - 18), e_elite)
+
+		var beam3_y = cur_top_y - p3_h - 10.0
+		_spawn_block(Vector2(cx, beam3_y), Vector2(span_3 + 8, 20), mat_heavy)
+		cur_top_y = beam3_y - 10.0
+
+	# ==========================================
+	# TẦNG 4 (NẾU CÓ - ĐẠI PHÁO ĐÀI CẤP CAO):
+	# ==========================================
+	if num_stories >= 4:
+		var span_4 = span_1 * 0.48
+		var p4_h = 75.0
+		var p4_y = cur_top_y - p4_h * 0.5
+		_spawn_block(Vector2(cx - span_4 * 0.5 + 10, p4_y), Vector2(18, p4_h), mat_heavy)
+		_spawn_block(Vector2(cx + span_4 * 0.5 - 10, p4_y), Vector2(18, p4_h), mat_heavy)
+		_spawn_enemy(Vector2(cx, cur_top_y - 18), e_grunt)
+
+		var beam4_y = cur_top_y - p4_h - 10.0
+		_spawn_block(Vector2(cx, beam4_y), Vector2(span_4 + 8, 20), mat_heavy)
+		cur_top_y = beam4_y - 10.0
+
+	# ==========================================
+	# NÓC HẦM: Bẫy Tảng Đá Lăn / Mái Nghiêng / Quạt Gió
+	# ==========================================
+	if lvl >= 8:
+		if lvl % 4 == 0:
+			_spawn_boulder(Vector2(cx, cur_top_y - 28))
+		elif lvl % 4 == 2 and lvl >= 15:
+			# Hai tảng đá lăn ở hai cánh
+			_spawn_boulder(Vector2(cx - 60, cur_top_y - 28))
+			_spawn_boulder(Vector2(cx + 60, cur_top_y - 28))
+
+	if world == 3 and lvl % 3 == 1:
+		_spawn_updraft(Vector2(cx - half_w * 0.5, floor_y))
+
+	# ==========================================
+	# TÍNH TOÁN KHO ĐẠN TRỨNG TỐI ƯU CHO MÀN
+	# ==========================================
+	match world:
+		1:
+			loadout = ["normal", "bomb"]
+			if lvl > 5: loadout.append("normal")
+			if lvl > 10: loadout.append("bomb")
+			if is_boss_level: loadout.append("drill")
+		2:
 			loadout = ["drill", "frost", "bomb"]
-
-		Archetype.DUAL_FORTRESS:
-			# === HAI LÔ CỐT ĐỘC LẬP TÁCH BIỆT (Trái X:180, Phải X:360) ===
-			var p_h = 120.0
-			var p_y = floor_y - p_h * 0.5
-
-			# Lô cốt Trái (West Tower)
-			_spawn_block(Vector2(135, p_y), Vector2(22, p_h), mat1)
-			_spawn_block(Vector2(225, p_y), Vector2(22, p_h), "glass")
-			_spawn_block(Vector2(180, floor_y - p_h - 10), Vector2(120, 20), mat1)
-			_spawn_enemy(Vector2(180, floor_y - 18), e_grunt)
-			_spawn_tnt(Vector2(180, floor_y - p_h - 30), world == 4)
-
-			# Lô cốt Phải (East Tower)
-			_spawn_block(Vector2(315, p_y), Vector2(22, p_h), "glass")
-			_spawn_block(Vector2(405, p_y), Vector2(22, p_h), mat1)
-			_spawn_block(Vector2(360, floor_y - p_h - 10), Vector2(120, 20), mat1)
-			_spawn_enemy(Vector2(360, floor_y - 18), e_elite)
-			_spawn_boulder(Vector2(360, floor_y - p_h - 35))
-
-			loadout = ["cluster", "bomb", "drill", "normal"]
-
-		Archetype.SEESAW_CATAPULT:
-			# === BẬP BÊNH ĐÒN BẨY: Đè 1 đầu phóng đầu kia ===
-			var pivot_y = floor_y - 35
-			_spawn_block(Vector2(270, pivot_y), Vector2(30, 70), "stone")
-			
-			# Thanh đòn bẩy ngang
-			var plank = _spawn_block(Vector2(270, floor_y - 75), Vector2(260, 20), mat1)
-			plank.rotation = deg_to_rad(-8)
-			
-			# Tảng đá nặng bên trái, quái vật và TNT bên phải
-			_spawn_boulder(Vector2(170, floor_y - 110))
-			_spawn_enemy(Vector2(360, floor_y - 100), e_elite)
-			_spawn_tnt(Vector2(340, floor_y - 20), world == 4)
-
-			# Chân vách kính bảo vệ
-			_spawn_block(Vector2(380, floor_y - 45), Vector2(18, 90), "glass")
-
-			loadout = ["normal", "drill", "bomb"]
-
-		Archetype.ROLLING_RAMP_MAZE:
-			# === DỐC ĐÁ LĂN ZICZAC DOMINO ===
-			var p_h = 100.0
-			# Tầng đáy chứa quái & thùng TNT
-			_spawn_block(Vector2(150, floor_y - p_h * 0.5), Vector2(24, p_h), mat1)
-			_spawn_block(Vector2(390, floor_y - p_h * 0.5), Vector2(24, p_h), mat1)
-			_spawn_enemy(Vector2(220, floor_y - 18), e_grunt)
-			_spawn_enemy(Vector2(330, floor_y - 18), e_grunt)
-			_spawn_tnt(Vector2(270, floor_y - 20), world == 4)
-
-			# Sàn giữa
-			var mid_y = floor_y - p_h - 12
-			_spawn_block(Vector2(270, mid_y), Vector2(280, 24), mat1)
-
-			# Dốc nghiêng tầng trên
-			var ramp = _spawn_block(Vector2(250, mid_y - 75), Vector2(200, 20), mat_heavy)
-			ramp.rotation = deg_to_rad(22)
-
-			# Khối chặn kính giữ tảng đá trên đỉnh dốc
-			_spawn_block(Vector2(165, mid_y - 115), Vector2(16, 45), "glass")
-			_spawn_boulder(Vector2(195, mid_y - 130))
-			_spawn_enemy(Vector2(360, mid_y - 30), e_elite)
-
-			loadout = ["normal", "bomb", "cluster"]
-
-		Archetype.WIND_UPDRAFT_CHAOS:
-			# === HẦM QUẠT GIÓ LỐC XOÁY UỐN CONG QUỸ ĐẠO ===
-			_spawn_updraft(Vector2(200, floor_y))
-			
-			var p_h = 120.0
-			_spawn_block(Vector2(310, floor_y - p_h * 0.5), Vector2(24, p_h), mat1)
-			_spawn_block(Vector2(410, floor_y - p_h * 0.5), Vector2(24, p_h), mat1)
-			_spawn_block(Vector2(360, floor_y - p_h - 10), Vector2(130, 20), mat_heavy)
-
-			_spawn_enemy(Vector2(360, floor_y - 18), e_elite)
-			_spawn_enemy(Vector2(360, floor_y - p_h - 30), e_grunt)
-			_spawn_tnt(Vector2(140, floor_y - 20), world == 4)
-
-			loadout = ["drill", "acid", "bomb"]
-
-		Archetype.BARRICADED_VAULT:
-			# === KÉT SẮT BỌC THÉP / OBSIDIAN KHÁNG ĐẠN ===
-			var p_h = 120.0
-			_spawn_block(Vector2(160, floor_y - p_h * 0.5), Vector2(32, p_h), "obsidian" if world >= 3 else "steel")
-			_spawn_block(Vector2(380, floor_y - p_h * 0.5), Vector2(32, p_h), "obsidian" if world >= 3 else "steel")
-			_spawn_block(Vector2(270, floor_y - p_h - 14), Vector2(270, 28), "obsidian" if world >= 3 else "steel")
-
-			_spawn_enemy(Vector2(220, floor_y - 18), e_elite)
-			_spawn_enemy(Vector2(320, floor_y - 18), e_elite)
-			_spawn_tnt(Vector2(270, floor_y - 20), true)
-
-			loadout = ["acid", "blackhole", "drill"]
-
-		Archetype.SUSPENSION_BRIDGE:
-			# === CẦU TREO SẬP HẦM ===
-			var span_y = floor_y - 140
-			_spawn_block(Vector2(150, span_y), Vector2(90, 18), mat1)
-			_spawn_block(Vector2(270, span_y), Vector2(100, 18), "glass")
-			_spawn_block(Vector2(390, span_y), Vector2(90, 18), mat1)
-
-			# Quái đứng trên cầu
-			_spawn_enemy(Vector2(220, span_y - 20), e_grunt)
-			_spawn_enemy(Vector2(320, span_y - 20), e_grunt)
-
-			# Đáy hầm chứa đầy thùng TNT
-			_spawn_tnt(Vector2(210, floor_y - 20), world == 4)
-			_spawn_tnt(Vector2(270, floor_y - 20), world == 4)
-			_spawn_tnt(Vector2(330, floor_y - 20), world == 4)
-			_spawn_enemy(Vector2(270, floor_y - 50), e_elite)
-
-			loadout = ["normal", "bomb", "cluster"]
-
-		Archetype.HOSTAGE_DILEMMA:
-			# === LỒNG CỨU GÀ CON TREO HIỂM HÓC ===
-			var p_h = 110.0
-			_spawn_block(Vector2(170, floor_y - p_h * 0.5), Vector2(24, p_h), mat1)
-			_spawn_block(Vector2(370, floor_y - p_h * 0.5), Vector2(24, p_h), mat1)
-			_spawn_block(Vector2(270, floor_y - p_h - 10), Vector2(230, 20), mat1)
-
-			_spawn_enemy(Vector2(215, floor_y - 18), e_elite)
-			_spawn_enemy(Vector2(325, floor_y - 18), e_elite)
-
-			# Lồng gà con lơ lửng trên nóc
-			_spawn_rescue_cage(Vector2(270, floor_y - p_h - 32))
-			_spawn_tnt(Vector2(270, floor_y - 20), world == 4)
-
-			loadout = ["frost", "normal", "bomb"]
-
-		Archetype.ZIGZAG_CATACOMBS:
-			# === HẦM ZICZAC TRỤC LỆCH 3 TẦNG ===
-			var p_h = 75.0
-			# Tầng 1 (Lệch phải)
-			_spawn_block(Vector2(240, floor_y - p_h * 0.5), Vector2(22, p_h), mat1)
-			_spawn_block(Vector2(400, floor_y - p_h * 0.5), Vector2(22, p_h), mat1)
-			_spawn_block(Vector2(320, floor_y - p_h - 8), Vector2(190, 18), mat1)
-			_spawn_enemy(Vector2(320, floor_y - 18), e_grunt)
-
-			# Tầng 2 (Lệch trái)
-			var y2_beam = floor_y - p_h - 8
-			_spawn_block(Vector2(140, y2_beam - 8 - p_h * 0.5), Vector2(22, p_h), mat1)
-			_spawn_block(Vector2(300, y2_beam - 8 - p_h * 0.5), Vector2(22, p_h), "glass")
-			_spawn_block(Vector2(220, y2_beam - 16 - p_h), Vector2(190, 18), mat_heavy)
-			_spawn_enemy(Vector2(220, y2_beam - 26), e_elite)
-
-			# Tầng 3 (Nóc)
-			var top_y = y2_beam - 16 - p_h
-			_spawn_boulder(Vector2(220, top_y - 28))
-			_spawn_tnt(Vector2(320, floor_y - p_h - 26), world == 4)
-
-			loadout = ["bomb", "drill", "cluster"]
-
-		Archetype.NARROW_DRILL_SHAFT:
-			# === KHE HẸP MŨI KHOAN XUYÊN 3 TẦNG TẤM ĐÁ ===
-			var plate1_y = floor_y - 60
-			var plate2_y = floor_y - 130
-			var plate3_y = floor_y - 200
-
-			_spawn_block(Vector2(180, plate1_y), Vector2(100, 20), mat_heavy)
-			_spawn_block(Vector2(360, plate1_y), Vector2(100, 20), mat_heavy)
-
-			_spawn_block(Vector2(180, plate2_y), Vector2(100, 20), mat_heavy)
-			_spawn_block(Vector2(360, plate2_y), Vector2(100, 20), mat_heavy)
-
-			_spawn_block(Vector2(180, plate3_y), Vector2(100, 20), mat_heavy)
-			_spawn_block(Vector2(360, plate3_y), Vector2(100, 20), mat_heavy)
-
-			# Khe hở 80px ở giữa trục X: 270
-			_spawn_tnt(Vector2(270, floor_y - 20), true)
-			_spawn_enemy(Vector2(180, floor_y - 18), e_elite)
-			_spawn_enemy(Vector2(360, floor_y - 18), e_elite)
-
-			loadout = ["drill", "drill", "blackhole"]
-
-		Archetype.GRAND_BOSS_CITADEL:
-			# === ĐẠI PHÁO ĐÀI BOSS HOÀNG GIA 4 TẦNG (MÀN 15, 30, 45, 60) ===
-			# Tầng 1: Ngai vàng Boss Hoàng Gia
-			var p1_h = 140.0
-			_spawn_block(Vector2(150, floor_y - p1_h * 0.5), Vector2(30, p1_h), mat_heavy)
-			_spawn_block(Vector2(390, floor_y - p1_h * 0.5), Vector2(30, p1_h), mat_heavy)
-			
-			var boss_type = "boss_baron_pig" if world == 4 else ("imperial_boar" if world == 3 else ("mine_wolf" if world == 2 else "fox_guard"))
-			_spawn_enemy(Vector2(270, floor_y - 32), boss_type)
-			_spawn_tnt(Vector2(195, floor_y - 20), true)
-			_spawn_tnt(Vector2(345, floor_y - 20), true)
-
-			# Sàn Tầng 2
-			var b1_y = floor_y - p1_h - 12
-			_spawn_block(Vector2(270, b1_y), Vector2(280, 24), mat_heavy)
-
-			# Tầng 2: Cận vệ bảo vệ
-			var p2_h = 100.0
-			var p2_y = b1_y - 12 - p2_h * 0.5
-			_spawn_block(Vector2(175, p2_y), Vector2(24, p2_h), mat1)
-			_spawn_block(Vector2(365, p2_y), Vector2(24, p2_h), mat1)
-			_spawn_enemy(Vector2(220, b1_y - 28), e_elite)
-			_spawn_enemy(Vector2(320, b1_y - 28), e_elite)
-
-			# Sàn Tầng 3
-			var b2_y = b1_y - 24 - p2_h
-			_spawn_block(Vector2(270, b2_y), Vector2(250, 22), mat1)
-
-			# Tầng 3: Bẫy 2 Tảng Đá Lăn trên tháp canh
-			_spawn_boulder(Vector2(190, b2_y - 32))
-			_spawn_boulder(Vector2(350, b2_y - 32))
-			_spawn_rescue_cage(Vector2(270, b2_y - 28))
-
+			if lvl > 20: loadout.append("normal")
+			if is_boss_level: loadout.append("bomb")
+		3:
+			loadout = ["acid", "cluster", "drill", "bomb"]
+			if lvl > 35: loadout.append("frost")
+			if is_boss_level: loadout.append("acid")
+		4:
 			loadout = ["blackhole", "acid", "drill", "bomb", "bomb"]
+			if is_boss_level: loadout.append("blackhole")
 
 	return loadout
 
