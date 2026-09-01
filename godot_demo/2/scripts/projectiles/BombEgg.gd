@@ -8,6 +8,7 @@ const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 @export var explosion_damage: float = 350.0
 
 var is_broken: bool = false
+var has_boosted: bool = false
 
 @onready var visual_root: Node2D = get_node_or_null("VisualRoot")
 @onready var explosion_particles: CPUParticles2D = get_node_or_null("ExplosionFX")
@@ -17,6 +18,11 @@ func _ready() -> void:
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_entered)
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not is_broken and not has_boosted and event is InputEventMouseButton and event.pressed:
+		has_boosted = true
+		_detonate()
 
 func _physics_process(delta: float) -> void:
 	if is_broken: return
@@ -34,6 +40,9 @@ func _detonate() -> void:
 
 	CameraShake.hit_stop(0.06)
 	CameraShake.add_trauma(0.85)
+
+	if has_node("/root/SoundManager"):
+		get_node("/root/SoundManager").play_explosion()
 
 	set_deferred("freeze", true)
 	if visual_root: visual_root.visible = false
@@ -59,6 +68,9 @@ func _detonate() -> void:
 			var dist = max(diff.length(), 10.0)
 			var dir = diff.normalized()
 			var falloff = 1.0 - clamp(dist / explosion_radius, 0.0, 0.8)
+
+			if collider.has_method("wake_up"):
+				collider.wake_up()
 
 			if collider is RigidBody2D:
 				var push_impulse = dir * explosion_force * falloff

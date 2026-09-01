@@ -1,0 +1,149 @@
+[gd_scene format=3 uid="uid://dm2k4v1q8x9p7"]
+
+[ext_resource type="Script" path="res://scripts/ui/LevelSelect.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ui/JuicyButton.gd" id="2_btn"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_TopBar"]
+bg_color = Color(0.11, 0.03, 0.21, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 3
+border_color = Color(0.79, 0.66, 0.0, 0.6)
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_WorldFrame"]
+bg_color = Color(0.16, 0.08, 0.26, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 4
+border_color = Color(1, 0.84, 0, 0.8)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[node name="LevelSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.11, 0.03, 0.21, 1)
+
+[node name="CavernGlow" type="Polygon2D" parent="Background"]
+color = Color(0.25, 0.1, 0.38, 0.5)
+polygon = PackedVector2Array(0, 200, 540, 160, 540, 800, 0, 840)
+
+[node name="TopBar" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 16.0
+offset_right = -12.0
+offset_bottom = 70.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_TopBar")
+
+[node name="Margin" type="MarginContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 4
+
+[node name="HBox" type="HBoxContainer" parent="TopBar/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BtnBack" type="Button" parent="TopBar/Margin/HBox"]
+custom_minimum_size = Vector2(85, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "◀ MENU"
+script = ExtResource("2_btn")
+is_wood_brown = true
+
+[node name="TotalStars" type="Label" parent="TopBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 18
+text = "⭐ 0 / 180"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="WorldFrame" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 82.0
+offset_right = -20.0
+offset_bottom = 138.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_WorldFrame")
+
+[node name="WorldNav" type="HBoxContainer" parent="WorldFrame"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BtnPrevWorld" type="Button" parent="WorldFrame/WorldNav"]
+custom_minimum_size = Vector2(60, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "◀"
+script = ExtResource("2_btn")
+is_wood_brown = true
+
+[node name="WorldTitle" type="Label" parent="WorldFrame/WorldNav"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.9, 0.25, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 16
+text = "THẾ GIỚI 1"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BtnNextWorld" type="Button" parent="WorldFrame/WorldNav"]
+custom_minimum_size = Vector2(60, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "▶"
+script = ExtResource("2_btn")
+is_wood_brown = true
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 25.0
+offset_top = 155.0
+offset_right = -25.0
+offset_bottom = -25.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GridContainer" type="GridContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 14
+theme_override_constants/v_separation = 14
+columns = 3

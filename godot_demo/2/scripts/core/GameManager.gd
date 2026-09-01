@@ -7,12 +7,12 @@ signal level_failed()
 signal score_updated(new_score)
 
 var current_level: int = 1
-var total_levels: int = 3
+var total_levels: int = 60
 
 var current_score: int = 0
 var remaining_enemies: int = 0
 var total_enemies: int = 0
-var available_eggs: Array[String] = [] # e.g. ["normal", "bomb", "drill"]
+var available_eggs: Array[String] = [] # e.g. ["normal", "bomb", "drill", "frost", "cluster", "acid", "blackhole"]
 var current_egg_index: int = 0
 
 var is_level_active: bool = false
@@ -54,7 +54,6 @@ func get_next_egg() -> String:
 
 func check_out_of_eggs() -> void:
 	if remaining_enemies > 0 and current_egg_index >= available_eggs.size():
-		# Wait for physics to settle before declaring game over
 		is_settling = true
 		settle_timer = 3.5
 
@@ -75,22 +74,39 @@ func _trigger_victory_delay() -> void:
 	is_level_active = false
 	
 	var unused_eggs = available_eggs.size() - current_egg_index
-	add_score(unused_eggs * 1000) # Bonus for remaining eggs
+	add_score(unused_eggs * 1000)
 
-	# Calculate stars
+	# Tính số sao (1-3 sao)
 	var stars = 1
 	if unused_eggs >= 1: stars = 2
-	if unused_eggs >= 2 or current_score >= 4000: stars = 3
+	if unused_eggs >= 2 or current_score >= 3500: stars = 3
+
+	# Lưu kết quả vào SaveManager
+	if has_node("/root/SaveManager"):
+		get_node("/root/SaveManager").record_level_result(current_level, stars, current_score)
 
 	await get_tree().create_timer(1.2).timeout
 	level_completed.emit(stars, current_score)
 
 func load_level(level_id: int) -> void:
-	var path = "res://scenes/levels/Level_%d.tscn" % level_id
+	current_level = clamp(level_id, 1, total_levels)
+	var path = "res://scenes/levels/Level_%d.tscn" % current_level
 	if ResourceLoader.exists(path):
 		get_tree().change_scene_to_file(path)
 	else:
-		get_tree().change_scene_to_file("res://scenes/levels/Level_1.tscn")
+		get_tree().change_scene_to_file("res://scenes/levels/CampaignLevel.tscn")
+
+func next_level() -> void:
+	if current_level < total_levels:
+		load_level(current_level + 1)
+	else:
+		go_to_level_select()
 
 func restart_current_level() -> void:
 	get_tree().reload_current_scene()
+
+func go_to_level_select() -> void:
+	get_tree().change_scene_to_file("res://scenes/ui/LevelSelect.tscn")
+
+func go_to_main_menu() -> void:
+	get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")

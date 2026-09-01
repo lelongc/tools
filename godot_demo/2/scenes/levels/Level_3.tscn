@@ -27,6 +27,7 @@ size = Vector2(140, 40)
 script = ExtResource("1_controller")
 level_id = 3
 available_eggs = ["drill", "bomb", "normal", "normal"]
+intro_target_y = 650.0
 
 [node name="CameraShake2D" type="Camera2D" parent="."]
 position = Vector2(270, 480)
@@ -50,7 +51,7 @@ polygon = PackedVector2Array(0, 400, 540, 400, 540, 960, 0, 960)
 
 [node name="CavernInterior" type="Polygon2D" parent="Background"]
 color = Color(0.09, 0.07, 0.12, 1)
-polygon = PackedVector2Array(115, 400, 425, 400, 425, 875, 115, 875)
+polygon = PackedVector2Array(115, 400, 425, 400, 425, 870, 115, 870)
 
 [node name="BunkerBoundaries" type="StaticBody2D" parent="."]
 collision_layer = 1
@@ -78,67 +79,70 @@ shape = SubResource("Ledge_Right")
 
 [node name="BunkerStructure" type="Node2D" parent="."]
 
-[node name="Floor3_PillarL" parent="BunkerStructure" instance=ExtResource("5_block")]
-position = Vector2(170, 810)
-rotation = 1.5708
-material_type = "stone"
-
-[node name="Floor3_PillarR" parent="BunkerStructure" instance=ExtResource("5_block")]
-position = Vector2(370, 810)
-rotation = 1.5708
-material_type = "stone"
-
-[node name="Floor3_Beam" parent="BunkerStructure" instance=ExtResource("5_block")]
-position = Vector2(270, 750)
-material_type = "wood"
-
-[node name="Floor2_PillarL" parent="BunkerStructure" instance=ExtResource("5_block")]
-position = Vector2(180, 670)
-rotation = 1.5708
-material_type = "wood"
-
-[node name="Floor2_PillarR" parent="BunkerStructure" instance=ExtResource("5_block")]
-position = Vector2(360, 670)
-rotation = 1.5708
-material_type = "wood"
-
-[node name="Floor2_Beam" parent="BunkerStructure" instance=ExtResource("5_block")]
-position = Vector2(270, 610)
-material_type = "stone"
-
 [node name="Floor1_PillarL" parent="BunkerStructure" instance=ExtResource("5_block")]
-position = Vector2(200, 540)
-rotation = 1.5708
-material_type = "glass"
+position = Vector2(160, 810)
+material_type = "stone"
+block_size = Vector2(28, 120)
 
 [node name="Floor1_PillarR" parent="BunkerStructure" instance=ExtResource("5_block")]
-position = Vector2(340, 540)
-rotation = 1.5708
-material_type = "glass"
-
-[node name="Roof_Beam" parent="BunkerStructure" instance=ExtResource("5_block")]
-position = Vector2(270, 470)
-material_type = "wood"
+position = Vector2(380, 810)
+material_type = "stone"
+block_size = Vector2(28, 120)
 
 [node name="TNT1" parent="BunkerStructure" instance=ExtResource("6_tnt")]
-position = Vector2(210, 720)
+position = Vector2(220, 847)
 
 [node name="TNT2" parent="BunkerStructure" instance=ExtResource("6_tnt")]
-position = Vector2(330, 720)
+position = Vector2(320, 847)
+
+[node name="Floor2_Beam" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(270, 738)
+material_type = "wood"
+block_size = Vector2(260, 24)
+
+[node name="Floor2_PillarL" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(180, 671)
+material_type = "wood"
+block_size = Vector2(24, 110)
+
+[node name="Floor2_PillarR" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(360, 671)
+material_type = "wood"
+block_size = Vector2(24, 110)
+
+[node name="Floor3_Beam" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(270, 604)
+material_type = "stone"
+block_size = Vector2(240, 24)
+
+[node name="Floor3_GlassL" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(200, 542)
+material_type = "glass"
+block_size = Vector2(18, 100)
+
+[node name="Floor3_GlassR" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(340, 542)
+material_type = "glass"
+block_size = Vector2(18, 100)
+
+[node name="Roof_Beam" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(270, 480)
+material_type = "wood"
+block_size = Vector2(220, 24)
 
 [node name="Enemies" type="Node2D" parent="BunkerStructure"]
 
 [node name="Fox1" parent="BunkerStructure/Enemies" groups=["Enemies"] instance=ExtResource("7_enemy")]
-position = Vector2(270, 580)
+position = Vector2(175, 852)
 
 [node name="Fox2" parent="BunkerStructure/Enemies" groups=["Enemies"] instance=ExtResource("7_enemy")]
-position = Vector2(270, 720)
+position = Vector2(365, 852)
 
 [node name="Fox3" parent="BunkerStructure/Enemies" groups=["Enemies"] instance=ExtResource("7_enemy")]
-position = Vector2(180, 850)
+position = Vector2(270, 708)
 
 [node name="Fox4" parent="BunkerStructure/Enemies" groups=["Enemies"] instance=ExtResource("7_enemy")]
-position = Vector2(360, 850)
+position = Vector2(270, 574)
 
 [node name="ChickenBomber" parent="." instance=ExtResource("3_chicken")]
 position = Vector2(270, 110)

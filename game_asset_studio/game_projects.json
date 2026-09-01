@@ -1,1402 +1,608 @@
 {
-  "active_game_id": "game_wobble_chicks",
+  "active_game_id": "game_cluck_and_drop",
   "games": [
     {
-      "id": "game_wobble_chicks",
-      "title": "Wobble Chicks: Bouncy Party Run (Gà Con Núng Nính Vượt Ải)",
-      "genre": "3D/2.5D Cute Physics Party Obstacle Platformer",
-      "art_style": "3D Cute Chibi Pop Art, Stylized Pixar & Fall Guys Aesthetic, Glossy Clay Render, Candy Colors",
-      "raw_input_story": "Game vượt chướng ngại vật tiệc tùng vui nhộn: Chú gà con Piyo tròn vo núng nính vượt qua các bãi thạch nhún cầu vồng, búa kẹo mút khổng lồ, cối xay gió bánh quy để về đích.",
+      "id": "game_cluck_and_drop",
+      "title": "Cluck & Drop: Bunker Buster (Chiến Dịch Bão Lòng Đất - 60 Màn Chơi)",
+      "genre": "2D Physics Destruction Puzzle / Vertical Gravity Bunker Buster",
+      "art_style": "Glossy 2D Cartoon Vector, Rich Juicy Physics, Vibrant Colors, Angry Birds & Cut The Rope Aesthetic",
+      "raw_input_story": "Kế hoạch 60 Màn Chơi Chia 4 Thế Giới: Gà Mẹ Clucky nã trứng dị biến phá hủy 60 căn hầm ngục từ dễ đến siêu khó, đè bẹp lũ Cáo trộm trứng và giải cứu bầy gà con.",
       "full_story": {
-        "synopsis": "Hội thi Vượt Ải Kẹo Ngọt Xứ Sở Gà Con: Điều khiển bé gà con tròn xoe nhảy nhót, phồng to như bóng bay hoặc cuộn tròn lăn tốc độ vượt qua các bẫy hài hước.",
-        "protagonist": "Bé Gà Piyo (Tròn xoe như quả trứng, lông vàng tươi, mắt to lấp lánh, biết phồng to và lăn tròn).",
-        "antagonists": "Búa Kẹo Mút Xoay 360, Găng Tay Đấm Lò Xo, Cối Xay Gió Bánh Quy, Vỏ Chuối Trơn Trượt.",
-        "environment": "Thung lũng Bánh Ngọt, Bầu trời Kẹo Bông Gòn, Dãy núi Donut.",
-        "gameplay_elements": "Vật lý Jelly đàn hồi núng nính (Squash & Stretch), Bệ nhún thạch nảy tưng tưng, Phồng bong bóng bay lơ lửng, Lăn tròn tốc độ cao."
+        "synopsis": "Hành trình 60 màn chơi vượt 4 Thế Giới ngầm kiên cố: Thế Giới 1 (Nông Trại Hang Đất), Thế Giới 2 (Mỏ Đá Bê Tông), Thế Giới 3 (Nhà Máy Hơi Nước Độc Dược), Thế Giới 4 (Lòng Núi Lửa Hoàng Gia). Quái vật và công trình tăng dần độ kiên cố, xuất hiện quái giáp nón sắt, quái to trùm hầm cần đòn nghiền nát nặng hàng tấn.",
+        "protagonist": "Gà Mẹ Clucky (Thân tròn béo ú, đội mũ phi công steampunk, lái trực thăng chong chóng tre mini, mắt liếc ngắm bắn thông minh).",
+        "antagonists": "Cáo Con Trộm Trứng, Cáo Lính Canh, Gấu Mèo Thợ Mỏ Đội Mũ Sắt, Chó Săn Bọc Giáp Gai, Cáo Kỹ Sư Độc Dược, Cận Vệ Heo Rừng Hoàng Gia, và Đại Boss Heo Trùm Hoàng Gia Baron Pig.",
+        "environment": "4 Vùng Địa Hình: 1. Nông Trại Hang Đất (Màn 1-15), 2. Mỏ Đá Bê Tông (Màn 16-30), 3. Nhà Máy Độc Dược Steampunk (Màn 31-45), 4. Hầm Dung Nham Hoàng Gia (Màn 46-60).",
+        "gameplay_elements": "Vật lý phá hủy kết cấu đa tầng (Destruction Physics), Kích hoạt kỹ năng giữa không trung (Tap-in-Flight), Phản ứng dây chuyền Domino TNT, Bẫy đá lăn & Hầm gió ngược, Giải cứu lồng gà con, Hệ thống Rewarded Ad Siêu Bom Nuke, Độ khó 60 màn tăng dần."
+      },
+      "level_campaign_plan": {
+        "total_levels": 60,
+        "worlds": [
+          {
+            "world_id": 1,
+            "name": "Thế Giới 1: Nông Trại Hang Đất (Farm Cavern)",
+            "levels": "Màn 1 -> Màn 15",
+            "theme": "Đất xốp, cỏ xanh, rễ cây ngầm, hang đất ấm cúng",
+            "materials": "Gỗ thông nhẹ (HP 80), Kính giòn (HP 25), Thùng TNT đơn (Radius 220)",
+            "enemies": "Cáo Con Trộm Trứng (40 HP), Cáo Lính Canh (60 HP), Boss Cáo Đại Ca Màn 15 (200 HP)",
+            "unlocked_eggs": "Trứng Thường Nặng Ký, Trứng Thuốc Nổ Đỏ",
+            "description": "Làm quen với cơ chế ngắm thả rơi và tính năng Tap-in-Flight. Các màn bố trí đơn giản để người chơi thỏa mãn cảm giác sập hầm domino ban đầu."
+          },
+          {
+            "world_id": 2,
+            "name": "Thế Giới 2: Mỏ Đá Bê Tông Kiên Cố (Stone Quarry Bunker)",
+            "levels": "Màn 16 -> Màn 30",
+            "theme": "Hang mỏ đá vôi, vỉa than ngầm, đường ray goòng, mạng nhện",
+            "materials": "Tảng đá Granite (HP 220, Mass 8.5), Cột kính cường lực (HP 40), Thùng TNT kép, Bẫy Tảng Đá Lăn Dốc",
+            "enemies": "Gấu Mèo Thợ Mỏ Đội Mũ Sắt (120 HP - Cản đòn 1), Chó Sói Hầm Mỏ (150 HP), Boss Cỗ Máy Khoan Màn 30 (450 HP)",
+            "unlocked_eggs": "Trứng Mũi Khoan Xuyên Thấu (Drill Penetrator Egg), Trứng Băng Đóng Băng (Frost Egg)",
+            "description": "Độ khó nâng cao, xuất hiện mái đá dày và kẻ địch đội mũ bảo hiểm. Người chơi bắt buộc phải dùng Trứng Khoan tăng tốc siêu thanh đục xuyên trần hoặc dùng Trứng Băng làm giòn kết cấu."
+          },
+          {
+            "world_id": 3,
+            "name": "Thế Giới 3: Nhà Máy Độc Dược Steampunk (Industrial Fortress)",
+            "levels": "Màn 31 -> Màn 45",
+            "theme": "Đường ống dẫn hơi nước đồng thau, bánh răng cưa xoay, bể axit xanh rực",
+            "materials": "Dầm thép kim loại I-Beam (HP 350, chỉ tan khi gặp axit), Bể hóa chất nổ độc, Xích sắt treo tảng đá, Quạt gió hầm đẩy ngược (Updraft Fans)",
+            "enemies": "Chó Săn Bọc Giáp Gai (220 HP, Mass 4.0), Cáo Kỹ Sư Độc Dược (180 HP), Boss Robot Hóa Chất Màn 45 (700 HP)",
+            "unlocked_eggs": "Trứng Axit Nham Thạch (Acid Lava Egg), Trứng Gà Con Náo Loạn (Cluster Chicks Egg)",
+            "description": "Kết cấu hầm ngục có quạt gió thổi ngược đổi quỹ đạo trứng và dầm sắt không thể phá bằng đòn thường. Phải dùng Trứng Axit ăn mòn chân đế hoặc thả Trứng Gà Con kích hoạt công tắc mở van."
+          },
+          {
+            "world_id": 4,
+            "name": "Thế Giới 4: Hầm Dung Nham Hoàng Gia (Lava Core Imperial Fortress)",
+            "levels": "Màn 46 -> Màn 60",
+            "theme": "Lòng núi lửa magma sôi sục, cột đá hắc diện thạch Obsidian, ngai vàng của Boss",
+            "materials": "Đá Hắc Diện Thạch Obsidian (HP 500, Mass 15.0), Thùng Thuốc Nổ Hạt Nhân Nuke, Cổng dịch chuyển Wormhole, Lồng Giam Gà Con Hoàng Gia",
+            "enemies": "Cận Vệ Heo Rừng Hoàng Gia (350 HP, Mass 6.0), Quái Thú Dung Nham (500 HP), ĐẠI BOSS HEO TRÙM BÁ TƯỚC BARON PIG Màn 60 (1500 HP - 3 Giai Đoạn Sập Hầm)",
+            "unlocked_eggs": "Trứng Phản Trọng Lực Lỗ Đen (Black Hole Egg), Siêu Trứng Rồng Hoàng Kim (Golden Dragon Egg)",
+            "description": "Đỉnh cao chiến thuật giải đố vật lý: Căn hầm khổng lồ 4 tầng với nhiều cạm bẫy, đòi hỏi chuỗi combo thả trứng tính toán hoàn hảo từng giây để tạo phản ứng sập toàn diện."
+          }
+        ]
       },
       "assets": [
         {
-          "id": "asset_piyo_classic",
-          "name": "Gà Con Vàng Cơ Bản (Piyo - The Classic Chick)",
+          "id": "asset_clucky_pilot",
+          "name": "Gà Mẹ Phi Công Clucky (Clucky The Mother Hen)",
           "category": "characters",
           "format": "image",
-          "format_reason": "Nhân vật 3D Chibi chất liệu đất sét bóng bẩy",
+          "format_reason": "Nhân vật chính 2D Vector hoạt hình bóng bẩy",
           "priority": "Cao",
           "status": "pending",
-          "prompt_video": "Full body 3D cute round baby chick running cheerfully, bouncing jelly physics, solid green screen background",
-          "prompt_image": "Full body centered front view of a super cute round egg-shaped baby chick named Piyo, glossy bright yellow soft feather, big sparkling chibi black eyes with cute highlights, tiny orange beak, small rounded wings, chubby short orange legs, tiny cute heart-shaped feather tuft on top of head, happy cheerful expression, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, vibrant cheerful pastel and candy color palette, rounded bouncy soft shapes, 4k resolution, raytraced soft lighting, clean solid vibrant green background for chroma key, centered asset, game ready",
+          "prompt_image": "Full body centered front view of a cute round chubby mother hen wearing a brown leather aviator pilot helmet and goggles on head, bright glossy yellow feathers, red comb on top, orange beak, big sparkling cartoon eyes with funny determined expression, holding a wooden control stick, 2D vector cartoon game character, clean bold black outline, bright vibrant flat colors with soft highlights, Angry Birds and Cut the Rope art style, game asset, white clean background --no background",
           "animations": [
-            "idle",
-            "walk",
-            "run",
-            "squash_land",
-            "puff_float",
-            "roll"
+            "idle_patrol",
+            "aim_look_down",
+            "squash_lay_egg",
+            "victory_cheer",
+            "panic"
           ]
         },
         {
-          "id": "asset_shelly_eggshell",
-          "name": "Gà Con Đội Vỏ Trứng (Shelly - Eggshell Chick)",
+          "id": "asset_flying_chopper",
+          "name": "Trực Thăng Chong Chóng Tre Mini (Clucky's Bamboo Chopper)",
           "category": "characters",
           "format": "image",
-          "format_reason": "Skin nhân vật độc đáo",
+          "format_reason": "Phương tiện bay của Gà Mẹ",
           "priority": "Cao",
           "status": "pending",
-          "prompt_video": "",
-          "prompt_image": "Full body centered front view of an adorable round baby chick wearing a cracked pastel pink eggshell with yellow polka dots on its head like a hat and pants, cream white fluffy soft body, blushing pink cheeks, sparkling cartoon eyes, tiny orange beak, playful innocent pose, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, vibrant cheerful pastel and candy color palette, rounded bouncy soft shapes, 4k resolution, clean solid vibrant green background for chroma key, centered asset",
+          "prompt_image": "Cute cartoon mini wooden helicopter with spinning bamboo propeller on top, woven wicker basket at the bottom, steampunk brass gears and gauges, 2D vector game sprite, clean outline, bright cartoon colors, white background --no background",
+          "animations": [
+            "propeller_spin",
+            "engine_puff"
+          ]
+        },
+        {
+          "id": "asset_rescued_baby_chick",
+          "name": "Bé Gà Con Cứu Hộ (Rescued Yellow Baby Chick)",
+          "category": "characters",
+          "format": "image",
+          "format_reason": "Bé gà con đáng yêu được giải cứu khỏi lồng",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Super cute tiny round fluffy yellow baby chick, big sparkling black cartoon eyes, tiny open orange beak, happy cheerful hopping pose, blushing pink cheeks, 2D vector cartoon sprite, bold outlines, white background --no background",
+          "animations": [
+            "hop_run",
+            "cheer_confetti",
+            "peck_switch"
+          ]
+        },
+        {
+          "id": "asset_egg_heavy_normal",
+          "name": "Trứng Thường Nặng Ký (Heavy Normal Egg)",
+          "category": "projectiles",
+          "format": "image",
+          "format_reason": "Trứng cơ bản - Tap-in-Flight hóa Kim Cương Siêu Nặng",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Cute shiny cartoon chicken egg wearing a small iron soldier helmet with a star, cream eggshell with tiny light brown speckles, glossy clean vector art style, bold outlines, white background --no background",
+          "animations": [
+            "drop_fall",
+            "squash_impact",
+            "diamond_boost_mode",
+            "shell_crack_pieces"
+          ]
+        },
+        {
+          "id": "asset_egg_tnt_bomb",
+          "name": "Trứng Thuốc Nổ Đỏ (TNT Bomb Egg)",
+          "category": "projectiles",
+          "format": "image",
+          "format_reason": "Trứng phát nổ xung kích - Tap-in-Flight nổ sớm Air Burst",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Dangerous and funny cartoon bomb egg, bright red shell with black skull icon and danger yellow stripes, burning sizzling rope fuse on top with yellow sparks, glowing angry eyes, 2D vector game sprite, white background --no background",
+          "animations": [
+            "fuse_burn",
+            "detonate_burst",
+            "shockwave_ring"
+          ]
+        },
+        {
+          "id": "asset_egg_drill_steel",
+          "name": "Trứng Mũi Khoan Xuyên Thấu (Drill Penetrator Egg)",
+          "category": "projectiles",
+          "format": "image",
+          "format_reason": "Trứng bọc thép - Tap-in-Flight kích hoạt Tên Lửa Siêu Thanh",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Heavy industrial drill egg made of polished steel armor, golden spiral sharp drill cone at the bottom, spinning turbine vents with orange exhaust glow, 2D cartoon game asset, clean vector style, white background --no background",
+          "animations": [
+            "drill_spin",
+            "rocket_boost_fire",
+            "sparks_burst"
+          ]
+        },
+        {
+          "id": "asset_egg_frost_shatter",
+          "name": "Trứng Băng Pha Lê (Frost Shatter Ice Egg)",
+          "category": "projectiles",
+          "format": "image",
+          "format_reason": "Trứng đóng băng mọi kết cấu thành thủy tinh giòn",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Magical crystal frozen egg made of shiny translucent cyan ice, sharp snowflake spikes, glowing cold blue mist aura, 2D vector cartoon sprite, white background --no background",
+          "animations": [
+            "frost_trail",
+            "freeze_burst",
+            "ice_crystals"
+          ]
+        },
+        {
+          "id": "asset_egg_cluster_chicks",
+          "name": "Trứng Gà Con Náo Loạn (Cluster Chicks Egg)",
+          "category": "projectiles",
+          "format": "image",
+          "format_reason": "Trứng nứt vỏ nở ra 5 chú gà con chạy nhốn nháo kích hoạt bẫy",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Cracked pastel pink egg with 3 tiny baby chicks peeking out with cute big eyes and open beaks, adorable 2D cartoon game sprite, clean bold outlines, white background --no background",
+          "animations": [
+            "crack_open",
+            "chicks_scatter",
+            "peck_run"
+          ]
+        },
+        {
+          "id": "asset_egg_acid_lava",
+          "name": "Trứng Axit Nham Thạch (Acid Lava Egg)",
+          "category": "projectiles",
+          "format": "image",
+          "format_reason": "Lòng đỏ sôi sùng sục làm tan chảy dầm thép kim loại",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Glowing neon toxic green and magma orange bubbling slime egg with bubbling molten yolk visible through translucent shell, sizzling chemical steam, 2D cartoon vector game asset, white background --no background",
+          "animations": [
+            "bubble_idle",
+            "melt_splash",
+            "acid_puddle"
+          ]
+        },
+        {
+          "id": "asset_egg_blackhole_vortex",
+          "name": "Trứng Lỗ Đen Phản Trọng Lực (Black Hole Vortex Egg)",
+          "category": "projectiles",
+          "format": "image",
+          "format_reason": "Trứng vũ trụ hút mọi khối đá và quái vật vào tâm rồi nổ tung",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Mystical cosmic purple and deep navy egg with a miniature swirling galactic black hole vortex center, golden orbital ring, sparkling stardust particles, 2D vector game asset, white background --no background",
+          "animations": [
+            "gravity_vortex_pulse",
+            "vacuum_collapse",
+            "supernova_blast"
+          ]
+        },
+        {
+          "id": "asset_enemy_sly_fox",
+          "name": "Cáo Con Trộm Trứng (Sly Fox Bandit - World 1)",
+          "category": "enemies",
+          "format": "image",
+          "format_reason": "Kẻ địch cơ bản World 1 (40 HP - Máu giấy)",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Funny cartoon orange fox wearing a black bandit eye mask and a striped thief shirt, sneaky smiling expression, big bushy tail, 2D vector game sprite, bold outlines, white background --no background",
+          "animations": [
+            "idle_taunt",
+            "panic_look_up",
+            "squashed_flat",
+            "dizzy_stars"
+          ]
+        },
+        {
+          "id": "asset_enemy_fox_guard",
+          "name": "Cáo Lính Canh Hầm (Fox Guard - World 1)",
+          "category": "enemies",
+          "format": "image",
+          "format_reason": "Lính canh tiêu chuẩn World 1 (60 HP)",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Grumpy cartoon fox wearing a blue guard uniform and a small wooden helmet, holding a wooden spear, funny scowling face, 2D vector game sprite, white background --no background",
+          "animations": [
+            "idle_stand",
+            "panic_scream",
+            "squashed_flat"
+          ]
+        },
+        {
+          "id": "asset_enemy_armored_raccoon",
+          "name": "Gấu Mèo Thợ Mỏ Mũ Sắt (Armored Miner Raccoon - World 2)",
+          "category": "enemies",
+          "format": "image",
+          "format_reason": "Kẻ địch có nón bảo hiểm cản 1 đòn (120 HP)",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Cute chubby raccoon wearing a heavy silver mining hard hat with a front flashlight, holding a wrench, scared nervous eyes, 2D vector game character, white background --no background",
+          "animations": [
+            "idle_patrol",
+            "helmet_pop_off",
+            "squashed_flat"
+          ]
+        },
+        {
+          "id": "asset_enemy_mine_wolf",
+          "name": "Chó Sói Hầm Mỏ (Mine Wolf - World 2)",
+          "category": "enemies",
+          "format": "image",
+          "format_reason": "Kẻ địch hung dữ World 2 (150 HP)",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Tough gray cartoon wolf wearing leather harness and spiked shoulder pads, snarling funny sharp teeth, crossed arms, 2D vector sprite, white background --no background",
+          "animations": [
+            "idle_snarl",
+            "panic_howl",
+            "squashed_flat"
+          ]
+        },
+        {
+          "id": "asset_enemy_spike_hound",
+          "name": "Chó Săn Bọc Giáp Gai (Spike Armored Hound - World 3)",
+          "category": "enemies",
+          "format": "image",
+          "format_reason": "Kẻ địch giáp nặng World 3 (220 HP, Mass 4.0)",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Bulky armored guard bulldog with full brass steampunk plate armor, spiked collar, steam venting from back armor, angry red glowing goggles, 2D vector game sprite, white background --no background",
+          "animations": [
+            "idle_breathe",
+            "armor_crack",
+            "squashed_heavy"
+          ]
+        },
+        {
+          "id": "asset_enemy_toxic_fox_engineer",
+          "name": "Cáo Kỹ Sư Độc Dược (Toxic Fox Engineer - World 3)",
+          "category": "enemies",
+          "format": "image",
+          "format_reason": "Kẻ địch World 3 (180 HP, có bình hóa chất)",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Mad scientist cartoon fox wearing a hazmat apron, thick rubber goggles, and holding a green potion flask, crazy green mustache, 2D vector sprite, white background --no background",
+          "animations": [
+            "idle_potion_shake",
+            "panic_chemical_splash",
+            "squashed_flat"
+          ]
+        },
+        {
+          "id": "asset_enemy_imperial_boar",
+          "name": "Cận Vệ Heo Rừng Hoàng Gia (Imperial Boar Guard - World 4)",
+          "category": "enemies",
+          "format": "image",
+          "format_reason": "Cận vệ siêu trâu World 4 (350 HP, Mass 6.0)",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Gigantic muscular wild boar warrior in gold-trimmed obsidian royal armor, massive curved ivory tusks, royal crimson cape, fierce angry red eyes, 2D vector cartoon sprite, white background --no background",
+          "animations": [
+            "idle_stomp",
+            "tusk_shatter",
+            "squashed_massive"
+          ]
+        },
+        {
+          "id": "asset_enemy_boss_baron_pig",
+          "name": "ĐẠI BOSS HEO TRÙM BÁ TƯỚC (Baron Pig Final Emperor Boss - Màn 60)",
+          "category": "enemies",
+          "format": "image",
+          "format_reason": "Đại Boss cuối game (1500 HP - 3 Giai đoạn sụp hầm liên hoàn)",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Gigantic ultra fat cartoon Emperor Pig sitting on an opulent golden throne, wearing an oversized jewel-encrusted imperial crown, luxurious velvet robe, holding a golden fork and egg sceptre, arrogant smug grin with double chins, 2D vector boss sprite, bold clean outline, white background --no background",
+          "animations": [
+            "boss_idle_laugh",
+            "stage1_damage_furious",
+            "stage2_panic_screaming",
+            "crown_fly_off",
+            "grand_boss_explosion"
+          ]
+        },
+        {
+          "id": "asset_block_wood_plank",
+          "name": "Thanh Xà Gỗ Chịu Lực (Wood Plank Beam)",
+          "category": "destructibles",
+          "format": "image",
+          "format_reason": "Vật liệu gỗ thông World 1 (HP 80)",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Modular wooden plank beam for physics puzzle game, polished pine wood texture with wood grain, golden metal bolt brackets on ends, clean 2D vector cartoon sprite, isolated on white background --no background",
+          "animations": [
+            "intact",
+            "cracked",
+            "wood_splinters"
+          ]
+        },
+        {
+          "id": "asset_block_stone_slab",
+          "name": "Tảng Đá Bê Tông Granite (Heavy Stone Slab)",
+          "category": "destructibles",
+          "format": "image",
+          "format_reason": "Vật liệu đá nặng World 2 (HP 220, Mass 8.5)",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Modular heavy gray stone block slab for 2D physics game, chiseled rock edge, moss accents, sturdy concrete texture, cartoon vector game asset, white background --no background",
+          "animations": [
+            "intact",
+            "cracked",
+            "stone_dust_debris"
+          ]
+        },
+        {
+          "id": "asset_block_glass_pillar",
+          "name": "Cột Kính Pha Lê Giòn Tan (Glass Crystal Pillar)",
+          "category": "destructibles",
+          "format": "image",
+          "format_reason": "Vật liệu kính trong suốt dễ vỡ (HP 25)",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Modular semi-transparent cyan glass crystal column pillar, glowing light reflections, delicate geometric edges, 2D cartoon game asset, white background --no background",
+          "animations": [
+            "intact",
+            "shattered_glass_shards"
+          ]
+        },
+        {
+          "id": "asset_block_steel_ibeam",
+          "name": "Dầm Thép Chữ I Steampunk (Industrial Steel I-Beam)",
+          "category": "destructibles",
+          "format": "image",
+          "format_reason": "Vật liệu sắt thép World 3 (HP 350 - Cần Axit)",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Heavy industrial steel I-beam girder with riveted brass plates, rust patina, metallic highlights, 2D cartoon game asset, white background --no background",
+          "animations": [
+            "intact",
+            "acid_corrosion",
+            "metal_tear"
+          ]
+        },
+        {
+          "id": "asset_block_obsidian_slab",
+          "name": "Khối Đá Hắc Diện Thạch (Obsidian Lava Slab)",
+          "category": "destructibles",
+          "format": "image",
+          "format_reason": "Vật liệu đá núi lửa World 4 siêu cứng (HP 500, Mass 15.0)",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Ultra dense black obsidian stone block with glowing red lava veins running through cracks, glossy volcanic glass texture, 2D cartoon vector game asset, white background --no background",
+          "animations": [
+            "intact",
+            "magma_crack",
+            "volcanic_shatter"
+          ]
+        },
+        {
+          "id": "asset_block_tnt_barrel",
+          "name": "Thùng Thuốc Nổ TNT Đỏ (Red TNT Explosive Barrel)",
+          "category": "destructibles",
+          "format": "image",
+          "format_reason": "Thùng nổ cơ bản (Radius 220, Damage 600)",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Classic red wooden gunpowder barrel with bold white TNT stencil label, dark iron bands, short burning fuse rope on top with spark, 2D vector cartoon sprite, white background --no background",
           "animations": [
             "idle",
-            "walk",
-            "roll"
+            "fuse_sparking",
+            "explosion_blast"
           ]
         },
         {
-          "id": "asset_lollipop_hammer",
-          "name": "Búa Kẹo Mút Khổng Lồ (Giant Lollipop Hammer)",
-          "category": "obstacles",
+          "id": "asset_block_nuke_barrel",
+          "name": "Thùng Bom Hạt Nhân Vàng (Mega Nuke Hazard Barrel)",
+          "category": "destructibles",
           "format": "image",
-          "format_reason": "Chướng ngại vật xoay tròn",
+          "format_reason": "Thùng bom siêu nổ World 4 (Radius 450, Damage 1500)",
           "priority": "Cao",
           "status": "pending",
-          "prompt_video": "",
-          "prompt_image": "Front view of a giant toy obstacle hammer made of a huge glossy swirl rainbow lollipop, vibrant pastel pink cyan yellow spiral pattern, sugar glazed candy finish, striped red and white candy cane handle, shiny mechanical axle joint in middle, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, vibrant candy colors, 4k resolution, clean solid vibrant green background for chroma key, centered asset",
+          "prompt_image": "Heavy bright yellow radioactive hazard barrel with black radiation trefoil symbol, reinforced titanium casing, pulsing green LED warning lights, 2D cartoon game sprite, white background --no background",
           "animations": [
-            "rotate_spin"
+            "idle_pulse",
+            "critical_meltdown",
+            "atomic_mushroom_blast"
           ]
         },
         {
-          "id": "asset_rainbow_jelly_pad",
-          "name": "Bệ Nhún Thạch Pudding (Rainbow Jelly Bouncer Pad)",
-          "category": "obstacles",
+          "id": "asset_gimmick_rolling_boulder",
+          "name": "Bẫy Tảng Đá Lăn Khổng Lồ (Giant Rolling Boulder)",
+          "category": "destructibles",
           "format": "image",
-          "format_reason": "Bệ nhún đàn hồi",
-          "priority": "Cao",
+          "format_reason": "Vật thể lăn theo dốc nghiền nát hầm ngục",
+          "priority": "Trung bình",
           "status": "pending",
-          "prompt_video": "",
-          "prompt_image": "Isometric view of a bouncy three-tiered rainbow pudding trampoline pad, glossy translucent gelatin jelly material, glowing vibrant strawberry pink, lemon yellow and mint turquoise layers, cute chick footprint embossed on top surface, soft bouncy rubbery look, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, 4k resolution, clean solid vibrant green background for chroma key, centered asset",
+          "prompt_image": "Massive spherical heavy ancient stone boulder with cracks and carved tribal spiral patterns, 2D cartoon game asset, white background --no background",
           "animations": [
-            "bounce_squish"
+            "roll_spin",
+            "crush_impact"
           ]
         },
         {
-          "id": "asset_spring_boxing_glove",
-          "name": "Găng Tay Đấm Lò Xo (Spring Boxing Glove Trap)",
-          "category": "obstacles",
+          "id": "asset_gimmick_chick_cage",
+          "name": "Lồng Giam Gà Con Cứu Hộ (Rescue Chick Cage)",
+          "category": "destructibles",
           "format": "image",
-          "format_reason": "Bẫy lò xo phóng",
+          "format_reason": "Lồng sắt giam gà con để người chơi giải cứu lấy Bonus Star",
           "priority": "Cao",
           "status": "pending",
-          "prompt_video": "",
-          "prompt_image": "Side view of a funny toy trap obstacle, cute bright red glossy cartoon boxing glove attached to a shiny silver spiral spring extending out from a colorful striped wooden surprise toy box, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, vibrant cheerful candy colors, 4k resolution, clean solid vibrant green background for chroma key, centered asset",
+          "prompt_image": "Hanging wooden and iron cage containing a scared crying little yellow chick, padlock on the door, 2D cartoon game asset, white background --no background",
           "animations": [
-            "punch_out"
+            "locked",
+            "cage_broken_open",
+            "chick_happy_freedom"
           ]
         },
         {
-          "id": "asset_cookie_windmill",
-          "name": "Cối Xay Gió Bánh Quy (Cookie Windmill Fan)",
-          "category": "obstacles",
+          "id": "asset_gimmick_updraft_fan",
+          "name": "Quạt Gió Hầm Ngầm Đẩy Ngược (Updraft Wind Vent)",
+          "category": "destructibles",
           "format": "image",
-          "format_reason": "Quạt gió đẩy lùi",
-          "priority": "Cao",
+          "format_reason": "Cơ chế quạt gió thổi luồng khí đẩy trứng bay lượn",
+          "priority": "Trung bình",
           "status": "pending",
-          "prompt_video": "",
-          "prompt_image": "Front view of a cute cartoon obstacle windmill fan, tower made of golden waffle cone with cream frosting, 4 rotating fan blades shaped like pastel macaron cookies and wafer biscuits, blowing cheerful wind swirls, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, vibrant candy colors, 4k resolution, clean solid vibrant green background for chroma key, centered asset",
+          "prompt_image": "Subterranean brass steampunk ventilation grate with spinning steel fan blades, blowing visible upward swirling cyan wind gusts and dust swirls, 2D cartoon game sprite, white background --no background",
           "animations": [
-            "spin"
+            "fan_spin_gust"
           ]
         },
         {
-          "id": "asset_golden_corn",
-          "name": "Bắp Ngô Vàng Lấp Lánh (Golden Corn Kernel)",
-          "category": "items",
+          "id": "asset_bg_world1_farm",
+          "name": "Bối Cảnh World 1: Nông Trại Hang Đất (Farm Cavern 9:16)",
+          "category": "environments",
           "format": "image",
-          "format_reason": "Vật phẩm thu thập tiền tệ",
+          "format_reason": "Background cắt ngang lòng đất 540x960 World 1",
           "priority": "Cao",
           "status": "pending",
-          "prompt_video": "",
-          "prompt_image": "Centered glowing collectible coin shaped like a plump golden corn kernel with a cute happy smiling face, shiny polished 24k gold and honey glaze material, floating with magical golden sparkle stars, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, vibrant candy colors, 4k resolution, clean solid vibrant green background for chroma key, centered asset",
+          "prompt_image": "2D mobile vertical 9:16 background for puzzle game, top third shows bright cheerful blue sky with fluffy cartoon clouds and green grass ground surface, bottom two thirds shows rich subterranean underground cross-section dirt layers with tree roots and dark cozy cavern interior, clean cartoon art style, vivid colors",
           "animations": [
-            "spin_float"
+            "clouds_parallax"
           ]
         },
         {
-          "id": "asset_sweet_finish_gate",
-          "name": "Cổng Về Đích Bánh Kem (Sweet Victory Finish Gate)",
-          "category": "items",
+          "id": "asset_bg_world2_quarry",
+          "name": "Bối Cảnh World 2: Mỏ Đá Bê Tông (Stone Quarry Mine 9:16)",
+          "category": "environments",
           "format": "image",
-          "format_reason": "Cổng chiến thắng",
+          "format_reason": "Background mỏ than và hang đá vôi World 2",
           "priority": "Cao",
           "status": "pending",
-          "prompt_video": "",
-          "prompt_image": "Front view of a grand victory finish line archway made of two giant candy canes, decorated with a joyful colorful FINISH banner on top, celebration party confetti poppers bursting on the sides, two spinning golden star trophies, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, vibrant candy colors, 4k resolution, clean solid vibrant green background for chroma key, centered asset",
+          "prompt_image": "2D mobile vertical 9:16 underground stone mine background, amber sunset sky on top, rugged gray granite and limestone rock layers underground with mine cart tracks and timber supports, stylized cartoon game art",
           "animations": [
-            "celebrate"
+            "lamp_flicker"
+          ]
+        },
+        {
+          "id": "asset_bg_world3_steampunk",
+          "name": "Bối Cảnh World 3: Nhà Máy Hơi Nước Độc Dược (Industrial Fortress 9:16)",
+          "category": "environments",
+          "format": "image",
+          "format_reason": "Background hầm ngục công nghiệp hơi nước World 3",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D vertical 9:16 underground steampunk factory background, smoggy copper sky on top with factory chimneys, brass pipes emitting steam, glowing amber lamps, iron girders and bubbling green acid vats underground, vibrant stylized cartoon art style",
+          "animations": [
+            "pipe_steam"
+          ]
+        },
+        {
+          "id": "asset_bg_world4_lava_core",
+          "name": "Bối Cảnh World 4: Hầm Dung Nham Hoàng Gia (Lava Core Depth 9:16)",
+          "category": "environments",
+          "format": "image",
+          "format_reason": "Background lòng núi lửa magma World 4",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D mobile vertical 9:16 volcanic fortress background, dark crimson stormy ash sky on top with volcanic lightning, subterranean cross-section with glowing fiery magma rivers, black obsidian basalt columns, golden imperial banners, epic cartoon game atmosphere",
+          "animations": [
+            "magma_glow_pulse"
+          ]
+        },
+        {
+          "id": "asset_vfx_explosion_pack",
+          "name": "Bộ Hiệu Ứng Nổ Lửa & Sóng Xung Kích (Cartoon Explosion VFX Pack)",
+          "category": "vfx",
+          "format": "image",
+          "format_reason": "Sprite sheet 6 frames nổ lửa giòn tan",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "2D cartoon explosion spritesheet pack, 6 frames animation of a fireball bursting with yellow core, orange flame burst, dark smoke puffs, and floating yellow spark stars, clean vector style, white background --no background",
+          "animations": [
+            "explosion_6frames",
+            "shockwave_ring",
+            "smoke_cloud"
+          ]
+        },
+        {
+          "id": "asset_vfx_dizzy_stars",
+          "name": "Hiệu Ứng Ngôi Sao Xoay Choáng (Dizzy Star Halo VFX)",
+          "category": "vfx",
+          "format": "image",
+          "format_reason": "Hiệu ứng khi quái bị đè bẹp",
+          "priority": "Trung bình",
+          "status": "pending",
+          "prompt_image": "Set of cute shiny yellow cartoon stars and swirling spiral swoosh line for dizzy stunned status effect, clean 2D vector, white background --no background",
+          "animations": [
+            "orbit_spin"
+          ]
+        },
+        {
+          "id": "asset_vfx_debris_particles",
+          "name": "Bộ Mảnh Vỡ Vật Liệu (Debris Shards VFX: Wood, Stone, Glass, Ice)",
+          "category": "vfx",
+          "format": "image",
+          "format_reason": "Mảnh vụn bắn ra khi khối công trình bị vỡ",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Sprite sheet set of shattered debris particles: jagged wood splinters, gray stone pebbles, sparkling cyan glass shards, and ice crystals, clean 2D cartoon game sprites, white background --no background",
+          "animations": [
+            "debris_scatter"
+          ]
+        },
+        {
+          "id": "asset_ui_star_victory_badge",
+          "name": "Bộ Huy Chương 3 Sao Chiến Thắng (3-Star Victory Badge Set)",
+          "category": "ui",
+          "format": "image",
+          "format_reason": "Icon 3 sao kết thúc màn",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Set of glossy 3D golden stars with cute smiling cartoon faces, sparkling gem reflections, wooden victory frame banner, 2D mobile game UI asset, clean transparent background --no background",
+          "animations": [
+            "star_pop_in",
+            "banner_bounce"
+          ]
+        },
+        {
+          "id": "asset_ui_egg_shelf_icons",
+          "name": "Bộ Icon Khay Đạn Trứng (Egg Ammo Inventory UI)",
+          "category": "ui",
+          "format": "image",
+          "format_reason": "Icon các loại trứng trên thanh HUD",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_image": "Set of 7 circular wooden and brass UI buttons containing colorful egg icons (Normal Egg, Bomb Egg, Drill Egg, Frost Egg, Chick Egg, Acid Egg, Black Hole Egg), glossy cartoon mobile UI style, white background --no background",
+          "animations": [
+            "selected_glow",
+            "empty_dark"
           ]
         }
       ]
-    },
-    {
-      "id": "game_rooster_survivor",
-      "title": "Rooster Survivor: Đại Chiến Nông Trại (1-Thumb Roguelite)",
-      "genre": "2D Roguelite Survivor (1 Ngón Tay)",
-      "art_style": "16-Bit Vibrant & Punchy Pixel Art, Dark Fantasy Farm",
-      "raw_input_story": "Game sinh tồn xả stress 1 ngón tay: Chú gà chiến đơn độc chống lại hàng nghìn quái vật bọ hung, cáo đói và chuột đột biến. Tự động xả chiêu bắn bắp rang bơ, thả trứng nổ và lốc xoáy lông gà.",
-      "full_story": {
-        "synopsis": "Chiến trường nông trại vô tận: Người chơi điều khiển gà di chuyển bằng 1 ngón tay. Mỗi khi lên cấp chọn nâng cấp kỹ năng bắp nổ, trứng nổ hạt nhân, cựa sét lôi điện để quét sạch hàng nghìn quái vật tràn vào.",
-        "protagonist": "Chiến Kê Sinh Tồn (Đeo kính râm, giáp cựa sấm sét, vỗ cánh tạo lốc).",
-        "antagonists": "Bầy Sâu Độc Béo Nhung Nhúc, Cáo Tốc Độ, Quạ Đen Cảm Tử, Trùm Heo Rừng Húc Điên.",
-        "environment": "Cánh đồng bắp rực lửa, Vườn rau đột biến, Đầm lầy bóng tối.",
-        "gameplay_elements": "Tự động bắn (Auto-shoot), Lên cấp chọn 1 trong 3 kỹ năng ngẫu nhiên, Thu thập hạt bắp vàng, Mở khóa hòm báu bí mật."
-      },
-      "assets": [
-        {
-          "id": "asset_survivor_rooster",
-          "name": "Gà Chiến Sinh Tồn (Survivor Hero)",
-          "category": "characters",
-          "format": "video",
-          "format_reason": "Cử động chạy lướt và vung cựa 8 hướng liên tục -> Dùng Video AI 2-3s bóc 8 frame",
-          "priority": "Cao",
-          "status": "pending",
-          "prompt_video": "2D pixel art character animation of a badass battle rooster running forward in action pose, 8 frames continuous run cycle, solid bright green screen background, side view game sprite",
-          "prompt_image": "2D pixel art rooster hero spritesheet, action running poses, victory crowing, hurt flash, transparent background",
-          "animations": [
-            "idle",
-            "run",
-            "attack_burst",
-            "hurt",
-            "death"
-          ]
-        },
-        {
-          "id": "asset_bug_minion",
-          "name": "Bầy Sâu Béo Đột Biến (Swarm Bug Minion)",
-          "category": "monsters",
-          "format": "video",
-          "format_reason": "Cử động bò nhung nhúc theo đàn -> Dùng Video AI",
-          "priority": "Cao",
-          "status": "pending",
-          "prompt_video": "2D pixel art crawling plump green beetle monster walking animation, 6 frames seamless loop, solid bright green screen background",
-          "prompt_image": "2D pixel art beetle bug monster spritesheet, walking, squish death, transparent background",
-          "animations": [
-            "walk",
-            "death_squish"
-          ]
-        },
-        {
-          "id": "asset_popcorn_vfx",
-          "name": "Kỹ Năng Súng Bắp Nổ (Popcorn Cannon Burst VFX)",
-          "category": "vfx",
-          "format": "video",
-          "format_reason": "Vệt bắn hạt bắp nở bung thành bỏng ngô vàng rực -> Dùng Video AI",
-          "priority": "Cao",
-          "status": "pending",
-          "prompt_video": "2D golden glowing corn kernels shooting forward and exploding into big crispy popcorn particles, solid black background, VFX animation",
-          "prompt_image": "2D sprite animation of popcorn blast explosion, solid black background",
-          "animations": [
-            "pop_explode"
-          ]
-        },
-        {
-          "id": "asset_farm_tileset",
-          "name": "Tileset Nông Trại Vườn Rau (Farm Survivor Arena Tileset)",
-          "category": "environments",
-          "format": "image",
-          "format_reason": "Mặt đất bãi cỏ, luống rau, rào gỗ, thùng bắp -> Dạng Ảnh Spritesheet chuẩn lưới",
-          "priority": "Cao",
-          "status": "pending",
-          "prompt_image": "2D pixel art top-down farm tileset, lush green grass ground, corn patch tiles, wooden fences, hay bales, seamless repeatable texture",
-          "animations": [
-            "static"
-          ]
-        }
-      ],
-      "created_at": "2026-08-31 08:53"
-    },
-    {
-      "id": "game_crossy_rooster",
-      "title": "The Bleeding Comb: Obscure Resurrection (Mào Máu Đoạn Hồn)",
-      "genre": "2D Dark Fantasy Action Metroidvania & Psychological Roguelite",
-      "art_style": "16-Bit Crimson Gothic Pixel Art, Rich 4-Layer Parallax, Near-Death Mind Freeze",
-      "raw_input_story": "Chiến kê già Gallus dấn thân vào luyện ngục ký ức để tìm lại người vợ Sari và 3 quả trứng. Mỗi lần chết là một lần mất ký ức và đốt cháy linh hồn vợ. Để lấy lại ký ức, phải quay lại đánh với ảo ảnh biến dạng của quá khứ. Cú bẻ lái chấn động: Chính Gallus đã tự tay hủy hoại gia đình trong cơn mộng du và vợ đã dệt nên ảo ảnh để bảo vệ chồng.",
-      "full_story": {
-        "synopsis": "Hành trình bi tráng của Gallus qua 5 vùng đất kỳ ảo. Cơ chế Ngọn Lửa Hồn Của Vợ: Mỗi lần chết mất 1 Mảnh Ký Ức (Mất hết = Điên loạn / Game Over). Đánh lại Boss cũ biến dạng để chuộc ký ức. Cơ chế Ngưng Đọng Tâm Trí 0.3s - 0.8s khi máu dưới 25% giúp căn nhịp né đòn sinh tử. Kết thúc đẫm nước mắt khi Gallus chấp nhận sự thật và buông tay để linh hồn đoàn tụ bên gia đình.",
-        "protagonist": "Gallus - Chiến Kê Lão Tướng (Mào chém đứt nửa, cựa sắt gỉ sét, linh hồn mang ngọn lửa tàn của người vợ).",
-        "antagonists": "Đao Phủ Bọ Hung Tội Lỗi, Đại Phán Quan Cú Mèo, Hiệp Sĩ Mào Sắt Khóc Than, Bản Ngã Tội Lỗi & Con Quỷ Ký Sinh.",
-        "environment": "1. Hang Nấm Dạ Quang, 2. Lâu Đài Tơ Vàng & Tháp Chuông, 3. Xưởng Rèn Dung Nham, 4. Vườn Hoa Pha Lê Ánh Trăng, 5. Đỉnh Tháp Nguyệt Thực.",
-        "gameplay_elements": "Pogo Đạp Cựa 4 hướng, Lướt Bóng Mờ (Phantom Dash), Ngưng Đọng Tâm Trí Khi Máu <25%, Mất Ký Ức & Chuộc Ký Ức, Giải đố Tiếng Gáy Phù Văn."
-      },
-      "assets": [
-        {
-          "id": "cr_hero_rooster",
-          "name": "1. Hiệp Sĩ Gà (Rooster Knight - Main Hero)",
-          "category": "characters",
-          "format": "video",
-          "format_reason": "Cử động nhảy lò cò 4 hướng, đá cựa trên không, bẹp dí khi va chạm -> Video AI 2-3s bóc 8 frame",
-          "priority": "Cao",
-          "status": "ready_to_export",
-          "animations": [
-            "idle",
-            "hop_forward",
-            "hop_side",
-            "talon_kick",
-            "squashed_death",
-            "feather_splat"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "📸 Bước 1: Tạo Dáng Nhân Vật Gốc Trên Phông Xanh (Base Image)",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Tạo 1 ảnh nhân vật góc nhìn ngang chuẩn 16-bit retro arcade trên nền xanh lá để làm ảnh gốc nạp vào Video AI (I2V)",
-              "prompt": "2D side-view character full body pose of a badass white battle rooster with bright red comb, yellow beak, sharp talons, clean pixel outlines, vibrant 16-bit arcade retro style, centered, solid bright green chroma key background --ar 1:1",
-              "action_description_vi": "Ảnh tĩnh góc nhìn ngang (Side-view) của chú gà chiến lông trắng, mào đỏ tươi, chân có cựa vàng sắc nhọn. Nhân vật đứng thẳng toàn thân chính giữa khung hình trên nền xanh lá cây thuần nhất (#00FF00).",
-              "cut_guide_vi": "Lưu file này dưới dạng .PNG hoặc .JPG để làm ảnh đầu vào (Image Input) nạp vào các công cụ Video AI (I2V) ở tất cả các bước tiếp theo.",
-              "negative_prompt": "blurry, low quality, human, realistic 3D, cropped legs, multi characters, gradient background",
-              "completed": true,
-              "raw_file_name": "Battle_rooster_full_body_pose_202608310949.jpeg",
-              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_0_1788145013.jpeg",
-              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_0_1788145013.jpeg",
-              "uploaded_at": "2026-08-31 09:56"
-            },
-            {
-              "step_name": "🎬 Bước 2.1: Video Hoạt Ảnh [hop_forward] (Nhảy Tiến)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 vào I2V tạo chu kỳ nhảy lò cò tiến lên phía trước",
-              "prompt": "Full body character jumping and hopping forward rhythmically in place, 8 frames continuous animation loop, fixed side profile view, moving to the right, solid bright green screen background",
-              "action_description_vi": "Gà chùng 2 chân xuống lấy đà ➔ Bật bổng người lên cao về phía trước ➔ Đập nhẹ 2 cánh giữ thăng bằng trên không ➔ Tiếp đất bằng 2 chân và thu người về tư thế ban đầu.",
-              "cut_guide_vi": "Kéo video đến khoảnh khắc gà vừa chùng chân chuẩn bị nhảy (thường ở 0.15s - 0.25s) bấm [⏱ Lấy Bắt Đầu] ➔ Kéo đến lúc gà vừa chạm đất khép cánh lại (thường ở 0.95s - 1.15s) bấm [⏱ Lấy Kết Thúc]. Tránh lấy đoạn đầu/cuối video khi gà đứng im.",
-              "negative_prompt": "camera zoom, camera pan, character walking away, background deformation, extra limbs, human legs",
-              "completed": true,
-              "raw_file_name": "White_rooster_jumping_forward_an…_202608311124.mp4",
-              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_1_1788150291.mp4",
-              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_1_1788150291.mp4",
-              "uploaded_at": "2026-08-31 11:24"
-            },
-            {
-              "step_name": "🎬 Bước 2.2: Video Hoạt Ảnh [talon_kick] (Đá Cựa Càn Quét)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 vào I2V tạo cú đá cựa bay trên không hất văng xe cộ",
-              "prompt": "Full body character leaping in mid-air and performing fierce martial arts flying talon kick forward, dynamic attack pose, 8 frames animation loop, fixed side profile view, solid bright green screen background",
-              "action_description_vi": "Gà nhảy vọt lên không trung ➔ Co 1 chân sau và duỗi thẳng 1 chân cựa nhọn hoắt đá mạnh về phía trước kèm vệt gió ➔ Rút chân về và đáp đất.",
-              "cut_guide_vi": "Bắt đầu từ lúc gà co chân chuẩn bị tung cước (khoảng 0.10s) ➔ Kết thúc ngay sau khi chân cựa vung hết biên độ và bắt đầu thu về (khoảng 0.85s - 1.05s). Bỏ cờ 'Loop' khi xuất Godot vì đây là đòn đánh 1 lần.",
-              "negative_prompt": "flying away offscreen, camera moving, rotating angle, multiple chickens, green screen artifacts",
-              "completed": true,
-              "raw_file_name": "Rooster_performing_martial_arts_…_202608311038.mp4",
-              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_2_1788153255.mp4",
-              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_2_1788153255.mp4",
-              "uploaded_at": "2026-08-31 12:14"
-            },
-            {
-              "step_name": "🎬 Bước 2.3: Video Hoạt Ảnh [squashed_death] (Bẹp Dí Như Bánh Tráng)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 vào I2V tạo cảnh va chạm bị xe đè bẹp dí hài hước",
-              "prompt": "Full body character getting squashed flat vertically into a pancake shape with dizzy stars, hilarious cartoon death animation, 6 frames, fixed side view, solid bright green screen background",
-              "action_description_vi": "Gà bị lực ép từ trên giáng xuống ➔ Thân người xẹp lép theo chiều dọc dẹt ra 2 bên như chiếc bánh tráng ➔ Mắt hóa thành 2 dấu X và có vòng sao xoay tít trên đầu.",
-              "cut_guide_vi": "Bắt đầu từ tư thế đứng bình thường trước va chạm (0.0s) ➔ Kết thúc khi thân gà bẹp phẳng hoàn toàn và bất động (khoảng 0.65s - 0.85s). Bỏ cờ 'Loop' vì đây là hoạt ảnh tử trận.",
-              "negative_prompt": "blood, gore, realistic violence, disappearing body, camera shaking",
-              "completed": true,
-              "raw_file_name": "White_rooster_squashed_flat_vert…_202608311338.mp4",
-              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_3_1788158468.mp4",
-              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_3_1788158468.mp4",
-              "uploaded_at": "2026-08-31 13:41"
-            },
-            {
-              "step_name": "🎬 Bước 2.4: Video Hoạt Ảnh [idle] (Đứng Nhìn Ngơ Ngác)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo chuyển động đứng thở, chớp mắt nhẹ",
-              "prompt": "Full body character standing idle, breathing slightly and blinking eyes, 6 frames seamless loop, fixed side view, solid bright green screen background",
-              "action_description_vi": "Gà đứng yên tại chỗ, ngực phập phồng nhẹ theo nhịp thở, chiếc mào đỏ hơi đung đưa, đầu hơi nghiêng quan sát và chớp mắt 1 nhịp.",
-              "cut_guide_vi": "Cắt 1 chu kỳ thở trọn vẹn: Từ lúc ngực bắt đầu nâng lên hít vào (khoảng 0.2s) ➔ Đến khi ngực hạ xuống thở ra và trở về vị trí cũ (khoảng 1.0s - 1.2s). Bật nút [🪃 Ping-Pong Loop] trong Tab 2 để thở mượt 100%.",
-              "negative_prompt": "running, walking away, jumping, extreme movement, camera pan",
-              "completed": true,
-              "raw_file_name": "White_battle_rooster_standing_idle_202608311407.mp4",
-              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_4_1788160114.mp4",
-              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_4_1788160114.mp4",
-              "uploaded_at": "2026-08-31 14:08"
-            },
-            {
-              "step_name": "🎬 Bước 2.5: Video Hoạt Ảnh [walk] (Đi Bộ Thong Thả)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo chuyển động đi bộ bước chân đều đặn",
-              "prompt": "Full body character walking forward at steady relaxed pace, continuous walking cycle, 8 frames animation loop, fixed side profile view, moving right, solid bright green screen background",
-              "action_description_vi": "Gà bước đi đều đặn: Chân phải bước lên chạm đất ➔ Thân người hơi nhấp nhô ➔ Chân trái bước lên chạm đất ➔ Đầu gật gù nhẹ theo từng bước chân.",
-              "cut_guide_vi": "Bắt đầu đúng lúc bàn chân phải chạm đất (khoảng 0.1s - 0.2s) ➔ Kết thúc khi bàn chân phải chạm đất lần thứ 2 (khoảng 0.9s - 1.1s).",
-              "negative_prompt": "running sprint, hopping, camera tracking, turning around, background scrolling",
-              "completed": true,
-              "raw_file_name": "White_rooster_walking_animation_202608311027.mp4",
-              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_5_1788160102.mp4",
-              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_5_1788160102.mp4",
-              "uploaded_at": "2026-08-31 14:08"
-            },
-            {
-              "step_name": "🎬 Bước 2.6: Video Hoạt Ảnh [run] (Chạy Nước Rút Siêu Tốc)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo cử động chạy nghiêng người bứt tốc qua đường",
-              "prompt": "Full body character running fast forward with head leaning forward, intense dash sprint animation, 8 frames continuous loop, fixed side view, solid bright green screen background",
-              "action_description_vi": "Thân gà ngả mạnh về phía trước, 2 chân guồng nhanh liên tục, cánh mở hé ra sau giữ gió, chiếc mào dạt ra sau theo tốc độ.",
-              "cut_guide_vi": "Chọn đoạn video khi gà đã đạt tốc độ guồng chân ổn định (bỏ 0.3s đầu khởi động) ➔ Cắt 1 chu kỳ 2 sải chân nhanh (khoảng 0.6s - 0.8s).",
-              "negative_prompt": "slow walk, stopping, camera moving, blurred background, human legs",
-              "completed": true,
-              "raw_file_name": "White_battle_rooster_sprinting_a…_202608311435.mp4",
-              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_6_1788161739.mp4",
-              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_6_1788161739.mp4",
-              "uploaded_at": "2026-08-31 14:35"
-            },
-            {
-              "step_name": "🎬 Bước 2.7: Video Hoạt Ảnh [victory_dance] (Nhảy Ăn Mừng Qua Đường)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo vũ điệu ăn mừng vỗ cánh gáy to",
-              "prompt": "Full body character jumping up excitedly, flapping wings and doing funny victory celebration dance, 8 frames loop, fixed side view, solid bright green screen background",
-              "action_description_vi": "Gà nhảy cẫng lên ăn mừng, 2 cánh đập liên hồi vui sướng, mỏ há to gáy 'ò ó o', xoay nhẹ hông theo điệu nhảy chiến thắng.",
-              "cut_guide_vi": "Bắt đầu từ lúc gà chuẩn bị bật nhảy vỗ cánh ➔ Kết thúc khi hoàn thành 1 nhịp nhảy đập cánh (khoảng 0.8s - 1.2s).",
-              "negative_prompt": "crying, dying, realistic wings, leaving camera frame",
-              "completed": true,
-              "raw_file_name": "White_rooster_jumping_with_wings_202608311503.mp4",
-              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_7_1788163490.mp4",
-              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_7_1788163490.mp4",
-              "uploaded_at": "2026-08-31 15:04"
-            },
-            {
-              "step_name": "🖼️ Bước 3: Spritesheet Trọn Bộ (Dự Phòng & Icon UI)",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Tạo ảnh spritesheet dạng lưới 3x2 tổng hợp tất cả các tư thế để dùng làm icon chọn nhân vật và cắt ảnh",
-              "prompt": "2D pixel art character spritesheet of heroic white rooster: idle stance, hop forward, hop side, flying talon kick, squashed pancake death, feather explosion, organized 3x2 grid, solid bright green screen background",
-              "action_description_vi": "Bức ảnh chứa lưới 6 khung hình gồm đủ các dáng: Đứng thở, Nhảy tiến, Đá cựa, Bẹp dí, Văng lông, Ăn mừng để làm ảnh cắt dự phòng.",
-              "cut_guide_vi": "Nạp vào Tab 3 (Cắt Ảnh Sheet) ➔ Chọn Chia Lưới 3 Cột × 2 Dòng để tự động cắt thành 6 frame riêng biệt.",
-              "completed": true,
-              "raw_file_name": "Rooster_character_spritesheet_an…_2K_202608311528.jpeg",
-              "raw_file_path": "d:\\folder\\tools\\godot_demo\\2\\raw_assets\\game_crossy_rooster\\cr_hero_rooster\\step_8_1788164943.jpeg",
-              "raw_file_url": "/raw_assets/game_crossy_rooster/cr_hero_rooster/step_8_1788164943.jpeg",
-              "uploaded_at": "2026-08-31 15:29"
-            }
-          ]
-        },
-        {
-          "id": "rk_monster_needle_beetle",
-          "name": "2. Bọ Gai Bay Lao Xiên (Needle Beetle Flyer - Monster)",
-          "category": "monsters",
-          "format": "video",
-          "format_reason": "Quái vật bay lơ lửng trên không và lao bổ xuống xiên gai -> Video AI bóc 6 frame",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "hover_idle",
-            "dive_sting",
-            "death_splat"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "📸 Bước 1: Tạo Dáng Bọ Gai Bay Phông Xanh",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Tạo ảnh con bọ giáp bay có gai nhọn dài ở mồm, cánh phát sáng ma thuật trên phông xanh",
-              "prompt": "2D side-view pixel art flying beetle monster with glowing cyan wings, sharp rapier needle stinger beak, dark gothic shell, Hollow Knight Silksong style, clean outlines, solid bright green chroma key background",
-              "action_description_vi": "Ảnh tĩnh góc nhìn ngang của con bọ gai bay cánh tím phát sáng xanh ngọc trên nền xanh lá cây.",
-              "completed": false
-            },
-            {
-              "step_name": "🎬 Bước 2.1: Video [hover_idle] (Bay Lơ Lửng Đập Cánh)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo chuyển động đập cánh lơ lửng tại chỗ",
-              "prompt": "Floating flying insect beetle hovering in place smoothly with rapid fluttering glowing wings, bobbing up and down gently, 6 frames seamless loop, fixed side view, solid bright green screen background",
-              "action_description_vi": "Con bọ đập cánh nhanh lơ lửng, thân mình nhấp nhô nhẹ nhàng theo chu kỳ lặp.",
-              "cut_guide_vi": "Cắt 1 chu kỳ nhấp nhô lên xuống trọn vẹn (khoảng 0.6s - 0.8s) ➔ Bật nút [🪃 Ping-Pong Loop].",
-              "completed": false
-            },
-            {
-              "step_name": "🎬 Bước 2.2: Video [dive_sting] (Lao Bổ Đâm Gai)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo đòn lao xiên chớp nhoáng",
-              "prompt": "Flying needle beetle charging and diving steeply downward forward with sharp needle thrust attack, intense strike motion, 6 frames, fixed side view, solid bright green screen background",
-              "action_description_vi": "Bọ khựng lại 1 nhịp trên không ➔ Lao vụt chéo xuống dưới đâm mũi gai sắc lẹm.",
-              "completed": false
-            },
-            {
-              "step_name": "🖼️ Bước 3: Spritesheet Bọ Gai & Nổ Vỡ Giáp",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Ảnh lưới các dáng bay, đâm gai và nổ vỡ",
-              "prompt": "2D pixel art needle beetle spritesheet: hovering wings, needle dive attack, shell break death explosion, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_monster_mantis_blade",
-          "name": "3. Cào Cào Kiếm Sĩ Song Đao (Mantis Blade Hunter - Monster)",
-          "category": "monsters",
-          "format": "video",
-          "format_reason": "Kiếm sĩ bọ ngựa đứng gác, vung song đao chém 2 nhát chớp nhoáng và nhảy lùi né đòn -> Video AI bóc 8 frame",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "guard_idle",
-            "blade_slash_combo",
-            "backstep_dodge",
-            "death"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "📸 Bước 1: Tạo Dáng Cào Cào Kiếm Sĩ Phông Xanh",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Tạo ảnh kiếm sĩ bọ ngựa áo choàng tơ lụa cầm song đao sắc bén trên phông xanh",
-              "prompt": "2D side-view pixel art mantis warrior swordsman wearing ragged dark silk cloak, holding two glowing curved blade scythes in battle stance, gothic insect knight, clean outlines, solid bright green chroma key background",
-              "completed": false
-            },
-            {
-              "step_name": "🎬 Bước 2.1: Video [blade_slash_combo] (Chém Song Đao 2 Nhát)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo đòn chém chéo liên hoàn 2 nhát",
-              "prompt": "Mantis insect swordsman performing fierce double slash attack with dual curved scythe blades, swinging blades with white arc trails, 8 frames animation, fixed side view, solid bright green screen background",
-              "completed": false
-            },
-            {
-              "step_name": "🎬 Bước 2.2: Video [guard_idle] (Đứng Thủ Thế Thở)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo cử động đứng gác cảnh giác",
-              "prompt": "Mantis warrior standing in ready combat guard pose, cloak swaying slightly, breathing rhythmically, 6 frames loop, fixed side view, solid bright green screen background",
-              "completed": false
-            },
-            {
-              "step_name": "🖼️ Bước 3: Spritesheet Trọn Bộ Kiếm Sĩ Cào Cào",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Spritesheet lưới chuẩn bị các tư thế đỡ đòn và gục ngã",
-              "prompt": "2D pixel art mantis warrior spritesheet: guard stance, dual slash combo with white blade arcs, parry block shield, hurt knockback, death, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_monster_spiked_roller",
-          "name": "4. Sâu Gai Bọc Giáp Lăn Tròn (Armored Spiked Pillbug - Monster)",
-          "category": "monsters",
-          "format": "video",
-          "format_reason": "Quái vật bò chậm rồi cuộn tròn thành quả cầu gai lăn qua lại trên mặt đất -> Video AI bóc 8 frame",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "crawl_walk",
-            "curl_into_ball",
-            "roll_attack_loop",
-            "uncurl_bounce"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "📸 Bước 1: Tạo Dáng Sâu Bọc Giáp Gai Phông Xanh",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Tạo ảnh chú sâu giáp nhiều khúc có gai nhọn trên lưng, màu tím đen bóng bẩy",
-              "prompt": "2D side-view pixel art segmented armored pillbug crawler with obsidian spiked shell, glowing purple underbelly, clean pixel outlines, solid bright green chroma key background",
-              "completed": false
-            },
-            {
-              "step_name": "🎬 Bước 2.1: Video [roll_attack_loop] (Lăn Tròn Gai Tốc Độ Cao)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo quả cầu gai xoay tít lăn băng băng",
-              "prompt": "Armored spiked pillbug curled completely into a spinning spiked ball rolling fast along the ground with dust sparks, 8 frames continuous loop, fixed side view, solid green screen background",
-              "completed": false
-            },
-            {
-              "step_name": "🖼️ Bước 3: Spritesheet Sâu Gai Bò & Cuộn Tròn",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Ảnh lưới bò, cuộn tròn, lăn và va vào tường dội ngược lại",
-              "prompt": "2D pixel art spiked roller bug spritesheet: crawling walk cycle, curl into sphere transition, fast rolling loop, bounce back impact, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_monster_moth_sorcerer",
-          "name": "5. Pháp Sư Bướm Đêm Triệu Hồi Tơ Sét (Moth Silk Sorcerer - Elite Monster)",
-          "category": "monsters",
-          "format": "video",
-          "format_reason": "Quái tinh anh bay lơ lửng niệm chú phóng quả cầu tơ sét và dịch chuyển tức thời -> Video AI bóc 8 frame",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "hover_cast",
-            "silk_bolt_shoot",
-            "teleport_fade",
-            "teleport_appear"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "📸 Bước 1: Tạo Dáng Pháp Sư Bướm Đêm Phông Xanh",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Tạo ảnh phù thủy bướm đêm mang áo choàng lông vũ dài, tay cầm quyền trượng tơ lụa phát sáng",
-              "prompt": "2D side-view gothic moth sorcerer with large fluffy white moth wings, dark royal purple wizard robes, holding glowing golden staff, floating in air, clean outlines, solid bright green chroma key background",
-              "completed": false
-            },
-            {
-              "step_name": "🎬 Bước 2.1: Video [hover_cast] (Lơ Lửng Niệm Chú Phóng Tơ)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo cử động giơ gậy niệm chú tỏa ánh hào quang",
-              "prompt": "Moth sorcerer hovering gracefully in air, raising glowing golden staff and casting magical runes with swirling silk light particles, 8 frames loop, fixed side view, solid green screen background",
-              "completed": false
-            },
-            {
-              "step_name": "🖼️ Bước 3: Spritesheet Pháp Sư & Quả Cầu Tơ Sét",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Spritesheet niệm phép, bắn đạn ma thuật và tan biến dịch chuyển",
-              "prompt": "2D pixel art moth sorcerer spritesheet: floating cast, shooting glowing silk lightning orbs, vanishing into glowing dust teleport, hurt, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_monster_iron_tusk_brute",
-          "name": "6. Bọ Hung Giáp Sắt Húc Điên (Iron Shell Brute - Mini-Boss)",
-          "category": "monsters",
-          "format": "video",
-          "format_reason": "Quái thú giáp dày dộng đất và húc điên cuồng ủi người chơi (phải nhảy Pogo đạp đầu) -> Video AI",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "walk_heavy",
-            "ground_slam",
-            "charge_ram",
-            "stunned_wall_crash"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "📸 Bước 1: Tạo Dáng Bọ Hung Giáp Sắt Phông Xanh",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Tạo ảnh bọ hung khổng lồ sừng kim loại, giáp lưng gai góc",
-              "prompt": "2D side-view giant heavy armored rhinoceros beetle beast with massive iron spiked horn, heavy obsidian shell, menacing red glowing eyes, clean pixel art, solid bright green chroma key background",
-              "completed": false
-            },
-            {
-              "step_name": "🎬 Bước 2.1: Video [charge_ram] (Húc Điên Cuồng Về Phía Trước)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo cử động húc ủi ầm ầm",
-              "prompt": "Giant armored rhinoceros beetle beast charging furiously forward with lowered iron horn, heavy stomping footsteps and smoke, 8 frames continuous loop, fixed side view, solid bright green screen background",
-              "completed": false
-            },
-            {
-              "step_name": "🖼️ Bước 3: Spritesheet Bọ Hung & Choáng Váng",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Spritesheet dộng đất và cảnh đâm đầu vào tường bị choáng",
-              "prompt": "2D pixel art heavy beetle brute spritesheet: ground slam stomp, charge ramming, stunned stars, defeat, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_boss_spider_queen",
-          "name": "7. Nữ Hoàng Nhện Dệt Gai (Silk Weaver Spider Queen - Main Boss 1)",
-          "category": "monsters",
-          "format": "video",
-          "format_reason": "ĐẠI TRÙM VÙNG TƠ LỤA: Leo trèo đu tơ nhện, giáng móng vuốt và phóng tơ gai chọc khắp màn hình -> Video AI",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "web_hang_idle",
-            "claw_slam_attack",
-            "silk_needle_burst",
-            "boss_defeat"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "📸 Bước 1: Tạo Dáng Boss Nữ Hoàng Nhện Phông Xanh",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Tạo ảnh Trùm Nhện Nữ Hoàng quý tộc ma mị đeo mặt nạ sứ trắng, váy tơ lụa đỏ thắm và 6 móng vuốt sắc nhọn",
-              "prompt": "2D side-view menacing spider queen boss wearing white porcelain mask, crimson silk gown, 6 long needle sharp spider legs, glowing red bioluminescent eyes, epic Silksong boss style, solid bright green screen background",
-              "completed": false
-            },
-            {
-              "step_name": "🎬 Bước 2.1: Video [claw_slam_attack] (Giáng Móng Vuốt Sấm Sét)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo đòn móng vuốt cắm phập xuống đất",
-              "prompt": "Spider queen boss rearing up on hind legs and slamming front massive needle claws violently into the ground with shockwave, 8 frames animation, fixed side view, solid bright green screen background",
-              "completed": false
-            },
-            {
-              "step_name": "🖼️ Bước 3: Spritesheet Boss Trọn Bộ Chiêu Thức",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Spritesheet các chiêu phun lưới tơ, phóng gai nhện và cảnh gục ngã phát nổ tơ lụa",
-              "prompt": "2D pixel art spider queen boss spritesheet: web hanging stance, needle claw ground slam with shockwave, shooting glowing silk threads, mask cracking defeat animation, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_boss_magma_forge_king",
-          "name": "8. Vua Rận Dung Nham & Lò Rèn Thượng Cổ (Magma Forge King - Main Boss 2)",
-          "category": "monsters",
-          "format": "video",
-          "format_reason": "ĐẠI TRÙM VÙNG LÒ RÈN DUNG NHAM: Toàn thân rực lửa, quai búa tạ khổng lồ tạo sóng dung nham dâng trào -> Video AI",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "forge_hammer_smash",
-            "magma_eruption_roar",
-            "molten_body_glow",
-            "boss_defeat_extinguish"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "📸 Bước 1: Tạo Dáng Boss Vua Dung Nham Phông Xanh",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Ảnh trùm quái thú đá nham thạch nứt nẻ phát sáng đỏ rực, tay cầm búa rèn khổng lồ bốc khói",
-              "prompt": "2D side-view colossal molten lava rock forge king monster, cracked volcanic shell glowing with molten magma, wielding giant glowing iron anvil warhammer, billowing dark smoke, solid bright green screen background",
-              "completed": false
-            },
-            {
-              "step_name": "🎬 Bước 2.1: Video [forge_hammer_smash] (Quai Búa Tạ Nổ Dung Nham)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo đòn nện búa xuống đất phụt trào nham thạch",
-              "prompt": "Colossal magma rock beast slamming massive glowing iron hammer onto ground with exploding fire sparks and molten lava geysers, 8 frames animation, fixed side view, solid green screen background",
-              "completed": false
-            },
-            {
-              "step_name": "🖼️ Bước 3: Spritesheet Boss Dung Nham",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Spritesheet quai búa, gầm rú phun lửa và hóa đá khi bị hạ gục",
-              "prompt": "2D pixel art magma forge boss spritesheet: hammer overhead smash, lava roar breath, fiery shockwave ground cracks, stone turning grey defeat, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_npc_turtle_blacksmith",
-          "name": "9. Cụ Rùa Thợ Rèn Cổ Thụ (Old Turtle Master Blacksmith - NPC)",
-          "category": "characters",
-          "format": "video",
-          "format_reason": "NPC thợ rèn ngồi bên đe đá gõ búa nâng cấp cựa kiếm, râu tóc phất phơ, tẩu thuốc bốc khói -> Video AI bóc 8 frame",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "hammer_anvil_loop",
-            "smoke_pipe_talk",
-            "proud_inspect"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "📸 Bước 1: Tạo Dáng Cụ Rùa Thợ Rèn Phông Xanh",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Ảnh cụ rùa già râu dài bạc trắng mang tạp dề da, ngồi trước đe đá thần thoại cầm búa",
-              "prompt": "2D side-view wise old turtle blacksmith with long white beard, wearing leather apron, holding small hammer over glowing anvil, cozy friendly Silksong NPC, clean outlines, solid bright green chroma key background",
-              "completed": false
-            },
-            {
-              "step_name": "🎬 Bước 2.1: Video [hammer_anvil_loop] (Gõ Búa Rèn Kiếm Nhịp Nhàng)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo chu kỳ gõ búa tít tắc tóe tia lửa vàng",
-              "prompt": "Wise old turtle blacksmith tapping hammer rhythmically onto glowing anvil with little golden spark flashes, blinking eyes and nodding head, 8 frames continuous loop, fixed side view, solid green screen background",
-              "completed": false
-            },
-            {
-              "step_name": "🖼️ Bước 3: Spritesheet Cụ Rùa Thợ Rèn & Lò Than",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Spritesheet gõ búa, rít tẩu thuốc nói chuyện và kiểm tra kiếm",
-              "prompt": "2D pixel art turtle blacksmith NPC spritesheet: hammer strike loop with spark particles, puffing smoke pipe dialogue emote, smiling proud nod, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_npc_moth_cartographer",
-          "name": "10. Sâu Bướm Họa Sĩ Vẽ Bản Đồ (Moth Cartographer & Quill - NPC)",
-          "category": "characters",
-          "format": "video",
-          "format_reason": "NPC vẽ bản đồ ngồi ngâm nga hát, tay cầm bút lông viết lên cuộn giấy da bay lơ lửng -> Video AI",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "humming_draw_loop",
-            "greeting_wave",
-            "sell_map_handout"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "📸 Bước 1: Tạo Dáng Sâu Bướm Họa Sĩ Phông Xanh",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Ảnh chú sâu bướm đeo kính cận tròn, đội mũ phớt, ngồi trên đống bản đồ cuộn tơ",
-              "prompt": "2D side-view adorable plump moth scholar cartographer wearing round spectacles, quill pen in hand, surrounded by parchment map scrolls, cozy NPC style, clean pixel art, solid bright green chroma key background",
-              "completed": false
-            },
-            {
-              "step_name": "🎬 Bước 2.1: Video [humming_draw_loop] (Ngâm Nga Vẽ Bản Đồ)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo cử động đầu lắc lư ngâm nga và tay chấm mực viết",
-              "prompt": "Cute moth scholar happily humming and drawing with feather quill on scroll parchment, head swaying gently with musical notes, 8 frames continuous loop, fixed side view, solid green screen background",
-              "completed": false
-            },
-            {
-              "step_name": "🖼️ Bước 3: Spritesheet Họa Sĩ & Trang Giấy Bay",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Spritesheet vẽ tranh, vẫy tay chào hiệp sĩ và trao cuộn bản đồ",
-              "prompt": "2D pixel art moth cartographer spritesheet: humming drawing loop, waving greeting with quill, handing over glowing map scroll, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_env_biome1_mossy_grotto_tileset",
-          "name": "11. Biome 1: Tileset Hang Động Rêu Nấm Dạ Quang (Bioluminescent Moss Grotto Tileset)",
-          "category": "environments",
-          "format": "image",
-          "format_reason": "Màn 1: Mặt đất đá cổ xám phủ rêu xanh ngọc phát sáng, bệ đá leo trèo, thạch nhũ và bãi gai nhọn -> Dạng Ảnh chuẩn lưới",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "static_tiles",
-            "hazard_spikes",
-            "breakable_wall"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "🖼️ Bước 1: Tileset Hang Động Rêu & Bãi Gai",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Bộ gạch mặt đất đá cổ, rêu xanh ngọc phát sáng bioluminescent, bệ đá nhảy parkour, cọc gai nhọn chết chóc, vách đá nứt có thể phá hủy",
-              "prompt": "2D modular pixel art metroidvania mossy cavern tileset: dark textured stone floor tiles with glowing cyan bioluminescent moss edge, floating rock platforms, sharp obsidian hazard spikes, breakable cracked wall tiles, hanging stalactites, seamless grid, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_env_biome2_gilded_citadel_tileset",
-          "name": "12. Biome 2: Tileset Lâu Đài Tơ Vàng & Tháp Chuông (Gilded Silk Spire Palace Tileset)",
-          "category": "environments",
-          "format": "image",
-          "format_reason": "Màn 2: Sàn đá cẩm thạch trắng viền vàng hoàng gia, cột trụ điêu khắc cổ, rèm tơ lụa vàng óng và tháp chuông -> Dạng Ảnh chuẩn lưới",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "static_palace_tiles",
-            "gilded_pillars",
-            "silk_curtains"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "🖼️ Bước 1: Tileset Lâu Đài Tơ Vàng Cẩm Thạch",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Sàn đá hoa cương viền vàng son, cột trụ điêu khắc phong cách Gothic, rèm tơ nhện vàng treo tường, lan can tháp chuông",
-              "prompt": "2D modular pixel art gilded castle tileset: polished white marble floor tiles with ornate gold inlay edges, carved gothic stone pillars, hanging golden silk banner tapestries, ornate bell tower railings, stained glass window arches, seamless grid, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_env_biome3_magma_forge_tileset",
-          "name": "13. Biome 3: Tileset Xưởng Rèn Dung Nham & Xích Sắt (Magma Forge & Iron Smeltery Tileset)",
-          "category": "environments",
-          "format": "image",
-          "format_reason": "Màn 3: Bề mặt đá nham thạch đen tuyền có rãnh dung nham đỏ rực phát sáng, bệ sắt xưởng đúc, xích treo khổng lồ -> Dạng Ảnh chuẩn lưới",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "static_forge_tiles",
-            "lava_surface_animated",
-            "iron_chains"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "🖼️ Bước 1: Tileset Nham Thạch & Lò Đúc Kim Loại",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Gạch đá núi lửa đen nứt rãnh nham thạch phát sáng, sàn kim loại lưới sắt rỉ sét, xích sắt khổng lồ, bồn chứa dung nham nguy hiểm",
-              "prompt": "2D modular pixel art volcanic magma forge tileset: dark basalt rock tiles with glowing orange molten lava cracks, rusty iron metal grate platforms, giant heavy hanging iron chain links, hot cinder hazard pits, seamless grid, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_env_biome4_crystal_spring_tileset",
-          "name": "14. Biome 4: Tileset Vườn Hoa Pha Lê & Hồ Ánh Trăng (Crystalline Arboretum & Moonlit Spring Tileset)",
-          "category": "environments",
-          "format": "image",
-          "format_reason": "Màn 4: Khối pha lê tím phát quang, mặt hồ nước trong vắt phản chiếu ánh trăng, thềm đá hoa đăng lung linh -> Dạng Ảnh chuẩn lưới",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "static_crystal_tiles",
-            "moonlit_water_surface",
-            "crystal_shards"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "🖼️ Bước 1: Tileset Pha Lê Tím & Hồ Nước Ánh Trăng",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Gạch thạch anh tím phát quang, bệ pha lê phản chiếu ánh sáng, thềm nước thiêng phục hồi năng lượng, hoa sen đá lung linh",
-              "prompt": "2D modular pixel art crystal cavern tileset: glowing purple amethyst crystal stone tiles, translucent crystal platforms, glowing moonlit healing water spring tiles, sparkling crystal flower sprouts, seamless grid, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_env_biome5_acid_cocoon_bog_tileset",
-          "name": "15. Biome 5: Tileset Đầm Lầy Axit & Tổ Kén Cổ Xưa (Acid Bog & Silk Cocoon Nursery Tileset)",
-          "category": "environments",
-          "format": "image",
-          "format_reason": "Màn 5: Vùng đất tơ nhện độc, hồ axit xanh lá sủi bọt, bệ kén nhện dẻo dai bám tường -> Dạng Ảnh chuẩn lưới",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "static_acid_tiles",
-            "acid_bubble_hazard",
-            "web_trampoline"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "🖼️ Bước 1: Tileset Đầm Lầy Axit & Tơ Nhện Độc",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Mặt đất bùn lầy bao phủ tơ nhện xám, hồ axit xanh lá sủi tăm độc hại, bệ tơ nhện đàn hồi có thể nhảy nảy",
-              "prompt": "2D modular pixel art acid swamp tileset: dark tangled spiderweb ground tiles, glowing green bubbling acid pool hazards, bouncy sticky silk web platforms, hanging cocoon pods, thorny poisonous vines, seamless grid, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_parallax_cavern_depth_4layers",
-          "name": "16. Parallax 4 Lớp: Hang Động Rêu Nấm Dạ Quang (Cavern 4-Layer Parallax Background)",
-          "category": "environments",
-          "format": "image",
-          "format_reason": "Tách 4 lớp ảnh độc lập để tạo chiều sâu 3D cuộn mượt mà: Lớp xa (Hố trời ánh trăng), Lớp trung xa (Rừng cột đá tơ giăng), Lớp trung gần (Rặng nấm sáng), Lớp tiền cảnh (Dây leo & giọt nước) -> Dạng Ảnh tách lớp",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "static_parallax_layers"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "🖼️ Bước 1: Bộ 4 Lớp Parallax Chiều Sâu Hang Động",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Tạo 4 lớp ảnh riêng biệt ghép cảnh nền cuộn vô tận cho Biome 1",
-              "prompt": "2D side-scrolling parallax background 4 separate layers for metroidvania glowing cave: Layer 1 deep blue moonlight shining through distant cavern chasm ceiling, Layer 2 silhouettes of massive stalactite pillars with spiderwebs, Layer 3 glowing cyan giant mushroom forest, Layer 4 dark hanging vines and water drops in foreground, seamless loop, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_parallax_citadel_skyline_4layers",
-          "name": "17. Parallax 4 Lớp: Bầu Trời Hoàng Hôn Lâu Đài Tơ Vàng (Gilded Citadel 4-Layer Skyline)",
-          "category": "environments",
-          "format": "image",
-          "format_reason": "Cảnh nền hoàng hôn tráng lệ: Lớp 1 (Mặt trời đỏ lặn sau mây tím), Lớp 2 (Rặng tháp chuông Gothic xa mờ), Lớp 3 (Cầu đá tơ lụa giăng ngang), Lớp 4 (Cột đèn vàng tiền cảnh) -> Dạng Ảnh tách lớp",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "static_parallax_layers"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "🖼️ Bước 1: Bộ 4 Lớp Parallax Thành Phố Tơ Vàng",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Tạo 4 lớp ảnh chiều sâu hoàng hôn cho Biome 2",
-              "prompt": "2D side-scrolling parallax background 4 layers for gilded gothic silk city: Layer 1 sunset crimson and gold sky with clouds, Layer 2 silhouettes of majestic gothic cathedral spires and giant bells, Layer 3 elevated stone bridges with flowing silk banners, Layer 4 glowing street lanterns and gargoyle statues, seamless loop, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_parallax_magma_smeltery_4layers",
-          "name": "18. Parallax 4 Lớp: Lò Rèn Dung Nham & Khói Lửa (Magma Smeltery 4-Layer Background)",
-          "category": "environments",
-          "format": "image",
-          "format_reason": "Cảnh nền xưởng đúc rực lửa: Lớp 1 (Vòm nham thạch đỏ rực), Lớp 2 (Bánh răng & xích sắt khổng lồ), Lớp 3 (Thác dung nham chảy), Lớp 4 (Tia than hồng bay tiền cảnh) -> Dạng Ảnh tách lớp",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "static_parallax_layers"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "🖼️ Bước 1: Bộ 4 Lớp Parallax Xưởng Lò Rèn",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Tạo 4 lớp ảnh khói lửa dung nham cho Biome 3",
-              "prompt": "2D side-scrolling parallax background 4 layers for subterranean magma forge: Layer 1 glowing red volcanic caldera cavern, Layer 2 silhouettes of massive industrial steam pipes and rotating giant gears, Layer 3 glowing orange molten lava waterfalls, Layer 4 rising dark smoke and floating glowing embers, seamless loop, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_prop_animated_bouncy_mushroom",
-          "name": "19. Nấm Nhún Nhảy Đàn Hồi (Animated Bouncy Mushroom Trampoline - Living Prop)",
-          "category": "environments",
-          "format": "video",
-          "format_reason": "Vật thể tương tác quan trọng: Nấm khổng lồ nhún xuống khi gà nhảy lên hoặc chém trúng rồi bật bổng gà lên cao (Pogo) -> Video AI bóc 6 frame",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "idle_pulsing",
-            "bounce_spring_up",
-            "spore_burst_fx"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "📸 Bước 1: Tạo Dáng Nấm Bật Nhảy Phông Xanh",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Tạo ảnh chiếc nấm khổng lồ mũ nấm dày bóng bẩy phát sáng xanh ngọc trên phông xanh",
-              "prompt": "2D side-view large plump bouncy trampoline mushroom with glowing turquoise spotted cap, flexible organic stem, clean pixel art, solid bright green chroma key background",
-              "completed": false
-            },
-            {
-              "step_name": "🎬 Bước 2.1: Video [bounce_spring_up] (Nấm Nhún Xuống Nảy Bổng Lên)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo chuyển động ép lò xo nhún xuống rồi bung mạnh lên trên kèm bào tử sáng",
-              "prompt": "Large bouncy mushroom squashing down organically under heavy weight and then springing forcefully upward into original shape with tiny glowing spore sparks, 6 frames animation, fixed side view, solid green screen background",
-              "action_description_vi": "Mũ nấm bị ép dẹp xuống ➔ Đàn hồi bật mạnh vút lên trên tạo lực đẩy rồi trở về hình dáng cũ.",
-              "completed": false
-            },
-            {
-              "step_name": "🖼️ Bước 3: Spritesheet Nấm Đàn Hồi",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Ảnh lưới nấm thở phập phồng, nhún ép dẹp và bung nảy đẩy nhân vật",
-              "prompt": "2D pixel art bouncy trampoline mushroom spritesheet: gentle pulsing idle, squash compress frame, spring stretch launch frame, spore dust puff, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_prop_animated_swaying_lantern",
-          "name": "20. Đèn Lồng Tơ Lụa Đung Đưa Trong Gió (Animated Swaying Silk Lantern - Living Prop)",
-          "category": "environments",
-          "format": "video",
-          "format_reason": "Đèn lồng treo đung đưa theo gió hoặc lắc lư dữ dội khi hiệp sĩ chém hoặc lướt qua -> Video AI bóc 8 frame",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "sway_wind_loop",
-            "impact_swing_fast",
-            "lantern_break_fire"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "📸 Bước 1: Tạo Dáng Đèn Lồng Tơ Treo Phông Xanh",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Ảnh chiếc đèn lồng kim loại điêu khắc cổ treo bằng sợi tơ nhện vàng, ngọn lửa ấm áp bên trong",
-              "prompt": "2D hanging ornate gothic brass lantern suspended by a silk thread, glowing warm golden flame candle inside, clean pixel art, solid bright green chroma key background",
-              "completed": false
-            },
-            {
-              "step_name": "🎬 Bước 2.1: Video [sway_wind_loop] (Đèn Lắc Lư Đung Đưa Mượt Mà)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo dao động con lắc đung đưa trái phải nhẹ nhàng",
-              "prompt": "Ornate brass hanging lantern swaying gently left and right like a pendulum in soft breeze with glowing light aura, 8 frames seamless loop, fixed camera, solid green screen background",
-              "completed": false
-            },
-            {
-              "step_name": "🖼️ Bước 3: Spritesheet Đèn Lồng Đung Đưa",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Spritesheet các góc nghiêng con lắc và hiệu ứng vỡ bốc lửa",
-              "prompt": "2D pixel art swaying hanging lantern spritesheet: pendulum swing cycle, fast recoil swing, glass shatter spark burst, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_prop_animated_pulsing_cocoon",
-          "name": "21. Kén Tơ Phập Phồng & Phun Bào Tử (Pulsing Silk Cocoon & Spore Node - Living Prop)",
-          "category": "environments",
-          "format": "video",
-          "format_reason": "Tổ kén tơ bám trần phập phồng như trái tim đập, chém vỡ sẽ rơi ra giọt tơ hồi máu (Soul Silk) -> Video AI bóc 6 frame",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "heartbeat_pulse_loop",
-            "burst_drop_silk"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "📸 Bước 1: Tạo Dáng Kén Tơ Phát Sáng Phông Xanh",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Ảnh chiếc kén tơ nhện treo lơ lửng, bên trong phát sáng nhịp nhàng",
-              "prompt": "2D hanging glowing silk cocoon pod attached to ceiling web, pulsing soft purple inner light, organic insect nest, pixel art, solid bright green chroma key background",
-              "completed": false
-            },
-            {
-              "step_name": "🎬 Bước 2.1: Video [heartbeat_pulse_loop] (Kén Co Bóp Phập Phồng)",
-              "tool_recommended": "Tencent HY Video 1.5 / Kling (I2V)",
-              "purpose": "Nạp ảnh Bước 1 tạo cử động co bóp phập phồng như nhịp tim",
-              "prompt": "Hanging silk cocoon pulsating rhythmically like a beating heart with glowing inner light fading in and out, 6 frames seamless loop, fixed camera, solid green screen background",
-              "completed": false
-            },
-            {
-              "step_name": "🖼️ Bước 3: Spritesheet Kén Nổ Rơi Tinh Chất",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Spritesheet kén đập nhịp và vỡ tung giải phóng tơ lụa",
-              "prompt": "2D pixel art pulsing cocoon spritesheet: heartbeat expansion cycle, sliced open burst explosion, releasing glowing silk soul drops, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_prop_animated_dripping_stalactite",
-          "name": "22. Thạch Nhũ Nhỏ Giọt Nước & Hơi Nước Bốc Lên (Dripping Stalactite & Steam Vent - Living Prop)",
-          "category": "environments",
-          "format": "video",
-          "format_reason": "Thạch nhũ liên tục nhỏ giọt nước tạo vòng sóng lan tỏa trên mặt hồ, và lỗ thông hơi phì khói định kỳ -> Video AI",
-          "priority": "Trung bình",
-          "status": "pending",
-          "animations": [
-            "water_drop_fall_loop",
-            "steam_puff_vent"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "🎬 Bước 1: Video Giọt Nước Rơi Tạo Gợn Sóng (Water Drop VFX)",
-              "tool_recommended": "Tencent HY Video 1.5 / Runway",
-              "purpose": "Tạo giọt nước trong suốt hình thành ở đầu nhọn thạch nhũ ➔ Rơi xuống đất nổ thành vòng sóng tròn",
-              "prompt": "2D pixel art water droplet forming at sharp stalactite tip, falling straight down and creating expanding circular ripple rings on puddle surface, 8 frames loop, solid black background",
-              "completed": false
-            },
-            {
-              "step_name": "🖼️ Bước 2: Spritesheet Thạch Nhũ & Cột Khói Xì",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Spritesheet giọt nước và cột khói hơi nước bốc lên định kỳ",
-              "prompt": "2D pixel art environmental props spritesheet: stalactite tip water drop cycle, water puddle ripple waves, volcanic steam vent puff, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_vfx_feather_slash_arcs",
-          "name": "23. Vệt Chém Lông Vũ & Bật Nhảy Pogo (Feather Slash Arcs & Pogo Strike VFX)",
-          "category": "vfx",
-          "format": "video",
-          "format_reason": "Vệt chém lưỡi liềm trắng bạc ánh xanh khi gà vung cựa và vệt chém hướng xuống để Pogo nảy lên đầu quái -> Video AI",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "slash_arc_horizontal",
-            "pogo_down_slash",
-            "metal_spark_burst"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "🎬 Bước 1: Video Vệt Chém Lưỡi Liềm Sắc Lẹm (Slash Arc VFX)",
-              "tool_recommended": "Tencent HY Video 1.5 / Runway",
-              "purpose": "Tạo vệt sáng lưỡi liềm bán nguyệt quét ngang kèm lông vũ trắng phát sáng trên nền đen",
-              "prompt": "2D pixel art sharp crescent sword slash arc with glowing white and cyan light trail, scattering feather particles, fast horizontal swing, solid black background, VFX animation",
-              "completed": false
-            },
-            {
-              "step_name": "🖼️ Bước 2: Spritesheet Tia Lửa & Vệt Chém Pogo",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Spritesheet vệt chém hướng xuống (Down Slash Pogo) và chùm tia lửa va chạm kim loại",
-              "prompt": "2D pixel art combat VFX spritesheet: downward sword slash arc for pogo jump, sharp glowing white blade swipe, yellow impact sparks explosion, solid black background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_vfx_dash_ghost_trail",
-          "name": "24. Hiệu Ứng Lướt Bóng Mờ & Lốc Xoáy Lông (Feather Dash Trail & Cyclone Burst VFX)",
-          "category": "vfx",
-          "format": "video",
-          "format_reason": "Hiệu ứng bóng mờ lướt gió (Dash) né đòn và lốc xoáy lông vũ khi tung tuyệt chiêu nộ -> Video AI",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "dash_smoke_trail",
-            "feather_cyclone_burst"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "🎬 Bước 1: Video Hiệu Ứng Lướt Gió Bóng Mờ (Dash Trail VFX)",
-              "tool_recommended": "Tencent HY Video 1.5 / Runway",
-              "purpose": "Tạo vệt gió lướt nhanh ngang màn hình có bóng mờ màu lam trên nền đen",
-              "prompt": "2D pixel art speed dash wind trail with glowing cyan smoke lines and fading motion blur silhouettes, fast horizontal burst, solid black background, VFX animation",
-              "completed": false
-            },
-            {
-              "step_name": "🖼️ Bước 2: Spritesheet Vụ Nổ Lốc Xoáy Lông Vũ",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Hiệu ứng nộ chiêu vỗ cánh tạo lốc xoáy quét sạch quái vật xung quanh",
-              "prompt": "2D pixel art magical feather cyclone burst explosion spritesheet, swirling glowing white feathers tornado, shockwave rings, solid black background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_items_bench_flask_relics",
-          "name": "25. Ghế Đá Nghỉ Chân & Bình Tinh Chất Lông Vũ (Bench Checkpoint & Soul Feather Flask)",
-          "category": "items",
-          "format": "image",
-          "format_reason": "Ghế đá cổ để ngồi nghỉ lưu game hồi máu (Bench), bình tinh chất phát sáng và 8 huy hiệu cổ phù văn (Charms) -> Dạng Ảnh Spritesheet",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "bench_sit_rest",
-            "flask_shining",
-            "relic_pickup"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "🖼️ Bước 1: Spritesheet Ghế Đá Checkpoint & Cổ Vật Tăng Lực",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Ghế đá rêu phong có đèn lồng treo phát sáng ấm áp, bình thủy tinh tơ năng lượng, 8 huy hiệu phù văn cổ (Charms tăng tầm chém, lướt nhanh, hút vàng), hòm kho báu",
-              "prompt": "2D pixel art metroidvania interactive items: ornate carved stone bench checkpoint with glowing hanging lantern, glowing glass soul flask with liquid essence, 8 ancient rune charms and badges, shiny silver keys, treasure chest, transparent background",
-              "completed": false
-            }
-          ]
-        },
-        {
-          "id": "rk_ui_silksong_hud_and_map",
-          "name": "26. Bộ Giao Diện Máu Mào Gà & Bản Đồ Mê Cung (Silksong Silk Spool HUD & Mini-Map UI)",
-          "category": "ui",
-          "format": "image",
-          "format_reason": "Giao diện thanh máu mào gà, cuộn tơ khâu vá hồi máu (Bind Heal), bảng Boss Bar và khung bản đồ mê cung từng phòng -> Dạng Ảnh giao diện",
-          "priority": "Cao",
-          "status": "pending",
-          "animations": [
-            "static_hud",
-            "health_loss_flash",
-            "boss_health_bar",
-            "map_screen"
-          ],
-          "pipeline_steps": [
-            {
-              "step_name": "🖼️ Bước 1: Bộ UI Kit & Màn Hình Bản Đồ Cổ",
-              "tool_recommended": "ChatGPT / Midjourney",
-              "purpose": "Thanh máu mào gà đỏ phát sáng, cuộn tơ năng lượng hình tròn, 4 ô trang bị phụ kiện, thanh máu Boss uy nghi, khung bản đồ da dê Metroidvania chia ô phòng",
-              "prompt": "2D pixel art metroidvania HUD kit: glowing crimson rooster comb health masks, ornate circular silk spool energy gauge, 4 sub-weapon tool diamond slots, ornate silver boss health bar with skull crest, vintage parchment map room grid screen, transparent background",
-              "completed": false
-            }
-          ]
-        }
-      ],
-      "created_at": "2026-08-31 08:53"
-    },
-    {
-      "id": "game_ragdoll_chicken_duel",
-      "title": "Gà Chọi Vật Lý: Cú Đá Lắc Lư (1-Button Physics Brawler)",
-      "genre": "2D Physics Ragdoll (1 Nút Bấm / 2 Người)",
-      "art_style": "16-Bit Cartoon Physics Pixel Art, Hilarious & Bouncy",
-      "raw_input_story": "Game đối kháng vật lý lắc lư 1 nút bấm: Bấm để đập cánh bay và duỗi chân đá văng đối thủ ra khỏi võ đài. Cực kỳ dễ viral TikTok & Shorts.",
-      "full_story": {
-        "synopsis": "2 chú gà chọi lắc lư theo vật lý Ragdoll trên võ đài hẹp. Người chơi chỉ cần căn đúng thời điểm bấm nút để gà tung cánh bay lên, đạp cựa vào đầu đối thủ để ghi điểm.",
-        "protagonist": "Chiến Kê Đỏ (P1) vs Chiến Kê Xanh (P2) với chiếc mào lắc lư hài hước.",
-        "antagonists": "Gà Máy Đấu Bot, Gà Lực Sĩ Boss.",
-        "environment": "Võ đài nóc chuồng gà, Bàn ăn bấp bênh, Cành cây đung đưa.",
-        "gameplay_elements": "Chơi 1 người hoặc 2 người chung màn hình điện thoại, Vật lý Ragdoll tấu hài, Thắng 3 hiệp ăn cúp."
-      },
-      "assets": [
-        {
-          "id": "asset_ragdoll_rooster",
-          "name": "Gà Chọi Lắc Lư Ragdoll (Ragdoll Fighter Rooster)",
-          "category": "characters",
-          "format": "video",
-          "format_reason": "Động tác đập cánh bay lên và duỗi chân đá quán tính -> Dùng Video AI",
-          "priority": "Cao",
-          "status": "pending",
-          "prompt_video": "2D pixel art funny fighting rooster flapping wings upward and kicking feet out in mid-air, floppy ragdoll physics movement, 8 frames loop, solid bright green screen background",
-          "prompt_image": "2D pixel art ragdoll rooster parts: body with head, separate flapping wing, kicking leg with spur, dizzy stars, transparent background",
-          "animations": [
-            "wing_flap",
-            "air_kick",
-            "dizzy_spin",
-            "celebrate"
-          ]
-        }
-      ],
-      "created_at": "2026-08-31 08:53"
-    },
-    {
-      "id": "game_cockfight_brawler",
-      "title": "Cựa Sắt Bá Vương: Sới Gà Ngầm",
-      "genre": "2D Beat Em Up / Arena Roguelite",
-      "art_style": "16-Bit Dark Fantasy & Underground Neon Pixel Art",
-      "raw_input_story": "Chú gà chiến Roosterius dấn thân vào các sới gà ngầm bất hợp pháp của thế giới ngầm để cày tiền chuộc lại giấy tờ nhà và bảo vệ cô bé khỏi bọn đòi nợ.",
-      "full_story": {
-        "synopsis": "Hành trình vượt qua 5 đấu trường ngầm từ Sới Cát Bờ Bụi, Hầm Ngục Casino, Đấu Trường Lồng Sắt đến Sào Huyệt Chúa Tể Cờ Bạc để giành lấy tự do và tiền thưởng.",
-        "protagonist": "Roosterius - Chiến Kê Cựa Sắt Sấm Sét (Đeo giáp chân, mào lửa rực sáng).",
-        "antagonists": "Gà Tre Cuồng Sát (Tốc độ), Gà Nồi Hộ Pháp (Trâu bò), Trùm Chủ Sới Cờ Bạc Ba Búa.",
-        "environment": "Sới gà rào lưới mắt cáo, Sàn đấu ngầm ánh đèn neon, Kho bãi cờ bạc.",
-        "gameplay_elements": "Đá cựa combo 3 hit, Tung cánh bão lốc, Đập đất nổ sét, Nâng cấp Cựa Sắt Vàng & Bùa Hộ Thân."
-      },
-      "assets": [
-        {
-          "id": "asset_brawler_rooster",
-          "name": "Chiến Kê Roosterius (Combat Rooster Hero)",
-          "category": "characters",
-          "format": "video",
-          "format_reason": "Chuỗi đòn đánh đá cựa 3 hit, né lướt, vung cánh tạo lốc -> Dùng Video AI 2-3s",
-          "priority": "Cao",
-          "status": "pending",
-          "prompt_video": "2D game character animation of a fierce battle rooster performing flying kick martial arts combo, 8 frames loop, dark fantasy pixel art, solid green screen background",
-          "prompt_image": "2D pixel art spritesheet of martial arts combat rooster, idle stance, running dash, flying talon kick, thunder wing slash, hurt, victory crow",
-          "animations": [
-            "idle",
-            "run",
-            "kick_combo",
-            "tornado_wing",
-            "hurt",
-            "victory"
-          ]
-        },
-        {
-          "id": "asset_enemy_ninja_rooster",
-          "name": "Gà Tre Đao Phủ (Ninja Rooster Enemy)",
-          "category": "monsters",
-          "format": "video",
-          "format_reason": "Tấn công lướt chém nhanh thoăn thoắt -> Dùng Video AI",
-          "priority": "Cao",
-          "status": "pending",
-          "prompt_video": "2D agile ninja fighting rooster lunging with swift steel spurs, 8 frames animation loop, dark pixel art, solid green screen background",
-          "prompt_image": "2D monster spritesheet of slender black ninja fighting rooster, fast attack, dash, hurt, transparent background",
-          "animations": [
-            "idle",
-            "dash",
-            "slash_kick",
-            "hurt",
-            "death"
-          ]
-        },
-        {
-          "id": "asset_boss_gambler_king",
-          "name": "Trùm Mafia Cờ Bạc (Gambling Syndicate Boss)",
-          "category": "monsters",
-          "format": "video",
-          "format_reason": "Trùm to lớn vung gậy ba toong và ném xúc xắc nổ -> Dùng Video AI",
-          "priority": "Cao",
-          "status": "pending",
-          "prompt_video": "2D menacing crime boss in dark suit swinging heavy cane attack animation, 8 frames loop, pixel art, solid green screen background",
-          "prompt_image": "2D giant crime boss spritesheet, heavy cane slam, cigar smoke, rage phase, defeat explosion",
-          "animations": [
-            "idle",
-            "cane_smash",
-            "toss_bomb",
-            "hurt",
-            "death"
-          ]
-        },
-        {
-          "id": "asset_lightning_slash_vfx",
-          "name": "Hiệu Ứng Cựa Sắt Lôi Điện (Lightning Talon Slash VFX)",
-          "category": "vfx",
-          "format": "video",
-          "format_reason": "Vệt chém tia điện màu vàng kim xé toạc không khí -> Dùng Video AI",
-          "priority": "Trung bình",
-          "status": "pending",
-          "prompt_video": "2D electric golden lightning crescent slash wave effect bursting, glowing particle trails, solid black background, VFX animation",
-          "prompt_image": "2D lightning slash sprite frames, energy burst, solid black background",
-          "animations": [
-            "slash_burst"
-          ]
-        },
-        {
-          "id": "asset_arena_tileset",
-          "name": "Tileset Sới Gà Ngầm & Lồng Sắt (Underground Arena Tileset)",
-          "category": "environments",
-          "format": "image",
-          "format_reason": "Sàn cát, rào lưới thép, thùng gỗ, cọc đèn neon -> Dạng Ảnh Spritesheet",
-          "priority": "Cao",
-          "status": "pending",
-          "prompt_image": "2D pixel art combat arena tileset, dirt and sand floor, wire mesh cage fence, wooden betting barrels, hanging incandescent lamps, seamless tiles",
-          "animations": [
-            "static"
-          ]
-        }
-      ],
-      "created_at": "2026-08-31 08:49"
-    },
-    {
-      "id": "game_rooster_loop_60s",
-      "title": "Rooster Loop: 60 Giây Cứu Cô Chủ",
-      "genre": "2D Time-Loop Stealth & Puzzle Platformer",
-      "art_style": "16-Bit Storybook Pixel Art, Cozy Rural with Dark Mood Accents",
-      "raw_input_story": "Một hiệp sĩ chuyển sinh thành chú gà trống ở nông thôn, sở hữu năng lực Return by Death (vòng lặp 60 giây khi chết) để tìm mọi cách ngăn chặn bi kịch bạo lực gia đình và cứu cô bé cùng người mẹ.",
-      "full_story": {
-        "synopsis": "Mỗi vòng lặp kéo dài đúng 60 giây tại khuôn viên trang trại trước khi ông bố say xỉn về đập phá đòi tiền. Chú gà phải tương tác với môi trường (kéo then cửa, gáy báo động, đánh lạc hướng chó canh, mổ đứt dây điện) để thay đổi số phận.",
-        "protagonist": "Gà Trống Hiệp Sĩ (Mào đỏ, cựa phong ấn ký ức, ánh mắt kiên định).",
-        "antagonists": "Bóng Ma Nghiện Ngập & Bạo Lực (Hiện thân của ông bố say xỉn), Chó Canh 1 Mắt (Ban đầu cản đường, sau trở thành đồng minh).",
-        "environment": "Sân gạch nông thôn Việt Nam, Chuồng gà gỗ, Gian bếp củi, Đường đất bờ tre.",
-        "gameplay_elements": "Giải đố tương tác thời gian thực 60s, Vòng lặp Return by Death mở khóa manh mối mới, Lựa chọn nhiều nhánh kết thúc (Multi-Endings)."
-      },
-      "assets": [
-        {
-          "id": "asset_loop_rooster",
-          "name": "Gà Trống Hiệp Sĩ (Loop Rooster Main)",
-          "category": "characters",
-          "format": "video",
-          "format_reason": "Cử động chạy, mổ đồ vật, gáy báo động nhiều khớp -> Dùng Video AI 2-3s bóc 8 frame cực mượt",
-          "priority": "Cao",
-          "status": "pending",
-          "prompt_video": "2D game animation of a stylized cartoon rooster walking and pecking interactive objects, 8 frames seamless loop, warm rural aesthetic, crisp pixel outlines, solid bright green screen background, side view game asset",
-          "prompt_image": "2D pixel art character spritesheet of heroic rooster, actions: idle, walk, peck, crow alarm, death loop reset, green screen background",
-          "animations": [
-            "idle",
-            "walk",
-            "run",
-            "peck_interact",
-            "crow_alarm",
-            "death_reset"
-          ]
-        },
-        {
-          "id": "asset_loop_daughter",
-          "name": "Cô Con Gái Nhỏ (Little Daughter NPC)",
-          "category": "characters",
-          "format": "video",
-          "format_reason": "Cử động ôm cặp đi học, ôm gà, trốn chạy -> Dùng Video AI",
-          "priority": "Cao",
-          "status": "pending",
-          "prompt_video": "2D cute pixel art young girl holding school backpack walking happily, 8 frames loop, whimsical storybook style, solid green screen background",
-          "prompt_image": "2D pixel art girl spritesheet, school outfit, crying, hugging chicken poses, transparent background",
-          "animations": [
-            "idle_read",
-            "walk_school",
-            "hug_rooster",
-            "hide_fear"
-          ]
-        },
-        {
-          "id": "asset_loop_guard_dog",
-          "name": "Chú Chó Canh Một Mắt (One-Eyed Dog Ally)",
-          "category": "characters",
-          "format": "video",
-          "format_reason": "Cử động sủa canh gác, nằm nghỉ, lao vào cản đường -> Dùng Video AI",
-          "priority": "Cao",
-          "status": "pending",
-          "prompt_video": "2D rustic village guard dog with one bandage eye patch lying down and barking, 8 frames loop, pixel art, solid green screen background",
-          "prompt_image": "2D pixel art dog spritesheet, injured paw, alert bark, friendly tail wag, transparent background",
-          "animations": [
-            "idle_sleep",
-            "bark_alert",
-            "pounce",
-            "ally_sit"
-          ]
-        },
-        {
-          "id": "asset_farm_props",
-          "name": "Bộ Đồ Vật Tương Tác (Farm Interactive Props)",
-          "category": "items",
-          "format": "image",
-          "format_reason": "Đồ vật tĩnh trong nhà (Bình rượu, then cửa gỗ, túi tiền, chổi, rổ trứng) -> Dạng Ảnh Spritesheet",
-          "priority": "Cao",
-          "status": "pending",
-          "prompt_image": "2D pixel art game item pack of rustic farm props: wooden door latch, money bag, wine bottle shattering into pieces, egg basket, rope, lantern, transparent background",
-          "animations": [
-            "intact",
-            "broken_shatter"
-          ]
-        },
-        {
-          "id": "asset_rural_tileset",
-          "name": "Tileset Nhà Nông Thôn & Chuồng Gà (Rural Homestead Tileset)",
-          "category": "environments",
-          "format": "image",
-          "format_reason": "Sân gạch đỏ, tường vách đất, hàng rào tre, mái ngói cổ -> Dạng Ảnh chuẩn pixel lưới",
-          "priority": "Cao",
-          "status": "pending",
-          "prompt_image": "2D pixel art platformer tileset of traditional Asian countryside homestead, red brick floor, wooden coop, bamboo fence, clay brick wall, seamless modular tiles",
-          "animations": [
-            "static"
-          ]
-        },
-        {
-          "id": "asset_parallax_bg",
-          "name": "Parallax Background Nông Thôn Hoàng Hôn (3 Depth Layers)",
-          "category": "environments",
-          "format": "image",
-          "format_reason": "Các lớp cảnh nền chiều sâu (Núi xa, lũy tre giữa, sân nhà gần) -> Dạng Ảnh tách lớp",
-          "priority": "Cao",
-          "status": "pending",
-          "prompt_image": "2D side-scrolling parallax background layers of peaceful countryside sunset, layer 1 distant purple mountains and warm dusk sky, layer 2 green bamboo grove and village trees, layer 3 rural house silhouette",
-          "animations": [
-            "static"
-          ]
-        }
-      ],
-      "created_at": "2026-08-31 08:49"
     }
   ]
 }

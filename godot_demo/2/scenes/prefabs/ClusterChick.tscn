@@ -1,0 +1,33 @@
+[gd_scene format=3 uid="uid://dm7k4v9q1x8p2"]
+
+[ext_resource type="Script" path="res://scripts/projectiles/ClusterChick.gd" id="1_script"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_1"]
+bounce = 0.75
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 10.0
+
+[node name="ClusterChick" type="RigidBody2D"]
+collision_layer = 2
+collision_mask = 7
+mass = 1.2
+physics_material_override = SubResource("PhysicsMaterial_1")
+script = ExtResource("1_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Body" type="Polygon2D" parent="Visual"]
+color = Color(1, 0.85, 0.2, 1)
+polygon = PackedVector2Array(-9, -9, 0, -12, 9, -9, 12, 0, 9, 9, 0, 11, -9, 9, -12, 0)
+
+[node name="Eye" type="Polygon2D" parent="Visual"]
+color = Color(0.1, 0.1, 0.1, 1)
+polygon = PackedVector2Array(2, -4, 5, -4, 5, -1, 2, -1)
+
+[node name="Beak" type="Polygon2D" parent="Visual"]
+color = Color(1, 0.5, 0.1, 1)
+polygon = PackedVector2Array(7, -2, 13, 0, 7, 2)

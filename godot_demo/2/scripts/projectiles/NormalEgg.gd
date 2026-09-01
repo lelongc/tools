@@ -9,6 +9,7 @@ const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 
 var bounces: int = 0
 var is_broken: bool = false
+var has_boosted: bool = false
 
 @onready var visual_root: Node2D = get_node_or_null("VisualRoot")
 @onready var trail_particles: CPUParticles2D = get_node_or_null("Trail")
@@ -19,6 +20,24 @@ func _ready() -> void:
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_entered)
+
+func _unhandled_input(event: InputEvent) -> void:
+	# Tap-in-Flight: Chạm màn hình khi đang bay để hóa Trứng Kim Cương Siêu Nặng
+	if not is_broken and not has_boosted and event is InputEventMouseButton and event.pressed:
+		_activate_special_ability()
+
+func _activate_special_ability() -> void:
+	has_boosted = true
+	mass = 9.0
+	base_damage = 380.0
+	linear_velocity = Vector2(0, max(linear_velocity.y * 1.5, 750.0))
+	CameraShake.add_trauma(0.25)
+
+	if visual_root:
+		var tween = create_tween()
+		tween.tween_property(visual_root, "scale", Vector2(1.6, 1.6), 0.1)
+		var body = visual_root.get_node_or_null("EggBody")
+		if body: body.color = Color(0.3, 0.85, 1.0) # Hóa kim cương xanh óng ánh
 
 func _physics_process(delta: float) -> void:
 	if is_broken: return

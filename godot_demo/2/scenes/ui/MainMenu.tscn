@@ -1,0 +1,190 @@
+[gd_scene format=3 uid="uid://dm3k9v8q1x2p5"]
+
+[ext_resource type="Script" path="res://scripts/ui/MainMenu.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ui/JuicyButton.gd" id="2_btn"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_TopBar"]
+bg_color = Color(0.11, 0.03, 0.21, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 3
+border_color = Color(0.79, 0.66, 0.0, 0.6)
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_StarBadge"]
+bg_color = Color(0.16, 0.08, 0.26, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 3
+border_color = Color(1, 0.84, 0, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.11, 0.03, 0.21, 1)
+
+[node name="CavernGlow" type="Polygon2D" parent="Background"]
+color = Color(0.25, 0.1, 0.38, 0.6)
+polygon = PackedVector2Array(0, 300, 540, 240, 540, 700, 0, 760)
+
+[node name="SunbeamRays" type="Polygon2D" parent="Background"]
+color = Color(1, 0.95, 0.6, 0.12)
+polygon = PackedVector2Array(270, 0, 180, 960, 360, 960)
+
+[node name="Crystal1" type="Polygon2D" parent="Background"]
+position = Vector2(60, 780)
+color = Color(0, 0.9, 1, 0.7)
+polygon = PackedVector2Array(0, -30, 15, -10, 8, 20, -8, 20, -15, -10)
+
+[node name="Crystal2" type="Polygon2D" parent="Background"]
+position = Vector2(480, 820)
+color = Color(1, 0.4, 0.8, 0.7)
+polygon = PackedVector2Array(0, -25, 12, -8, 6, 18, -6, 18, -12, -8)
+
+[node name="TopBar" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 16.0
+offset_right = -12.0
+offset_bottom = 68.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_TopBar")
+
+[node name="Margin" type="MarginContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
+
+[node name="HBox" type="HBoxContainer" parent="TopBar/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="StarBadge" type="PanelContainer" parent="TopBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_StarBadge")
+
+[node name="StarMargin" type="MarginContainer" parent="TopBar/Margin/HBox/StarBadge"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 8
+
+[node name="TotalStarsLabel" type="Label" parent="TopBar/Margin/HBox/StarBadge/StarMargin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 18
+text = "⭐ 0 / 180"
+vertical_alignment = 1
+
+[node name="BtnLang" type="Button" parent="TopBar/Margin/HBox"]
+custom_minimum_size = Vector2(125, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "🇺🇸 English"
+script = ExtResource("2_btn")
+
+[node name="BtnSound" type="Button" parent="TopBar/Margin/HBox"]
+custom_minimum_size = Vector2(85, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "🔊 BẬT"
+script = ExtResource("2_btn")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 22
+alignment = 1
+
+[node name="LogoContainer" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="CenterContainer/VBoxContainer/LogoContainer"]
+layout_mode = 2
+pivot_offset = Vector2(200, 35)
+theme_override_colors/font_color = Color(1, 0.85, 0.15, 1)
+theme_override_colors/font_shadow_color = Color(0.18, 0.08, 0, 1)
+theme_override_colors/font_outline_color = Color(0.48, 0.25, 0, 1)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 5
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 42
+text = "CLUCK & DROP"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="CenterContainer/VBoxContainer/LogoContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.45, 0.35, 1)
+theme_override_colors/font_shadow_color = Color(0.1, 0, 0, 1)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 18
+text = "BUNKER BUSTER 60 LEVELS"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+
+[node name="BtnPlay" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(290, 68)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 26
+text = "▶ CHƠI NGAY"
+script = ExtResource("2_btn")
+is_primary_green = true
+
+[node name="BtnLevels" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(290, 56)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 20
+text = "🗺️ CHỌN MÀN"
+script = ExtResource("2_btn")
+is_wood_brown = true
+
+[node name="Footer" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -45.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.75, 0.7, 0.85, 0.8)
+theme_override_font_sizes/font_size = 13
+text = "Vật lý phá hủy • 7 Loại Trứng Dị Biến • 4 Thế Giới"
+horizontal_alignment = 1

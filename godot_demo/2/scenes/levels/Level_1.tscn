@@ -27,6 +27,7 @@ size = Vector2(140, 40)
 script = ExtResource("1_controller")
 level_id = 1
 available_eggs = ["normal", "bomb", "normal"]
+intro_target_y = 680.0
 
 [node name="CameraShake2D" type="Camera2D" parent="."]
 position = Vector2(270, 480)
@@ -61,7 +62,7 @@ polygon = PackedVector2Array(410, 390, 540, 390, 540, 415, 410, 415)
 
 [node name="CavernInterior" type="Polygon2D" parent="Background"]
 color = Color(0.18, 0.13, 0.09, 1)
-polygon = PackedVector2Array(115, 400, 425, 400, 425, 875, 115, 875)
+polygon = PackedVector2Array(115, 400, 425, 400, 425, 870, 115, 870)
 
 [node name="BunkerBoundaries" type="StaticBody2D" parent="."]
 collision_layer = 1
@@ -89,44 +90,51 @@ shape = SubResource("Ledge_Right")
 
 [node name="BunkerStructure" type="Node2D" parent="."]
 
-[node name="Floor2_PillarL" parent="BunkerStructure" instance=ExtResource("5_block")]
-position = Vector2(170, 770)
-rotation = 1.5708
-material_type = "wood"
-
-[node name="Floor2_PillarR" parent="BunkerStructure" instance=ExtResource("5_block")]
-position = Vector2(370, 770)
-rotation = 1.5708
-material_type = "wood"
-
-[node name="Floor2_Beam" parent="BunkerStructure" instance=ExtResource("5_block")]
-position = Vector2(270, 700)
-material_type = "wood"
-
 [node name="Floor1_PillarL" parent="BunkerStructure" instance=ExtResource("5_block")]
-position = Vector2(180, 580)
-rotation = 1.5708
+position = Vector2(170, 805)
 material_type = "wood"
+block_size = Vector2(24, 130)
 
 [node name="Floor1_PillarR" parent="BunkerStructure" instance=ExtResource("5_block")]
-position = Vector2(360, 580)
-rotation = 1.5708
+position = Vector2(370, 805)
 material_type = "wood"
-
-[node name="Roof_Beam" parent="BunkerStructure" instance=ExtResource("5_block")]
-position = Vector2(270, 500)
-material_type = "wood"
+block_size = Vector2(24, 130)
 
 [node name="TNT" parent="BunkerStructure" instance=ExtResource("6_tnt")]
-position = Vector2(320, 660)
+position = Vector2(270, 847)
+
+[node name="Floor2_Beam" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(270, 728)
+material_type = "wood"
+block_size = Vector2(240, 24)
+
+[node name="Floor2_PillarL" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(180, 656)
+material_type = "wood"
+block_size = Vector2(24, 120)
+
+[node name="Floor2_PillarR" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(360, 656)
+material_type = "wood"
+block_size = Vector2(24, 120)
+
+[node name="Roof_Beam" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(270, 584)
+material_type = "wood"
+block_size = Vector2(240, 24)
+
+[node name="Roof_Cap" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(270, 560)
+material_type = "wood"
+block_size = Vector2(60, 24)
 
 [node name="Enemies" type="Node2D" parent="BunkerStructure"]
 
 [node name="Fox1" parent="BunkerStructure/Enemies" groups=["Enemies"] instance=ExtResource("7_enemy")]
-position = Vector2(220, 660)
+position = Vector2(210, 852)
 
 [node name="Fox2" parent="BunkerStructure/Enemies" groups=["Enemies"] instance=ExtResource("7_enemy")]
-position = Vector2(270, 840)
+position = Vector2(270, 698)
 
 [node name="ChickenBomber" parent="." instance=ExtResource("3_chicken")]
 position = Vector2(270, 110)

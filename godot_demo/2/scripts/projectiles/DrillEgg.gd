@@ -9,6 +9,7 @@ const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 
 var is_broken: bool = false
 var is_drilling: bool = false
+var has_boosted: bool = false
 var drill_timer: float = 0.0
 
 @onready var visual_root: Node2D = get_node_or_null("VisualRoot")
@@ -20,6 +21,23 @@ func _ready() -> void:
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_entered)
+
+func _unhandled_input(event: InputEvent) -> void:
+	# Tap-in-Flight: Chạm màn hình để kích hoạt Tên Lửa Siêu Thanh đâm cực mạnh
+	if not is_broken and not has_boosted and event is InputEventMouseButton and event.pressed:
+		has_boosted = true
+		_activate_rocket_boost()
+
+func _activate_rocket_boost() -> void:
+	drill_speed = 950.0
+	linear_velocity = Vector2(0, 950.0)
+	CameraShake.add_trauma(0.35)
+	if spark_particles:
+		spark_particles.restart()
+		spark_particles.emitting = true
+	if visual_root:
+		var tween = create_tween()
+		tween.tween_property(visual_root, "scale", Vector2(0.8, 1.6), 0.1)
 
 func _on_body_entered(body: Node) -> void:
 	if is_broken: return

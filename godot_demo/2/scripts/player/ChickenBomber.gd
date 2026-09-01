@@ -1,10 +1,12 @@
 extends Node2D
 
+const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
+
 signal egg_spawned(egg_instance)
 
-@export var move_speed: float = 140.0
-@export var min_x: float = 60.0
-@export var max_x: float = 480.0
+@export var move_speed: float = 160.0
+@export var min_x: float = 80.0
+@export var max_x: float = 460.0
 @export var default_y: float = 110.0
 
 var move_direction: float = 1.0
@@ -30,7 +32,11 @@ var is_dropping_anim: bool = false
 var egg_scenes: Dictionary = {
 	"normal": preload("res://scenes/prefabs/NormalEgg.tscn"),
 	"bomb": preload("res://scenes/prefabs/BombEgg.tscn"),
-	"drill": preload("res://scenes/prefabs/DrillEgg.tscn")
+	"drill": preload("res://scenes/prefabs/DrillEgg.tscn"),
+	"frost": preload("res://scenes/prefabs/FrostEgg.tscn"),
+	"cluster": preload("res://scenes/prefabs/ClusterEgg.tscn"),
+	"acid": preload("res://scenes/prefabs/AcidEgg.tscn"),
+	"blackhole": preload("res://scenes/prefabs/BlackHoleEgg.tscn")
 }
 
 func _ready() -> void:
@@ -40,7 +46,7 @@ func _ready() -> void:
 	_prepare_next_egg()
 
 func _process(delta: float) -> void:
-	# 1. Tự động lượn ngang bầu trời nếu không chủ động kéo ngắm
+	# 1. Tự động lượn ngang bầu trời nếu không chủ động ngắm
 	if not is_aiming:
 		position.x += move_speed * move_direction * delta
 		if position.x >= max_x:
@@ -51,37 +57,47 @@ func _process(delta: float) -> void:
 			move_direction = 1.0
 
 	# 2. Đập cánh bồng bềnh
-	wing_flap_time += delta * 12.0
-	if left_wing: left_wing.rotation = sin(wing_flap_time) * 0.4
-	if right_wing: right_wing.rotation = -sin(wing_flap_time) * 0.4
+	wing_flap_time += delta * (22.0 if is_aiming else 12.0)
+	if left_wing: left_wing.rotation = sin(wing_flap_time) * 0.45
+	if right_wing: right_wing.rotation = -sin(wing_flap_time) * 0.45
 
 	# 3. Squash & Stretch lerp
-	if not is_dropping_anim:
+	if not is_dropping_anim and not is_aiming:
 		visual_root.scale = visual_root.scale.lerp(Vector2.ONE, 10.0 * delta)
 
 	# 4. Xử lý Input ngắm bắn
 	_handle_aim_input()
 
 func _handle_aim_input() -> void:
+	if CameraShake.instance and CameraShake.instance.is_intro_playing:
+		if is_aiming:
+			is_aiming = false
+			if trajectory_line: trajectory_line.visible = false
+		return
+
 	var mouse_pos = get_global_mouse_position()
 
 	# Bắt đầu chạm / click chuột để ngắm
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		if not is_aiming:
-			# Chỉ bắt đầu ngắm nếu bấm ở nửa trên màn hình
-			if mouse_pos.y < 500.0:
-				is_aiming = true
-				aim_start_pos = mouse_pos
+			is_aiming = true
+			aim_start_pos = mouse_pos
 
 		if is_aiming:
-			# Kéo gà tới vị trí x của chuột (trong giới hạn)
+			# Kéo gà tới vị trí X của chuột
 			position.x = clamp(mouse_pos.x, min_x, max_x)
 			
-			# Vector lực thả: hướng thẳng xuống kèm góc lệch nhẹ theo chuột
-			var pull_diff = mouse_pos - global_position
-			aim_vector = Vector2(clamp(pull_diff.x * 1.5, -250.0, 250.0), clamp(pull_diff.y * 2.0 + 300.0, 300.0, 750.0))
+			# Tính toán lực và góc bắn tự nhiên
+			var pull_y = clamp(mouse_pos.y - global_position.y, 40.0, 320.0)
+			var pull_x = clamp((mouse_pos.x - global_position.x) * 1.8, -260.0, 260.0)
+			var launch_spd_y = clamp(pull_y * 2.2 + 350.0, 350.0, 850.0)
+			aim_vector = Vector2(pull_x, launch_spd_y)
+
+			# Co giãn người gà theo lực kéo (Nén như lò xo)
+			var tension = clamp(pull_y / 280.0, 0.0, 0.45)
+			visual_root.scale = Vector2(1.0 + tension, 1.0 - tension * 0.6)
 			
-			# Cập nhật mắt liếc nhìn theo hướng ngắm
+			# Mắt liếc nhìn xuống hầm
 			_update_eye_direction(aim_vector.normalized())
 			
 			# Vẽ đường dự đoán quỹ đạo
@@ -99,13 +115,13 @@ func _draw_trajectory(initial_vel: Vector2) -> void:
 	trajectory_line.visible = true
 	
 	var points: PackedVector2Array = []
-	var start_p = Vector2(0, 20) # Từ bụng gà
+	var start_p = Vector2(0, 24) # Từ bụng gà
 	var vel = initial_vel
 	var gravity = Vector2(0, 980.0)
-	var dt = 0.03
+	var dt = 0.025
 	var cur_p = start_p
 	
-	for i in range(25):
+	for i in range(30):
 		points.append(cur_p)
 		cur_p += vel * dt
 		vel += gravity * dt
@@ -114,8 +130,8 @@ func _draw_trajectory(initial_vel: Vector2) -> void:
 
 func _update_eye_direction(dir: Vector2) -> void:
 	if eye_left and eye_right:
-		eye_left.position = Vector2(-12, -4) + dir * 4.0
-		eye_right.position = Vector2(12, -4) + dir * 4.0
+		eye_left.position = Vector2(-12, -4) + dir * 5.0
+		eye_right.position = Vector2(12, -4) + dir * 5.0
 
 func _reset_eye_direction() -> void:
 	if eye_left and eye_right:
@@ -134,18 +150,18 @@ func _drop_egg(launch_vel: Vector2) -> void:
 		GameManager.check_out_of_eggs()
 		return
 
-	# Hiệu ứng rặn đẻ Squash & Stretch
+	# Hiệu ứng rặn đẻ Squash & Stretch bùng nổ
 	is_dropping_anim = true
 	var tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	visual_root.scale = Vector2(1.4, 0.6) # Phồng bẹp người
-	tween.tween_property(visual_root, "scale", Vector2(0.7, 1.35), 0.12) # Bật dài người
-	tween.tween_property(visual_root, "scale", Vector2.ONE, 0.2)
+	visual_root.scale = Vector2(0.65, 1.45) # Bật dài người lên trên
+	tween.tween_property(visual_root, "scale", Vector2(1.2, 0.8), 0.12)
+	tween.tween_property(visual_root, "scale", Vector2.ONE, 0.18)
 	tween.finished.connect(func(): is_dropping_anim = false)
 
 	# Sinh quả trứng
 	var egg_scene = egg_scenes[egg_type]
 	var egg = egg_scene.instantiate()
-	egg.global_position = global_position + Vector2(0, 25.0)
+	egg.global_position = global_position + Vector2(0, 26.0)
 	egg.linear_velocity = launch_vel
 	get_parent().add_child(egg)
 	

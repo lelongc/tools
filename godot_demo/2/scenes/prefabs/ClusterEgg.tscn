@@ -1,0 +1,46 @@
+[gd_scene format=3 uid="uid://dm1k8v7q3x9p5"]
+
+[ext_resource type="Script" path="res://scripts/projectiles/ClusterEgg.gd" id="1_script"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 16.0
+
+[node name="ClusterEgg" type="RigidBody2D"]
+collision_layer = 2
+collision_mask = 7
+mass = 2.8
+contact_monitor = true
+max_contacts_reported = 4
+script = ExtResource("1_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1")
+
+[node name="VisualRoot" type="Node2D" parent="."]
+
+[node name="EggBody" type="Polygon2D" parent="VisualRoot"]
+color = Color(1, 0.75, 0.8, 1)
+polygon = PackedVector2Array(0, -18, 10, -12, 14, 0, 12, 12, 0, 16, -12, 12, -14, 0, -10, -12)
+
+[node name="PolkaDots" type="Polygon2D" parent="VisualRoot"]
+color = Color(1, 0.9, 0.3, 1)
+polygon = PackedVector2Array(-5, -6, -2, -6, -2, -3, -5, -3)
+
+[node name="CrackLine" type="Line2D" parent="VisualRoot"]
+points = PackedVector2Array(-8, 4, -2, 8, 4, 2, 9, 7)
+width = 2.0
+default_color = Color(0.8, 0.3, 0.5, 1)
+
+[node name="HatchFX" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 25
+lifetime = 0.4
+one_shot = true
+explosiveness = 0.95
+spread = 180.0
+gravity = Vector2(0, 400)
+initial_velocity_min = 100.0
+initial_velocity_max = 220.0
+scale_amount_min = 3.0
+scale_amount_max = 6.0
+color = Color(1, 0.8, 0.85, 1)

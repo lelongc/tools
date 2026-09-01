@@ -1,72 +1,151 @@
-[gd_scene format=3 uid="uid://dm9k7p2v4q1w8"]
+[gd_scene format=3 uid="uid://dm5k2v7q1x8p4"]
 
-[ext_resource type="Script" path="res://scripts/ui/GameHUD.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ui/GameHUD.gd" id="1_hud"]
+[ext_resource type="Script" path="res://scripts/ui/JuicyButton.gd" id="2_btn"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_TopBar"]
+bg_color = Color(0.11, 0.03, 0.21, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 3
+border_color = Color(0.79, 0.66, 0.0, 0.6)
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_Shelf"]
+bg_color = Color(0.14, 0.06, 0.24, 0.92)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.84, 0.0, 0.8)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_VictoryModal"]
+bg_color = Color(0.14, 0.04, 0.25, 0.98)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 8
+border_color = Color(1.0, 0.84, 0.0, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_FailModal"]
+bg_color = Color(0.18, 0.04, 0.12, 0.98)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 8
+border_color = Color(1.0, 0.3, 0.3, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
 
 [node name="GameHUD" type="CanvasLayer"]
-script = ExtResource("1_script")
+process_mode = 3
+script = ExtResource("1_hud")
 
-[node name="TopBar" type="HBoxContainer" parent="."]
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 524.0
-offset_bottom = 66.0
-theme_override_constants/separation = 12
+[node name="TopBar" type="PanelContainer" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 68.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_TopBar")
 
-[node name="LevelBox" type="PanelContainer" parent="TopBar"]
+[node name="Margin" type="MarginContainer" parent="TopBar"]
 layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 4
 
-[node name="Margin" type="MarginContainer" parent="TopBar/LevelBox"]
+[node name="HBox" type="HBoxContainer" parent="TopBar/Margin"]
 layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 6
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 6
+theme_override_constants/separation = 10
 
-[node name="LevelLabel" type="Label" parent="TopBar/LevelBox/Margin"]
+[node name="BtnPause" type="Button" parent="TopBar/Margin/HBox"]
+custom_minimum_size = Vector2(46, 40)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
 theme_override_font_sizes/font_size = 18
-text = "🏰 HẦM NGỤC 1"
+text = "⏸️"
+script = ExtResource("2_btn")
+is_wood_brown = true
 
-[node name="ScoreBox" type="PanelContainer" parent="TopBar"]
+[node name="LevelBox" type="PanelContainer" parent="TopBar/Margin/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="Margin" type="MarginContainer" parent="TopBar/ScoreBox"]
+[node name="Margin" type="MarginContainer" parent="TopBar/Margin/HBox/LevelBox"]
 layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 6
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 6
+theme_override_constants/margin_left = 6
 
-[node name="ScoreLabel" type="Label" parent="TopBar/ScoreBox/Margin"]
+[node name="LevelLabel" type="Label" parent="TopBar/Margin/HBox/LevelBox/Margin"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "ĐIỂM: 0"
-horizontal_alignment = 1
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 17
+text = "🏰 LEVEL 1"
+vertical_alignment = 1
 
-[node name="BtnRestart" type="Button" parent="TopBar"]
-custom_minimum_size = Vector2(50, 0)
+[node name="ScoreBox" type="PanelContainer" parent="TopBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="TopBar/Margin/HBox/ScoreBox"]
+layout_mode = 2
+theme_override_constants/margin_right = 6
+
+[node name="ScoreLabel" type="Label" parent="TopBar/Margin/HBox/ScoreBox/Margin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 17
+text = "SCORE: 0"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="BtnRestart" type="Button" parent="TopBar/Margin/HBox"]
+custom_minimum_size = Vector2(46, 40)
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
 text = "🔄"
+script = ExtResource("2_btn")
+is_wood_brown = true
 
 [node name="EggShelf" type="PanelContainer" parent="."]
-offset_left = 16.0
-offset_top = 880.0
-offset_right = 260.0
-offset_bottom = 936.0
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 30.0
+offset_top = -80.0
+offset_right = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_Shelf")
 
 [node name="Margin" type="MarginContainer" parent="EggShelf"]
 layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 6
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 6
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
 
 [node name="EggIcons" type="HBoxContainer" parent="EggShelf/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 12
+alignment = 1
 
 [node name="VictoryModal" type="PanelContainer" parent="."]
 visible = false
@@ -75,13 +154,14 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -210.0
-offset_top = -160.0
-offset_right = 210.0
-offset_bottom = 160.0
+offset_left = -220.0
+offset_top = -190.0
+offset_right = 220.0
+offset_bottom = 190.0
 grow_horizontal = 2
 grow_vertical = 2
-pivot_offset = Vector2(210, 160)
+pivot_offset = Vector2(220, 190)
+theme_override_styles/panel = SubResource("StyleBoxFlat_VictoryModal")
 
 [node name="VBox" type="VBoxContainer" parent="VictoryModal"]
 layout_mode = 2
@@ -90,28 +170,42 @@ alignment = 1
 
 [node name="Title" type="Label" parent="VictoryModal/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 24
-text = "🎉 SẬP HẦM THÀNH CÔNG! 🎉"
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 23
+text = "🎉 BUNKER DESTROYED! 🎉"
 horizontal_alignment = 1
 
 [node name="StarsLabel" type="Label" parent="VictoryModal/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 42
 text = "⭐⭐⭐"
 horizontal_alignment = 1
 
 [node name="ScoreLabel" type="Label" parent="VictoryModal/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Tổng điểm: 3500"
+theme_override_font_sizes/font_size = 20
+text = "Total Score: 5000"
 horizontal_alignment = 1
 
 [node name="BtnNext" type="Button" parent="VictoryModal/VBox"]
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(240, 52)
 layout_mode = 2
+size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 20
-text = "MÀN TIẾP THEO ➔"
+text = "NEXT LEVEL ▶"
+script = ExtResource("2_btn")
+is_primary_green = true
+
+[node name="BtnLevels" type="Button" parent="VictoryModal/VBox"]
+custom_minimum_size = Vector2(240, 44)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 16
+text = "🗺️ SELECT LEVEL"
+script = ExtResource("2_btn")
+is_wood_brown = true
 
 [node name="FailModal" type="PanelContainer" parent="."]
 visible = false
@@ -120,13 +214,14 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -210.0
-offset_top = -160.0
-offset_right = 210.0
-offset_bottom = 160.0
+offset_left = -220.0
+offset_top = -170.0
+offset_right = 220.0
+offset_bottom = 170.0
 grow_horizontal = 2
 grow_vertical = 2
-pivot_offset = Vector2(210, 160)
+pivot_offset = Vector2(220, 170)
+theme_override_styles/panel = SubResource("StyleBoxFlat_FailModal")
 
 [node name="VBox" type="VBoxContainer" parent="FailModal"]
 layout_mode = 2
@@ -135,26 +230,92 @@ alignment = 1
 
 [node name="Title" type="Label" parent="FailModal/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 24
-text = "💀 HẾT TRỨNG RỒI! 💀"
-horizontal_alignment = 1
-
-[node name="Sub" type="Label" parent="FailModal/VBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 15
-text = "Quái vật vẫn còn sống trong hầm ngục!"
+text = "💀 OUT OF EGGS! 💀"
 horizontal_alignment = 1
 
 [node name="BtnNukeAd" type="Button" parent="FailModal/VBox"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(260, 55)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.2, 0.1, 0, 1)
 theme_override_font_sizes/font_size = 16
-text = "📺 XEM AD NHẬN SIÊU BOM 💣"
+text = "📺 WATCH AD: BLACK HOLE"
+script = ExtResource("2_btn")
+is_gold_action = true
 
 [node name="BtnRetry" type="Button" parent="FailModal/VBox"]
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(260, 46)
 layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 17
+text = "🔄 RETRY"
+script = ExtResource("2_btn")
+is_wood_brown = true
+
+[node name="BtnLevels" type="Button" parent="FailModal/VBox"]
+custom_minimum_size = Vector2(260, 42)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 15
+text = "🗺️ SELECT LEVEL"
+script = ExtResource("2_btn")
+is_wood_brown = true
+
+[node name="PauseModal" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -160.0
+offset_right = 200.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(200, 160)
+theme_override_styles/panel = SubResource("StyleBoxFlat_VictoryModal")
+
+[node name="VBox" type="VBoxContainer" parent="PauseModal"]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Title" type="Label" parent="PauseModal/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 24
+text = "⏸️ PAUSED"
+horizontal_alignment = 1
+
+[node name="BtnResume" type="Button" parent="PauseModal/VBox"]
+custom_minimum_size = Vector2(230, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 18
+text = "RESUME ▶"
+script = ExtResource("2_btn")
+is_primary_green = true
+
+[node name="BtnRestart" type="Button" parent="PauseModal/VBox"]
+custom_minimum_size = Vector2(230, 44)
+layout_mode = 2
+size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 16
-text = "CHƠI LẠI VÒNG NÀY 🔄"
+text = "🔄 RETRY"
+script = ExtResource("2_btn")
+is_wood_brown = true
+
+[node name="BtnLevels" type="Button" parent="PauseModal/VBox"]
+custom_minimum_size = Vector2(230, 44)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 16
+text = "🗺️ SELECT LEVEL"
+script = ExtResource("2_btn")
+is_wood_brown = true

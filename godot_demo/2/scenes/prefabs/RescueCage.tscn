@@ -1,0 +1,43 @@
+[gd_scene format=3 uid="uid://dm5k9v1q2x7p3"]
+
+[ext_resource type="Script" path="res://scripts/destructibles/RescueCage.gd" id="1_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(36, 40)
+
+[node name="RescueCage" type="RigidBody2D"]
+collision_layer = 4
+collision_mask = 7
+mass = 2.5
+script = ExtResource("1_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="CageBars" type="Polygon2D" parent="Visual"]
+color = Color(0.3, 0.3, 0.35, 1)
+polygon = PackedVector2Array(-18, -20, 18, -20, 18, 20, -18, 20)
+
+[node name="Interior" type="Polygon2D" parent="Visual"]
+color = Color(0.15, 0.15, 0.2, 0.8)
+polygon = PackedVector2Array(-14, -16, 14, -16, 14, 16, -14, 16)
+
+[node name="Chick" type="Polygon2D" parent="Visual"]
+color = Color(1, 0.85, 0.2, 1)
+polygon = PackedVector2Array(-6, -6, 0, -9, 6, -6, 8, 2, 0, 8, -8, 2)
+
+[node name="ConfettiFX" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 40
+lifetime = 0.8
+one_shot = true
+explosiveness = 0.95
+spread = 180.0
+gravity = Vector2(0, 300)
+initial_velocity_min = 120.0
+initial_velocity_max = 280.0
+scale_amount_min = 4.0
+scale_amount_max = 8.0
+color = Color(1, 0.85, 0.2, 1)
