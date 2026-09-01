@@ -1,4 +1,5 @@
 extends Node2D
+class_name ChickenBomber
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 
@@ -12,7 +13,7 @@ signal egg_spawned(egg_instance)
 var move_direction: float = 1.0
 var is_aiming: bool = false
 var aim_start_pos: Vector2 = Vector2.ZERO
-var aim_vector: Vector2 = Vector2.ZERO
+var aim_vector: Vector2 = Vector2(0, 480.0)
 var current_egg_type: String = "normal"
 
 # Visual Nodes
@@ -40,6 +41,7 @@ var egg_scenes: Dictionary = {
 }
 
 func _ready() -> void:
+	add_to_group("Player")
 	position = Vector2(270.0, default_y)
 	if trajectory_line:
 		trajectory_line.visible = false
@@ -69,7 +71,8 @@ func _process(delta: float) -> void:
 	_handle_aim_input()
 
 func _handle_aim_input() -> void:
-	if (CameraShake.instance and CameraShake.instance.is_intro_playing) or GameManager.is_game_over:
+	# Bỏ qua nếu game kết thúc
+	if not GameManager.is_level_active:
 		if is_aiming:
 			is_aiming = false
 			if trajectory_line: trajectory_line.visible = false
@@ -77,25 +80,31 @@ func _handle_aim_input() -> void:
 
 	var mouse_pos = get_global_mouse_position()
 
-	# Bắt đầu chạm / click chuột để ngắm (bỏ qua vùng TopBar và khay đạn)
+	# Bắt đầu chạm / click chuột để ngắm
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		# Nếu camera đang chiếu intro pan, click để tua nhanh vào chơi luôn
+		if CameraShake.instance and CameraShake.instance.is_intro_playing:
+			CameraShake.instance.skip_intro_pan()
+
 		if not is_aiming:
-			if mouse_pos.y < 75.0 or mouse_pos.y > 880.0:
+			# Không nhận click nếu bấm đè thanh menu TopBar ở trên đỉnh
+			if mouse_pos.y < 65.0:
 				return
 			is_aiming = true
 			aim_start_pos = mouse_pos
+			aim_vector = Vector2(0, 480.0)
 
 		if is_aiming:
-			# Kéo gà tới vị trí X của chuột
+			# Di chuyển gà mượt mà theo vị trí X của ngón tay / chuột
 			position.x = clamp(mouse_pos.x, min_x, max_x)
 			
-			# Tính toán lực và góc bắn tự nhiên
+			# Tính toán lực và góc bắn
 			var pull_y = clamp(mouse_pos.y - global_position.y, 40.0, 320.0)
-			var pull_x = clamp((mouse_pos.x - global_position.x) * 1.8, -260.0, 260.0)
-			var launch_spd_y = clamp(pull_y * 2.2 + 350.0, 350.0, 850.0)
+			var pull_x = clamp((mouse_pos.x - global_position.x) * 1.6, -240.0, 240.0)
+			var launch_spd_y = clamp(pull_y * 2.0 + 350.0, 350.0, 850.0)
 			aim_vector = Vector2(pull_x, launch_spd_y)
 
-			# Co giãn người gà theo lực kéo (Nén như lò xo)
+			# Co giãn người gà theo lực kéo (Nén lò xo)
 			var tension = clamp(pull_y / 280.0, 0.0, 0.45)
 			visual_root.scale = Vector2(1.0 + tension, 1.0 - tension * 0.6)
 			
@@ -105,12 +114,15 @@ func _handle_aim_input() -> void:
 			# Vẽ đường dự đoán quỹ đạo
 			_draw_trajectory(aim_vector)
 	else:
-		# Nhả chuột -> Thả trứng!
+		# Nhả chuột / ngón tay -> Thả trứng ngay lập tức!
 		if is_aiming:
 			is_aiming = false
 			if trajectory_line: trajectory_line.visible = false
 			_reset_eye_direction()
+			if aim_vector == Vector2.ZERO:
+				aim_vector = Vector2(0, 480.0)
 			_drop_egg(aim_vector)
+			aim_vector = Vector2(0, 480.0)
 
 func _draw_trajectory(initial_vel: Vector2) -> void:
 	if not trajectory_line: return

@@ -11,6 +11,7 @@ var trauma: float = 0.0
 var trauma_power: int = 2
 var noise_y: float = 0.0
 var is_intro_playing: bool = false
+var intro_tween: Tween = null
 
 func _ready() -> void:
 	instance = self
@@ -18,22 +19,31 @@ func _ready() -> void:
 func play_intro_pan(target_bunker_y: float = 700.0, on_finished_callback: Callable = Callable()) -> void:
 	is_intro_playing = true
 	
-	# Bắt đầu tại cận cảnh hầm quái vật (Zoom in 1.35x)
+	# Bắt đầu tại cận cảnh hầm quái vật (Zoom in 1.25x)
 	global_position = Vector2(270.0, target_bunker_y)
-	zoom = Vector2(1.35, 1.35)
+	zoom = Vector2(1.25, 1.25)
 
-	# Giữ lại 0.7s cho người chơi quan sát căn hầm và quái vật
-	await get_tree().create_timer(0.7).timeout
+	# Giữ lại 0.4s cho người chơi quan sát căn hầm
+	await get_tree().create_timer(0.4).timeout
+	if not is_intro_playing: return
 
 	# Lướt êm ái về toàn cảnh (Zoom out 1.0x, vị trí trung tâm 270, 480)
-	var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
-	tween.tween_property(self, "global_position", Vector2(270.0, 480.0), 0.85)
-	tween.tween_property(self, "zoom", Vector2.ONE, 0.85)
+	intro_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN_OUT)
+	intro_tween.tween_property(self, "global_position", Vector2(270.0, 480.0), 0.5)
+	intro_tween.tween_property(self, "zoom", Vector2.ONE, 0.5)
 	
-	await tween.finished
+	await intro_tween.finished
 	is_intro_playing = false
 	if on_finished_callback.is_valid():
 		on_finished_callback.call()
+
+func skip_intro_pan() -> void:
+	if not is_intro_playing: return
+	is_intro_playing = false
+	if intro_tween and intro_tween.is_valid():
+		intro_tween.kill()
+	global_position = Vector2(270.0, 480.0)
+	zoom = Vector2.ONE
 
 func _process(delta: float) -> void:
 	if is_intro_playing: return

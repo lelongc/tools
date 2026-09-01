@@ -11,9 +11,11 @@ var current_health: float = 60.0
 var is_defeated: bool = false
 var is_awake: bool = false
 var is_panicking: bool = false
+var is_doing_micro_action: bool = false
 var has_armor: bool = false
 var spawn_settle_timer: float = 0.5
 var idle_anim_time: float = 0.0
+var micro_action_timer: float = 2.0
 var base_scale_val: float = 0.22
 
 # Node References
@@ -53,6 +55,7 @@ func _ready() -> void:
 	body_entered.connect(_on_impact)
 	if dizzy_stars: dizzy_stars.visible = false
 
+	micro_action_timer = randf_range(1.0, 3.0)
 	_play_spawn_bounce()
 
 func _setup_monster_stats() -> void:
@@ -113,7 +116,6 @@ func _setup_monster_stats() -> void:
 		visual_root.scale = Vector2(base_scale_val, base_scale_val)
 
 func _load_modular_cutouts() -> void:
-	# Đặt lại vị trí mặc định của các layer
 	acc_back.position = Vector2.ZERO
 	acc_back.z_index = -1
 	body_sprite.position = Vector2.ZERO
@@ -319,20 +321,72 @@ func _process(delta: float) -> void:
 
 	if is_defeated: return
 
-	# 1. Procedural Idle Breathing
+	# 1. Nhịp Thở Phập Phồng Tự Nhiên (Idle Breathing)
 	idle_anim_time += delta * 3.5
-	if not is_panicking and visual_root:
+	if not is_panicking and not is_doing_micro_action and visual_root:
 		var breath = sin(idle_anim_time) * 0.02
 		visual_root.scale = Vector2(base_scale_val * (1.0 + breath), base_scale_val * (1.0 - breath))
 
-	# 2. Eye Tracking & Threat Panic
+	# 2. Ngẫu nhiên thực hiện các biểu cảm sống động Angry Birds (Chớp mắt, cười khẩy, nghiêng đầu, vểnh tai)
+	if not is_panicking and not is_doing_micro_action:
+		micro_action_timer -= delta
+		if micro_action_timer <= 0.0:
+			micro_action_timer = randf_range(2.0, 4.5)
+			_trigger_random_angrybirds_action()
+
+	# 3. Theo dõi mục tiêu & Phản ứng đe dọa (Threat Tracking)
 	_track_threats_and_eggs()
+
+func _trigger_random_angrybirds_action() -> void:
+	is_doing_micro_action = true
+	var action = randi() % 4
+
+	match action:
+		0: # Chớp mắt tự nhiên (Blink)
+			if eyes_sprite:
+				var blink_tween = create_tween()
+				blink_tween.tween_property(eyes_sprite, "scale:y", 0.08, 0.07)
+				blink_tween.tween_property(eyes_sprite, "scale:y", 1.0, 0.09)
+				await blink_tween.finished
+		1: # Cười đểu rung bụng nhún nhảy (Snicker / Chuckle)
+			if visual_root:
+				var chuckle_tween = create_tween().set_trans(Tween.TRANS_QUAD)
+				chuckle_tween.tween_property(visual_root, "scale", Vector2(base_scale_val * 1.12, base_scale_val * 0.88), 0.08)
+				chuckle_tween.tween_property(visual_root, "scale", Vector2(base_scale_val * 0.92, base_scale_val * 1.08), 0.08)
+				chuckle_tween.tween_property(visual_root, "scale", Vector2(base_scale_val, base_scale_val), 0.1)
+				if head_part:
+					var ear_tween = create_tween()
+					ear_tween.tween_property(head_part, "rotation_degrees", 8.0, 0.08)
+					ear_tween.tween_property(head_part, "rotation_degrees", -8.0, 0.08)
+					ear_tween.tween_property(head_part, "rotation_degrees", 0.0, 0.08)
+				await chuckle_tween.finished
+		2: # Nghiêng đầu tò mò nhìn ngó (Head Tilt)
+			if visual_root:
+				var tilt_tween = create_tween().set_trans(Tween.TRANS_SINE)
+				var tilt_ang = 10.0 if randf() > 0.5 else -10.0
+				tilt_tween.tween_property(visual_root, "rotation_degrees", tilt_ang, 0.25)
+				tilt_tween.tween_interval(0.4)
+				tilt_tween.tween_property(visual_root, "rotation_degrees", 0.0, 0.2)
+				await tilt_tween.finished
+		3: # Liếc mắt sang hai bên thăm dò (Look Left / Right)
+			if pupils_sprite and pupils_sprite.visible:
+				var look_tween = create_tween().set_trans(Tween.TRANS_SINE)
+				look_tween.tween_property(pupils_sprite, "position:x", pupils_sprite.position.x - 5.0, 0.2)
+				look_tween.tween_interval(0.3)
+				look_tween.tween_property(pupils_sprite, "position:x", pupils_sprite.position.x + 5.0, 0.3)
+				look_tween.tween_interval(0.3)
+				look_tween.tween_property(pupils_sprite, "position:x", 0.0, 0.2)
+				await look_tween.finished
+
+	is_doing_micro_action = false
 
 func _track_threats_and_eggs() -> void:
 	var eggs = get_tree().get_nodes_in_group("Eggs")
+	var chicken = get_tree().get_first_node_in_group("Player")
 	var target_pos = Vector2.ZERO
 	var has_threat = false
 
+	# 1. Ưu tiên theo dõi quả trứng đang rơi
 	if eggs.size() > 0:
 		var closest_dist = 9999.0
 		for egg in eggs:
@@ -341,9 +395,14 @@ func _track_threats_and_eggs() -> void:
 				if dist < closest_dist:
 					closest_dist = dist
 					target_pos = egg.global_position
-					if dist < 280.0 and egg.linear_velocity.y > 60.0:
+					if dist < 290.0 and egg.linear_velocity.y > 50.0:
 						has_threat = true
 
+	# 2. Nếu không có trứng rơi, ngước nhìn theo con gà đang bay tuần tra trên trời!
+	if target_pos == Vector2.ZERO and is_instance_valid(chicken):
+		target_pos = chicken.global_position
+
+	# 3. Quét tảng đá/khối gỗ rơi từ trần xuống
 	var space_state = get_world_2d().direct_space_state
 	var query = PhysicsRayQueryParameters2D.create(global_position, global_position + Vector2(0, -280.0))
 	query.collide_with_bodies = true
@@ -352,9 +411,10 @@ func _track_threats_and_eggs() -> void:
 		has_threat = true
 		target_pos = res.collider.global_position
 
+	# 4. Cập nhật góc nhìn của mắt (Eye-Tracking)
 	if pupils_sprite and pupils_sprite.visible and target_pos != Vector2.ZERO:
 		var dir = (target_pos - global_position).normalized()
-		pupils_sprite.position = Vector2(0, -25) + dir * 5.0
+		pupils_sprite.position = Vector2(0, -25) + dir * 6.0
 
 	_set_panic_state(has_threat)
 
@@ -369,8 +429,8 @@ func _set_panic_state(panic: bool) -> void:
 			snout_sprite.texture = tex_snout_scream
 		if visual_root:
 			var shake_tween = create_tween().set_loops(4)
-			shake_tween.tween_property(visual_root, "position:x", 3.0, 0.04)
-			shake_tween.tween_property(visual_root, "position:x", -3.0, 0.04)
+			shake_tween.tween_property(visual_root, "position:x", 3.5, 0.035)
+			shake_tween.tween_property(visual_root, "position:x", -3.5, 0.035)
 			shake_tween.finished.connect(func(): if is_instance_valid(visual_root): visual_root.position.x = 0.0)
 	else:
 		if eyes_sprite and tex_eyes_normal:
