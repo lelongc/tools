@@ -1,18 +1,25 @@
 @echo off
-title THE BLEEDING COMB: OBSCURE RESURRECTION - METROIDVANIA DEMO
+title WOBBLE CHICKS: BOUNCY PARTY RUN - 2-PLAYER CO-OP SLINGSHOT
 echo =========================================================================
-echo   🩸 DANG KHOI DONG THE BLEEDING COMB: OBSCURE RESURRECTION 🩸
+echo   🐣 DANG KHOI DONG WOBBLE CHICKS: BOUNCY PARTY RUN 🐣
 echo   ---------------------------------------------------------------------
-echo   🎮 DIEU KHIEN DI CHUYEN & CHIEN DAU (CONTROLS):
-echo   - Phim A / D (hoac Mui Ten Trai / Phai): DI BO TUAN TRA (Walk - 8 frames)
-echo   - Giu Shift + A / D (hoac Phim C): CHAY NUOC RUT PHI TOC (Run - 58 frames)
-echo   - Phim Space / W / Mui Ten Len: Nhay / Nhay 2 Buoc (Double Jump)
-echo   - Phim J / Z / Chuot Trai: Cua Kiem (Talon Slash)
-echo   - S + J (Khi dang o tren khong): POGO DAP CUA XUONG DUOI (Bat nay len!)
-echo   - Phim K / Chuot Phai: Luot Bong Mo (Phantom Dash)
-echo   - Phim R: Choi lai / Reset tran dau
-echo   ---------------------------------------------------------------------
-echo   ⏱️ CO CHE DAU TRUM (MIND FREEZE):
-echo   - Khi mau Gallus duoi 25%%: Boss tung don se lam NGUNG DONG TAM TRI 0.3s!
+echo   🎮 DIEU KHIEN 2 NGUOI CHOI (LOCAL 2-PLAYER CO-OP):
+echo.
+echo   🐥 NGUOI CHOI 1 (GA VANG PIYO):
+echo   - Phim A / D: Di chuyen Trai / Phai (Waddle)
+echo   - Phim Space / W: Nhay len cao (Squash ^& Stretch)
+echo   - Phim S (Giu chat): GAM CHAN LAM TRU (Anchor)
+echo   - Phim Shift (Giu): PHONG BONG BONG (Puff ^& Float)
+echo.
+echo   🐔 NGUOI CHOI 2 (GA HONG SHELLY):
+echo   - Phim Mui Ten Trai / Phai: Di chuyen Trai / Phai
+echo   - Phim Enter / Mui Ten Len: Nhay len cao
+echo   - Phim Mui Ten Xuong (Giu chat): GAM CHAN LAM TRU (Anchor)
+echo   - Phim Shift / P / Dau Cham: PHONG BONG BONG (Puff ^& Float)
+echo.
+echo   🎯 BI QUYET VUOT VUC SIEU CUON (SLINGSHOT TETHER):
+echo   - 1 nguoi bam GAM CHAN giu chac o mep vuc, nguoi kia lay da keo cang
+echo     soi day thun roi BAT NHAY de BAN NA vung vut bay qua bo ben kia!
+echo   - Phim R: Choi lai / Reset man choi
 echo =========================================================================
 start "" "D:\app\godot\Godot_v4.7.1-stable_win64.exe" --path "d:\folder\tools\godot_demo\2" --rendering-driver opengl3

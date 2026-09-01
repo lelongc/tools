@@ -1,0 +1,570 @@
+[gd_scene load_steps=22 format=3 uid="uid://main_level_scene"]
+
+[ext_resource type="Script" path="res://scripts/controllers/LevelManager.gd" id="1_mgr"]
+[ext_resource type="PackedScene" uid="uid://wobble_chick_scene" path="res://scenes/characters/WobbleChick.tscn" id="2_chick"]
+[ext_resource type="Script" path="res://scripts/controllers/TetherRope.gd" id="3_rope"]
+[ext_resource type="Script" path="res://scripts/controllers/CoopCamera2D.gd" id="4_cam"]
+[ext_resource type="Script" path="res://scripts/obstacles/JellyBouncer.gd" id="5_jelly"]
+[ext_resource type="Script" path="res://scripts/obstacles/SpinningHammer.gd" id="6_hammer"]
+[ext_resource type="Script" path="res://scripts/obstacles/GoldenCorn.gd" id="7_corn"]
+[ext_resource type="Script" path="res://scripts/obstacles/FinishGate.gd" id="8_gate"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_start"]
+size = Vector2(480, 80)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_mid"]
+size = Vector2(400, 80)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_high"]
+size = Vector2(300, 40)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ground_end"]
+size = Vector2(450, 80)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cloud"]
+size = Vector2(160, 28)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_jelly"]
+radius = 36.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hammer"]
+radius = 38.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_corn"]
+radius = 22.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_gate"]
+size = Vector2(120, 160)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud_pill"]
+bg_color = Color(0.12, 0.16, 0.24, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 3
+border_color = Color(1, 0.85, 0.2, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hint"]
+bg_color = Color(1, 0.2, 0.45, 0.92)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.9, 0.3, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
+bg_color = Color(0.08, 0.12, 0.2, 0.96)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 6
+border_color = Color(1, 0.8, 0, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+
+[sub_resource type="Curve" id="Curve_confetti"]
+_data = [Vector2(0, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 2
+
+[node name="MainLevel" type="Node2D"]
+script = ExtResource("1_mgr")
+
+[node name="Background" type="CanvasLayer" parent="."]
+layer = -10
+
+[node name="SkyGradient" type="ColorRect" parent="Background"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.55, 0.82, 0.95, 1)
+
+[node name="PastelRainbow" type="Polygon2D" parent="Background"]
+position = Vector2(640, 220)
+color = Color(1, 0.6, 0.75, 0.35)
+polygon = PackedVector2Array(-500, 300, -350, 0, 0, -120, 350, 0, 500, 300, 420, 300, 300, 50, 0, -60, -300, 50, -420, 300)
+
+[node name="DistantCandyHills" type="Polygon2D" parent="Background"]
+position = Vector2(640, 520)
+color = Color(0.72, 0.88, 0.95, 0.7)
+polygon = PackedVector2Array(-800, 200, -500, -80, -200, 40, 150, -120, 450, 20, 800, -60, 800, 200)
+
+[node name="Environment" type="Node2D" parent="."]
+
+[node name="PlatformStart" type="StaticBody2D" parent="Environment"]
+position = Vector2(120, 240)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/PlatformStart"]
+shape = SubResource("RectangleShape2D_ground_start")
+
+[node name="Soil" type="ColorRect" parent="Environment/PlatformStart"]
+offset_left = -240.0
+offset_top = -40.0
+offset_right = 240.0
+offset_bottom = 40.0
+color = Color(0.45, 0.28, 0.18, 1)
+
+[node name="Grass" type="ColorRect" parent="Environment/PlatformStart"]
+offset_left = -240.0
+offset_top = -40.0
+offset_right = 240.0
+offset_bottom = -30.0
+color = Color(0.35, 0.85, 0.45, 1)
+
+[node name="PlatformMid" type="StaticBody2D" parent="Environment"]
+position = Vector2(800, 240)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/PlatformMid"]
+shape = SubResource("RectangleShape2D_ground_mid")
+
+[node name="Soil" type="ColorRect" parent="Environment/PlatformMid"]
+offset_left = -200.0
+offset_top = -40.0
+offset_right = 200.0
+offset_bottom = 40.0
+color = Color(0.45, 0.28, 0.18, 1)
+
+[node name="Grass" type="ColorRect" parent="Environment/PlatformMid"]
+offset_left = -200.0
+offset_top = -40.0
+offset_right = 200.0
+offset_bottom = -30.0
+color = Color(0.35, 0.85, 0.45, 1)
+
+[node name="PlatformHigh" type="StaticBody2D" parent="Environment"]
+position = Vector2(1320, 80)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/PlatformHigh"]
+shape = SubResource("RectangleShape2D_ground_high")
+
+[node name="Soil" type="ColorRect" parent="Environment/PlatformHigh"]
+offset_left = -150.0
+offset_top = -20.0
+offset_right = 150.0
+offset_bottom = 20.0
+color = Color(0.85, 0.4, 0.55, 1)
+
+[node name="Frosting" type="ColorRect" parent="Environment/PlatformHigh"]
+offset_left = -150.0
+offset_top = -20.0
+offset_right = 150.0
+offset_bottom = -12.0
+color = Color(1, 0.92, 0.96, 1)
+
+[node name="CloudPlatform1" type="StaticBody2D" parent="Environment"]
+position = Vector2(1620, 120)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/CloudPlatform1"]
+shape = SubResource("RectangleShape2D_cloud")
+
+[node name="Visual" type="Polygon2D" parent="Environment/CloudPlatform1"]
+color = Color(0.95, 0.98, 1, 1)
+polygon = PackedVector2Array(-80, 0, -60, -14, -20, -16, 20, -14, 60, -16, 80, 0, 60, 14, -60, 14)
+
+[node name="PlatformEnd" type="StaticBody2D" parent="Environment"]
+position = Vector2(2000, 240)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/PlatformEnd"]
+shape = SubResource("RectangleShape2D_ground_end")
+
+[node name="Soil" type="ColorRect" parent="Environment/PlatformEnd"]
+offset_left = -225.0
+offset_top = -40.0
+offset_right = 225.0
+offset_bottom = 40.0
+color = Color(0.45, 0.28, 0.18, 1)
+
+[node name="Grass" type="ColorRect" parent="Environment/PlatformEnd"]
+offset_left = -225.0
+offset_top = -40.0
+offset_right = 225.0
+offset_bottom = -30.0
+color = Color(0.35, 0.85, 0.45, 1)
+
+[node name="JellyBouncer" type="Area2D" parent="Environment"]
+position = Vector2(1080, 200)
+script = ExtResource("5_jelly")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/JellyBouncer"]
+shape = SubResource("CircleShape2D_jelly")
+
+[node name="Visual" type="Node2D" parent="Environment/JellyBouncer"]
+
+[node name="PuddingLayer1" type="Polygon2D" parent="Environment/JellyBouncer/Visual"]
+color = Color(0.1, 0.9, 0.75, 0.95)
+polygon = PackedVector2Array(-36, 12, -30, -8, 0, -18, 30, -8, 36, 12)
+
+[node name="PuddingLayer2" type="Polygon2D" parent="Environment/JellyBouncer/Visual"]
+position = Vector2(0, -6)
+color = Color(1, 0.45, 0.7, 0.95)
+polygon = PackedVector2Array(-24, 6, -18, -10, 0, -16, 18, -10, 24, 6)
+
+[node name="Sparks" type="CPUParticles2D" parent="Environment/JellyBouncer"]
+emitting = false
+one_shot = true
+amount = 18
+explosiveness = 0.9
+direction = Vector2(0, -1)
+spread = 60.0
+initial_velocity_min = 220.0
+initial_velocity_max = 380.0
+color = Color(1, 0.9, 0.3, 1)
+
+[node name="SpinningHammer" type="Area2D" parent="Environment"]
+position = Vector2(800, 110)
+script = ExtResource("6_hammer")
+
+[node name="Axle" type="Polygon2D" parent="Environment/SpinningHammer"]
+color = Color(0.8, 0.85, 0.9, 1)
+polygon = PackedVector2Array(-6, -6, 6, -6, 6, 6, -6, 6)
+
+[node name="Pole" type="ColorRect" parent="Environment/SpinningHammer"]
+offset_left = -5.0
+offset_top = -80.0
+offset_right = 5.0
+offset_bottom = 0.0
+color = Color(1, 0.3, 0.35, 1)
+
+[node name="HammerHead" type="Polygon2D" parent="Environment/SpinningHammer"]
+position = Vector2(0, -85)
+color = Color(1, 0.85, 0.2, 1)
+polygon = PackedVector2Array(-30, -18, 30, -18, 35, 0, 30, 18, -30, 18, -35, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/SpinningHammer"]
+position = Vector2(0, -85)
+shape = SubResource("CircleShape2D_hammer")
+
+[node name="CornGroup" type="Node2D" parent="Environment"]
+
+[node name="Corn1" type="Area2D" parent="Environment/CornGroup"]
+position = Vector2(500, 120)
+script = ExtResource("7_corn")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/CornGroup/Corn1"]
+shape = SubResource("CircleShape2D_corn")
+
+[node name="Visual" type="Polygon2D" parent="Environment/CornGroup/Corn1"]
+color = Color(1, 0.85, 0.1, 1)
+polygon = PackedVector2Array(0, -16, 12, -6, 10, 12, -10, 12, -12, -6)
+
+[node name="Sparkles" type="CPUParticles2D" parent="Environment/CornGroup/Corn1"]
+emitting = false
+one_shot = true
+amount = 12
+explosiveness = 0.85
+color = Color(1, 0.95, 0.4, 1)
+
+[node name="Corn2" type="Area2D" parent="Environment/CornGroup"]
+position = Vector2(800, 0)
+script = ExtResource("7_corn")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/CornGroup/Corn2"]
+shape = SubResource("CircleShape2D_corn")
+
+[node name="Visual" type="Polygon2D" parent="Environment/CornGroup/Corn2"]
+color = Color(1, 0.85, 0.1, 1)
+polygon = PackedVector2Array(0, -16, 12, -6, 10, 12, -10, 12, -12, -6)
+
+[node name="Sparkles" type="CPUParticles2D" parent="Environment/CornGroup/Corn2"]
+emitting = false
+one_shot = true
+amount = 12
+explosiveness = 0.85
+color = Color(1, 0.95, 0.4, 1)
+
+[node name="Corn3" type="Area2D" parent="Environment/CornGroup"]
+position = Vector2(1320, 20)
+script = ExtResource("7_corn")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/CornGroup/Corn3"]
+shape = SubResource("CircleShape2D_corn")
+
+[node name="Visual" type="Polygon2D" parent="Environment/CornGroup/Corn3"]
+color = Color(1, 0.85, 0.1, 1)
+polygon = PackedVector2Array(0, -16, 12, -6, 10, 12, -10, 12, -12, -6)
+
+[node name="Sparkles" type="CPUParticles2D" parent="Environment/CornGroup/Corn3"]
+emitting = false
+one_shot = true
+amount = 12
+explosiveness = 0.85
+color = Color(1, 0.95, 0.4, 1)
+
+[node name="Corn4" type="Area2D" parent="Environment/CornGroup"]
+position = Vector2(1620, 60)
+script = ExtResource("7_corn")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/CornGroup/Corn4"]
+shape = SubResource("CircleShape2D_corn")
+
+[node name="Visual" type="Polygon2D" parent="Environment/CornGroup/Corn4"]
+color = Color(1, 0.85, 0.1, 1)
+polygon = PackedVector2Array(0, -16, 12, -6, 10, 12, -10, 12, -12, -6)
+
+[node name="Sparkles" type="CPUParticles2D" parent="Environment/CornGroup/Corn4"]
+emitting = false
+one_shot = true
+amount = 12
+explosiveness = 0.85
+color = Color(1, 0.95, 0.4, 1)
+
+[node name="FinishGate" type="Area2D" parent="Environment"]
+position = Vector2(2100, 160)
+script = ExtResource("8_gate")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/FinishGate"]
+shape = SubResource("RectangleShape2D_gate")
+
+[node name="Banner" type="Node2D" parent="Environment/FinishGate"]
+position = Vector2(0, -60)
+
+[node name="LeftPole" type="ColorRect" parent="Environment/FinishGate/Banner"]
+offset_left = -50.0
+offset_top = 0.0
+offset_right = -42.0
+offset_bottom = 100.0
+color = Color(1, 0.3, 0.35, 1)
+
+[node name="RightPole" type="ColorRect" parent="Environment/FinishGate/Banner"]
+offset_left = 42.0
+offset_top = 0.0
+offset_right = 50.0
+offset_bottom = 100.0
+color = Color(1, 0.3, 0.35, 1)
+
+[node name="Ribbon" type="ColorRect" parent="Environment/FinishGate/Banner"]
+offset_left = -46.0
+offset_top = 0.0
+offset_right = 46.0
+offset_bottom = 32.0
+color = Color(1, 0.85, 0.2, 1)
+
+[node name="FinishText" type="Label" parent="Environment/FinishGate/Banner/Ribbon"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.85, 0.15, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+text = "🏁 FINISH!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ConfettiLeft" type="CPUParticles2D" parent="Environment/FinishGate"]
+position = Vector2(-46, -60)
+emitting = false
+amount = 32
+lifetime = 1.5
+one_shot = true
+explosiveness = 0.95
+direction = Vector2(-0.7, -1)
+initial_velocity_min = 260.0
+initial_velocity_max = 420.0
+scale_amount_min = 4.0
+scale_amount_max = 8.0
+scale_amount_curve = SubResource("Curve_confetti")
+color = Color(1, 0.3, 0.6, 1)
+
+[node name="ConfettiRight" type="CPUParticles2D" parent="Environment/FinishGate"]
+position = Vector2(46, -60)
+emitting = false
+amount = 32
+lifetime = 1.5
+one_shot = true
+explosiveness = 0.95
+direction = Vector2(0.7, -1)
+initial_velocity_min = 260.0
+initial_velocity_max = 420.0
+scale_amount_min = 4.0
+scale_amount_max = 8.0
+scale_amount_curve = SubResource("Curve_confetti")
+color = Color(0.2, 0.9, 1, 1)
+
+[node name="Player1" parent="." instance=ExtResource("2_chick")]
+position = Vector2(60, 180)
+player_id = 1
+
+[node name="Player2" parent="." instance=ExtResource("2_chick")]
+position = Vector2(140, 180)
+player_id = 2
+
+[node name="TetherRope" type="Node2D" parent="."]
+script = ExtResource("3_rope")
+
+[node name="Line2D" type="Line2D" parent="TetherRope"]
+width = 6.0
+default_color = Color(0.2, 0.9, 1, 0.95)
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Sparks" type="CPUParticles2D" parent="TetherRope"]
+emitting = false
+one_shot = true
+amount = 20
+explosiveness = 0.9
+initial_velocity_min = 180.0
+initial_velocity_max = 320.0
+color = Color(1, 0.9, 0.2, 1)
+
+[node name="CoopCamera2D" type="Camera2D" parent="."]
+position = Vector2(100, 160)
+zoom = Vector2(1.15, 1.15)
+limit_left = -150
+limit_top = -250
+limit_right = 2300
+limit_bottom = 450
+position_smoothing_enabled = true
+position_smoothing_speed = 7.0
+script = ExtResource("4_cam")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="TopBar" type="HBoxContainer" parent="HUD"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 24.0
+offset_top = 20.0
+offset_right = -24.0
+offset_bottom = 68.0
+grow_horizontal = 2
+theme_override_constants/separation = 16
+
+[node name="P1Panel" type="PanelContainer" parent="HUD/TopBar"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud_pill")
+
+[node name="Margin" type="MarginContainer" parent="HUD/TopBar/P1Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 6
+
+[node name="Label" type="Label" parent="HUD/TopBar/P1Panel/Margin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+theme_override_font_sizes/font_size = 13
+text = "🐥 P1 (VÀNG): A/D Chạy | Space Nhảy | S GĂM CHÂN | Shift Phồng"
+
+[node name="P2Panel" type="PanelContainer" parent="HUD/TopBar"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud_pill")
+
+[node name="Margin" type="MarginContainer" parent="HUD/TopBar/P2Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 6
+
+[node name="Label" type="Label" parent="HUD/TopBar/P2Panel/Margin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.7, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "🐔 P2 (HỒNG): Mũi Tên Chạy | Enter Nhảy | Xuống GĂM CHÂN | Shift/P Phồng"
+
+[node name="CornContainer" type="PanelContainer" parent="HUD/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 10
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud_pill")
+
+[node name="Margin" type="MarginContainer" parent="HUD/TopBar/CornContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 6
+
+[node name="CornLabel" type="Label" parent="HUD/TopBar/CornContainer/Margin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "🌽 BẮP VÀNG: 0 / 4"
+
+[node name="SlingshotHint" type="PanelContainer" parent="HUD"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -140.0
+offset_right = 220.0
+offset_bottom = -88.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hint")
+
+[node name="Label" type="Label" parent="HUD/SlingshotHint"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "🎯 DÂY ĐÃ CĂNG HẾT CỠ! BẬT NHẢY ĐỂ BẮN NÁ VÈO QUA VỰC!"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ControlsGuide" type="Label" parent="HUD"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -480.0
+offset_top = -34.0
+offset_right = 480.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.2, 0.25, 0.35, 0.9)
+theme_override_font_sizes/font_size = 13
+text = "💡 MẸO CUỐN: 1 người giữ phím GĂM CHÂN (S/Xuống) làm trụ, người kia kéo căng dây rồi NHẢY để BẮN NÁ qua vực! | R: Chơi lại"
+horizontal_alignment = 1
+
+[node name="VictoryModal" type="PanelContainer" parent="HUD"]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -120.0
+offset_right = 200.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
+
+[node name="VBox" type="VBoxContainer" parent="HUD/VictoryModal"]
+layout_mode = 2
+alignment = 1
+
+[node name="Title" type="Label" parent="HUD/VictoryModal/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.1, 1)
+theme_override_font_sizes/font_size = 24
+text = "🎉 ĐẠI THẮNG VỀ ĐÍCH! 🎉"
+horizontal_alignment = 1
+
+[node name="Sub" type="Label" parent="HUD/VictoryModal/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "2 Chú Gà Đã Vượt Ải Xuất Sắc!
+Bấm phím R để chơi lại thử thách!"
+horizontal_alignment = 1

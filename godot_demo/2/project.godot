@@ -7,9 +7,13 @@ config_version=5
 [application]
 
 config/name="Wobble Chicks: Bouncy Party Run"
-run/main_scene="res://scenes/levels/MainLevel.tscn"
+run/main_scene="res://scenes/levels/Level_1.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[autoload]
+
+GameData="*res://scripts/autoload/GameData.gd"
 
 [display]
 
