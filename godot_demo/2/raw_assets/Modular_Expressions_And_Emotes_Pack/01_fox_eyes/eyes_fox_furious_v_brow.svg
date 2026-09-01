@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90" width="160" height="90">
+  <defs>
+    <radialGradient id="rage_eye" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="60%" stop-color="#fca5a5"/>
+      <stop offset="100%" stop-color="#ef4444"/>
+    </radialGradient>
+  </defs>
+  <!-- Slanted Angry Eyes -->
+  <path d="M20 54 Q45 28 72 50 Q45 74 20 54 Z" fill="url(#rage_eye)" stroke="#4a1503" stroke-width="6"/>
+  <circle cx="48" cy="48" r="10" fill="#7f1d1d"/>
+  <path d="M140 54 Q115 28 88 50 Q115 74 140 54 Z" fill="url(#rage_eye)" stroke="#4a1503" stroke-width="6"/>
+  <circle cx="112" cy="48" r="10" fill="#7f1d1d"/>
+  <!-- Heavy V-shaped furious eyebrows -->
+  <polygon points="12,18 78,42 76,50 14,30" fill="#4a1503"/>
+  <polygon points="148,18 82,42 84,50 146,30" fill="#4a1503"/>
+</svg>

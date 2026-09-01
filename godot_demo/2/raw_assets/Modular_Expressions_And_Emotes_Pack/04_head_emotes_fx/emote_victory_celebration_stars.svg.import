@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bed7mb54nlcxd"
-path="res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
+uid="uid://de0p7q3rxdoyn"
+path="res://.godot/imported/emote_victory_celebration_stars.svg-20369e81d8c5231486435890941ffa3b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icon.svg"
-dest_files=["res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"]
+source_file="res://raw_assets/Modular_Expressions_And_Emotes_Pack/04_head_emotes_fx/emote_victory_celebration_stars.svg"
+dest_files=["res://.godot/imported/emote_victory_celebration_stars.svg-20369e81d8c5231486435890941ffa3b.ctex"]
 
 [params]
 

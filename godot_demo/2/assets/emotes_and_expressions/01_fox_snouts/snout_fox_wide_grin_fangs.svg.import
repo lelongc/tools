@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bed7mb54nlcxd"
-path="res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
+uid="uid://dwf5f1e8g6epw"
+path="res://.godot/imported/snout_fox_wide_grin_fangs.svg-3fc9e8324110454c279a70dc2b1c42aa.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icon.svg"
-dest_files=["res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"]
+source_file="res://assets/emotes_and_expressions/01_fox_snouts/snout_fox_wide_grin_fangs.svg"
+dest_files=["res://.godot/imported/snout_fox_wide_grin_fangs.svg-3fc9e8324110454c279a70dc2b1c42aa.ctex"]
 
 [params]
 

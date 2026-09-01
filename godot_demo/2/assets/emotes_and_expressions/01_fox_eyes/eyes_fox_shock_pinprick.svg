@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90" width="160" height="90">
+  <!-- Gigantic Round Eyes -->
+  <circle cx="45" cy="48" r="34" fill="#ffffff" stroke="#4a1503" stroke-width="7"/>
+  <circle cx="115" cy="48" r="34" fill="#ffffff" stroke="#4a1503" stroke-width="7"/>
+  <!-- Pinprick trembling pupils -->
+  <circle cx="45" cy="48" r="4.5" fill="#1a0b06"/>
+  <circle cx="115" cy="48" r="4.5" fill="#1a0b06"/>
+  <!-- High Arched Shock Brows -->
+  <path d="M18 16 Q45 4 72 16" stroke="#4a1503" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <path d="M88 16 Q115 4 142 16" stroke="#4a1503" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <!-- Shiver Lines -->
+  <line x1="8" y1="48" x2="2" y2="48" stroke="#4a1503" stroke-width="3"/>
+  <line x1="158" y1="48" x2="152" y2="48" stroke="#4a1503" stroke-width="3"/>
+</svg>

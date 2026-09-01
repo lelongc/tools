@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bed7mb54nlcxd"
-path="res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
+uid="uid://c1e4lld58efcc"
+path="res://.godot/imported/snout_wolf_snarl_saliva.svg-1be80cc47855d345a5412adab3066a9c.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icon.svg"
-dest_files=["res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"]
+source_file="res://raw_assets/Modular_Expressions_And_Emotes_Pack/02_raccoon_wolf_hound_expressions/snout_wolf_snarl_saliva.svg"
+dest_files=["res://.godot/imported/snout_wolf_snarl_saliva.svg-1be80cc47855d345a5412adab3066a9c.ctex"]
 
 [params]
 

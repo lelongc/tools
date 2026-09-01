@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 140" width="220" height="140">
+  <!-- Royal Pig Snout -->
+  <ellipse cx="110" cy="46" rx="58" ry="40" fill="#4ade80" stroke="#052e16" stroke-width="7"/>
+  <ellipse cx="86" cy="46" rx="14" ry="20" fill="#052e16"/>
+  <ellipse cx="134" cy="46" rx="14" ry="20" fill="#052e16"/>
+  <!-- Curly Golden Mustache -->
+  <path d="M110 66 C80 60 40 66 26 90 C20 102 40 110 52 96 C70 80 90 76 110 80 C130 76 150 80 168 96 C180 110 200 102 194 90 C180 66 140 60 110 66 Z" fill="#facc15" stroke="#713f12" stroke-width="5"/>
+  <!-- Wide Open Laughing Mouth -->
+  <path d="M60 88 Q110 136 160 88 Z" fill="#450a0a" stroke="#052e16" stroke-width="5"/>
+  <!-- Golden Tooth Highlight -->
+  <polygon points="76,88 88,88 88,104 76,104" fill="#fbbf24" stroke="#78350f" stroke-width="2"/>
+  <!-- Pink Tongue -->
+  <path d="M96 112 Q110 98 124 112 Z" fill="#fb7185"/>
+</svg>

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bed7mb54nlcxd"
-path="res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
+uid="uid://c5quexqovme61"
+path="res://.godot/imported/monocle_popping_shock.svg-21086cdfa7a6121ac12e8bb6d716d344.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icon.svg"
-dest_files=["res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"]
+source_file="res://raw_assets/Modular_Expressions_And_Emotes_Pack/03_baron_pig_special/monocle_popping_shock.svg"
+dest_files=["res://.godot/imported/monocle_popping_shock.svg-21086cdfa7a6121ac12e8bb6d716d344.ctex"]
 
 [params]
 

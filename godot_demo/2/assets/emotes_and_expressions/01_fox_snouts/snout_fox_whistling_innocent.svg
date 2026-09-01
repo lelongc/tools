@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96" width="160" height="96">
+  <!-- Muzzle patch -->
+  <path d="M35 25 Q80 12 125 25 Q145 65 110 85 Q80 95 50 85 Q15 65 35 25 Z" fill="#fff3d9" stroke="#4a1503" stroke-width="5"/>
+  <!-- Black Nose -->
+  <ellipse cx="80" cy="28" rx="14" ry="9" fill="#1a0b06"/>
+  <!-- Puckered round whistling mouth 'O' -->
+  <circle cx="80" cy="58" r="10" fill="#580808" stroke="#4a1503" stroke-width="4"/>
+  <ellipse cx="80" cy="58" rx="4" ry="5" fill="#ff758f"/>
+  <!-- Whistle musical note -->
+  <path d="M106 45 Q114 36 122 42" fill="none" stroke="#0284c7" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="106" cy="46" r="3" fill="#0284c7"/>
+</svg>

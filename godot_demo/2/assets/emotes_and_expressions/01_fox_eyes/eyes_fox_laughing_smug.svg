@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90" width="160" height="90">
+  <!-- Left Happy Arc -->
+  <path d="M20 54 Q45 20 70 54" fill="none" stroke="#4a1503" stroke-width="9" stroke-linecap="round"/>
+  <!-- Right Happy Arc -->
+  <path d="M90 54 Q115 20 140 54" fill="none" stroke="#4a1503" stroke-width="9" stroke-linecap="round"/>
+  <!-- Cute Cheek Blush -->
+  <ellipse cx="38" cy="68" rx="16" ry="9" fill="#ff7070" fill-opacity="0.6"/>
+  <ellipse cx="122" cy="68" rx="16" ry="9" fill="#ff7070" fill-opacity="0.6"/>
+  <!-- Smug Brow Lines -->
+  <path d="M22 22 Q45 14 68 24" stroke="#4a1503" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M92 24 Q115 14 138 22" stroke="#4a1503" stroke-width="6" stroke-linecap="round" fill="none"/>
+</svg>

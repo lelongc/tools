@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96" width="160" height="96">
+  <path d="M35 20 Q80 10 125 20 Q145 65 110 85 Q80 95 50 85 Q15 65 35 20 Z" fill="#fff3d9" stroke="#4a1503" stroke-width="5"/>
+  <ellipse cx="80" cy="24" rx="14" ry="9" fill="#1a0b06"/>
+  <!-- Wide grin -->
+  <path d="M42 42 Q80 84 118 42 Z" fill="#4a0404" stroke="#4a1503" stroke-width="5"/>
+  <!-- Sharp Fangs -->
+  <polygon points="50,42 56,54 62,42" fill="#ffffff" stroke="#4a1503" stroke-width="2"/>
+  <polygon points="98,42 104,54 110,42" fill="#ffffff" stroke="#4a1503" stroke-width="2"/>
+  <!-- Tongue -->
+  <path d="M66 68 Q80 56 94 68 Q80 80 66 68 Z" fill="#fb7185"/>
+</svg>

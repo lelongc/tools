@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 100" width="240" height="100">
+  <!-- Puffy Red Eyelids -->
+  <ellipse cx="75" cy="50" rx="34" ry="32" fill="#fca5a5" stroke="#991b1b" stroke-width="6"/>
+  <ellipse cx="165" cy="50" rx="34" ry="32" fill="#fca5a5" stroke="#991b1b" stroke-width="6"/>
+  <!-- Squeezed Shut Eyes (> <) -->
+  <path d="M55 40 L75 52 L55 64" fill="none" stroke="#991b1b" stroke-width="6" stroke-linecap="round"/>
+  <path d="M185 40 L165 52 L185 64" fill="none" stroke="#991b1b" stroke-width="6" stroke-linecap="round"/>
+  <!-- Gushing Water Fountains Left & Right -->
+  <path d="M45 52 C20 40 10 10 4 20 C-2 30 15 70 42 62 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="4"/>
+  <path d="M195 52 C220 40 230 10 236 20 C242 30 225 70 198 62 Z" fill="#38bdf8" stroke="#0284c7" stroke-width="4"/>
+  <circle cx="10" cy="12" r="4" fill="#bae6fd"/>
+  <circle cx="230" cy="12" r="4" fill="#bae6fd"/>
+</svg>

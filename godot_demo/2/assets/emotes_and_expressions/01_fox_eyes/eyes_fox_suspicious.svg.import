@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bed7mb54nlcxd"
-path="res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
+uid="uid://2prntomjm6lb"
+path="res://.godot/imported/eyes_fox_suspicious.svg-18f4b5a9a31ad4e888150793ff80c8d9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icon.svg"
-dest_files=["res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"]
+source_file="res://assets/emotes_and_expressions/01_fox_eyes/eyes_fox_suspicious.svg"
+dest_files=["res://.godot/imported/eyes_fox_suspicious.svg-18f4b5a9a31ad4e888150793ff80c8d9.ctex"]
 
 [params]
 

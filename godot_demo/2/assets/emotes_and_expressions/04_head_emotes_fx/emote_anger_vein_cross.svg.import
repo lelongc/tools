@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bed7mb54nlcxd"
-path="res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
+uid="uid://cbftw0td6seqj"
+path="res://.godot/imported/emote_anger_vein_cross.svg-c91a3c0d681975bce53669919ea13100.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icon.svg"
-dest_files=["res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"]
+source_file="res://assets/emotes_and_expressions/04_head_emotes_fx/emote_anger_vein_cross.svg"
+dest_files=["res://.godot/imported/emote_anger_vein_cross.svg-c91a3c0d681975bce53669919ea13100.ctex"]
 
 [params]
 

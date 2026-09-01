@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bed7mb54nlcxd"
-path="res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
+uid="uid://cq7ce5qq7b5i0"
+path="res://.godot/imported/eyes_wolf_glowing_red_rage.svg-9d6f2e44300c107c5a434f4f7ee6ecc0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icon.svg"
-dest_files=["res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"]
+source_file="res://raw_assets/Modular_Expressions_And_Emotes_Pack/02_raccoon_wolf_hound_expressions/eyes_wolf_glowing_red_rage.svg"
+dest_files=["res://.godot/imported/eyes_wolf_glowing_red_rage.svg-9d6f2e44300c107c5a434f4f7ee6ecc0.ctex"]
 
 [params]
 

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <radialGradient id="sweat_grad" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="40%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#0369a1" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  <!-- Sweat Drop tilted sideways -->
+  <g transform="rotate(30 64 64)">
+    <path d="M64 12 C64 12 24 56 24 84 C24 106 42 120 64 120 C86 120 104 106 104 84 C104 56 64 12 64 12 Z" 
+          fill="url(#sweat_grad)" stroke="#0c4a6e" stroke-width="6" filter="url(#shadow)"/>
+    <!-- Specular Gloss -->
+    <ellipse cx="48" cy="76" rx="10" ry="20" transform="rotate(-20 48 76)" fill="#ffffff" fill-opacity="0.75"/>
+    <circle cx="44" cy="58" r="4" fill="#ffffff"/>
+  </g>
+</svg>

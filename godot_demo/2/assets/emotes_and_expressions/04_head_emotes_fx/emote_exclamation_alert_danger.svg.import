@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bed7mb54nlcxd"
-path="res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
+uid="uid://dacw7jc7xgm31"
+path="res://.godot/imported/emote_exclamation_alert_danger.svg-d283d3a3f6fdbd8b97bb039a0ece674e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icon.svg"
-dest_files=["res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"]
+source_file="res://assets/emotes_and_expressions/04_head_emotes_fx/emote_exclamation_alert_danger.svg"
+dest_files=["res://.godot/imported/emote_exclamation_alert_danger.svg-d283d3a3f6fdbd8b97bb039a0ece674e.ctex"]
 
 [params]
 

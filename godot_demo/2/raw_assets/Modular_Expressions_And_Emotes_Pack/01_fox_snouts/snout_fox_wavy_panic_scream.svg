@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100" width="160" height="100">
+  <path d="M35 15 Q80 8 125 15 Q145 65 110 85 Q80 95 50 85 Q15 65 35 15 Z" fill="#fff3d9" stroke="#4a1503" stroke-width="5"/>
+  <ellipse cx="80" cy="18" rx="13" ry="8" fill="#1a0b06"/>
+  <!-- Wavy Screaming Mouth -->
+  <path d="M44 38 Q58 44 72 36 Q88 44 102 36 Q116 44 120 40 Q116 84 80 84 Q44 84 44 38 Z" fill="#450a0a" stroke="#4a1503" stroke-width="5"/>
+  <!-- Vibrating tongue -->
+  <ellipse cx="80" cy="74" rx="20" ry="8" fill="#f43f5e"/>
+  <!-- Upper & lower teeth -->
+  <polygon points="56,39 62,48 68,40" fill="#ffffff"/>
+  <polygon points="94,40 100,48 106,39" fill="#ffffff"/>
+</svg>

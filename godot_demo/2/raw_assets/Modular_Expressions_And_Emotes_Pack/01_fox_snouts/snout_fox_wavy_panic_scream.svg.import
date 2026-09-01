@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bed7mb54nlcxd"
-path="res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
+uid="uid://deg1hjqng88xq"
+path="res://.godot/imported/snout_fox_wavy_panic_scream.svg-cbb6209977c2eec4ea0ab24e5cb3223f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icon.svg"
-dest_files=["res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"]
+source_file="res://raw_assets/Modular_Expressions_And_Emotes_Pack/01_fox_snouts/snout_fox_wavy_panic_scream.svg"
+dest_files=["res://.godot/imported/snout_fox_wavy_panic_scream.svg-cbb6209977c2eec4ea0ab24e5cb3223f.ctex"]
 
 [params]
 

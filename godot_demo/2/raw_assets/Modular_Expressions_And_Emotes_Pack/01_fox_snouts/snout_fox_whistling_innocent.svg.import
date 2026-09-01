@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bed7mb54nlcxd"
-path="res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
+uid="uid://dq7bsphge7ja3"
+path="res://.godot/imported/snout_fox_whistling_innocent.svg-9e3d115885490bf9ef6602285aba40f2.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icon.svg"
-dest_files=["res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"]
+source_file="res://raw_assets/Modular_Expressions_And_Emotes_Pack/01_fox_snouts/snout_fox_whistling_innocent.svg"
+dest_files=["res://.godot/imported/snout_fox_whistling_innocent.svg-9e3d115885490bf9ef6602285aba40f2.ctex"]
 
 [params]
 

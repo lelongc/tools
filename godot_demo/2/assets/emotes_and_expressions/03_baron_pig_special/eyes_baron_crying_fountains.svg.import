@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bed7mb54nlcxd"
-path="res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"
+uid="uid://dr45l20sxukxh"
+path="res://.godot/imported/eyes_baron_crying_fountains.svg-69a6d3e212fb634c203008dfa73f28a3.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://icon.svg"
-dest_files=["res://.godot/imported/icon.svg-218a8f2b3041327d8a5756f3a245f83b.ctex"]
+source_file="res://assets/emotes_and_expressions/03_baron_pig_special/eyes_baron_crying_fountains.svg"
+dest_files=["res://.godot/imported/eyes_baron_crying_fountains.svg-69a6d3e212fb634c203008dfa73f28a3.ctex"]
 
 [params]
 

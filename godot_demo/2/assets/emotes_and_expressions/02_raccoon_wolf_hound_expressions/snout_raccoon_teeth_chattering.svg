@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100" width="160" height="100">
+  <ellipse cx="80" cy="46" rx="46" ry="34" fill="#f3f4f6" stroke="#1f2937" stroke-width="5"/>
+  <ellipse cx="80" cy="28" rx="14" ry="10" fill="#111827"/>
+  <!-- Chattering teeth line -->
+  <path d="M52 56 L108 56" stroke="#1f2937" stroke-width="4"/>
+  <!-- Shivering top and bottom teeth -->
+  <polygon points="56,56 60,48 64,56 68,48 72,56 76,48 80,56 84,48 88,56 92,48 96,56 100,48 104,56" fill="#ffffff" stroke="#1f2937" stroke-width="1.5"/>
+  <polygon points="56,56 60,64 64,56 68,64 72,56 76,64 80,56 84,64 88,56 92,64 96,56 100,64 104,56" fill="#ffffff" stroke="#1f2937" stroke-width="1.5"/>
+  <!-- Vibration motion lines -->
+  <line x1="38" y1="52" x2="30" y2="52" stroke="#6b7280" stroke-width="3" stroke-linecap="round"/>
+  <line x1="38" y1="60" x2="28" y2="60" stroke="#6b7280" stroke-width="3" stroke-linecap="round"/>
+  <line x1="122" y1="52" x2="130" y2="52" stroke="#6b7280" stroke-width="3" stroke-linecap="round"/>
+  <line x1="122" y1="60" x2="132" y2="60" stroke="#6b7280" stroke-width="3" stroke-linecap="round"/>
+</svg>

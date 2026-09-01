@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <radialGradient id="vein_grad" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#ff4d4d"/>
+      <stop offset="100%" stop-color="#b91c1c"/>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#450a0a" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+  <!-- Anime Anger Vein 4-way cross -->
+  <path d="M38 18 Q64 38 90 18 Q70 44 90 70 Q64 50 38 70 Q58 44 38 18 Z" 
+        fill="url(#vein_grad)" stroke="#450a0a" stroke-width="7" stroke-linejoin="round" filter="url(#shadow)" transform="scale(1.4) translate(-14,-14)"/>
+  <!-- Highlight on edge -->
+  <path d="M46 28 Q64 42 82 28" fill="none" stroke="#fef08a" stroke-width="3" stroke-linecap="round" transform="scale(1.4) translate(-14,-14)"/>
+</svg>
