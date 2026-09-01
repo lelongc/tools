@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 120" width="180" height="120">
+  <!-- Droopy Jowls & Underbite Teeth -->
+  <path d="M30 40 Q40 90 90 94 Q140 90 150 40 Q170 80 130 104 Q90 116 50 104 Q10 80 30 40 Z" fill="#6f4518" stroke="#38220f" stroke-width="6"/>
+  <ellipse cx="90" cy="44" rx="22" ry="14" fill="#1f1309"/>
+  <!-- Two sticking out bottom tusks -->
+  <polygon points="64,88 72,56 80,88" fill="#ffffff" stroke="#38220f" stroke-width="3"/>
+  <polygon points="100,88 108,56 116,88" fill="#ffffff" stroke="#38220f" stroke-width="3"/>
+  <!-- Drooling Tongue -->
+  <path d="M82 86 C82 110 102 110 102 86 Z" fill="#fb7185" stroke="#9f1239" stroke-width="3"/>
+</svg>

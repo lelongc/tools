@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 80" width="180" height="80">
+  <!-- Smug Half-lidded Eyes -->
+  <circle cx="50" cy="45" r="32" fill="#ffffff" stroke="#052e16" stroke-width="6"/>
+  <circle cx="130" cy="45" r="32" fill="#ffffff" stroke="#052e16" stroke-width="6"/>
+  <circle cx="58" cy="48" r="11" fill="#052e16"/>
+  <circle cx="122" cy="48" r="11" fill="#052e16"/>
+  <!-- Half-closed green eyelids -->
+  <path d="M20 38 Q50 48 80 38 L80 15 L20 15 Z" fill="#22c55e" stroke="#052e16" stroke-width="5"/>
+  <path d="M100 38 Q130 48 160 38 L160 15 L100 15 Z" fill="#22c55e" stroke="#052e16" stroke-width="5"/>
+</svg>

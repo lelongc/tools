@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 90" width="200" height="90">
+  <!-- Ultra-shocked giant cartoon eyes with vibrating pupils -->
+  <circle cx="55" cy="45" r="38" fill="#ffffff" stroke="#052e16" stroke-width="7"/>
+  <circle cx="145" cy="45" r="38" fill="#ffffff" stroke="#052e16" stroke-width="7"/>
+  <circle cx="55" cy="45" r="6" fill="#052e16"/>
+  <circle cx="145" cy="45" r="6" fill="#052e16"/>
+</svg>

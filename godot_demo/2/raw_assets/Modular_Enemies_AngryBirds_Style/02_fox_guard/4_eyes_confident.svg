@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  <!-- Confident half-closed eyes with thick eyebrows -->
+  <ellipse cx="45" cy="45" rx="30" ry="30" fill="#ffffff" stroke="#370617" stroke-width="5"/>
+  <ellipse cx="115" cy="45" rx="30" ry="30" fill="#ffffff" stroke="#370617" stroke-width="5"/>
+  <circle cx="52" cy="48" r="12" fill="#1b0000"/>
+  <circle cx="108" cy="48" r="12" fill="#1b0000"/>
+  <!-- Eyelids (Half closed) -->
+  <path d="M15 32 Q45 42 75 32 L75 15 L15 15 Z" fill="#e85d04" stroke="#370617" stroke-width="5"/>
+  <path d="M85 32 Q115 42 145 32 L145 15 L85 15 Z" fill="#e85d04" stroke="#370617" stroke-width="5"/>
+  <!-- Stern Eyebrows -->
+  <path d="M14 20 L74 34" stroke="#370617" stroke-width="7" stroke-linecap="round"/>
+  <path d="M146 20 L86 34" stroke="#370617" stroke-width="7" stroke-linecap="round"/>
+</svg>

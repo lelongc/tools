@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 120" width="260" height="120">
+  <!-- Royal Red Velvet Cape with White Ermine Fur Trim -->
+  <path d="M20 20 Q130 90 240 20 L230 70 Q130 120 30 70 Z" fill="#991b1b" stroke="#450a0a" stroke-width="6"/>
+  <!-- White Ermine Fur Fluff -->
+  <path d="M20 20 Q130 70 240 20 L234 44 Q130 94 26 44 Z" fill="#ffffff" stroke="#1f2937" stroke-width="4"/>
+  <!-- Ermine Black Spots -->
+  <polygon points="60,34 64,44 56,44" fill="#000000"/>
+  <polygon points="100,42 104,52 96,52" fill="#000000"/>
+  <polygon points="140,46 144,56 136,56" fill="#000000"/>
+  <polygon points="180,42 184,52 176,52" fill="#000000"/>
+  <polygon points="214,34 218,44 210,44" fill="#000000"/>
+</svg>

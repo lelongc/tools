@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 100" width="200" height="100">
+  <!-- Massive Curved Golden Tusks Left and Right -->
+  <defs>
+    <linearGradient id="gold_tusk" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#ca8a04"/>
+      <stop offset="100%" stop-color="#fef08a"/>
+    </linearGradient>
+  </defs>
+  <!-- Left Tusk -->
+  <path d="M50 80 C20 70 10 30 20 10 C30 30 40 50 60 70 Z" fill="url(#gold_tusk)" stroke="#502a03" stroke-width="4" stroke-linejoin="round"/>
+  <!-- Right Tusk -->
+  <path d="M150 80 C180 70 190 30 180 10 C170 30 160 50 140 70 Z" fill="url(#gold_tusk)" stroke="#502a03" stroke-width="4" stroke-linejoin="round"/>
+</svg>

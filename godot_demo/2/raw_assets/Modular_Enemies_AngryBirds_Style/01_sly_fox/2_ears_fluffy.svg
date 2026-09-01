@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 128" width="256" height="128">
+  <!-- Left Ear -->
+  <g transform="rotate(-15 64 64)">
+    <path d="M40 100 Q30 30 64 10 Q98 30 88 100 Z" fill="#f35914" stroke="#4a1503" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M50 90 Q44 45 64 28 Q84 45 78 90 Z" fill="#ffb4b4" stroke="#4a1503" stroke-width="4"/>
+    <path d="M42 80 L52 72 M42 90 L54 84" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <!-- Right Ear -->
+  <g transform="rotate(15 192 64)">
+    <path d="M168 100 Q158 30 192 10 Q226 30 216 100 Z" fill="#f35914" stroke="#4a1503" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M178 90 Q172 45 192 28 Q212 45 206 90 Z" fill="#ffb4b4" stroke="#4a1503" stroke-width="4"/>
+    <path d="M214 80 L204 72 M214 90 L202 84" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>

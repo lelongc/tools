@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96" width="160" height="96">
+  <path d="M40 20 Q80 10 120 20 Q145 65 110 85 Q80 95 50 85 Q15 65 40 20 Z" fill="#ecfccb" stroke="#1a2e05" stroke-width="5"/>
+  <ellipse cx="80" cy="26" rx="12" ry="8" fill="#1a2e05"/>
+  <!-- Manic Evil Grin -->
+  <path d="M48 48 Q80 84 112 48 Z" fill="#14532d" stroke="#1a2e05" stroke-width="4"/>
+  <!-- Jagged teeth -->
+  <polygon points="56,48 62,58 68,48" fill="#ffffff"/>
+  <polygon points="74,48 80,58 86,48" fill="#ffffff"/>
+  <polygon points="92,48 98,58 104,48" fill="#ffffff"/>
+  <!-- Acid Drip -->
+  <path d="M102 54 C102 70 108 72 108 78 C108 82 104 84 102 84 C100 84 96 82 96 78 C96 72 102 70 102 54 Z" fill="#84cc16"/>
+</svg>

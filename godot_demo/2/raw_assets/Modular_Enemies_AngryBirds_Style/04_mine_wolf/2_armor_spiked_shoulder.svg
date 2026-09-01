@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <!-- Heavy Iron Pauldron with Spikes -->
+  <defs>
+    <linearGradient id="iron_metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#94a3b8"/>
+      <stop offset="70%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <path d="M30 50 C30 20 80 20 130 50 L140 110 C90 140 50 130 20 100 Z" fill="url(#iron_metal)" stroke="#0f172a" stroke-width="6"/>
+  <!-- Spikes -->
+  <polygon points="40,30 20,2 60,24" fill="#cbd5e1" stroke="#0f172a" stroke-width="4"/>
+  <polygon points="80,24 84,-6 100,28" fill="#cbd5e1" stroke="#0f172a" stroke-width="4"/>
+  <polygon points="120,38 146,14 130,56" fill="#cbd5e1" stroke="#0f172a" stroke-width="4"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  <!-- Goofy Mismatched Eyes -->
+  <circle cx="45" cy="40" r="34" fill="#ffffff" stroke="#38220f" stroke-width="6"/>
+  <circle cx="115" cy="42" r="26" fill="#ffffff" stroke="#38220f" stroke-width="5"/>
+  <circle cx="48" cy="34" r="14" fill="#000000"/>
+  <circle cx="112" cy="46" r="9" fill="#000000"/>
+  <circle cx="52" cy="30" r="4" fill="#ffffff"/>
+</svg>

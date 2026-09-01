@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96" width="160" height="96">
+  <path d="M35 25 Q80 12 125 25 Q145 65 110 85 Q80 95 50 85 Q15 65 35 25 Z" fill="#ffeedd" stroke="#370617" stroke-width="5"/>
+  <ellipse cx="80" cy="32" rx="15" ry="10" fill="#200508"/>
+  <!-- Confident Tooth Grin -->
+  <path d="M50 54 Q80 76 110 54" stroke="#370617" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <polygon points="65,58 72,66 79,58" fill="#ffffff" stroke="#370617" stroke-width="2"/>
+</svg>

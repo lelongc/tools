@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 160" width="256" height="160">
+  <!-- Wooden pot helmet with iron bands -->
+  <defs>
+    <linearGradient id="wood_pot" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b07d4b"/>
+      <stop offset="100%" stop-color="#6f4518"/>
+    </linearGradient>
+  </defs>
+  <!-- Pot Body -->
+  <path d="M40 100 C36 40 76 16 128 16 C180 16 220 40 216 100 L224 106 L32 106 Z" fill="url(#wood_pot)" stroke="#2b1500" stroke-width="7" stroke-linejoin="round"/>
+  <!-- Iron Band with Rivets -->
+  <path d="M34 84 Q128 100 222 84 L220 102 Q128 118 36 102 Z" fill="#6c757d" stroke="#2b1500" stroke-width="4"/>
+  <circle cx="56" cy="94" r="3" fill="#ffffff"/>
+  <circle cx="96" cy="98" r="3" fill="#ffffff"/>
+  <circle cx="128" cy="100" r="3" fill="#ffffff"/>
+  <circle cx="160" cy="98" r="3" fill="#ffffff"/>
+  <circle cx="200" cy="94" r="3" fill="#ffffff"/>
+  <!-- Top Handle -->
+  <path d="M112 16 L112 6 L144 6 L144 16" fill="none" stroke="#495057" stroke-width="6" stroke-linecap="round"/>
+  <!-- Chin Strap -->
+  <path d="M48 104 Q36 148 70 156" fill="none" stroke="#49280d" stroke-width="5" stroke-linecap="round"/>
+</svg>

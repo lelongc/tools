@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 110" width="160" height="110">
+  <!-- Boar Snout with Big Nostrils -->
+  <ellipse cx="80" cy="55" rx="54" ry="40" fill="#9d174d" stroke="#1f020e" stroke-width="7"/>
+  <ellipse cx="58" cy="55" rx="14" ry="20" fill="#1f020e"/>
+  <ellipse cx="102" cy="55" rx="14" ry="20" fill="#1f020e"/>
+</svg>

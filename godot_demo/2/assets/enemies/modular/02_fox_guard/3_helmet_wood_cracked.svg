@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 160" width="256" height="160">
+  <!-- Damaged Wooden Pot Helmet with cracks & missing chunks -->
+  <defs>
+    <linearGradient id="wood_pot2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a06d3b"/>
+      <stop offset="100%" stop-color="#5f3508"/>
+    </linearGradient>
+  </defs>
+  <path d="M40 100 C36 40 76 16 128 16 C180 16 220 40 216 100 L224 106 L170 106 L160 94 L150 106 L32 106 Z" fill="url(#wood_pot2)" stroke="#2b1500" stroke-width="7"/>
+  <!-- Jagged Cracks -->
+  <path d="M128 18 L134 45 L118 60 L136 84" fill="none" stroke="#200d00" stroke-width="5" stroke-linecap="round"/>
+  <path d="M78 40 L90 54 L84 72" fill="none" stroke="#200d00" stroke-width="4" stroke-linecap="round"/>
+  <!-- Iron Band Damaged -->
+  <path d="M34 84 Q128 100 222 84 L220 102 Q128 118 36 102 Z" fill="#495057" stroke="#2b1500" stroke-width="4"/>
+</svg>

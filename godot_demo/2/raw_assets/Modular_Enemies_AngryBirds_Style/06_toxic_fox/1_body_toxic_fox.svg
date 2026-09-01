@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="toxic_grad" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#bef264"/>
+      <stop offset="70%" stop-color="#65a30d"/>
+      <stop offset="100%" stop-color="#365314"/>
+    </radialGradient>
+  </defs>
+  <!-- Slime Green Body -->
+  <circle cx="128" cy="136" r="96" fill="url(#toxic_grad)" stroke="#1a2e05" stroke-width="8"/>
+  <!-- Slime dripping belly -->
+  <path d="M78 150 Q100 190 128 170 Q156 190 178 150 Q160 210 128 214 Q96 210 78 150 Z" fill="#d9f99d" stroke="#1a2e05" stroke-width="4"/>
+</svg>

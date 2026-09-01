@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="fox_body_grad" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ff8c3b"/>
+      <stop offset="70%" stop-color="#f35914"/>
+      <stop offset="100%" stop-color="#ba3505"/>
+    </radialGradient>
+    <radialGradient id="belly_grad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="80%" stop-color="#fff0d0"/>
+      <stop offset="100%" stop-color="#f8d399"/>
+    </radialGradient>
+  </defs>
+  <!-- Main Chubby Round Body -->
+  <circle cx="128" cy="132" r="96" fill="url(#fox_body_grad)" stroke="#4a1503" stroke-width="8"/>
+  <!-- Belly Patch -->
+  <ellipse cx="128" cy="164" rx="56" ry="48" fill="url(#belly_grad)" stroke="#4a1503" stroke-width="5"/>
+  <!-- Top Head Fluff -->
+  <path d="M118 36 C124 24 132 24 138 36" stroke="#4a1503" stroke-width="6" stroke-linecap="round" fill="none"/>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  <ellipse cx="45" cy="40" rx="32" ry="34" fill="#ffffff" stroke="#4a1503" stroke-width="6"/>
+  <ellipse cx="115" cy="40" rx="32" ry="34" fill="#ffffff" stroke="#4a1503" stroke-width="6"/>
+  <!-- X_X Dizzy marks -->
+  <path d="M30 25 L60 55 M60 25 L30 55" stroke="#741e05" stroke-width="7" stroke-linecap="round"/>
+  <path d="M100 25 L130 55 M130 25 L100 55" stroke="#741e05" stroke-width="7" stroke-linecap="round"/>
+</svg>

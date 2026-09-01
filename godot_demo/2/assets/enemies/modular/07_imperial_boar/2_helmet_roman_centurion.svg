@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 180" width="256" height="180">
+  <!-- Gilded Roman Helmet with Red Feather Crest Brush -->
+  <defs>
+    <linearGradient id="gold_helm" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#854d0e"/>
+    </linearGradient>
+  </defs>
+  <!-- Red Feather Crest -->
+  <path d="M70 70 C70 10 186 10 186 70 Z" fill="#dc2626" stroke="#7f1d1d" stroke-width="6"/>
+  <!-- Crest Bristles -->
+  <line x1="80" y1="70" x2="80" y2="34" stroke="#f87171" stroke-width="4"/>
+  <line x1="104" y1="70" x2="104" y2="20" stroke="#f87171" stroke-width="4"/>
+  <line x1="128" y1="70" x2="128" y2="16" stroke="#f87171" stroke-width="4"/>
+  <line x1="152" y1="70" x2="152" y2="20" stroke="#f87171" stroke-width="4"/>
+  <line x1="176" y1="70" x2="176" y2="34" stroke="#f87171" stroke-width="4"/>
+  <!-- Helmet Dome -->
+  <path d="M40 130 C40 64 80 50 128 50 C176 50 216 64 216 130 L224 140 L32 140 Z" fill="url(#gold_helm)" stroke="#502a03" stroke-width="7"/>
+  <!-- Brow Band -->
+  <rect x="32" y="126" width="192" height="20" rx="4" fill="#ca8a04" stroke="#502a03" stroke-width="4"/>
+</svg>

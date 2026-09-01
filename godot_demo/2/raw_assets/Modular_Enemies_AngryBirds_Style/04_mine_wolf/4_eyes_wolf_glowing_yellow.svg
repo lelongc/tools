@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 80" width="180" height="80">
+  <!-- Sharp aggressive glowing yellow wolf eyes -->
+  <!-- Left Eye -->
+  <path d="M20 48 Q50 18 80 44 Q50 62 20 48 Z" fill="#facc15" stroke="#020617" stroke-width="6"/>
+  <polygon points="44,30 58,46 48,56 40,40" fill="#713f12"/>
+  <!-- Right Eye -->
+  <path d="M160 48 Q130 18 100 44 Q130 62 160 48 Z" fill="#facc15" stroke="#020617" stroke-width="6"/>
+  <polygon points="136,30 122,46 132,56 140,40" fill="#713f12"/>
+  <!-- Angry Slanted Brows -->
+  <path d="M12 24 L86 42" stroke="#020617" stroke-width="9" stroke-linecap="round"/>
+  <path d="M168 24 L94 42" stroke="#020617" stroke-width="9" stroke-linecap="round"/>
+</svg>

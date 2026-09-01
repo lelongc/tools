@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  <!-- Eye Whites -->
+  <ellipse cx="45" cy="40" rx="32" ry="34" fill="#ffffff" stroke="#4a1503" stroke-width="6"/>
+  <ellipse cx="115" cy="40" rx="32" ry="34" fill="#ffffff" stroke="#4a1503" stroke-width="6"/>
+  <!-- Eye Brows -->
+  <path d="M20 16 Q45 6 70 20" stroke="#4a1503" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M90 20 Q115 6 140 16" stroke="#4a1503" stroke-width="6" stroke-linecap="round" fill="none"/>
+</svg>

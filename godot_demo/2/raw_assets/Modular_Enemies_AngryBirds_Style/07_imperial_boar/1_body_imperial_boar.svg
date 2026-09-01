@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="boar_grad" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#831843"/>
+      <stop offset="70%" stop-color="#500724"/>
+      <stop offset="100%" stop-color="#1f020e"/>
+    </radialGradient>
+  </defs>
+  <!-- Rotund imperial boar body -->
+  <circle cx="128" cy="136" r="102" fill="url(#boar_grad)" stroke="#1a020d" stroke-width="9"/>
+</svg>

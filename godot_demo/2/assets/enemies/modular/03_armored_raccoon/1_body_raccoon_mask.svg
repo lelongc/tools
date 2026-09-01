@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="raccoon_body" cx="45%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#9aa0a6"/>
+      <stop offset="70%" stop-color="#5f6368"/>
+      <stop offset="100%" stop-color="#3c4043"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="136" r="96" fill="url(#raccoon_body)" stroke="#202124" stroke-width="8"/>
+  <!-- Bandit Eye Mask Patch -->
+  <path d="M28 114 Q70 86 128 100 Q186 86 228 114 Q218 154 186 150 Q128 132 70 150 Q38 154 28 114 Z" fill="#202124" stroke="#101112" stroke-width="4"/>
+  <!-- Belly Patch -->
+  <ellipse cx="128" cy="180" rx="50" ry="40" fill="#e8eaed" stroke="#202124" stroke-width="4"/>
+</svg>

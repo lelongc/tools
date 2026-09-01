@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 160" width="240" height="160">
+  <!-- Giant Royal Crown with Ruby & Sapphire Gems -->
+  <defs>
+    <linearGradient id="crown_gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="30%" stop-color="#fde047"/>
+      <stop offset="70%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#854d0e"/>
+    </linearGradient>
+  </defs>
+  <path d="M30 130 L40 50 L85 90 L120 30 L155 90 L200 50 L210 130 Z" fill="url(#crown_gold)" stroke="#451a03" stroke-width="7" stroke-linejoin="round"/>
+  <!-- Base Trim -->
+  <rect x="25" y="124" width="190" height="24" rx="6" fill="#ca8a04" stroke="#451a03" stroke-width="4"/>
+  <!-- Rubies & Sapphires -->
+  <circle cx="40" cy="50" r="10" fill="#ef4444" stroke="#451a03" stroke-width="3"/>
+  <circle cx="120" cy="30" r="12" fill="#3b82f6" stroke="#451a03" stroke-width="3"/>
+  <circle cx="200" cy="50" r="10" fill="#ef4444" stroke="#451a03" stroke-width="3"/>
+  <!-- Base Jewels -->
+  <ellipse cx="70" cy="136" rx="8" ry="6" fill="#3b82f6"/>
+  <ellipse cx="120" cy="136" rx="8" ry="6" fill="#ef4444"/>
+  <ellipse cx="170" cy="136" rx="8" ry="6" fill="#3b82f6"/>
+</svg>

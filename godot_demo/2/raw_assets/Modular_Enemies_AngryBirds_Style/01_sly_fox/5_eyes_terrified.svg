@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  <!-- Terrified dilated eyes -->
+  <ellipse cx="45" cy="40" rx="34" ry="36" fill="#ffffff" stroke="#4a1503" stroke-width="6"/>
+  <ellipse cx="115" cy="40" rx="34" ry="36" fill="#ffffff" stroke="#4a1503" stroke-width="6"/>
+  <!-- Tiny shaking pupils -->
+  <circle cx="45" cy="40" r="6" fill="#1a0b06"/>
+  <circle cx="115" cy="40" r="6" fill="#1a0b06"/>
+  <!-- Shiver lines -->
+  <line x1="14" y1="40" x2="6" y2="40" stroke="#4a1503" stroke-width="3"/>
+  <line x1="154" y1="40" x2="146" y2="40" stroke="#4a1503" stroke-width="3"/>
+</svg>

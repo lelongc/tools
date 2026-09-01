@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140" width="120" height="140">
+  <!-- Royal Medal with Egg Insignia -->
+  <polygon points="40,20 60,70 20,70" fill="#dc2626" stroke="#991b1b" stroke-width="3"/>
+  <polygon points="80,20 100,70 60,70" fill="#dc2626" stroke="#991b1b" stroke-width="3"/>
+  <!-- Golden Medal Circle -->
+  <circle cx="60" cy="90" r="30" fill="#facc15" stroke="#713f12" stroke-width="5"/>
+  <!-- Egg Emblem on Medal -->
+  <ellipse cx="60" cy="90" rx="12" ry="16" fill="#ffffff" stroke="#713f12" stroke-width="2"/>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96" width="160" height="96">
+  <!-- Muzzle patch -->
+  <path d="M40 20 Q80 10 120 20 Q145 65 110 85 Q80 95 50 85 Q15 65 40 20 Z" fill="#fff3d9" stroke="#4a1503" stroke-width="5"/>
+  <!-- Black Nose -->
+  <ellipse cx="80" cy="24" rx="14" ry="9" fill="#1a0b06"/>
+  <!-- Wide screaming open mouth -->
+  <path d="M54 44 Q80 38 106 44 Q114 84 80 84 Q46 84 54 44 Z" fill="#580808" stroke="#4a1503" stroke-width="5"/>
+  <!-- Tongue -->
+  <ellipse cx="80" cy="74" rx="18" ry="9" fill="#ff5a77"/>
+  <!-- Top teeth -->
+  <polygon points="68,44 74,52 80,44" fill="#ffffff"/>
+  <polygon points="80,44 86,52 92,44" fill="#ffffff"/>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="wolf_grad" cx="40%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#64748b"/>
+      <stop offset="65%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </radialGradient>
+  </defs>
+  <!-- Bulky aggressive wolf base -->
+  <circle cx="128" cy="136" r="100" fill="url(#wolf_grad)" stroke="#020617" stroke-width="9"/>
+  <!-- Pointed Fur Tufts Left and Right -->
+  <polygon points="26,130 4,146 32,158" fill="#334155" stroke="#020617" stroke-width="4"/>
+  <polygon points="230,130 252,146 224,158" fill="#334155" stroke="#020617" stroke-width="4"/>
+  <!-- Wolf Ears -->
+  <polygon points="46,60 20,4 82,34" fill="#334155" stroke="#020617" stroke-width="6"/>
+  <polygon points="210,60 236,4 174,34" fill="#334155" stroke="#020617" stroke-width="6"/>
+</svg>
