@@ -6,16 +6,10 @@ config_version=5
 
 [application]
 
-config/name="The Bleeding Comb: Obscure Resurrection"
-run/main_scene="res://scenes/Main2D.tscn"
+config/name="Wobble Chicks: Bouncy Party Run"
+run/main_scene="res://scenes/levels/MainLevel.tscn"
 config/features=PackedStringArray("4.3", "GL Compatibility")
 config/icon="res://icon.svg"
-
-[autoload]
-
-PlatformBridge="*res://scripts/autoload/PlatformBridge.gd"
-SaveSystem="*res://scripts/autoload/SaveSystem.gd"
-SoundManager="*res://scripts/autoload/SoundManager.gd"
 
 [display]
 
@@ -33,7 +27,7 @@ pointing/emulate_mouse_from_touch=true
 
 [rendering]
 
-textures/canvas_textures/default_texture_filter=0
+textures/canvas_textures/default_texture_filter=1
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/vram_compression/import_etc2_astc=true

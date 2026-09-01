@@ -1,6 +1,141 @@
 {
-  "active_game_id": "game_crossy_rooster",
+  "active_game_id": "game_wobble_chicks",
   "games": [
+    {
+      "id": "game_wobble_chicks",
+      "title": "Wobble Chicks: Bouncy Party Run (Gà Con Núng Nính Vượt Ải)",
+      "genre": "3D/2.5D Cute Physics Party Obstacle Platformer",
+      "art_style": "3D Cute Chibi Pop Art, Stylized Pixar & Fall Guys Aesthetic, Glossy Clay Render, Candy Colors",
+      "raw_input_story": "Game vượt chướng ngại vật tiệc tùng vui nhộn: Chú gà con Piyo tròn vo núng nính vượt qua các bãi thạch nhún cầu vồng, búa kẹo mút khổng lồ, cối xay gió bánh quy để về đích.",
+      "full_story": {
+        "synopsis": "Hội thi Vượt Ải Kẹo Ngọt Xứ Sở Gà Con: Điều khiển bé gà con tròn xoe nhảy nhót, phồng to như bóng bay hoặc cuộn tròn lăn tốc độ vượt qua các bẫy hài hước.",
+        "protagonist": "Bé Gà Piyo (Tròn xoe như quả trứng, lông vàng tươi, mắt to lấp lánh, biết phồng to và lăn tròn).",
+        "antagonists": "Búa Kẹo Mút Xoay 360, Găng Tay Đấm Lò Xo, Cối Xay Gió Bánh Quy, Vỏ Chuối Trơn Trượt.",
+        "environment": "Thung lũng Bánh Ngọt, Bầu trời Kẹo Bông Gòn, Dãy núi Donut.",
+        "gameplay_elements": "Vật lý Jelly đàn hồi núng nính (Squash & Stretch), Bệ nhún thạch nảy tưng tưng, Phồng bong bóng bay lơ lửng, Lăn tròn tốc độ cao."
+      },
+      "assets": [
+        {
+          "id": "asset_piyo_classic",
+          "name": "Gà Con Vàng Cơ Bản (Piyo - The Classic Chick)",
+          "category": "characters",
+          "format": "image",
+          "format_reason": "Nhân vật 3D Chibi chất liệu đất sét bóng bẩy",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "Full body 3D cute round baby chick running cheerfully, bouncing jelly physics, solid green screen background",
+          "prompt_image": "Full body centered front view of a super cute round egg-shaped baby chick named Piyo, glossy bright yellow soft feather, big sparkling chibi black eyes with cute highlights, tiny orange beak, small rounded wings, chubby short orange legs, tiny cute heart-shaped feather tuft on top of head, happy cheerful expression, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, vibrant cheerful pastel and candy color palette, rounded bouncy soft shapes, 4k resolution, raytraced soft lighting, clean solid vibrant green background for chroma key, centered asset, game ready",
+          "animations": [
+            "idle",
+            "walk",
+            "run",
+            "squash_land",
+            "puff_float",
+            "roll"
+          ]
+        },
+        {
+          "id": "asset_shelly_eggshell",
+          "name": "Gà Con Đội Vỏ Trứng (Shelly - Eggshell Chick)",
+          "category": "characters",
+          "format": "image",
+          "format_reason": "Skin nhân vật độc đáo",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "",
+          "prompt_image": "Full body centered front view of an adorable round baby chick wearing a cracked pastel pink eggshell with yellow polka dots on its head like a hat and pants, cream white fluffy soft body, blushing pink cheeks, sparkling cartoon eyes, tiny orange beak, playful innocent pose, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, vibrant cheerful pastel and candy color palette, rounded bouncy soft shapes, 4k resolution, clean solid vibrant green background for chroma key, centered asset",
+          "animations": [
+            "idle",
+            "walk",
+            "roll"
+          ]
+        },
+        {
+          "id": "asset_lollipop_hammer",
+          "name": "Búa Kẹo Mút Khổng Lồ (Giant Lollipop Hammer)",
+          "category": "obstacles",
+          "format": "image",
+          "format_reason": "Chướng ngại vật xoay tròn",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "",
+          "prompt_image": "Front view of a giant toy obstacle hammer made of a huge glossy swirl rainbow lollipop, vibrant pastel pink cyan yellow spiral pattern, sugar glazed candy finish, striped red and white candy cane handle, shiny mechanical axle joint in middle, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, vibrant candy colors, 4k resolution, clean solid vibrant green background for chroma key, centered asset",
+          "animations": [
+            "rotate_spin"
+          ]
+        },
+        {
+          "id": "asset_rainbow_jelly_pad",
+          "name": "Bệ Nhún Thạch Pudding (Rainbow Jelly Bouncer Pad)",
+          "category": "obstacles",
+          "format": "image",
+          "format_reason": "Bệ nhún đàn hồi",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "",
+          "prompt_image": "Isometric view of a bouncy three-tiered rainbow pudding trampoline pad, glossy translucent gelatin jelly material, glowing vibrant strawberry pink, lemon yellow and mint turquoise layers, cute chick footprint embossed on top surface, soft bouncy rubbery look, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, 4k resolution, clean solid vibrant green background for chroma key, centered asset",
+          "animations": [
+            "bounce_squish"
+          ]
+        },
+        {
+          "id": "asset_spring_boxing_glove",
+          "name": "Găng Tay Đấm Lò Xo (Spring Boxing Glove Trap)",
+          "category": "obstacles",
+          "format": "image",
+          "format_reason": "Bẫy lò xo phóng",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "",
+          "prompt_image": "Side view of a funny toy trap obstacle, cute bright red glossy cartoon boxing glove attached to a shiny silver spiral spring extending out from a colorful striped wooden surprise toy box, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, vibrant cheerful candy colors, 4k resolution, clean solid vibrant green background for chroma key, centered asset",
+          "animations": [
+            "punch_out"
+          ]
+        },
+        {
+          "id": "asset_cookie_windmill",
+          "name": "Cối Xay Gió Bánh Quy (Cookie Windmill Fan)",
+          "category": "obstacles",
+          "format": "image",
+          "format_reason": "Quạt gió đẩy lùi",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "",
+          "prompt_image": "Front view of a cute cartoon obstacle windmill fan, tower made of golden waffle cone with cream frosting, 4 rotating fan blades shaped like pastel macaron cookies and wafer biscuits, blowing cheerful wind swirls, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, vibrant candy colors, 4k resolution, clean solid vibrant green background for chroma key, centered asset",
+          "animations": [
+            "spin"
+          ]
+        },
+        {
+          "id": "asset_golden_corn",
+          "name": "Bắp Ngô Vàng Lấp Lánh (Golden Corn Kernel)",
+          "category": "items",
+          "format": "image",
+          "format_reason": "Vật phẩm thu thập tiền tệ",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "",
+          "prompt_image": "Centered glowing collectible coin shaped like a plump golden corn kernel with a cute happy smiling face, shiny polished 24k gold and honey glaze material, floating with magical golden sparkle stars, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, vibrant candy colors, 4k resolution, clean solid vibrant green background for chroma key, centered asset",
+          "animations": [
+            "spin_float"
+          ]
+        },
+        {
+          "id": "asset_sweet_finish_gate",
+          "name": "Cổng Về Đích Bánh Kem (Sweet Victory Finish Gate)",
+          "category": "items",
+          "format": "image",
+          "format_reason": "Cổng chiến thắng",
+          "priority": "Cao",
+          "status": "pending",
+          "prompt_video": "",
+          "prompt_image": "Front view of a grand victory finish line archway made of two giant candy canes, decorated with a joyful colorful FINISH banner on top, celebration party confetti poppers bursting on the sides, two spinning golden star trophies, 3D cute chibi pop art, stylized Pixar and Fall Guys aesthetic, smooth glossy clay render, soft ambient occlusion, vibrant candy colors, 4k resolution, clean solid vibrant green background for chroma key, centered asset",
+          "animations": [
+            "celebrate"
+          ]
+        }
+      ]
+    },
     {
       "id": "game_rooster_survivor",
       "title": "Rooster Survivor: Đại Chiến Nông Trại (1-Thumb Roguelite)",
