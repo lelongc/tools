@@ -1,0 +1,51 @@
+[gd_scene format=3 uid="uid://cx6g3k7n1e8p1"]
+
+[ext_resource type="Script" path="res://scripts/projectiles/NormalEgg.gd" id="1_script"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 16.0
+
+[node name="NormalEgg" type="RigidBody2D"]
+collision_layer = 2
+collision_mask = 7
+mass = 3.5
+continuous_cd = 1
+contact_monitor = true
+max_contacts_reported = 4
+script = ExtResource("1_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1")
+
+[node name="Trail" type="CPUParticles2D" parent="."]
+amount = 16
+lifetime = 0.3
+emission_shape = 1
+emission_sphere_radius = 6.0
+gravity = Vector2(0, 50)
+scale_amount_min = 3.0
+scale_amount_max = 5.0
+color = Color(1, 0.95, 0.8, 0.6)
+
+[node name="VisualRoot" type="Node2D" parent="."]
+
+[node name="EggBody" type="Polygon2D" parent="VisualRoot"]
+color = Color(0.98, 0.94, 0.82, 1)
+polygon = PackedVector2Array(0, -18, 12, -8, 14, 8, 8, 18, -8, 18, -14, 8, -12, -8)
+
+[node name="Spot" type="Polygon2D" parent="VisualRoot"]
+color = Color(0.85, 0.75, 0.55, 1)
+polygon = PackedVector2Array(2, -6, 8, -4, 6, 2, 0, 0)
+
+[node name="BreakFX" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 14
+one_shot = true
+explosiveness = 0.9
+spread = 180.0
+gravity = Vector2(0, 450)
+initial_velocity_min = 80.0
+initial_velocity_max = 160.0
+scale_amount_min = 3.0
+scale_amount_max = 6.0
+color = Color(0.98, 0.94, 0.82, 1)

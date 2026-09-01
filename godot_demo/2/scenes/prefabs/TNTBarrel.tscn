@@ -1,0 +1,66 @@
+[gd_scene format=3 uid="uid://dm2k4v8p1x7q9"]
+
+[ext_resource type="Script" path="res://scripts/destructibles/TNTBarrel.gd" id="1_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(36, 46)
+
+[node name="TNTBarrel" type="RigidBody2D"]
+collision_layer = 4
+collision_mask = 7
+mass = 2.5
+contact_monitor = true
+max_contacts_reported = 4
+script = ExtResource("1_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")
+
+[node name="Visual" type="Polygon2D" parent="."]
+color = Color(0.9, 0.2, 0.15, 1)
+polygon = PackedVector2Array(-18, -23, 18, -23, 18, 23, -18, 23)
+
+[node name="BandTop" type="Polygon2D" parent="Visual"]
+color = Color(0.2, 0.2, 0.2, 1)
+polygon = PackedVector2Array(-18, -18, 18, -18, 18, -13, -18, -13)
+
+[node name="BandBot" type="Polygon2D" parent="Visual"]
+color = Color(0.2, 0.2, 0.2, 1)
+polygon = PackedVector2Array(-18, 13, 18, 13, 18, 18, -18, 18)
+
+[node name="TNTLabel" type="Label" parent="Visual"]
+offset_left = -16.0
+offset_top = -10.0
+offset_right = 16.0
+offset_bottom = 10.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "TNT"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="FuseSparks" type="CPUParticles2D" parent="."]
+position = Vector2(0, -24)
+emitting = false
+amount = 12
+lifetime = 0.25
+spread = 180.0
+initial_velocity_min = 30.0
+initial_velocity_max = 60.0
+scale_amount_min = 2.0
+scale_amount_max = 4.0
+color = Color(1, 0.9, 0.2, 1)
+
+[node name="ExplosionFX" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 60
+lifetime = 0.6
+one_shot = true
+explosiveness = 0.95
+spread = 180.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 180.0
+initial_velocity_max = 350.0
+scale_amount_min = 8.0
+scale_amount_max = 18.0
+color = Color(1, 0.45, 0.1, 1)

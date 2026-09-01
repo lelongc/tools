@@ -1,0 +1,68 @@
+[gd_scene format=3 uid="uid://b8m3k9v2x1p7q"]
+
+[ext_resource type="Script" path="res://scripts/enemies/BunkerMonster.gd" id="1_script"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
+radius = 18.0
+
+[node name="BunkerMonster" type="RigidBody2D"]
+collision_layer = 4
+collision_mask = 7
+mass = 1.5
+contact_monitor = true
+max_contacts_reported = 4
+script = ExtResource("1_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1")
+
+[node name="VisualRoot" type="Node2D" parent="."]
+
+[node name="Body" type="Polygon2D" parent="VisualRoot"]
+color = Color(0.95, 0.45, 0.15, 1)
+polygon = PackedVector2Array(-18, -8, -12, -22, -4, -14, 4, -14, 12, -22, 18, -8, 18, 12, 10, 18, -10, 18, -18, 12)
+
+[node name="Cheeks" type="Polygon2D" parent="VisualRoot"]
+color = Color(1, 0.9, 0.8, 1)
+polygon = PackedVector2Array(-14, 0, -4, 4, 4, 4, 14, 0, 10, 14, -10, 14)
+
+[node name="EyeL" type="Polygon2D" parent="VisualRoot"]
+position = Vector2(-7, -4)
+color = Color(0.1, 0.1, 0.1, 1)
+polygon = PackedVector2Array(-4, -4, 4, -4, 4, 4, -4, 4)
+
+[node name="EyeR" type="Polygon2D" parent="VisualRoot"]
+position = Vector2(7, -4)
+color = Color(0.1, 0.1, 0.1, 1)
+polygon = PackedVector2Array(-4, -4, 4, -4, 4, 4, -4, 4)
+
+[node name="Mouth" type="Polygon2D" parent="VisualRoot"]
+position = Vector2(0, 6)
+color = Color(0.1, 0.1, 0.1, 1)
+polygon = PackedVector2Array(-3, -2, 3, -2, 0, 3)
+
+[node name="DizzyStars" type="Node2D" parent="VisualRoot"]
+position = Vector2(0, -26)
+
+[node name="Star1" type="Polygon2D" parent="VisualRoot/DizzyStars"]
+position = Vector2(-12, 0)
+color = Color(1, 0.9, 0.2, 1)
+polygon = PackedVector2Array(0, -4, 3, -1, 6, 0, 3, 2, 0, 5, -2, 2, -5, 0, -2, -1)
+
+[node name="Star2" type="Polygon2D" parent="VisualRoot/DizzyStars"]
+position = Vector2(12, 0)
+color = Color(1, 0.9, 0.2, 1)
+polygon = PackedVector2Array(0, -4, 3, -1, 6, 0, 3, 2, 0, 5, -2, 2, -5, 0, -2, -1)
+
+[node name="PoofFX" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 18
+lifetime = 0.4
+one_shot = true
+explosiveness = 0.9
+spread = 180.0
+initial_velocity_min = 60.0
+initial_velocity_max = 140.0
+scale_amount_min = 4.0
+scale_amount_max = 8.0
+color = Color(0.9, 0.9, 0.9, 0.8)

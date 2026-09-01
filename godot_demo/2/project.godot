@@ -1,37 +1,37 @@
 ; Engine configuration file.
 ; It's best edited using the editor UI and not directly,
-; but for standard project initialization it is generated here.
-
-config_version=5
+; but it can also be edited by hand.
 
 [application]
 
-config/name="Wobble Chicks: Bouncy Party Run"
+config/name="Cluck & Drop: Bunker Buster"
+config/description="Physics Puzzle Drop Bomb Eggs Game"
 run/main_scene="res://scenes/levels/Level_1.tscn"
-config/features=PackedStringArray("4.3", "GL Compatibility")
+config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
 [autoload]
 
-GameData="*res://scripts/autoload/GameData.gd"
+GameManager="*res://scripts/core/GameManager.gd"
 
 [display]
 
-window/size/viewport_width=1280
-window/size/viewport_height=720
-window/size/window_width_override=1280
-window/size/window_height_override=720
+window/size/viewport_width=540
+window/size/viewport_height=960
+window/size/window_width_override=540
+window/size/window_height_override=960
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep_width"
+window/stretch/aspect="keep"
+window/handheld/orientation=1
 
-[input_devices]
+[input]
 
-pointing/emulate_touch_from_mouse=true
-pointing/emulate_mouse_from_touch=true
+[physics]
+
+2d/default_gravity=980.0
+2d/default_gravity_vector=Vector2(0, 1)
 
 [rendering]
 
-textures/canvas_textures/default_texture_filter=1
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-textures/vram_compression/import_etc2_astc=true

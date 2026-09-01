@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://c8n4y2v7m1p9q"]
+
+[ext_resource type="Script" path="res://scripts/destructibles/DestructibleBlock.gd" id="1_script"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
+size = Vector2(120, 24)
+
+[node name="DestructibleBlock" type="RigidBody2D"]
+collision_layer = 4
+collision_mask = 7
+mass = 3.0
+contact_monitor = true
+max_contacts_reported = 4
+script = ExtResource("1_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_1")
+
+[node name="Visual" type="Polygon2D" parent="."]
+color = Color(0.76, 0.52, 0.28, 1)
+polygon = PackedVector2Array(-60, -12, 60, -12, 60, 12, -60, 12)
+
+[node name="CrackOverlay" type="Line2D" parent="."]
+visible = false
+points = PackedVector2Array(-30, -10, -10, 4, 15, -6, 40, 8)
+width = 2.0
+default_color = Color(0.2, 0.15, 0.1, 0.85)
+
+[node name="FractureFX" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 20
+one_shot = true
+explosiveness = 0.95
+spread = 180.0
+gravity = Vector2(0, 500)
+initial_velocity_min = 60.0
+initial_velocity_max = 180.0
+scale_amount_min = 3.0
+scale_amount_max = 7.0
+color = Color(0.76, 0.52, 0.28, 1)
