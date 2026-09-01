@@ -1,13 +1,16 @@
 extends RigidBody2D
 class_name BunkerMonster
 
-@export var monster_type: String = "fox" # "fox", "raccoon_helmet", "boss_pig"
+const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
+
+@export var monster_type: String = "fox"
 @export var max_health: float = 60.0
 @export var score_value: int = 800
 
 var current_health: float = 60.0
 var is_defeated: bool = false
 var is_panicking: bool = false
+var spawn_immunity: float = 0.25
 
 @onready var visual_root: Node2D = $VisualRoot
 @onready var eye_left: Polygon2D = get_node_or_null("VisualRoot/EyeL")
@@ -24,12 +27,13 @@ func _ready() -> void:
 	if dizzy_stars: dizzy_stars.visible = false
 
 func _process(delta: float) -> void:
+	if spawn_immunity > 0.0:
+		spawn_immunity -= delta
+
 	if is_defeated: return
 
-	# Quét xem có quả trứng hoặc khối đá nào đang rơi thẳng xuống đầu không để biểu cảm HOẢNG SỢ (Panic)
 	_check_for_falling_threats()
 
-	# Xoay nhẹ mắt rung rinh
 	if is_panicking:
 		if visual_root:
 			visual_root.position.x = sin(Time.get_ticks_msec() * 0.05) * 3.0
@@ -38,7 +42,6 @@ func _process(delta: float) -> void:
 			visual_root.position.x = 0.0
 
 func _check_for_falling_threats() -> void:
-	# Tìm các vật thể ở trên đầu trong bán kính 220px
 	var space_state = get_world_2d().direct_space_state
 	var query = PhysicsRayQueryParameters2D.create(global_position, global_position + Vector2(0, -220.0))
 	query.collide_with_bodies = true
@@ -57,26 +60,24 @@ func _set_panic_state(panic: bool) -> void:
 		if panic:
 			eye_left.scale = Vector2(1.4, 1.4)
 			eye_right.scale = Vector2(1.4, 1.4)
-			mouth.scale = Vector2(1.5, 1.5) # Há hốc mồm
+			mouth.scale = Vector2(1.5, 1.5)
 		else:
 			eye_left.scale = Vector2.ONE
 			eye_right.scale = Vector2.ONE
 			mouth.scale = Vector2.ONE
 
 func _on_impact(body: Node) -> void:
-	if is_defeated: return
+	if is_defeated or spawn_immunity > 0.0: return
 	if body is RigidBody2D:
 		var rel_vel = (linear_velocity - body.linear_velocity).length()
-		# Bị vật thể nặng đè hoặc va chạm mạnh
-		if rel_vel > 110.0:
-			var crush_dmg = (rel_vel - 110.0) * (body.mass * 0.6) + 30.0
+		if rel_vel > 130.0:
+			var crush_dmg = (rel_vel - 130.0) * (body.mass * 0.6) + 30.0
 			take_damage(crush_dmg, body.global_position)
 
 func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
-	if is_defeated: return
+	if is_defeated or spawn_immunity > 0.0: return
 	current_health -= amount
 
-	# Hiệu ứng nháy đỏ khi ăn đòn
 	var tween = create_tween()
 	tween.tween_property(visual_root, "modulate", Color(1.0, 0.3, 0.3), 0.05)
 	tween.tween_property(visual_root, "modulate", Color.WHITE, 0.08)
@@ -88,15 +89,12 @@ func _defeat_monster() -> void:
 	if is_defeated: return
 	is_defeated = true
 
-	# Báo điểm cho GameManager
 	GameManager.register_enemy_defeat(self, score_value)
-	CameraShake2D.add_trauma(0.2)
+	CameraShake.add_trauma(0.2)
 
-	# Vô hiệu hóa va chạm
 	$CollisionShape2D.set_deferred("disabled", true)
-	freeze = true
+	set_deferred("freeze", true)
 
-	# Hiệu ứng dẹp lép như bánh tráng (Squash Flat)
 	if visual_root:
 		var tween = create_tween().set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
 		tween.tween_property(visual_root, "scale", Vector2(1.6, 0.25), 0.12)

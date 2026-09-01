@@ -1,0 +1,134 @@
+[gd_scene format=3 uid="uid://b1n8k4p7x2q9w"]
+
+[ext_resource type="Script" path="res://scripts/core/LevelController.gd" id="1_controller"]
+[ext_resource type="Script" path="res://scripts/core/CameraShake2D.gd" id="2_camera"]
+[ext_resource type="PackedScene" path="res://scenes/prefabs/ChickenBomber.tscn" id="3_chicken"]
+[ext_resource type="PackedScene" path="res://scenes/prefabs/GameHUD.tscn" id="4_hud"]
+[ext_resource type="PackedScene" path="res://scenes/prefabs/DestructibleBlock.tscn" id="5_block"]
+[ext_resource type="PackedScene" path="res://scenes/prefabs/TNTBarrel.tscn" id="6_tnt"]
+[ext_resource type="PackedScene" path="res://scenes/prefabs/BunkerMonster.tscn" id="7_enemy"]
+
+[sub_resource type="RectangleShape2D" id="Wall_Left"]
+size = Vector2(30, 520)
+
+[sub_resource type="RectangleShape2D" id="Wall_Right"]
+size = Vector2(30, 520)
+
+[sub_resource type="RectangleShape2D" id="Floor_Bottom"]
+size = Vector2(380, 40)
+
+[sub_resource type="RectangleShape2D" id="Ledge_Left"]
+size = Vector2(140, 40)
+
+[sub_resource type="RectangleShape2D" id="Ledge_Right"]
+size = Vector2(140, 40)
+
+[node name="Level_1" type="Node2D"]
+script = ExtResource("1_controller")
+level_id = 1
+available_eggs = ["normal", "bomb", "normal"]
+
+[node name="CameraShake2D" type="Camera2D" parent="."]
+position = Vector2(270, 480)
+script = ExtResource("2_camera")
+
+[node name="Background" type="Node2D" parent="."]
+z_index = -10
+
+[node name="Sky" type="Polygon2D" parent="Background"]
+color = Color(0.48, 0.78, 0.96, 1)
+polygon = PackedVector2Array(0, 0, 540, 0, 540, 400, 0, 400)
+
+[node name="Clouds" type="Polygon2D" parent="Background/Sky"]
+color = Color(1, 1, 1, 0.6)
+polygon = PackedVector2Array(40, 80, 110, 60, 160, 80, 140, 110, 50, 110)
+
+[node name="Clouds2" type="Polygon2D" parent="Background/Sky"]
+color = Color(1, 1, 1, 0.6)
+polygon = PackedVector2Array(340, 120, 420, 95, 480, 120, 450, 150, 360, 150)
+
+[node name="UndergroundDirt" type="Polygon2D" parent="Background"]
+color = Color(0.3, 0.22, 0.15, 1)
+polygon = PackedVector2Array(0, 400, 540, 400, 540, 960, 0, 960)
+
+[node name="GrassLeft" type="Polygon2D" parent="Background"]
+color = Color(0.38, 0.76, 0.28, 1)
+polygon = PackedVector2Array(0, 390, 130, 390, 130, 415, 0, 415)
+
+[node name="GrassRight" type="Polygon2D" parent="Background"]
+color = Color(0.38, 0.76, 0.28, 1)
+polygon = PackedVector2Array(410, 390, 540, 390, 540, 415, 410, 415)
+
+[node name="CavernInterior" type="Polygon2D" parent="Background"]
+color = Color(0.18, 0.13, 0.09, 1)
+polygon = PackedVector2Array(115, 400, 425, 400, 425, 875, 115, 875)
+
+[node name="BunkerBoundaries" type="StaticBody2D" parent="."]
+collision_layer = 1
+collision_mask = 7
+
+[node name="ColWallL" type="CollisionShape2D" parent="BunkerBoundaries"]
+position = Vector2(100, 640)
+shape = SubResource("Wall_Left")
+
+[node name="ColWallR" type="CollisionShape2D" parent="BunkerBoundaries"]
+position = Vector2(440, 640)
+shape = SubResource("Wall_Right")
+
+[node name="ColFloor" type="CollisionShape2D" parent="BunkerBoundaries"]
+position = Vector2(270, 890)
+shape = SubResource("Floor_Bottom")
+
+[node name="ColLedgeL" type="CollisionShape2D" parent="BunkerBoundaries"]
+position = Vector2(50, 410)
+shape = SubResource("Ledge_Left")
+
+[node name="ColLedgeR" type="CollisionShape2D" parent="BunkerBoundaries"]
+position = Vector2(490, 410)
+shape = SubResource("Ledge_Right")
+
+[node name="BunkerStructure" type="Node2D" parent="."]
+
+[node name="Floor2_PillarL" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(170, 770)
+rotation = 1.5708
+material_type = "wood"
+
+[node name="Floor2_PillarR" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(370, 770)
+rotation = 1.5708
+material_type = "wood"
+
+[node name="Floor2_Beam" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(270, 700)
+material_type = "wood"
+
+[node name="Floor1_PillarL" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(180, 580)
+rotation = 1.5708
+material_type = "wood"
+
+[node name="Floor1_PillarR" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(360, 580)
+rotation = 1.5708
+material_type = "wood"
+
+[node name="Roof_Beam" parent="BunkerStructure" instance=ExtResource("5_block")]
+position = Vector2(270, 500)
+material_type = "wood"
+
+[node name="TNT" parent="BunkerStructure" instance=ExtResource("6_tnt")]
+position = Vector2(320, 660)
+
+[node name="Enemies" type="Node2D" parent="BunkerStructure"]
+
+[node name="Fox1" parent="BunkerStructure/Enemies" groups=["Enemies"] instance=ExtResource("7_enemy")]
+position = Vector2(220, 660)
+
+[node name="Fox2" parent="BunkerStructure/Enemies" groups=["Enemies"] instance=ExtResource("7_enemy")]
+position = Vector2(270, 840)
+
+[node name="ChickenBomber" parent="." instance=ExtResource("3_chicken")]
+position = Vector2(270, 110)
+
+[node name="GameHUD" parent="." instance=ExtResource("4_hud")]

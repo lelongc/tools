@@ -1,4 +1,5 @@
 extends Camera2D
+class_name CameraShake2D
 
 static var instance: Camera2D = null
 

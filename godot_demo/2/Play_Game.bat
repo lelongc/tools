@@ -1,25 +1,20 @@
 @echo off
-title WOBBLE CHICKS: BOUNCY PARTY RUN - 2-PLAYER CO-OP SLINGSHOT
+title CLUCK ^& DROP: BUNKER BUSTER - PHYSICS PUZZLE DESTRUCTION
 echo =========================================================================
-echo   🐣 DANG KHOI DONG WOBBLE CHICKS: BOUNCY PARTY RUN 🐣
+echo   🐔 CLUCK ^& DROP: BUNKER BUSTER (GA THA TRUNG PHA SAP HAM) 🥚
 echo   ---------------------------------------------------------------------
-echo   🎮 DIEU KHIEN 2 NGUOI CHOI (LOCAL 2-PLAYER CO-OP):
+echo   🎮 HUONG DAN DIEU KHIEN (1 NTYLE / MOUSE / TOUCH):
 echo.
-echo   🐥 NGUOI CHOI 1 (GA VANG PIYO):
-echo   - Phim A / D: Di chuyen Trai / Phai (Waddle)
-echo   - Phim Space / W: Nhay len cao (Squash ^& Stretch)
-echo   - Phim S (Giu chat): GAM CHAN LAM TRU (Anchor)
-echo   - Phim Shift (Giu): PHONG BONG BONG (Puff ^& Float)
+echo   - NHAN VA RE CHUOT (o nua tren man hinh):
+echo     Ga Me se bay den vi tri va hien vach ngam quy dao cham bi.
+echo   - NHA CHUOT:
+echo     Ga Me se "ran de" tha trung roi thang xuong ham nguc!
 echo.
-echo   🐔 NGUOI CHOI 2 (GA HONG SHELLY):
-echo   - Phim Mui Ten Trai / Phai: Di chuyen Trai / Phai
-echo   - Phim Enter / Mui Ten Len: Nhay len cao
-echo   - Phim Mui Ten Xuong (Giu chat): GAM CHAN LAM TRU (Anchor)
-echo   - Phim Shift / P / Dau Cham: PHONG BONG BONG (Puff ^& Float)
+echo   🎯 CAC LOAI TRUNG DI BIEN:
+echo   - 🥚 TRUNG THUONG: Nang ky, dap guc xa go va kinh.
+echo   - 💣 TRUNG THUOC NO: No chan dong dien rong, pha tan da va thung TNT.
+echo   - 🔩 TRUNG MUI KHOAN: Xoay tit khoan xuyen 2-3 tang ham ngam!
 echo.
-echo   🎯 BI QUYET VUOT VUC SIEU CUON (SLINGSHOT TETHER):
-echo   - 1 nguoi bam GAM CHAN giu chac o mep vuc, nguoi kia lay da keo cang
-echo     soi day thun roi BAT NHAY de BAN NA vung vut bay qua bo ben kia!
-echo   - Phim R: Choi lai / Reset man choi
+echo   - Phim R: Choi lai man / Reset
 echo =========================================================================
 start "" "D:\app\godot\Godot_v4.7.1-stable_win64.exe" --path "d:\folder\tools\godot_demo\2" --rendering-driver opengl3

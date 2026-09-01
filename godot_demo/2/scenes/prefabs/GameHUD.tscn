@@ -1,0 +1,160 @@
+[gd_scene format=3 uid="uid://dm9k7p2v4q1w8"]
+
+[ext_resource type="Script" path="res://scripts/ui/GameHUD.gd" id="1_script"]
+
+[node name="GameHUD" type="CanvasLayer"]
+script = ExtResource("1_script")
+
+[node name="TopBar" type="HBoxContainer" parent="."]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 524.0
+offset_bottom = 66.0
+theme_override_constants/separation = 12
+
+[node name="LevelBox" type="PanelContainer" parent="TopBar"]
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="TopBar/LevelBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 6
+
+[node name="LevelLabel" type="Label" parent="TopBar/LevelBox/Margin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 18
+text = "🏰 HẦM NGỤC 1"
+
+[node name="ScoreBox" type="PanelContainer" parent="TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Margin" type="MarginContainer" parent="TopBar/ScoreBox"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 6
+
+[node name="ScoreLabel" type="Label" parent="TopBar/ScoreBox/Margin"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "ĐIỂM: 0"
+horizontal_alignment = 1
+
+[node name="BtnRestart" type="Button" parent="TopBar"]
+custom_minimum_size = Vector2(50, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "🔄"
+
+[node name="EggShelf" type="PanelContainer" parent="."]
+offset_left = 16.0
+offset_top = 880.0
+offset_right = 260.0
+offset_bottom = 936.0
+
+[node name="Margin" type="MarginContainer" parent="EggShelf"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 6
+
+[node name="EggIcons" type="HBoxContainer" parent="EggShelf/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="VictoryModal" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -210.0
+offset_top = -160.0
+offset_right = 210.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(210, 160)
+
+[node name="VBox" type="VBoxContainer" parent="VictoryModal"]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Title" type="Label" parent="VictoryModal/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 24
+text = "🎉 SẬP HẦM THÀNH CÔNG! 🎉"
+horizontal_alignment = 1
+
+[node name="StarsLabel" type="Label" parent="VictoryModal/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "⭐⭐⭐"
+horizontal_alignment = 1
+
+[node name="ScoreLabel" type="Label" parent="VictoryModal/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Tổng điểm: 3500"
+horizontal_alignment = 1
+
+[node name="BtnNext" type="Button" parent="VictoryModal/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "MÀN TIẾP THEO ➔"
+
+[node name="FailModal" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -210.0
+offset_top = -160.0
+offset_right = 210.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(210, 160)
+
+[node name="VBox" type="VBoxContainer" parent="FailModal"]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Title" type="Label" parent="FailModal/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 24
+text = "💀 HẾT TRỨNG RỒI! 💀"
+horizontal_alignment = 1
+
+[node name="Sub" type="Label" parent="FailModal/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Quái vật vẫn còn sống trong hầm ngục!"
+horizontal_alignment = 1
+
+[node name="BtnNukeAd" type="Button" parent="FailModal/VBox"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "📺 XEM AD NHẬN SIÊU BOM 💣"
+
+[node name="BtnRetry" type="Button" parent="FailModal/VBox"]
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "CHƠI LẠI VÒNG NÀY 🔄"

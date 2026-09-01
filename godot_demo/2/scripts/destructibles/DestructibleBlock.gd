@@ -1,12 +1,15 @@
 extends RigidBody2D
 class_name DestructibleBlock
 
+const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
+
 @export_enum("wood", "stone", "glass") var material_type: String = "wood"
 @export var max_health: float = 100.0
 @export var block_size: Vector2 = Vector2(120.0, 24.0)
 
 var current_health: float = 100.0
 var is_destroyed: bool = false
+var spawn_immunity: float = 0.25
 
 @onready var visual_mesh: Polygon2D = get_node_or_null("Visual")
 @onready var crack_overlay: Line2D = get_node_or_null("CrackOverlay")
@@ -17,7 +20,6 @@ func _ready() -> void:
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_impact)
 
-	# Thiết lập chỉ số vật lý theo loại vật liệu
 	match material_type:
 		"wood":
 			max_health = 80.0
@@ -34,25 +36,26 @@ func _ready() -> void:
 
 	current_health = max_health
 
-func _on_body_impact(body: Node) -> void:
-	if is_destroyed: return
+func _process(delta: float) -> void:
+	if spawn_immunity > 0.0:
+		spawn_immunity -= delta
 
-	# Tính sát thương chấn động khi bị vật nặng đè hoặc rơi từ trên cao
+func _on_body_impact(body: Node) -> void:
+	if is_destroyed or spawn_immunity > 0.0: return
+
 	if body is RigidBody2D:
 		var rel_vel = (linear_velocity - body.linear_velocity).length()
-		if rel_vel > 140.0:
-			var impact_dmg = (rel_vel - 140.0) * (body.mass * 0.4)
+		if rel_vel > 160.0:
+			var impact_dmg = (rel_vel - 160.0) * (body.mass * 0.4)
 			take_damage(impact_dmg, global_position)
 
 func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
-	if is_destroyed: return
+	if is_destroyed or spawn_immunity > 0.0: return
 	current_health -= amount
 
-	# Hiệu ứng nứt vỡ
 	if current_health <= max_health * 0.5 and crack_overlay:
 		crack_overlay.visible = true
 
-	# Nháy trắng khi nhận đòn
 	if visual_mesh:
 		var prev_c = visual_mesh.color
 		visual_mesh.color = Color(1.0, 1.0, 1.0, 1.0)
@@ -76,11 +79,10 @@ func _fracture_block() -> void:
 	if crack_overlay:
 		crack_overlay.visible = false
 
-	# Vô hiệu hóa va chạm
 	$CollisionShape2D.set_deferred("disabled", true)
-	freeze = true
+	set_deferred("freeze", true)
 
-	CameraShake2D.add_trauma(0.08)
+	CameraShake.add_trauma(0.08)
 
 	await get_tree().create_timer(0.4).timeout
 	queue_free()

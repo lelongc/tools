@@ -1,15 +1,16 @@
 extends RigidBody2D
 class_name TNTBarrel
 
+const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
+
 @export var explosion_radius: float = 220.0
 @export var explosion_force: float = 1200.0
 @export var explosion_damage: float = 600.0
 
 var is_ignited: bool = false
-var current_hp: float = 30.0
+var spawn_immunity: float = 0.25
 
 @onready var visual: Polygon2D = get_node_or_null("Visual")
-@onready var label: Label = get_node_or_null("Visual/TNTLabel")
 @onready var fuse_sparks: CPUParticles2D = get_node_or_null("FuseSparks")
 @onready var explosion_fx: CPUParticles2D = get_node_or_null("ExplosionFX")
 
@@ -18,15 +19,19 @@ func _ready() -> void:
 	max_contacts_reported = 4
 	body_entered.connect(_on_impact)
 
+func _process(delta: float) -> void:
+	if spawn_immunity > 0.0:
+		spawn_immunity -= delta
+
 func _on_impact(body: Node) -> void:
-	if is_ignited: return
+	if is_ignited or spawn_immunity > 0.0: return
 	if body is RigidBody2D:
 		var speed = (linear_velocity - body.linear_velocity).length()
-		if speed > 100.0:
+		if speed > 130.0:
 			take_damage(50.0, global_position)
 
 func take_damage(_amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
-	if is_ignited: return
+	if is_ignited or spawn_immunity > 0.0: return
 	is_ignited = true
 	_ignite_fuse()
 
@@ -35,7 +40,6 @@ func _ignite_fuse() -> void:
 		fuse_sparks.restart()
 		fuse_sparks.emitting = true
 
-	# Nhấp nháy cảnh báo chuẩn bị nổ
 	var tween = create_tween().set_loops(3)
 	if visual:
 		tween.tween_property(visual, "color", Color(1.0, 1.0, 1.0), 0.05)
@@ -45,11 +49,11 @@ func _ignite_fuse() -> void:
 	_detonate()
 
 func _detonate() -> void:
-	CameraShake2D.hit_stop(0.08)
-	CameraShake2D.add_trauma(1.0)
+	CameraShake.hit_stop(0.08)
+	CameraShake.add_trauma(1.0)
 	GameManager.add_score(300)
 
-	freeze = true
+	set_deferred("freeze", true)
 	if visual: visual.visible = false
 	$CollisionShape2D.set_deferred("disabled", true)
 
@@ -57,12 +61,11 @@ func _detonate() -> void:
 		explosion_fx.restart()
 		explosion_fx.emitting = true
 
-	# Quét xung lực nổ bán kính lớn
 	var space_state = get_world_2d().direct_space_state
 	var query = PhysicsShapeQueryParameters2D.new()
-	var circle = CircleShape2D.new()
-	circle.radius = explosion_radius
-	query.shape = circle
+	var circle_shape = CircleShape2D.new()
+	circle_shape.radius = explosion_radius
+	query.shape = circle_shape
 	query.transform = global_transform
 	query.collide_with_bodies = true
 

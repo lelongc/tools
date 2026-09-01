@@ -1,14 +1,30 @@
-extends BaseEgg
-class_name BombEgg
+extends RigidBody2D
 
+const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
+
+@export var egg_name: String = "Bomb Egg"
 @export var explosion_radius: float = 160.0
 @export var explosion_force: float = 850.0
 @export var explosion_damage: float = 350.0
 
-@onready var explosion_area: Area2D = get_node_or_null("ExplosionArea")
+var is_broken: bool = false
+
+@onready var visual_root: Node2D = get_node_or_null("VisualRoot")
 @onready var explosion_particles: CPUParticles2D = get_node_or_null("ExplosionFX")
 
-func _on_body_entered(body: Node) -> void:
+func _ready() -> void:
+	continuous_cd = RigidBody2D.CCD_MODE_CAST_RAY
+	contact_monitor = true
+	max_contacts_reported = 4
+	body_entered.connect(_on_body_entered)
+
+func _physics_process(delta: float) -> void:
+	if is_broken: return
+	if linear_velocity.length() > 30.0:
+		var target_rot = linear_velocity.angle() + PI * 0.5
+		rotation = lerp_angle(rotation, target_rot, 12.0 * delta)
+
+func _on_body_entered(_body: Node) -> void:
 	if is_broken: return
 	_detonate()
 
@@ -16,21 +32,16 @@ func _detonate() -> void:
 	if is_broken: return
 	is_broken = true
 
-	# Hit-stop và chấn động camera cực mạnh
-	CameraShake2D.hit_stop(0.06)
-	CameraShake2D.add_trauma(0.85)
+	CameraShake.hit_stop(0.06)
+	CameraShake.add_trauma(0.85)
 
-	# Vô hiệu hóa vật lý quả trứng
-	freeze = true
-	linear_velocity = Vector2.ZERO
+	set_deferred("freeze", true)
 	if visual_root: visual_root.visible = false
 
-	# Kích hoạt hạt lửa nổ
 	if explosion_particles:
 		explosion_particles.restart()
 		explosion_particles.emitting = true
 
-	# Quét toàn bộ vật thể trong bán kính nổ
 	var space_state = get_world_2d().direct_space_state
 	var query = PhysicsShapeQueryParameters2D.new()
 	var circle_shape = CircleShape2D.new()
@@ -49,14 +60,12 @@ func _detonate() -> void:
 			var dir = diff.normalized()
 			var falloff = 1.0 - clamp(dist / explosion_radius, 0.0, 0.8)
 
-			# 1. Đẩy văng vật lý
 			if collider is RigidBody2D:
 				var push_impulse = dir * explosion_force * falloff
 				if push_impulse.y > -0.2:
 					push_impulse.y = -abs(push_impulse.y) * 0.7 - 200.0
 				collider.apply_central_impulse(push_impulse)
 
-			# 2. Gây sát thương nổ
 			if collider.has_method("take_damage"):
 				collider.take_damage(explosion_damage * falloff, global_position)
 
