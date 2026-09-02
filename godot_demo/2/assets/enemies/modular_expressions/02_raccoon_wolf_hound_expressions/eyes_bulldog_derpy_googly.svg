@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90" width="160" height="90">
+  <circle cx="45" cy="48" r="32" fill="#ffffff" stroke="#38220f" stroke-width="6"/>
+  <circle cx="115" cy="48" r="32" fill="#ffffff" stroke="#38220f" stroke-width="6"/>
+  <!-- Left Eye Looking Up-Left -->
+  <circle cx="32" cy="34" r="12" fill="#111827"/>
+  <circle cx="34" cy="32" r="3.5" fill="#ffffff"/>
+  <!-- Right Eye Looking Down-Right -->
+  <circle cx="128" cy="62" r="12" fill="#111827"/>
+  <circle cx="130" cy="60" r="3.5" fill="#ffffff"/>
+</svg>

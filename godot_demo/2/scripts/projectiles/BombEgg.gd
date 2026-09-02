@@ -3,9 +3,9 @@ extends RigidBody2D
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 
 @export var egg_name: String = "Bomb Egg"
-@export var explosion_radius: float = 160.0
-@export var explosion_force: float = 850.0
-@export var explosion_damage: float = 350.0
+@export var explosion_radius: float = 145.0
+@export var explosion_force: float = 750.0
+@export var explosion_damage: float = 280.0
 
 var is_broken: bool = false
 var has_boosted: bool = false
@@ -20,7 +20,7 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not is_broken and not has_boosted and event is InputEventMouseButton and event.pressed:
+	if not is_broken and not has_boosted and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():
 		has_boosted = true
 		_detonate()
 

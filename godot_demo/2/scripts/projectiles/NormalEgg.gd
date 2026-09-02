@@ -3,7 +3,7 @@ extends RigidBody2D
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 
 @export var egg_name: String = "Heavy Normal Egg"
-@export var base_damage: float = 180.0
+@export var base_damage: float = 130.0
 @export var min_impact_speed: float = 80.0
 @export var max_bounces_before_break: int = 2
 
@@ -23,14 +23,14 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Tap-in-Flight: Chạm màn hình khi đang bay để hóa Trứng Kim Cương Siêu Nặng
-	if not is_broken and not has_boosted and event is InputEventMouseButton and event.pressed:
+	if not is_broken and not has_boosted and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():
 		_activate_special_ability()
 
 func _activate_special_ability() -> void:
 	has_boosted = true
-	mass = 9.0
-	base_damage = 380.0
-	linear_velocity = Vector2(0, max(linear_velocity.y * 1.5, 750.0))
+	mass = 7.0
+	base_damage = 260.0
+	linear_velocity = Vector2(0, max(linear_velocity.y * 1.4, 700.0))
 	CameraShake.add_trauma(0.25)
 
 	if visual_root:

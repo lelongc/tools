@@ -3,12 +3,13 @@ extends RigidBody2D
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 
 @export var egg_name: String = "Acid Lava Egg"
-@export var puddle_radius: float = 120.0
-@export var acid_duration: float = 1.6
-@export var damage_per_sec: float = 180.0
+@export var puddle_radius: float = 135.0
+@export var acid_duration: float = 1.8
+@export var damage_per_sec: float = 220.0
 
 var is_broken: bool = false
 var is_melting: bool = false
+var has_boosted: bool = false
 var melt_timer: float = 0.0
 
 @onready var visual_root: Node2D = get_node_or_null("VisualRoot")
@@ -20,6 +21,11 @@ func _ready() -> void:
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_entered)
 
+func _unhandled_input(event: InputEvent) -> void:
+	if not is_broken and not has_boosted and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():
+		has_boosted = true
+		_start_acid_melting()
+
 func _on_body_entered(_body: Node) -> void:
 	if is_broken: return
 	_start_acid_melting()
@@ -30,7 +36,7 @@ func _start_acid_melting() -> void:
 	is_melting = true
 	melt_timer = acid_duration
 
-	CameraShake.add_trauma(0.3)
+	CameraShake.add_trauma(0.35)
 	if has_node("/root/SoundManager"):
 		get_node("/root/SoundManager").play_egg_drop()
 

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 100" width="160" height="100">
+  <path d="M35 20 Q80 10 125 20 Q145 65 110 85 Q80 95 50 85 Q15 65 35 20 Z" fill="#fff3d9" stroke="#4a1503" stroke-width="5"/>
+  <ellipse cx="80" cy="22" rx="13" ry="8" fill="#1a0b06"/>
+  <!-- Big Shocked Oval Gasp -->
+  <ellipse cx="80" cy="58" rx="22" ry="28" fill="#310303" stroke="#4a1503" stroke-width="5"/>
+  <!-- Uvula -->
+  <circle cx="80" cy="42" r="4" fill="#fb7185"/>
+</svg>

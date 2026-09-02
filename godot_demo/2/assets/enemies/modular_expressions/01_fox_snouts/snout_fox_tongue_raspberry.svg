@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 106" width="160" height="106">
+  <path d="M35 20 Q80 10 125 20 Q145 65 110 85 Q80 95 50 85 Q15 65 35 20 Z" fill="#fff3d9" stroke="#4a1503" stroke-width="5"/>
+  <ellipse cx="80" cy="24" rx="14" ry="9" fill="#1a0b06"/>
+  <!-- Smiling Mouth Line -->
+  <path d="M52 46 Q80 60 108 46" fill="#4a0404" stroke="#4a1503" stroke-width="4"/>
+  <!-- Sticking out Tongue -->
+  <path d="M68 50 C68 86 92 86 92 50 Z" fill="#ff4d6d" stroke="#800f2f" stroke-width="4"/>
+  <line x1="80" y1="52" x2="80" y2="72" stroke="#800f2f" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Spit droplets -->
+  <circle cx="114" cy="50" r="3" fill="#38bdf8"/>
+  <circle cx="122" cy="42" r="2" fill="#38bdf8"/>
+</svg>

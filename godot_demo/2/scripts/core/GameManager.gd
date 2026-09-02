@@ -12,7 +12,7 @@ var total_levels: int = 60
 var current_score: int = 0
 var remaining_enemies: int = 0
 var total_enemies: int = 0
-var available_eggs: Array[String] = [] # e.g. ["normal", "bomb", "drill", "frost", "cluster", "acid", "blackhole"]
+var available_eggs: Array[String] = []
 var current_egg_index: int = 0
 
 var is_level_active: bool = false
@@ -35,7 +35,7 @@ func add_score(points: int) -> void:
 	current_score += points
 	score_updated.emit(current_score)
 
-func register_enemy_defeat(enemy: Node, points: int = 500) -> void:
+func register_enemy_defeat(enemy: Node, points: int = 800) -> void:
 	if not is_level_active: return
 	remaining_enemies = max(0, remaining_enemies - 1)
 	add_score(points)
@@ -74,12 +74,21 @@ func _trigger_victory_delay() -> void:
 	is_level_active = false
 	
 	var unused_eggs = available_eggs.size() - current_egg_index
-	add_score(unused_eggs * 1000)
+	add_score(unused_eggs * 1200)
 
-	# Tính số sao (1-3 sao)
+	# Công thức tính sao khắt khe chuẩn mực (Skill-based Angry Birds logic):
+	# 1 Sao: Tiêu diệt hết quái (vượt qua màn).
+	# 2 Sao: Phá hủy công trình khá + còn dư 1 quả trứng hoặc đạt điểm tốt.
+	# 3 Sao: Phá hủy công trình xuất sắc VÀ bắt buộc phải còn dư ít nhất 1-2 quả trứng!
+	var base_target = (total_enemies * 800) + 400
+	var star3_target = base_target + 1400 # Cần dư ít nhất 1 quả trứng (1200 điểm) + điểm phá hủy công trình
+	var star2_target = base_target + 600
+
 	var stars = 1
-	if unused_eggs >= 1: stars = 2
-	if unused_eggs >= 2 or current_score >= 3500: stars = 3
+	if current_score >= star3_target and unused_eggs >= 1:
+		stars = 3
+	elif current_score >= star2_target or unused_eggs >= 1:
+		stars = 2
 
 	# Lưu kết quả vào SaveManager
 	if has_node("/root/SaveManager"):

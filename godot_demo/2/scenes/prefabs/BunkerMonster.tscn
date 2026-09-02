@@ -59,12 +59,12 @@ color = Color(1, 0.9, 0.2, 1)
 polygon = PackedVector2Array(0, -4, 3, -1, 6, 0, 3, 2, 0, 5, -2, 2, -5, 0, -2, -1)
 
 [node name="EmotePivot" type="Node2D" parent="."]
-position = Vector2(0, -32)
+position = Vector2(14, -22)
 z_index = 20
 
 [node name="EmoteSprite" type="Sprite2D" parent="EmotePivot"]
 visible = false
-scale = Vector2(0.35, 0.35)
+scale = Vector2(0.24, 0.24)
 
 [node name="PoofFX" type="CPUParticles2D" parent="."]
 emitting = false
