@@ -82,10 +82,6 @@ func _handle_aim_input() -> void:
 
 	# Bắt đầu chạm / click chuột để ngắm
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		# Nếu camera đang chiếu intro pan, click để tua nhanh vào chơi luôn
-		if CameraShake.instance and CameraShake.instance.is_intro_playing:
-			CameraShake.instance.skip_intro_pan()
-
 		if not is_aiming:
 			# Không nhận click nếu bấm đè thanh menu TopBar ở trên đỉnh
 			if mouse_pos.y < 65.0:

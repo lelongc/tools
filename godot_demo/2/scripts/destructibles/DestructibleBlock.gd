@@ -119,7 +119,6 @@ func wake_up() -> void:
 	if is_awake or is_destroyed: return
 	is_awake = true
 	set_deferred("freeze", false)
-	_wake_up_neighbors()
 
 func _wake_up_neighbors() -> void:
 	var space_state = get_world_2d().direct_space_state
