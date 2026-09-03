@@ -28,6 +28,7 @@ static var tex_steel: Texture2D = null
 
 static var tex_pillar_wood: Texture2D = null
 static var tex_pillar_stone: Texture2D = null
+static var tex_pillar_glass: Texture2D = null
 static var tex_girder_steel: Texture2D = null
 
 static var tex_crack_wood_l: Texture2D = null
@@ -68,6 +69,7 @@ func _load_textures_once() -> void:
 
 		tex_pillar_wood = _safe_load_tex("res://assets/sprites/obstacles/wood_pillar_column.svg")
 		tex_pillar_stone = _safe_load_tex("res://assets/sprites/obstacles/stone_pillar_column.svg")
+		tex_pillar_glass = _safe_load_tex("res://assets/sprites/obstacles/glass_pillar_column.svg")
 		tex_girder_steel = _safe_load_tex("res://assets/sprites/obstacles/steel_girder_column.svg")
 
 		tex_crack_wood_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_wood_light.svg")
@@ -85,16 +87,7 @@ func _load_textures_once() -> void:
 		tex_smoke_puff = _safe_load_tex("res://assets/sprites/vfx/smoke_puff_cartoon.svg")
 
 func _safe_load_tex(path: String) -> Texture2D:
-	var global_path = ProjectSettings.globalize_path(path)
-	if FileAccess.file_exists(global_path):
-		var img = Image.load_from_file(global_path)
-		if img:
-			var tex = ImageTexture.create_from_image(img)
-			tex.resource_path = path
-			return tex
-	if ResourceLoader.exists(path):
-		return load(path)
-	return null
+	return ParticleHelper._safe_load(path)
 
 func _apply_block_dimensions() -> void:
 	if col_shape:
@@ -105,20 +98,36 @@ func _apply_block_dimensions() -> void:
 	var hw = block_size.x * 0.5
 	var hh = block_size.y * 0.5
 
+	# Tự động tính toán patch_margin thông minh để không bao giờ bị méo mó/chèn ép
+	var margin_x = clamp(int(block_size.x * 0.22), 2, 8)
+	var margin_y = clamp(int(block_size.y * 0.22), 2, 8)
+
 	if block_visual:
 		block_visual.size = block_size
 		block_visual.position = Vector2(-hw, -hh)
 		block_visual.modulate = Color.WHITE
+		block_visual.patch_margin_left = margin_x
+		block_visual.patch_margin_right = margin_x
+		block_visual.patch_margin_top = margin_y
+		block_visual.patch_margin_bottom = margin_y
 
 	if crack_stage1:
 		crack_stage1.size = block_size
 		crack_stage1.position = Vector2(-hw, -hh)
 		crack_stage1.visible = false
+		crack_stage1.patch_margin_left = margin_x
+		crack_stage1.patch_margin_right = margin_x
+		crack_stage1.patch_margin_top = margin_y
+		crack_stage1.patch_margin_bottom = margin_y
 
 	if crack_stage2:
 		crack_stage2.size = block_size
 		crack_stage2.position = Vector2(-hw, -hh)
 		crack_stage2.visible = false
+		crack_stage2.patch_margin_left = margin_x
+		crack_stage2.patch_margin_right = margin_x
+		crack_stage2.patch_margin_top = margin_y
+		crack_stage2.patch_margin_bottom = margin_y
 
 	var is_vertical = block_size.y > block_size.x * 1.3
 	match material_type:
@@ -139,7 +148,7 @@ func _apply_block_dimensions() -> void:
 		"glass":
 			max_health = 40.0
 			mass = (block_size.x * block_size.y) * 0.0008
-			if block_visual: block_visual.texture = tex_glass
+			if block_visual: block_visual.texture = tex_pillar_glass if (is_vertical and tex_pillar_glass) else tex_glass
 			if crack_stage1: crack_stage1.texture = tex_crack_glass_l
 			if crack_stage2: crack_stage2.texture = tex_crack_glass_h
 			if fracture_particles: fracture_particles.color = Color(0.60, 0.90, 0.98, 0.85)

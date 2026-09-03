@@ -59,9 +59,13 @@ func _ready() -> void:
 
 	GameManager.score_updated.connect(_on_score_updated)
 	GameManager.egg_dropped.connect(_on_egg_dropped)
+	GameManager.level_started.connect(func(_lvl, _eggs): _refresh_egg_icons())
 	GameManager.level_completed.connect(_on_level_completed)
 	GameManager.level_failed.connect(_on_level_failed)
 	GameManager.last_stand_offered.connect(_on_last_stand_offered)
+
+	if GameManager.available_eggs.size() > 0:
+		_refresh_egg_icons()
 
 	if has_node("/root/SaveManager"):
 		var sm = get_node("/root/SaveManager")
@@ -137,13 +141,20 @@ func _refresh_egg_icons() -> void:
 	for child in egg_container.get_children():
 		child.queue_free()
 
+	var shelf = get_node_or_null("EggShelf")
+	if shelf:
+		var egg_count = GameManager.available_eggs.size()
+		var target_w = clamp(egg_count * 34.0 + 32.0, 130.0, 240.0)
+		shelf.offset_left = -target_w * 0.5
+		shelf.offset_right = target_w * 0.5
+
 	for i in range(GameManager.available_eggs.size()):
 		var egg_type = GameManager.available_eggs[i]
 		var tex_path = EGG_TEXTURES.get(egg_type, EGG_TEXTURES["normal"])
 		var tex = ParticleHelper._safe_load(tex_path)
 
 		var tr = TextureRect.new()
-		tr.custom_minimum_size = Vector2(36, 44)
+		tr.custom_minimum_size = Vector2(24, 30)
 		tr.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
 		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		if tex:
@@ -151,15 +162,19 @@ func _refresh_egg_icons() -> void:
 
 		if i < GameManager.current_egg_index:
 			# Đã bắn: Mờ xám
-			tr.modulate = Color(0.35, 0.35, 0.35, 0.35)
+			tr.modulate = Color(0.4, 0.4, 0.4, 0.35)
+			tr.scale = Vector2(0.88, 0.88)
+			tr.pivot_offset = Vector2(12, 15)
 		elif i == GameManager.current_egg_index:
 			# Trứng đang trên giỏ của Gà: Sáng nổi bật & nảy nhẹ
 			tr.modulate = Color(1.2, 1.2, 1.1, 1.0)
-			tr.scale = Vector2(1.15, 1.15)
-			tr.pivot_offset = Vector2(18, 22)
+			tr.scale = Vector2(1.10, 1.10)
+			tr.pivot_offset = Vector2(12, 15)
 		else:
 			# Trứng trong hàng chờ
 			tr.modulate = Color(0.85, 0.85, 0.85, 0.85)
+			tr.scale = Vector2(0.95, 0.95)
+			tr.pivot_offset = Vector2(12, 15)
 
 		egg_container.add_child(tr)
 

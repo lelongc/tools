@@ -125,7 +125,7 @@ func _ready() -> void:
 	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
 
 	contact_monitor = true
-	max_contacts_reported = 4
+	max_contacts_reported = 8
 	body_entered.connect(_on_impact)
 
 	if dizzy_stars: dizzy_stars.visible = false
@@ -510,6 +510,62 @@ func wake_up() -> void:
 	if is_awake or is_defeated: return
 	is_awake = true
 	set_deferred("freeze", false)
+
+var crush_audio_cooldown: float = 0.0
+
+func _physics_process(delta: float) -> void:
+	if is_defeated or not is_awake or spawn_settle_timer > 0.0: return
+	_handle_continuous_crushing(delta)
+
+func _handle_continuous_crushing(delta: float) -> void:
+	if crush_audio_cooldown > 0.0:
+		crush_audio_cooldown -= delta
+
+	var bodies = get_colliding_bodies()
+	var is_crushed_this_frame = false
+
+	for b in bodies:
+		if not is_instance_valid(b) or b == self: continue
+		if b is RigidBody2D:
+			# Kiểm tra xem khối có đang đè phía trên hay ép vào quái
+			var is_above = (b.global_position.y < global_position.y + 12.0)
+			if not is_above: continue
+
+			var b_speed = b.linear_velocity.length() + abs(b.angular_velocity) * 18.0
+			var rel_vel = (linear_velocity - b.linear_velocity).length()
+			var b_mass = clamp(b.mass, 0.8, 5.0)
+
+			# 1. TRƯỜNG HỢP VẬT ĐÈ VẪN ĐANG CỬ ĐỘNG / TRƯỢT / LĂN / LẮC LƯ:
+			# Người dùng yêu cầu rõ: "quái bị đè mà kiểu cái đè kia vẫn cử động thì vẫn gây sát thương nhé"
+			if b_speed > 8.0 or rel_vel > 12.0:
+				is_crushed_this_frame = true
+				var active_speed = max(b_speed, rel_vel)
+				# Sát thương liên tục theo tốc độ chuyển động & khối lượng của vật đè
+				var crush_dps = (55.0 + active_speed * 0.65) * (b_mass * 0.5)
+				take_damage(crush_dps * delta, b.global_position)
+
+				# Hiệu ứng biến dạng bị đè & âm thanh rên rỉ
+				if visual_root:
+					var squish_x = clamp(1.0 + active_speed * 0.003, 1.15, 1.45)
+					var squish_y = clamp(1.0 - active_speed * 0.003, 0.55, 0.85)
+					visual_root.scale = Vector2(base_scale_val * squish_x, base_scale_val * squish_y)
+
+				if crush_audio_cooldown <= 0.0 and has_node("/root/SoundManager"):
+					crush_audio_cooldown = 0.35
+					get_node("/root/SoundManager").play_synth_tone(220.0, 0.08, "noise", -2.0)
+					_pop_emote(tex_emote_sweat, 0.6)
+
+			# 2. TRƯỜNG HỢP VẬT NẶNG ĐÈ TĨNH (Overburden static pressure):
+			elif b_mass >= 1.6 and b.global_position.y < global_position.y - 6.0:
+				is_crushed_this_frame = true
+				var static_dps = 24.0 * b_mass
+				take_damage(static_dps * delta, b.global_position)
+
+	if is_crushed_this_frame:
+		is_currently_pinned = true
+		pinned_cooldown = 0.6
+		if current_state != State.PINNED_UNDER_DEBRIS:
+			_set_state(State.PINNED_UNDER_DEBRIS)
 
 func _process(delta: float) -> void:
 	if spawn_settle_timer > 0.0:

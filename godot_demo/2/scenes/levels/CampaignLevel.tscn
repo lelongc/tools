@@ -43,10 +43,22 @@ polygon = PackedVector2Array(0, 400, 540, 400, 540, 960, 0, 960)
 
 [node name="CavernInterior" type="Polygon2D" parent="Background"]
 color = Color(0.18, 0.13, 0.09, 1)
-polygon = PackedVector2Array(115, 400, 425, 400, 425, 870, 115, 870)
+polygon = PackedVector2Array(15, 390, 525, 390, 525, 895, 15, 895)
 
-[node name="GroundStrata" type="Sprite2D" parent="Background"]
-position = Vector2(270, 680)
+[node name="CavernBackdrop" type="Sprite2D" parent="Background"]
+position = Vector2(270, 642)
+
+[node name="DirtWallL" type="Sprite2D" parent="Background"]
+position = Vector2(8, 642)
+
+[node name="DirtWallR" type="Sprite2D" parent="Background"]
+position = Vector2(532, 642)
+
+[node name="GrassCliffL" type="Sprite2D" parent="Background"]
+position = Vector2(10, 390)
+
+[node name="GrassCliffR" type="Sprite2D" parent="Background"]
+position = Vector2(530, 390)
 
 [node name="BunkerBoundaries" type="StaticBody2D" parent="."]
 collision_layer = 1

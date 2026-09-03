@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 700" width="540" height="700">
+  <defs>
+    <!-- Subterranean Ambient Wall Gradient -->
+    <linearGradient id="wallGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2a1810"/>
+      <stop offset="25%" stop-color="#20120c"/>
+      <stop offset="60%" stop-color="#170d08"/>
+      <stop offset="100%" stop-color="#0f0704"/>
+    </linearGradient>
+
+    <!-- Warm Lantern Radial Glow -->
+    <radialGradient id="torchGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.85"/>
+      <stop offset="25%" stop-color="#f59e0b" stop-opacity="0.45"/>
+      <stop offset="60%" stop-color="#d97706" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#78350f" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Timber Scaffolding Texture -->
+    <linearGradient id="timberGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3d1f0d"/>
+      <stop offset="40%" stop-color="#4d2812"/>
+      <stop offset="70%" stop-color="#3d1f0d"/>
+      <stop offset="100%" stop-color="#2c1407"/>
+    </linearGradient>
+
+    <!-- Brick Texture Pattern -->
+    <pattern id="brickPattern" width="60" height="28" patternUnits="userSpaceOnUse">
+      <rect width="60" height="28" fill="#1b100a" opacity="0.4"/>
+      <!-- Row 1 -->
+      <rect x="1" y="1" width="58" height="12" rx="2" fill="#2d1a10" stroke="#160c07" stroke-width="1.2" opacity="0.55"/>
+      <!-- Row 2 (offset) -->
+      <rect x="-29" y="15" width="58" height="12" rx="2" fill="#26150d" stroke="#160c07" stroke-width="1.2" opacity="0.5"/>
+      <rect x="31" y="15" width="58" height="12" rx="2" fill="#26150d" stroke="#160c07" stroke-width="1.2" opacity="0.5"/>
+    </pattern>
+  </defs>
+
+  <!-- Solid Cavern Wall Backdrop -->
+  <rect width="540" height="700" fill="url(#wallGrad)"/>
+
+  <!-- Ancient Dungeon Brick Pattern Layer -->
+  <rect width="540" height="700" fill="url(#brickPattern)"/>
+
+  <!-- Background Wooden Mine Framing & Archways -->
+  <!-- Left Mine Arch -->
+  <rect x="22" y="60" width="16" height="640" fill="url(#timberGrad)"/>
+  <rect x="150" y="60" width="14" height="640" fill="url(#timberGrad)"/>
+  <rect x="18" y="52" width="152" height="18" rx="3" fill="url(#timberGrad)"/>
+  <!-- Left Cross Braces -->
+  <line x1="38" y1="70" x2="150" y2="240" stroke="#221006" stroke-width="6" opacity="0.75"/>
+  <line x1="150" y1="70" x2="38" y2="240" stroke="#221006" stroke-width="6" opacity="0.75"/>
+  <line x1="38" y1="280" x2="150" y2="450" stroke="#221006" stroke-width="6" opacity="0.75"/>
+  <line x1="150" y1="280" x2="38" y2="450" stroke="#221006" stroke-width="6" opacity="0.75"/>
+
+  <!-- Center Grand Fortress Arch -->
+  <rect x="195" y="30" width="18" height="670" fill="url(#timberGrad)"/>
+  <rect x="345" y="30" width="18" height="670" fill="url(#timberGrad)"/>
+  <rect x="190" y="22" width="178" height="20" rx="4" fill="url(#timberGrad)"/>
+  <!-- Center Cross Braces -->
+  <line x1="213" y1="42" x2="345" y2="220" stroke="#221006" stroke-width="7" opacity="0.75"/>
+  <line x1="345" y1="42" x2="213" y2="220" stroke="#221006" stroke-width="7" opacity="0.75"/>
+  <line x1="213" y1="260" x2="345" y2="440" stroke="#221006" stroke-width="7" opacity="0.75"/>
+  <line x1="345" y1="260" x2="213" y2="440" stroke="#221006" stroke-width="7" opacity="0.75"/>
+
+  <!-- Right Mine Arch -->
+  <rect x="388" y="60" width="14" height="640" fill="url(#timberGrad)"/>
+  <rect x="506" y="60" width="16" height="640" fill="url(#timberGrad)"/>
+  <rect x="384" y="52" width="142" height="18" rx="3" fill="url(#timberGrad)"/>
+  <!-- Right Cross Braces -->
+  <line x1="402" y1="70" x2="506" y2="240" stroke="#221006" stroke-width="6" opacity="0.75"/>
+  <line x1="506" y1="70" x2="402" y2="240" stroke="#221006" stroke-width="6" opacity="0.75"/>
+  <line x1="402" y1="280" x2="506" y2="450" stroke="#221006" stroke-width="6" opacity="0.75"/>
+  <line x1="506" y1="280" x2="402" y2="450" stroke="#221006" stroke-width="6" opacity="0.75"/>
+
+  <!-- Glowing Subterranean Mine Lanterns -->
+  <!-- Lantern 1 (West Outpost) -->
+  <g transform="translate(92, 140)">
+    <!-- Light Glow -->
+    <circle cx="0" cy="18" r="85" fill="url(#torchGlow)"/>
+    <!-- Chain -->
+    <line x1="0" y1="-80" x2="0" y2="0" stroke="#475569" stroke-width="2" stroke-dasharray="4 2"/>
+    <!-- Iron Bracket -->
+    <rect x="-9" y="0" width="18" height="5" rx="1" fill="#1e293b"/>
+    <!-- Glass Chamber -->
+    <rect x="-7" y="5" width="14" height="16" rx="2" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/>
+    <ellipse cx="0" cy="13" rx="3" ry="5" fill="#ffffff"/>
+    <rect x="-9" y="21" width="18" height="4" rx="1" fill="#1e293b"/>
+  </g>
+
+  <!-- Lantern 2 (Center Royal Throne) -->
+  <g transform="translate(270, 110)">
+    <!-- Light Glow -->
+    <circle cx="0" cy="20" r="110" fill="url(#torchGlow)"/>
+    <!-- Chain -->
+    <line x1="0" y1="-80" x2="0" y2="0" stroke="#475569" stroke-width="2.5" stroke-dasharray="4 2"/>
+    <rect x="-11" y="0" width="22" height="6" rx="1" fill="#1e293b"/>
+    <rect x="-9" y="6" width="18" height="20" rx="2" fill="#f59e0b" stroke="#0f172a" stroke-width="1.8"/>
+    <ellipse cx="0" cy="16" rx="4.5" ry="7" fill="#fef08a"/>
+    <rect x="-11" y="26" width="22" height="5" rx="1" fill="#1e293b"/>
+  </g>
+
+  <!-- Lantern 3 (East Bastion) -->
+  <g transform="translate(448, 140)">
+    <!-- Light Glow -->
+    <circle cx="0" cy="18" r="85" fill="url(#torchGlow)"/>
+    <!-- Chain -->
+    <line x1="0" y1="-80" x2="0" y2="0" stroke="#475569" stroke-width="2" stroke-dasharray="4 2"/>
+    <rect x="-9" y="0" width="18" height="5" rx="1" fill="#1e293b"/>
+    <rect x="-7" y="5" width="14" height="16" rx="2" fill="#fbbf24" stroke="#0f172a" stroke-width="1.5"/>
+    <ellipse cx="0" cy="13" rx="3" ry="5" fill="#ffffff"/>
+    <rect x="-9" y="21" width="18" height="4" rx="1" fill="#1e293b"/>
+  </g>
+
+  <!-- Dangling Roots and Foliage Vines from Ceiling -->
+  <path d="M40 0 Q45 40, 38 80 Q32 110, 36 140" fill="none" stroke="#78350f" stroke-width="3" stroke-linecap="round"/>
+  <path d="M120 0 Q115 35, 122 70 T118 115" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M220 0 Q228 30, 222 65 T226 95" fill="none" stroke="#78350f" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M315 0 Q310 35, 318 75 T314 125" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M410 0 Q418 45, 412 90 T416 135" fill="none" stroke="#78350f" stroke-width="3" stroke-linecap="round"/>
+  <path d="M495 0 Q490 30, 496 60 T492 90" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Bottom Fog & Shadow Vignette -->
+  <linearGradient id="bottomShadow" x1="0%" y1="0%" x2="0%" y2="100%">
+    <stop offset="0%" stop-color="#050302" stop-opacity="0"/>
+    <stop offset="70%" stop-color="#050302" stop-opacity="0.6"/>
+    <stop offset="100%" stop-color="#020101" stop-opacity="0.95"/>
+  </linearGradient>
+  <rect y="480" width="540" height="220" fill="url(#bottomShadow)"/>
+</svg>

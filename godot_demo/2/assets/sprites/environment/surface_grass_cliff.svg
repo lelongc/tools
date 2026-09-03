@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 48" width="120" height="48">
+  <defs>
+    <linearGradient id="grassBladeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4ade80"/>
+      <stop offset="35%" stop-color="#22c55e"/>
+      <stop offset="80%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#14532d"/>
+    </linearGradient>
+    <linearGradient id="soilTop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#451a03"/>
+      <stop offset="100%" stop-color="#2a1002"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Dark Topsoil Strip -->
+  <rect y="16" width="120" height="32" fill="url(#soilTop)"/>
+
+  <!-- Main Grass Top Cap -->
+  <rect width="120" height="18" rx="3" fill="url(#grassBladeGrad)"/>
+  <line x1="0" y1="2" x2="120" y2="2" stroke="#86efac" stroke-width="2"/>
+
+  <!-- Organic Hanging Grass Tufts & Blades -->
+  <path d="M0 18 
+           Q6 28, 10 36 Q12 26, 16 18 
+           Q22 30, 26 38 Q28 27, 34 18 
+           Q40 32, 45 42 Q47 28, 52 18 
+           Q58 29, 62 37 Q65 26, 70 18 
+           Q76 34, 82 44 Q85 30, 90 18 
+           Q96 28, 100 36 Q103 26, 108 18 
+           Q113 30, 116 38 L120 18 Z" 
+        fill="url(#grassBladeGrad)" stroke="#15803d" stroke-width="1.2"/>
+
+  <!-- Dangling Little Roots -->
+  <path d="M26 38 Q28 44, 25 48" fill="none" stroke="#92400e" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M45 42 Q48 46, 46 48" fill="none" stroke="#92400e" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M82 44 Q85 47, 83 48" fill="none" stroke="#92400e" stroke-width="1.8" stroke-linecap="round"/>
+</svg>

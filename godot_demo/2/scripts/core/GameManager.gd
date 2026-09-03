@@ -2,6 +2,7 @@ extends Node
 
 signal enemy_defeated(enemy_node, points)
 signal egg_dropped(egg_type)
+signal level_started(level_id, egg_list)
 signal level_completed(stars, score, coins)
 signal level_failed()
 signal last_stand_offered(enemies_left)
@@ -36,6 +37,7 @@ func start_level(level_id: int, enemy_count: int, egg_list: Array[String]) -> vo
 	last_stand_used_in_level = false
 	vip_trial_used_in_level = false
 	score_updated.emit(current_score)
+	level_started.emit(current_level, available_eggs)
 
 func add_score(points: int) -> void:
 	current_score += points

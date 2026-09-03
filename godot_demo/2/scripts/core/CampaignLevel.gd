@@ -13,42 +13,42 @@ const UpdraftVentScene = preload("res://scenes/prefabs/UpdraftVent.tscn")
 @export var level_id: int = 1
 @export var intro_target_y: float = 640.0
 
+const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
+
 @onready var bg_sky: Polygon2D = $Background/Sky
 @onready var bg_sky_clouds: Sprite2D = get_node_or_null("Background/SkyClouds")
 @onready var bg_dirt: Polygon2D = $Background/UndergroundDirt
 @onready var bg_cavern: Polygon2D = $Background/CavernInterior
-@onready var bg_ground_strata: Sprite2D = get_node_or_null("Background/GroundStrata")
+@onready var bg_cavern_backdrop: Sprite2D = get_node_or_null("Background/CavernBackdrop")
+@onready var bg_dirt_wall_l: Sprite2D = get_node_or_null("Background/DirtWallL")
+@onready var bg_dirt_wall_r: Sprite2D = get_node_or_null("Background/DirtWallR")
+@onready var bg_grass_cliff_l: Sprite2D = get_node_or_null("Background/GrassCliffL")
+@onready var bg_grass_cliff_r: Sprite2D = get_node_or_null("Background/GrassCliffR")
 @onready var bunker_structure: Node2D = $BunkerStructure
 
-static var _tex_cache: Dictionary = {}
-
 func _safe_load(path: String) -> Texture2D:
-	if _tex_cache.has(path):
-		return _tex_cache[path]
-	var global_path = ProjectSettings.globalize_path(path)
-	if FileAccess.file_exists(global_path):
-		var img = Image.load_from_file(global_path)
-		if img:
-			var tex = ImageTexture.create_from_image(img)
-			tex.resource_path = path
-			_tex_cache[path] = tex
-			return tex
-	if ResourceLoader.exists(path):
-		var res = load(path)
-		_tex_cache[path] = res
-		return res
-	return null
+	return ParticleHelper._safe_load(path)
 
 func _ready() -> void:
 	if GameManager.current_level > 0:
 		level_id = GameManager.current_level
 
 	if bg_sky_clouds:
-		var ts = _safe_load("res://assets/sprites/environment/bg_sky_clouds.svg")
+		var ts = _safe_load("res://assets/sprites/environment/sky_clouds_panorama.svg")
 		if ts: bg_sky_clouds.texture = ts
-	if bg_ground_strata:
-		var tg = _safe_load("res://assets/sprites/environment/bg_ground_strata.svg")
-		if tg: bg_ground_strata.texture = tg
+	if bg_cavern_backdrop:
+		var tc = _safe_load("res://assets/sprites/environment/cavern_backdrop_dungeon.svg")
+		if tc: bg_cavern_backdrop.texture = tc
+	if bg_dirt_wall_l:
+		var td = _safe_load("res://assets/sprites/environment/dirt_wall_strata.svg")
+		if td:
+			bg_dirt_wall_l.texture = td
+			if bg_dirt_wall_r: bg_dirt_wall_r.texture = td
+	if bg_grass_cliff_l:
+		var tgr = _safe_load("res://assets/sprites/environment/surface_grass_cliff.svg")
+		if tgr:
+			bg_grass_cliff_l.texture = tgr
+			if bg_grass_cliff_r: bg_grass_cliff_r.texture = tgr
 
 	_setup_level()
 
@@ -61,28 +61,62 @@ func _setup_level() -> void:
 		1: # World 1: Farm Cavern (Nông trại đất đá)
 			bg_sky.color = Color(0.48, 0.78, 0.96)
 			bg_dirt.color = Color(0.32, 0.22, 0.15)
-			bg_cavern.color = Color(0.18, 0.13, 0.09)
+			bg_cavern.color = Color(0.16, 0.10, 0.07)
+			if bg_cavern_backdrop: bg_cavern_backdrop.modulate = Color(1.0, 0.96, 0.92)
 		2: # World 2: Stone Quarry (Mỏ đá hoàng hôn)
 			bg_sky.color = Color(0.85, 0.62, 0.42)
 			bg_dirt.color = Color(0.24, 0.2, 0.24)
 			bg_cavern.color = Color(0.13, 0.11, 0.15)
+			if bg_cavern_backdrop: bg_cavern_backdrop.modulate = Color(0.88, 0.78, 0.95)
 		3: # World 3: Steampunk Industrial (Nhà máy khói độc)
 			bg_sky.color = Color(0.65, 0.52, 0.35)
 			bg_dirt.color = Color(0.2, 0.18, 0.22)
 			bg_cavern.color = Color(0.09, 0.12, 0.14)
+			if bg_cavern_backdrop: bg_cavern_backdrop.modulate = Color(0.82, 0.88, 0.82)
 		4: # World 4: Lava Core Imperial (Hoàng cung nham thạch)
 			bg_sky.color = Color(0.25, 0.1, 0.2)
 			bg_dirt.color = Color(0.18, 0.06, 0.08)
 			bg_cavern.color = Color(0.08, 0.03, 0.05)
+			if bg_cavern_backdrop: bg_cavern_backdrop.modulate = Color(0.95, 0.70, 0.65)
 
 	# 2. Quy mô công trình CỰC ĐẠI TOÀN CẢNH (Mở rộng toàn màn hình từ x=15 đến x=525)
 	var cavern_half_width = 255.0
 	var cavern_top_y = clamp(390.0 - (level_id * 2.0), 240.0, 390.0)
-	intro_target_y = (885.0 + cavern_top_y) * 0.5
+	var cavern_bottom_y = 860.0
+	intro_target_y = (cavern_bottom_y - 10.0 + cavern_top_y) * 0.5
 
 	var cx = 270.0
 	var left_edge_x = cx - cavern_half_width
 	var right_edge_x = cx + cavern_half_width
+
+	var cav_mid_y = (cavern_top_y + cavern_bottom_y) * 0.5
+	var cav_height = cavern_bottom_y - cavern_top_y
+	var cav_width = right_edge_x - left_edge_x
+
+	# Cập nhật hình ảnh bối cảnh phong phú
+	if bg_cavern_backdrop:
+		bg_cavern_backdrop.position = Vector2(cx, cav_mid_y)
+		bg_cavern_backdrop.scale = Vector2(cav_width / 540.0, cav_height / 700.0)
+
+	if bg_dirt_wall_l:
+		bg_dirt_wall_l.position = Vector2(left_edge_x * 0.5, cav_mid_y)
+		bg_dirt_wall_l.scale = Vector2(max(left_edge_x, 15.0) / 120.0, cav_height / 700.0)
+
+	if bg_dirt_wall_r:
+		bg_dirt_wall_r.position = Vector2(cx + cavern_half_width + (540.0 - right_edge_x) * 0.5, cav_mid_y)
+		bg_dirt_wall_r.scale = Vector2(max(540.0 - right_edge_x, 15.0) / 120.0, cav_height / 700.0)
+
+	if bg_grass_cliff_l:
+		bg_grass_cliff_l.position = Vector2(left_edge_x * 0.5, cavern_top_y + 8.0)
+		bg_grass_cliff_l.scale = Vector2(max(left_edge_x, 20.0) / 120.0, 1.0)
+
+	if bg_grass_cliff_r:
+		bg_grass_cliff_r.position = Vector2(cx + cavern_half_width + (540.0 - right_edge_x) * 0.5, cavern_top_y + 8.0)
+		bg_grass_cliff_r.scale = Vector2(max(540.0 - right_edge_x, 20.0) / 120.0, 1.0)
+
+	if bg_sky_clouds:
+		bg_sky_clouds.position = Vector2(cx, cavern_top_y * 0.5)
+		bg_sky_clouds.scale = Vector2(1.0, cavern_top_y / 400.0)
 
 	# Cập nhật hình ảnh nền đồng bộ
 	if bg_sky:
@@ -99,8 +133,8 @@ func _setup_level() -> void:
 		bg_cavern.polygon = PackedVector2Array([
 			Vector2(left_edge_x, cavern_top_y),
 			Vector2(right_edge_x, cavern_top_y),
-			Vector2(right_edge_x, 895),
-			Vector2(left_edge_x, 895)
+			Vector2(right_edge_x, cavern_bottom_y),
+			Vector2(left_edge_x, cavern_bottom_y)
 		])
 
 	# Cập nhật ranh giới vật lý (Hoàn toàn thông suốt không bị vướng miệng hang)
@@ -110,8 +144,8 @@ func _setup_level() -> void:
 	var col_ledge_l = get_node_or_null("BunkerBoundaries/ColLedgeL")
 	var col_ledge_r = get_node_or_null("BunkerBoundaries/ColLedgeR")
 
-	var wall_h = 895.0 - cavern_top_y + 40.0
-	var wall_mid_y = (cavern_top_y + 895.0) * 0.5
+	var wall_h = cavern_bottom_y - cavern_top_y + 40.0
+	var wall_mid_y = (cavern_top_y + cavern_bottom_y) * 0.5
 
 	if col_wall_l:
 		col_wall_l.position = Vector2(left_edge_x - 15.0, wall_mid_y)
@@ -126,7 +160,7 @@ func _setup_level() -> void:
 		col_wall_r.shape = shape_r
 
 	if col_floor:
-		col_floor.position = Vector2(cx, 895.0)
+		col_floor.position = Vector2(cx, cavern_bottom_y + 15.0)
 		var floor_shape = RectangleShape2D.new()
 		floor_shape.size = Vector2(cavern_half_width * 2.0 + 80.0, 40.0)
 		col_floor.shape = floor_shape
@@ -181,7 +215,7 @@ func _setup_level() -> void:
 	GameManager.start_level(level_id, enemy_count, egg_loadout)
 
 func _generate_grand_bunker(lvl: int, world: int, _half_w: float, mat1: String, mat2: String, mat_heavy: String, e_grunt: String, e_elite: String) -> Array[String]:
-	var floor_y = 875.0
+	var floor_y = 840.0
 	var cx = 270.0
 	var loadout: Array[String] = []
 	var is_boss_level = (lvl % 15 == 0)
@@ -204,8 +238,9 @@ func _generate_grand_bunker(lvl: int, world: int, _half_w: float, mat1: String, 
 	# Tầng 2 Tháp Tây (Vọng lâu trên cao)
 	var tw_p2_h = 88.0
 	var tw_p2_y = tw_b1_y - 12.0 - tw_p2_h * 0.5
-	_spawn_block(Vector2(42, tw_p2_y), Vector2(18, tw_p2_h), "glass" if (lvl % 3 == 1) else mat2)
-	_spawn_block(Vector2(142, tw_p2_y), Vector2(18, tw_p2_h), "glass" if (lvl % 3 == 1) else mat2)
+	var tw_col_mat = "glass" if (lvl >= 5 and lvl % 3 == 1) else (mat2 if lvl >= 3 else mat1)
+	_spawn_block(Vector2(42, tw_p2_y), Vector2(18, tw_p2_h), tw_col_mat)
+	_spawn_block(Vector2(142, tw_p2_y), Vector2(18, tw_p2_h), tw_col_mat)
 	var tw_b2_y = tw_b1_y - 12.0 - tw_p2_h - 10.0
 	_spawn_block(Vector2(tw_cx, tw_b2_y), Vector2(118, 20), mat1)
 	if lvl >= 3:
@@ -276,8 +311,9 @@ func _generate_grand_bunker(lvl: int, world: int, _half_w: float, mat1: String, 
 	# Tầng 2 Tháp Đông (Kho đạn / Lồng cứu gà con)
 	var te_p2_h = 88.0
 	var te_p2_y = te_b1_y - 12.0 - te_p2_h * 0.5
-	_spawn_block(Vector2(398, te_p2_y), Vector2(18, te_p2_h), "glass" if (lvl % 3 == 2) else mat2)
-	_spawn_block(Vector2(498, te_p2_y), Vector2(18, te_p2_h), "glass" if (lvl % 3 == 2) else mat2)
+	var te_col_mat = "glass" if (lvl >= 6 and lvl % 3 == 2) else (mat2 if lvl >= 3 else mat1)
+	_spawn_block(Vector2(398, te_p2_y), Vector2(18, te_p2_h), te_col_mat)
+	_spawn_block(Vector2(498, te_p2_y), Vector2(18, te_p2_h), te_col_mat)
 	var te_b2_y = te_b1_y - 12.0 - te_p2_h - 10.0
 	_spawn_block(Vector2(te_cx, te_b2_y), Vector2(118, 20), mat1)
 	if lvl % 4 == 1 and lvl >= 5:

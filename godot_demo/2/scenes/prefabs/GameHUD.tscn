@@ -19,14 +19,16 @@ corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_Shelf"]
-bg_color = Color(0.14, 0.06, 0.24, 0.92)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(1, 0.84, 0.0, 0.8)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
+bg_color = Color(0.12, 0.05, 0.20, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.84, 0.0, 0.85)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_VictoryModal"]
 bg_color = Color(0.14, 0.04, 0.25, 0.98)
@@ -155,27 +157,29 @@ script = ExtResource("2_btn")
 is_gold_action = true
 
 [node name="EggShelf" type="PanelContainer" parent="."]
-anchors_preset = 12
+anchors_preset = 7
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = 30.0
-offset_top = -80.0
-offset_right = -30.0
+offset_left = -110.0
+offset_top = -52.0
+offset_right = 110.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_Shelf")
 
 [node name="Margin" type="MarginContainer" parent="EggShelf"]
 layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 4
 
 [node name="EggIcons" type="HBoxContainer" parent="EggShelf/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 alignment = 1
 
 [node name="VictoryModal" type="PanelContainer" parent="."]

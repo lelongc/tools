@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 700" width="120" height="700">
+  <defs>
+    <linearGradient id="dirtBase" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3b1d0e"/>
+      <stop offset="70%" stop-color="#2a1408"/>
+      <stop offset="100%" stop-color="#190a03"/>
+    </linearGradient>
+    <linearGradient id="edgeHighlight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#5c3018"/>
+      <stop offset="100%" stop-color="#190a03"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Dirt Wall Mass -->
+  <rect width="120" height="700" fill="url(#dirtBase)"/>
+
+  <!-- Sedimentary Strata Bands -->
+  <path d="M0 60 Q50 50, 120 70 L120 95 Q60 80, 0 85 Z" fill="#4d2612" opacity="0.8"/>
+  <path d="M0 160 Q70 180, 120 155 L120 185 Q50 200, 0 180 Z" fill="#240f05" opacity="0.9"/>
+  <path d="M0 270 Q40 250, 120 280 L120 310 Q60 290, 0 295 Z" fill="#522a14" opacity="0.75"/>
+  <path d="M0 400 Q70 420, 120 395 L120 425 Q50 445, 0 420 Z" fill="#1f0c04" opacity="0.95"/>
+  <path d="M0 530 Q50 515, 120 540 L120 565 Q60 545, 0 550 Z" fill="#4a2410" opacity="0.75"/>
+
+  <!-- Embedded Rocks & Mineral Ore -->
+  <ellipse cx="45" cy="110" rx="14" ry="9" fill="#6b7280" stroke="#374151" stroke-width="1.5"/>
+  <ellipse cx="43" cy="108" rx="7" ry="4" fill="#9ca3af" opacity="0.6"/>
+
+  <ellipse cx="75" cy="220" rx="16" ry="11" fill="#4b5563" stroke="#1f2937" stroke-width="1.5"/>
+  <ellipse cx="30" cy="340" rx="18" ry="12" fill="#572208" stroke="#3b1502" stroke-width="1.8"/>
+
+  <!-- Gold Ore Flecks -->
+  <g fill="#fbbf24" opacity="0.85">
+    <circle cx="25" cy="180" r="2.5"/>
+    <circle cx="32" cy="184" r="1.8"/>
+    <circle cx="85" cy="460" r="3"/>
+    <circle cx="92" cy="465" r="2"/>
+    <circle cx="40" cy="610" r="2.5"/>
+  </g>
+
+  <!-- Winding Roots -->
+  <path d="M20 0 Q35 80, 15 160 Q5 220, 22 300" fill="none" stroke="#78350f" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M70 0 Q50 90, 65 180 Q80 250, 60 350" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Chiseled Edge Border -->
+  <line x1="118" y1="0" x2="118" y2="700" stroke="#5c3018" stroke-width="3"/>
+  <line x1="120" y1="0" x2="120" y2="700" stroke="#140802" stroke-width="1.5"/>
+</svg>
