@@ -205,10 +205,13 @@ func _on_impact(body: Node) -> void:
 		wake_up()
 
 	if body is RigidBody2D:
-		var rel_vel = (linear_velocity - body.linear_velocity).length()
-		if rel_vel > 160.0:
-			var impact_dmg = (rel_vel - 160.0) * min(body.mass * 0.22, 2.2)
-			impact_dmg = min(impact_dmg, 180.0)
+		var b_vel = body.linear_velocity
+		if "pre_impact_velocity" in body and body.pre_impact_velocity.length() > b_vel.length():
+			b_vel = body.pre_impact_velocity
+		var rel_vel = (linear_velocity - b_vel).length()
+		if rel_vel > 140.0:
+			var impact_dmg = (rel_vel - 140.0) * min(body.mass * 0.28, 2.5)
+			impact_dmg = min(impact_dmg, 220.0)
 			take_damage(impact_dmg, global_position)
 
 func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
