@@ -38,14 +38,14 @@ var translations: Dictionary = {
 		"ru": "БУНКЕР БАСТЕР 60 УРОВНЕЙ"
 	},
 	"KEY_PLAY": {
-		"en": "▶ PLAY NOW", "vi": "▶ CHƠI NGAY", "ja": "▶ プレイ", "ko": "▶ 지금 플레이",
-		"zh_CN": "▶ 开始游戏", "es": "▶ JUGAR AHORA", "pt_BR": "▶ JOGAR AGORA", "de": "▶ JETZT SPIELEN",
-		"fr": "▶ JOUER", "ru": "▶ ИГРАТЬ"
+		"en": "PLAY NOW", "vi": "CHƠI NGAY", "ja": "プレイ", "ko": "지금 플레이",
+		"zh_CN": "开始游戏", "es": "JUGAR AHORA", "pt_BR": "JOGAR AGORA", "de": "JETZT SPIELEN",
+		"fr": "JOUER", "ru": "ИГРАТЬ"
 	},
 	"KEY_SELECT_LEVEL": {
-		"en": "🗺️ SELECT LEVEL", "vi": "🗺️ CHỌN MÀN", "ja": "🗺️ ステージ選択", "ko": "🗺️ 레벨 선택",
-		"zh_CN": "🗺️ 选择关卡", "es": "🗺️ SELECCIONAR NIVEL", "pt_BR": "🗺️ SELECIONAR FASE",
-		"de": "🗺️ LEVEL WÄHLEN", "fr": "🗺️ CHOISIR NIVEAU", "ru": "🗺️ ВЫБОР УРОВНЯ"
+		"en": "SELECT LEVEL", "vi": "CHỌN MÀN", "ja": "ステージ選択", "ko": "레벨 선택",
+		"zh_CN": "选择关卡", "es": "SELECCIONAR NIVEL", "pt_BR": "SELECIONAR FASE",
+		"de": "LEVEL WÄHLEN", "fr": "CHOISIR NIVEAU", "ru": "ВЫБОР УРОВНЯ"
 	},
 	"KEY_SOUND_ON": {
 		"en": "🔊 ON", "vi": "🔊 BẬT", "ja": "🔊 オン", "ko": "🔊 켜짐",
@@ -80,14 +80,14 @@ var translations: Dictionary = {
 		"de": "Gesamtpunktzahl: %d", "fr": "Score Total : %d", "ru": "Итоговые Очки: %d"
 	},
 	"KEY_NEXT_LEVEL": {
-		"en": "NEXT LEVEL ▶", "vi": "MÀN TIẾP THEO ▶", "ja": "次のステージ ▶", "ko": "다음 레벨 ▶",
-		"zh_CN": "下一关 ▶", "es": "SIGUIENTE ▶", "pt_BR": "PRÓXIMA FASE ▶",
-		"de": "NÄCHSTES LEVEL ▶", "fr": "NIVEAU SUIVANT ▶", "ru": "СЛЕДУЮЩИЙ ▶"
+		"en": "NEXT LEVEL", "vi": "MÀN TIẾP THEO", "ja": "次のステージ", "ko": "다음 레벨",
+		"zh_CN": "下一关", "es": "SIGUIENTE", "pt_BR": "PRÓXIMA FASE",
+		"de": "NÄCHSTES LEVEL", "fr": "NIVEAU SUIVANT", "ru": "СЛЕДУЮЩИЙ"
 	},
 	"KEY_RETRY": {
-		"en": "🔄 RETRY", "vi": "🔄 THỬ LẠI", "ja": "🔄 もう一度", "ko": "🔄 다시 시도",
-		"zh_CN": "🔄 重试", "es": "🔄 REINTENTAR", "pt_BR": "🔄 TENTAR DE NOVO",
-		"de": "🔄 WIEDERHOLEN", "fr": "🔄 RÉESSAYER", "ru": "🔄 ЗАНОВО"
+		"en": "RETRY", "vi": "THỬ LẠI", "ja": "もう一度", "ko": "다시 시도",
+		"zh_CN": "重试", "es": "REINTENTAR", "pt_BR": "TENTAR DE NOVO",
+		"de": "WIEDERHOLEN", "fr": "RÉESSAYER", "ru": "ЗАНОВО"
 	},
 	"KEY_FAIL": {
 		"en": "💀 OUT OF EGGS! 💀", "vi": "💀 HẾT TRỨNG RỒI! 💀",
@@ -97,11 +97,11 @@ var translations: Dictionary = {
 		"fr": "💀 PLUS D'OEUFS ! 💀", "ru": "💀 ЯЙЦА ЗАКОНЧИЛИСЬ! 💀"
 	},
 	"KEY_AD_NUKE": {
-		"en": "📺 WATCH AD FOR BLACK HOLE", "vi": "📺 XEM AD NHẬN LỖ ĐEN",
-		"ja": "📺 広告を見てブラックホール獲得", "ko": "📺 광고 보고 블랙홀 받기",
-		"zh_CN": "📺 看广告获得黑洞蛋", "es": "📺 VER ANUNCIO: AGUJERO NEGRO",
-		"pt_BR": "📺 VER ANÚNCIO: BURACO NEGRO", "de": "📺 WERBUNG: SCHWARZES LOCH",
-		"fr": "📺 PUB POUR TROU NOIR", "ru": "📺 РЕКЛАМА: ЧЁРНАЯ ДЫРА"
+		"en": "WATCH AD FOR BLACK HOLE", "vi": "XEM AD NHẬN LỖ ĐEN",
+		"ja": "広告を見てブラックホール獲得", "ko": "광고 보고 블랙홀 받기",
+		"zh_CN": "看广告获得黑洞蛋", "es": "VER ANUNCIO: AGUJERO NEGRO",
+		"pt_BR": "VER ANÚNCIO: BURACO NEGRO", "de": "WERBUNG: SCHWARZES LOCH",
+		"fr": "PUB POUR TROU NOIR", "ru": "РЕКЛАМА: ЧЁРНАЯ ДЫРА"
 	},
 	"KEY_PAUSE": {
 		"en": "⏸️ PAUSED", "vi": "⏸️ TẠM DỪNG", "ja": "⏸️ 一時停止", "ko": "⏸️ 일시 정지",
@@ -109,14 +109,19 @@ var translations: Dictionary = {
 		"de": "⏸️ PAUSE", "fr": "⏸️ PAUSE", "ru": "⏸️ ПАУЗА"
 	},
 	"KEY_RESUME": {
-		"en": "RESUME ▶", "vi": "TIẾP TỤC ▶", "ja": "再開 ▶", "ko": "계속하기 ▶",
-		"zh_CN": "继续 ▶", "es": "CONTINUAR ▶", "pt_BR": "CONTINUAR ▶",
-		"de": "WEITER ▶", "fr": "REPRENDRE ▶", "ru": "ПРОДОЛЖИТЬ ▶"
+		"en": "RESUME", "vi": "TIẾP TỤC", "ja": "再開", "ko": "계속하기",
+		"zh_CN": "继续", "es": "CONTINUAR", "pt_BR": "CONTINUAR",
+		"de": "WEITER", "fr": "REPRENDRE", "ru": "ПРОДОЛЖИТЬ"
 	},
 	"KEY_MENU": {
-		"en": "◀ MENU", "vi": "◀ MENU", "ja": "◀ メニュー", "ko": "◀ 메뉴",
-		"zh_CN": "◀ 主菜单", "es": "◀ MENÚ", "pt_BR": "◀ MENU",
-		"de": "◀ MENÜ", "fr": "◀ MENU", "ru": "◀ МЕНЮ"
+		"en": "MENU", "vi": "MENU", "ja": "メニュー", "ko": "메뉴",
+		"zh_CN": "主菜单", "es": "MENÚ", "pt_BR": "MENU",
+		"de": "MENÜ", "fr": "MENU", "ru": "МЕНЮ"
+	},
+	"KEY_LUCKY_WHEEL": {
+		"en": "LUCKY WHEEL", "vi": "VÒNG QUAY MAY MẮN", "ja": "ラッキーホイール", "ko": "행운의 룰렛",
+		"zh_CN": "幸运转盘", "es": "RULETA DE LA SUERTE", "pt_BR": "ROLETA DA SORTE",
+		"de": "GLÜCKSRAD", "fr": "ROUE DE LA CHANCE", "ru": "КОЛЕСО УДАЧИ"
 	},
 	"KEY_WORLD_1": {
 		"en": "WORLD 1: FARM CAVERN (1 - 15)", "vi": "THẾ GIỚI 1: NÔNG TRẠI (1 - 15)",

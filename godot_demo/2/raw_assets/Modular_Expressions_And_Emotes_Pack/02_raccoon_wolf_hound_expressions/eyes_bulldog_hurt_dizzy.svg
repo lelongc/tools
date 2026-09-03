@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  <!-- Bulldog Hurt / Swollen Shiner & Dizzy Eye -->
+  <!-- Left Swollen Eye with Purple Shiner -->
+  <ellipse cx="44" cy="40" rx="34" ry="24" fill="#a855f7" opacity="0.45"/>
+  <ellipse cx="44" cy="40" rx="26" ry="14" fill="#ffffff" stroke="#38220f" stroke-width="5"/>
+  <path d="M26 40 L62 40" stroke="#38220f" stroke-width="5" stroke-linecap="round"/>
+  <!-- Right Eye with Dizzy Spiral -->
+  <circle cx="116" cy="40" r="28" fill="#ffffff" stroke="#38220f" stroke-width="5"/>
+  <!-- Spiral -->
+  <path d="M116 40 A4 4 0 0 1 112 36 A8 8 0 0 1 120 32 A12 12 0 0 1 128 40 A16 16 0 0 1 116 56" fill="none" stroke="#000000" stroke-width="3" stroke-linecap="round"/>
+  <!-- Bandage patch on brow -->
+  <polygon points="26,12 46,6 50,18 30,24" fill="#fde047" stroke="#38220f" stroke-width="2.5"/>
+</svg>

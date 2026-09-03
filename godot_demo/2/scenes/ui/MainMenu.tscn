@@ -100,19 +100,36 @@ theme_override_constants/margin_right = 8
 [node name="TotalStarsLabel" type="Label" parent="TopBar/Margin/HBox/StarBadge/StarMargin"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 17
 text = "⭐ 0 / 180"
 vertical_alignment = 1
 
+[node name="CoinBadge" type="PanelContainer" parent="TopBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_StarBadge")
+
+[node name="CoinMargin" type="MarginContainer" parent="TopBar/Margin/HBox/CoinBadge"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 8
+
+[node name="TotalCoinsLabel" type="Label" parent="TopBar/Margin/HBox/CoinBadge/CoinMargin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 17
+text = "🪙 150"
+vertical_alignment = 1
+
 [node name="BtnLang" type="Button" parent="TopBar/Margin/HBox"]
-custom_minimum_size = Vector2(125, 38)
+custom_minimum_size = Vector2(110, 38)
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "🇺🇸 English"
 script = ExtResource("2_btn")
 
 [node name="BtnSound" type="Button" parent="TopBar/Margin/HBox"]
-custom_minimum_size = Vector2(90, 38)
+custom_minimum_size = Vector2(85, 38)
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
 text = "🔊 BẬT"
@@ -130,7 +147,7 @@ grow_vertical = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
 layout_mode = 2
-theme_override_constants/separation = 22
+theme_override_constants/separation = 18
 alignment = 1
 
 [node name="LogoContainer" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
@@ -160,7 +177,7 @@ text = "BUNKER BUSTER 60 LEVELS"
 horizontal_alignment = 1
 
 [node name="Spacer" type="Control" parent="CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 30)
+custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
 
 [node name="BtnPlay" type="Button" parent="CenterContainer/VBoxContainer"]
@@ -175,15 +192,25 @@ script = ExtResource("2_btn")
 is_primary_green = true
 
 [node name="BtnLevels" type="Button" parent="CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(290, 56)
+custom_minimum_size = Vector2(290, 54)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 20
-text = "  CHỌN MÀN"
+theme_override_font_sizes/font_size = 18
+text = " CHỌN MÀN CHƠI"
 icon = ExtResource("4_lvl_ico")
 expand_icon = true
 script = ExtResource("2_btn")
 is_wood_brown = true
+
+[node name="BtnWheel" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(290, 56)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.15, 0.08, 0, 1)
+theme_override_font_sizes/font_size = 19
+text = "🎡 VÒNG QUAY MAY MẮN"
+script = ExtResource("2_btn")
+is_gold_action = true
 
 [node name="Footer" type="Label" parent="."]
 layout_mode = 1

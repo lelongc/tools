@@ -290,21 +290,20 @@ func _load_character_expression_palette() -> void:
 			acc_back.texture = _load_tex("res://assets/enemies/modular/03_armored_raccoon/4_tail_striped.svg")
 			acc_back.position = Vector2(-70, 28)
 
-			pupils_sprite.texture = _load_tex("res://assets/enemies/modular/01_sly_fox/4_pupils_separate.svg")
-			pupils_sprite.visible = true
+			pupils_sprite.visible = false
 
-			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/01_sly_fox/3_eyes_normal.svg")
-			char_tex_eyes_aiming = _load_tex("res://assets/enemies/modular/01_sly_fox/5_eyes_terrified.svg")
-			char_tex_eyes_panic = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_shock_pinprick.svg")
-			char_tex_eyes_hurt = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_tearful_pleading.svg")
-			char_tex_eyes_furious = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_furious_v_brow.svg")
+			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_raccoon_bandit_normal.svg")
+			char_tex_eyes_aiming = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_raccoon_shock_pinprick.svg")
+			char_tex_eyes_panic = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_raccoon_shock_pinprick.svg")
+			char_tex_eyes_hurt = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_raccoon_defeat_swollen.svg")
+			char_tex_eyes_furious = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_raccoon_bandit_normal.svg")
 			char_tex_eyes_special = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_raccoon_greedy_stars.svg")
-			char_tex_eyes_dizzy = _load_tex("res://assets/enemies/modular/01_sly_fox/6_eyes_dizzy_xx.svg")
+			char_tex_eyes_dizzy = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_raccoon_defeat_swollen.svg")
 
 			char_tex_snout_normal = _load_tex("res://assets/enemies/modular/03_armored_raccoon/5_snout_sneaky_teeth.svg")
 			char_tex_snout_aiming = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/snout_raccoon_teeth_chattering.svg")
 			char_tex_snout_panic = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/snout_raccoon_teeth_chattering.svg")
-			char_tex_snout_hurt = _load_tex("res://assets/enemies/modular_expressions/01_fox_snouts/snout_fox_bruised_broken_tooth.svg")
+			char_tex_snout_hurt = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/snout_raccoon_teeth_chattering.svg")
 			char_tex_snout_furious = _load_tex("res://assets/enemies/modular/03_armored_raccoon/5_snout_sneaky_teeth.svg")
 			char_tex_snout_special = _load_tex("res://assets/enemies/modular/03_armored_raccoon/5_snout_sneaky_teeth.svg")
 			char_tex_snout_taunt = _load_tex("res://assets/enemies/modular/03_armored_raccoon/5_snout_sneaky_teeth.svg")
@@ -324,16 +323,16 @@ func _load_character_expression_palette() -> void:
 
 			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/04_mine_wolf/4_eyes_wolf_glowing_yellow.svg")
 			char_tex_eyes_aiming = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_wolf_glowing_red_rage.svg")
-			char_tex_eyes_panic = _load_tex("res://assets/enemies/modular/01_sly_fox/5_eyes_terrified.svg")
-			char_tex_eyes_hurt = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_tearful_pleading.svg")
+			char_tex_eyes_panic = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_wolf_terrified_shock.svg")
+			char_tex_eyes_hurt = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_wolf_hurt_whimper.svg")
 			char_tex_eyes_furious = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_wolf_glowing_red_rage.svg")
 			char_tex_eyes_special = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_wolf_glowing_red_rage.svg")
-			char_tex_eyes_dizzy = _load_tex("res://assets/enemies/modular/01_sly_fox/6_eyes_dizzy_xx.svg")
+			char_tex_eyes_dizzy = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_wolf_hurt_whimper.svg")
 
 			char_tex_snout_normal = _load_tex("res://assets/enemies/modular/04_mine_wolf/5_snout_snarling_fangs.svg")
 			char_tex_snout_aiming = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/snout_wolf_snarl_saliva.svg")
-			char_tex_snout_panic = _load_tex("res://assets/enemies/modular/01_sly_fox/8_mouth_screaming.svg")
-			char_tex_snout_hurt = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/snout_raccoon_teeth_chattering.svg")
+			char_tex_snout_panic = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/snout_wolf_snarl_saliva.svg")
+			char_tex_snout_hurt = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/snout_wolf_whimper_pain.svg")
 			char_tex_snout_furious = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/snout_wolf_snarl_saliva.svg")
 			char_tex_snout_special = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/snout_wolf_snarl_saliva.svg")
 			char_tex_snout_taunt = _load_tex("res://assets/enemies/modular/04_mine_wolf/5_snout_snarling_fangs.svg")
@@ -349,17 +348,17 @@ func _load_character_expression_palette() -> void:
 			pupils_sprite.visible = false
 
 			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/05_spike_hound/3_eyes_mismatched.svg")
-			char_tex_eyes_aiming = _load_tex("res://assets/enemies/modular/01_sly_fox/5_eyes_terrified.svg")
-			char_tex_eyes_panic = _load_tex("res://assets/enemies/modular/01_sly_fox/5_eyes_terrified.svg")
-			char_tex_eyes_hurt = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_tearful_pleading.svg")
-			char_tex_eyes_furious = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_furious_v_brow.svg")
+			char_tex_eyes_aiming = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_bulldog_shock_pop.svg")
+			char_tex_eyes_panic = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_bulldog_shock_pop.svg")
+			char_tex_eyes_hurt = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_bulldog_hurt_dizzy.svg")
+			char_tex_eyes_furious = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_bulldog_shock_pop.svg")
 			char_tex_eyes_special = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_bulldog_derpy_googly.svg")
-			char_tex_eyes_dizzy = _load_tex("res://assets/enemies/modular/01_sly_fox/6_eyes_dizzy_xx.svg")
+			char_tex_eyes_dizzy = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_bulldog_hurt_dizzy.svg")
 
 			char_tex_snout_normal = _load_tex("res://assets/enemies/modular/05_spike_hound/4_jaw_underbite_drool.svg")
-			char_tex_snout_aiming = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/snout_raccoon_teeth_chattering.svg")
-			char_tex_snout_panic = _load_tex("res://assets/enemies/modular/01_sly_fox/8_mouth_screaming.svg")
-			char_tex_snout_hurt = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/snout_raccoon_teeth_chattering.svg")
+			char_tex_snout_aiming = _load_tex("res://assets/enemies/modular/05_spike_hound/4_jaw_underbite_drool.svg")
+			char_tex_snout_panic = _load_tex("res://assets/enemies/modular/05_spike_hound/4_jaw_underbite_drool.svg")
+			char_tex_snout_hurt = _load_tex("res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/jaw_bulldog_hurt_loose_tooth.svg")
 			char_tex_snout_furious = _load_tex("res://assets/enemies/modular/05_spike_hound/4_jaw_underbite_drool.svg")
 			char_tex_snout_special = _load_tex("res://assets/enemies/modular/05_spike_hound/4_jaw_underbite_drool.svg")
 			char_tex_snout_taunt = _load_tex("res://assets/enemies/modular/05_spike_hound/4_jaw_underbite_drool.svg")
@@ -413,21 +412,20 @@ func _load_character_expression_palette() -> void:
 			acc_front.texture = _load_tex("res://assets/enemies/modular/07_imperial_boar/5_badge_egg_medal.svg")
 			acc_front.position = Vector2(0, 64)
 
-			pupils_sprite.texture = _load_tex("res://assets/enemies/modular/01_sly_fox/4_pupils_separate.svg")
-			pupils_sprite.visible = true
+			pupils_sprite.visible = false
 
-			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/01_sly_fox/3_eyes_normal.svg")
-			char_tex_eyes_aiming = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_furious_v_brow.svg")
-			char_tex_eyes_panic = _load_tex("res://assets/enemies/modular/01_sly_fox/5_eyes_terrified.svg")
-			char_tex_eyes_hurt = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_tearful_pleading.svg")
-			char_tex_eyes_furious = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_furious_v_brow.svg")
-			char_tex_eyes_special = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_laughing_smug.svg")
-			char_tex_eyes_dizzy = _load_tex("res://assets/enemies/modular/01_sly_fox/6_eyes_dizzy_xx.svg")
+			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular_expressions/05_boar_expressions/eyes_boar_roman_normal.svg")
+			char_tex_eyes_aiming = _load_tex("res://assets/enemies/modular_expressions/05_boar_expressions/eyes_boar_shock_bulging.svg")
+			char_tex_eyes_panic = _load_tex("res://assets/enemies/modular_expressions/05_boar_expressions/eyes_boar_shock_bulging.svg")
+			char_tex_eyes_hurt = _load_tex("res://assets/enemies/modular_expressions/05_boar_expressions/eyes_boar_defeat_black_eye.svg")
+			char_tex_eyes_furious = _load_tex("res://assets/enemies/modular_expressions/05_boar_expressions/eyes_boar_furious_war.svg")
+			char_tex_eyes_special = _load_tex("res://assets/enemies/modular_expressions/05_boar_expressions/eyes_boar_furious_war.svg")
+			char_tex_eyes_dizzy = _load_tex("res://assets/enemies/modular_expressions/05_boar_expressions/eyes_boar_defeat_black_eye.svg")
 
 			char_tex_snout_normal = _load_tex("res://assets/enemies/modular/07_imperial_boar/4_snout_royal_boar.svg")
-			char_tex_snout_aiming = _load_tex("res://assets/enemies/modular_expressions/01_fox_snouts/snout_fox_gasp_shock_hole.svg")
-			char_tex_snout_panic = _load_tex("res://assets/enemies/modular/01_sly_fox/8_mouth_screaming.svg")
-			char_tex_snout_hurt = _load_tex("res://assets/enemies/modular_expressions/01_fox_snouts/snout_fox_bruised_broken_tooth.svg")
+			char_tex_snout_aiming = _load_tex("res://assets/enemies/modular/07_imperial_boar/4_snout_royal_boar.svg")
+			char_tex_snout_panic = _load_tex("res://assets/enemies/modular_expressions/05_boar_expressions/snout_boar_screaming_oink.svg")
+			char_tex_snout_hurt = _load_tex("res://assets/enemies/modular_expressions/05_boar_expressions/snout_boar_screaming_oink.svg")
 			char_tex_snout_furious = _load_tex("res://assets/enemies/modular/07_imperial_boar/4_snout_royal_boar.svg")
 			char_tex_snout_special = _load_tex("res://assets/enemies/modular/07_imperial_boar/4_snout_royal_boar.svg")
 			char_tex_snout_taunt = _load_tex("res://assets/enemies/modular/07_imperial_boar/4_snout_royal_boar.svg")
@@ -460,7 +458,7 @@ func _load_character_expression_palette() -> void:
 
 			char_tex_snout_normal = _load_tex("res://assets/enemies/modular/08_baron_pig/7_snout_baron_mustache.svg")
 			char_tex_snout_aiming = _load_tex("res://assets/enemies/modular/08_baron_pig/7_snout_baron_mustache.svg")
-			char_tex_snout_panic = _load_tex("res://assets/enemies/modular/01_sly_fox/8_mouth_screaming.svg")
+			char_tex_snout_panic = _load_tex("res://assets/enemies/modular/08_baron_pig/7_snout_baron_mustache.svg")
 			char_tex_snout_hurt = _load_tex("res://assets/enemies/modular/08_baron_pig/7_snout_baron_mustache.svg")
 			char_tex_snout_furious = _load_tex("res://assets/enemies/modular/08_baron_pig/7_snout_baron_mustache.svg")
 			char_tex_snout_special = _load_tex("res://assets/enemies/modular_expressions/03_baron_pig_special/snout_baron_laughing_gold_tooth.svg")
@@ -477,7 +475,15 @@ func _load_character_expression_palette() -> void:
 
 func _load_tex(path: String) -> Texture2D:
 	if ResourceLoader.exists(path):
-		return load(path)
+		var res = load(path)
+		if res: return res
+	var global_path = ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(global_path):
+		var img = Image.load_from_file(global_path)
+		if img:
+			var tex = ImageTexture.create_from_image(img)
+			tex.resource_path = path
+			return tex
 	return null
 
 func _play_spawn_bounce() -> void:

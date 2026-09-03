@@ -2,8 +2,9 @@ extends Node
 
 signal enemy_defeated(enemy_node, points)
 signal egg_dropped(egg_type)
-signal level_completed(stars, score)
+signal level_completed(stars, score, coins)
 signal level_failed()
+signal last_stand_offered(enemies_left)
 signal score_updated(new_score)
 
 var current_level: int = 1
@@ -19,6 +20,9 @@ var is_level_active: bool = false
 var is_settling: bool = false
 var settle_timer: float = 0.0
 
+var last_stand_used_in_level: bool = false
+var vip_trial_used_in_level: bool = false
+
 func start_level(level_id: int, enemy_count: int, egg_list: Array[String]) -> void:
 	current_level = level_id
 	total_enemies = enemy_count
@@ -29,6 +33,8 @@ func start_level(level_id: int, enemy_count: int, egg_list: Array[String]) -> vo
 	is_level_active = true
 	is_settling = false
 	settle_timer = 0.0
+	last_stand_used_in_level = false
+	vip_trial_used_in_level = false
 	score_updated.emit(current_score)
 
 func add_score(points: int) -> void:
@@ -66,8 +72,15 @@ func _process(delta: float) -> void:
 		elif settle_timer <= 0.0:
 			is_settling = false
 			if remaining_enemies > 0:
-				is_level_active = false
-				level_failed.emit()
+				# Điểm chạm 1: Cứu thua "Suýt thắng" (Last Stand)
+				# Grace Period: chỉ xuất hiện từ Màn 6 trở đi
+				# Điều kiện: quái còn <= 2 con và chưa dùng cứu thua ở màn này
+				if current_level > 5 and remaining_enemies <= 2 and not last_stand_used_in_level:
+					last_stand_used_in_level = true
+					last_stand_offered.emit(remaining_enemies)
+				else:
+					is_level_active = false
+					level_failed.emit()
 
 func _trigger_victory_delay() -> void:
 	if not is_level_active: return
@@ -76,12 +89,8 @@ func _trigger_victory_delay() -> void:
 	var unused_eggs = available_eggs.size() - current_egg_index
 	add_score(unused_eggs * 1200)
 
-	# Công thức tính sao khắt khe chuẩn mực (Skill-based Angry Birds logic):
-	# 1 Sao: Tiêu diệt hết quái (vượt qua màn).
-	# 2 Sao: Phá hủy công trình khá + còn dư 1 quả trứng hoặc đạt điểm tốt.
-	# 3 Sao: Phá hủy công trình xuất sắc VÀ bắt buộc phải còn dư ít nhất 1-2 quả trứng!
 	var base_target = (total_enemies * 800) + 400
-	var star3_target = base_target + 1400 # Cần dư ít nhất 1 quả trứng (1200 điểm) + điểm phá hủy công trình
+	var star3_target = base_target + 1400
 	var star2_target = base_target + 600
 
 	var stars = 1
@@ -90,12 +99,17 @@ func _trigger_victory_delay() -> void:
 	elif current_score >= star2_target or unused_eggs >= 1:
 		stars = 2
 
+	var base_coins = 50
+	if stars == 2: base_coins = 80
+	elif stars == 3: base_coins = 120
+
 	# Lưu kết quả vào SaveManager
 	if has_node("/root/SaveManager"):
-		get_node("/root/SaveManager").record_level_result(current_level, stars, current_score)
+		var sm = get_node("/root/SaveManager")
+		sm.record_level_result(current_level, stars, current_score)
 
 	await get_tree().create_timer(1.2).timeout
-	level_completed.emit(stars, current_score)
+	level_completed.emit(stars, current_score, base_coins)
 
 func load_level(level_id: int) -> void:
 	current_level = clamp(level_id, 1, total_levels)

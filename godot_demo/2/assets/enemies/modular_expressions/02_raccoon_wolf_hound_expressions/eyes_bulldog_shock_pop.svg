@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  <!-- Popping Out Shocked Bulldog Eyes with Bloodshot Veins -->
+  <!-- Left Giant Eye -->
+  <circle cx="44" cy="40" r="36" fill="#ffffff" stroke="#38220f" stroke-width="7"/>
+  <!-- Red Veins -->
+  <path d="M16 34 Q28 36 34 40 M24 54 Q32 46 36 44" stroke="#ef4444" stroke-width="2.5" fill="none"/>
+  <circle cx="48" cy="40" r="10" fill="#000000"/>
+  <circle cx="51" cy="37" r="3" fill="#ffffff"/>
+  <!-- Right Giant Eye -->
+  <circle cx="116" cy="40" r="32" fill="#ffffff" stroke="#38220f" stroke-width="6"/>
+  <!-- Red Veins -->
+  <path d="M140 32 Q130 36 124 40 M134 50 Q126 44 122 42" stroke="#ef4444" stroke-width="2.5" fill="none"/>
+  <circle cx="114" cy="40" r="9" fill="#000000"/>
+  <circle cx="117" cy="37" r="3" fill="#ffffff"/>
+</svg>

@@ -1,0 +1,79 @@
+[gd_scene load_steps=2 format=3 uid="uid://dailywheelmodal01"]
+
+[ext_resource type="Script" path="res://scripts/ui/DailyWheelModal.gd" id="1_script"]
+
+[node name="DailyWheelModal" type="CanvasLayer"]
+layer = 100
+script = ExtResource("1_script")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.04, 0.08, 0.88)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(460, 680)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Title" type="Label" parent="CenterContainer/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.98, 0.84, 0.25, 1)
+theme_override_font_sizes/font_size = 26
+text = "🎡 VÒNG QUAY MAY MẮN"
+horizontal_alignment = 1
+
+[node name="StatusLabel" type="Label" parent="CenterContainer/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "Mỗi ngày 1 lượt quay Miễn Phí!"
+horizontal_alignment = 1
+
+[node name="WheelContainer" type="Control" parent="CenterContainer/Panel/VBox"]
+custom_minimum_size = Vector2(300, 300)
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="WheelPivot" type="Node2D" parent="CenterContainer/Panel/VBox/WheelContainer"]
+position = Vector2(150, 150)
+
+[node name="Pointer" type="Polygon2D" parent="CenterContainer/Panel/VBox/WheelContainer"]
+position = Vector2(150, 8)
+color = Color(1, 0.2, 0.2, 1)
+polygon = PackedVector2Array(-12, -10, 12, -10, 0, 18)
+
+[node name="ResultBanner" type="Label" parent="CenterContainer/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.95, 0.4, 1)
+theme_override_font_sizes/font_size = 16
+text = "Quay để nhận quà hấp dẫn!"
+horizontal_alignment = 1
+
+[node name="BtnSpin" type="Button" parent="CenterContainer/Panel/VBox"]
+custom_minimum_size = Vector2(280, 52)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 18
+text = "🎡 QUAY MIỄN PHÍ"
+
+[node name="BtnClose" type="Button" parent="CenterContainer/Panel/VBox"]
+custom_minimum_size = Vector2(160, 42)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 15
+text = "✕ Đóng"

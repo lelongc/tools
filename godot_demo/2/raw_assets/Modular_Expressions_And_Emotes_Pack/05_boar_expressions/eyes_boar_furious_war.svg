@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  <!-- Bloodshot Furious War Pig Glare (Armor Loss / Enraged) -->
+  <!-- Left Eye -->
+  <path d="M22 46 Q50 14 78 46 Q50 62 22 46 Z" fill="#ef4444" stroke="#1f020e" stroke-width="6"/>
+  <!-- Bloodshot Vein -->
+  <path d="M26 38 Q38 42 44 44" stroke="#991b1b" stroke-width="2.5" fill="none"/>
+  <ellipse cx="56" cy="44" rx="7" ry="11" fill="#1f020e"/>
+  <circle cx="58" cy="40" r="2.5" fill="#fef08a"/>
+  <!-- Right Eye -->
+  <path d="M138 46 Q110 14 82 46 Q110 62 138 46 Z" fill="#ef4444" stroke="#1f020e" stroke-width="6"/>
+  <!-- Bloodshot Vein -->
+  <path d="M134 38 Q122 42 116 44" stroke="#991b1b" stroke-width="2.5" fill="none"/>
+  <ellipse cx="104" cy="44" rx="7" ry="11" fill="#1f020e"/>
+  <circle cx="106" cy="40" r="2.5" fill="#fef08a"/>
+  <!-- Deep V-Brow of Pure Rage -->
+  <path d="M14 20 L80 44" stroke="#1f020e" stroke-width="11" stroke-linecap="round"/>
+  <path d="M146 20 L80 44" stroke="#1f020e" stroke-width="11" stroke-linecap="round"/>
+</svg>

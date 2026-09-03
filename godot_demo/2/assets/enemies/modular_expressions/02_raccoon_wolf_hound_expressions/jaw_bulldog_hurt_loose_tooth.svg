@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 120" width="180" height="120">
+  <!-- Bulldog Hurt Droopy Jaw with Crooked Wobbly Tooth -->
+  <path d="M30 42 Q40 92 90 96 Q140 92 150 42 Q170 82 130 106 Q90 118 50 106 Q10 82 30 42 Z" fill="#6f4518" stroke="#38220f" stroke-width="6"/>
+  <!-- Swollen Purple Cheek -->
+  <ellipse cx="44" cy="80" rx="18" ry="12" fill="#7e22ce" opacity="0.4"/>
+  <!-- Black Nose -->
+  <ellipse cx="90" cy="44" rx="22" ry="14" fill="#1f1309"/>
+  <!-- Quivering Underbite Mouth Line -->
+  <path d="M50 78 Q70 70 90 80 Q110 90 130 78" stroke="#38220f" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <!-- Left Loose Tilted Tooth -->
+  <polygon points="62,88 66,60 76,86" transform="rotate(-15, 68, 75)" fill="#ffffff" stroke="#38220f" stroke-width="3"/>
+  <!-- Right Missing Tooth / Bruised Gum Spot -->
+  <ellipse cx="108" cy="80" rx="8" ry="5" fill="#881337"/>
+  <!-- Panting / Quivering Tongue -->
+  <path d="M84 84 C84 102 98 102 98 84 Z" fill="#f43f5e" stroke="#9f1239" stroke-width="3"/>
+</svg>

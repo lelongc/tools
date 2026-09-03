@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 80" width="180" height="80">
+  <!-- Terrified Shocked Wolf Eyes -->
+  <!-- Left Eye Wide Open -->
+  <path d="M20 40 Q50 8 80 40 Q50 72 20 40 Z" fill="#fef08a" stroke="#020617" stroke-width="6"/>
+  <circle cx="50" cy="40" r="8" fill="#713f12"/>
+  <circle cx="50" cy="40" r="4" fill="#020617"/>
+  <circle cx="53" cy="37" r="2" fill="#ffffff"/>
+  <!-- Right Eye Wide Open -->
+  <path d="M160 40 Q130 8 100 40 Q130 72 160 40 Z" fill="#fef08a" stroke="#020617" stroke-width="6"/>
+  <circle cx="130" cy="40" r="8" fill="#713f12"/>
+  <circle cx="130" cy="40" r="4" fill="#020617"/>
+  <circle cx="133" cy="37" r="2" fill="#ffffff"/>
+  <!-- High Arched Terrified Brows -->
+  <path d="M16 20 Q50 5 78 28" stroke="#020617" stroke-width="8" stroke-linecap="round" fill="none"/>
+  <path d="M164 20 Q130 5 102 28" stroke="#020617" stroke-width="8" stroke-linecap="round" fill="none"/>
+</svg>

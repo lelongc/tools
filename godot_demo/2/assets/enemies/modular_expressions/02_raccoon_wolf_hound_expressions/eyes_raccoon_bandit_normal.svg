@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  <!-- Shifty Sneaky Bandit Raccoon Eyes -->
+  <!-- Left Eye -->
+  <ellipse cx="48" cy="40" rx="26" ry="24" fill="#ffffff" stroke="#101112" stroke-width="5"/>
+  <circle cx="54" cy="40" r="10" fill="#101112"/>
+  <circle cx="57" cy="37" r="3" fill="#ffffff"/>
+  <!-- Right Eye -->
+  <ellipse cx="112" cy="40" rx="26" ry="24" fill="#ffffff" stroke="#101112" stroke-width="5"/>
+  <circle cx="118" cy="40" r="10" fill="#101112"/>
+  <circle cx="121" cy="37" r="3" fill="#ffffff"/>
+  <!-- Suspicious Mask Brow Slits -->
+  <path d="M22 28 Q48 20 74 32" stroke="#101112" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <path d="M138 28 Q112 20 86 32" stroke="#101112" stroke-width="7" stroke-linecap="round" fill="none"/>
+</svg>

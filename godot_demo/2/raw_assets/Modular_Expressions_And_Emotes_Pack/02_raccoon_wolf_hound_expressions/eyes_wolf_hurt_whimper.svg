@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 80" width="180" height="80">
+  <!-- Beaten / Whimpering Wolf Eyes with Bruises -->
+  <!-- Left Bruised Eye -->
+  <path d="M22 46 Q50 32 78 46 Q50 58 22 46 Z" fill="#ca8a04" stroke="#020617" stroke-width="6"/>
+  <ellipse cx="50" cy="46" rx="6" ry="4" fill="#020617"/>
+  <!-- Black Eye Shiner Patch -->
+  <path d="M14 42 Q50 18 84 40 Q50 68 14 42 Z" fill="#6b21a8" opacity="0.35"/>
+  <!-- Tear drop -->
+  <path d="M72 52 C72 58 66 64 60 64 C54 64 50 58 58 50 Z" fill="#38bdf8"/>
+  <!-- Right Eye Half Closed -->
+  <path d="M158 46 Q130 32 102 46 Q130 58 158 46 Z" fill="#ca8a04" stroke="#020617" stroke-width="6"/>
+  <ellipse cx="130" cy="46" rx="6" ry="4" fill="#020617"/>
+  <!-- Drooping Sad Brows -->
+  <path d="M24 30 Q52 40 76 48" stroke="#020617" stroke-width="7" stroke-linecap="round" fill="none"/>
+  <path d="M156 30 Q128 40 104 48" stroke="#020617" stroke-width="7" stroke-linecap="round" fill="none"/>
+</svg>

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c1e4lld58efcc"
-path="res://.godot/imported/snout_wolf_snarl_saliva.svg-1be80cc47855d345a5412adab3066a9c.ctex"
+path="res://.godot/imported/snout_wolf_snarl_saliva.svg-9bd087dad903fe44e4ad6b7c3f72c529.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://raw_assets/Modular_Expressions_And_Emotes_Pack/02_raccoon_wolf_hound_expressions/snout_wolf_snarl_saliva.svg"
-dest_files=["res://.godot/imported/snout_wolf_snarl_saliva.svg-1be80cc47855d345a5412adab3066a9c.ctex"]
+source_file="res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/snout_wolf_snarl_saliva.svg"
+dest_files=["res://.godot/imported/snout_wolf_snarl_saliva.svg-9bd087dad903fe44e4ad6b7c3f72c529.ctex"]
 
 [params]
 

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  <!-- Shocked Bulging Boar Eyes -->
+  <!-- Left Eye -->
+  <circle cx="48" cy="40" r="28" fill="#ffffff" stroke="#1f020e" stroke-width="6"/>
+  <circle cx="50" cy="40" r="8" fill="#1f020e"/>
+  <circle cx="52" cy="38" r="2" fill="#ffffff"/>
+  <!-- Right Eye -->
+  <circle cx="112" cy="40" r="28" fill="#ffffff" stroke="#1f020e" stroke-width="6"/>
+  <circle cx="110" cy="40" r="8" fill="#1f020e"/>
+  <circle cx="112" cy="38" r="2" fill="#ffffff"/>
+  <!-- High Arched Shocked Brows -->
+  <path d="M22 18 Q48 6 74 20" stroke="#1f020e" stroke-width="8" stroke-linecap="round" fill="none"/>
+  <path d="M138 18 Q112 6 86 20" stroke="#1f020e" stroke-width="8" stroke-linecap="round" fill="none"/>
+</svg>

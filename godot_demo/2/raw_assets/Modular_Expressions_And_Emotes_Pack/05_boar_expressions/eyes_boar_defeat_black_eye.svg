@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  <!-- Boar Defeated / Black Eye & Swollen Bruise -->
+  <!-- Left Eye: Huge purple black eye with bandage -->
+  <ellipse cx="48" cy="40" rx="34" ry="24" fill="#581c87" opacity="0.45"/>
+  <path d="M26 42 L70 42" stroke="#1f020e" stroke-width="6" stroke-linecap="round"/>
+  <!-- Bandage -->
+  <polygon points="28,14 48,8 52,20 32,26" fill="#fde047" stroke="#1f020e" stroke-width="2.5"/>
+  <!-- Right Eye: Spiraling dizzy -->
+  <circle cx="112" cy="40" r="26" fill="#ffffff" stroke="#1f020e" stroke-width="6"/>
+  <path d="M112 40 A4 4 0 0 1 108 36 A8 8 0 0 1 116 32 A12 12 0 0 1 124 40 A16 16 0 0 1 112 56" fill="none" stroke="#1f020e" stroke-width="3" stroke-linecap="round"/>
+  <!-- Drooping Sad Brow -->
+  <path d="M90 22 Q112 28 134 36" stroke="#1f020e" stroke-width="7" stroke-linecap="round" fill="none"/>
+</svg>

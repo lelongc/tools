@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  <!-- Raccoon Defeated / Swollen Black Eye with Tear -->
+  <!-- Left Eye: Swollen closed with bandage -->
+  <ellipse cx="48" cy="40" rx="30" ry="20" fill="#7e22ce" opacity="0.4"/>
+  <path d="M28 42 L68 42" stroke="#101112" stroke-width="5" stroke-linecap="round"/>
+  <!-- Teardrop -->
+  <path d="M40 52 C40 58 34 62 28 62 C22 62 18 58 26 50 Z" fill="#38bdf8"/>
+  <!-- Right Eye: Spiraling XX dizzy -->
+  <circle cx="112" cy="40" r="24" fill="#ffffff" stroke="#101112" stroke-width="5"/>
+  <path d="M100 30 L124 50 M124 30 L100 50" stroke="#101112" stroke-width="5" stroke-linecap="round"/>
+</svg>

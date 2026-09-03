@@ -2,6 +2,8 @@ extends CanvasLayer
 
 @onready var score_label: Label = $TopBar/Margin/HBox/ScoreBox/Margin/ScoreLabel
 @onready var level_label: Label = $TopBar/Margin/HBox/LevelBox/Margin/LevelLabel
+@onready var coin_label: Label = $TopBar/Margin/HBox/CoinBox/Margin/CoinLabel
+@onready var btn_vip_trial: Button = $BtnVipTrial
 @onready var egg_container: HBoxContainer = $EggShelf/Margin/EggIcons
 @onready var btn_pause: Button = $TopBar/Margin/HBox/BtnPause
 @onready var btn_restart: Button = $TopBar/Margin/HBox/BtnRestart
@@ -11,13 +13,21 @@ extends CanvasLayer
 @onready var victory_title: Label = $VictoryModal/VBox/Title
 @onready var victory_score: Label = $VictoryModal/VBox/ScoreLabel
 @onready var stars_label: Label = $VictoryModal/VBox/StarsLabel
+@onready var coin_reward_label: Label = $VictoryModal/VBox/CoinRewardLabel
+@onready var btn_claim_triple: Button = $VictoryModal/VBox/BtnClaimTriple
 @onready var next_level_btn: Button = $VictoryModal/VBox/BtnNext
 @onready var victory_levels_btn: Button = $VictoryModal/VBox/BtnLevels
+
+@onready var last_stand_modal: PanelContainer = $LastStandModal
+@onready var last_stand_title: Label = $LastStandModal/VBox/Title
+@onready var last_stand_sub: Label = $LastStandModal/VBox/Subtitle
+@onready var last_stand_timer_bar: ProgressBar = $LastStandModal/VBox/TimerBar
+@onready var btn_last_stand_ad: Button = $LastStandModal/VBox/BtnLastStandAd
+@onready var btn_last_stand_skip: Button = $LastStandModal/VBox/BtnLastStandSkip
 
 @onready var fail_modal: PanelContainer = $FailModal
 @onready var fail_title: Label = $FailModal/VBox/Title
 @onready var retry_btn: Button = $FailModal/VBox/BtnRetry
-@onready var nuke_ad_btn: Button = $FailModal/VBox/BtnNukeAd
 @onready var fail_levels_btn: Button = $FailModal/VBox/BtnLevels
 
 @onready var pause_modal: PanelContainer = $PauseModal
@@ -26,26 +36,52 @@ extends CanvasLayer
 @onready var pause_retry_btn: Button = $PauseModal/VBox/BtnRestart
 @onready var pause_levels_btn: Button = $PauseModal/VBox/BtnLevels
 
+var current_base_coins: int = 50
+var last_stand_tween: Tween = null
+
 func _ready() -> void:
 	if victory_modal: victory_modal.visible = false
 	if fail_modal: fail_modal.visible = false
 	if pause_modal: pause_modal.visible = false
+	if last_stand_modal: last_stand_modal.visible = false
 
 	GameManager.score_updated.connect(_on_score_updated)
 	GameManager.egg_dropped.connect(_on_egg_dropped)
 	GameManager.level_completed.connect(_on_level_completed)
 	GameManager.level_failed.connect(_on_level_failed)
+	GameManager.last_stand_offered.connect(_on_last_stand_offered)
+
+	if has_node("/root/SaveManager"):
+		var sm = get_node("/root/SaveManager")
+		sm.coins_updated.connect(_update_coin_display)
+		_update_coin_display(sm.get_coins())
 
 	if btn_restart: btn_restart.pressed.connect(func(): GameManager.restart_current_level())
 	if btn_pause: btn_pause.pressed.connect(_toggle_pause)
 
-	if next_level_btn: next_level_btn.pressed.connect(func(): GameManager.next_level())
-	if victory_levels_btn: victory_levels_btn.pressed.connect(func(): GameManager.go_to_level_select())
+	# Nút VIP Trial trên TopBar
+	if btn_vip_trial:
+		btn_vip_trial.pressed.connect(_on_vip_trial_pressed)
+		# Grace period: chỉ hiển thị từ Màn 6 trở đi
+		btn_vip_trial.visible = (GameManager.current_level > 5 and not GameManager.vip_trial_used_in_level)
+
+	# Nút Victory Modal
+	if btn_claim_triple: btn_claim_triple.pressed.connect(_on_claim_triple_pressed)
+	if next_level_btn: next_level_btn.pressed.connect(_on_claim_normal_and_next)
+	if victory_levels_btn: victory_levels_btn.pressed.connect(func():
+		_on_claim_normal_and_next()
+		GameManager.go_to_level_select()
+	)
 	
+	# Nút Last Stand Modal
+	if btn_last_stand_ad: btn_last_stand_ad.pressed.connect(_on_last_stand_ad_pressed)
+	if btn_last_stand_skip: btn_last_stand_skip.pressed.connect(_on_last_stand_skip_pressed)
+
+	# Nút Fail Modal
 	if retry_btn: retry_btn.pressed.connect(func(): GameManager.restart_current_level())
-	if nuke_ad_btn: nuke_ad_btn.pressed.connect(_on_nuke_ad_pressed)
 	if fail_levels_btn: fail_levels_btn.pressed.connect(func(): GameManager.go_to_level_select())
 
+	# Nút Pause Modal
 	if resume_btn: resume_btn.pressed.connect(_toggle_pause)
 	if pause_retry_btn: pause_retry_btn.pressed.connect(func():
 		get_tree().paused = false
@@ -57,6 +93,10 @@ func _ready() -> void:
 	)
 
 	_update_ui()
+
+func _update_coin_display(amount: int) -> void:
+	if coin_label:
+		coin_label.text = "🪙 %d" % amount
 
 func _toggle_pause() -> void:
 	var is_p = not get_tree().paused
@@ -113,41 +153,137 @@ func _on_score_updated(new_score: int) -> void:
 func _on_egg_dropped(_egg_type: String) -> void:
 	_refresh_egg_icons()
 
-func _on_level_completed(stars: int, final_score: int) -> void:
+# ==========================================
+# ĐIỂM CHẠM 3: DÙNG THỬ ĐẠN VIP (FREE TRIAL)
+# ==========================================
+func _on_vip_trial_pressed() -> void:
+	if not has_node("/root/AdsManager"): return
+	var am = get_node("/root/AdsManager")
+	am.show_rewarded_ad(
+		AdsManager.PLACEMENT_VIP_TRIAL,
+		"egg",
+		1,
+		func():
+			GameManager.vip_trial_used_in_level = true
+			if btn_vip_trial: btn_vip_trial.visible = false
+			_refresh_egg_icons()
+	)
+
+# ==========================================
+# ĐIỂM CHẠM 1: CỨU THUA SUÝT THẮNG (LAST STAND)
+# ==========================================
+func _on_last_stand_offered(enemies_left: int) -> void:
+	if not last_stand_modal: return
+	last_stand_modal.visible = true
+	if last_stand_sub:
+		last_stand_sub.text = "Chỉ còn %d quái vật! Đừng bỏ cuộc!" % enemies_left
+
+	var tween_modal = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	last_stand_modal.scale = Vector2(0.6, 0.6)
+	tween_modal.tween_property(last_stand_modal, "scale", Vector2.ONE, 0.3)
+
+	# Đếm ngược 5 giây
+	if last_stand_timer_bar:
+		last_stand_timer_bar.max_value = 5.0
+		last_stand_timer_bar.value = 5.0
+		if last_stand_tween and last_stand_tween.is_valid():
+			last_stand_tween.kill()
+		last_stand_tween = create_tween()
+		last_stand_tween.tween_property(last_stand_timer_bar, "value", 0.0, 5.0)
+		last_stand_tween.finished.connect(_on_last_stand_timeout)
+
+func _on_last_stand_timeout() -> void:
+	if last_stand_modal and last_stand_modal.visible:
+		last_stand_modal.visible = false
+		GameManager.is_level_active = false
+		GameManager.level_failed.emit()
+
+func _on_last_stand_ad_pressed() -> void:
+	if last_stand_tween and last_stand_tween.is_valid():
+		last_stand_tween.kill()
+
+	if has_node("/root/AdsManager"):
+		var am = get_node("/root/AdsManager")
+		am.show_rewarded_ad(
+			AdsManager.PLACEMENT_LAST_STAND,
+			"egg",
+			1,
+			func():
+				if last_stand_modal: last_stand_modal.visible = false
+				_refresh_egg_icons(),
+			func():
+				# Nếu hủy ad, tiếp tục đếm ngược còn lại hoặc fail
+				_on_last_stand_timeout()
+		)
+
+func _on_last_stand_skip_pressed() -> void:
+	if last_stand_tween and last_stand_tween.is_valid():
+		last_stand_tween.kill()
+	_on_last_stand_timeout()
+
+# ==========================================
+# ĐIỂM CHẠM 2: NHÂN BA PHẦN THƯỞNG (X3 COINS)
+# ==========================================
+func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> void:
+	current_base_coins = base_coins
+
 	if victory_modal:
 		victory_modal.visible = true
 		var lm = get_node_or_null("/root/LocalizationManager")
 		if victory_title:
-			victory_title.text = lm.t("KEY_VICTORY") if lm else "🎉 VICTORY! 🎉"
+			victory_title.text = lm.t("KEY_VICTORY") if lm else "🎉 CHIẾN THẮNG! 🎉"
 		if victory_score:
-			victory_score.text = lm.t("KEY_FINAL_SCORE") % final_score if lm else "Score: %d" % final_score
-		if next_level_btn and lm: next_level_btn.text = lm.t("KEY_NEXT_LEVEL")
-		if victory_levels_btn and lm: victory_levels_btn.text = lm.t("KEY_SELECT_LEVEL")
+			victory_score.text = lm.t("KEY_FINAL_SCORE") % final_score if lm else "Điểm số: %d" % final_score
 
 		if stars_label:
 			var stars_str = "⭐⭐⭐" if stars == 3 else ("⭐⭐" if stars == 2 else "⭐")
 			stars_label.text = stars_str
 
+		if coin_reward_label:
+			coin_reward_label.text = "Phần thưởng: +%d 🪙 Vàng" % base_coins
+
+		# Grace Period: Màn 1 đến 5 không có nút xem x3 ad
+		if GameManager.current_level <= 5:
+			if btn_claim_triple: btn_claim_triple.visible = false
+			if next_level_btn: next_level_btn.text = "TIẾP TỤC (+%d 🪙)" % base_coins
+		else:
+			if btn_claim_triple:
+				btn_claim_triple.visible = true
+				btn_claim_triple.text = "🎬 NHẬN X3 VÀNG (+%d 🪙)" % (base_coins * 3)
+			if next_level_btn:
+				next_level_btn.text = "Nhận %d 🪙 & Tiếp tục" % base_coins
+
 		var tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		victory_modal.scale = Vector2(0.5, 0.5)
 		tween.tween_property(victory_modal, "scale", Vector2.ONE, 0.3)
 
+func _on_claim_triple_pressed() -> void:
+	if not has_node("/root/AdsManager"): return
+	var am = get_node("/root/AdsManager")
+	am.show_rewarded_ad(
+		AdsManager.PLACEMENT_TRIPLE_COINS,
+		"coins",
+		current_base_coins * 3,
+		func():
+			GameManager.next_level()
+	)
+
+func _on_claim_normal_and_next() -> void:
+	if has_node("/root/SaveManager"):
+		get_node("/root/SaveManager").add_coins(current_base_coins)
+	GameManager.next_level()
+
+# ==========================================
+# THẤT BẠI (FAIL MODAL)
+# ==========================================
 func _on_level_failed() -> void:
 	if fail_modal:
 		fail_modal.visible = true
 		var lm = get_node_or_null("/root/LocalizationManager")
 		if fail_title and lm: fail_title.text = lm.t("KEY_FAIL")
-		if nuke_ad_btn and lm: nuke_ad_btn.text = lm.t("KEY_AD_NUKE")
 		if retry_btn and lm: retry_btn.text = lm.t("KEY_RETRY")
 		if fail_levels_btn and lm: fail_levels_btn.text = lm.t("KEY_SELECT_LEVEL")
 
 		var tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		fail_modal.scale = Vector2(0.5, 0.5)
 		tween.tween_property(fail_modal, "scale", Vector2.ONE, 0.3)
-
-func _on_nuke_ad_pressed() -> void:
-	if fail_modal: fail_modal.visible = false
-	GameManager.available_eggs.append("blackhole")
-	GameManager.is_level_active = true
-	GameManager.is_settling = false
-	_refresh_egg_icons()

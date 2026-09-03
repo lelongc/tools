@@ -14,7 +14,7 @@ func _ready() -> void:
 	# Tự động kết nối các tín hiệu toàn cục từ GameManager
 	GameManager.egg_dropped.connect(func(_type): play_egg_drop())
 	GameManager.enemy_defeated.connect(func(_enemy, _pts): play_enemy_squash())
-	GameManager.level_completed.connect(func(_stars, _score): play_victory())
+	GameManager.level_completed.connect(func(_stars, _score, _coins = 0): play_victory())
 
 func _get_available_player() -> AudioStreamPlayer:
 	for p in sfx_players:
@@ -46,6 +46,9 @@ func play_synth_tone(freq: float, duration: float, type: String = "sine", vol_db
 			"boom":
 				var cur_f = freq * (1.0 - progress * 0.9)
 				val = sin(TAU * cur_f * t) * 0.7 + randf_range(-0.3, 0.3)
+			"pop":
+				var cur_f = freq * (1.0 + (1.0 - progress) * 0.4)
+				val = sin(TAU * cur_f * t)
 
 		var sample_byte = int(clamp((val * env * 0.8 + 1.0) * 127.5, 0, 255))
 		data.append(sample_byte)

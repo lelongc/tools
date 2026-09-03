@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 110" width="160" height="110">
+  <!-- Screaming Oinking Boar Snout with Flared Nostrils & Wide Open Mouth -->
+  <!-- Snout Base -->
+  <ellipse cx="80" cy="40" rx="54" ry="32" fill="#9d174d" stroke="#1f020e" stroke-width="7"/>
+  <ellipse cx="58" cy="40" rx="14" ry="18" fill="#1f020e"/>
+  <ellipse cx="102" cy="40" rx="14" ry="18" fill="#1f020e"/>
+  <!-- Wide Open Screaming Mouth below snout -->
+  <ellipse cx="80" cy="80" rx="34" ry="22" fill="#000000" stroke="#1f020e" stroke-width="5"/>
+  <!-- Tongue -->
+  <ellipse cx="80" cy="90" rx="20" ry="10" fill="#f43f5e"/>
+</svg>

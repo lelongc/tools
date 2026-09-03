@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  <!-- Shocked Pinprick Raccoon Eyes Behind Mask -->
+  <!-- Left Eye -->
+  <circle cx="48" cy="40" r="26" fill="#ffffff" stroke="#101112" stroke-width="5"/>
+  <circle cx="48" cy="40" r="4" fill="#000000"/>
+  <!-- Right Eye -->
+  <circle cx="112" cy="40" r="26" fill="#ffffff" stroke="#101112" stroke-width="5"/>
+  <circle cx="112" cy="40" r="4" fill="#000000"/>
+  <!-- Arched Trembling Brows -->
+  <path d="M24 18 Q48 10 72 20" stroke="#101112" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M136 18 Q112 10 88 20" stroke="#101112" stroke-width="6" stroke-linecap="round" fill="none"/>
+</svg>
