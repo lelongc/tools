@@ -7,13 +7,31 @@ const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 
 var is_awake: bool = false
 
+@onready var visual_sprite: Sprite2D = get_node_or_null("VisualSprite")
+
 func _ready() -> void:
+	if visual_sprite:
+		var tex = _load_svg("res://assets/sprites/obstacles/rolling_boulder_stone.svg")
+		if tex: visual_sprite.texture = tex
+
 	set_deferred("freeze", true)
 	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
 	mass = 25.0
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_impact)
+
+func _load_svg(path: String) -> Texture2D:
+	var global_path = ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(global_path):
+		var img = Image.load_from_file(global_path)
+		if img:
+			var tex = ImageTexture.create_from_image(img)
+			tex.resource_path = path
+			return tex
+	if ResourceLoader.exists(path):
+		return load(path)
+	return null
 
 func wake_up() -> void:
 	if is_awake: return

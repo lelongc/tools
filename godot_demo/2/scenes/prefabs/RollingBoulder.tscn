@@ -19,11 +19,5 @@ script = ExtResource("1_script")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_1")
 
-[node name="Visual" type="Polygon2D" parent="."]
-color = Color(0.4, 0.42, 0.45, 1)
-polygon = PackedVector2Array(-20, -20, 0, -28, 20, -20, 28, 0, 20, 20, 0, 28, -20, 20, -28, 0)
-
-[node name="RockCracks" type="Line2D" parent="Visual"]
-points = PackedVector2Array(-14, -8, 0, 4, 12, -6, 18, 10)
-width = 2.0
-default_color = Color(0.25, 0.26, 0.28, 1)
+[node name="VisualSprite" type="Sprite2D" parent="."]
+scale = Vector2(0.875, 0.875)

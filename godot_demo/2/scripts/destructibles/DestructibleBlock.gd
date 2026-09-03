@@ -24,6 +24,10 @@ static var tex_stone: Texture2D = null
 static var tex_glass: Texture2D = null
 static var tex_steel: Texture2D = null
 
+static var tex_pillar_wood: Texture2D = null
+static var tex_pillar_stone: Texture2D = null
+static var tex_girder_steel: Texture2D = null
+
 static var tex_crack_wood_l: Texture2D = null
 static var tex_crack_wood_h: Texture2D = null
 static var tex_crack_stone_l: Texture2D = null
@@ -57,6 +61,10 @@ func _load_textures_once() -> void:
 		tex_glass = _safe_load_tex("res://assets/sprites/obstacles/glass_block_ice.svg")
 		tex_steel = _safe_load_tex("res://assets/sprites/obstacles/steel_block_beam.svg")
 
+		tex_pillar_wood = _safe_load_tex("res://assets/sprites/obstacles/wood_pillar_column.svg")
+		tex_pillar_stone = _safe_load_tex("res://assets/sprites/obstacles/stone_pillar_column.svg")
+		tex_girder_steel = _safe_load_tex("res://assets/sprites/obstacles/steel_girder_column.svg")
+
 		tex_crack_wood_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_wood_light.svg")
 		tex_crack_wood_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_wood_heavy.svg")
 		tex_crack_stone_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_stone_light.svg")
@@ -72,9 +80,6 @@ func _load_textures_once() -> void:
 		tex_smoke_puff = _safe_load_tex("res://assets/sprites/vfx/smoke_puff_cartoon.svg")
 
 func _safe_load_tex(path: String) -> Texture2D:
-	if ResourceLoader.exists(path):
-		var res = load(path)
-		if res: return res
 	var global_path = ProjectSettings.globalize_path(path)
 	if FileAccess.file_exists(global_path):
 		var img = Image.load_from_file(global_path)
@@ -82,6 +87,8 @@ func _safe_load_tex(path: String) -> Texture2D:
 			var tex = ImageTexture.create_from_image(img)
 			tex.resource_path = path
 			return tex
+	if ResourceLoader.exists(path):
+		return load(path)
 	return null
 
 func _apply_block_dimensions() -> void:
@@ -108,18 +115,19 @@ func _apply_block_dimensions() -> void:
 		crack_stage2.position = Vector2(-hw, -hh)
 		crack_stage2.visible = false
 
+	var is_vertical = block_size.y > block_size.x * 1.3
 	match material_type:
 		"wood":
 			max_health = 130.0
 			mass = (block_size.x * block_size.y) * 0.0016
-			if block_visual: block_visual.texture = tex_wood
+			if block_visual: block_visual.texture = tex_pillar_wood if (is_vertical and tex_pillar_wood) else tex_wood
 			if crack_stage1: crack_stage1.texture = tex_crack_wood_l
 			if crack_stage2: crack_stage2.texture = tex_crack_wood_h
 			if fracture_particles: fracture_particles.color = Color(0.85, 0.60, 0.30)
 		"stone":
 			max_health = 340.0
 			mass = (block_size.x * block_size.y) * 0.0048
-			if block_visual: block_visual.texture = tex_stone
+			if block_visual: block_visual.texture = tex_pillar_stone if (is_vertical and tex_pillar_stone) else tex_stone
 			if crack_stage1: crack_stage1.texture = tex_crack_stone_l
 			if crack_stage2: crack_stage2.texture = tex_crack_stone_h
 			if fracture_particles: fracture_particles.color = Color(0.65, 0.68, 0.72)
@@ -133,7 +141,7 @@ func _apply_block_dimensions() -> void:
 		"steel":
 			max_health = 650.0
 			mass = (block_size.x * block_size.y) * 0.0070
-			if block_visual: block_visual.texture = tex_steel
+			if block_visual: block_visual.texture = tex_girder_steel if (is_vertical and tex_girder_steel) else tex_steel
 			if crack_stage1: crack_stage1.texture = tex_crack_steel_l
 			if crack_stage2: crack_stage2.texture = tex_crack_steel_h
 			if fracture_particles: fracture_particles.color = Color(0.45, 0.52, 0.60)
@@ -141,7 +149,7 @@ func _apply_block_dimensions() -> void:
 			max_health = 950.0
 			mass = (block_size.x * block_size.y) * 0.0100
 			if block_visual:
-				block_visual.texture = tex_stone
+				block_visual.texture = tex_pillar_stone if (is_vertical and tex_pillar_stone) else tex_stone
 				block_visual.modulate = Color(0.25, 0.12, 0.32, 1.0)
 			if crack_stage1: crack_stage1.texture = tex_crack_stone_l
 			if crack_stage2: crack_stage2.texture = tex_crack_stone_h

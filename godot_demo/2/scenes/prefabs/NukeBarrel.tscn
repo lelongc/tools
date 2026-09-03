@@ -16,13 +16,8 @@ script = ExtResource("1_script")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_1")
 
-[node name="Visual" type="Polygon2D" parent="."]
-color = Color(0.9, 0.8, 0.1, 1)
-polygon = PackedVector2Array(-20, -26, 20, -26, 20, 26, -20, 26)
-
-[node name="HazardSymbol" type="Polygon2D" parent="Visual"]
-color = Color(0.1, 0.1, 0.1, 1)
-polygon = PackedVector2Array(-8, -8, 8, -8, 0, 8)
+[node name="VisualSprite" type="Sprite2D" parent="."]
+scale = Vector2(0.83, 0.83)
 
 [node name="RadiationSparks" type="CPUParticles2D" parent="."]
 emitting = false
@@ -43,9 +38,9 @@ lifetime = 0.7
 one_shot = true
 explosiveness = 0.95
 spread = 180.0
-gravity = Vector2(0, -50)
-initial_velocity_min = 200.0
-initial_velocity_max = 500.0
-scale_amount_min = 8.0
-scale_amount_max = 24.0
-color = Color(0.95, 0.85, 0.2, 0.9)
+gravity = Vector2(0, 400)
+initial_velocity_min = 160.0
+initial_velocity_max = 340.0
+scale_amount_min = 6.0
+scale_amount_max = 12.0
+color = Color(0.4, 1, 0.2, 1)

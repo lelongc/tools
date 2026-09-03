@@ -12,11 +12,15 @@ var is_ignited: bool = false
 var is_awake: bool = false
 var spawn_settle_timer: float = 0.5
 
-@onready var visual: Polygon2D = get_node_or_null("Visual")
+@onready var visual_sprite: Sprite2D = get_node_or_null("VisualSprite")
 @onready var fuse_sparks: CPUParticles2D = get_node_or_null("FuseSparks")
 @onready var explosion_fx: CPUParticles2D = get_node_or_null("ExplosionFX")
 
 func _ready() -> void:
+	if visual_sprite:
+		var tex = _load_svg("res://assets/sprites/obstacles/tnt_barrel_cartoon.svg")
+		if tex: visual_sprite.texture = tex
+
 	set_deferred("freeze", true)
 	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
 	linear_damp = 1.0
@@ -24,6 +28,18 @@ func _ready() -> void:
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_impact)
+
+func _load_svg(path: String) -> Texture2D:
+	var global_path = ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(global_path):
+		var img = Image.load_from_file(global_path)
+		if img:
+			var tex = ImageTexture.create_from_image(img)
+			tex.resource_path = path
+			return tex
+	if ResourceLoader.exists(path):
+		return load(path)
+	return null
 
 func _process(delta: float) -> void:
 	if spawn_settle_timer > 0.0:
@@ -57,10 +73,12 @@ func _ignite_fuse() -> void:
 		fuse_sparks.restart()
 		fuse_sparks.emitting = true
 
-	var tween = create_tween().set_loops(3)
-	if visual:
-		tween.tween_property(visual, "color", Color(1.0, 1.0, 1.0), 0.05)
-		tween.tween_property(visual, "color", Color(0.9, 0.2, 0.15), 0.05)
+	var tween = create_tween().set_loops(4)
+	if visual_sprite:
+		tween.tween_property(visual_sprite, "scale", Vector2(0.88, 0.88), 0.06).set_trans(Tween.TRANS_QUAD)
+		tween.parallel().tween_property(visual_sprite, "modulate", Color(1.8, 1.8, 1.8, 1.0), 0.06)
+		tween.tween_property(visual_sprite, "scale", Vector2(0.72, 0.72), 0.06).set_trans(Tween.TRANS_QUAD)
+		tween.parallel().tween_property(visual_sprite, "modulate", Color(2.0, 0.5, 0.3, 1.0), 0.06)
 	
 	await tween.finished
 	_detonate()
@@ -76,7 +94,7 @@ func _detonate() -> void:
 	CartoonExplosionFX.spawn_comic_explosion(get_parent(), global_position, explosion_radius)
 
 	set_deferred("freeze", true)
-	if visual: visual.visible = false
+	if visual_sprite: visual_sprite.visible = false
 	$CollisionShape2D.set_deferred("disabled", true)
 
 	if explosion_fx:

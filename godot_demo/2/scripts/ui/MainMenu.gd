@@ -8,6 +8,7 @@ extends Control
 @onready var btn_levels: Button = $CenterContainer/VBoxContainer/BtnLevels
 @onready var btn_wheel: Button = $CenterContainer/VBoxContainer/BtnWheel
 @onready var btn_sound: Button = $TopBar/Margin/HBox/BtnSound
+@onready var btn_reset: Button = get_node_or_null("TopBar/Margin/HBox/BtnReset")
 @onready var btn_lang: Button = $TopBar/Margin/HBox/BtnLang
 @onready var footer_label: Label = $Footer
 
@@ -33,6 +34,8 @@ func _ready() -> void:
 	btn_play.pressed.connect(_on_btn_play_pressed)
 	btn_levels.pressed.connect(_on_btn_levels_pressed)
 	btn_sound.pressed.connect(_on_btn_sound_pressed)
+	if btn_reset:
+		btn_reset.pressed.connect(_on_btn_reset_pressed)
 	if btn_lang:
 		btn_lang.pressed.connect(_on_btn_lang_pressed)
 	if btn_wheel:
@@ -98,3 +101,11 @@ func _on_btn_sound_pressed() -> void:
 		sm.save_game()
 		_update_sound_button()
 		AudioServer.set_bus_mute(0, not enabled)
+
+func _on_btn_reset_pressed() -> void:
+	if has_node("/root/SaveManager"):
+		get_node("/root/SaveManager").reset_save()
+		_update_star_count()
+		_update_coin_count()
+	if has_node("/root/SoundManager"):
+		get_node("/root/SoundManager").play_synth_tone("pop")

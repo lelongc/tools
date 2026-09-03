@@ -2,20 +2,25 @@ extends RigidBody2D
 class_name NukeBarrel
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
+const CartoonExplosionFX = preload("res://scripts/core/CartoonExplosionFX.gd")
 
-@export var explosion_radius: float = 450.0
-@export var explosion_force: float = 2400.0
-@export var explosion_damage: float = 1500.0
+@export var explosion_radius: float = 300.0
+@export var explosion_force: float = 1800.0
+@export var explosion_damage: float = 1200.0
 
 var is_ignited: bool = false
 var is_awake: bool = false
 var spawn_settle_timer: float = 0.5
 
-@onready var visual: Polygon2D = get_node_or_null("Visual")
+@onready var visual_sprite: Sprite2D = get_node_or_null("VisualSprite")
 @onready var radiation_sparks: CPUParticles2D = get_node_or_null("RadiationSparks")
 @onready var nuke_fx: CPUParticles2D = get_node_or_null("NukeFX")
 
 func _ready() -> void:
+	if visual_sprite:
+		var tex = _load_svg("res://assets/sprites/obstacles/nuke_barrel_toxic.svg")
+		if tex: visual_sprite.texture = tex
+
 	set_deferred("freeze", true)
 	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
 	linear_damp = 1.0
@@ -23,6 +28,18 @@ func _ready() -> void:
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_impact)
+
+func _load_svg(path: String) -> Texture2D:
+	var global_path = ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(global_path):
+		var img = Image.load_from_file(global_path)
+		if img:
+			var tex = ImageTexture.create_from_image(img)
+			tex.resource_path = path
+			return tex
+	if ResourceLoader.exists(path):
+		return load(path)
+	return null
 
 func _process(delta: float) -> void:
 	if spawn_settle_timer > 0.0:
@@ -53,10 +70,12 @@ func _critical_meltdown() -> void:
 		radiation_sparks.restart()
 		radiation_sparks.emitting = true
 
-	var tween = create_tween().set_loops(4)
-	if visual:
-		tween.tween_property(visual, "color", Color(1.0, 1.0, 1.0), 0.04)
-		tween.tween_property(visual, "color", Color(0.2, 0.9, 0.2), 0.04)
+	var tween = create_tween().set_loops(5)
+	if visual_sprite:
+		tween.tween_property(visual_sprite, "scale", Vector2(0.98, 0.98), 0.05).set_trans(Tween.TRANS_QUAD)
+		tween.parallel().tween_property(visual_sprite, "modulate", Color(1.8, 1.8, 1.8, 1.0), 0.05)
+		tween.tween_property(visual_sprite, "scale", Vector2(0.78, 0.78), 0.05).set_trans(Tween.TRANS_QUAD)
+		tween.parallel().tween_property(visual_sprite, "modulate", Color(0.3, 2.0, 0.4, 1.0), 0.05)
 	
 	await tween.finished
 	_detonate_nuke()
@@ -69,8 +88,10 @@ func _detonate_nuke() -> void:
 	if has_node("/root/SoundManager"):
 		get_node("/root/SoundManager").play_synth_tone(70.0, 0.8, "boom", 4.0)
 
+	CartoonExplosionFX.spawn_comic_explosion(get_parent(), global_position, explosion_radius)
+
 	set_deferred("freeze", true)
-	if visual: visual.visible = false
+	if visual_sprite: visual_sprite.visible = false
 	$CollisionShape2D.set_deferred("disabled", true)
 
 	if nuke_fx:

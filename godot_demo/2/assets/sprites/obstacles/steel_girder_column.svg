@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 128" width="32" height="128">
+  <defs>
+    <linearGradient id="girderGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="25%" stop-color="#94a3b8"/>
+      <stop offset="70%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="innerWeb" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Girder Flange Outer Frame -->
+  <rect x="2" y="2" width="28" height="124" rx="3" fill="url(#girderGrad)" stroke="#0f172a" stroke-width="2.5"/>
+
+  <!-- Recessed Center Web -->
+  <rect x="8" y="10" width="16" height="108" rx="1.5" fill="url(#innerWeb)" stroke="#0f172a" stroke-width="1.5"/>
+
+  <!-- Industrial Bolts down the column (Left & Right Flanges) -->
+  <!-- Left Side Rivets -->
+  <circle cx="5" cy="14" r="1.8" fill="#cbd5e1" stroke="#0f172a" stroke-width="0.8"/>
+  <circle cx="5" cy="38" r="1.8" fill="#cbd5e1" stroke="#0f172a" stroke-width="0.8"/>
+  <circle cx="5" cy="62" r="1.8" fill="#cbd5e1" stroke="#0f172a" stroke-width="0.8"/>
+  <circle cx="5" cy="86" r="1.8" fill="#cbd5e1" stroke="#0f172a" stroke-width="0.8"/>
+  <circle cx="5" cy="110" r="1.8" fill="#cbd5e1" stroke="#0f172a" stroke-width="0.8"/>
+
+  <!-- Right Side Rivets -->
+  <circle cx="27" cy="14" r="1.8" fill="#cbd5e1" stroke="#0f172a" stroke-width="0.8"/>
+  <circle cx="27" cy="38" r="1.8" fill="#cbd5e1" stroke="#0f172a" stroke-width="0.8"/>
+  <circle cx="27" cy="62" r="1.8" fill="#cbd5e1" stroke="#0f172a" stroke-width="0.8"/>
+  <circle cx="27" cy="86" r="1.8" fill="#cbd5e1" stroke="#0f172a" stroke-width="0.8"/>
+  <circle cx="27" cy="110" r="1.8" fill="#cbd5e1" stroke="#0f172a" stroke-width="0.8"/>
+</svg>

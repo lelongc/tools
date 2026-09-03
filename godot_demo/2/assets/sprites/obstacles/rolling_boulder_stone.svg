@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="boulderGrad" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#94a3b8"/>
+      <stop offset="45%" stop-color="#64748b"/>
+      <stop offset="85%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Main Boulder Outline (Slightly irregular boulder silhouette) -->
+  <polygon points="20,4 44,5 58,18 61,42 46,59 22,60 6,48 3,24" 
+           fill="url(#boulderGrad)" stroke="#0f172a" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- 3D Chiseled Facets -->
+  <!-- Top Light Facet -->
+  <polygon points="20,4 44,5 36,18 16,16" fill="#cbd5e1" opacity="0.6"/>
+  <!-- Upper Right Facet -->
+  <polygon points="44,5 58,18 48,32 36,18" fill="#94a3b8" opacity="0.4"/>
+  <!-- Bottom Shadow Facet -->
+  <polygon points="22,60 46,59 40,46 18,48" fill="#0f172a" opacity="0.5"/>
+
+  <!-- Deep Fractured Fault Lines -->
+  <path d="M16 16 L28 28 L42 26 L48 40" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M28 28 L22 42 L18 48" fill="none" stroke="#0f172a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M42 26 L52 20" fill="none" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round"/>
+
+  <!-- White Powder Impact Glints -->
+  <path d="M17 17 L27 27 M29 29 L41 27" fill="none" stroke="#f1f5f9" stroke-width="1" opacity="0.8"/>
+
+  <!-- Comic Green Moss Flecks -->
+  <circle cx="14" cy="36" r="3" fill="#65a30d" opacity="0.8"/>
+  <circle cx="17" cy="38" r="2" fill="#4d7c0f" opacity="0.8"/>
+  <circle cx="38" cy="48" r="3.5" fill="#65a30d" opacity="0.75"/>
+</svg>

@@ -153,7 +153,7 @@ func _setup_level() -> void:
 	GameManager.start_level(level_id, enemy_count, egg_loadout)
 
 func _generate_grand_bunker(lvl: int, world: int, half_w: float, mat1: String, mat2: String, mat_heavy: String, e_grunt: String, e_elite: String) -> Array[String]:
-	var floor_y = 885.0
+	var floor_y = 875.0
 	var cx = 270.0
 	var loadout: Array[String] = []
 
@@ -191,23 +191,23 @@ func _generate_grand_bunker(lvl: int, world: int, half_w: float, mat1: String, m
 
 	if is_boss_level:
 		var boss_name = "boss_baron_pig" if world == 4 else ("imperial_boar" if world == 3 else ("mine_wolf" if world == 2 else "fox_guard"))
-		_spawn_enemy(Vector2(cx, floor_y - 32), boss_name)
-		_spawn_enemy(Vector2(room_l_center, floor_y - 18), e_elite)
-		_spawn_enemy(Vector2(room_r_center, floor_y - 18), e_elite)
+		_spawn_enemy(Vector2(cx, floor_y - 36), boss_name)
+		_spawn_enemy(Vector2(room_l_center, floor_y - 24), e_elite)
+		_spawn_enemy(Vector2(room_r_center, floor_y - 24), e_elite)
 		_spawn_tnt(Vector2(cx - 55.0, floor_y - 18), world == 4)
 		_spawn_tnt(Vector2(cx + 55.0, floor_y - 18), world == 4)
 	else:
 		# Gian Trái: Quái nằm chính giữa gian
-		_spawn_enemy(Vector2(room_l_center, floor_y - 18), e_grunt)
+		_spawn_enemy(Vector2(room_l_center, floor_y - 24), e_grunt)
 
 		# Gian Giữa Rộng: Quái ở giữa (cx), TNT ở 2 bên cách cột 40px
-		_spawn_enemy(Vector2(cx, floor_y - 18), e_grunt)
+		_spawn_enemy(Vector2(cx, floor_y - 24), e_grunt)
 		_spawn_tnt(Vector2(cx - 48.0, floor_y - 18), world == 4)
 		if lvl >= 2:
 			_spawn_tnt(Vector2(cx + 48.0, floor_y - 18), world == 4)
 
 		# Gian Phải: Quái nằm chính giữa gian
-		_spawn_enemy(Vector2(room_r_center, floor_y - 18), e_grunt)
+		_spawn_enemy(Vector2(room_r_center, floor_y - 24), e_grunt)
 
 	# Trần Tầng 1 (Dầm chịu lực chính đặt tiếp xúc 0px flush)
 	var beam1_y = floor_y - p1_h - 12.0
@@ -235,8 +235,8 @@ func _generate_grand_bunker(lvl: int, world: int, half_w: float, mat1: String, m
 		var r2_l_center = (p2_left_x + cx) * 0.5
 		var r2_r_center = (p2_right_x + cx) * 0.5
 
-		_spawn_enemy(Vector2(r2_l_center, cur_top_y - 18), e_elite if lvl >= 4 else e_grunt)
-		_spawn_enemy(Vector2(r2_r_center, cur_top_y - 18), e_elite if lvl >= 4 else e_grunt)
+		_spawn_enemy(Vector2(r2_l_center, cur_top_y - 24), e_elite if lvl >= 4 else e_grunt)
+		_spawn_enemy(Vector2(r2_r_center, cur_top_y - 24), e_elite if lvl >= 4 else e_grunt)
 
 		if lvl >= 6:
 			_spawn_tnt(Vector2((r2_l_center + cx) * 0.5, cur_top_y - 18), world == 4)
@@ -261,9 +261,9 @@ func _generate_grand_bunker(lvl: int, world: int, half_w: float, mat1: String, m
 		if lvl % 4 == 1 and lvl >= 9:
 			_spawn_rescue_cage(Vector2(cx, cur_top_y - 26))
 		else:
-			_spawn_enemy(Vector2(cx, cur_top_y - 18), e_elite)
+			_spawn_enemy(Vector2(cx, cur_top_y - 24), e_elite)
 			if lvl >= 10:
-				_spawn_enemy(Vector2((p3_left_x + cx) * 0.5, cur_top_y - 18), e_grunt)
+				_spawn_enemy(Vector2((p3_left_x + cx) * 0.5, cur_top_y - 24), e_grunt)
 
 		var beam3_y = cur_top_y - p3_h - 10.0
 		_spawn_block(Vector2(cx, beam3_y), Vector2(span_3 + 8, 20), mat_heavy)

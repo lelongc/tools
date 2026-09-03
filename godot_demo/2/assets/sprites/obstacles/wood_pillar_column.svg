@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 128" width="32" height="128">
+  <defs>
+    <linearGradient id="pillarWood" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#b45309"/>
+      <stop offset="35%" stop-color="#d97706"/>
+      <stop offset="75%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </linearGradient>
+    <linearGradient id="capGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="50%" stop-color="#64748b"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Wood Column Body -->
+  <rect x="2" y="2" width="28" height="124" rx="4" fill="url(#pillarWood)" stroke="#451a03" stroke-width="2.5"/>
+
+  <!-- Vertical Wood Grain Lines -->
+  <path d="M9 12 Q7 45, 10 80 T8 116" fill="none" stroke="#78350f" stroke-width="1.8" opacity="0.75"/>
+  <path d="M16 8 Q18 50, 15 90 T17 120" fill="none" stroke="#92400e" stroke-width="1.6" opacity="0.6"/>
+  <path d="M23 14 Q25 40, 22 75 T24 114" fill="none" stroke="#78350f" stroke-width="1.8" opacity="0.75"/>
+
+  <!-- Knot on column -->
+  <ellipse cx="16" cy="54" rx="4" ry="7" fill="none" stroke="#78350f" stroke-width="1.5" opacity="0.7"/>
+  <ellipse cx="16" cy="54" rx="1.5" ry="3" fill="#451a03" opacity="0.8"/>
+
+  <!-- Top Cast-Iron Bracket Cap -->
+  <rect x="1" y="2" width="30" height="10" rx="2" fill="url(#capGrad)" stroke="#0f172a" stroke-width="1.5"/>
+  <circle cx="8" cy="7" r="1.8" fill="#e2e8f0" stroke="#0f172a" stroke-width="0.8"/>
+  <circle cx="24" cy="7" r="1.8" fill="#e2e8f0" stroke="#0f172a" stroke-width="0.8"/>
+
+  <!-- Bottom Cast-Iron Bracket Base -->
+  <rect x="1" y="116" width="30" height="10" rx="2" fill="url(#capGrad)" stroke="#0f172a" stroke-width="1.5"/>
+  <circle cx="8" cy="121" r="1.8" fill="#cbd5e1" stroke="#0f172a" stroke-width="0.8"/>
+  <circle cx="24" cy="121" r="1.8" fill="#cbd5e1" stroke="#0f172a" stroke-width="0.8"/>
+</svg>

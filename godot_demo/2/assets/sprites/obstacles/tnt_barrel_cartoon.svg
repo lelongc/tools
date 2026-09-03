@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 64" width="48" height="64">
+  <defs>
+    <linearGradient id="barrelWood" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#b45309"/>
+      <stop offset="30%" stop-color="#d97706"/>
+      <stop offset="70%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#92400e"/>
+    </linearGradient>
+    <linearGradient id="metalHoop" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="50%" stop-color="#64748b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Burning Fuse on Top -->
+  <path d="M24 10 Q28 4, 34 5" fill="none" stroke="#78350f" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="35" cy="5" r="3" fill="#facc15"/>
+  <circle cx="35" cy="5" r="1.5" fill="#ef4444"/>
+
+  <!-- Barrel Body (Slightly bulging barrel shape) -->
+  <path d="M8 10 C3 25, 3 45, 8 60 H40 C45 45, 45 25, 40 10 Z" 
+        fill="url(#barrelWood)" stroke="#451a03" stroke-width="2.5"/>
+
+  <!-- Wood Stave Vertical Seams -->
+  <path d="M16 10 C13 25, 13 45, 16 60" fill="none" stroke="#78350f" stroke-width="1.5"/>
+  <path d="M24 10 C24 25, 24 45, 24 60" fill="none" stroke="#92400e" stroke-width="1.5"/>
+  <path d="M32 10 C35 25, 35 45, 32 60" fill="none" stroke="#78350f" stroke-width="1.5"/>
+
+  <!-- Top Metal Hoop -->
+  <path d="M6 16 C4 20, 4 21, 6 22 H42 C44 21, 44 20, 42 16 Z" 
+        fill="url(#metalHoop)" stroke="#0f172a" stroke-width="1.5"/>
+  <circle cx="12" cy="19" r="1.5" fill="#cbd5e1"/>
+  <circle cx="36" cy="19" r="1.5" fill="#cbd5e1"/>
+
+  <!-- Bottom Metal Hoop -->
+  <path d="M6 48 C4 50, 4 51, 6 54 H42 C44 51, 44 50, 42 48 Z" 
+        fill="url(#metalHoop)" stroke="#0f172a" stroke-width="1.5"/>
+  <circle cx="12" cy="51" r="1.5" fill="#cbd5e1"/>
+  <circle cx="36" cy="51" r="1.5" fill="#cbd5e1"/>
+
+  <!-- Comic Stencil "TNT" Banner & Letters -->
+  <rect x="9" y="27" width="30" height="17" rx="3" fill="#dc2626" stroke="#991b1b" stroke-width="1.5"/>
+  <text x="24" y="40" font-family="Arial, Impact, sans-serif" font-weight="900" font-size="12" 
+        fill="#ffffff" stroke="#450a0a" stroke-width="0.8" text-anchor="middle" letter-spacing="1">TNT</text>
+</svg>

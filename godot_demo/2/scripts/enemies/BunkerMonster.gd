@@ -9,6 +9,8 @@ enum State {
 	PANIC_FALLING,
 	SHOCKED_BY_NEIGHBOR,
 	PINNED_UNDER_DEBRIS,
+	SURVIVED_RELIEF,
+	SMUG_MOCKING,
 	CRITICAL_INJURED,
 	FURIOUS_ARMOR_LOSS,
 	VICTORY_TAUNT,
@@ -42,6 +44,9 @@ var anim_time: float = 0.0
 var spawn_settle_timer: float = 0.5
 var shock_timer: float = 0.0
 var furious_timer: float = 0.0
+var relief_timer: float = 0.0
+var smug_timer: float = 0.0
+var was_in_panic: bool = false
 var pinned_check_timer: float = 0.2
 var is_currently_pinned: bool = false
 var pinned_cooldown: float = 0.0
@@ -226,7 +231,7 @@ func _load_character_expression_palette() -> void:
 			pupils_sprite.visible = true
 
 			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/01_sly_fox/3_eyes_normal.svg")
-			char_tex_eyes_aiming = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_furious_v_brow.svg")
+			char_tex_eyes_aiming = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_shock_pinprick.svg")
 			char_tex_eyes_panic = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_shock_pinprick.svg")
 			char_tex_eyes_hurt = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_tearful_pleading.svg")
 			char_tex_eyes_furious = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_furious_v_brow.svg")
@@ -261,7 +266,7 @@ func _load_character_expression_palette() -> void:
 			pupils_sprite.visible = false
 
 			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/02_fox_guard/4_eyes_confident.svg")
-			char_tex_eyes_aiming = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_furious_v_brow.svg")
+			char_tex_eyes_aiming = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_shock_pinprick.svg")
 			char_tex_eyes_panic = _load_tex("res://assets/enemies/modular/02_fox_guard/5_eyes_panic.svg")
 			char_tex_eyes_hurt = _load_tex("res://assets/enemies/modular/02_fox_guard/5_eyes_defeated_black_eye.svg")
 			if not char_tex_eyes_hurt:
@@ -383,7 +388,7 @@ func _load_character_expression_palette() -> void:
 			pupils_sprite.visible = true
 
 			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/01_sly_fox/3_eyes_normal.svg")
-			char_tex_eyes_aiming = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_furious_v_brow.svg")
+			char_tex_eyes_aiming = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_shock_pinprick.svg")
 			char_tex_eyes_panic = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_shock_pinprick.svg")
 			char_tex_eyes_hurt = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_tearful_pleading.svg")
 			char_tex_eyes_furious = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_furious_v_brow.svg")
@@ -514,21 +519,36 @@ func _evaluate_situational_state(delta: float) -> void:
 	if current_state == State.DEFEATED or current_state == State.VICTORY_TAUNT:
 		return
 
-	# 1. Đang bị choáng sau khi chứng kiến quái bạn chết gần kề
+	# 1. Đang trong trạng thái thở phào "Hên quá chưa chết!" (Surviving Near-Miss / Relief)
+	if relief_timer > 0.0:
+		relief_timer -= delta
+		if relief_timer <= 0.0:
+			smug_timer = 1.4
+			_set_state(State.SMUG_MOCKING)
+		return
+
+	# 2. Đang trong trạng thái "Cười khinh / Thè lưỡi lêu lêu" (Smug Taunt)
+	if smug_timer > 0.0:
+		smug_timer -= delta
+		if smug_timer <= 0.0:
+			_set_state(State.IDLE if current_health > max_health * 0.45 else State.CRITICAL_INJURED)
+		return
+
+	# 3. Đang bị choáng sau khi chứng kiến quái bạn chết gần kề
 	if shock_timer > 0.0:
 		shock_timer -= delta
 		if shock_timer <= 0.0:
 			_evaluate_base_state(delta)
 		return
 
-	# 2. Đang tức giận sau khi văng mũ
+	# 4. Đang tức giận sau khi văng mũ
 	if furious_timer > 0.0:
 		furious_timer -= delta
 		if furious_timer <= 0.0:
 			_evaluate_base_state(delta)
 		return
 
-	# 3. Kiểm tra xem có đang bị đè kẹt dưới đống đổ nát (Pinned under debris)
+	# 5. Kiểm tra xem có đang bị đè kẹt dưới đống đổ nát (Pinned under debris)
 	pinned_check_timer -= delta
 	if pinned_check_timer <= 0.0:
 		pinned_check_timer = 0.2
@@ -544,13 +564,12 @@ func _evaluate_situational_state(delta: float) -> void:
 		pinned_cooldown -= delta
 		if pinned_cooldown <= 0.0:
 			is_currently_pinned = false
-			_set_state(State.IDLE)
-		else:
-			return
+			trigger_survived_relief()
+		return
 
-	# 4. Kiểm tra sức khỏe nguy kịch (Critical Injured - HP < 45%)
+	# 6. Kiểm tra sức khỏe nguy kịch (Critical Injured - HP < 45%)
 	if current_health <= max_health * 0.45:
-		if current_state != State.CRITICAL_INJURED and current_state != State.PANIC_FALLING:
+		if current_state != State.CRITICAL_INJURED and current_state != State.PANIC_FALLING and current_state != State.SURVIVED_RELIEF and current_state != State.SMUG_MOCKING:
 			_set_state(State.CRITICAL_INJURED)
 		if current_state == State.CRITICAL_INJURED:
 			_update_injured_behaviors(delta)
@@ -558,39 +577,67 @@ func _evaluate_situational_state(delta: float) -> void:
 
 	_evaluate_base_state(delta)
 
+func trigger_survived_relief() -> void:
+	if is_defeated or current_state == State.DEFEATED: return
+	relief_timer = 1.2
+	_set_state(State.SURVIVED_RELIEF)
+
 func _evaluate_base_state(delta: float) -> void:
-	# 1. Kiểm tra mối nguy hiểm từ trên cao (Trứng đang rơi hoặc Khối nhà đang sập đè)
+	# 1. Quét tìm quả trứng đang bay trên bầu trời (Toàn bộ màn hình)
 	var eggs = get_tree().get_nodes_in_group("Eggs")
 	var chicken = get_tree().get_first_node_in_group("Player") as ChickenBomber
 
-	var threat_node: Node2D = null
-	var min_threat_dist: float = 300.0
+	var active_egg: RigidBody2D = null
+	var min_egg_dist: float = 9999.0
 
-	# Trứng đang rơi
 	for egg in eggs:
-		if is_instance_valid(egg) and egg is RigidBody2D:
-			if egg.global_position.y < global_position.y + 40.0 and egg.linear_velocity.y > 35.0:
-				var dist = global_position.distance_to(egg.global_position)
-				if dist < min_threat_dist:
-					min_threat_dist = dist
-					threat_node = egg
+		if is_instance_valid(egg) and egg is RigidBody2D and not egg.get("is_broken"):
+			if egg.global_position.y < global_position.y + 60.0:
+				var d = global_position.distance_to(egg.global_position)
+				if d < min_egg_dist:
+					min_egg_dist = d
+					active_egg = egg
 
-	# Khối nhà phía trên đang rơi sập
-	if threat_node == null:
-		var blocks = get_tree().get_nodes_in_group("Destructibles")
-		for b in blocks:
-			if is_instance_valid(b) and b is RigidBody2D:
-				if b.global_position.y < global_position.y - 15.0 and b.global_position.y > global_position.y - 180.0:
-					if abs(b.global_position.x - global_position.x) < 70.0 and b.linear_velocity.y > 55.0:
-						threat_node = b
-						break
+	# 2. Quét tìm khối nhà phía trên đang rơi sập đè
+	var falling_block: RigidBody2D = null
+	var blocks = get_tree().get_nodes_in_group("Destructibles")
+	for b in blocks:
+		if is_instance_valid(b) and b is RigidBody2D and not b.get("is_destroyed"):
+			if b.global_position.y < global_position.y - 15.0 and b.global_position.y > global_position.y - 280.0:
+				if abs(b.global_position.x - global_position.x) < 85.0 and b.linear_velocity.y > 45.0:
+					falling_block = b
+					break
 
-	# Có mối nguy hiểm rơi trên đầu -> PANIC_FALLING (Mắt trợn tròng, la hét, toát mồ hôi)
-	if threat_node != null:
+	# Có khối nhà đang rơi sập đè -> Hoảng loạn tột độ!
+	if falling_block != null:
+		was_in_panic = true
 		if current_state != State.PANIC_FALLING:
 			_set_state(State.PANIC_FALLING)
-		var dir = (threat_node.global_position - global_position).normalized()
-		eye_look_offset = dir * 6.0
+		eye_look_offset = Vector2(0, -6.5)
+		return
+
+	# Có quả trứng đang bay trên bầu trời
+	if active_egg != null:
+		was_in_panic = true
+		# Tròng mắt NGAY LẬP TỨC ngước nhìn quả trứng dù ở bất kỳ độ cao nào!
+		var dir = (active_egg.global_position - global_position).normalized()
+		eye_look_offset = dir * 6.5
+
+		# Nếu trứng bay gần (< 480px) hoặc đang lao thẳng xuống gian phòng này:
+		var horiz_dist = abs(active_egg.global_position.x - global_position.x)
+		if min_egg_dist < 480.0 or (horiz_dist < 180.0 and active_egg.linear_velocity.y > 35.0):
+			if current_state != State.PANIC_FALLING:
+				_set_state(State.PANIC_FALLING)
+		else:
+			# Trứng còn ở trên cao: Trợn mắt ngước nhìn lo sợ (không bao giờ ngủ hay huýt sáo!)
+			if current_state != State.ALERT_AIMING and current_state != State.PANIC_FALLING:
+				_set_state(State.ALERT_AIMING)
+		return
+
+	# Không còn trứng đang rơi: Nếu vừa trải qua hoảng loạn mà sống sót -> "Hên quá chưa chết!"
+	if was_in_panic:
+		was_in_panic = false
+		trigger_survived_relief()
 		return
 
 	# Gà đang kéo ngắm bắn -> ALERT_AIMING (Dõi mắt theo ngắm bắn thời gian thực)
@@ -598,7 +645,7 @@ func _evaluate_base_state(delta: float) -> void:
 		if current_state != State.ALERT_AIMING:
 			_set_state(State.ALERT_AIMING)
 		var dir = (chicken.global_position - global_position).normalized()
-		eye_look_offset = dir * 5.0
+		eye_look_offset = dir * 5.5
 		return
 
 	# Bình thường -> IDLE (nếu còn khỏe) hoặc CRITICAL_INJURED (nếu yếu)
@@ -800,6 +847,30 @@ func _set_state(new_state: State) -> void:
 			if pupils_sprite: pupils_sprite.visible = false
 			if dizzy_stars: dizzy_stars.visible = true
 
+		State.SURVIVED_RELIEF:
+			if eyes_sprite:
+				var relief_eyes = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_laughing_smug.svg") if monster_type in ["sly_fox", "fox_guard", "toxic_fox"] else char_tex_eyes_special
+				if relief_eyes: eyes_sprite.texture = relief_eyes
+			if snout_sprite:
+				var sigh_snout = _load_tex("res://assets/enemies/modular_expressions/01_fox_snouts/snout_fox_whistling_innocent.svg") if monster_type in ["sly_fox", "fox_guard", "toxic_fox"] else char_tex_snout_normal
+				if sigh_snout: snout_sprite.texture = sigh_snout
+			if pupils_sprite: pupils_sprite.visible = false
+			if dizzy_stars: dizzy_stars.visible = false
+			_pop_emote(tex_emote_sweat, 1.1)
+
+		State.SMUG_MOCKING:
+			if eyes_sprite:
+				var smug_eyes = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_suspicious.svg") if monster_type in ["sly_fox", "fox_guard", "toxic_fox"] else char_tex_eyes_special
+				if smug_eyes: eyes_sprite.texture = smug_eyes
+			if snout_sprite:
+				var taunt_snout = char_tex_snout_special
+				if not taunt_snout:
+					taunt_snout = _load_tex("res://assets/enemies/modular_expressions/01_fox_snouts/snout_fox_tongue_raspberry.svg")
+				if taunt_snout: snout_sprite.texture = taunt_snout
+			if pupils_sprite: pupils_sprite.visible = (monster_type in ["sly_fox", "toxic_fox", "armored_raccoon", "imperial_boar"])
+			if dizzy_stars: dizzy_stars.visible = false
+			_pop_emote(tex_emote_stars, 1.3)
+
 		State.CRITICAL_INJURED:
 			if eyes_sprite and char_tex_eyes_hurt:
 				eyes_sprite.texture = char_tex_eyes_hurt
@@ -883,6 +954,17 @@ func _animate_character(delta: float) -> void:
 			visual_root.position.x = 0.0
 			visual_root.rotation = 0.03
 
+		State.SURVIVED_RELIEF:
+			var sigh = sin(anim_time * 3.5) * 0.03
+			visual_root.scale = Vector2(base_scale_val * (1.05 + sigh), base_scale_val * (0.95 - sigh))
+			visual_root.position = Vector2.ZERO
+			visual_root.rotation = 0.03
+
+		State.SMUG_MOCKING:
+			visual_root.position.y = -abs(sin(anim_time * 12.0)) * 7.0
+			visual_root.rotation = sin(anim_time * 8.0) * 0.09
+			visual_root.scale = Vector2(base_scale_val, base_scale_val)
+
 		State.CRITICAL_INJURED:
 			var heavy_pant = sin(anim_time * 5.0) * 0.04
 			visual_root.scale = Vector2(base_scale_val * (1.0 + heavy_pant), base_scale_val * (1.0 - heavy_pant))
@@ -898,7 +980,7 @@ func _animate_character(delta: float) -> void:
 			visual_root.rotation = sin(anim_time * 6.0) * 0.08
 
 func _trigger_blink() -> void:
-	if not eyes_sprite or is_blinking or current_state == State.PANIC_FALLING or current_idle_action == IdleAction.SLEEPY_NAP or current_state == State.PINNED_UNDER_DEBRIS:
+	if not eyes_sprite or is_blinking or current_state == State.PANIC_FALLING or current_idle_action == IdleAction.SLEEPY_NAP or current_state == State.PINNED_UNDER_DEBRIS or current_state == State.SURVIVED_RELIEF:
 		return
 	is_blinking = true
 	var blink = create_tween()

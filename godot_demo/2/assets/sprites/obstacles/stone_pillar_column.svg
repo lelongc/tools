@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 128" width="32" height="128">
+  <defs>
+    <linearGradient id="stonePillarGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="35%" stop-color="#64748b"/>
+      <stop offset="75%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Pillar Body -->
+  <rect x="2" y="2" width="28" height="124" rx="3" fill="url(#stonePillarGrad)" stroke="#1e293b" stroke-width="2.5"/>
+
+  <!-- Stacked Masonry Horizontal Mortar Joints -->
+  <!-- Joint 1 -->
+  <line x1="2" y1="32" x2="30" y2="32" stroke="#0f172a" stroke-width="2.5"/>
+  <line x1="2" y1="34" x2="30" y2="34" stroke="#cbd5e1" stroke-width="1" opacity="0.6"/>
+  <!-- Joint 2 -->
+  <line x1="2" y1="64" x2="30" y2="64" stroke="#0f172a" stroke-width="2.5"/>
+  <line x1="2" y1="66" x2="30" y2="66" stroke="#cbd5e1" stroke-width="1" opacity="0.6"/>
+  <!-- Joint 3 -->
+  <line x1="2" y1="96" x2="30" y2="96" stroke="#0f172a" stroke-width="2.5"/>
+  <line x1="2" y1="98" x2="30" y2="98" stroke="#cbd5e1" stroke-width="1" opacity="0.6"/>
+
+  <!-- Chiseled Edge Indentations -->
+  <polygon points="2,16 6,18 2,22" fill="#334155"/>
+  <polygon points="30,48 26,50 30,54" fill="#1e293b"/>
+  <polygon points="2,80 5,82 2,85" fill="#334155"/>
+  <polygon points="30,110 25,112 30,115" fill="#1e293b"/>
+
+  <!-- Stone Flecks -->
+  <rect x="10" y="14" width="4" height="2" rx="1" fill="#334155" opacity="0.6"/>
+  <rect x="18" y="44" width="5" height="2" rx="1" fill="#cbd5e1" opacity="0.7"/>
+  <rect x="8" y="76" width="6" height="3" rx="1" fill="#334155" opacity="0.6"/>
+  <rect x="16" y="106" width="4" height="2" rx="1" fill="#cbd5e1" opacity="0.6"/>
+</svg>

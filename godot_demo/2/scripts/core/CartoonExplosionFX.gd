@@ -12,9 +12,6 @@ static func _init_textures() -> void:
 		tex_flash = _safe_load("res://assets/sprites/vfx/explosion_flash_star.svg")
 
 static func _safe_load(path: String) -> Texture2D:
-	if ResourceLoader.exists(path):
-		var res = load(path)
-		if res: return res
 	var global_path = ProjectSettings.globalize_path(path)
 	if FileAccess.file_exists(global_path):
 		var img = Image.load_from_file(global_path)
@@ -22,6 +19,8 @@ static func _safe_load(path: String) -> Texture2D:
 			var tex = ImageTexture.create_from_image(img)
 			tex.resource_path = path
 			return tex
+	if ResourceLoader.exists(path):
+		return load(path)
 	return null
 
 static func spawn_comic_explosion(parent: Node, pos: Vector2, radius: float = 160.0) -> void:
