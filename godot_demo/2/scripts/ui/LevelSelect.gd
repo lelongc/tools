@@ -52,7 +52,6 @@ func _render_world_levels() -> void:
 	var end_lvl = start_lvl + 14
 
 	var tex_star_full = preload("res://assets/ui/icons/icon_star.svg")
-	var tex_star_empty = preload("res://assets/ui/icons/icon_star_empty.svg")
 
 	for lvl in range(start_lvl, end_lvl + 1):
 		var btn = Button.new()
@@ -107,7 +106,8 @@ func _render_world_levels() -> void:
 				s_rect.custom_minimum_size = Vector2(20, 20)
 				s_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 				s_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-				s_rect.texture = tex_star_full if (s_idx < stars) else tex_star_empty
+				s_rect.texture = tex_star_full
+				s_rect.modulate = Color.WHITE if (s_idx < stars) else Color(0.25, 0.18, 0.35, 0.65)
 				stars_hbox.add_child(s_rect)
 
 			style_norm.bg_color = Color(0.24, 0.12, 0.38, 0.95)

@@ -272,15 +272,15 @@ func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> 
 
 		# Chuỗi hoạt ảnh 3 Ngôi Sao Vector sinh động chuẩn Angry Birds
 		var tex_star_full = preload("res://assets/ui/icons/icon_star.svg")
-		var tex_star_empty = preload("res://assets/ui/icons/icon_star_empty.svg")
 		var star_nodes = [star1, star2, star3]
 		for i in range(3):
 			var s_node = star_nodes[i]
 			if s_node:
 				s_node.scale = Vector2.ZERO
 				s_node.pivot_offset = s_node.size * 0.5
+				s_node.texture = tex_star_full
 				if i < stars:
-					s_node.texture = tex_star_full
+					s_node.modulate = Color.WHITE
 					var st = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 					st.tween_interval(0.2 + i * 0.2)
 					st.tween_property(s_node, "scale", Vector2.ONE, 0.32)
@@ -290,7 +290,7 @@ func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> 
 							get_node("/root/SoundManager").play_synth_tone(520.0 + star_idx * 160.0, 0.12, "sine", 1.0)
 					)
 				else:
-					s_node.texture = tex_star_empty
+					s_node.modulate = Color(0.25, 0.18, 0.35, 0.65)
 					var st = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 					st.tween_interval(0.2 + i * 0.2)
 					st.tween_property(s_node, "scale", Vector2(0.85, 0.85), 0.22)

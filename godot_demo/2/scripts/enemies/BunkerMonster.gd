@@ -1232,18 +1232,68 @@ func _defeat_monster() -> void:
 	if dizzy_stars:
 		dizzy_stars.visible = true
 		var star_tween = create_tween().set_loops(2)
-		star_tween.tween_property(dizzy_stars, "rotation", TAU, 0.3)
+		star_tween.tween_property(dizzy_stars, "rotation", TAU, 0.25)
 
+	# Âm thanh vui nhộn khi quái thoát xác
+	if has_node("/root/SoundManager"):
+		get_node("/root/SoundManager").play_synth_tone(340.0, 0.12, "pop", 0.9)
+		get_node("/root/SoundManager").play_synth_tone(480.0, 0.15, "sine", 0.8)
+
+	# =========================================================================
+	# HIỆU ỨNG THOÁT XÁC HOẠT HÌNH (CARTOON SHOCK JUMP & BALLOON POP)
+	# Thay vì bị ép bẹp dí như bánh tráng, quái vật giật nảy lên vì hoảng hốt,
+	# phồng căng tròn như quả bóng bay rồi nổ "BÙM" thành chùm khói bồng bềnh!
+	# =========================================================================
 	if visual_root:
-		var flat_tween = create_tween().set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
-		flat_tween.tween_property(visual_root, "scale", Vector2(base_scale_val * 1.55, base_scale_val * 0.12), 0.16)
+		var pop_tween = create_tween().set_parallel(true)
+		# 1. Quái nảy vọt lên cao một đoạn
+		pop_tween.tween_property(visual_root, "position:y", visual_root.position.y - 22.0, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		# 2. Xoay nghiêng hài hước
+		pop_tween.tween_property(visual_root, "rotation", randf_range(-0.35, 0.35), 0.18)
+		# 3. Phồng to căng tròn như quả bóng bay
+		pop_tween.tween_property(visual_root, "scale", Vector2(base_scale_val * 1.35, base_scale_val * 1.35), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		# 4. Chớp trắng báo hiệu nổ tung
+		pop_tween.tween_property(visual_root, "modulate", Color(1.3, 1.3, 1.3, 1.0), 0.18)
 
-	await get_tree().create_timer(0.38).timeout
+	await get_tree().create_timer(0.18).timeout
+
+	# Quái vật tan biến ngay tức khắc khi đạt đỉnh nổ
+	if visual_root:
+		visual_root.visible = false
+
+	# Nở bung các đám mây khói Comic Puff bồng bềnh
+	_spawn_monster_poof_clouds()
 
 	if poof_fx:
 		poof_fx.restart()
 		poof_fx.emitting = true
 
-	if visual_root: visual_root.visible = false
-	await get_tree().create_timer(0.35).timeout
+	await get_tree().create_timer(0.38).timeout
 	queue_free()
+
+static var tex_comic_smoke: Texture2D = null
+
+func _spawn_monster_poof_clouds() -> void:
+	if tex_comic_smoke == null:
+		tex_comic_smoke = ParticleHelper._safe_load("res://assets/sprites/vfx/smoke_puff_cartoon.svg")
+	var p = get_parent()
+	if not p or not tex_comic_smoke: return
+
+	# Tạo chùm 4 đám mây khói hoạt hình bung nở mềm mại
+	for i in range(4):
+		var puff = Sprite2D.new()
+		puff.texture = tex_comic_smoke
+		var offset = Vector2(randf_range(-15, 15), randf_range(-15, 15))
+		puff.global_position = global_position + offset
+		puff.scale = Vector2(0.25, 0.25)
+		puff.modulate = Color(1.0, 1.0, 1.0, 0.95)
+		p.add_child(puff)
+
+		var tween = puff.create_tween()
+		var target_scale = randf_range(0.80, 1.15)
+		var target_offset = offset * 2.2 + Vector2(randf_range(-16, 16), randf_range(-22, -6))
+		tween.parallel().tween_property(puff, "scale", Vector2(target_scale, target_scale), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(puff, "position", puff.position + target_offset, 0.35)
+		tween.parallel().tween_property(puff, "modulate:a", 0.0, 0.35).set_trans(Tween.TRANS_SINE)
+		tween.parallel().tween_property(puff, "rotation", randf_range(-1.2, 1.2), 0.35)
+		tween.tween_callback(puff.queue_free)

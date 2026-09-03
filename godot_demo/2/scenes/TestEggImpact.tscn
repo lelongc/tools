@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://testeggimpact01"]
+
+[ext_resource type="Script" path="res://scripts/test_egg_impact.gd" id="1_script"]
+
+[node name="TestEggImpact" type="Node"]
+script = ExtResource("1_script")

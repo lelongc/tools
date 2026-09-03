@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://testeggcampaigndrop01"]
+
+[ext_resource type="Script" path="res://scripts/test_egg_campaign_drop.gd" id="1_script"]
+
+[node name="TestEggCampaignDrop" type="Node"]
+script = ExtResource("1_script")
