@@ -46,7 +46,9 @@ var shock_timer: float = 0.0
 var furious_timer: float = 0.0
 var relief_timer: float = 0.0
 var smug_timer: float = 0.0
+var pending_relief_timer: float = 0.0
 var was_in_panic: bool = false
+var anim_phase: float = 0.0
 var pinned_check_timer: float = 0.2
 var is_currently_pinned: bool = false
 var pinned_cooldown: float = 0.0
@@ -132,9 +134,10 @@ func _ready() -> void:
 		gm.level_failed.connect(_on_player_failed_taunt)
 		gm.enemy_defeated.connect(_on_nearby_enemy_defeated)
 
-	blink_timer = randf_range(2.0, 4.0)
-	eye_wander_timer = randf_range(1.0, 2.0)
-	idle_action_timer = randf_range(2.0, 4.0)
+	blink_timer = randf_range(1.5, 4.5)
+	eye_wander_timer = randf_range(0.8, 2.2)
+	idle_action_timer = randf_range(1.2, 4.0)
+	anim_phase = randf() * TAU
 
 	_play_spawn_bounce()
 
@@ -519,11 +522,18 @@ func _evaluate_situational_state(delta: float) -> void:
 	if current_state == State.DEFEATED or current_state == State.VICTORY_TAUNT:
 		return
 
+	# 0. Đang chờ độ trễ phản xạ thở phào (Random reaction delay để không đồng loạt)
+	if pending_relief_timer > 0.0:
+		pending_relief_timer -= delta
+		if pending_relief_timer <= 0.0:
+			trigger_survived_relief()
+		return
+
 	# 1. Đang trong trạng thái thở phào "Hên quá chưa chết!" (Surviving Near-Miss / Relief)
 	if relief_timer > 0.0:
 		relief_timer -= delta
 		if relief_timer <= 0.0:
-			smug_timer = 1.4
+			smug_timer = randf_range(1.2, 1.7)
 			_set_state(State.SMUG_MOCKING)
 		return
 
@@ -564,7 +574,7 @@ func _evaluate_situational_state(delta: float) -> void:
 		pinned_cooldown -= delta
 		if pinned_cooldown <= 0.0:
 			is_currently_pinned = false
-			trigger_survived_relief()
+			pending_relief_timer = randf_range(0.06, 0.20)
 		return
 
 	# 6. Kiểm tra sức khỏe nguy kịch (Critical Injured - HP < 45%)
@@ -579,24 +589,45 @@ func _evaluate_situational_state(delta: float) -> void:
 
 func trigger_survived_relief() -> void:
 	if is_defeated or current_state == State.DEFEATED: return
-	relief_timer = 1.2
+	relief_timer = randf_range(1.0, 1.35)
 	_set_state(State.SURVIVED_RELIEF)
 
+func on_near_explosion(blast_pos: Vector2, blast_radius: float) -> void:
+	if is_defeated or current_state == State.DEFEATED: return
+	var dist = global_position.distance_to(blast_pos)
+	var danger_zone = blast_radius * 1.55
+
+	if dist <= danger_zone:
+		# CON Ở GẦN VỤ NỔ: Trải qua phen hú vía suýt chết!
+		was_in_panic = true
+		pending_relief_timer = randf_range(0.06, 0.24)
+	else:
+		# CON Ở XA: Bình thường, không thở phào, chỉ liếc nhìn tò mò về phía vụ nổ
+		var dir = (blast_pos - global_position).normalized()
+		eye_look_offset = dir * 4.0
+
 func _evaluate_base_state(delta: float) -> void:
-	# 1. Quét tìm quả trứng đang bay trên bầu trời (Toàn bộ màn hình)
+	# 1. Quét tìm quả trứng đang bay trên bầu trời
 	var eggs = get_tree().get_nodes_in_group("Eggs")
 	var chicken = get_tree().get_first_node_in_group("Player") as ChickenBomber
 
-	var active_egg: RigidBody2D = null
-	var min_egg_dist: float = 9999.0
+	var threat_egg: RigidBody2D = null
+	var min_threat_dist: float = 9999.0
 
 	for egg in eggs:
 		if is_instance_valid(egg) and egg is RigidBody2D and not egg.get("is_broken"):
 			if egg.global_position.y < global_position.y + 60.0:
 				var d = global_position.distance_to(egg.global_position)
-				if d < min_egg_dist:
-					min_egg_dist = d
-					active_egg = egg
+				var horiz_d = abs(egg.global_position.x - global_position.x)
+				# CHỈ coi là đe dọa trực tiếp nếu quả trứng ở trong bán kính 380px hoặc rơi thẳng vào trục X của quái (< 120px)
+				if d <= 380.0 or (horiz_d <= 120.0 and egg.linear_velocity.y > 30.0):
+					if d < min_threat_dist:
+						min_threat_dist = d
+						threat_egg = egg
+				else:
+					# Quả trứng ở xa (con ở xa): Chỉ liếc nhìn nhẹ, không hề sợ hay hoảng loạn!
+					var dir = (egg.global_position - global_position).normalized()
+					eye_look_offset = dir * 3.5
 
 	# 2. Quét tìm khối nhà phía trên đang rơi sập đè
 	var falling_block: RigidBody2D = null
@@ -616,37 +647,50 @@ func _evaluate_base_state(delta: float) -> void:
 		eye_look_offset = Vector2(0, -6.5)
 		return
 
-	# Có quả trứng đang bay trên bầu trời
-	if active_egg != null:
+	# Có quả trứng đe dọa trực tiếp tới gần quái
+	if threat_egg != null:
 		was_in_panic = true
-		# Tròng mắt NGAY LẬP TỨC ngước nhìn quả trứng dù ở bất kỳ độ cao nào!
-		var dir = (active_egg.global_position - global_position).normalized()
+		var dir = (threat_egg.global_position - global_position).normalized()
 		eye_look_offset = dir * 6.5
 
-		# Nếu trứng bay gần (< 480px) hoặc đang lao thẳng xuống gian phòng này:
-		var horiz_dist = abs(active_egg.global_position.x - global_position.x)
-		if min_egg_dist < 480.0 or (horiz_dist < 180.0 and active_egg.linear_velocity.y > 35.0):
+		var horiz_dist = abs(threat_egg.global_position.x - global_position.x)
+		if min_threat_dist < 260.0 or (horiz_dist < 80.0 and threat_egg.linear_velocity.y > 35.0):
 			if current_state != State.PANIC_FALLING:
 				_set_state(State.PANIC_FALLING)
 		else:
-			# Trứng còn ở trên cao: Trợn mắt ngước nhìn lo sợ (không bao giờ ngủ hay huýt sáo!)
 			if current_state != State.ALERT_AIMING and current_state != State.PANIC_FALLING:
 				_set_state(State.ALERT_AIMING)
 		return
 
-	# Không còn trứng đang rơi: Nếu vừa trải qua hoảng loạn mà sống sót -> "Hên quá chưa chết!"
+	# Không còn trứng đang rơi: Nếu vừa trải qua hoảng loạn đe dọa gần mà sống sót -> "Hên quá chưa chết!"
 	if was_in_panic:
 		was_in_panic = false
-		trigger_survived_relief()
+		pending_relief_timer = randf_range(0.06, 0.22)
 		return
 
-	# Gà đang kéo ngắm bắn -> ALERT_AIMING (Dõi mắt theo ngắm bắn thời gian thực)
+	# Gà đang kéo ngắm bắn -> ALERT_AIMING
 	if is_instance_valid(chicken) and chicken.is_aiming:
-		if current_state != State.ALERT_AIMING:
-			_set_state(State.ALERT_AIMING)
-		var dir = (chicken.global_position - global_position).normalized()
-		eye_look_offset = dir * 5.5
+		var dist_to_chicken = global_position.distance_to(chicken.global_position)
+		var horiz_to_chicken = abs(chicken.global_position.x - global_position.x)
+		# Nếu gà đang ngắm ở trục X gần quái (< 220px) hoặc khoảng cách < 450px -> Lo sợ!
+		if horiz_to_chicken < 220.0 or dist_to_chicken < 450.0:
+			if current_state != State.ALERT_AIMING:
+				_set_state(State.ALERT_AIMING)
+			var dir = (chicken.global_position - global_position).normalized()
+			eye_look_offset = dir * 5.5
+			return
+
+	# Bình thường -> IDLE (nếu còn khỏe) hoặc CRITICAL_INJURED (nếu yếu)
+	if current_health <= max_health * 0.45:
+		if current_state != State.CRITICAL_INJURED:
+			_set_state(State.CRITICAL_INJURED)
+		_update_injured_behaviors(delta)
 		return
+
+	if current_state != State.IDLE:
+		_set_state(State.IDLE)
+
+	_update_idle_micro_actions(delta)
 
 	# Bình thường -> IDLE (nếu còn khỏe) hoặc CRITICAL_INJURED (nếu yếu)
 	if current_health <= max_health * 0.45:
@@ -860,16 +904,38 @@ func _set_state(new_state: State) -> void:
 
 		State.SMUG_MOCKING:
 			if eyes_sprite:
-				var smug_eyes = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_suspicious.svg") if monster_type in ["sly_fox", "fox_guard", "toxic_fox"] else char_tex_eyes_special
+				var smug_eyes = null
+				if monster_type in ["sly_fox", "fox_guard", "toxic_fox"]:
+					smug_eyes = _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_suspicious.svg") if randf() < 0.55 else _load_tex("res://assets/enemies/modular_expressions/01_fox_eyes/eyes_fox_laughing_smug.svg")
+				else:
+					smug_eyes = char_tex_eyes_special
 				if smug_eyes: eyes_sprite.texture = smug_eyes
+
 			if snout_sprite:
-				var taunt_snout = char_tex_snout_special
-				if not taunt_snout:
-					taunt_snout = _load_tex("res://assets/enemies/modular_expressions/01_fox_snouts/snout_fox_tongue_raspberry.svg")
+				var taunt_snout = null
+				if monster_type in ["sly_fox", "fox_guard", "toxic_fox"]:
+					var roll = randf()
+					if roll < 0.50:
+						taunt_snout = _load_tex("res://assets/enemies/modular_expressions/01_fox_snouts/snout_fox_tongue_raspberry.svg")
+					elif roll < 0.82:
+						taunt_snout = _load_tex("res://assets/enemies/modular_expressions/01_fox_snouts/snout_fox_wide_grin_fangs.svg")
+					else:
+						taunt_snout = _load_tex("res://assets/enemies/modular_expressions/01_fox_snouts/snout_fox_whistling_innocent.svg")
+				else:
+					taunt_snout = char_tex_snout_special if randf() < 0.55 else char_tex_snout_taunt
 				if taunt_snout: snout_sprite.texture = taunt_snout
+
 			if pupils_sprite: pupils_sprite.visible = (monster_type in ["sly_fox", "toxic_fox", "armored_raccoon", "imperial_boar"])
 			if dizzy_stars: dizzy_stars.visible = false
-			_pop_emote(tex_emote_stars, 1.3)
+
+			# Randomize comic emote
+			var emote_roll = randf()
+			if emote_roll < 0.45:
+				_pop_emote(tex_emote_stars, 1.2)
+			elif emote_roll < 0.75:
+				_pop_emote(tex_emote_question, 1.0)
+			else:
+				_pop_emote(tex_emote_sweat, 0.9)
 
 		State.CRITICAL_INJURED:
 			if eyes_sprite and char_tex_eyes_hurt:
@@ -900,6 +966,8 @@ func _set_state(new_state: State) -> void:
 func _animate_character(delta: float) -> void:
 	if not visual_root: return
 
+	var t = anim_time + anim_phase
+
 	# 1. Di chuyển con ngươi mắt mượt mà
 	if pupils_sprite and pupils_sprite.visible:
 		var target_pos = base_eye_pos + eye_look_offset
@@ -910,74 +978,74 @@ func _animate_character(delta: float) -> void:
 		State.IDLE:
 			match current_idle_action:
 				IdleAction.WHISTLING:
-					visual_root.rotation = sin(anim_time * 4.0) * 0.05
-					visual_root.scale = Vector2(base_scale_val * (1.0 + sin(anim_time * 8.0) * 0.02), base_scale_val)
+					visual_root.rotation = sin(t * 4.0) * 0.05
+					visual_root.scale = Vector2(base_scale_val * (1.0 + sin(t * 8.0) * 0.02), base_scale_val)
 				IdleAction.TONGUE_RASPBERRY:
-					visual_root.rotation = sin(anim_time * 12.0) * 0.06
-					visual_root.position.x = sin(anim_time * 12.0) * 2.0
+					visual_root.rotation = sin(t * 12.0) * 0.06
+					visual_root.position.x = sin(t * 12.0) * 2.0
 				IdleAction.SMUG_LAUGH:
-					visual_root.position.y = -abs(sin(anim_time * 10.0)) * 3.5
+					visual_root.position.y = -abs(sin(t * 10.0)) * 3.5
 					visual_root.scale = Vector2(base_scale_val * 1.04, base_scale_val * 0.96)
 				IdleAction.SLEEPY_NAP:
-					var nap_breath = sin(anim_time * 1.5) * 0.03
+					var nap_breath = sin(t * 1.5) * 0.03
 					visual_root.scale = Vector2(base_scale_val * (1.0 - nap_breath), base_scale_val * (1.0 + nap_breath))
 					visual_root.rotation = 0.06
 				IdleAction.SUSPICIOUS:
 					visual_root.rotation = -0.14
 					visual_root.position.x = 0.0
 				IdleAction.CHARACTER_SPECIAL:
-					visual_root.rotation = sin(anim_time * 6.0) * 0.06
-					visual_root.position.y = -abs(sin(anim_time * 6.0)) * 2.5
+					visual_root.rotation = sin(t * 6.0) * 0.06
+					visual_root.position.y = -abs(sin(t * 6.0)) * 2.5
 				_:
-					var breath = sin(anim_time * 2.5) * 0.02
+					var breath = sin(t * 2.5) * 0.02
 					visual_root.scale = Vector2(base_scale_val * (1.0 + breath), base_scale_val * (1.0 - breath))
 					visual_root.rotation = 0.0
 					visual_root.position = Vector2.ZERO
 
 		State.ALERT_AIMING:
-			var tense = sin(anim_time * 7.0) * 0.02
+			var tense = sin(t * 7.0) * 0.02
 			visual_root.scale = Vector2(base_scale_val * 0.95, base_scale_val * 1.05 + tense)
 			visual_root.position.x = 0.0
 
 		State.PANIC_FALLING:
-			visual_root.position.x = sin(anim_time * 48.0) * 2.5
-			visual_root.position.y = cos(anim_time * 42.0) * 1.5
+			visual_root.position.x = sin(t * 48.0) * 2.5
+			visual_root.position.y = cos(t * 42.0) * 1.5
 			visual_root.scale = Vector2(base_scale_val * 0.90, base_scale_val * 1.10)
 
 		State.SHOCKED_BY_NEIGHBOR:
-			visual_root.position.y = -abs(sin(anim_time * 16.0)) * 6.0
+			visual_root.position.y = -abs(sin(t * 16.0)) * 6.0
 			visual_root.scale = Vector2(base_scale_val * 0.88, base_scale_val * 1.14)
 
 		State.PINNED_UNDER_DEBRIS:
-			var squish_pant = sin(anim_time * 4.0) * 0.025
+			var squish_pant = sin(t * 4.0) * 0.025
 			visual_root.scale = Vector2(base_scale_val * (1.28 + squish_pant), base_scale_val * (0.68 - squish_pant))
 			visual_root.position.x = 0.0
 			visual_root.rotation = 0.03
 
 		State.SURVIVED_RELIEF:
-			var sigh = sin(anim_time * 3.5) * 0.03
+			var sigh = sin(t * 3.5) * 0.03
 			visual_root.scale = Vector2(base_scale_val * (1.05 + sigh), base_scale_val * (0.95 - sigh))
 			visual_root.position = Vector2.ZERO
 			visual_root.rotation = 0.03
 
 		State.SMUG_MOCKING:
-			visual_root.position.y = -abs(sin(anim_time * 12.0)) * 7.0
-			visual_root.rotation = sin(anim_time * 8.0) * 0.09
+			visual_root.position.y = -abs(sin(t * 12.0)) * 7.0
+			visual_root.rotation = sin(t * 8.0) * 0.09
 			visual_root.scale = Vector2(base_scale_val, base_scale_val)
 
 		State.CRITICAL_INJURED:
-			var heavy_pant = sin(anim_time * 5.0) * 0.04
+			var heavy_pant = sin(t * 5.0) * 0.04
 			visual_root.scale = Vector2(base_scale_val * (1.0 + heavy_pant), base_scale_val * (1.0 - heavy_pant))
-			visual_root.rotation = sin(anim_time * 3.5) * 0.08
+			visual_root.rotation = sin(t * 3.5) * 0.08
 			if dizzy_stars: dizzy_stars.rotation += delta * 4.0
 
 		State.FURIOUS_ARMOR_LOSS:
 			visual_root.scale = Vector2(base_scale_val * 1.08, base_scale_val * 0.94)
-			visual_root.position.x = sin(anim_time * 25.0) * 1.5
+			visual_root.position.x = sin(t * 25.0) * 1.5
 
 		State.VICTORY_TAUNT:
-			visual_root.position.y = -abs(sin(anim_time * 9.0)) * 10.0
-			visual_root.rotation = sin(anim_time * 6.0) * 0.08
+			visual_root.position.y = -abs(sin(t * 9.0)) * 10.0
+			visual_root.rotation = sin(t * 6.0) * 0.08
 
 func _trigger_blink() -> void:
 	if not eyes_sprite or is_blinking or current_state == State.PANIC_FALLING or current_idle_action == IdleAction.SLEEPY_NAP or current_state == State.PINNED_UNDER_DEBRIS or current_state == State.SURVIVED_RELIEF:
@@ -1001,8 +1069,8 @@ func _pop_emote(tex: Texture2D, duration: float = 0.8) -> void:
 	emote_sprite.position = Vector2.ZERO
 
 	active_emote_tween = create_tween()
-	active_emote_tween.tween_property(emote_sprite, "scale", Vector2(0.24, 0.24), 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	active_emote_tween.parallel().tween_property(emote_sprite, "position:y", -10.0, duration)
+	active_emote_tween.tween_property(emote_sprite, "scale", Vector2(0.12, 0.12), 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	active_emote_tween.parallel().tween_property(emote_sprite, "position:y", -8.0, duration)
 	active_emote_tween.tween_property(emote_sprite, "modulate:a", 0.0, 0.18).set_delay(max(0.05, duration - 0.18))
 	active_emote_tween.tween_callback(func(): emote_sprite.visible = false)
 

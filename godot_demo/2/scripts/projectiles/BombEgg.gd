@@ -84,5 +84,11 @@ func _detonate() -> void:
 			if collider.has_method("take_damage"):
 				collider.take_damage(explosion_damage * falloff, global_position)
 
+	# Thông báo cho quái vật xung quanh về vụ nổ gần kề
+	var enemies = get_tree().get_nodes_in_group("Enemies")
+	for enemy in enemies:
+		if is_instance_valid(enemy) and enemy.has_method("on_near_explosion"):
+			enemy.on_near_explosion(global_position, explosion_radius)
+
 	await get_tree().create_timer(0.6).timeout
 	queue_free()
