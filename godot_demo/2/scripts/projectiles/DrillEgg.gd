@@ -1,6 +1,7 @@
 extends RigidBody2D
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
+const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 @export var egg_name: String = "Drill Egg"
 @export var drill_duration: float = 0.85
@@ -21,6 +22,16 @@ func _ready() -> void:
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_entered)
+
+	ParticleHelper.setup_egg_visual(visual_root, "res://assets/sprites/projectiles/egg_drill.svg")
+
+	var trail = get_node_or_null("Trail") as CPUParticles2D
+	if trail:
+		ParticleHelper.apply_circle_fx(trail, 0.25, 0.5)
+	if spark_particles:
+		ParticleHelper.apply_spark_fx(spark_particles, 0.3, 0.6)
+	if break_particles:
+		ParticleHelper.apply_shard_fx(break_particles, 0.3, 0.6)
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Tap-in-Flight: Chạm màn hình để kích hoạt Tên Lửa Siêu Thanh đâm cực mạnh

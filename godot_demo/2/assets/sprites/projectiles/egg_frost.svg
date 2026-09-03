@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48" width="40" height="48">
+  <defs>
+    <radialGradient id="iceGrad" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="40%" stop-color="#bae6fd"/>
+      <stop offset="75%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Ice Crystal Egg Silhouette -->
+  <path d="M20 4 C10 4, 4 18, 4 30 C4 40, 11 45, 20 45 C29 45, 36 40, 36 30 C36 18, 30 4, 20 4 Z" 
+        fill="url(#iceGrad)" stroke="#0369a1" stroke-width="2.2"/>
+
+  <!-- Geometric Ice Facets -->
+  <polygon points="20,4 28,16 12,18" fill="#ffffff" opacity="0.65"/>
+  <polygon points="28,16 36,26 24,30 12,18" fill="#7dd3fc" opacity="0.45"/>
+  <polygon points="4,30 14,36 12,18" fill="#e0f2fe" opacity="0.5"/>
+  <polygon points="14,36 20,45 28,42 24,30" fill="#0284c7" opacity="0.4"/>
+
+  <!-- Glowing Snowflake Emblem -->
+  <g transform="translate(20, 26)" stroke="#ffffff" stroke-width="1.6" stroke-linecap="round">
+    <line x1="-6" y1="0" x2="6" y2="0"/>
+    <line x1="0" y1="-6" x2="0" y2="6"/>
+    <line x1="-4" y1="-4" x2="4" y2="4"/>
+    <line x1="-4" y1="4" x2="4" y2="-4"/>
+    <circle cx="0" cy="0" r="1.5" fill="#ffffff"/>
+  </g>
+</svg>

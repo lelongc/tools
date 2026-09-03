@@ -14,13 +14,41 @@ const UpdraftVentScene = preload("res://scenes/prefabs/UpdraftVent.tscn")
 @export var intro_target_y: float = 640.0
 
 @onready var bg_sky: Polygon2D = $Background/Sky
+@onready var bg_sky_clouds: Sprite2D = get_node_or_null("Background/SkyClouds")
 @onready var bg_dirt: Polygon2D = $Background/UndergroundDirt
 @onready var bg_cavern: Polygon2D = $Background/CavernInterior
+@onready var bg_ground_strata: Sprite2D = get_node_or_null("Background/GroundStrata")
 @onready var bunker_structure: Node2D = $BunkerStructure
+
+static var _tex_cache: Dictionary = {}
+
+func _safe_load(path: String) -> Texture2D:
+	if _tex_cache.has(path):
+		return _tex_cache[path]
+	var global_path = ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(global_path):
+		var img = Image.load_from_file(global_path)
+		if img:
+			var tex = ImageTexture.create_from_image(img)
+			tex.resource_path = path
+			_tex_cache[path] = tex
+			return tex
+	if ResourceLoader.exists(path):
+		var res = load(path)
+		_tex_cache[path] = res
+		return res
+	return null
 
 func _ready() -> void:
 	if GameManager.current_level > 0:
 		level_id = GameManager.current_level
+
+	if bg_sky_clouds:
+		var ts = _safe_load("res://assets/sprites/environment/bg_sky_clouds.svg")
+		if ts: bg_sky_clouds.texture = ts
+	if bg_ground_strata:
+		var tg = _safe_load("res://assets/sprites/environment/bg_ground_strata.svg")
+		if tg: bg_ground_strata.texture = tg
 
 	_setup_level()
 
@@ -47,9 +75,9 @@ func _setup_level() -> void:
 			bg_dirt.color = Color(0.18, 0.06, 0.08)
 			bg_cavern.color = Color(0.08, 0.03, 0.05)
 
-	# 2. Quy mô công trình RỘNG LỚN & HOÀNH TRÁNG (440px -> 510px)
-	var cavern_half_width = clamp(220.0 + (level_id * 0.6), 220.0, 255.0)
-	var cavern_top_y = clamp(460.0 - (level_id * 2.8), 280.0, 460.0)
+	# 2. Quy mô công trình CỰC ĐẠI TOÀN CẢNH (Mở rộng toàn màn hình từ x=15 đến x=525)
+	var cavern_half_width = 255.0
+	var cavern_top_y = clamp(390.0 - (level_id * 2.0), 240.0, 390.0)
 	intro_target_y = (885.0 + cavern_top_y) * 0.5
 
 	var cx = 270.0
@@ -152,154 +180,135 @@ func _setup_level() -> void:
 	var enemy_count = enemies.size()
 	GameManager.start_level(level_id, enemy_count, egg_loadout)
 
-func _generate_grand_bunker(lvl: int, world: int, half_w: float, mat1: String, mat2: String, mat_heavy: String, e_grunt: String, e_elite: String) -> Array[String]:
+func _generate_grand_bunker(lvl: int, world: int, _half_w: float, mat1: String, mat2: String, mat_heavy: String, e_grunt: String, e_elite: String) -> Array[String]:
 	var floor_y = 875.0
 	var cx = 270.0
 	var loadout: Array[String] = []
-
-	var num_stories = 1
-	if lvl >= 3: num_stories = 2
-	if lvl >= 8: num_stories = 3
-	if lvl >= 21: num_stories = 4
-
 	var is_boss_level = (lvl % 15 == 0)
 
-	# ==========================================
-	# TẦNG 1 (ĐẠI SẢNH ĐÁY HẦM): Rộng 360px -> 480px, Cao 120px - 140px
-	# ==========================================
-	var span_1 = clamp(half_w * 1.84, 360.0, 480.0)
-	var p1_h = 120.0 + min(lvl * 0.35, 20.0)
-	var p1_y = floor_y - p1_h * 0.5
+	# =========================================================================
+	# CỤM 1: THÁP TIỀN ĐỒN TÂY (WEST OUTPOST TOWER) - X: 26 -> 158 (Tâm: 92)
+	# =========================================================================
+	var tw_cx = 92.0
+	var tw_p1_h = 120.0
+	var tw_p1_y = floor_y - tw_p1_h * 0.5
+	# 2 Cột trụ Tháp Tây
+	_spawn_block(Vector2(28, tw_p1_y), Vector2(20, tw_p1_h), mat_heavy if lvl > 6 else mat1)
+	_spawn_block(Vector2(156, tw_p1_y), Vector2(20, tw_p1_h), mat1)
+	# Dầm trần Tầng 1 Tháp Tây
+	var tw_b1_y = floor_y - tw_p1_h - 12.0
+	_spawn_block(Vector2(tw_cx, tw_b1_y), Vector2(148, 24), mat1)
+	# Quái Tầng 1 Tháp Tây
+	_spawn_enemy(Vector2(tw_cx, floor_y - 24), e_grunt)
 
-	var p1_left_x = cx - span_1 * 0.5 + 14.0
-	var p1_right_x = cx + span_1 * 0.5 - 14.0
+	# Tầng 2 Tháp Tây (Vọng lâu trên cao)
+	var tw_p2_h = 88.0
+	var tw_p2_y = tw_b1_y - 12.0 - tw_p2_h * 0.5
+	_spawn_block(Vector2(42, tw_p2_y), Vector2(18, tw_p2_h), "glass" if (lvl % 3 == 1) else mat2)
+	_spawn_block(Vector2(142, tw_p2_y), Vector2(18, tw_p2_h), "glass" if (lvl % 3 == 1) else mat2)
+	var tw_b2_y = tw_b1_y - 12.0 - tw_p2_h - 10.0
+	_spawn_block(Vector2(tw_cx, tw_b2_y), Vector2(118, 20), mat1)
+	if lvl >= 3:
+		_spawn_enemy(Vector2(tw_cx, tw_b1_y - 12.0 - 24), e_grunt)
 
-	# 2 Cột trụ biên bên ngoài
-	_spawn_block(Vector2(p1_left_x, p1_y), Vector2(24, p1_h), mat_heavy if lvl > 8 else mat1)
-	_spawn_block(Vector2(p1_right_x, p1_y), Vector2(24, p1_h), mat_heavy if lvl > 8 else mat1)
+	# =========================================================================
+	# CỤM 2: ĐẠI PHÁO ĐÀI HOÀNG GIA TRUNG TÂM (ROYAL CITADEL) - X: 190 -> 350 (Tâm: 270)
+	# =========================================================================
+	var tc_cx = cx
+	var tc_p1_h = 130.0
+	var tc_p1_y = floor_y - tc_p1_h * 0.5
+	# Cột trụ đại sảnh trung tâm
+	_spawn_block(Vector2(192, tc_p1_y), Vector2(24, tc_p1_h), mat_heavy if lvl > 4 else mat1)
+	_spawn_block(Vector2(348, tc_p1_y), Vector2(24, tc_p1_h), mat_heavy if lvl > 4 else mat1)
+	# Cột chống tâm chịu lực bổ trợ cho đại sảnh
+	_spawn_block(Vector2(tc_cx, tc_p1_y + 15), Vector2(18, tc_p1_h - 30), mat1)
 
-	# 2 Cột trung gian chia 3 gian phòng rộng rãi
-	var mid_l_x = cx - span_1 * 0.28
-	var mid_r_x = cx + span_1 * 0.28
+	# Dầm trần Tầng 1 Trung Tâm
+	var tc_b1_y = floor_y - tc_p1_h - 12.0
+	_spawn_block(Vector2(tc_cx, tc_b1_y), Vector2(176, 26), mat_heavy)
 
-	_spawn_block(Vector2(mid_l_x, p1_y), Vector2(22, p1_h), mat1)
-	_spawn_block(Vector2(mid_r_x, p1_y), Vector2(22, p1_h), mat1)
-
-	# Bố trí Quái vật & TNT Tầng 1 (ĐẢM BẢO 100% ZERO-OVERLAP TOÁN HỌC)
-	var room_l_center = (p1_left_x + mid_l_x) * 0.5
-	var room_r_center = (p1_right_x + mid_r_x) * 0.5
-
+	# Quái vật & TNT Đại Sảnh
 	if is_boss_level:
 		var boss_name = "boss_baron_pig" if world == 4 else ("imperial_boar" if world == 3 else ("mine_wolf" if world == 2 else "fox_guard"))
-		_spawn_enemy(Vector2(cx, floor_y - 36), boss_name)
-		_spawn_enemy(Vector2(room_l_center, floor_y - 24), e_elite)
-		_spawn_enemy(Vector2(room_r_center, floor_y - 24), e_elite)
-		_spawn_tnt(Vector2(cx - 55.0, floor_y - 18), world == 4)
-		_spawn_tnt(Vector2(cx + 55.0, floor_y - 18), world == 4)
+		_spawn_enemy(Vector2(tc_cx - 35, floor_y - 36), boss_name)
+		_spawn_tnt(Vector2(tc_cx + 45, floor_y - 18), world == 4)
 	else:
-		# Gian Trái: Quái nằm chính giữa gian
-		_spawn_enemy(Vector2(room_l_center, floor_y - 24), e_grunt)
-
-		# Gian Giữa Rộng: Quái ở giữa (cx), TNT ở 2 bên cách cột 40px
-		_spawn_enemy(Vector2(cx, floor_y - 24), e_grunt)
-		_spawn_tnt(Vector2(cx - 48.0, floor_y - 18), world == 4)
+		_spawn_enemy(Vector2(tc_cx - 40, floor_y - 24), e_elite if lvl >= 2 else e_grunt)
 		if lvl >= 2:
-			_spawn_tnt(Vector2(cx + 48.0, floor_y - 18), world == 4)
+			_spawn_tnt(Vector2(tc_cx + 42, floor_y - 18), world == 4)
 
-		# Gian Phải: Quái nằm chính giữa gian
-		_spawn_enemy(Vector2(room_r_center, floor_y - 24), e_grunt)
+	# Tầng 2 Đại Pháo Đài (Kho Vũ Khí)
+	var tc_p2_h = 100.0
+	var tc_p2_y = tc_b1_y - 13.0 - tc_p2_h * 0.5
+	_spawn_block(Vector2(208, tc_p2_y), Vector2(22, tc_p2_h), mat1)
+	_spawn_block(Vector2(332, tc_p2_y), Vector2(22, tc_p2_h), mat1)
+	var tc_b2_y = tc_b1_y - 13.0 - tc_p2_h - 11.0
+	_spawn_block(Vector2(tc_cx, tc_b2_y), Vector2(144, 24), mat_heavy if lvl > 8 else mat1)
+	_spawn_enemy(Vector2(tc_cx, tc_b1_y - 13.0 - 24), e_elite if lvl >= 4 else e_grunt)
 
-	# Trần Tầng 1 (Dầm chịu lực chính đặt tiếp xúc 0px flush)
-	var beam1_y = floor_y - p1_h - 12.0
-	_spawn_block(Vector2(cx, beam1_y), Vector2(span_1 + 10, 24), mat_heavy if lvl > 5 else mat1)
-	var cur_top_y = beam1_y - 12.0
+	# Tầng 3 Tháp Vua (Level 6+)
+	var cur_citadel_top = tc_b2_y - 11.0
+	if lvl >= 6:
+		var tc_p3_h = 88.0
+		var tc_p3_y = cur_citadel_top - tc_p3_h * 0.5
+		_spawn_block(Vector2(228, tc_p3_y), Vector2(20, tc_p3_h), mat_heavy)
+		_spawn_block(Vector2(312, tc_p3_y), Vector2(20, tc_p3_h), mat_heavy)
+		var tc_b3_y = cur_citadel_top - tc_p3_h - 10.0
+		_spawn_block(Vector2(tc_cx, tc_b3_y), Vector2(104, 22), mat_heavy)
+		_spawn_enemy(Vector2(tc_cx, cur_citadel_top - 24), e_elite)
+		cur_citadel_top = tc_b3_y - 10.0
 
-	# ==========================================
-	# TẦNG 2 (TỪ LEVEL 3 TRỞ ĐI): Rộng 310px - 410px, Cao 105px
-	# ==========================================
-	if num_stories >= 2:
-		var span_2 = span_1 * (0.86 if lvl >= 5 else 0.80)
-		var p2_h = 105.0
-		var p2_y = cur_top_y - p2_h * 0.5
-		var p2_left_x = cx - span_2 * 0.5 + 12.0
-		var p2_right_x = cx + span_2 * 0.5 - 12.0
+	# =========================================================================
+	# CỤM 3: THÁP PHÒNG NGỰ ĐÔNG (EAST BASTION) - X: 382 -> 514 (Tâm: 448)
+	# =========================================================================
+	var te_cx = 448.0
+	var te_p1_h = 120.0
+	var te_p1_y = floor_y - te_p1_h * 0.5
+	# Cột trụ Tháp Đông
+	_spawn_block(Vector2(384, te_p1_y), Vector2(20, te_p1_h), mat1)
+	_spawn_block(Vector2(512, te_p1_y), Vector2(20, te_p1_h), mat_heavy if lvl > 6 else mat1)
+	# Dầm trần Tầng 1 Tháp Đông
+	var te_b1_y = floor_y - te_p1_h - 12.0
+	_spawn_block(Vector2(te_cx, te_b1_y), Vector2(148, 24), mat1)
+	# Quái Tầng 1 Tháp Đông
+	_spawn_enemy(Vector2(te_cx, floor_y - 24), e_grunt)
 
-		var col_mat2 = "glass" if (lvl % 3 == 0) else (mat2 if lvl < 18 else mat1)
-		_spawn_block(Vector2(p2_left_x, p2_y), Vector2(20, p2_h), col_mat2)
-		_spawn_block(Vector2(p2_right_x, p2_y), Vector2(20, p2_h), col_mat2)
+	# Tầng 2 Tháp Đông (Kho đạn / Lồng cứu gà con)
+	var te_p2_h = 88.0
+	var te_p2_y = te_b1_y - 12.0 - te_p2_h * 0.5
+	_spawn_block(Vector2(398, te_p2_y), Vector2(18, te_p2_h), "glass" if (lvl % 3 == 2) else mat2)
+	_spawn_block(Vector2(498, te_p2_y), Vector2(18, te_p2_h), "glass" if (lvl % 3 == 2) else mat2)
+	var te_b2_y = te_b1_y - 12.0 - te_p2_h - 10.0
+	_spawn_block(Vector2(te_cx, te_b2_y), Vector2(118, 20), mat1)
+	if lvl % 4 == 1 and lvl >= 5:
+		_spawn_rescue_cage(Vector2(te_cx, te_b1_y - 12.0 - 26))
+	else:
+		if lvl >= 2:
+			_spawn_enemy(Vector2(te_cx, te_b1_y - 12.0 - 24), e_grunt)
 
-		if span_2 > 330.0 or lvl >= 5:
-			_spawn_block(Vector2(cx, p2_y), Vector2(20, p2_h), mat1)
+	# =========================================================================
+	# HỆ THỐNG CẦU ĐÁ TREO NỐI 3 THÁP (HIGH SUSPENSION BRIDGES)
+	# =========================================================================
+	# Cầu Nối Tây (Bắc qua khoảng hở giữa Tháp Tây và Citadel)
+	var br_l_y = (tw_b1_y + tc_b1_y) * 0.5
+	_spawn_block(Vector2(174, br_l_y), Vector2(44, 20), mat1)
 
-		# Quái & TNT Tầng 2
-		var r2_l_center = (p2_left_x + cx) * 0.5
-		var r2_r_center = (p2_right_x + cx) * 0.5
-
-		_spawn_enemy(Vector2(r2_l_center, cur_top_y - 24), e_elite if lvl >= 4 else e_grunt)
-		_spawn_enemy(Vector2(r2_r_center, cur_top_y - 24), e_elite if lvl >= 4 else e_grunt)
-
-		if lvl >= 6:
-			_spawn_tnt(Vector2((r2_l_center + cx) * 0.5, cur_top_y - 18), world == 4)
-
-		var beam2_y = cur_top_y - p2_h - 11.0
-		_spawn_block(Vector2(cx, beam2_y), Vector2(span_2 + 8, 22), mat_heavy if lvl > 12 else mat1)
-		cur_top_y = beam2_y - 11.0
-
-	# ==========================================
-	# TẦNG 3 (TỪ LEVEL 8 TRỞ ĐI): Tháp Canh Cao 95px
-	# ==========================================
-	if num_stories >= 3:
-		var span_3 = span_1 * (0.72 if lvl >= 14 else 0.62)
-		var p3_h = 95.0
-		var p3_y = cur_top_y - p3_h * 0.5
-		var p3_left_x = cx - span_3 * 0.5 + 10.0
-		var p3_right_x = cx + span_3 * 0.5 - 10.0
-
-		_spawn_block(Vector2(p3_left_x, p3_y), Vector2(18, p3_h), "glass" if (lvl % 4 == 1) else mat1)
-		_spawn_block(Vector2(p3_right_x, p3_y), Vector2(18, p3_h), "glass" if (lvl % 4 == 1) else mat1)
-
-		if lvl % 4 == 1 and lvl >= 9:
-			_spawn_rescue_cage(Vector2(cx, cur_top_y - 26))
-		else:
-			_spawn_enemy(Vector2(cx, cur_top_y - 24), e_elite)
-			if lvl >= 10:
-				_spawn_enemy(Vector2((p3_left_x + cx) * 0.5, cur_top_y - 24), e_grunt)
-
-		var beam3_y = cur_top_y - p3_h - 10.0
-		_spawn_block(Vector2(cx, beam3_y), Vector2(span_3 + 8, 20), mat_heavy)
-		cur_top_y = beam3_y - 10.0
-
-	# ==========================================
-	# TẦNG 4 (TỪ LEVEL 21 TRỞ ĐI - ĐẠI PHÁO ĐÀI CẤP CAO):
-	# ==========================================
-	if num_stories >= 4:
-		var span_4 = span_1 * 0.50
-		var p4_h = 88.0
-		var p4_y = cur_top_y - p4_h * 0.5
-		var p4_l_x = cx - span_4 * 0.5 + 8.0
-		var p4_r_x = cx + span_4 * 0.5 - 8.0
-		_spawn_block(Vector2(p4_l_x, p4_y), Vector2(16, p4_h), mat_heavy)
-		_spawn_block(Vector2(p4_r_x, p4_y), Vector2(16, p4_h), mat_heavy)
-		_spawn_enemy(Vector2(cx, cur_top_y - 18), e_elite)
-		if lvl >= 32:
-			_spawn_tnt(Vector2((p4_l_x + cx) * 0.5, cur_top_y - 18), world == 4)
-
-		var beam4_y = cur_top_y - p4_h - 10.0
-		_spawn_block(Vector2(cx, beam4_y), Vector2(span_4 + 8, 20), mat_heavy)
-		cur_top_y = beam4_y - 10.0
+	# Cầu Nối Đông (Bắc qua khoảng hở giữa Citadel và Tháp Đông)
+	var br_r_y = (tc_b1_y + te_b1_y) * 0.5
+	_spawn_block(Vector2(366, br_r_y), Vector2(44, 20), mat1)
 
 	# ==========================================
 	# BẪY TẢNG ĐÁ LĂN & QUẠT GIÓ TRÊN NÓC
 	# ==========================================
 	if lvl >= 4:
 		if lvl % 4 == 2:
-			_spawn_boulder(Vector2(cx, cur_top_y - 28))
+			_spawn_boulder(Vector2(cx, cur_citadel_top - 28))
 		elif lvl % 4 == 0 and lvl >= 8:
-			_spawn_boulder(Vector2(cx - 65, cur_top_y - 28))
-			_spawn_boulder(Vector2(cx + 65, cur_top_y - 28))
+			_spawn_boulder(Vector2(cx - 65, cur_citadel_top - 28))
+			_spawn_boulder(Vector2(cx + 65, cur_citadel_top - 28))
 
 	if world >= 2 and lvl % 3 == 2:
-		_spawn_updraft(Vector2(cx - half_w * 0.55, floor_y))
+		_spawn_updraft(Vector2(cx - 140.0, floor_y))
 
 	# ==========================================
 	# KHO ĐẠN CHIẾN THUẬT ANGRY BIRDS

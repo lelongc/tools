@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 400" width="540" height="400">
+  <defs>
+    <!-- Sky Atmosphere Gradient -->
+    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="45%" stop-color="#7dd3fc"/>
+      <stop offset="85%" stop-color="#bae6fd"/>
+      <stop offset="100%" stop-color="#e0f2fe"/>
+    </linearGradient>
+    <!-- Distant Mountains Gradient -->
+    <linearGradient id="mountainsGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#93c5fd" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="hillsGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#86efac"/>
+      <stop offset="100%" stop-color="#4ade80"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sky Background -->
+  <rect width="540" height="400" fill="url(#skyGrad)"/>
+
+  <!-- Distant Blue Mountains -->
+  <path d="M-20 380 L60 270 L160 380 L260 250 L380 380 L460 290 L560 380 L560 400 L-20 400 Z" 
+        fill="url(#mountainsGrad)"/>
+
+  <!-- Midground Rolling Green Foothills -->
+  <path d="M-20 400 C80 340, 180 340, 290 370 C390 330, 480 340, 560 400 Z" 
+        fill="url(#hillsGrad)" opacity="0.85"/>
+
+  <!-- Fluffy Cartoon Clouds -->
+  <!-- Cloud 1 (Left High) -->
+  <g fill="#ffffff" opacity="0.92">
+    <circle cx="90" cy="110" r="32"/>
+    <circle cx="130" cy="95" r="38"/>
+    <circle cx="175" cy="110" r="30"/>
+    <circle cx="65" cy="120" r="22"/>
+    <rect x="65" y="112" width="115" height="28" rx="14"/>
+  </g>
+
+  <!-- Cloud 2 (Right Mid) -->
+  <g fill="#ffffff" opacity="0.88">
+    <circle cx="410" cy="160" r="28"/>
+    <circle cx="445" cy="148" r="34"/>
+    <circle cx="485" cy="160" r="26"/>
+    <rect x="390" y="162" width="100" height="24" rx="12"/>
+  </g>
+
+  <!-- Cloud 3 (Small Center High) -->
+  <g fill="#ffffff" opacity="0.75">
+    <circle cx="280" cy="70" r="20"/>
+    <circle cx="305" cy="62" r="24"/>
+    <circle cx="330" cy="70" r="18"/>
+    <rect x="270" y="70" width="65" height="18" rx="9"/>
+  </g>
+</svg>

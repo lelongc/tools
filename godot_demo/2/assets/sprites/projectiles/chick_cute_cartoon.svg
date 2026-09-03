@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" width="36" height="36">
+  <defs>
+    <radialGradient id="chickBody" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="60%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#eab308"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Round Body -->
+  <circle cx="18" cy="19" r="14" fill="url(#chickBody)" stroke="#ca8a04" stroke-width="2"/>
+
+  <!-- Head Feather Tuft -->
+  <path d="M17 6 C15 2, 21 2, 19 6 Z" fill="#facc15" stroke="#ca8a04" stroke-width="1.5"/>
+
+  <!-- Flappy Little Wing -->
+  <path d="M8 20 C4 23, 7 28, 12 26 C12 22, 10 20, 8 20 Z" fill="#fde047" stroke="#ca8a04" stroke-width="1.5"/>
+
+  <!-- Rosy Pink Cheeks -->
+  <ellipse cx="10" cy="22" rx="2.5" ry="1.5" fill="#f87171" opacity="0.6"/>
+  <ellipse cx="26" cy="22" rx="2.5" ry="1.5" fill="#f87171" opacity="0.6"/>
+
+  <!-- Big Glossy Eyes -->
+  <!-- Left Eye -->
+  <ellipse cx="13" cy="17" rx="3.5" ry="4.5" fill="#0f172a"/>
+  <circle cx="14" cy="15.5" r="1.5" fill="#ffffff"/>
+  <circle cx="12" cy="18.5" r="0.7" fill="#ffffff"/>
+
+  <!-- Right Eye -->
+  <ellipse cx="23" cy="17" rx="3.5" ry="4.5" fill="#0f172a"/>
+  <circle cx="24" cy="15.5" r="1.5" fill="#ffffff"/>
+  <circle cx="22" cy="18.5" r="0.7" fill="#ffffff"/>
+
+  <!-- Cute Orange Beak -->
+  <polygon points="15,20 21,20 18,25" fill="#f97316" stroke="#c2410c" stroke-width="1.2"/>
+</svg>

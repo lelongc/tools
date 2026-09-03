@@ -81,7 +81,26 @@ alignment = 1
 
 [node name="LogoContainer" type="VBoxContainer" parent="CenterContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 8
+
+[node name="MascotContainer" type="Control" parent="CenterContainer/VBoxContainer/LogoContainer"]
+custom_minimum_size = Vector2(0, 100)
+layout_mode = 2
+
+[node name="MascotRoot" type="Node2D" parent="CenterContainer/VBoxContainer/LogoContainer/MascotContainer"]
+position = Vector2(175, 50)
+scale = Vector2(1.2, 1.2)
+
+[node name="Basket" type="Sprite2D" parent="CenterContainer/VBoxContainer/LogoContainer/MascotContainer/MascotRoot"]
+position = Vector2(0, 18)
+
+[node name="LeftWing" type="Sprite2D" parent="CenterContainer/VBoxContainer/LogoContainer/MascotContainer/MascotRoot"]
+position = Vector2(-26, -2)
+
+[node name="RightWing" type="Sprite2D" parent="CenterContainer/VBoxContainer/LogoContainer/MascotContainer/MascotRoot"]
+position = Vector2(26, -2)
+
+[node name="Body" type="Sprite2D" parent="CenterContainer/VBoxContainer/LogoContainer/MascotContainer/MascotRoot"]
 
 [node name="Title" type="Label" parent="CenterContainer/VBoxContainer/LogoContainer"]
 layout_mode = 2

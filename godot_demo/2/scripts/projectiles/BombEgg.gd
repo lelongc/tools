@@ -2,6 +2,7 @@ extends RigidBody2D
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 const CartoonExplosionFX = preload("res://scripts/core/CartoonExplosionFX.gd")
+const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 @export var egg_name: String = "Bomb Egg"
 @export var explosion_radius: float = 145.0
@@ -19,6 +20,19 @@ func _ready() -> void:
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_entered)
+
+	ParticleHelper.setup_egg_visual(visual_root, "res://assets/sprites/projectiles/egg_bomb.svg")
+
+	var fuse_sparks = get_node_or_null("VisualRoot/Fuse/FuseSparks") as CPUParticles2D
+	if fuse_sparks:
+		ParticleHelper.apply_spark_fx(fuse_sparks, 0.3, 0.6)
+
+	if explosion_particles:
+		ParticleHelper.apply_circle_fx(explosion_particles, 0.35, 0.75)
+
+	var trail = get_node_or_null("Trail") as CPUParticles2D
+	if trail:
+		ParticleHelper.apply_circle_fx(trail, 0.25, 0.5)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_broken and not has_boosted and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():

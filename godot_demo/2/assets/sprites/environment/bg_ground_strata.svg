@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 560" width="540" height="560">
+  <defs>
+    <!-- Earth Soil Layers -->
+    <linearGradient id="earthGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#451a03"/>
+      <stop offset="30%" stop-color="#3b1502"/>
+      <stop offset="70%" stop-color="#2a0e02"/>
+      <stop offset="100%" stop-color="#1c0901"/>
+    </linearGradient>
+    <linearGradient id="grassGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#22c55e"/>
+      <stop offset="40%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#15803d"/>
+    </linearGradient>
+    <!-- Deep Bunker Cavern Darkness -->
+    <radialGradient id="cavernDark" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#1e130c"/>
+      <stop offset="60%" stop-color="#140c07"/>
+      <stop offset="100%" stop-color="#0a0503"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Solid Earth Block Background -->
+  <rect width="540" height="560" fill="url(#earthGrad)"/>
+
+  <!-- Sedimentary Rock Strata Bands -->
+  <path d="M0 80 Q140 70, 270 90 Q400 110, 540 85 L540 120 Q380 135, 270 115 Q120 100, 0 110 Z" 
+        fill="#572208" opacity="0.6"/>
+  <path d="M0 200 Q150 220, 300 190 Q420 210, 540 195 L540 230 Q400 240, 270 225 Q130 240, 0 220 Z" 
+        fill="#301406" opacity="0.8"/>
+  <path d="M0 360 Q180 340, 360 370 Q460 360, 540 375 L540 405 Q440 390, 270 400 Q110 380, 0 395 Z" 
+        fill="#260f04" opacity="0.9"/>
+
+  <!-- Excavated Cavern Interior Chamber (115 to 425 width = 310, height 470) -->
+  <rect x="110" y="0" width="320" height="470" rx="16" fill="url(#cavernDark)"/>
+
+  <!-- Cavern Rough Chiseled Stone Framing -->
+  <path d="M110 0 C105 50, 115 120, 108 200 C114 280, 106 360, 112 470 L110 470 Z" 
+        fill="#261207" stroke="#3b1b0a" stroke-width="3"/>
+  <path d="M430 0 C435 50, 425 120, 432 200 C426 280, 434 360, 428 470 L430 470 Z" 
+        fill="#261207" stroke="#3b1b0a" stroke-width="3"/>
+
+  <!-- Underground Pebbles & Boulders Embedded in Soil -->
+  <ellipse cx="60" cy="150" rx="18" ry="12" fill="#78350f" stroke="#451a03" stroke-width="2"/>
+  <ellipse cx="480" cy="120" rx="22" ry="14" fill="#78350f" stroke="#451a03" stroke-width="2"/>
+  <ellipse cx="50" cy="300" rx="24" ry="16" fill="#572208" stroke="#3b1502" stroke-width="2"/>
+  <ellipse cx="490" cy="340" rx="20" ry="13" fill="#572208" stroke="#3b1502" stroke-width="2"/>
+
+  <!-- Dangling Tree Roots -->
+  <path d="M130 0 C125 30, 135 60, 128 90 C125 105, 130 115, 126 130" 
+        fill="none" stroke="#92400e" stroke-width="3" stroke-linecap="round"/>
+  <path d="M410 0 C415 35, 405 70, 412 100" 
+        fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Top Surface Grass Layer (Spanning Across Top at y = 0, with gap for entrance) -->
+  <!-- Left Cliff Grass -->
+  <rect x="0" y="0" width="120" height="24" rx="4" fill="url(#grassGrad)"/>
+  <path d="M0 24 L10 32 L20 24 L30 34 L40 24 L55 33 L70 24 L85 34 L100 24 L115 32 L120 24 Z" fill="url(#grassGrad)"/>
+
+  <!-- Right Cliff Grass -->
+  <rect x="420" y="0" width="120" height="24" rx="4" fill="url(#grassGrad)"/>
+  <path d="M420 24 L435 34 L450 24 L465 33 L480 24 L495 34 L510 24 L525 33 L540 24 Z" fill="url(#grassGrad)"/>
+</svg>

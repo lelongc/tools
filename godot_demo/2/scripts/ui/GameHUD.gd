@@ -1,9 +1,21 @@
 extends CanvasLayer
 
+const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
+
+const EGG_TEXTURES: Dictionary = {
+	"normal": "res://assets/sprites/projectiles/egg_normal.svg",
+	"bomb": "res://assets/sprites/projectiles/egg_bomb.svg",
+	"drill": "res://assets/sprites/projectiles/egg_drill.svg",
+	"frost": "res://assets/sprites/projectiles/egg_frost.svg",
+	"acid": "res://assets/sprites/projectiles/egg_acid.svg",
+	"blackhole": "res://assets/sprites/projectiles/egg_blackhole.svg",
+	"cluster": "res://assets/sprites/projectiles/egg_cluster.svg"
+}
+
 @onready var score_label: Label = $TopBar/Margin/HBox/ScoreBox/Margin/ScoreLabel
 @onready var level_label: Label = $TopBar/Margin/HBox/LevelBox/Margin/LevelLabel
 @onready var coin_label: Label = $TopBar/Margin/HBox/CoinBox/Margin/CoinLabel
-@onready var btn_vip_trial: Button = $BtnVipTrial
+@onready var btn_vip_trial: Button = $TopBar/Margin/HBox/BtnVipTrial
 @onready var egg_container: HBoxContainer = $EggShelf/Margin/EggIcons
 @onready var btn_pause: Button = $TopBar/Margin/HBox/BtnPause
 @onready var btn_restart: Button = $TopBar/Margin/HBox/BtnRestart
@@ -127,22 +139,29 @@ func _refresh_egg_icons() -> void:
 
 	for i in range(GameManager.available_eggs.size()):
 		var egg_type = GameManager.available_eggs[i]
-		var icon = Label.new()
-		match egg_type:
-			"normal": icon.text = "🥚"
-			"bomb": icon.text = "💣"
-			"drill": icon.text = "🔩"
-			"frost": icon.text = "❄️"
-			"cluster": icon.text = "🐣"
-			"acid": icon.text = "🧪"
-			"blackhole": icon.text = "🌌"
-			_: icon.text = "🥚"
-		icon.add_theme_font_size_override("font_size", 28)
+		var tex_path = EGG_TEXTURES.get(egg_type, EGG_TEXTURES["normal"])
+		var tex = ParticleHelper._safe_load(tex_path)
+
+		var tr = TextureRect.new()
+		tr.custom_minimum_size = Vector2(36, 44)
+		tr.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		if tex:
+			tr.texture = tex
+
 		if i < GameManager.current_egg_index:
-			icon.modulate = Color(0.3, 0.3, 0.3, 0.4)
+			# Đã bắn: Mờ xám
+			tr.modulate = Color(0.35, 0.35, 0.35, 0.35)
 		elif i == GameManager.current_egg_index:
-			icon.modulate = Color(1.0, 1.0, 1.0, 1.0)
-		egg_container.add_child(icon)
+			# Trứng đang trên giỏ của Gà: Sáng nổi bật & nảy nhẹ
+			tr.modulate = Color(1.2, 1.2, 1.1, 1.0)
+			tr.scale = Vector2(1.15, 1.15)
+			tr.pivot_offset = Vector2(18, 22)
+		else:
+			# Trứng trong hàng chờ
+			tr.modulate = Color(0.85, 0.85, 0.85, 0.85)
+
+		egg_container.add_child(tr)
 
 func _on_score_updated(new_score: int) -> void:
 	var lm = get_node_or_null("/root/LocalizationManager")

@@ -3,10 +3,11 @@ class_name NukeBarrel
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 const CartoonExplosionFX = preload("res://scripts/core/CartoonExplosionFX.gd")
+const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
-@export var explosion_radius: float = 300.0
-@export var explosion_force: float = 1800.0
-@export var explosion_damage: float = 1200.0
+@export var explosion_radius: float = 175.0
+@export var explosion_force: float = 1100.0
+@export var explosion_damage: float = 550.0
 
 var is_ignited: bool = false
 var is_awake: bool = false
@@ -21,6 +22,11 @@ func _ready() -> void:
 		var tex = _load_svg("res://assets/sprites/obstacles/nuke_barrel_toxic.svg")
 		if tex: visual_sprite.texture = tex
 
+	if radiation_sparks:
+		ParticleHelper.apply_spark_fx(radiation_sparks, 0.3, 0.6)
+	if nuke_fx:
+		ParticleHelper.apply_circle_fx(nuke_fx, 0.45, 1.0)
+
 	set_deferred("freeze", true)
 	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
 	linear_damp = 1.0
@@ -30,16 +36,7 @@ func _ready() -> void:
 	body_entered.connect(_on_impact)
 
 func _load_svg(path: String) -> Texture2D:
-	var global_path = ProjectSettings.globalize_path(path)
-	if FileAccess.file_exists(global_path):
-		var img = Image.load_from_file(global_path)
-		if img:
-			var tex = ImageTexture.create_from_image(img)
-			tex.resource_path = path
-			return tex
-	if ResourceLoader.exists(path):
-		return load(path)
-	return null
+	return ParticleHelper._safe_load(path)
 
 func _process(delta: float) -> void:
 	if spawn_settle_timer > 0.0:

@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48" width="40" height="48">
+  <defs>
+    <radialGradient id="ironGrad" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="40%" stop-color="#1e293b"/>
+      <stop offset="85%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+    <linearGradient id="brassCap" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#ca8a04"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Burning Fuse Rope -->
+  <path d="M20 6 Q24 2, 28 3" fill="none" stroke="#78350f" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="29" cy="3" r="2.5" fill="#facc15"/>
+  <circle cx="29" cy="3" r="1.2" fill="#ef4444"/>
+
+  <!-- Metal Fuse Collar -->
+  <rect x="16" y="5" width="8" height="4" rx="1.5" fill="url(#brassCap)" stroke="#0f172a" stroke-width="1.2"/>
+
+  <!-- Cast-Iron Bomb Egg Body -->
+  <path d="M20 7 C10 7, 4 19, 4 31 C4 41, 11 46, 20 46 C29 46, 36 41, 36 31 C36 19, 30 7, 20 7 Z" 
+        fill="url(#ironGrad)" stroke="#020617" stroke-width="2.2"/>
+
+  <!-- Metallic Specular Reflection -->
+  <ellipse cx="14" cy="16" rx="4" ry="7" fill="#94a3b8" opacity="0.6" transform="rotate(-15 14 16)"/>
+
+  <!-- Comic Stencil Skull Hazard Icon -->
+  <g transform="translate(20, 30)" fill="#f8fafc">
+    <!-- Skull Cranium -->
+    <path d="M-6 -6 C-6 -10, 6 -10, 6 -6 C6 -3, 4 -2, 3 0 H-3 C-4 -2, -6 -3, -6 -6 Z"/>
+    <!-- Eye Sockets -->
+    <circle cx="-2.5" cy="-5" r="1.5" fill="#0f172a"/>
+    <circle cx="2.5" cy="-5" r="1.5" fill="#0f172a"/>
+    <!-- Teeth -->
+    <rect x="-2" y="1" width="1" height="2" fill="#f8fafc"/>
+    <rect x="0" y="1" width="1" height="2" fill="#f8fafc"/>
+    <rect x="1.5" y="1" width="1" height="2" fill="#f8fafc"/>
+    <!-- Crossbones underneath -->
+    <path d="M-6 4 L6 7 M-6 7 L6 4" stroke="#f8fafc" stroke-width="1.2" stroke-linecap="round"/>
+  </g>
+</svg>

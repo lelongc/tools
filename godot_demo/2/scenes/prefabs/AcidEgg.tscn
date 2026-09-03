@@ -18,13 +18,8 @@ shape = SubResource("CircleShape2D_1")
 
 [node name="VisualRoot" type="Node2D" parent="."]
 
-[node name="EggBody" type="Polygon2D" parent="VisualRoot"]
-color = Color(0.2, 0.9, 0.3, 1)
-polygon = PackedVector2Array(0, -18, 10, -12, 14, 0, 12, 12, 0, 16, -12, 12, -14, 0, -10, -12)
-
-[node name="SlimeDrip" type="Polygon2D" parent="VisualRoot"]
-color = Color(0.95, 0.55, 0.1, 0.9)
-polygon = PackedVector2Array(-6, -6, 6, -6, 8, 4, 3, 12, -3, 8, -8, 2)
+[node name="EggBody" type="Sprite2D" parent="VisualRoot"]
+scale = Vector2(0.75, 0.75)
 
 [node name="AcidFX" type="CPUParticles2D" parent="."]
 emitting = false

@@ -2,6 +2,8 @@ extends RigidBody2D
 class_name BunkerMonster
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
+const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
+const ComicScorePopup = preload("res://scripts/core/ComicScorePopup.gd")
 
 enum State {
 	IDLE,
@@ -128,6 +130,8 @@ func _ready() -> void:
 
 	if dizzy_stars: dizzy_stars.visible = false
 	if emote_sprite: emote_sprite.visible = false
+	if poof_fx:
+		ParticleHelper.apply_smoke_fx(poof_fx, 0.35, 0.7)
 
 	if has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
@@ -1086,8 +1090,8 @@ func _on_impact(body: Node) -> void:
 
 	if body is RigidBody2D:
 		var rel_vel = (linear_velocity - body.linear_velocity).length()
-		if rel_vel > 95.0:
-			var crush_dmg = (rel_vel - 95.0) * (body.mass * 0.65) + 25.0
+		if rel_vel > 140.0:
+			var crush_dmg = (rel_vel - 140.0) * min(body.mass * 0.35, 3.5) + 15.0
 			take_damage(crush_dmg, body.global_position)
 
 func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
@@ -1147,6 +1151,7 @@ func _defeat_monster() -> void:
 
 	if has_node("/root/GameManager"):
 		get_node("/root/GameManager").register_enemy_defeat(self, score_value)
+	ComicScorePopup.spawn_score_popup(get_parent(), global_position, score_value)
 	CameraShake.add_trauma(0.55 if monster_type == "boss_baron_pig" else 0.22)
 
 	$CollisionShape2D.set_deferred("disabled", true)

@@ -21,3 +21,16 @@ shape = SubResource("CircleShape2D_1")
 
 [node name="VisualSprite" type="Sprite2D" parent="."]
 scale = Vector2(0.875, 0.875)
+
+[node name="DustFX" type="CPUParticles2D" parent="."]
+position = Vector2(0, 24)
+emitting = false
+amount = 14
+lifetime = 0.4
+spread = 60.0
+gravity = Vector2(0, -20)
+initial_velocity_min = 20.0
+initial_velocity_max = 60.0
+scale_amount_min = 0.3
+scale_amount_max = 0.6
+color = Color(0.7, 0.6, 0.5, 0.7)

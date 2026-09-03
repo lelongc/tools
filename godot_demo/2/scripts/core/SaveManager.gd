@@ -24,7 +24,7 @@ var save_data: Dictionary = {
 
 func _ready() -> void:
 	load_game()
-	if save_data.get("version", 1) < 2:
+	if save_data.get("version", 1) < 3:
 		reset_save()
 
 func reset_save() -> void:
@@ -42,7 +42,7 @@ func reset_save() -> void:
 		},
 		"daily_spins_date": "",
 		"daily_spins_count": 0,
-		"version": 2
+		"version": 3
 	}
 	save_game()
 	coins_updated.emit(save_data["coins"])
@@ -102,6 +102,12 @@ func get_level_score(level_id: int) -> int:
 
 func is_level_unlocked(level_id: int) -> bool:
 	return level_id <= save_data.get("highest_unlocked_level", 1)
+
+func get_highest_unlocked_level() -> int:
+	return save_data.get("highest_unlocked_level", 1)
+
+func get_total_stars() -> int:
+	return save_data.get("total_stars", 0)
 
 # ==========================================
 # KINH TẾ VÀNG (COINS - SOFT CURRENCY)

@@ -2,6 +2,8 @@ extends RigidBody2D
 class_name DestructibleBlock
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
+const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
+const ComicScorePopup = preload("res://scripts/core/ComicScorePopup.gd")
 
 @export_enum("wood", "stone", "glass", "steel", "obsidian") var material_type: String = "wood"
 @export var max_health: float = 130.0
@@ -53,6 +55,9 @@ func _ready() -> void:
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_impact)
+
+	if fracture_particles:
+		ParticleHelper.apply_smoke_fx(fracture_particles, 0.25, 0.5)
 
 func _load_textures_once() -> void:
 	if tex_wood == null:
@@ -191,8 +196,9 @@ func _on_impact(body: Node) -> void:
 
 	if body is RigidBody2D:
 		var rel_vel = (linear_velocity - body.linear_velocity).length()
-		if rel_vel > 115.0:
-			var impact_dmg = (rel_vel - 115.0) * (body.mass * 0.5)
+		if rel_vel > 160.0:
+			var impact_dmg = (rel_vel - 160.0) * min(body.mass * 0.22, 2.2)
+			impact_dmg = min(impact_dmg, 180.0)
 			take_damage(impact_dmg, global_position)
 
 func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
@@ -223,7 +229,9 @@ func _fracture_block() -> void:
 
 	_wake_up_neighbors()
 
-	GameManager.add_score(250 if material_type in ["steel", "obsidian"] else (150 if material_type == "stone" else 75))
+	var pts = 250 if material_type in ["steel", "obsidian"] else (150 if material_type == "stone" else 75)
+	GameManager.add_score(pts)
+	ComicScorePopup.spawn_score_popup(get_parent(), global_position, pts)
 
 	if has_node("/root/SoundManager"):
 		var snd = get_node("/root/SoundManager")

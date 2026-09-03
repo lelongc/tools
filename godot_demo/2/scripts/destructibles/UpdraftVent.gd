@@ -1,6 +1,8 @@
 extends Area2D
 class_name UpdraftVent
 
+const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
+
 @export var wind_force: float = 1400.0
 
 @onready var wind_fx: CPUParticles2D = $WindFX
@@ -8,6 +10,8 @@ class_name UpdraftVent
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
+	if wind_fx:
+		ParticleHelper.apply_smoke_fx(wind_fx, 0.35, 0.7)
 
 var overlapping_bodies: Array[RigidBody2D] = []
 

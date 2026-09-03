@@ -1,7 +1,15 @@
 extends Control
 
+const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
+
 @onready var title_label: Label = $CenterContainer/VBoxContainer/LogoContainer/Title
 @onready var subtitle_label: Label = $CenterContainer/VBoxContainer/LogoContainer/Subtitle
+@onready var mascot_root: Node2D = get_node_or_null("CenterContainer/VBoxContainer/LogoContainer/MascotContainer/MascotRoot")
+@onready var mascot_body: Sprite2D = get_node_or_null("CenterContainer/VBoxContainer/LogoContainer/MascotContainer/MascotRoot/Body")
+@onready var mascot_basket: Sprite2D = get_node_or_null("CenterContainer/VBoxContainer/LogoContainer/MascotContainer/MascotRoot/Basket")
+@onready var mascot_left_wing: Sprite2D = get_node_or_null("CenterContainer/VBoxContainer/LogoContainer/MascotContainer/MascotRoot/LeftWing")
+@onready var mascot_right_wing: Sprite2D = get_node_or_null("CenterContainer/VBoxContainer/LogoContainer/MascotContainer/MascotRoot/RightWing")
+
 @onready var total_stars_label: Label = $TopBar/Margin/HBox/StarBadge/StarMargin/TotalStarsLabel
 @onready var total_coins_label: Label = $TopBar/Margin/HBox/CoinBadge/CoinMargin/TotalCoinsLabel
 @onready var btn_play: Button = $CenterContainer/VBoxContainer/BtnPlay
@@ -15,6 +23,19 @@ extends Control
 var wheel_modal_instance: Node = null
 
 func _ready() -> void:
+	if mascot_body:
+		var tb = ParticleHelper._safe_load("res://assets/sprites/player/chicken_aviator_body.svg")
+		if tb: mascot_body.texture = tb
+	if mascot_basket:
+		var tk = ParticleHelper._safe_load("res://assets/sprites/player/chicken_basket_wicker.svg")
+		if tk: mascot_basket.texture = tk
+	if mascot_left_wing:
+		var tw = ParticleHelper._safe_load("res://assets/sprites/player/chicken_wing_flap.svg")
+		if tw: mascot_left_wing.texture = tw
+	if mascot_right_wing:
+		var tw = ParticleHelper._safe_load("res://assets/sprites/player/chicken_wing_flap.svg")
+		if tw: mascot_right_wing.texture = tw
+
 	if title_label:
 		var tween = create_tween().set_loops()
 		tween.tween_property(title_label, "scale", Vector2(1.05, 1.05), 0.6).set_trans(Tween.TRANS_SINE)
@@ -40,6 +61,16 @@ func _ready() -> void:
 		btn_lang.pressed.connect(_on_btn_lang_pressed)
 	if btn_wheel:
 		btn_wheel.pressed.connect(_on_btn_wheel_pressed)
+
+func _process(_delta: float) -> void:
+	if mascot_root:
+		var t = Time.get_ticks_msec() * 0.001
+		mascot_root.position.y = 50.0 + sin(t * 3.0) * 8.0
+		mascot_root.rotation = sin(t * 2.0) * 0.04
+		if mascot_left_wing:
+			mascot_left_wing.rotation = sin(t * 6.5) * 0.28
+		if mascot_right_wing:
+			mascot_right_wing.rotation = -sin(t * 6.5) * 0.28
 
 func _update_language_ui() -> void:
 	if not has_node("/root/LocalizationManager"): return
@@ -108,4 +139,4 @@ func _on_btn_reset_pressed() -> void:
 		_update_star_count()
 		_update_coin_count()
 	if has_node("/root/SoundManager"):
-		get_node("/root/SoundManager").play_synth_tone("pop")
+		get_node("/root/SoundManager").play_synth_tone(520.0, 0.08, "pop", 0.8)

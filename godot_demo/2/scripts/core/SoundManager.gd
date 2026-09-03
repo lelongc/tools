@@ -22,7 +22,19 @@ func _get_available_player() -> AudioStreamPlayer:
 			return p
 	return sfx_players[0]
 
-func play_synth_tone(freq: float, duration: float, type: String = "sine", vol_db: float = 0.0) -> void:
+func play_synth_tone(freq_or_type = 440.0, duration: float = 0.12, type: String = "sine", vol_db: float = 0.0) -> void:
+	var freq: float = 440.0
+	if typeof(freq_or_type) == TYPE_STRING:
+		type = freq_or_type
+		match type:
+			"pop": freq = 520.0
+			"boom": freq = 90.0
+			"laser": freq = 600.0
+			"noise": freq = 240.0
+			_: freq = 440.0
+	elif typeof(freq_or_type) in [TYPE_FLOAT, TYPE_INT]:
+		freq = float(freq_or_type)
+
 	var sample_hz = 22050
 	var total_samples = int(sample_hz * duration)
 	var data = PackedByteArray()

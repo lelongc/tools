@@ -34,6 +34,9 @@ z_index = -10
 color = Color(0.48, 0.78, 0.96, 1)
 polygon = PackedVector2Array(0, 0, 540, 0, 540, 400, 0, 400)
 
+[node name="SkyClouds" type="Sprite2D" parent="Background"]
+position = Vector2(270, 200)
+
 [node name="UndergroundDirt" type="Polygon2D" parent="Background"]
 color = Color(0.3, 0.22, 0.15, 1)
 polygon = PackedVector2Array(0, 400, 540, 400, 540, 960, 0, 960)
@@ -41,6 +44,9 @@ polygon = PackedVector2Array(0, 400, 540, 400, 540, 960, 0, 960)
 [node name="CavernInterior" type="Polygon2D" parent="Background"]
 color = Color(0.18, 0.13, 0.09, 1)
 polygon = PackedVector2Array(115, 400, 425, 400, 425, 870, 115, 870)
+
+[node name="GroundStrata" type="Sprite2D" parent="Background"]
+position = Vector2(270, 680)
 
 [node name="BunkerBoundaries" type="StaticBody2D" parent="."]
 collision_layer = 1

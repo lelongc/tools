@@ -1,6 +1,7 @@
 extends RigidBody2D
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
+const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 @export var egg_name: String = "Black Hole Vortex Egg"
 @export var vortex_radius: float = 240.0
@@ -20,6 +21,11 @@ func _ready() -> void:
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_entered)
+
+	ParticleHelper.setup_egg_visual(visual_root, "res://assets/sprites/projectiles/egg_blackhole.svg")
+
+	if vortex_particles:
+		ParticleHelper.apply_circle_fx(vortex_particles, 0.4, 0.8)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_broken and not is_singularity and event is InputEventMouseButton and event.pressed:

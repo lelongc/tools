@@ -7,12 +7,18 @@ const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 
 var is_awake: bool = false
 
+const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
+
 @onready var visual_sprite: Sprite2D = get_node_or_null("VisualSprite")
+@onready var dust_fx: CPUParticles2D = get_node_or_null("DustFX")
 
 func _ready() -> void:
 	if visual_sprite:
 		var tex = _load_svg("res://assets/sprites/obstacles/rolling_boulder_stone.svg")
 		if tex: visual_sprite.texture = tex
+
+	if dust_fx:
+		ParticleHelper.apply_smoke_fx(dust_fx, 0.25, 0.5)
 
 	set_deferred("freeze", true)
 	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
@@ -21,17 +27,12 @@ func _ready() -> void:
 	max_contacts_reported = 4
 	body_entered.connect(_on_impact)
 
+func _physics_process(_delta: float) -> void:
+	if dust_fx:
+		dust_fx.emitting = (is_awake and linear_velocity.length() > 65.0)
+
 func _load_svg(path: String) -> Texture2D:
-	var global_path = ProjectSettings.globalize_path(path)
-	if FileAccess.file_exists(global_path):
-		var img = Image.load_from_file(global_path)
-		if img:
-			var tex = ImageTexture.create_from_image(img)
-			tex.resource_path = path
-			return tex
-	if ResourceLoader.exists(path):
-		return load(path)
-	return null
+	return ParticleHelper._safe_load(path)
 
 func wake_up() -> void:
 	if is_awake: return

@@ -145,17 +145,11 @@ expand_icon = true
 script = ExtResource("2_btn")
 is_wood_brown = true
 
-[node name="BtnVipTrial" type="Button" parent="."]
+[node name="BtnVipTrial" type="Button" parent="TopBar/Margin/HBox"]
 visible = false
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -115.0
-offset_top = 76.0
-offset_right = -15.0
-offset_bottom = 120.0
-grow_horizontal = 0
-theme_override_font_sizes/font_size = 14
+custom_minimum_size = Vector2(68, 40)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
 text = "🎬 VIP 🧪"
 script = ExtResource("2_btn")
 is_gold_action = true

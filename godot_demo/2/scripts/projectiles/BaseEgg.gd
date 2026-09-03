@@ -1,6 +1,8 @@
 extends RigidBody2D
 class_name BaseEgg
 
+const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
+
 @export var egg_name: String = "Normal Egg"
 @export var base_damage: float = 120.0
 @export var min_impact_speed: float = 80.0
@@ -18,6 +20,11 @@ func _ready() -> void:
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_entered)
+
+	if trail_particles:
+		ParticleHelper.apply_circle_fx(trail_particles, 0.25, 0.5)
+	if break_particles:
+		ParticleHelper.apply_shard_fx(break_particles, 0.3, 0.6)
 
 func _physics_process(delta: float) -> void:
 	if is_broken: return

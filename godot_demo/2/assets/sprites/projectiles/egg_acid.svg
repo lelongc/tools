@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48" width="40" height="48">
+  <defs>
+    <radialGradient id="acidGrad" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#bbf7d0"/>
+      <stop offset="40%" stop-color="#4ade80"/>
+      <stop offset="75%" stop-color="#16a34a"/>
+      <stop offset="100%" stop-color="#14532d"/>
+    </radialGradient>
+    <linearGradient id="glassSheen" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Toxic Egg Base -->
+  <path d="M20 4 C10 4, 4 18, 4 30 C4 40, 11 45, 20 45 C29 45, 36 40, 36 30 C36 18, 30 4, 20 4 Z" 
+        fill="url(#acidGrad)" stroke="#14532d" stroke-width="2.2"/>
+
+  <!-- Bubbling Acid Bubbles -->
+  <circle cx="16" cy="24" r="3.5" fill="#86efac" stroke="#15803d" stroke-width="1"/>
+  <circle cx="15" cy="23" r="1.2" fill="#ffffff"/>
+
+  <circle cx="26" cy="30" r="4" fill="#86efac" stroke="#15803d" stroke-width="1"/>
+  <circle cx="25" cy="29" r="1.2" fill="#ffffff"/>
+
+  <circle cx="18" cy="38" r="2.5" fill="#86efac"/>
+  <circle cx="28" cy="18" r="2" fill="#86efac"/>
+
+  <!-- Hazard Bio-Drop Symbol (Center) -->
+  <path d="M20 12 C18 16, 16 18, 16 20 C16 22.2, 17.8 24, 20 24 C22.2 24, 24 22.2, 24 20 C24 18, 22 16, 20 12 Z" 
+        fill="#facc15" stroke="#854d0e" stroke-width="1.2"/>
+
+  <!-- Glass Specular Curved Highlights -->
+  <path d="M10 14 C8 22, 8 32, 11 38" fill="none" stroke="url(#glassSheen)" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 48" width="40" height="48">
+  <defs>
+    <radialGradient id="eggGrad" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="35%" stop-color="#fef3c7"/>
+      <stop offset="70%" stop-color="#fde68a"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </radialGradient>
+  </defs>
+  <!-- Egg Silhouette -->
+  <path d="M20 4 C10 4, 4 18, 4 30 C4 40, 11 45, 20 45 C29 45, 36 40, 36 30 C36 18, 30 4, 20 4 Z" 
+        fill="url(#eggGrad)" stroke="#b45309" stroke-width="2.2"/>
+  <!-- Specular 3D Highlight -->
+  <ellipse cx="15" cy="14" rx="4" ry="7" fill="#ffffff" opacity="0.85" transform="rotate(-15 15 14)"/>
+  <!-- Speckles -->
+  <circle cx="26" cy="22" r="1.5" fill="#b45309" opacity="0.45"/>
+  <circle cx="22" cy="34" r="1.8" fill="#b45309" opacity="0.45"/>
+  <circle cx="12" cy="32" r="1.2" fill="#b45309" opacity="0.4"/>
+  <circle cx="29" cy="30" r="1.0" fill="#b45309" opacity="0.4"/>
+</svg>

@@ -20,14 +20,18 @@ shape = SubResource("CircleShape2D_1")
 
 [node name="Visual" type="Node2D" parent="."]
 
-[node name="Body" type="Polygon2D" parent="Visual"]
-color = Color(1, 0.85, 0.2, 1)
-polygon = PackedVector2Array(-9, -9, 0, -12, 9, -9, 12, 0, 9, 9, 0, 11, -9, 9, -12, 0)
+[node name="ChickSprite" type="Sprite2D" parent="Visual"]
+scale = Vector2(0.65, 0.65)
 
-[node name="Eye" type="Polygon2D" parent="Visual"]
-color = Color(0.1, 0.1, 0.1, 1)
-polygon = PackedVector2Array(2, -4, 5, -4, 5, -1, 2, -1)
-
-[node name="Beak" type="Polygon2D" parent="Visual"]
-color = Color(1, 0.5, 0.1, 1)
-polygon = PackedVector2Array(7, -2, 13, 0, 7, 2)
+[node name="PoofFX" type="CPUParticles2D" parent="."]
+emitting = false
+amount = 12
+lifetime = 0.35
+one_shot = true
+explosiveness = 0.9
+spread = 180.0
+initial_velocity_min = 40.0
+initial_velocity_max = 110.0
+scale_amount_min = 0.3
+scale_amount_max = 0.6
+color = Color(1, 0.9, 0.4, 0.9)

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" width="48" height="32">
+  <defs>
+    <linearGradient id="basketWood" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#b45309"/>
+      <stop offset="50%" stop-color="#92400e"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </linearGradient>
+  </defs>
+  <!-- Suspension Ropes -->
+  <line x1="8" y1="2" x2="12" y2="12" stroke="#451a03" stroke-width="1.8" stroke-dasharray="2,2"/>
+  <line x1="40" y1="2" x2="36" y2="12" stroke="#451a03" stroke-width="1.8" stroke-dasharray="2,2"/>
+
+  <!-- Basket Rim -->
+  <rect x="6" y="10" width="36" height="5" rx="2.5" fill="#d97706" stroke="#451a03" stroke-width="1.5"/>
+
+  <!-- Basket Body -->
+  <path d="M9 14 L12 28 C13 30, 35 30, 36 28 L39 14 Z" 
+        fill="url(#basketWood)" stroke="#451a03" stroke-width="2"/>
+
+  <!-- Wicker Weave Cross-Hatching -->
+  <path d="M12 16 L20 28 M20 14 L28 28 M28 14 L36 28" stroke="#d97706" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/>
+  <path d="M36 16 L28 28 M28 14 L20 28 M20 14 L12 28" stroke="#78350f" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+</svg>

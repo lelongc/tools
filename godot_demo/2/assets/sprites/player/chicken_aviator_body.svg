@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <defs>
+    <radialGradient id="chickenBody" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#facc15"/>
+      <stop offset="85%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </radialGradient>
+    <linearGradient id="leatherCap" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#78350f"/>
+      <stop offset="50%" stop-color="#92400e"/>
+      <stop offset="100%" stop-color="#451a03"/>
+    </linearGradient>
+    <linearGradient id="brassRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="40%" stop-color="#d97706"/>
+      <stop offset="80%" stop-color="#b45309"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </linearGradient>
+    <radialGradient id="glassLens" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="50%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Fluffy Tail Feathers (Left/Back) -->
+  <path d="M14 42 C6 36, 4 48, 12 54 C4 54, 6 66, 16 64 C8 68, 12 78, 22 72 Z" 
+        fill="#facc15" stroke="#ca8a04" stroke-width="2.5" stroke-linejoin="round"/>
+
+  <!-- Main Round Hen Body -->
+  <circle cx="50" cy="54" r="34" fill="url(#chickenBody)" stroke="#ca8a04" stroke-width="2.5"/>
+
+  <!-- Red Crown Comb (Top of head) -->
+  <path d="M40 22 C38 12, 46 10, 48 18 C50 8, 60 8, 60 18 C64 12, 70 14, 68 24 Z" 
+        fill="#dc2626" stroke="#991b1b" stroke-width="2"/>
+
+  <!-- Aviator Leather Pilot Helmet -->
+  <path d="M26 40 C24 24, 40 18, 56 18 C72 18, 76 28, 76 40 C76 43, 72 44, 68 44 C66 36, 58 32, 48 32 C38 32, 32 36, 28 44 C26 44, 26 42, 26 40 Z" 
+        fill="url(#leatherCap)" stroke="#3b1502" stroke-width="2.5"/>
+  <!-- Helmet Ear Flaps -->
+  <path d="M25 38 C22 46, 22 56, 26 62 C28 62, 30 56, 30 46 Z" fill="url(#leatherCap)" stroke="#3b1502" stroke-width="1.8"/>
+  <path d="M75 38 C78 46, 78 56, 74 62 C72 62, 70 56, 70 46 Z" fill="url(#leatherCap)" stroke="#3b1502" stroke-width="1.8"/>
+
+  <!-- Steampunk Goggles Strap -->
+  <path d="M22 36 Q50 34, 78 36" fill="none" stroke="#1e293b" stroke-width="4.5" stroke-linecap="round"/>
+
+  <!-- Steampunk Brass Goggles (Pushed up on forehead) -->
+  <!-- Left Eye Glass Lens -->
+  <circle cx="39" cy="34" r="10" fill="url(#brassRim)" stroke="#3b1502" stroke-width="1.8"/>
+  <circle cx="39" cy="34" r="7.5" fill="url(#glassLens)"/>
+  <path d="M35 30 Q39 31, 37 36" stroke="#ffffff" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- Right Eye Glass Lens -->
+  <circle cx="61" cy="34" r="10" fill="url(#brassRim)" stroke="#3b1502" stroke-width="1.8"/>
+  <circle cx="61" cy="34" r="7.5" fill="url(#glassLens)"/>
+  <path d="M57 30 Q61 31, 59 36" stroke="#ffffff" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- Goggle Bridge -->
+  <rect x="47" y="32" width="6" height="4" rx="1.5" fill="url(#brassRim)" stroke="#3b1502" stroke-width="1"/>
+
+  <!-- Big Comic Hen Eyes -->
+  <!-- Left Eye -->
+  <ellipse cx="40" cy="50" rx="8" ry="10" fill="#ffffff" stroke="#78350f" stroke-width="2"/>
+  <circle cx="42" cy="50" r="4.5" fill="#0f172a"/>
+  <circle cx="44" cy="48" r="1.8" fill="#ffffff"/>
+
+  <!-- Right Eye -->
+  <ellipse cx="60" cy="50" rx="8" ry="10" fill="#ffffff" stroke="#78350f" stroke-width="2"/>
+  <circle cx="62" cy="50" r="4.5" fill="#0f172a"/>
+  <circle cx="64" cy="48" r="1.8" fill="#ffffff"/>
+
+  <!-- Cheerful Eyebrows -->
+  <path d="M34 40 Q40 38, 45 42" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M55 42 Q60 38, 66 40" fill="none" stroke="#92400e" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Cute Rosy Cheeks -->
+  <ellipse cx="32" cy="57" rx="5" ry="3" fill="#f87171" opacity="0.6"/>
+  <ellipse cx="68" cy="57" rx="5" ry="3" fill="#f87171" opacity="0.6"/>
+
+  <!-- Red Wattle below beak -->
+  <path d="M47 64 C44 72, 52 74, 50 64 Z" fill="#ef4444" stroke="#991b1b" stroke-width="1.5"/>
+
+  <!-- Orange Beak -->
+  <path d="M44 56 Q50 53, 56 56 Q50 67, 44 56 Z" fill="#f97316" stroke="#9a3412" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M45 57 Q50 60, 55 57" fill="none" stroke="#9a3412" stroke-width="1.2"/>
+</svg>

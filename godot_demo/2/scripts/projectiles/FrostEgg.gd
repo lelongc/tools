@@ -1,6 +1,7 @@
 extends RigidBody2D
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
+const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 @export var egg_name: String = "Frost Shatter Egg"
 @export var freeze_radius: float = 190.0
@@ -17,6 +18,11 @@ func _ready() -> void:
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_entered)
 
+	ParticleHelper.setup_egg_visual(visual_root, "res://assets/sprites/projectiles/egg_frost.svg")
+
+	if frost_particles:
+		ParticleHelper.apply_spark_fx(frost_particles, 0.35, 0.7)
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_broken and not has_boosted and event is InputEventMouseButton and event.pressed:
 		has_boosted = true
@@ -32,6 +38,25 @@ func _on_body_entered(_body: Node) -> void:
 	if is_broken: return
 	_freeze_blast()
 
+static var _tex_cache: Dictionary = {}
+
+func _safe_load(path: String) -> Texture2D:
+	if _tex_cache.has(path):
+		return _tex_cache[path]
+	var global_path = ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(global_path):
+		var img = Image.load_from_file(global_path)
+		if img:
+			var tex = ImageTexture.create_from_image(img)
+			tex.resource_path = path
+			_tex_cache[path] = tex
+			return tex
+	if ResourceLoader.exists(path):
+		var res = load(path)
+		_tex_cache[path] = res
+		return res
+	return null
+
 func _freeze_blast() -> void:
 	if is_broken: return
 	is_broken = true
@@ -44,6 +69,24 @@ func _freeze_blast() -> void:
 
 	set_deferred("freeze", true)
 	if visual_root: visual_root.visible = false
+
+	# Tạo sóng chấn băng tuyết phát nổ
+	var ring = Sprite2D.new()
+	var tex_ring = _safe_load("res://assets/sprites/vfx/ice_shockwave_ring.svg")
+	if tex_ring:
+		ring.texture = tex_ring
+		ring.global_position = global_position
+		ring.scale = Vector2(0.1, 0.1)
+		ring.modulate = Color(1.0, 1.0, 1.0, 0.95)
+		var p = get_parent()
+		if p: p.add_child(ring)
+
+		var target_scale = Vector2.ONE * (freeze_radius / 48.0)
+		var tw = ring.create_tween()
+		tw.parallel().tween_property(ring, "scale", target_scale, 0.28).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.parallel().tween_property(ring, "rotation", 0.4, 0.28)
+		tw.parallel().tween_property(ring, "modulate:a", 0.0, 0.28).set_delay(0.06)
+		tw.chain().tween_callback(ring.queue_free)
 
 	if frost_particles:
 		frost_particles.restart()

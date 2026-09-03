@@ -1,6 +1,7 @@
 extends RigidBody2D
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
+const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 @export var egg_name: String = "Heavy Normal Egg"
 @export var base_damage: float = 130.0
@@ -21,6 +22,10 @@ func _ready() -> void:
 	max_contacts_reported = 4
 	body_entered.connect(_on_body_entered)
 
+	ParticleHelper.setup_egg_visual(visual_root, "res://assets/sprites/projectiles/egg_normal.svg")
+	if trail_particles: ParticleHelper.apply_circle_fx(trail_particles, 0.25, 0.5)
+	if break_particles: ParticleHelper.apply_shard_fx(break_particles, 0.3, 0.6)
+
 func _unhandled_input(event: InputEvent) -> void:
 	# Tap-in-Flight: Chạm màn hình khi đang bay để hóa Trứng Kim Cương Siêu Nặng
 	if not is_broken and not has_boosted and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():
@@ -37,7 +42,7 @@ func _activate_special_ability() -> void:
 		var tween = create_tween()
 		tween.tween_property(visual_root, "scale", Vector2(1.6, 1.6), 0.1)
 		var body = visual_root.get_node_or_null("EggBody")
-		if body: body.color = Color(0.3, 0.85, 1.0) # Hóa kim cương xanh óng ánh
+		if body: body.modulate = Color(0.3, 0.85, 1.0) # Hóa kim cương xanh óng ánh
 
 func _physics_process(delta: float) -> void:
 	if is_broken: return

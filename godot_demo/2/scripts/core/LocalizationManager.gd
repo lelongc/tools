@@ -218,6 +218,9 @@ func cycle_language() -> void:
 
 	language_changed.emit(current_lang)
 
+func set_language(code: String) -> void:
+	set_language_by_code(code)
+
 func set_language_by_code(code: String) -> void:
 	for i in range(LANGUAGES.size()):
 		if LANGUAGES[i]["code"] == code:

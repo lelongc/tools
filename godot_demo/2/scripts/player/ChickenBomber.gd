@@ -6,9 +6,9 @@ const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 signal egg_spawned(egg_instance)
 
 @export var move_speed: float = 160.0
-@export var min_x: float = 80.0
-@export var max_x: float = 460.0
-@export var default_y: float = 110.0
+@export var min_x: float = 55.0
+@export var max_x: float = 485.0
+@export var default_y: float = 135.0
 
 var move_direction: float = 1.0
 var is_aiming: bool = false
@@ -18,11 +18,10 @@ var current_egg_type: String = "normal"
 
 # Visual Nodes
 @onready var visual_root: Node2D = $VisualRoot
-@onready var body_mesh: Polygon2D = $VisualRoot/Body
-@onready var left_wing: Node2D = $VisualRoot/LeftWing
-@onready var right_wing: Node2D = $VisualRoot/RightWing
-@onready var eye_left: Node2D = $VisualRoot/EyeLeft
-@onready var eye_right: Node2D = $VisualRoot/EyeRight
+@onready var body_sprite: Sprite2D = get_node_or_null("VisualRoot/Body")
+@onready var basket_sprite: Sprite2D = get_node_or_null("VisualRoot/Basket")
+@onready var left_wing: Sprite2D = get_node_or_null("VisualRoot/LeftWing")
+@onready var right_wing: Sprite2D = get_node_or_null("VisualRoot/RightWing")
 @onready var trajectory_line: Line2D = $TrajectoryLine
 
 var wing_flap_time: float = 0.0
@@ -40,11 +39,33 @@ var egg_scenes: Dictionary = {
 	"blackhole": preload("res://scenes/prefabs/BlackHoleEgg.tscn")
 }
 
+static var _tex_cache: Dictionary = {}
+
+const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
+
+func _safe_load(path: String) -> Texture2D:
+	return ParticleHelper._safe_load(path)
+
 func _ready() -> void:
 	add_to_group("Player")
 	position = Vector2(270.0, default_y)
 	if trajectory_line:
 		trajectory_line.visible = false
+
+	# Nạp texture SVG hoạt hình Vector cao cấp
+	if body_sprite:
+		var tb = _safe_load("res://assets/sprites/player/chicken_aviator_body.svg")
+		if tb: body_sprite.texture = tb
+	if basket_sprite:
+		var tk = _safe_load("res://assets/sprites/player/chicken_basket_wicker.svg")
+		if tk: basket_sprite.texture = tk
+	if left_wing:
+		var tw = _safe_load("res://assets/sprites/player/chicken_wing_flap.svg")
+		if tw: left_wing.texture = tw
+	if right_wing:
+		var tw = _safe_load("res://assets/sprites/player/chicken_wing_flap.svg")
+		if tw: right_wing.texture = tw
+
 	_prepare_next_egg()
 
 func _process(delta: float) -> void:
@@ -57,6 +78,11 @@ func _process(delta: float) -> void:
 		elif position.x <= min_x:
 			position.x = min_x
 			move_direction = 1.0
+		if visual_root:
+			visual_root.rotation = lerp_angle(visual_root.rotation, move_direction * 0.08, 6.0 * delta)
+	else:
+		if visual_root:
+			visual_root.rotation = lerp_angle(visual_root.rotation, 0.0, 10.0 * delta)
 
 	# 2. Đập cánh bồng bềnh
 	wing_flap_time += delta * (22.0 if is_aiming else 12.0)
@@ -139,14 +165,12 @@ func _draw_trajectory(initial_vel: Vector2) -> void:
 	trajectory_line.points = points
 
 func _update_eye_direction(dir: Vector2) -> void:
-	if eye_left and eye_right:
-		eye_left.position = Vector2(-12, -4) + dir * 5.0
-		eye_right.position = Vector2(12, -4) + dir * 5.0
+	if body_sprite:
+		body_sprite.rotation = clamp(dir.x * 0.15, -0.15, 0.15)
 
 func _reset_eye_direction() -> void:
-	if eye_left and eye_right:
-		eye_left.position = Vector2(-12, -4)
-		eye_right.position = Vector2(12, -4)
+	if body_sprite:
+		body_sprite.rotation = 0.0
 
 func _prepare_next_egg() -> void:
 	if GameManager.current_egg_index < GameManager.available_eggs.size():
