@@ -17,6 +17,8 @@ var overlapping_bodies: Array[RigidBody2D] = []
 
 func _on_body_entered(body: Node2D) -> void:
 	if body is RigidBody2D and not body in overlapping_bodies:
+		if body is DestructibleBlock and body.mass > 1.2:
+			return # Không nâng các cột trụ và dầm chịu lực của công trình
 		overlapping_bodies.append(body)
 
 func _on_body_exited(body: Node2D) -> void:

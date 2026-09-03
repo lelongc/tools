@@ -179,23 +179,24 @@ func wake_up() -> void:
 	if is_awake or is_destroyed: return
 	is_awake = true
 	set_deferred("freeze", false)
+	_wake_up_neighbors()
 
 func _wake_up_neighbors() -> void:
 	var space_state = get_world_2d().direct_space_state
 	if not space_state: return
 	var query = PhysicsShapeQueryParameters2D.new()
 	var sphere = CircleShape2D.new()
-	sphere.radius = max(block_size.x, block_size.y) * 0.7 + 45.0
+	sphere.radius = max(block_size.x, block_size.y) * 0.8 + 65.0
 	query.shape = sphere
 	query.transform = Transform2D(0, global_position)
 	query.collide_with_bodies = true
 	query.exclude = [get_rid()]
 
-	var hits = space_state.intersect_shape(query, 16)
+	var hits = space_state.intersect_shape(query, 32)
 	for h in hits:
 		var b = h.collider
 		if is_instance_valid(b) and b != self:
-			if b.has_method("wake_up"):
+			if b.has_method("wake_up") and not b.is_awake:
 				b.wake_up()
 
 func _on_impact(body: Node) -> void:

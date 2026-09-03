@@ -120,12 +120,13 @@ func _create_mock_ad_overlay() -> void:
 	screen_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	screen_rect.add_child(screen_vbox)
 
-	var icon_label = Label.new()
-	icon_label.name = "RewardIcon"
-	icon_label.text = "🎁"
-	icon_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	icon_label.add_theme_font_size_override("font_size", 48)
-	screen_vbox.add_child(icon_label)
+	var icon_tex = TextureRect.new()
+	icon_tex.name = "RewardIconTexture"
+	icon_tex.custom_minimum_size = Vector2(72, 72)
+	icon_tex.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	icon_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	screen_vbox.add_child(icon_tex)
 
 	var desc_label = Label.new()
 	desc_label.name = "RewardDesc"
@@ -164,7 +165,7 @@ func _play_mock_video_overlay() -> void:
 	var pbar = ad_overlay_layer.get_node_or_null("Center/Card/VBox/ProgressBar") as ProgressBar
 	var btn_claim = ad_overlay_layer.get_node_or_null("Center/Card/VBox/HBox/BtnClaim") as Button
 	var btn_skip = ad_overlay_layer.get_node_or_null("Center/Card/VBox/HBox/BtnSkip") as Button
-	var icon_label = ad_overlay_layer.get_node_or_null("Center/Card/VBox/ScreenRect/VBoxContainer/RewardIcon") as Label
+	var icon_tex = ad_overlay_layer.get_node_or_null("Center/Card/VBox/ScreenRect/VBoxContainer/RewardIconTexture") as TextureRect
 	var desc_label = ad_overlay_layer.get_node_or_null("Center/Card/VBox/ScreenRect/VBoxContainer/RewardDesc") as Label
 
 	if btn_claim: btn_claim.disabled = true
@@ -173,16 +174,16 @@ func _play_mock_video_overlay() -> void:
 
 	match current_placement:
 		PLACEMENT_LAST_STAND:
-			if icon_label: icon_label.text = "💣"
+			if icon_tex: icon_tex.texture = load("res://assets/ui/icons/icon_egg_bomb.svg")
 			if desc_label: desc_label.text = "Cứu thua: Tặng +1 Quả Trứng Nổ!"
 		PLACEMENT_TRIPLE_COINS:
-			if icon_label: icon_label.text = "🪙🪙🪙"
+			if icon_tex: icon_tex.texture = load("res://assets/ui/icons/icon_coin.svg")
 			if desc_label: desc_label.text = "Nhân ba phần thưởng: Nhận ngay %d Vàng!" % current_amount
 		PLACEMENT_VIP_TRIAL:
-			if icon_label: icon_label.text = "🧪"
+			if icon_tex: icon_tex.texture = load("res://assets/sprites/projectiles/egg_acid.svg")
 			if desc_label: desc_label.text = "Dùng thử đạn VIP: Tặng 1 Trứng Axit!"
 		PLACEMENT_DAILY_SPIN:
-			if icon_label: icon_label.text = "🎡"
+			if icon_tex: icon_tex.texture = load("res://assets/ui/icons/icon_star.svg")
 			if desc_label: desc_label.text = "Quay thêm 1 lượt may mắn!"
 
 	# Chạy đếm ngược 3 giây

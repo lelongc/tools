@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://testuiuxharmony1"]
+
+[ext_resource type="Script" path="res://scripts/test_ui_ux_harmony.gd" id="1_script"]
+
+[node name="TestUiUxHarmony" type="Node"]
+script = ExtResource("1_script")

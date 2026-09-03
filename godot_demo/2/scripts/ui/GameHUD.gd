@@ -14,7 +14,7 @@ const EGG_TEXTURES: Dictionary = {
 
 @onready var score_label: Label = $TopBar/Margin/HBox/ScoreBox/Margin/ScoreLabel
 @onready var level_label: Label = $TopBar/Margin/HBox/LevelBox/Margin/LevelLabel
-@onready var coin_label: Label = $TopBar/Margin/HBox/CoinBox/Margin/CoinLabel
+@onready var coin_label: Label = $TopBar/Margin/HBox/CoinBox/Margin/HBox/CoinLabel
 @onready var btn_vip_trial: Button = $TopBar/Margin/HBox/BtnVipTrial
 @onready var egg_container: HBoxContainer = $EggShelf/Margin/EggIcons
 @onready var btn_pause: Button = $TopBar/Margin/HBox/BtnPause
@@ -24,8 +24,10 @@ const EGG_TEXTURES: Dictionary = {
 @onready var victory_modal: PanelContainer = $VictoryModal
 @onready var victory_title: Label = $VictoryModal/VBox/Title
 @onready var victory_score: Label = $VictoryModal/VBox/ScoreLabel
-@onready var stars_label: Label = $VictoryModal/VBox/StarsLabel
-@onready var coin_reward_label: Label = $VictoryModal/VBox/CoinRewardLabel
+@onready var star1: TextureRect = $VictoryModal/VBox/StarsContainer/Star1
+@onready var star2: TextureRect = $VictoryModal/VBox/StarsContainer/Star2
+@onready var star3: TextureRect = $VictoryModal/VBox/StarsContainer/Star3
+@onready var coin_reward_label: Label = $VictoryModal/VBox/CoinRewardBox/CoinRewardLabel
 @onready var btn_claim_triple: Button = $VictoryModal/VBox/BtnClaimTriple
 @onready var next_level_btn: Button = $VictoryModal/VBox/BtnNext
 @onready var victory_levels_btn: Button = $VictoryModal/VBox/BtnLevels
@@ -112,7 +114,7 @@ func _ready() -> void:
 
 func _update_coin_display(amount: int) -> void:
 	if coin_label:
-		coin_label.text = "🪙 %d" % amount
+		coin_label.text = "%d" % amount
 
 func _toggle_pause() -> void:
 	var is_p = not get_tree().paused
@@ -130,10 +132,9 @@ func _update_ui() -> void:
 	var lm = get_node_or_null("/root/LocalizationManager")
 	if level_label:
 		if lm: level_label.text = lm.t("KEY_LEVEL") % GameManager.current_level
-		else: level_label.text = "🏰 LEVEL %d" % GameManager.current_level
+		else: level_label.text = "MÀN %d" % GameManager.current_level
 	if score_label:
-		if lm: score_label.text = lm.t("KEY_SCORE") % GameManager.current_score
-		else: score_label.text = "SCORE: %d" % GameManager.current_score
+		score_label.text = "%d" % GameManager.current_score
 	_refresh_egg_icons()
 
 func _refresh_egg_icons() -> void:
@@ -265,27 +266,48 @@ func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> 
 		victory_modal.visible = true
 		var lm = get_node_or_null("/root/LocalizationManager")
 		if victory_title:
-			victory_title.text = lm.t("KEY_VICTORY") if lm else "🎉 CHIẾN THẮNG! 🎉"
+			victory_title.text = lm.t("KEY_VICTORY") if lm else "CHIẾN THẮNG!"
 		if victory_score:
 			victory_score.text = lm.t("KEY_FINAL_SCORE") % final_score if lm else "Điểm số: %d" % final_score
 
-		if stars_label:
-			var stars_str = "⭐⭐⭐" if stars == 3 else ("⭐⭐" if stars == 2 else "⭐")
-			stars_label.text = stars_str
+		# Chuỗi hoạt ảnh 3 Ngôi Sao Vector sinh động chuẩn Angry Birds
+		var tex_star_full = preload("res://assets/ui/icons/icon_star.svg")
+		var tex_star_empty = preload("res://assets/ui/icons/icon_star_empty.svg")
+		var star_nodes = [star1, star2, star3]
+		for i in range(3):
+			var s_node = star_nodes[i]
+			if s_node:
+				s_node.scale = Vector2.ZERO
+				s_node.pivot_offset = s_node.size * 0.5
+				if i < stars:
+					s_node.texture = tex_star_full
+					var st = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+					st.tween_interval(0.2 + i * 0.2)
+					st.tween_property(s_node, "scale", Vector2.ONE, 0.32)
+					var star_idx = i
+					st.tween_callback(func():
+						if has_node("/root/SoundManager"):
+							get_node("/root/SoundManager").play_synth_tone(520.0 + star_idx * 160.0, 0.12, "sine", 1.0)
+					)
+				else:
+					s_node.texture = tex_star_empty
+					var st = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+					st.tween_interval(0.2 + i * 0.2)
+					st.tween_property(s_node, "scale", Vector2(0.85, 0.85), 0.22)
 
 		if coin_reward_label:
-			coin_reward_label.text = "Phần thưởng: +%d 🪙 Vàng" % base_coins
+			coin_reward_label.text = "+%d VÀNG" % base_coins
 
 		# Grace Period: Màn 1 đến 5 không có nút xem x3 ad
 		if GameManager.current_level <= 5:
 			if btn_claim_triple: btn_claim_triple.visible = false
-			if next_level_btn: next_level_btn.text = "TIẾP TỤC (+%d 🪙)" % base_coins
+			if next_level_btn: next_level_btn.text = " TIẾP TỤC (+%d Vàng)" % base_coins
 		else:
 			if btn_claim_triple:
 				btn_claim_triple.visible = true
-				btn_claim_triple.text = "🎬 NHẬN X3 VÀNG (+%d 🪙)" % (base_coins * 3)
+				btn_claim_triple.text = "NHẬN X3 VÀNG (+%d)" % (base_coins * 3)
 			if next_level_btn:
-				next_level_btn.text = "Nhận %d 🪙 & Tiếp tục" % base_coins
+				next_level_btn.text = " TIẾP THEO"
 
 		var tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		victory_modal.scale = Vector2(0.5, 0.5)

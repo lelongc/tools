@@ -11,14 +11,14 @@ signal wheel_closed()
 
 var is_spinning: bool = false
 var prizes = [
-	{"name": "100 Vàng", "type": "coins", "amount": 100, "icon": "🪙 100"},
-	{"name": "+1 Trứng Nổ", "type": "egg", "egg_type": "bomb", "icon": "💣 Trứng Nổ"},
-	{"name": "250 Vàng", "type": "coins", "amount": 250, "icon": "🪙 250"},
-	{"name": "+1 Trứng Axit", "type": "egg", "egg_type": "acid", "icon": "🧪 Trứng Axit"},
-	{"name": "500 Vàng", "type": "coins", "amount": 500, "icon": "🪙 500"},
-	{"name": "+1 Trứng Khoan", "type": "egg", "egg_type": "drill", "icon": "🔩 Trứng Khoan"},
-	{"name": "JACKPOT 1000 Vàng", "type": "coins", "amount": 1000, "icon": "👑 1000 🪙"},
-	{"name": "50 Vàng", "type": "coins", "amount": 50, "icon": "🪙 50"}
+	{"name": "100 Vàng", "type": "coins", "amount": 100, "icon": "100 Vàng"},
+	{"name": "+1 Trứng Nổ", "type": "egg", "egg_type": "bomb", "icon": "Trứng Nổ"},
+	{"name": "250 Vàng", "type": "coins", "amount": 250, "icon": "250 Vàng"},
+	{"name": "+1 Trứng Axit", "type": "egg", "egg_type": "acid", "icon": "Trứng Axit"},
+	{"name": "500 Vàng", "type": "coins", "amount": 500, "icon": "500 Vàng"},
+	{"name": "+1 Trứng Khoan", "type": "egg", "egg_type": "drill", "icon": "Trứng Khoan"},
+	{"name": "ĐẶC BIỆT: 1000 Vàng", "type": "coins", "amount": 1000, "icon": "1000 Vàng"},
+	{"name": "50 Vàng", "type": "coins", "amount": 50, "icon": "50 Vàng"}
 ]
 
 func _ready() -> void:
@@ -44,16 +44,16 @@ func _update_spin_button_state() -> void:
 	var sm = get_node("/root/SaveManager")
 	
 	if sm.is_first_daily_spin_free():
-		btn_spin.text = "🎡 QUAY MIỄN PHÍ"
+		btn_spin.text = "QUAY MIỄN PHÍ"
 		btn_spin.disabled = false
 		if status_label: status_label.text = "Lượt quay đầu tiên trong ngày: MIỄN PHÍ!"
 	elif sm.can_spin_daily_wheel():
 		var used = sm.get_daily_spins_used()
-		btn_spin.text = "🎬 QUAY THÊM (Lượt %d/4)" % (used + 1)
+		btn_spin.text = "XEM VIDEO QUAY THÊM (%d/4)" % (used + 1)
 		btn_spin.disabled = false
 		if status_label: status_label.text = "Xem 1 video ngắn để nhận thêm lượt quay!"
 	else:
-		btn_spin.text = "✕ ĐÃ HẾT LƯỢT HÔM NAY"
+		btn_spin.text = "ĐÃ HẾT LƯỢT HÔM NAY"
 		btn_spin.disabled = true
 		if status_label: status_label.text = "Bạn đã dùng hết 4 lượt quay hôm nay. Hãy quay lại vào ngày mai!"
 

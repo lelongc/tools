@@ -48,19 +48,19 @@ var translations: Dictionary = {
 		"de": "LEVEL WÄHLEN", "fr": "CHOISIR NIVEAU", "ru": "ВЫБОР УРОВНЯ"
 	},
 	"KEY_SOUND_ON": {
-		"en": "🔊 ON", "vi": "🔊 BẬT", "ja": "🔊 オン", "ko": "🔊 켜짐",
-		"zh_CN": "🔊 开启", "es": "🔊 SÍ", "pt_BR": "🔊 LIGADO", "de": "🔊 AN",
-		"fr": "🔊 OUI", "ru": "🔊 ВКЛ"
+		"en": "ON", "vi": "BẬT", "ja": "オン", "ko": "켜짐",
+		"zh_CN": "开启", "es": "SÍ", "pt_BR": "LIGADO", "de": "AN",
+		"fr": "OUI", "ru": "ВКЛ"
 	},
 	"KEY_SOUND_OFF": {
-		"en": "🔇 OFF", "vi": "🔇 TẮT", "ja": "🔇 オフ", "ko": "🔇 꺼짐",
-		"zh_CN": "🔇 关闭", "es": "🔇 NO", "pt_BR": "🔇 DESLIGADO", "de": "🔇 AUS",
-		"fr": "🔇 NON", "ru": "🔇 ВЫКЛ"
+		"en": "OFF", "vi": "TẮT", "ja": "オフ", "ko": "꺼짐",
+		"zh_CN": "关闭", "es": "NO", "pt_BR": "DESLIGADO", "de": "AUS",
+		"fr": "NON", "ru": "ВЫКЛ"
 	},
 	"KEY_LEVEL": {
-		"en": "🏰 LEVEL %d", "vi": "🏰 MÀN %d", "ja": "🏰 ステージ %d", "ko": "🏰 레벨 %d",
-		"zh_CN": "🏰 关卡 %d", "es": "🏰 NIVEL %d", "pt_BR": "🏰 FASE %d", "de": "🏰 LEVEL %d",
-		"fr": "🏰 NIVEAU %d", "ru": "🏰 УРОВЕНЬ %d"
+		"en": "LEVEL %d", "vi": "MÀN %d", "ja": "ステージ %d", "ko": "레벨 %d",
+		"zh_CN": "关卡 %d", "es": "NIVEL %d", "pt_BR": "FASE %d", "de": "LEVEL %d",
+		"fr": "NIVEAU %d", "ru": "УРОВЕНЬ %d"
 	},
 	"KEY_SCORE": {
 		"en": "SCORE: %d", "vi": "ĐIỂM: %d", "ja": "スコア: %d", "ko": "점수: %d",
@@ -68,11 +68,11 @@ var translations: Dictionary = {
 		"fr": "SCORE : %d", "ru": "ОЧКИ: %d"
 	},
 	"KEY_VICTORY": {
-		"en": "🎉 BUNKER DESTROYED! 🎉", "vi": "🎉 SẬP HẦM THÀNH CÔNG! 🎉",
-		"ja": "🎉 バンカー壊滅成功! 🎉", "ko": "🎉 벙커 파괴 성공! 🎉",
-		"zh_CN": "🎉 地堡摧毁成功! 🎉", "es": "🎉 ¡BÚNKER DESTRUIDO! 🎉",
-		"pt_BR": "🎉 BUNKER DESTRUÍDO! 🎉", "de": "🎉 BUNKER ZERSTÖRT! 🎉",
-		"fr": "🎉 BUNKER DÉTRUIT ! 🎉", "ru": "🎉 БУНКЕР УНИЧТОЖЕН! 🎉"
+		"en": "BUNKER DESTROYED!", "vi": "CHIẾN THẮNG RỰC RỠ!",
+		"ja": "バンカー壊滅成功!", "ko": "벙커 파괴 성공!",
+		"zh_CN": "地堡摧毁成功!", "es": "¡BÚNKER DESTRUIDO!",
+		"pt_BR": "BUNKER DESTRUÍDO!", "de": "BUNKER ZERSTÖRT!",
+		"fr": "BUNKER DÉTRUIT !", "ru": "БУНКЕР УНИЧТОЖЕН!"
 	},
 	"KEY_FINAL_SCORE": {
 		"en": "Total Score: %d", "vi": "Tổng Điểm: %d", "ja": "合計スコア: %d", "ko": "최종 점수: %d",
@@ -90,11 +90,11 @@ var translations: Dictionary = {
 		"de": "WIEDERHOLEN", "fr": "RÉESSAYER", "ru": "ЗАНОВО"
 	},
 	"KEY_FAIL": {
-		"en": "💀 OUT OF EGGS! 💀", "vi": "💀 HẾT TRỨNG RỒI! 💀",
-		"ja": "💀 タマゴ切れ! 💀", "ko": "💀 달걀 소진! 💀",
-		"zh_CN": "💀 鸡蛋用光了! 💀", "es": "💀 ¡SIN HUEVOS! 💀",
-		"pt_BR": "💀 SEM OVOS! 💀", "de": "💀 KEINE EIER MEHR! 💀",
-		"fr": "💀 PLUS D'OEUFS ! 💀", "ru": "💀 ЯЙЦА ЗАКОНЧИЛИСЬ! 💀"
+		"en": "OUT OF EGGS!", "vi": "HẾT TRỨNG RỒI!",
+		"ja": "タマゴ切れ!", "ko": "달걀 소진!",
+		"zh_CN": "鸡蛋用光了!", "es": "¡SIN HUEVOS!",
+		"pt_BR": "SEM OVOS!", "de": "KEINE EIER MEHR!",
+		"fr": "PLUS D'OEUFS !", "ru": "ЯЙЦА ЗАКОНЧИЛИСЬ!"
 	},
 	"KEY_AD_NUKE": {
 		"en": "WATCH AD FOR BLACK HOLE", "vi": "XEM AD NHẬN LỖ ĐEN",
@@ -104,9 +104,9 @@ var translations: Dictionary = {
 		"fr": "PUB POUR TROU NOIR", "ru": "РЕКЛАМА: ЧЁРНАЯ ДЫРА"
 	},
 	"KEY_PAUSE": {
-		"en": "⏸️ PAUSED", "vi": "⏸️ TẠM DỪNG", "ja": "⏸️ 一時停止", "ko": "⏸️ 일시 정지",
-		"zh_CN": "⏸️ 暂停", "es": "⏸️ PAUSA", "pt_BR": "⏸️ PAUSA",
-		"de": "⏸️ PAUSE", "fr": "⏸️ PAUSE", "ru": "⏸️ ПАУЗА"
+		"en": "PAUSED", "vi": "TẠM DỪNG", "ja": "一時停止", "ko": "일시 정지",
+		"zh_CN": "暂停", "es": "PAUSA", "pt_BR": "PAUSA",
+		"de": "PAUSE", "fr": "PAUSE", "ru": "ПАУЗА"
 	},
 	"KEY_RESUME": {
 		"en": "RESUME", "vi": "TIẾP TỤC", "ja": "再開", "ko": "계속하기",

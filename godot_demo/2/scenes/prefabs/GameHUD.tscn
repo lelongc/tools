@@ -7,24 +7,36 @@
 [ext_resource type="Texture2D" path="res://assets/ui/icons/btn_level_select.svg" id="5_lvl_ico"]
 [ext_resource type="Texture2D" path="res://assets/ui/icons/btn_play.svg" id="6_play_ico"]
 [ext_resource type="Texture2D" path="res://assets/ui/icons/btn_next.svg" id="7_next_ico"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/icon_coin.svg" id="8_coin_ico"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/icon_star.svg" id="9_star_ico"]
+[ext_resource type="Texture2D" path="res://assets/ui/icons/icon_star_empty.svg" id="10_star_empty_ico"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_TopBar"]
-bg_color = Color(0.11, 0.03, 0.21, 0.88)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
+bg_color = Color(0.12, 0.04, 0.22, 0.92)
 border_width_bottom = 3
-border_color = Color(0.79, 0.66, 0.0, 0.6)
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
+border_color = Color(1, 0.84, 0, 0.6)
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_Shelf"]
-bg_color = Color(0.12, 0.05, 0.20, 0.92)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_Badge"]
+bg_color = Color(0.18, 0.08, 0.32, 0.92)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(1, 0.84, 0.0, 0.85)
+border_color = Color(1, 0.84, 0, 0.5)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_Shelf"]
+bg_color = Color(0.12, 0.05, 0.2, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.84, 0, 0.85)
 corner_radius_top_left = 18
 corner_radius_top_right = 18
 corner_radius_bottom_right = 18
@@ -36,7 +48,7 @@ border_width_left = 4
 border_width_top = 4
 border_width_right = 4
 border_width_bottom = 8
-border_color = Color(1.0, 0.84, 0.0, 1)
+border_color = Color(1, 0.84, 0, 1)
 corner_radius_top_left = 24
 corner_radius_top_right = 24
 corner_radius_bottom_right = 24
@@ -48,7 +60,7 @@ border_width_left = 4
 border_width_top = 4
 border_width_right = 4
 border_width_bottom = 8
-border_color = Color(1.0, 0.3, 0.3, 1)
+border_color = Color(1, 0.3, 0.3, 1)
 corner_radius_top_left = 24
 corner_radius_top_right = 24
 corner_radius_bottom_right = 24
@@ -61,10 +73,10 @@ script = ExtResource("1_hud")
 [node name="TopBar" type="PanelContainer" parent="."]
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = 68.0
+offset_left = 12.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = 60.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_TopBar")
 
@@ -77,10 +89,11 @@ theme_override_constants/margin_bottom = 4
 
 [node name="HBox" type="HBoxContainer" parent="TopBar/Margin"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
+alignment = 1
 
 [node name="BtnPause" type="Button" parent="TopBar/Margin/HBox"]
-custom_minimum_size = Vector2(46, 40)
+custom_minimum_size = Vector2(44, 42)
 layout_mode = 2
 icon = ExtResource("3_pause_ico")
 expand_icon = true
@@ -89,58 +102,83 @@ is_wood_brown = true
 
 [node name="LevelBox" type="PanelContainer" parent="TopBar/Margin/HBox"]
 layout_mode = 2
-size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_Badge")
 
 [node name="Margin" type="MarginContainer" parent="TopBar/Margin/HBox/LevelBox"]
 layout_mode = 2
-theme_override_constants/margin_left = 6
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_bottom = 2
 
 [node name="LevelLabel" type="Label" parent="TopBar/Margin/HBox/LevelBox/Margin"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_colors/font_color = Color(1, 0.88, 0.2, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 17
-text = "🏰 LEVEL 1"
+theme_override_font_sizes/font_size = 15
+text = "MÀN 1"
+horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="ScoreBox" type="PanelContainer" parent="TopBar/Margin/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_Badge")
 
 [node name="Margin" type="MarginContainer" parent="TopBar/Margin/HBox/ScoreBox"]
 layout_mode = 2
-theme_override_constants/margin_right = 6
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_bottom = 2
 
 [node name="ScoreLabel" type="Label" parent="TopBar/Margin/HBox/ScoreBox/Margin"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 17
-text = "SCORE: 0"
-horizontal_alignment = 2
+theme_override_font_sizes/font_size = 16
+text = "0"
+horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="CoinBox" type="PanelContainer" parent="TopBar/Margin/HBox"]
 layout_mode = 2
-size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_Badge")
 
 [node name="Margin" type="MarginContainer" parent="TopBar/Margin/HBox/CoinBox"]
 layout_mode = 2
-theme_override_constants/margin_left = 6
-theme_override_constants/margin_right = 6
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_bottom = 2
 
-[node name="CoinLabel" type="Label" parent="TopBar/Margin/HBox/CoinBox/Margin"]
+[node name="HBox" type="HBoxContainer" parent="TopBar/Margin/HBox/CoinBox/Margin"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 16
-text = "🪙 150"
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="CoinIcon" type="TextureRect" parent="TopBar/Margin/HBox/CoinBox/Margin/HBox"]
+custom_minimum_size = Vector2(20, 20)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("8_coin_ico")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CoinLabel" type="Label" parent="TopBar/Margin/HBox/CoinBox/Margin/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.2, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 15
+text = "150"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="BtnRestart" type="Button" parent="TopBar/Margin/HBox"]
-custom_minimum_size = Vector2(46, 40)
+custom_minimum_size = Vector2(44, 42)
 layout_mode = 2
 icon = ExtResource("4_replay_ico")
 expand_icon = true
@@ -149,10 +187,10 @@ is_wood_brown = true
 
 [node name="BtnVipTrial" type="Button" parent="TopBar/Margin/HBox"]
 visible = false
-custom_minimum_size = Vector2(68, 40)
+custom_minimum_size = Vector2(68, 42)
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
-text = "🎬 VIP 🧪"
+text = "VIP"
 script = ExtResource("2_btn")
 is_gold_action = true
 
@@ -208,27 +246,68 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_y = 3
-theme_override_font_sizes/font_size = 23
-text = "🎉 BUNKER DESTROYED! 🎉"
+theme_override_font_sizes/font_size = 24
+text = "CHIẾN THẮNG!"
 horizontal_alignment = 1
 
-[node name="StarsLabel" type="Label" parent="VictoryModal/VBox"]
+[node name="StarsContainer" type="HBoxContainer" parent="VictoryModal/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 40
-text = "⭐⭐⭐"
-horizontal_alignment = 1
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Star1" type="TextureRect" parent="VictoryModal/VBox/StarsContainer"]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("10_star_empty_ico")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star2" type="TextureRect" parent="VictoryModal/VBox/StarsContainer"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("10_star_empty_ico")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star3" type="TextureRect" parent="VictoryModal/VBox/StarsContainer"]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("10_star_empty_ico")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="ScoreLabel" type="Label" parent="VictoryModal/VBox"]
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 18
-text = "Total Score: 5000"
+text = "Tổng Điểm: 5000"
 horizontal_alignment = 1
 
-[node name="CoinRewardLabel" type="Label" parent="VictoryModal/VBox"]
+[node name="CoinRewardBox" type="HBoxContainer" parent="VictoryModal/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="CoinIcon" type="TextureRect" parent="VictoryModal/VBox/CoinRewardBox"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("8_coin_ico")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CoinRewardLabel" type="Label" parent="VictoryModal/VBox/CoinRewardBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.88, 0.3, 1)
-theme_override_font_sizes/font_size = 17
-text = "Thưởng: +120 Vàng"
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 18
+text = "+120 VÀNG"
 horizontal_alignment = 1
 
 [node name="BtnClaimTriple" type="Button" parent="VictoryModal/VBox"]
@@ -237,7 +316,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.15, 0.08, 0, 1)
 theme_override_font_sizes/font_size = 17
-text = "🎬 NHẬN X3 VÀNG (+360 🪙)"
+text = "NHẬN X3 VÀNG (+360)"
 script = ExtResource("2_btn")
 is_gold_action = true
 
@@ -246,7 +325,7 @@ custom_minimum_size = Vector2(250, 48)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
-text = " NEXT LEVEL"
+text = " TIẾP THEO"
 icon = ExtResource("7_next_ico")
 expand_icon = true
 script = ExtResource("2_btn")
@@ -257,7 +336,7 @@ custom_minimum_size = Vector2(250, 42)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 15
-text = " SELECT LEVEL"
+text = " CHỌN MÀN"
 icon = ExtResource("5_lvl_ico")
 expand_icon = true
 script = ExtResource("2_btn")
@@ -290,7 +369,7 @@ theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 22
-text = "🚨 SUÝT THẮNG RỒI! 🚨"
+text = "CƠ HỘI CUỐI!"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="LastStandModal/VBox"]
@@ -314,7 +393,7 @@ layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.1, 0.1, 0.1, 1)
 theme_override_font_sizes/font_size = 17
-text = "🎬 +1 TRỨNG NỔ CỨU THUA"
+text = "+1 TRỨNG NỔ CỨU THUA"
 script = ExtResource("2_btn")
 is_gold_action = true
 
@@ -323,7 +402,7 @@ custom_minimum_size = Vector2(160, 40)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 14
-text = "✕ Bỏ qua"
+text = "BỎ QUA"
 script = ExtResource("2_btn")
 is_wood_brown = true
 
@@ -354,7 +433,7 @@ theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
 theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 24
-text = "💀 OUT OF EGGS! 💀"
+text = "HẾT TRỨNG RỒI!"
 horizontal_alignment = 1
 
 [node name="BtnRetry" type="Button" parent="FailModal/VBox"]
@@ -362,7 +441,7 @@ custom_minimum_size = Vector2(260, 46)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 17
-text = " RETRY"
+text = " THỬ LẠI"
 icon = ExtResource("4_replay_ico")
 expand_icon = true
 script = ExtResource("2_btn")
@@ -373,7 +452,7 @@ custom_minimum_size = Vector2(260, 42)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 15
-text = " SELECT LEVEL"
+text = " CHỌN MÀN"
 icon = ExtResource("5_lvl_ico")
 expand_icon = true
 script = ExtResource("2_btn")
@@ -404,7 +483,7 @@ alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
 theme_override_font_sizes/font_size = 24
-text = "⏸️ PAUSED"
+text = "TẠM DỪNG"
 horizontal_alignment = 1
 
 [node name="BtnResume" type="Button" parent="PauseModal/VBox"]
@@ -412,7 +491,7 @@ custom_minimum_size = Vector2(230, 48)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
-text = " RESUME"
+text = " TIẾP TỤC"
 icon = ExtResource("6_play_ico")
 expand_icon = true
 script = ExtResource("2_btn")
@@ -423,7 +502,7 @@ custom_minimum_size = Vector2(230, 44)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 16
-text = " RETRY"
+text = " CHƠI LẠI"
 icon = ExtResource("4_replay_ico")
 expand_icon = true
 script = ExtResource("2_btn")
@@ -434,7 +513,7 @@ custom_minimum_size = Vector2(230, 44)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 16
-text = " SELECT LEVEL"
+text = " CHỌN MÀN"
 icon = ExtResource("5_lvl_ico")
 expand_icon = true
 script = ExtResource("2_btn")

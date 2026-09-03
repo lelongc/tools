@@ -514,7 +514,14 @@ func wake_up() -> void:
 var crush_audio_cooldown: float = 0.0
 
 func _physics_process(delta: float) -> void:
-	if is_defeated or not is_awake or spawn_settle_timer > 0.0: return
+	if is_defeated: return
+	if not is_awake:
+		for b in get_colliding_bodies():
+			if is_instance_valid(b) and b is RigidBody2D and (not b.freeze or b.linear_velocity.length() > 5.0):
+				wake_up()
+				break
+		return
+	if spawn_settle_timer > 0.0: return
 	_handle_continuous_crushing(delta)
 
 func _handle_continuous_crushing(delta: float) -> void:
@@ -542,7 +549,7 @@ func _handle_continuous_crushing(delta: float) -> void:
 				var active_speed = max(b_speed, rel_vel)
 				# Sát thương liên tục theo tốc độ chuyển động & khối lượng của vật đè
 				var crush_dps = (55.0 + active_speed * 0.65) * (b_mass * 0.5)
-				take_damage(crush_dps * delta, b.global_position)
+				take_damage(crush_dps * delta, b.global_position, true)
 
 				# Hiệu ứng biến dạng bị đè & âm thanh rên rỉ
 				if visual_root:
@@ -559,7 +566,7 @@ func _handle_continuous_crushing(delta: float) -> void:
 			elif b_mass >= 1.6 and b.global_position.y < global_position.y - 6.0:
 				is_crushed_this_frame = true
 				var static_dps = 24.0 * b_mass
-				take_damage(static_dps * delta, b.global_position)
+				take_damage(static_dps * delta, b.global_position, true)
 
 	if is_crushed_this_frame:
 		is_currently_pinned = true
@@ -1150,7 +1157,7 @@ func _on_impact(body: Node) -> void:
 			var crush_dmg = (rel_vel - 140.0) * min(body.mass * 0.35, 3.5) + 15.0
 			take_damage(crush_dmg, body.global_position)
 
-func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
+func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO, is_continuous_crush: bool = false) -> void:
 	if is_defeated: return
 	if not is_awake: wake_up()
 
@@ -1170,16 +1177,19 @@ func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
 	if current_health > 0.0 and current_health <= max_health * 0.45 and not is_currently_pinned:
 		_set_state(State.CRITICAL_INJURED)
 
-	if visual_root:
-		var tween = create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-		visual_root.scale = Vector2(base_scale_val * 1.4, base_scale_val * 0.6)
-		tween.tween_property(visual_root, "scale", Vector2(base_scale_val, base_scale_val), 0.28)
+	# Hiệu ứng biến dạng và chớp đỏ chỉ khi bị đòn đánh trực tiếp (không spam 60 lần/giây khi bị đè cạ)
+	if not is_continuous_crush:
+		if visual_root:
+			var tween = create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+			visual_root.scale = Vector2(base_scale_val * 1.4, base_scale_val * 0.6)
+			tween.tween_property(visual_root, "scale", Vector2(base_scale_val, base_scale_val), 0.28)
 
-	var flash_tween = create_tween()
-	flash_tween.tween_property(visual_root, "modulate", Color(1.0, 0.35, 0.35), 0.05)
-	flash_tween.tween_property(visual_root, "modulate", Color.WHITE, 0.08)
+		var flash_tween = create_tween()
+		flash_tween.tween_property(visual_root, "modulate", Color(1.0, 0.35, 0.35), 0.05)
+		flash_tween.tween_property(visual_root, "modulate", Color.WHITE, 0.08)
 
-	CameraShake.add_trauma(0.35 if monster_type == "boss_baron_pig" else 0.16)
+	# TUYỆT ĐỐI KHÔNG rung giật camera khi bị đè, cạ hay nghiến dầm!
+	# CameraShake chỉ dành cho bom nổ lớn.
 
 	if current_health <= 0.0:
 		_defeat_monster()
@@ -1208,7 +1218,8 @@ func _defeat_monster() -> void:
 	if has_node("/root/GameManager"):
 		get_node("/root/GameManager").register_enemy_defeat(self, score_value)
 	ComicScorePopup.spawn_score_popup(get_parent(), global_position, score_value)
-	CameraShake.add_trauma(0.55 if monster_type == "boss_baron_pig" else 0.22)
+	# Cú nổ nhỏ nhẹ êm dịu khi quái tan biến
+	CameraShake.add_trauma(0.18 if monster_type == "boss_baron_pig" else 0.08)
 
 	$CollisionShape2D.set_deferred("disabled", true)
 	set_deferred("freeze", true)
