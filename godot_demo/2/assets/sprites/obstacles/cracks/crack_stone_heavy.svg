@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 64" width="128" height="64">
+  <!-- Missing Chipped Void on Edge -->
+  <polygon points="56,2 68,2 62,12" fill="#111317" stroke="#000000" stroke-width="1.5"/>
+  <polygon points="126,24 126,38 116,30" fill="#111317" stroke="#000000" stroke-width="1.5"/>
+
+  <!-- Deep Jagged Chasm across the stone -->
+  <polygon points="62,12 52,24 66,32 44,46 54,60 46,62 38,48 58,34 44,22 56,12" 
+           fill="#111317" stroke="#000000" stroke-width="1.5"/>
+
+  <!-- Secondary Shatter Lines -->
+  <path d="M52 24 L22 18 L6 28 M66 32 L94 28 L116 30 M44 46 L26 56 M94 28 L112 48" 
+        fill="none" stroke="#181a1f" stroke-width="2.8" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- White rock powder edge highlights -->
+  <path d="M22 19 L6 29 M66 33 L94 29 M44 47 L26 57" 
+        fill="none" stroke="#e2e8f0" stroke-width="1.2" opacity="0.7"/>
+</svg>

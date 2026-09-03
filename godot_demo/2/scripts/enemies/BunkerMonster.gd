@@ -44,6 +44,7 @@ var shock_timer: float = 0.0
 var furious_timer: float = 0.0
 var pinned_check_timer: float = 0.2
 var is_currently_pinned: bool = false
+var pinned_cooldown: float = 0.0
 
 # Eye tracking and micro-actions
 var eye_look_offset: Vector2 = Vector2.ZERO
@@ -530,15 +531,22 @@ func _evaluate_situational_state(delta: float) -> void:
 	# 3. Kiểm tra xem có đang bị đè kẹt dưới đống đổ nát (Pinned under debris)
 	pinned_check_timer -= delta
 	if pinned_check_timer <= 0.0:
-		pinned_check_timer = 0.25
-		is_currently_pinned = _check_is_pinned()
+		pinned_check_timer = 0.2
+		var currently_pinned = _check_is_pinned()
+		if currently_pinned:
+			is_currently_pinned = true
+			pinned_cooldown = 0.8
+			if current_state != State.PINNED_UNDER_DEBRIS:
+				_set_state(State.PINNED_UNDER_DEBRIS)
+			return
 
 	if is_currently_pinned:
-		if current_state != State.PINNED_UNDER_DEBRIS:
-			_set_state(State.PINNED_UNDER_DEBRIS)
-		return
-	elif current_state == State.PINNED_UNDER_DEBRIS:
-		_set_state(State.IDLE)
+		pinned_cooldown -= delta
+		if pinned_cooldown <= 0.0:
+			is_currently_pinned = false
+			_set_state(State.IDLE)
+		else:
+			return
 
 	# 4. Kiểm tra sức khỏe nguy kịch (Critical Injured - HP < 45%)
 	if current_health <= max_health * 0.45:
@@ -551,26 +559,41 @@ func _evaluate_situational_state(delta: float) -> void:
 	_evaluate_base_state(delta)
 
 func _evaluate_base_state(delta: float) -> void:
+	# 1. Kiểm tra mối nguy hiểm từ trên cao (Trứng đang rơi hoặc Khối nhà đang sập đè)
 	var eggs = get_tree().get_nodes_in_group("Eggs")
 	var chicken = get_tree().get_first_node_in_group("Player") as ChickenBomber
 
-	var falling_egg: Node = null
-	if eggs.size() > 0:
-		for egg in eggs:
-			if is_instance_valid(egg) and egg is RigidBody2D:
-				if egg.global_position.y < global_position.y + 60.0 and egg.linear_velocity.y > 40.0:
-					falling_egg = egg
-					break
+	var threat_node: Node2D = null
+	var min_threat_dist: float = 300.0
 
-	# Trứng đang rơi trên đầu -> PANIC_FALLING
-	if falling_egg != null:
+	# Trứng đang rơi
+	for egg in eggs:
+		if is_instance_valid(egg) and egg is RigidBody2D:
+			if egg.global_position.y < global_position.y + 40.0 and egg.linear_velocity.y > 35.0:
+				var dist = global_position.distance_to(egg.global_position)
+				if dist < min_threat_dist:
+					min_threat_dist = dist
+					threat_node = egg
+
+	# Khối nhà phía trên đang rơi sập
+	if threat_node == null:
+		var blocks = get_tree().get_nodes_in_group("Destructibles")
+		for b in blocks:
+			if is_instance_valid(b) and b is RigidBody2D:
+				if b.global_position.y < global_position.y - 15.0 and b.global_position.y > global_position.y - 180.0:
+					if abs(b.global_position.x - global_position.x) < 70.0 and b.linear_velocity.y > 55.0:
+						threat_node = b
+						break
+
+	# Có mối nguy hiểm rơi trên đầu -> PANIC_FALLING (Mắt trợn tròng, la hét, toát mồ hôi)
+	if threat_node != null:
 		if current_state != State.PANIC_FALLING:
 			_set_state(State.PANIC_FALLING)
-		var dir = (falling_egg.global_position - global_position).normalized()
+		var dir = (threat_node.global_position - global_position).normalized()
 		eye_look_offset = dir * 6.0
 		return
 
-	# Gà đang kéo ngắm bắn -> ALERT_AIMING
+	# Gà đang kéo ngắm bắn -> ALERT_AIMING (Dõi mắt theo ngắm bắn thời gian thực)
 	if is_instance_valid(chicken) and chicken.is_aiming:
 		if current_state != State.ALERT_AIMING:
 			_set_state(State.ALERT_AIMING)
@@ -713,6 +736,8 @@ func _reset_to_normal_idle() -> void:
 	if monster_type == "boss_baron_pig" and acc_front and tex_monocle_normal:
 		acc_front.texture = tex_monocle_normal
 		acc_front.position = Vector2(32, -22)
+	if dizzy_stars:
+		dizzy_stars.visible = false
 
 func _clear_emote() -> void:
 	if active_emote_tween and active_emote_tween.is_valid():
@@ -773,7 +798,7 @@ func _set_state(new_state: State) -> void:
 			if snout_sprite and char_tex_snout_hurt:
 				snout_sprite.texture = char_tex_snout_hurt
 			if pupils_sprite: pupils_sprite.visible = false
-			_pop_emote(tex_emote_sweat, 0.9)
+			if dizzy_stars: dizzy_stars.visible = true
 
 		State.CRITICAL_INJURED:
 			if eyes_sprite and char_tex_eyes_hurt:
@@ -853,10 +878,10 @@ func _animate_character(delta: float) -> void:
 			visual_root.scale = Vector2(base_scale_val * 0.88, base_scale_val * 1.14)
 
 		State.PINNED_UNDER_DEBRIS:
-			var squish_pant = sin(anim_time * 8.0) * 0.03
-			visual_root.scale = Vector2(base_scale_val * (1.22 + squish_pant), base_scale_val * (0.75 - squish_pant))
-			visual_root.position.x = sin(anim_time * 16.0) * 0.8
-			visual_root.rotation = 0.04
+			var squish_pant = sin(anim_time * 4.0) * 0.025
+			visual_root.scale = Vector2(base_scale_val * (1.28 + squish_pant), base_scale_val * (0.68 - squish_pant))
+			visual_root.position.x = 0.0
+			visual_root.rotation = 0.03
 
 		State.CRITICAL_INJURED:
 			var heavy_pant = sin(anim_time * 5.0) * 0.04

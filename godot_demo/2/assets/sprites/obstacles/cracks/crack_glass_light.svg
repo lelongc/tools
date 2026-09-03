@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 64" width="128" height="64">
+  <!-- Bright glowing crystal fractures -->
+  <path d="M64 32 L36 12 M64 32 L22 42 M64 32 L78 54 M64 32 L106 20 M64 32 L92 48 M64 32 L60 8" 
+        fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" opacity="0.95"/>
+  <!-- Dark refraction shadow behind glint -->
+  <path d="M64 33 L36 13 M64 33 L22 43 M64 33 L78 55 M64 33 L106 21 M64 33 L92 49" 
+        fill="none" stroke="#0e7490" stroke-width="1.2" opacity="0.6"/>
+  <!-- Little star glints -->
+  <circle cx="64" cy="32" r="2.5" fill="#ffffff"/>
+  <circle cx="36" cy="12" r="1.5" fill="#ffffff"/>
+  <circle cx="106" cy="20" r="1.5" fill="#ffffff"/>
+</svg>

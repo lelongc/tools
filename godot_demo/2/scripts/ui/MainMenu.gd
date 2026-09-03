@@ -68,14 +68,14 @@ func _on_btn_wheel_pressed() -> void:
 		wheel_modal_instance.wheel_closed.connect(func(): _update_coin_count())
 	wheel_modal_instance.open_wheel()
 
+const ICON_SOUND_ON = preload("res://assets/ui/icons/btn_sound_on.svg")
+const ICON_SOUND_OFF = preload("res://assets/ui/icons/btn_sound_off.svg")
+
 func _update_sound_button() -> void:
 	if has_node("/root/SaveManager") and btn_sound:
 		var enabled = get_node("/root/SaveManager").save_data.get("sound_enabled", true)
-		if has_node("/root/LocalizationManager"):
-			var lm = get_node("/root/LocalizationManager")
-			btn_sound.text = lm.t("KEY_SOUND_ON") if enabled else lm.t("KEY_SOUND_OFF")
-		else:
-			btn_sound.text = "🔊 BẬT" if enabled else "🔇 TẮT"
+		btn_sound.text = ""
+		btn_sound.icon = ICON_SOUND_ON if enabled else ICON_SOUND_OFF
 
 func _on_btn_play_pressed() -> void:
 	var highest = 1

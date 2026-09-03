@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 64" width="128" height="64">
+  <!-- Metallic stress fracture and warped dent -->
+  <path d="M25 32 Q50 24, 75 36 T115 30" fill="none" stroke="#090d14" stroke-width="3" stroke-linecap="round"/>
+  <path d="M60 33 L68 18 M75 36 L70 52" fill="none" stroke="#090d14" stroke-width="2" stroke-linecap="round"/>
+  <!-- Metallic highlight reflection on edge of dent -->
+  <path d="M26 33.5 Q50 25.5, 75 37.5 T115 31.5" fill="none" stroke="#e2e8f0" stroke-width="1.2" opacity="0.8"/>
+  <!-- Sheared bolt indicator -->
+  <circle cx="8" cy="32" r="3.5" fill="#ef4444" stroke="#7f1d1d" stroke-width="1"/>
+</svg>

@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ba0ke348ooyhb"
-path="res://.godot/imported/snout_raccoon_teeth_chattering.svg-14ed0be37b8bfab3f8a092e9eb938715.ctex"
+path="res://.godot/imported/snout_raccoon_teeth_chattering.svg-c1061ff8fc16723b4ab930b069803b66.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/snout_raccoon_teeth_chattering.svg"
-dest_files=["res://.godot/imported/snout_raccoon_teeth_chattering.svg-14ed0be37b8bfab3f8a092e9eb938715.ctex"]
+source_file="res://raw_assets/Modular_Expressions_And_Emotes_Pack/02_raccoon_wolf_hound_expressions/snout_raccoon_teeth_chattering.svg"
+dest_files=["res://.godot/imported/snout_raccoon_teeth_chattering.svg-c1061ff8fc16723b4ab930b069803b66.ctex"]
 
 [params]
 

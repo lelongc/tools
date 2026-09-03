@@ -1,6 +1,7 @@
 extends RigidBody2D
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
+const CartoonExplosionFX = preload("res://scripts/core/CartoonExplosionFX.gd")
 
 @export var egg_name: String = "Bomb Egg"
 @export var explosion_radius: float = 145.0
@@ -43,6 +44,8 @@ func _detonate() -> void:
 
 	if has_node("/root/SoundManager"):
 		get_node("/root/SoundManager").play_explosion()
+
+	CartoonExplosionFX.spawn_comic_explosion(get_parent(), global_position, explosion_radius)
 
 	set_deferred("freeze", true)
 	if visual_root: visual_root.visible = false

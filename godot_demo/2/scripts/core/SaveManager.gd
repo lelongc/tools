@@ -18,11 +18,14 @@ var save_data: Dictionary = {
 		"acid": 0
 	},
 	"daily_spins_date": "",
-	"daily_spins_count": 0
+	"daily_spins_count": 0,
+	"version": 2
 }
 
 func _ready() -> void:
 	load_game()
+	if save_data.get("version", 1) < 2:
+		reset_save()
 
 func reset_save() -> void:
 	save_data = {
@@ -38,7 +41,8 @@ func reset_save() -> void:
 			"acid": 0
 		},
 		"daily_spins_date": "",
-		"daily_spins_count": 0
+		"daily_spins_count": 0,
+		"version": 2
 	}
 	save_game()
 	coins_updated.emit(save_data["coins"])

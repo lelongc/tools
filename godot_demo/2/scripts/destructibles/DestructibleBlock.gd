@@ -13,14 +13,34 @@ var is_awake: bool = false
 var spawn_settle_timer: float = 0.5
 
 @onready var col_shape: CollisionShape2D = $CollisionShape2D
-@onready var visual_mesh: Polygon2D = $Visual
+@onready var block_visual: NinePatchRect = $BlockVisual
+@onready var crack_stage1: NinePatchRect = $CrackStage1
+@onready var crack_stage2: NinePatchRect = $CrackStage2
 @onready var fracture_particles: CPUParticles2D = $FractureFX
 
-var crack_stage1: Line2D = null
-var crack_stage2: Line2D = null
+# Texture Cache
+static var tex_wood: Texture2D = null
+static var tex_stone: Texture2D = null
+static var tex_glass: Texture2D = null
+static var tex_steel: Texture2D = null
+
+static var tex_crack_wood_l: Texture2D = null
+static var tex_crack_wood_h: Texture2D = null
+static var tex_crack_stone_l: Texture2D = null
+static var tex_crack_stone_h: Texture2D = null
+static var tex_crack_glass_l: Texture2D = null
+static var tex_crack_glass_h: Texture2D = null
+static var tex_crack_steel_l: Texture2D = null
+static var tex_crack_steel_h: Texture2D = null
+
+static var tex_shard_wood: Texture2D = null
+static var tex_shard_stone: Texture2D = null
+static var tex_shard_glass: Texture2D = null
+static var tex_smoke_puff: Texture2D = null
 
 func _ready() -> void:
 	add_to_group("Destructibles")
+	_load_textures_once()
 	_apply_block_dimensions()
 
 	set_deferred("freeze", true)
@@ -30,7 +50,39 @@ func _ready() -> void:
 	max_contacts_reported = 4
 	body_entered.connect(_on_impact)
 
-	_setup_procedural_cracks()
+func _load_textures_once() -> void:
+	if tex_wood == null:
+		tex_wood = _safe_load_tex("res://assets/sprites/obstacles/wood_block_plank.svg")
+		tex_stone = _safe_load_tex("res://assets/sprites/obstacles/stone_block_brick.svg")
+		tex_glass = _safe_load_tex("res://assets/sprites/obstacles/glass_block_ice.svg")
+		tex_steel = _safe_load_tex("res://assets/sprites/obstacles/steel_block_beam.svg")
+
+		tex_crack_wood_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_wood_light.svg")
+		tex_crack_wood_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_wood_heavy.svg")
+		tex_crack_stone_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_stone_light.svg")
+		tex_crack_stone_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_stone_heavy.svg")
+		tex_crack_glass_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_glass_light.svg")
+		tex_crack_glass_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_glass_heavy.svg")
+		tex_crack_steel_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_steel_light.svg")
+		tex_crack_steel_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_steel_heavy.svg")
+
+		tex_shard_wood = _safe_load_tex("res://assets/sprites/vfx/debris_wood_shard.svg")
+		tex_shard_stone = _safe_load_tex("res://assets/sprites/vfx/debris_stone_shard.svg")
+		tex_shard_glass = _safe_load_tex("res://assets/sprites/vfx/debris_glass_shard.svg")
+		tex_smoke_puff = _safe_load_tex("res://assets/sprites/vfx/smoke_puff_cartoon.svg")
+
+func _safe_load_tex(path: String) -> Texture2D:
+	if ResourceLoader.exists(path):
+		var res = load(path)
+		if res: return res
+	var global_path = ProjectSettings.globalize_path(path)
+	if FileAccess.file_exists(global_path):
+		var img = Image.load_from_file(global_path)
+		if img:
+			var tex = ImageTexture.create_from_image(img)
+			tex.resource_path = path
+			return tex
+	return null
 
 func _apply_block_dimensions() -> void:
 	if col_shape:
@@ -41,75 +93,61 @@ func _apply_block_dimensions() -> void:
 	var hw = block_size.x * 0.5
 	var hh = block_size.y * 0.5
 
-	if visual_mesh:
-		visual_mesh.polygon = PackedVector2Array([
-			Vector2(-hw, -hh),
-			Vector2(hw, -hh),
-			Vector2(hw, hh),
-			Vector2(-hw, hh)
-		])
+	if block_visual:
+		block_visual.size = block_size
+		block_visual.position = Vector2(-hw, -hh)
+		block_visual.modulate = Color.WHITE
+
+	if crack_stage1:
+		crack_stage1.size = block_size
+		crack_stage1.position = Vector2(-hw, -hh)
+		crack_stage1.visible = false
+
+	if crack_stage2:
+		crack_stage2.size = block_size
+		crack_stage2.position = Vector2(-hw, -hh)
+		crack_stage2.visible = false
 
 	match material_type:
 		"wood":
 			max_health = 130.0
 			mass = (block_size.x * block_size.y) * 0.0016
-			if visual_mesh: visual_mesh.color = Color(0.76, 0.52, 0.28, 1.0)
+			if block_visual: block_visual.texture = tex_wood
+			if crack_stage1: crack_stage1.texture = tex_crack_wood_l
+			if crack_stage2: crack_stage2.texture = tex_crack_wood_h
+			if fracture_particles: fracture_particles.color = Color(0.85, 0.60, 0.30)
 		"stone":
 			max_health = 340.0
 			mass = (block_size.x * block_size.y) * 0.0048
-			if visual_mesh: visual_mesh.color = Color(0.55, 0.58, 0.62, 1.0)
+			if block_visual: block_visual.texture = tex_stone
+			if crack_stage1: crack_stage1.texture = tex_crack_stone_l
+			if crack_stage2: crack_stage2.texture = tex_crack_stone_h
+			if fracture_particles: fracture_particles.color = Color(0.65, 0.68, 0.72)
 		"glass":
-			max_health = 35.0
+			max_health = 40.0
 			mass = (block_size.x * block_size.y) * 0.0008
-			if visual_mesh: visual_mesh.color = Color(0.65, 0.88, 0.95, 0.75)
+			if block_visual: block_visual.texture = tex_glass
+			if crack_stage1: crack_stage1.texture = tex_crack_glass_l
+			if crack_stage2: crack_stage2.texture = tex_crack_glass_h
+			if fracture_particles: fracture_particles.color = Color(0.60, 0.90, 0.98, 0.85)
 		"steel":
 			max_health = 650.0
 			mass = (block_size.x * block_size.y) * 0.0070
-			if visual_mesh: visual_mesh.color = Color(0.35, 0.42, 0.5, 1.0)
+			if block_visual: block_visual.texture = tex_steel
+			if crack_stage1: crack_stage1.texture = tex_crack_steel_l
+			if crack_stage2: crack_stage2.texture = tex_crack_steel_h
+			if fracture_particles: fracture_particles.color = Color(0.45, 0.52, 0.60)
 		"obsidian":
 			max_health = 950.0
 			mass = (block_size.x * block_size.y) * 0.0100
-			if visual_mesh: visual_mesh.color = Color(0.18, 0.12, 0.22, 1.0)
+			if block_visual:
+				block_visual.texture = tex_stone
+				block_visual.modulate = Color(0.25, 0.12, 0.32, 1.0)
+			if crack_stage1: crack_stage1.texture = tex_crack_stone_l
+			if crack_stage2: crack_stage2.texture = tex_crack_stone_h
+			if fracture_particles: fracture_particles.color = Color(0.35, 0.18, 0.45)
 
 	current_health = max_health
-
-func _setup_procedural_cracks() -> void:
-	var existing_overlay = get_node_or_null("CrackOverlay")
-	if existing_overlay:
-		existing_overlay.queue_free()
-
-	var hw = block_size.x * 0.5
-	var hh = block_size.y * 0.5
-
-	# Crack Stage 1 (< 70% HP): Vết nứt chân chim thanh mảnh
-	crack_stage1 = Line2D.new()
-	crack_stage1.width = 1.6
-	crack_stage1.default_color = Color(0.15, 0.1, 0.08, 0.8)
-	crack_stage1.visible = false
-	var pts1 = PackedVector2Array()
-	var steps = 4
-	for i in range(steps + 1):
-		var t = float(i) / float(steps)
-		var x = lerp(-hw * 0.7, hw * 0.7, t)
-		var y = (randf() - 0.5) * hh * 0.7
-		pts1.append(Vector2(x, y))
-	crack_stage1.points = pts1
-	add_child(crack_stage1)
-
-	# Crack Stage 2 (< 35% HP): Vết nứt mạng nhện vỡ vụn
-	crack_stage2 = Line2D.new()
-	crack_stage2.width = 2.4
-	crack_stage2.default_color = Color(0.1, 0.05, 0.05, 0.95)
-	crack_stage2.visible = false
-	var pts2 = PackedVector2Array([
-		Vector2(-hw * 0.8, -hh * 0.5),
-		Vector2(-hw * 0.3, hh * 0.3),
-		Vector2(0, -hh * 0.6),
-		Vector2(hw * 0.4, hh * 0.5),
-		Vector2(hw * 0.85, -hh * 0.2)
-	])
-	crack_stage2.points = pts2
-	add_child(crack_stage2)
 
 func _process(delta: float) -> void:
 	if spawn_settle_timer > 0.0:
@@ -145,8 +183,8 @@ func _on_impact(body: Node) -> void:
 
 	if body is RigidBody2D:
 		var rel_vel = (linear_velocity - body.linear_velocity).length()
-		if rel_vel > 130.0:
-			var impact_dmg = (rel_vel - 130.0) * (body.mass * 0.45)
+		if rel_vel > 115.0:
+			var impact_dmg = (rel_vel - 115.0) * (body.mass * 0.5)
 			take_damage(impact_dmg, global_position)
 
 func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
@@ -156,16 +194,17 @@ func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
 
 	current_health -= amount
 
+	# Vết nứt đa tầng chuẩn Angry Birds
 	if current_health <= max_health * 0.70 and crack_stage1:
 		crack_stage1.visible = true
 	if current_health <= max_health * 0.35 and crack_stage2:
 		crack_stage2.visible = true
 
-	if visual_mesh:
-		var prev_c = visual_mesh.color
-		visual_mesh.color = Color(1.0, 1.0, 1.0, 1.0)
+	if block_visual:
+		var orig_mod = block_visual.modulate
+		block_visual.modulate = Color(1.8, 1.8, 1.8, 1.0)
 		var flash_tween = create_tween()
-		flash_tween.tween_property(visual_mesh, "color", prev_c, 0.05)
+		flash_tween.tween_property(block_visual, "modulate", orig_mod, 0.07)
 
 	if current_health <= 0.0:
 		_fracture_block()
@@ -174,7 +213,6 @@ func _fracture_block() -> void:
 	if is_destroyed: return
 	is_destroyed = true
 
-	# Đánh thức toàn bộ các khối lân cận trước khi biến mất để chống dính lơ lửng!
 	_wake_up_neighbors()
 
 	GameManager.add_score(250 if material_type in ["steel", "obsidian"] else (150 if material_type == "stone" else 75))
@@ -187,11 +225,17 @@ func _fracture_block() -> void:
 			"glass": snd.play_glass_break()
 			"steel": snd.play_wood_break()
 
+	# 1. Bắn khói Comic Puff bồng bềnh
+	_spawn_comic_smoke_poof()
+
+	# 2. Bắn các mảnh vỡ vật lý (Flying Shards)
+	_spawn_flying_shards()
+
 	if fracture_particles:
 		fracture_particles.restart()
 		fracture_particles.emitting = true
 
-	if visual_mesh: visual_mesh.visible = false
+	if block_visual: block_visual.visible = false
 	if crack_stage1: crack_stage1.visible = false
 	if crack_stage2: crack_stage2.visible = false
 
@@ -200,5 +244,53 @@ func _fracture_block() -> void:
 
 	CameraShake.add_trauma(0.12 if material_type in ["steel", "obsidian"] else 0.08)
 
-	await get_tree().create_timer(0.4).timeout
+	await get_tree().create_timer(0.45).timeout
 	queue_free()
+
+func _spawn_comic_smoke_poof() -> void:
+	if not tex_smoke_puff: return
+	var p = get_parent()
+	if not p: return
+
+	var puff = Sprite2D.new()
+	puff.texture = tex_smoke_puff
+	puff.global_position = global_position
+	puff.scale = Vector2(0.2, 0.2)
+	puff.modulate = Color(1, 1, 1, 0.95)
+	p.add_child(puff)
+
+	var tween = puff.create_tween()
+	tween.parallel().tween_property(puff, "scale", Vector2(0.85, 0.85), 0.32).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(puff, "modulate:a", 0.0, 0.32).set_trans(Tween.TRANS_SINE)
+	tween.parallel().tween_property(puff, "rotation", randf_range(-0.8, 0.8), 0.32)
+	tween.tween_callback(puff.queue_free)
+
+func _spawn_flying_shards() -> void:
+	var shard_tex: Texture2D = tex_shard_wood
+	if material_type in ["stone", "obsidian"]:
+		shard_tex = tex_shard_stone
+	elif material_type == "glass":
+		shard_tex = tex_shard_glass
+	elif material_type == "steel":
+		shard_tex = tex_shard_stone
+
+	if not shard_tex: return
+	var p = get_parent()
+	if not p: return
+
+	for i in range(3):
+		var shard = Sprite2D.new()
+		shard.texture = shard_tex
+		shard.global_position = global_position + Vector2(randf_range(-15, 15), randf_range(-8, 8))
+		shard.scale = Vector2(0.65, 0.65)
+		p.add_child(shard)
+
+		var target_offset = Vector2(randf_range(-60, 60), randf_range(-70, -20))
+		var fall_y = target_offset.y + randf_range(80, 140)
+
+		var tween = shard.create_tween()
+		tween.tween_property(shard, "global_position", shard.global_position + target_offset, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(shard, "rotation", randf_range(-3.0, 3.0), 0.5)
+		tween.tween_property(shard, "global_position:y", shard.global_position.y + fall_y, 0.32).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tween.parallel().tween_property(shard, "modulate:a", 0.0, 0.32)
+		tween.tween_callback(shard.queue_free)

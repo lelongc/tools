@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 64" width="128" height="64">
+  <!-- Subtle inner drop shadow -->
+  <path d="M15 28 Q45 22, 65 30 T115 26" fill="none" stroke="#260f02" stroke-width="2.8" stroke-linecap="round"/>
+  <path d="M42 25 L48 16 M85 30 L92 38 M60 28 L56 36" fill="none" stroke="#260f02" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- Highlight on lower edge for 3D depth -->
+  <path d="M16 29.5 Q45 23.5, 65 31.5 T115 27.5" fill="none" stroke="#fcd34d" stroke-width="1" opacity="0.6"/>
+</svg>

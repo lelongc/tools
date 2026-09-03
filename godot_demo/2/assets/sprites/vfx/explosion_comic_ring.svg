@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <defs>
+    <radialGradient id="ringGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="65%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="78%" stop-color="#f59e0b" stop-opacity="0.9"/>
+      <stop offset="88%" stop-color="#ef4444" stop-opacity="1"/>
+      <stop offset="96%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#451a03" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Cartoon Shockwave Outer Outline -->
+  <circle cx="80" cy="80" r="74" fill="none" stroke="#7c2d12" stroke-width="4"/>
+  <!-- Vibrant Yellow/Orange Shockwave Body -->
+  <circle cx="80" cy="80" r="70" fill="none" stroke="#fbbf24" stroke-width="8"/>
+  <circle cx="80" cy="80" r="66" fill="none" stroke="#ffffff" stroke-width="3"/>
+  <circle cx="80" cy="80" r="75" fill="url(#ringGrad)"/>
+</svg>

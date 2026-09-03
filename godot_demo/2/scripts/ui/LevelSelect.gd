@@ -14,6 +14,9 @@ func _ready() -> void:
 	btn_prev_world.pressed.connect(_prev_world)
 	btn_next_world.pressed.connect(_next_world)
 
+	if has_node("/root/LocalizationManager"):
+		get_node("/root/LocalizationManager").language_changed.connect(func(_c): _render_world_levels())
+
 	_update_total_stars()
 	_render_world_levels()
 

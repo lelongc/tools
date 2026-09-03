@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 64" width="128" height="64">
+  <defs>
+    <linearGradient id="stoneGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#949ba6"/>
+      <stop offset="50%" stop-color="#737a85"/>
+      <stop offset="100%" stop-color="#555c66"/>
+    </linearGradient>
+    <linearGradient id="stoneHighlight" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#b8c0cc" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#949ba6" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="stoneShadow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2d333b" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#1f2329" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base Stone Rect -->
+  <rect x="2" y="2" width="124" height="60" rx="5" fill="url(#stoneGrad)" stroke="#22262c" stroke-width="3"/>
+
+  <!-- 3D Chiseled Bevel -->
+  <path d="M4 5 H124 L119 11 H9 Z" fill="url(#stoneHighlight)"/>
+  <path d="M9 53 H119 L124 59 H4 Z" fill="url(#stoneShadow)"/>
+
+  <!-- Chiseled Edge Chips -->
+  <polygon points="2,16 9,19 2,24" fill="#505660"/>
+  <polygon points="126,38 119,42 126,46" fill="#383d45"/>
+  <polygon points="50,2 55,8 64,2" fill="#505660"/>
+
+  <!-- Masonry Texture Flecks -->
+  <rect x="22" y="18" width="8" height="4" rx="1.5" fill="#4b515b" opacity="0.6"/>
+  <rect x="75" y="22" width="10" height="5" rx="2" fill="#5a616d" opacity="0.7"/>
+  <rect x="42" y="38" width="14" height="4" rx="1.5" fill="#444952" opacity="0.6"/>
+  <rect x="94" y="42" width="7" height="3" rx="1" fill="#5a616d" opacity="0.6"/>
+
+  <!-- Subtle Surface Weathering Lines -->
+  <path d="M28 32 L40 33 L46 38" fill="none" stroke="#3b4047" stroke-width="1.8" opacity="0.6"/>
+  <path d="M82 15 L88 20 L98 18" fill="none" stroke="#3b4047" stroke-width="1.8" opacity="0.6"/>
+</svg>

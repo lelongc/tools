@@ -1,14 +1,13 @@
-[gd_scene format=3 uid="uid://dm3k9v8q1x2p5"]
+[gd_scene format=3 uid="uid://c6xk7b0q3p2r5"]
 
 [ext_resource type="Script" path="res://scripts/ui/MainMenu.gd" id="1_script"]
 [ext_resource type="Script" path="res://scripts/ui/JuicyButton.gd" id="2_btn"]
 [ext_resource type="Texture2D" path="res://assets/ui/icons/btn_play.svg" id="3_play_ico"]
 [ext_resource type="Texture2D" path="res://assets/ui/icons/btn_level_select.svg" id="4_lvl_ico"]
 [ext_resource type="Texture2D" path="res://assets/ui/icons/btn_sound_on.svg" id="5_snd_ico"]
-[ext_resource type="Texture2D" path="res://assets/ui/icons/icon_star.svg" id="6_star_ico"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_TopBar"]
-bg_color = Color(0.11, 0.03, 0.21, 0.85)
+bg_color = Color(0.12, 0.05, 0.22, 0.85)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -18,12 +17,12 @@ corner_radius_bottom_right = 16
 corner_radius_bottom_left = 16
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_StarBadge"]
-bg_color = Color(0.16, 0.08, 0.26, 0.9)
+bg_color = Color(0.2, 0.09, 0.32, 0.9)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
-border_width_bottom = 3
-border_color = Color(1, 0.84, 0, 1)
+border_width_bottom = 2
+border_color = Color(1, 0.84, 0, 0.6)
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
@@ -45,7 +44,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.11, 0.03, 0.21, 1)
+mouse_filter = 2
+color = Color(0.13, 0.04, 0.24, 1)
 
 [node name="CavernGlow" type="Polygon2D" parent="Background"]
 color = Color(0.25, 0.1, 0.38, 0.6)
@@ -65,78 +65,6 @@ position = Vector2(480, 820)
 color = Color(1, 0.4, 0.8, 0.7)
 polygon = PackedVector2Array(0, -25, 12, -8, 6, 18, -6, 18, -12, -8)
 
-[node name="TopBar" type="PanelContainer" parent="."]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_left = 12.0
-offset_top = 16.0
-offset_right = -12.0
-offset_bottom = 68.0
-grow_horizontal = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_TopBar")
-
-[node name="Margin" type="MarginContainer" parent="TopBar"]
-layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 4
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 4
-
-[node name="HBox" type="HBoxContainer" parent="TopBar/Margin"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="StarBadge" type="PanelContainer" parent="TopBar/Margin/HBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_StarBadge")
-
-[node name="StarMargin" type="MarginContainer" parent="TopBar/Margin/HBox/StarBadge"]
-layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_right = 8
-
-[node name="TotalStarsLabel" type="Label" parent="TopBar/Margin/HBox/StarBadge/StarMargin"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 17
-text = "⭐ 0 / 180"
-vertical_alignment = 1
-
-[node name="CoinBadge" type="PanelContainer" parent="TopBar/Margin/HBox"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_StarBadge")
-
-[node name="CoinMargin" type="MarginContainer" parent="TopBar/Margin/HBox/CoinBadge"]
-layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_right = 8
-
-[node name="TotalCoinsLabel" type="Label" parent="TopBar/Margin/HBox/CoinBadge/CoinMargin"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 17
-text = "🪙 150"
-vertical_alignment = 1
-
-[node name="BtnLang" type="Button" parent="TopBar/Margin/HBox"]
-custom_minimum_size = Vector2(110, 38)
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "🇺🇸 English"
-script = ExtResource("2_btn")
-
-[node name="BtnSound" type="Button" parent="TopBar/Margin/HBox"]
-custom_minimum_size = Vector2(85, 38)
-layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "🔊 BẬT"
-icon = ExtResource("5_snd_ico")
-expand_icon = true
-script = ExtResource("2_btn")
-
 [node name="CenterContainer" type="CenterContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -144,6 +72,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
 layout_mode = 2
@@ -179,6 +108,7 @@ horizontal_alignment = 1
 [node name="Spacer" type="Control" parent="CenterContainer/VBoxContainer"]
 custom_minimum_size = Vector2(0, 20)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="BtnPlay" type="Button" parent="CenterContainer/VBoxContainer"]
 custom_minimum_size = Vector2(290, 68)
@@ -221,7 +151,87 @@ anchor_bottom = 1.0
 offset_top = -45.0
 grow_horizontal = 2
 grow_vertical = 0
+mouse_filter = 2
 theme_override_colors/font_color = Color(0.75, 0.7, 0.85, 0.8)
 theme_override_font_sizes/font_size = 13
 text = "Vật lý phá hủy • 7 Loại Trứng Dị Biến • 4 Thế Giới"
 horizontal_alignment = 1
+
+[node name="TopBar" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 12.0
+offset_top = 16.0
+offset_right = -12.0
+offset_bottom = 68.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_TopBar")
+
+[node name="Margin" type="MarginContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 4
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 4
+
+[node name="HBox" type="HBoxContainer" parent="TopBar/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="StarBadge" type="PanelContainer" parent="TopBar/Margin/HBox"]
+custom_minimum_size = Vector2(95, 38)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_StarBadge")
+
+[node name="StarMargin" type="MarginContainer" parent="TopBar/Margin/HBox/StarBadge"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 8
+
+[node name="TotalStarsLabel" type="Label" parent="TopBar/Margin/HBox/StarBadge/StarMargin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "⭐ 0 / 180"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CoinBadge" type="PanelContainer" parent="TopBar/Margin/HBox"]
+custom_minimum_size = Vector2(85, 38)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_StarBadge")
+
+[node name="CoinMargin" type="MarginContainer" parent="TopBar/Margin/HBox/CoinBadge"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_right = 8
+
+[node name="TotalCoinsLabel" type="Label" parent="TopBar/Margin/HBox/CoinBadge/CoinMargin"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "🪙 150"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="TopBar/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="BtnLang" type="Button" parent="TopBar/Margin/HBox"]
+custom_minimum_size = Vector2(120, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "🇻🇳 Tiếng Việt"
+script = ExtResource("2_btn")
+is_wood_brown = true
+
+[node name="BtnSound" type="Button" parent="TopBar/Margin/HBox"]
+custom_minimum_size = Vector2(44, 38)
+layout_mode = 2
+icon = ExtResource("5_snd_ico")
+expand_icon = true
+script = ExtResource("2_btn")
+is_wood_brown = true

@@ -2,6 +2,7 @@ extends RigidBody2D
 class_name TNTBarrel
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
+const CartoonExplosionFX = preload("res://scripts/core/CartoonExplosionFX.gd")
 
 @export var explosion_radius: float = 220.0
 @export var explosion_force: float = 1200.0
@@ -71,6 +72,8 @@ func _detonate() -> void:
 
 	if has_node("/root/SoundManager"):
 		get_node("/root/SoundManager").play_explosion()
+
+	CartoonExplosionFX.spawn_comic_explosion(get_parent(), global_position, explosion_radius)
 
 	set_deferred("freeze", true)
 	if visual: visual.visible = false

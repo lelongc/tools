@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 64" width="128" height="64">
+  <!-- Radial crack from center point -->
+  <path d="M58 32 L35 22 L15 28 M58 32 L46 48 L28 54 M58 32 L78 20 L98 16 M58 32 L82 40 L110 36 M58 32 L64 12" 
+        fill="none" stroke="#181a1f" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Highlight edges -->
+  <path d="M35 23 L15 29 M46 49 L28 55 M78 21 L98 17 M82 41 L110 37" 
+        fill="none" stroke="#d1d5db" stroke-width="1.0" opacity="0.6" stroke-linejoin="round"/>
+</svg>

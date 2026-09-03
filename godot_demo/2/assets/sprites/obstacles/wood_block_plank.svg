@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 64" width="128" height="64">
+  <defs>
+    <linearGradient id="woodGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#df9648"/>
+      <stop offset="40%" stop-color="#c67d38"/>
+      <stop offset="100%" stop-color="#9a5a20"/>
+    </linearGradient>
+    <linearGradient id="bevelTop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f8bf78" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#df9648" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="bevelBottom" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4d2407" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#3b1903" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base Block with Border -->
+  <rect x="2" y="2" width="124" height="60" rx="6" fill="url(#woodGrad)" stroke="#421d05" stroke-width="3"/>
+
+  <!-- 3D Bevel Lighting -->
+  <path d="M4 5 H124 L120 10 H8 Z" fill="url(#bevelTop)"/>
+  <path d="M8 54 H120 L124 59 H4 Z" fill="url(#bevelBottom)"/>
+
+  <!-- Wood Grain Lines -->
+  <path d="M12 20 Q40 16, 75 22 T116 19" fill="none" stroke="#874716" stroke-width="2.5" stroke-linecap="round" opacity="0.75"/>
+  <path d="M14 34 Q55 38, 90 32 T114 36" fill="none" stroke="#753a0d" stroke-width="2" stroke-linecap="round" opacity="0.65"/>
+  <path d="M18 46 Q45 43, 70 48 T110 44" fill="none" stroke="#683109" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+
+  <!-- Knot detail -->
+  <ellipse cx="85" cy="27" rx="8" ry="4" fill="none" stroke="#753a0d" stroke-width="2" opacity="0.7"/>
+  <ellipse cx="85" cy="27" rx="3" ry="1.5" fill="#683109" opacity="0.8"/>
+
+  <!-- Metal Corner Brackets & Screws/Nails -->
+  <!-- Top-Left Nail -->
+  <circle cx="9" cy="9" r="3.5" fill="#e2e8f0" stroke="#334155" stroke-width="1.2"/>
+  <circle cx="8" cy="8" r="1.2" fill="#ffffff"/>
+  <!-- Top-Right Nail -->
+  <circle cx="119" cy="9" r="3.5" fill="#e2e8f0" stroke="#334155" stroke-width="1.2"/>
+  <circle cx="118" cy="8" r="1.2" fill="#ffffff"/>
+  <!-- Bottom-Left Nail -->
+  <circle cx="9" cy="55" r="3.5" fill="#cbd5e1" stroke="#1e293b" stroke-width="1.2"/>
+  <circle cx="8" cy="54" r="1.2" fill="#ffffff"/>
+  <!-- Bottom-Right Nail -->
+  <circle cx="119" cy="55" r="3.5" fill="#cbd5e1" stroke="#1e293b" stroke-width="1.2"/>
+  <circle cx="118" cy="54" r="1.2" fill="#ffffff"/>
+</svg>

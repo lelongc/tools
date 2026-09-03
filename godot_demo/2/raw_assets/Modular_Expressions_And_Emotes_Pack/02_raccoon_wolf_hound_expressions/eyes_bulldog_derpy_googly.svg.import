@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ynl0sshfmy33"
-path="res://.godot/imported/eyes_bulldog_derpy_googly.svg-bd5d07e95ed8e2232bf4191ae2fcc62d.ctex"
+path="res://.godot/imported/eyes_bulldog_derpy_googly.svg-2932f6c9cee1255b62b154b71eebd842.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/enemies/modular_expressions/02_raccoon_wolf_hound_expressions/eyes_bulldog_derpy_googly.svg"
-dest_files=["res://.godot/imported/eyes_bulldog_derpy_googly.svg-bd5d07e95ed8e2232bf4191ae2fcc62d.ctex"]
+source_file="res://raw_assets/Modular_Expressions_And_Emotes_Pack/02_raccoon_wolf_hound_expressions/eyes_bulldog_derpy_googly.svg"
+dest_files=["res://.godot/imported/eyes_bulldog_derpy_googly.svg-2932f6c9cee1255b62b154b71eebd842.ctex"]
 
 [params]
 
