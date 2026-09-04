@@ -2,8 +2,6 @@ extends RigidBody2D
 class_name BunkerMonster
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
-const ComicScorePopup = preload("res://scripts/core/ComicScorePopup.gd")
 
 enum State {
 	IDLE,
@@ -131,7 +129,8 @@ func _ready() -> void:
 	if dizzy_stars: dizzy_stars.visible = false
 	if emote_sprite: emote_sprite.visible = false
 	if poof_fx:
-		ParticleHelper.apply_smoke_fx(poof_fx, 0.35, 0.7)
+		ParticleHelper.apply_feather_fx(poof_fx, 0.35, 0.7)
+		poof_fx.color = Color(1.0, 0.88, 0.2, 0.95)
 
 	if has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
@@ -1261,8 +1260,8 @@ func _defeat_monster() -> void:
 	if visual_root:
 		visual_root.visible = false
 
-	# Nở bung các đám mây khói Comic Puff bồng bềnh
-	_spawn_monster_poof_clouds()
+	# Nở bung hiệu ứng tiêu diệt quái vật hoạt hình độc bản (Bụi đất nhân vật + Sao váng đầu xoay tròn + Lông thú/giáp vụn, KHÔNG dùng hạt trứng vỡ)
+	ParticleHelper.spawn_monster_defeat_fx(get_parent(), global_position, monster_type)
 
 	if poof_fx:
 		poof_fx.restart()
@@ -1270,30 +1269,3 @@ func _defeat_monster() -> void:
 
 	await get_tree().create_timer(0.38).timeout
 	queue_free()
-
-static var tex_comic_smoke: Texture2D = null
-
-func _spawn_monster_poof_clouds() -> void:
-	if tex_comic_smoke == null:
-		tex_comic_smoke = ParticleHelper._safe_load("res://assets/sprites/vfx/smoke_puff_cartoon.svg")
-	var p = get_parent()
-	if not p or not tex_comic_smoke: return
-
-	# Tạo chùm 4 đám mây khói hoạt hình bung nở mềm mại
-	for i in range(4):
-		var puff = Sprite2D.new()
-		puff.texture = tex_comic_smoke
-		var offset = Vector2(randf_range(-15, 15), randf_range(-15, 15))
-		puff.global_position = global_position + offset
-		puff.scale = Vector2(0.25, 0.25)
-		puff.modulate = Color(1.0, 1.0, 1.0, 0.95)
-		p.add_child(puff)
-
-		var tween = puff.create_tween()
-		var target_scale = randf_range(0.80, 1.15)
-		var target_offset = offset * 2.2 + Vector2(randf_range(-16, 16), randf_range(-22, -6))
-		tween.parallel().tween_property(puff, "scale", Vector2(target_scale, target_scale), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		tween.parallel().tween_property(puff, "position", puff.position + target_offset, 0.35)
-		tween.parallel().tween_property(puff, "modulate:a", 0.0, 0.35).set_trans(Tween.TRANS_SINE)
-		tween.parallel().tween_property(puff, "rotation", randf_range(-1.2, 1.2), 0.35)
-		tween.tween_callback(puff.queue_free)

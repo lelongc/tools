@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 32" width="16" height="32">
+  <!-- Tapered aerodynamic wind streak -->
+  <path d="M8 0 C10 8 11 20 8 32 C5 20 6 8 8 0 Z" fill="#ffffff"/>
+  <!-- Micro dash -->
+  <circle cx="8" cy="28" r="2" fill="#ffffff" opacity="0.75"/>
+</svg>

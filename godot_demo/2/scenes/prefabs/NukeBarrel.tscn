@@ -1,6 +1,8 @@
 [gd_scene format=3 uid="uid://dm8k1v4q7x3p9"]
 
 [ext_resource type="Script" path="res://scripts/destructibles/NukeBarrel.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/particle_spark_star.svg" id="2_spark"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/smoke_puff_cartoon.svg" id="3_smoke"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(40, 52)
@@ -20,6 +22,7 @@ shape = SubResource("RectangleShape2D_1")
 scale = Vector2(0.83, 0.83)
 
 [node name="RadiationSparks" type="CPUParticles2D" parent="."]
+texture = ExtResource("2_spark")
 emitting = false
 amount = 25
 lifetime = 0.3
@@ -27,11 +30,12 @@ spread = 180.0
 gravity = Vector2(0, -100)
 initial_velocity_min = 40.0
 initial_velocity_max = 90.0
-scale_amount_min = 2.0
-scale_amount_max = 5.0
+scale_amount_min = 0.22
+scale_amount_max = 0.45
 color = Color(0.3, 1, 0.3, 0.9)
 
 [node name="NukeFX" type="CPUParticles2D" parent="."]
+texture = ExtResource("3_smoke")
 emitting = false
 amount = 80
 lifetime = 0.7
@@ -41,6 +45,6 @@ spread = 180.0
 gravity = Vector2(0, 400)
 initial_velocity_min = 160.0
 initial_velocity_max = 340.0
-scale_amount_min = 6.0
-scale_amount_max = 12.0
+scale_amount_min = 0.4
+scale_amount_max = 0.85
 color = Color(0.4, 1, 0.2, 1)

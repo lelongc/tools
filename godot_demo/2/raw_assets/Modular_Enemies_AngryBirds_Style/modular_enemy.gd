@@ -1,6 +1,6 @@
 # modular_enemy.gd
 extends RigidBody2D
-class_name ModularEnemy
+# class_name ModularEnemy (duplicate of assets/enemies/modular/modular_enemy.gd)
 
 @export var max_health: float = 100.0
 var current_health: float

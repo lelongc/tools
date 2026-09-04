@@ -164,10 +164,10 @@ func _start_spin_physics() -> void:
 		if prize["type"] == "coins":
 			sm.add_coins(prize["amount"])
 			if result_banner:
-				result_banner.text = "🎉 Chúc mừng! Bạn nhận được %s!" % prize["name"]
+				result_banner.text = "CHÚC MỪNG! BẠN NHẬN ĐƯỢC %s!" % prize["name"]
 		elif prize["type"] == "egg":
 			sm.add_consumable(prize["egg_type"], 1)
 			if result_banner:
-				result_banner.text = "🎉 Chúc mừng! Bạn nhận được %s!" % prize["name"]
+				result_banner.text = "CHÚC MỪNG! BẠN NHẬN ĐƯỢC %s!" % prize["name"]
 
 	_update_spin_button_state()

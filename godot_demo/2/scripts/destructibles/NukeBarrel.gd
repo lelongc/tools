@@ -2,8 +2,6 @@ extends RigidBody2D
 class_name NukeBarrel
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
-const CartoonExplosionFX = preload("res://scripts/core/CartoonExplosionFX.gd")
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 @export var explosion_radius: float = 175.0
 @export var explosion_force: float = 1100.0
@@ -23,9 +21,9 @@ func _ready() -> void:
 		if tex: visual_sprite.texture = tex
 
 	if radiation_sparks:
-		ParticleHelper.apply_spark_fx(radiation_sparks, 0.3, 0.6)
+		ParticleHelper.apply_spark_fx(radiation_sparks, 0.22, 0.45)
 	if nuke_fx:
-		ParticleHelper.apply_circle_fx(nuke_fx, 0.45, 1.0)
+		ParticleHelper.apply_smoke_fx(nuke_fx, 0.4, 0.85)
 
 	set_deferred("freeze", true)
 	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
@@ -86,6 +84,8 @@ func _detonate_nuke() -> void:
 		get_node("/root/SoundManager").play_synth_tone(70.0, 0.8, "boom", 4.0)
 
 	CartoonExplosionFX.spawn_comic_explosion(get_parent(), global_position, explosion_radius)
+	# Khói độc phóng xạ neon xanh lá đặc trưng của thùng Nuke
+	ParticleHelper.spawn_egg_break_fx(get_parent(), global_position, "acid", false)
 
 	set_deferred("freeze", true)
 	if visual_sprite: visual_sprite.visible = false

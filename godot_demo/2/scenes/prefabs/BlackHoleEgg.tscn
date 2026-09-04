@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dm2k8v5q7x4p1"]
 
 [ext_resource type="Script" path="res://scripts/projectiles/BlackHoleEgg.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/particle_void_spiral.svg" id="2_void"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1"]
 radius = 16.0
@@ -22,6 +23,7 @@ shape = SubResource("CircleShape2D_1")
 scale = Vector2(0.75, 0.75)
 
 [node name="VortexFX" type="CPUParticles2D" parent="."]
+texture = ExtResource("2_void")
 emitting = false
 amount = 45
 lifetime = 0.5
@@ -31,6 +33,6 @@ orbit_velocity_min = 2.0
 orbit_velocity_max = 5.0
 radial_accel_min = -250.0
 radial_accel_max = -150.0
-scale_amount_min = 4.0
-scale_amount_max = 8.0
+scale_amount_min = 0.3
+scale_amount_max = 0.65
 color = Color(0.7, 0.3, 1, 0.9)

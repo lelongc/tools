@@ -2,8 +2,6 @@ extends RigidBody2D
 class_name DestructibleBlock
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
-const ComicScorePopup = preload("res://scripts/core/ComicScorePopup.gd")
 
 @export_enum("wood", "stone", "glass", "steel", "obsidian") var material_type: String = "wood"
 @export var max_health: float = 130.0

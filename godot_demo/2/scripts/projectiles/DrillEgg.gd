@@ -1,7 +1,6 @@
 extends RigidBody2D
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 @export var egg_name: String = "Drill Egg"
 @export var drill_duration: float = 0.85
@@ -32,6 +31,7 @@ func _ready() -> void:
 		ParticleHelper.apply_spark_fx(spark_particles, 0.3, 0.6)
 	if break_particles:
 		ParticleHelper.apply_shard_fx(break_particles, 0.3, 0.6)
+		break_particles.color = Color(0.75, 0.82, 0.9, 0.95)
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Tap-in-Flight: Chạm màn hình để kích hoạt Tên Lửa Siêu Thanh đâm cực mạnh
@@ -108,15 +108,23 @@ func _crack_and_destroy() -> void:
 	
 	set_deferred("freeze", true)
 
+	# Bắn hạt cơ khí: Khói xám công nghiệp + Mảnh thép mũi khoan + Tia lửa hàn điện
+	ParticleHelper.spawn_egg_break_fx(get_parent(), global_position, "drill", has_boosted)
+
+	if has_node("/root/SoundManager"):
+		get_node("/root/SoundManager").play_synth_tone(220.0, 0.10, "pop", 0.9)
+		get_node("/root/SoundManager").play_synth_tone(540.0, 0.12, "laser", 0.7)
+
 	if break_particles:
 		break_particles.restart()
 		break_particles.emitting = true
 
 	if visual_root:
 		var tween = create_tween()
-		tween.tween_property(visual_root, "scale", Vector2(1.4, 0.4), 0.08)
+		tween.tween_property(visual_root, "scale", Vector2(1.3, 0.5), 0.08)
 		tween.tween_property(visual_root, "modulate:a", 0.0, 0.12)
 		await tween.finished
 
 	await get_tree().create_timer(0.4).timeout
 	queue_free()
+

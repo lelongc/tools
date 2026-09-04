@@ -1,6 +1,6 @@
 # emote_controller.gd
 extends Node2D
-class_name EmoteController
+# class_name EmoteController (duplicate of assets/enemies/modular_expressions/emote_controller.gd)
 
 @onready var emote_sprite: Sprite2D = $EmoteSprite
 

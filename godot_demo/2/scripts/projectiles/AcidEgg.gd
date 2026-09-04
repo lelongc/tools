@@ -1,7 +1,6 @@
 extends RigidBody2D
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 @export var egg_name: String = "Acid Lava Egg"
 @export var puddle_radius: float = 135.0
@@ -25,7 +24,7 @@ func _ready() -> void:
 	ParticleHelper.setup_egg_visual(visual_root, "res://assets/sprites/projectiles/egg_acid.svg")
 
 	if acid_particles:
-		ParticleHelper.apply_circle_fx(acid_particles, 0.35, 0.7)
+		ParticleHelper.apply_acid_fx(acid_particles, 0.28, 0.58)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_broken and not has_boosted and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():
@@ -88,6 +87,9 @@ func _start_acid_melting() -> void:
 	if acid_particles:
 		acid_particles.restart()
 		acid_particles.emitting = true
+
+	# Bắn hạt axit: Hơi độc xanh chuối + Vảy ăn mòn + Giọt chất độc neon
+	ParticleHelper.spawn_egg_break_fx(get_parent(), global_position, "acid", false)
 
 func _physics_process(delta: float) -> void:
 	if not is_melting:

@@ -18,6 +18,14 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+
+
+
+
+
+
+
+
 GameManager="*res://scripts/core/GameManager.gd"
 SoundManager="*res://scripts/core/SoundManager.gd"
 SaveManager="*res://scripts/core/SaveManager.gd"

@@ -1,6 +1,5 @@
 extends CanvasLayer
 
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 const EGG_TEXTURES: Dictionary = {
 	"normal": "res://assets/sprites/projectiles/egg_normal.svg",
@@ -154,32 +153,33 @@ func _refresh_egg_icons() -> void:
 		var tex_path = EGG_TEXTURES.get(egg_type, EGG_TEXTURES["normal"])
 		var tex = ParticleHelper._safe_load(tex_path)
 
-		var tr = TextureRect.new()
-		tr.custom_minimum_size = Vector2(24, 30)
-		tr.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
-		tr.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		var egg_rect = TextureRect.new()
+		egg_rect.custom_minimum_size = Vector2(24, 30)
+		egg_rect.expand_mode = TextureRect.EXPAND_FIT_WIDTH_PROPORTIONAL
+		egg_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		if tex:
-			tr.texture = tex
+			egg_rect.texture = tex
 
 		if i < GameManager.current_egg_index:
 			# Đã bắn: Mờ xám
-			tr.modulate = Color(0.4, 0.4, 0.4, 0.35)
-			tr.scale = Vector2(0.88, 0.88)
-			tr.pivot_offset = Vector2(12, 15)
+			egg_rect.modulate = Color(0.4, 0.4, 0.4, 0.35)
+			egg_rect.scale = Vector2(0.88, 0.88)
+			egg_rect.pivot_offset = Vector2(12, 15)
 		elif i == GameManager.current_egg_index:
 			# Trứng đang trên giỏ của Gà: Sáng nổi bật & nảy nhẹ
-			tr.modulate = Color(1.2, 1.2, 1.1, 1.0)
-			tr.scale = Vector2(1.10, 1.10)
-			tr.pivot_offset = Vector2(12, 15)
+			egg_rect.modulate = Color(1.2, 1.2, 1.1, 1.0)
+			egg_rect.scale = Vector2(1.10, 1.10)
+			egg_rect.pivot_offset = Vector2(12, 15)
 		else:
 			# Trứng trong hàng chờ
-			tr.modulate = Color(0.85, 0.85, 0.85, 0.85)
-			tr.scale = Vector2(0.95, 0.95)
-			tr.pivot_offset = Vector2(12, 15)
+			egg_rect.modulate = Color(0.85, 0.85, 0.85, 0.85)
+			egg_rect.scale = Vector2(0.95, 0.95)
+			egg_rect.pivot_offset = Vector2(12, 15)
 
-		egg_container.add_child(tr)
+		egg_container.add_child(egg_rect)
 
 func _on_score_updated(new_score: int) -> void:
+	if not is_inside_tree(): return
 	var lm = get_node_or_null("/root/LocalizationManager")
 	if score_label:
 		if lm: score_label.text = lm.t("KEY_SCORE") % new_score

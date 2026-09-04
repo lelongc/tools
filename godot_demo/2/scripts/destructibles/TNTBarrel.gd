@@ -2,8 +2,6 @@ extends RigidBody2D
 class_name TNTBarrel
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
-const CartoonExplosionFX = preload("res://scripts/core/CartoonExplosionFX.gd")
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 @export var explosion_radius: float = 130.0
 @export var explosion_force: float = 850.0
@@ -23,9 +21,9 @@ func _ready() -> void:
 		if tex: visual_sprite.texture = tex
 
 	if fuse_sparks:
-		ParticleHelper.apply_spark_fx(fuse_sparks, 0.3, 0.6)
+		ParticleHelper.apply_spark_fx(fuse_sparks, 0.2, 0.42)
 	if explosion_fx:
-		ParticleHelper.apply_circle_fx(explosion_fx, 0.35, 0.75)
+		ParticleHelper.apply_smoke_fx(explosion_fx, 0.35, 0.75)
 
 	set_deferred("freeze", true)
 	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
@@ -89,6 +87,7 @@ func _detonate() -> void:
 		get_node("/root/SoundManager").play_explosion()
 
 	CartoonExplosionFX.spawn_comic_explosion(get_parent(), global_position, explosion_radius)
+	ParticleHelper.spawn_egg_break_fx(get_parent(), global_position, "bomb", false)
 
 	set_deferred("freeze", true)
 	if visual_sprite: visual_sprite.visible = false

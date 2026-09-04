@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://c3f8k1m7q9v4w"]
 
 [ext_resource type="Script" path="res://scripts/projectiles/FrostEgg.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/particle_frost_crystal.svg" id="2_frost"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1"]
 radius = 16.0
@@ -22,6 +23,7 @@ shape = SubResource("CircleShape2D_1")
 scale = Vector2(0.75, 0.75)
 
 [node name="FrostFX" type="CPUParticles2D" parent="."]
+texture = ExtResource("2_frost")
 emitting = false
 amount = 35
 lifetime = 0.5
@@ -31,6 +33,6 @@ spread = 180.0
 gravity = Vector2(0, 300)
 initial_velocity_min = 120.0
 initial_velocity_max = 240.0
-scale_amount_min = 4.0
-scale_amount_max = 8.0
+scale_amount_min = 0.3
+scale_amount_max = 0.65
 color = Color(0.65, 0.95, 1.0, 0.9)

@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dm7k4v9q1x8p2"]
 
 [ext_resource type="Script" path="res://scripts/projectiles/ClusterChick.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/particle_feather.svg" id="2_feather"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_1"]
 bounce = 0.75
@@ -24,6 +25,7 @@ shape = SubResource("CircleShape2D_1")
 scale = Vector2(0.65, 0.65)
 
 [node name="PoofFX" type="CPUParticles2D" parent="."]
+texture = ExtResource("2_feather")
 emitting = false
 amount = 12
 lifetime = 0.35
@@ -32,6 +34,6 @@ explosiveness = 0.9
 spread = 180.0
 initial_velocity_min = 40.0
 initial_velocity_max = 110.0
-scale_amount_min = 0.3
-scale_amount_max = 0.6
+scale_amount_min = 0.25
+scale_amount_max = 0.5
 color = Color(1, 0.9, 0.4, 0.9)

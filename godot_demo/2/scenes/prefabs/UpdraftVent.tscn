@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dm6k2v8q4x1p7"]
 
 [ext_resource type="Script" path="res://scripts/destructibles/UpdraftVent.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/particle_wind_streak.svg" id="2_wind"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_1"]
 size = Vector2(80, 260)
@@ -19,6 +20,7 @@ color = Color(0.3, 0.25, 0.2, 1)
 polygon = PackedVector2Array(-40, -10, 40, -10, 36, 10, -36, 10)
 
 [node name="WindFX" type="CPUParticles2D" parent="."]
+texture = ExtResource("2_wind")
 amount = 25
 lifetime = 0.8
 emission_shape = 3
@@ -26,6 +28,6 @@ emission_rect_extents = Vector2(35, 5)
 gravity = Vector2(0, -600)
 initial_velocity_min = 100.0
 initial_velocity_max = 200.0
-scale_amount_min = 3.0
-scale_amount_max = 6.0
+scale_amount_min = 0.3
+scale_amount_max = 0.6
 color = Color(0.6, 0.9, 1, 0.6)

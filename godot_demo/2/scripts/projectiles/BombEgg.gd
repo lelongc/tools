@@ -1,8 +1,6 @@
 extends RigidBody2D
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
-const CartoonExplosionFX = preload("res://scripts/core/CartoonExplosionFX.gd")
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 @export var egg_name: String = "Bomb Egg"
 @export var explosion_radius: float = 145.0
@@ -60,6 +58,7 @@ func _detonate() -> void:
 		get_node("/root/SoundManager").play_explosion()
 
 	CartoonExplosionFX.spawn_comic_explosion(get_parent(), global_position, explosion_radius)
+	ParticleHelper.spawn_egg_break_fx(get_parent(), global_position, "bomb", false)
 
 	set_deferred("freeze", true)
 	if visual_root: visual_root.visible = false

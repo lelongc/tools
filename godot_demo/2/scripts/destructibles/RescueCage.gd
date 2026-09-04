@@ -2,8 +2,6 @@ extends RigidBody2D
 class_name RescueCage
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
-const ComicScorePopup = preload("res://scripts/core/ComicScorePopup.gd")
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 var is_broken: bool = false
 var is_awake: bool = false
@@ -29,8 +27,7 @@ func _ready() -> void:
 		if tk: chick.texture = tk
 
 	if confetti_fx:
-		var tf = ParticleHelper._safe_load("res://assets/sprites/vfx/particle_confetti_ribbon.svg")
-		if tf: confetti_fx.texture = tf
+		ParticleHelper.apply_confetti_fx(confetti_fx, 0.3, 0.65)
 
 func wake_up() -> void:
 	if is_awake: return

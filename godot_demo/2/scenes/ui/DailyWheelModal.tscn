@@ -69,11 +69,11 @@ custom_minimum_size = Vector2(280, 52)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 18
-text = "🎡 QUAY MIỄN PHÍ"
+text = "QUAY MIỄN PHÍ"
 
 [node name="BtnClose" type="Button" parent="CenterContainer/Panel/VBox"]
 custom_minimum_size = Vector2(160, 42)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 15
-text = "✕ Đóng"
+text = "Đóng"

@@ -7,7 +7,6 @@ const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 
 var is_awake: bool = false
 
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 @onready var visual_sprite: Sprite2D = get_node_or_null("VisualSprite")
 @onready var dust_fx: CPUParticles2D = get_node_or_null("DustFX")

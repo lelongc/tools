@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dm4k7v1q9x2p8"]
 
 [ext_resource type="Script" path="res://scripts/projectiles/AcidEgg.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/particle_acid_drop.svg" id="2_acid"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1"]
 radius = 16.0
@@ -22,6 +23,7 @@ shape = SubResource("CircleShape2D_1")
 scale = Vector2(0.75, 0.75)
 
 [node name="AcidFX" type="CPUParticles2D" parent="."]
+texture = ExtResource("2_acid")
 emitting = false
 amount = 40
 lifetime = 0.6
@@ -29,6 +31,6 @@ spread = 180.0
 gravity = Vector2(0, 80)
 initial_velocity_min = 60.0
 initial_velocity_max = 140.0
-scale_amount_min = 4.0
-scale_amount_max = 8.0
+scale_amount_min = 0.28
+scale_amount_max = 0.58
 color = Color(0.3, 0.95, 0.3, 0.85)

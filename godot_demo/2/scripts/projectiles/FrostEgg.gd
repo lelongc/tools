@@ -1,7 +1,6 @@
 extends RigidBody2D
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 @export var egg_name: String = "Frost Shatter Egg"
 @export var freeze_radius: float = 190.0
@@ -21,7 +20,7 @@ func _ready() -> void:
 	ParticleHelper.setup_egg_visual(visual_root, "res://assets/sprites/projectiles/egg_frost.svg")
 
 	if frost_particles:
-		ParticleHelper.apply_spark_fx(frost_particles, 0.35, 0.7)
+		ParticleHelper.apply_frost_fx(frost_particles, 0.3, 0.65)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_broken and not has_boosted and event is InputEventMouseButton and event.pressed:
@@ -91,6 +90,9 @@ func _freeze_blast() -> void:
 	if frost_particles:
 		frost_particles.restart()
 		frost_particles.emitting = true
+
+	# Bắn hạt băng tuyết: Sương lạnh băng giá + Tinh thể băng sắc nhọn + Hoa tuyết sáng lóa
+	ParticleHelper.spawn_egg_break_fx(get_parent(), global_position, "frost", false)
 
 	var space_state = get_world_2d().direct_space_state
 	var query = PhysicsShapeQueryParameters2D.new()

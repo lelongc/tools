@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dm9k1v2q7x4p8"]
 
 [ext_resource type="Script" path="res://scripts/destructibles/RollingBoulder.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/smoke_puff_cartoon.svg" id="2_smoke"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_1"]
 bounce = 0.2
@@ -23,6 +24,7 @@ shape = SubResource("CircleShape2D_1")
 scale = Vector2(0.875, 0.875)
 
 [node name="DustFX" type="CPUParticles2D" parent="."]
+texture = ExtResource("2_smoke")
 position = Vector2(0, 24)
 emitting = false
 amount = 14
@@ -31,6 +33,6 @@ spread = 60.0
 gravity = Vector2(0, -20)
 initial_velocity_min = 20.0
 initial_velocity_max = 60.0
-scale_amount_min = 0.3
-scale_amount_max = 0.6
+scale_amount_min = 0.25
+scale_amount_max = 0.55
 color = Color(0.7, 0.6, 0.5, 0.7)

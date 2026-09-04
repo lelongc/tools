@@ -39,9 +39,6 @@ var egg_scenes: Dictionary = {
 	"blackhole": preload("res://scenes/prefabs/BlackHoleEgg.tscn")
 }
 
-static var _tex_cache: Dictionary = {}
-
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 func _safe_load(path: String) -> Texture2D:
 	return ParticleHelper._safe_load(path)

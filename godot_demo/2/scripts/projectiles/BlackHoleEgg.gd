@@ -1,7 +1,6 @@
 extends RigidBody2D
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 @export var egg_name: String = "Black Hole Vortex Egg"
 @export var vortex_radius: float = 240.0
@@ -25,7 +24,8 @@ func _ready() -> void:
 	ParticleHelper.setup_egg_visual(visual_root, "res://assets/sprites/projectiles/egg_blackhole.svg")
 
 	if vortex_particles:
-		ParticleHelper.apply_circle_fx(vortex_particles, 0.4, 0.8)
+		ParticleHelper.apply_void_fx(vortex_particles, 0.3, 0.65)
+		vortex_particles.color = Color(0.85, 0.35, 1.0, 0.95)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_broken and not is_singularity and event is InputEventMouseButton and event.pressed:
@@ -90,6 +90,9 @@ func _supernova_blast() -> void:
 	CameraShake.add_trauma(0.9)
 	if has_node("/root/SoundManager"):
 		get_node("/root/SoundManager").play_explosion()
+
+	# Bắn hạt hố đen: Tinh vân tím không gian + Mảnh vỡ không thời gian + Sao hấp dẫn neon
+	ParticleHelper.spawn_egg_break_fx(get_parent(), global_position, "blackhole", false)
 
 	var space_state = get_world_2d().direct_space_state
 	var query = PhysicsShapeQueryParameters2D.new()

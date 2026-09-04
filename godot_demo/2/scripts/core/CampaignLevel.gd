@@ -13,8 +13,6 @@ const UpdraftVentScene = preload("res://scenes/prefabs/UpdraftVent.tscn")
 @export var level_id: int = 1
 @export var intro_target_y: float = 640.0
 
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
-
 @onready var bg_sky: Polygon2D = $Background/Sky
 @onready var bg_sky_clouds: Sprite2D = get_node_or_null("Background/SkyClouds")
 @onready var bg_dirt: Polygon2D = $Background/UndergroundDirt
@@ -53,7 +51,7 @@ func _ready() -> void:
 	_setup_level()
 
 func _setup_level() -> void:
-	var world_id = int((level_id - 1) / 15) + 1
+	var world_id = int(float(level_id - 1) / 15.0) + 1
 	var egg_loadout: Array[String] = []
 
 	# 1. Bảng màu mỹ thuật theo từng Thế Giới
@@ -79,16 +77,24 @@ func _setup_level() -> void:
 			bg_cavern.color = Color(0.08, 0.03, 0.05)
 			if bg_cavern_backdrop: bg_cavern_backdrop.modulate = Color(0.95, 0.70, 0.65)
 
-	# 2. Quy mô công trình CỰC ĐẠI TOÀN CẢNH (Mở rộng toàn màn hình từ x=15 đến x=525)
-	var cavern_half_width = 255.0
-	var cavern_top_y = clamp(390.0 - (level_id * 2.0), 240.0, 390.0)
-	var cavern_bottom_y = 840.0
-	var floor_y = 840.0
-	intro_target_y = (cavern_bottom_y - 20.0 + cavern_top_y) * 0.5
+	# 2. Quy mô công trình CỰC ĐẠI THEO THẾ GIỚI & GIAI ĐOẠN
+	var world_stage = (level_id - 1) % 15 + 1
+	var cavern_half_width = 260.0
+	match world_id:
+		1: cavern_half_width = 260.0 + (world_stage - 1) * 4.0 # 260 -> 316 (Rộng 520 -> 632)
+		2: cavern_half_width = 340.0 + (world_stage - 1) * 5.0 # 340 -> 410 (Rộng 680 -> 820)
+		3: cavern_half_width = 410.0 + (world_stage - 1) * 5.0 # 410 -> 480 (Rộng 820 -> 960)
+		4: cavern_half_width = 480.0 + (world_stage - 1) * 5.0 # 480 -> 550 (Rộng 960 -> 1100)
 
-	var cx = 270.0
-	var left_edge_x = cx - cavern_half_width
-	var right_edge_x = cx + cavern_half_width
+	var left_edge_x = 30.0
+	var cx = left_edge_x + cavern_half_width
+	var right_edge_x = left_edge_x + cavern_half_width * 2.0
+	var total_w = right_edge_x + 30.0
+
+	var floor_y = 840.0 + (world_id - 1) * 20.0 # W1: 840, W2: 860, W3: 880, W4: 900
+	var cavern_top_y = clamp(380.0 - (world_id * 25.0) - (world_stage * 3.0), 210.0, 380.0)
+	var cavern_bottom_y = floor_y
+	intro_target_y = (cavern_bottom_y - 20.0 + cavern_top_y) * 0.5
 
 	var cav_mid_y = (cavern_top_y + cavern_bottom_y) * 0.5
 	var cav_height = cavern_bottom_y - cavern_top_y
@@ -104,58 +110,61 @@ func _setup_level() -> void:
 		bg_dirt_wall_l.scale = Vector2(max(left_edge_x, 15.0) / 120.0, cav_height / 700.0)
 
 	if bg_dirt_wall_r:
-		bg_dirt_wall_r.position = Vector2(cx + cavern_half_width + (540.0 - right_edge_x) * 0.5, cav_mid_y)
-		bg_dirt_wall_r.scale = Vector2(max(540.0 - right_edge_x, 15.0) / 120.0, cav_height / 700.0)
+		bg_dirt_wall_r.position = Vector2(right_edge_x + (total_w - right_edge_x) * 0.5, cav_mid_y)
+		bg_dirt_wall_r.scale = Vector2(max(total_w - right_edge_x, 15.0) / 120.0, cav_height / 700.0)
 
 	if bg_grass_cliff_l:
 		bg_grass_cliff_l.position = Vector2(left_edge_x * 0.5, cavern_top_y + 8.0)
 		bg_grass_cliff_l.scale = Vector2(max(left_edge_x, 20.0) / 120.0, 1.0)
 
 	if bg_grass_cliff_r:
-		bg_grass_cliff_r.position = Vector2(cx + cavern_half_width + (540.0 - right_edge_x) * 0.5, cavern_top_y + 8.0)
-		bg_grass_cliff_r.scale = Vector2(max(540.0 - right_edge_x, 20.0) / 120.0, 1.0)
+		bg_grass_cliff_r.position = Vector2(right_edge_x + (total_w - right_edge_x) * 0.5, cavern_top_y + 8.0)
+		bg_grass_cliff_r.scale = Vector2(max(total_w - right_edge_x, 20.0) / 120.0, 1.0)
 
 	if bg_sky_clouds:
 		bg_sky_clouds.position = Vector2(cx, cavern_top_y * 0.5)
-		bg_sky_clouds.scale = Vector2(1.0, cavern_top_y / 400.0)
+		bg_sky_clouds.scale = Vector2(total_w / 540.0, cavern_top_y / 400.0)
 
-	# Cập nhật hình ảnh nền đồng bộ
+	# Cập nhật hình ảnh nền mở rộng toàn cảnh
+	var bg_margin_x = 1200.0
+	var bg_min_x = -bg_margin_x
+	var bg_max_x = total_w + bg_margin_x
+
 	if bg_sky:
 		bg_sky.polygon = PackedVector2Array([
-			Vector2(0, 0), Vector2(540, 0),
-			Vector2(540, cavern_top_y), Vector2(0, cavern_top_y)
+			Vector2(bg_min_x, -800.0), Vector2(bg_max_x, -800.0),
+			Vector2(bg_max_x, cavern_top_y), Vector2(bg_min_x, cavern_top_y)
 		])
 	if bg_dirt:
 		bg_dirt.polygon = PackedVector2Array([
-			Vector2(0, cavern_top_y), Vector2(540, cavern_top_y),
-			Vector2(540, 960), Vector2(0, 960)
+			Vector2(bg_min_x, cavern_top_y), Vector2(bg_max_x, cavern_top_y),
+			Vector2(bg_max_x, floor_y + 800.0), Vector2(bg_min_x, floor_y + 800.0)
 		])
 	if bg_cavern:
 		bg_cavern.polygon = PackedVector2Array([
 			Vector2(left_edge_x, cavern_top_y),
 			Vector2(right_edge_x, cavern_top_y),
-			Vector2(right_edge_x, cavern_bottom_y),
-			Vector2(left_edge_x, cavern_bottom_y)
+			Vector2(right_edge_x, floor_y),
+			Vector2(left_edge_x, floor_y)
 		])
 
-	# Cập nhật ranh giới vật lý (Hoàn toàn thông suốt không bị vướng miệng hang)
+	# Cập nhật ranh giới vật lý
 	var col_wall_l = get_node_or_null("BunkerBoundaries/ColWallL")
 	var col_wall_r = get_node_or_null("BunkerBoundaries/ColWallR")
 	var col_floor = get_node_or_null("BunkerBoundaries/ColFloor")
 	var col_ledge_l = get_node_or_null("BunkerBoundaries/ColLedgeL")
 	var col_ledge_r = get_node_or_null("BunkerBoundaries/ColLedgeR")
 
-	var wall_h = cavern_bottom_y - cavern_top_y + 40.0
-	var wall_mid_y = (cavern_top_y + cavern_bottom_y) * 0.5
+	var wall_h = cav_height + 40.0
 
 	if col_wall_l:
-		col_wall_l.position = Vector2(left_edge_x - 15.0, wall_mid_y)
+		col_wall_l.position = Vector2(left_edge_x - 15.0, cav_mid_y)
 		var shape_l = RectangleShape2D.new()
 		shape_l.size = Vector2(30.0, wall_h)
 		col_wall_l.shape = shape_l
 
 	if col_wall_r:
-		col_wall_r.position = Vector2(right_edge_x + 15.0, wall_mid_y)
+		col_wall_r.position = Vector2(right_edge_x + 15.0, cav_mid_y)
 		var shape_r = RectangleShape2D.new()
 		shape_r.size = Vector2(30.0, wall_h)
 		col_wall_r.shape = shape_r
@@ -163,23 +172,37 @@ func _setup_level() -> void:
 	if col_floor:
 		col_floor.position = Vector2(cx, floor_y + 20.0)
 		var floor_shape = RectangleShape2D.new()
-		floor_shape.size = Vector2(cavern_half_width * 2.0 + 80.0, 40.0)
+		floor_shape.size = Vector2(cav_width + 80.0, 40.0)
 		col_floor.shape = floor_shape
 
-	# Cập nhật Mép Đất 2 Bên (Đảm bảo hoàn toàn nằm ngoài miệng hang!)
 	if col_ledge_l:
-		var ledge_l_width = max(left_edge_x + 50.0, 10.0)
-		col_ledge_l.position = Vector2(left_edge_x - ledge_l_width * 0.5, cavern_top_y + 20.0)
+		col_ledge_l.position = Vector2(left_edge_x - 300.0, cavern_top_y + 20.0)
 		var shape_ledge_l = RectangleShape2D.new()
-		shape_ledge_l.size = Vector2(ledge_l_width, 40.0)
+		shape_ledge_l.size = Vector2(600.0, 40.0)
 		col_ledge_l.shape = shape_ledge_l
 
 	if col_ledge_r:
-		var ledge_r_width = max((540.0 - right_edge_x) + 50.0, 10.0)
-		col_ledge_r.position = Vector2(right_edge_x + ledge_r_width * 0.5, cavern_top_y + 20.0)
+		col_ledge_r.position = Vector2(right_edge_x + 300.0, cavern_top_y + 20.0)
 		var shape_ledge_r = RectangleShape2D.new()
-		shape_ledge_r.size = Vector2(ledge_r_width, 40.0)
+		shape_ledge_r.size = Vector2(600.0, 40.0)
 		col_ledge_r.shape = shape_ledge_r
+
+	# Camera thu phóng góc nhìn theo độ rộng thế giới
+	var target_zoom_val = clamp(540.0 / (cav_width + 40.0), 0.45, 1.0)
+	var cam = get_node_or_null("CameraShake2D") as Camera2D
+	if cam:
+		var cam_y = (cavern_top_y - 120.0 + floor_y + 60.0) * 0.5
+		cam.global_position = Vector2(cx, cam_y)
+		cam.zoom = Vector2(target_zoom_val, target_zoom_val)
+
+	# Gà oanh tạc lượn theo sải cánh bầu trời tương ứng
+	var chicken = get_node_or_null("ChickenBomber")
+	if chicken:
+		chicken.min_x = left_edge_x + 35.0
+		chicken.max_x = right_edge_x - 35.0
+		chicken.default_y = cavern_top_y - 120.0
+		chicken.position = Vector2(cx, chicken.default_y)
+		chicken.move_speed = 160.0 + (world_id - 1) * 32.0
 
 	# 3. Phân bổ quái vật & vật liệu theo Thế Giới
 	var primary_mat = "wood"
@@ -208,7 +231,7 @@ func _setup_level() -> void:
 		enemy_elite = "imperial_boar"
 
 	# 4. Xây dựng công trình đại hầm & kho đạn
-	egg_loadout = _generate_grand_bunker(level_id, world_id, cavern_half_width, primary_mat, secondary_mat, heavy_mat, enemy_grunt, enemy_elite)
+	egg_loadout = _generate_grand_bunker(level_id, world_id, cx, floor_y, primary_mat, secondary_mat, heavy_mat, enemy_grunt, enemy_elite)
 
 	# 5. Khởi chạy màn chơi
 	var enemies = get_tree().get_nodes_in_group("Enemies")
@@ -219,176 +242,251 @@ func _setup_level() -> void:
 	get_tree().create_timer(0.15).timeout.connect(func():
 		if is_instance_valid(bunker_structure):
 			for child in bunker_structure.get_children():
+				if child is RollingBoulder:
+					continue # Tảng đá nằm yên trên bệ, chỉ lăn khi bị bắn trúng hoặc dầm sập!
 				if child.has_method("wake_up"):
 					child.wake_up()
 	)
 
-func _generate_grand_bunker(lvl: int, world: int, _half_w: float, mat1: String, mat2: String, mat_heavy: String, e_grunt: String, e_elite: String) -> Array[String]:
-	var floor_y = 840.0
-	var cx = 270.0
+func _spawn_bastion_tier(center_x: float, base_y: float, span: float, pillar_h: float, mat: String, enemy_type: String = "", tnt_mode: int = 0) -> float:
+	# tnt_mode: 0 = none, 1 = TNT, 2 = Nuke
+	var p_y = base_y - pillar_h * 0.5
+	_spawn_block(Vector2(center_x - span * 0.5, p_y), Vector2(20, pillar_h), mat)
+	_spawn_block(Vector2(center_x + span * 0.5, p_y), Vector2(20, pillar_h), mat)
+
+	var beam_h = 24.0
+	var beam_y = base_y - pillar_h - beam_h * 0.5
+	_spawn_block(Vector2(center_x, beam_y), Vector2(span + 24.0, beam_h), mat)
+
+	if enemy_type != "":
+		if tnt_mode > 0:
+			_spawn_enemy(Vector2(center_x - 30.0, base_y - 24.0), enemy_type)
+			_spawn_tnt(Vector2(center_x + 32.0, base_y - (26.0 if tnt_mode == 2 else 23.0)), tnt_mode == 2)
+		else:
+			_spawn_enemy(Vector2(center_x, base_y - 24.0), enemy_type)
+	elif tnt_mode > 0:
+		_spawn_tnt(Vector2(center_x, base_y - (26.0 if tnt_mode == 2 else 23.0)), tnt_mode == 2)
+
+	return base_y - pillar_h - beam_h
+
+func _spawn_bridge(x1: float, x2: float, y: float, mat: String) -> void:
+	var w = abs(x2 - x1) + 24.0
+	var mid_x = (x1 + x2) * 0.5
+	_spawn_block(Vector2(mid_x, y - 8.0), Vector2(w, 16.0), mat)
+
+func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat1: String, mat2: String, mat_heavy: String, e_grunt: String, e_elite: String) -> Array[String]:
 	var loadout: Array[String] = []
 	var is_boss_level = (lvl % 15 == 0)
+	var world_stage = (lvl - 1) % 15 + 1
 
-	# =========================================================================
-	# CỤM 1: THÁP TIỀN ĐỒN TÂY (WEST OUTPOST TOWER) - X: 24 -> 152 (Tâm: 88)
-	# =========================================================================
-	var tw_cx = 88.0
-	var tw_p1_h = 120.0
-	var tw_p1_y = floor_y - tw_p1_h * 0.5
-	# 2 Cột trụ Tháp Tây
-	_spawn_block(Vector2(34, tw_p1_y), Vector2(20, tw_p1_h), mat_heavy if lvl > 6 else mat1)
-	_spawn_block(Vector2(142, tw_p1_y), Vector2(20, tw_p1_h), mat1)
-	# Dầm trần Tầng 1 Tháp Tây
-	var tw_b1_h = 24.0
-	var tw_b1_y = floor_y - tw_p1_h - tw_b1_h * 0.5
-	_spawn_block(Vector2(tw_cx, tw_b1_y), Vector2(128, tw_b1_h), mat1)
-	# Quái Tầng 1 Tháp Tây
-	_spawn_enemy(Vector2(tw_cx, floor_y - 24), e_grunt)
-
-	# Tầng 2 Tháp Tây (Vọng lâu trên cao)
-	var tw_p2_h = 88.0
-	var tw_p2_y = tw_b1_y - tw_b1_h * 0.5 - tw_p2_h * 0.5
-	var tw_col_mat = "glass" if (lvl >= 5 and lvl % 3 == 1) else (mat2 if lvl >= 3 else mat1)
-	_spawn_block(Vector2(46, tw_p2_y), Vector2(18, tw_p2_h), tw_col_mat)
-	_spawn_block(Vector2(130, tw_p2_y), Vector2(18, tw_p2_h), tw_col_mat)
-	var tw_b2_h = 20.0
-	var tw_b2_y = tw_p2_y - tw_p2_h * 0.5 - tw_b2_h * 0.5
-	_spawn_block(Vector2(tw_cx, tw_b2_y), Vector2(104, tw_b2_h), mat1)
-	if lvl >= 3:
-		_spawn_enemy(Vector2(tw_cx, tw_b1_y - tw_b1_h * 0.5 - 24), e_grunt)
-
-	# =========================================================================
-	# CỤM 2: ĐẠI PHÁO ĐÀI HOÀNG GIA TRUNG TÂM (ROYAL CITADEL) - X: 186 -> 354 (Tâm: 270)
-	# =========================================================================
-	var tc_cx = cx
-	var tc_p1_h = 120.0
-	var tc_p1_y = floor_y - tc_p1_h * 0.5
-	# Cột trụ đại sảnh trung tâm
-	_spawn_block(Vector2(198, tc_p1_y), Vector2(24, tc_p1_h), mat_heavy if lvl > 4 else mat1)
-	_spawn_block(Vector2(342, tc_p1_y), Vector2(24, tc_p1_h), mat_heavy if lvl > 4 else mat1)
-	# Cột chống tâm chịu lực bổ trợ cho đại sảnh
-	_spawn_block(Vector2(tc_cx, floor_y - 45.0), Vector2(18, 90.0), mat1)
-
-	# Dầm trần Tầng 1 Trung Tâm (Cùng cao độ [696, 720] với 2 tháp)
-	var tc_b1_h = 24.0
-	var tc_b1_y = floor_y - tc_p1_h - tc_b1_h * 0.5
-	_spawn_block(Vector2(tc_cx, tc_b1_y), Vector2(168, tc_b1_h), mat_heavy)
-
-	# Quái vật & TNT Đại Sảnh
-	if is_boss_level:
-		var boss_name = "boss_baron_pig" if world == 4 else ("imperial_boar" if world == 3 else ("mine_wolf" if world == 2 else "fox_guard"))
-		_spawn_enemy(Vector2(tc_cx - 35, floor_y - 36), boss_name)
-		_spawn_tnt(Vector2(tc_cx + 45, floor_y - 18), world == 4)
-	else:
-		_spawn_enemy(Vector2(tc_cx - 40, floor_y - 24), e_elite if lvl >= 2 else e_grunt)
-		if lvl >= 2:
-			_spawn_tnt(Vector2(tc_cx + 42, floor_y - 18), world == 4)
-
-	# Tầng 2 Đại Pháo Đài (Kho Vũ Khí)
-	var tc_p2_h = 96.0
-	var tc_p2_y = tc_b1_y - tc_b1_h * 0.5 - tc_p2_h * 0.5
-	_spawn_block(Vector2(212, tc_p2_y), Vector2(22, tc_p2_h), mat1)
-	_spawn_block(Vector2(328, tc_p2_y), Vector2(22, tc_p2_h), mat1)
-	var tc_b2_h = 24.0
-	var tc_b2_y = tc_p2_y - tc_p2_h * 0.5 - tc_b2_h * 0.5
-	_spawn_block(Vector2(tc_cx, tc_b2_y), Vector2(140, tc_b2_h), mat_heavy if lvl > 8 else mat1)
-	_spawn_enemy(Vector2(tc_cx, tc_b1_y - tc_b1_h * 0.5 - 24), e_elite if lvl >= 4 else e_grunt)
-
-	# Tầng 3 Tháp Vua (Level 6+)
-	var cur_citadel_top = tc_b2_y - tc_b2_h * 0.5
-	if lvl >= 6:
-		var tc_p3_h = 80.0
-		var tc_p3_y = cur_citadel_top - tc_p3_h * 0.5
-		_spawn_block(Vector2(230, tc_p3_y), Vector2(20, tc_p3_h), mat_heavy)
-		_spawn_block(Vector2(310, tc_p3_y), Vector2(20, tc_p3_h), mat_heavy)
-		var tc_b3_h = 20.0
-		var tc_b3_y = tc_p3_y - tc_p3_h * 0.5 - tc_b3_h * 0.5
-		_spawn_block(Vector2(tc_cx, tc_b3_y), Vector2(100, tc_b3_h), mat_heavy)
-		_spawn_enemy(Vector2(tc_cx, cur_citadel_top - 24), e_elite)
-		cur_citadel_top = tc_b3_y - tc_b3_h * 0.5
-
-	# =========================================================================
-	# CỤM 3: THÁP PHÒNG NGỰ ĐÔNG (EAST BASTION) - X: 388 -> 516 (Tâm: 452)
-	# =========================================================================
-	var te_cx = 452.0
-	var te_p1_h = 120.0
-	var te_p1_y = floor_y - te_p1_h * 0.5
-	# Cột trụ Tháp Đông
-	_spawn_block(Vector2(398, te_p1_y), Vector2(20, te_p1_h), mat1)
-	_spawn_block(Vector2(506, te_p1_y), Vector2(20, te_p1_h), mat_heavy if lvl > 6 else mat1)
-	# Dầm trần Tầng 1 Tháp Đông
-	var te_b1_h = 24.0
-	var te_b1_y = floor_y - te_p1_h - te_b1_h * 0.5
-	_spawn_block(Vector2(te_cx, te_b1_y), Vector2(128, te_b1_h), mat1)
-	# Quái Tầng 1 Tháp Đông
-	_spawn_enemy(Vector2(te_cx, floor_y - 24), e_grunt)
-
-	# Tầng 2 Tháp Đông (Kho đạn / Lồng cứu gà con)
-	var te_p2_h = 88.0
-	var te_p2_y = te_b1_y - te_b1_h * 0.5 - te_p2_h * 0.5
-	var te_col_mat = "glass" if (lvl >= 6 and lvl % 3 == 2) else (mat2 if lvl >= 3 else mat1)
-	_spawn_block(Vector2(410, te_p2_y), Vector2(18, te_p2_h), te_col_mat)
-	_spawn_block(Vector2(494, te_p2_y), Vector2(18, te_p2_h), te_col_mat)
-	var te_b2_h = 20.0
-	var te_b2_y = te_p2_y - te_p2_h * 0.5 - te_b2_h * 0.5
-	_spawn_block(Vector2(te_cx, te_b2_y), Vector2(104, te_b2_h), mat1)
-	if lvl % 4 == 1 and lvl >= 5:
-		_spawn_rescue_cage(Vector2(te_cx, te_b1_y - te_b1_h * 0.5 - 26))
-	else:
-		if lvl >= 2:
-			_spawn_enemy(Vector2(te_cx, te_b1_y - te_b1_h * 0.5 - 24), e_grunt)
-
-	# =========================================================================
-	# HỆ THỐNG CẦU ĐÁ TREO NỐI 3 THÁP (HIGH SUSPENSION BRIDGES)
-	# Bắc ngang khoảng hở giữa các tháp, đặt êm ả trên mép dầm trần tầng 1!
-	# =========================================================================
-	# Cầu Nối Tây: Bắc qua khoảng hở x in [152, 186], đặt trên mép trần y = 696.0
-	var br_h = 16.0
-	var br_y = 696.0 - br_h * 0.5
-	_spawn_block(Vector2(169.0, br_y), Vector2(58.0, br_h), mat1)
-
-	# Cầu Nối Đông: Bắc qua khoảng hở x in [354, 388], đặt trên mép trần y = 696.0
-	_spawn_block(Vector2(371.0, br_y), Vector2(58.0, br_h), mat1)
-
-	# ==========================================
-	# BẪY TẢNG ĐÁ LĂN & QUẠT GIÓ TRÊN NÓC
-	# ==========================================
-	if lvl >= 4:
-		if lvl % 4 == 2:
-			_spawn_boulder(Vector2(cx, cur_citadel_top - 28))
-		elif lvl % 4 == 0 and lvl >= 8:
-			_spawn_boulder(Vector2(cx - 65, cur_citadel_top - 28))
-			_spawn_boulder(Vector2(cx + 65, cur_citadel_top - 28))
-
-	if world >= 2 and lvl % 3 == 2:
-		_spawn_updraft(Vector2(cx - 140.0, floor_y))
-
-	# ==========================================
-	# KHO ĐẠN CHIẾN THUẬT ANGRY BIRDS
-	# ==========================================
 	match world:
 		1:
-			loadout = ["normal", "bomb"]
-			if lvl >= 2: loadout.append("normal")
-			if lvl >= 6: loadout.append("drill")
-			if lvl >= 10: loadout.append("bomb")
-			if is_boss_level: loadout.append("drill")
+			# =========================================================================
+			# WORLD 1: FARM CAVERN (Tháp Gỗ & Nông Trại Đá) - 1 đến 4 Quái Vật
+			# =========================================================================
+			var tw_cx = cx - 180.0
+			var te_cx = cx + 180.0
+
+			# 1. Pháo Đài Trung Tâm (Center Citadel)
+			var c_tnt = 0 if world_stage == 1 else 1
+			var r1 = _spawn_bastion_tier(cx, floor_y, 144.0, 120.0, mat1, e_grunt, c_tnt)
+
+			var r2 = r1
+			if world_stage >= 2:
+				var e2 = e_elite if (world_stage >= 4 and not is_boss_level) else e_grunt
+				if is_boss_level: e2 = e_elite
+				r2 = _spawn_bastion_tier(cx, r1, 116.0, 96.0, mat1, e2, 0)
+
+			var r3 = r2
+			if world_stage >= 6:
+				var e3 = e_elite if (world_stage >= 10 and not is_boss_level) else ""
+				r3 = _spawn_bastion_tier(cx, r2, 80.0, 80.0, mat_heavy, e3, 0)
+
+			# 2. Tháp Tiền Đồn Tây (West Outpost, Stage 3+)
+			var rw1 = floor_y
+			if world_stage >= 3:
+				rw1 = _spawn_bastion_tier(tw_cx, floor_y, 108.0, 120.0, mat1, e_grunt, 0)
+				if world_stage >= 5:
+					_spawn_bastion_tier(tw_cx, rw1, 84.0, 88.0, mat2, "", 0)
+				_spawn_bridge(tw_cx, cx, r1, mat1)
+
+			# 3. Tháp Phòng Ngự Đông (East Bastion, Stage 6+)
+			var re1 = floor_y
+			if world_stage >= 6:
+				re1 = _spawn_bastion_tier(te_cx, floor_y, 108.0, 120.0, mat1, e_grunt, 0)
+				if world_stage >= 8:
+					var re2 = _spawn_bastion_tier(te_cx, re1, 84.0, 88.0, mat2, "", 0)
+					if world_stage % 4 == 1:
+						_spawn_rescue_cage(Vector2(te_cx, re2 + 10.0))
+				_spawn_bridge(cx, te_cx, r1, mat1)
+
+			# Boss Level 15: Baron Pig
+			if is_boss_level:
+				_spawn_enemy(Vector2(cx - 28.0, floor_y - 34.0), "boss_baron_pig")
+
+			# Boulders
+			if world_stage >= 6:
+				_spawn_boulder(Vector2(cx, r3 - 28.0))
+			if world_stage >= 10 and rw1 < floor_y:
+				_spawn_boulder(Vector2(tw_cx, floor_y - 208.0 - 28.0 if world_stage >= 5 else rw1 - 28.0))
+
+			# Loadout World 1
+			if world_stage == 1:
+				loadout = ["normal", "normal", "bomb"]
+			elif world_stage == 2:
+				loadout = ["normal", "bomb", "normal", "drill"]
+			elif world_stage <= 5:
+				loadout = ["normal", "bomb", "normal", "drill", "bomb"]
+			elif world_stage <= 9:
+				loadout = ["normal", "bomb", "drill", "normal", "drill", "bomb"]
+			elif world_stage < 15:
+				loadout = ["normal", "bomb", "drill", "normal", "drill", "bomb", "bomb"]
+			else:
+				loadout = ["bomb", "drill", "normal", "drill", "bomb", "bomb", "bomb"]
+
 		2:
-			loadout = ["drill", "frost", "bomb"]
-			if lvl >= 18: loadout.append("normal")
-			if lvl >= 23: loadout.append("drill")
-			if is_boss_level: loadout.append("bomb")
+			# =========================================================================
+			# WORLD 2: STONE QUARRY (Mỏ Đá Hoàng Hôn) - 4 đến 6 Quái Vật
+			# =========================================================================
+			var tw_cx = cx - 210.0
+			var te_cx = cx + 210.0
+			var tx_sniper = cx - 315.0
+
+			# 1. Đại Pháo Đài Trung Tâm (3 tầng đá & thép kiên cố)
+			var r1 = _spawn_bastion_tier(cx, floor_y, 144.0, 120.0, mat1, "mine_wolf" if is_boss_level else e_elite, 1)
+			var r2 = _spawn_bastion_tier(cx, r1, 116.0, 96.0, mat_heavy, e_grunt, 0)
+			var r3 = _spawn_bastion_tier(cx, r2, 80.0, 80.0, mat_heavy, e_elite if world_stage >= 4 else "", 0)
+
+			# 2. Tháp Cần Cẩu Tây (West Quarry Crane)
+			var rw1 = _spawn_bastion_tier(tw_cx, floor_y, 116.0, 120.0, mat1, e_grunt, 1)
+			var rw2 = rw1
+			if world_stage >= 3:
+				rw2 = _spawn_bastion_tier(tw_cx, rw1, 88.0, 92.0, mat2, e_grunt if world_stage >= 10 else "", 0)
+			_spawn_bridge(tw_cx, cx, r1, mat1)
+			_spawn_boulder(Vector2(tw_cx, rw2 - 28.0))
+
+			# 3. Tháp Quặng Đông (East Ore Bastion)
+			var re1 = _spawn_bastion_tier(te_cx, floor_y, 116.0, 120.0, mat1, e_grunt, 0)
+			var re2 = re1
+			if world_stage >= 2:
+				re2 = _spawn_bastion_tier(te_cx, re1, 88.0, 92.0, mat_heavy, e_elite, 0)
+			_spawn_bridge(cx, te_cx, r1, mat1)
+			_spawn_boulder(Vector2(te_cx, re2 - 28.0))
+
+			# 4. Vọng Lâu Bắn Tỉa Trên Vách Đá (Sniper Overlook, Stage 6+)
+			if world_stage >= 6:
+				var p_y = floor_y - 180.0
+				_spawn_block(Vector2(tx_sniper, p_y), Vector2(80.0, 18.0), mat_heavy)
+				_spawn_enemy(Vector2(tx_sniper, p_y - 33.0), e_grunt)
+
+			if world_stage % 3 == 0:
+				_spawn_updraft(Vector2(cx - 105.0, floor_y))
+
+			# Loadout World 2
+			if world_stage <= 4:
+				loadout = ["drill", "frost", "bomb", "normal", "drill"]
+			elif world_stage <= 9:
+				loadout = ["drill", "frost", "bomb", "drill", "frost", "bomb"]
+			elif world_stage < 15:
+				loadout = ["drill", "frost", "bomb", "bomb", "drill", "frost", "bomb"]
+			else:
+				loadout = ["drill", "frost", "bomb", "bomb", "drill", "frost", "bomb", "bomb"]
+
 		3:
-			loadout = ["acid", "cluster", "drill", "bomb"]
-			if lvl >= 33: loadout.append("frost")
-			if lvl >= 38: loadout.append("acid")
-			if is_boss_level: loadout.append("acid")
+			# =========================================================================
+			# WORLD 3: STEAMPUNK CHEMICAL (Khu Công Nghiệp Hóa Chất) - 5 đến 7 Quái Vật
+			# =========================================================================
+			var s1_cx = cx - 280.0
+			var s3_cx = cx + 240.0
+			var s4_cx = cx + 360.0
+
+			# 1. Bể Axit Hóa Chất Tây (West Chemical Vat & Vent)
+			_spawn_updraft(Vector2(s1_cx - 50.0, floor_y))
+			var rs1_1 = _spawn_bastion_tier(s1_cx, floor_y, 120.0, 120.0, mat1, e_grunt, 1)
+			var rs1_2 = rs1_1
+			if world_stage >= 4:
+				rs1_2 = _spawn_bastion_tier(s1_cx, rs1_1, 90.0, 90.0, mat2, e_elite, 0)
+			_spawn_bridge(s1_cx, cx, rs1_1, mat1)
+
+			# 2. Đại Lò Luyện Trung Tâm (Central Smelting Bastion)
+			var rc1 = _spawn_bastion_tier(cx, floor_y, 150.0, 120.0, mat_heavy, e_elite if is_boss_level else e_elite, 2)
+			var rc2 = _spawn_bastion_tier(cx, rc1, 120.0, 96.0, mat1, e_grunt, 0)
+			var rc3 = _spawn_bastion_tier(cx, rc2, 88.0, 84.0, mat_heavy, e_elite, 0)
+			_spawn_boulder(Vector2(cx, rc3 - 28.0))
+
+			# 3. Tháp Nồi Hơi Đông (East Boiler Tower)
+			var rs3_1 = _spawn_bastion_tier(s3_cx, floor_y, 120.0, 120.0, mat1, e_grunt, 1)
+			var rs3_2 = _spawn_bastion_tier(s3_cx, rs3_1, 90.0, 90.0, mat_heavy, e_elite, 0)
+			_spawn_bridge(cx, s3_cx, rc1, mat1)
+
+			# 4. Giàn Giáo Treo Trên Không (High Conveyor Catwalk, Stage 5+)
+			if world_stage >= 5:
+				var p_y = floor_y - 200.0
+				_spawn_block(Vector2(s4_cx, p_y), Vector2(88.0, 18.0), mat_heavy)
+				_spawn_enemy(Vector2(s4_cx, p_y - 33.0), e_grunt)
+
+			# Loadout World 3
+			if world_stage <= 4:
+				loadout = ["acid", "cluster", "drill", "bomb", "acid", "cluster"]
+			elif world_stage <= 9:
+				loadout = ["acid", "cluster", "drill", "bomb", "cluster", "acid", "bomb"]
+			elif world_stage < 15:
+				loadout = ["acid", "drill", "bomb", "cluster", "acid", "drill", "bomb", "bomb"]
+			else:
+				loadout = ["acid", "drill", "bomb", "cluster", "acid", "drill", "blackhole", "bomb"]
+
 		4:
-			loadout = ["blackhole", "acid", "drill", "bomb", "bomb"]
-			if lvl >= 48: loadout.append("blackhole")
-			if is_boss_level: loadout.append("blackhole")
+			# =========================================================================
+			# WORLD 4: LAVA CORE IMPERIAL CITADEL (Đại Hoàng Cung Nham Thạch) - 6 đến 8 Quái
+			# =========================================================================
+			var b1_cx = cx - 380.0
+			var b2_cx = cx - 190.0
+			var b4_cx = cx + 190.0
+			var b5_cx = cx + 380.0
+
+			# Bastion 1: Tiền Đồn Cửa Ải Tây
+			var rb1 = _spawn_bastion_tier(b1_cx, floor_y, 110.0, 120.0, mat1, e_grunt, 1)
+			_spawn_bridge(b1_cx, b2_cx, rb1, mat1)
+
+			# Bastion 2: Kho Vũ Khí Hoàng Gia Tây
+			var rb2_1 = _spawn_bastion_tier(b2_cx, floor_y, 126.0, 120.0, mat_heavy, e_grunt, 0)
+			var rb2_2 = rb2_1
+			if world_stage >= 3:
+				rb2_2 = _spawn_bastion_tier(b2_cx, rb2_1, 96.0, 92.0, mat1, e_grunt if world_stage >= 10 else "", 0)
+			_spawn_bridge(b2_cx, cx, rb2_1, mat1)
+			_spawn_boulder(Vector2(b2_cx, rb2_2 - 28.0))
+
+			# Bastion 3: Cung Điện Ngai Vàng Hoàng Gia Trung Tâm (Imperial High Palace)
+			var e_boss = "boss_baron_pig" if is_boss_level else e_elite
+			var rc1 = _spawn_bastion_tier(cx, floor_y, 156.0, 120.0, mat_heavy, e_boss, 2)
+			var rc2 = _spawn_bastion_tier(cx, rc1, 126.0, 96.0, mat_heavy, e_grunt, 0)
+			var rc3 = _spawn_bastion_tier(cx, rc2, 92.0, 84.0, mat_heavy, e_elite if world_stage >= 4 else "", 0)
+			_spawn_boulder(Vector2(cx, rc3 - 28.0))
+
+			# Bastion 4: Hầm Silo Hạt Nhân Đông
+			var rb4_1 = _spawn_bastion_tier(b4_cx, floor_y, 126.0, 120.0, mat_heavy, e_grunt, 2)
+			var rb4_2 = rb4_1
+			if world_stage >= 6:
+				rb4_2 = _spawn_bastion_tier(b4_cx, rb4_1, 96.0, 92.0, mat1, e_grunt, 0)
+			_spawn_bridge(cx, b4_cx, rc1, mat1)
+			_spawn_boulder(Vector2(b4_cx, rb4_2 - 28.0))
+
+			# Bastion 5: Tháp Can Rồng Viễn Đông (Outer East Dragon Watchtower)
+			var rb5 = _spawn_bastion_tier(b5_cx, floor_y, 110.0, 120.0, mat1, e_elite, 0)
+			_spawn_bridge(b4_cx, b5_cx, rb4_1, mat1)
+
+			# Loadout World 4
+			if world_stage <= 4:
+				loadout = ["blackhole", "acid", "drill", "bomb", "blackhole", "bomb"]
+			elif world_stage <= 9:
+				loadout = ["blackhole", "acid", "drill", "bomb", "blackhole", "acid", "bomb"]
+			elif world_stage < 15:
+				loadout = ["blackhole", "acid", "drill", "bomb", "blackhole", "drill", "acid", "bomb"]
+			else: # Final Level 60
+				loadout = ["blackhole", "bomb", "drill", "acid", "blackhole", "drill", "acid", "bomb"]
 
 	return loadout
+
 
 func _spawn_block(pos: Vector2, size: Vector2, mat: String) -> RigidBody2D:
 	var b = BlockScene.instantiate()

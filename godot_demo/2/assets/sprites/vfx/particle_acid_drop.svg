@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" width="28" height="28">
+  <!-- Droplet body -->
+  <path d="M14 2 C11 7 6 13 6 18 A8 8 0 0 0 22 18 C22 13 17 7 14 2 Z" fill="#ffffff"/>
+  <!-- Gloss highlight inside droplet -->
+  <path d="M12 7 C10.5 10 9 13.5 9 17 A4.5 4.5 0 0 1 11 14 C12 11 13 8 13.5 6.5 Z" fill="#ffffff" opacity="0.65"/>
+  <circle cx="16.5" cy="19" r="2.2" fill="#ffffff" opacity="0.8"/>
+</svg>

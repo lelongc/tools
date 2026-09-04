@@ -2,7 +2,6 @@ extends RigidBody2D
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 const ChickScene = preload("res://scenes/prefabs/ClusterChick.tscn")
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 @export var egg_name: String = "Cluster Chicks Egg"
 @export var chick_count: int = 4
@@ -21,7 +20,8 @@ func _ready() -> void:
 
 	ParticleHelper.setup_egg_visual(visual_root, "res://assets/sprites/projectiles/egg_cluster.svg")
 	if hatch_particles:
-		ParticleHelper.apply_smoke_fx(hatch_particles, 0.35, 0.7)
+		ParticleHelper.apply_feather_fx(hatch_particles, 0.3, 0.6)
+		hatch_particles.color = Color(1.0, 0.88, 0.25, 0.95)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_broken and not has_boosted and event is InputEventMouseButton and event.pressed:
@@ -52,6 +52,9 @@ func _hatch_chicks() -> void:
 	if hatch_particles:
 		hatch_particles.restart()
 		hatch_particles.emitting = true
+
+	# Bắn hạt ấp trứng: Khói rơm ấm + Mảnh vỏ trứng gà con + Lông tơ vàng
+	ParticleHelper.spawn_egg_break_fx(get_parent(), global_position, "cluster", false)
 
 	# Bắn tỏa 4 chú gà con nảy tưng bừng
 	for i in range(chick_count):

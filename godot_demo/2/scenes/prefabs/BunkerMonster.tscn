@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://b8m3k9v2x1p7q"]
 
 [ext_resource type="Script" path="res://scripts/enemies/BunkerMonster.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/sprites/vfx/smoke_puff_cartoon.svg" id="2_smoke"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_1"]
 radius = 20.0
@@ -67,6 +68,7 @@ visible = false
 scale = Vector2(0.12, 0.12)
 
 [node name="PoofFX" type="CPUParticles2D" parent="."]
+texture = ExtResource("2_smoke")
 emitting = false
 amount = 22
 lifetime = 0.45
@@ -75,6 +77,6 @@ explosiveness = 0.92
 spread = 180.0
 initial_velocity_min = 70.0
 initial_velocity_max = 160.0
-scale_amount_min = 5.0
-scale_amount_max = 9.0
-color = Color(0.95, 0.95, 0.95, 0.85)
+scale_amount_min = 0.35
+scale_amount_max = 0.75
+color = Color(1, 0.88, 0.2, 0.95)

@@ -84,7 +84,7 @@ func _create_mock_ad_overlay() -> void:
 	# Header
 	var title = Label.new()
 	title.name = "AdTitle"
-	title.text = "🎬 QUẢNG CÁO NHẬN THƯỞNG"
+	title.text = "QUẢNG CÁO NHẬN THƯỞNG"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 22)
 	title.add_theme_color_override("font_color", Color(0.95, 0.8, 0.2))
@@ -143,16 +143,17 @@ func _create_mock_ad_overlay() -> void:
 
 	var btn_skip = Button.new()
 	btn_skip.name = "BtnSkip"
-	btn_skip.text = "✕ Bỏ qua"
+	btn_skip.text = "Bỏ qua"
 	btn_skip.custom_minimum_size = Vector2(130, 48)
 	hbox.add_child(btn_skip)
 
 	var btn_claim = Button.new()
 	btn_claim.name = "BtnClaim"
-	btn_claim.text = "✔ Nhận Thưởng"
+	btn_claim.text = "Nhận Thưởng"
 	btn_claim.disabled = true
 	btn_claim.custom_minimum_size = Vector2(180, 48)
 	hbox.add_child(btn_claim)
+
 
 	btn_skip.pressed.connect(_on_ad_skipped)
 	btn_claim.pressed.connect(_on_ad_claimed)
@@ -199,7 +200,7 @@ func _play_mock_video_overlay() -> void:
 	await tween.finished
 
 	if timer_label:
-		timer_label.text = "🎉 Đã đủ điều kiện nhận thưởng!"
+		timer_label.text = "Đã đủ điều kiện nhận thưởng!"
 		timer_label.add_theme_color_override("font_color", Color(0.2, 0.9, 0.4))
 	if btn_claim:
 		btn_claim.disabled = false

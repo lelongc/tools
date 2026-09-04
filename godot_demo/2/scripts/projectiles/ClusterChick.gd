@@ -1,6 +1,5 @@
 extends RigidBody2D
 
-const ParticleHelper = preload("res://scripts/core/ParticleHelper.gd")
 
 var lifetime: float = 3.2
 var peck_damage: float = 50.0
@@ -20,7 +19,7 @@ func _ready() -> void:
 		if tc: chick_sprite.texture = tc
 
 	if poof_fx:
-		ParticleHelper.apply_smoke_fx(poof_fx, 0.25, 0.5)
+		ParticleHelper.apply_feather_fx(poof_fx, 0.25, 0.5)
 
 func _process(delta: float) -> void:
 	if is_poofed: return
