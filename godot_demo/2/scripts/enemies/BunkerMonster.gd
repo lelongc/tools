@@ -150,52 +150,59 @@ func _setup_monster_attributes() -> void:
 			max_health = 70.0
 			mass = 1.8
 			score_value = 800
-			base_scale_val = 0.22
+			base_scale_val = 0.20
 		"fox_guard":
 			max_health = 140.0
 			mass = 2.4
 			score_value = 1400
 			has_armor = true
-			base_scale_val = 0.22
+			base_scale_val = 0.20
 		"armored_raccoon":
 			max_health = 220.0
 			mass = 3.5
 			score_value = 2000
 			has_armor = true
-			base_scale_val = 0.23
+			base_scale_val = 0.21
 		"mine_wolf":
 			max_health = 360.0
 			mass = 5.0
 			score_value = 2800
 			has_armor = true
-			base_scale_val = 0.25
+			base_scale_val = 0.23
 		"spike_hound":
 			max_health = 320.0
 			mass = 4.5
 			score_value = 2500
 			has_armor = true
-			base_scale_val = 0.24
+			base_scale_val = 0.22
 		"toxic_fox":
 			max_health = 260.0
 			mass = 3.2
 			score_value = 2200
-			base_scale_val = 0.23
+			base_scale_val = 0.21
 		"imperial_boar":
 			max_health = 600.0
 			mass = 8.0
 			score_value = 4500
 			has_armor = true
-			base_scale_val = 0.27
+			base_scale_val = 0.24
 		"boss_baron_pig":
 			max_health = 1800.0
-			mass = 20.0
+			mass = 16.0
 			score_value = 10000
 			has_armor = true
-			base_scale_val = 0.35
-			if col_shape and col_shape.shape is CircleShape2D:
-				var big_circle = CircleShape2D.new()
-				big_circle.radius = 32.0
-				col_shape.shape = big_circle
+			base_scale_val = 0.27
+
+	# Gán collider chuẩn xác cho từng kích cỡ quái vật
+	var c_shape = CircleShape2D.new()
+	if monster_type == "boss_baron_pig":
+		c_shape.radius = 25.0
+	elif monster_type in ["imperial_boar", "mine_wolf", "spike_hound"]:
+		c_shape.radius = 21.0
+	else:
+		c_shape.radius = 18.0
+	if col_shape:
+		col_shape.shape = c_shape
 
 	current_health = max_health
 	if visual_root:
@@ -549,13 +556,6 @@ func _handle_continuous_crushing(delta: float) -> void:
 				# Sát thương liên tục theo tốc độ chuyển động & khối lượng của vật đè
 				var crush_dps = (55.0 + active_speed * 0.65) * (b_mass * 0.5)
 				take_damage(crush_dps * delta, b.global_position, true)
-
-				# Hiệu ứng biến dạng bị đè & âm thanh rên rỉ
-				if visual_root:
-					var squish_x = clamp(1.0 + active_speed * 0.003, 1.15, 1.45)
-					var squish_y = clamp(1.0 - active_speed * 0.003, 0.55, 0.85)
-					visual_root.scale = Vector2(base_scale_val * squish_x, base_scale_val * squish_y)
-
 				if crush_audio_cooldown <= 0.0 and has_node("/root/SoundManager"):
 					crush_audio_cooldown = 0.35
 					get_node("/root/SoundManager").play_synth_tone(220.0, 0.08, "noise", -2.0)
@@ -576,6 +576,7 @@ func _handle_continuous_crushing(delta: float) -> void:
 func _process(delta: float) -> void:
 	if spawn_settle_timer > 0.0:
 		spawn_settle_timer -= delta
+		return
 
 	if is_defeated: return
 
@@ -1069,49 +1070,50 @@ func _animate_character(delta: float) -> void:
 					visual_root.position = Vector2.ZERO
 
 		State.ALERT_AIMING:
-			var tense = sin(t * 7.0) * 0.02
-			visual_root.scale = Vector2(base_scale_val * 0.95, base_scale_val * 1.05 + tense)
-			visual_root.position.x = 0.0
+			var tense = sin(t * 5.0) * 0.015
+			visual_root.scale = Vector2(base_scale_val * (0.97 - tense), base_scale_val * (1.03 + tense))
+			visual_root.position = Vector2.ZERO
 
 		State.PANIC_FALLING:
-			visual_root.position.x = sin(t * 48.0) * 2.5
-			visual_root.position.y = cos(t * 42.0) * 1.5
-			visual_root.scale = Vector2(base_scale_val * 0.90, base_scale_val * 1.10)
+			visual_root.position.x = sin(t * 20.0) * 1.5
+			visual_root.position.y = cos(t * 16.0) * 1.0
+			visual_root.scale = Vector2(base_scale_val * 0.96, base_scale_val * 1.04)
 
 		State.SHOCKED_BY_NEIGHBOR:
-			visual_root.position.y = -abs(sin(t * 16.0)) * 6.0
-			visual_root.scale = Vector2(base_scale_val * 0.88, base_scale_val * 1.14)
+			visual_root.position.y = -abs(sin(t * 8.0)) * 2.5
+			visual_root.scale = Vector2(base_scale_val * 0.96, base_scale_val * 1.04)
 
 		State.PINNED_UNDER_DEBRIS:
-			var squish_pant = sin(t * 4.0) * 0.025
-			visual_root.scale = Vector2(base_scale_val * (1.28 + squish_pant), base_scale_val * (0.68 - squish_pant))
-			visual_root.position.x = 0.0
-			visual_root.rotation = 0.03
+			var squish_pant = sin(t * 3.5) * 0.02
+			visual_root.scale = Vector2(base_scale_val * (1.12 + squish_pant), base_scale_val * (0.88 - squish_pant))
+			visual_root.position = Vector2(0.0, 2.2) # Giữ chân quái bám sát nền đất khi bị đè
+			visual_root.rotation = 0.02
 
 		State.SURVIVED_RELIEF:
-			var sigh = sin(t * 3.5) * 0.03
-			visual_root.scale = Vector2(base_scale_val * (1.05 + sigh), base_scale_val * (0.95 - sigh))
+			var sigh = sin(t * 3.0) * 0.02
+			visual_root.scale = Vector2(base_scale_val * (1.03 + sigh), base_scale_val * (0.97 - sigh))
 			visual_root.position = Vector2.ZERO
-			visual_root.rotation = 0.03
+			visual_root.rotation = 0.02
 
 		State.SMUG_MOCKING:
-			visual_root.position.y = -abs(sin(t * 12.0)) * 7.0
-			visual_root.rotation = sin(t * 8.0) * 0.09
+			visual_root.position.y = -abs(sin(t * 8.0)) * 3.0
+			visual_root.rotation = sin(t * 6.0) * 0.05
 			visual_root.scale = Vector2(base_scale_val, base_scale_val)
 
 		State.CRITICAL_INJURED:
-			var heavy_pant = sin(t * 5.0) * 0.04
-			visual_root.scale = Vector2(base_scale_val * (1.0 + heavy_pant), base_scale_val * (1.0 - heavy_pant))
-			visual_root.rotation = sin(t * 3.5) * 0.08
+			var heavy_pant = sin(t * 4.0) * 0.025
+			visual_root.scale = Vector2(base_scale_val * (1.04 + heavy_pant), base_scale_val * (0.96 - heavy_pant))
+			visual_root.rotation = sin(t * 3.0) * 0.05
 			if dizzy_stars: dizzy_stars.rotation += delta * 4.0
 
 		State.FURIOUS_ARMOR_LOSS:
-			visual_root.scale = Vector2(base_scale_val * 1.08, base_scale_val * 0.94)
-			visual_root.position.x = sin(t * 25.0) * 1.5
+			visual_root.scale = Vector2(base_scale_val * 1.04, base_scale_val * 0.96)
+			visual_root.position.x = sin(t * 18.0) * 1.0
 
 		State.VICTORY_TAUNT:
-			visual_root.position.y = -abs(sin(t * 9.0)) * 10.0
-			visual_root.rotation = sin(t * 6.0) * 0.08
+			visual_root.position.y = -abs(sin(t * 7.0)) * 4.0
+			visual_root.rotation = sin(t * 5.0) * 0.06
+			visual_root.scale = Vector2(base_scale_val * 1.03, base_scale_val * 0.97)
 
 func _trigger_blink() -> void:
 	if not eyes_sprite or is_blinking or current_state == State.PANIC_FALLING or current_idle_action == IdleAction.SLEEPY_NAP or current_state == State.PINNED_UNDER_DEBRIS or current_state == State.SURVIVED_RELIEF:

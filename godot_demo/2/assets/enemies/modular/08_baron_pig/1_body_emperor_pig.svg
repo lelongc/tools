@@ -1,17 +1,56 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 280" width="280" height="280">
   <defs>
-    <radialGradient id="king_pig_grad" cx="40%" cy="30%" r="70%">
-      <stop offset="0%" stop-color="#86efac"/>
-      <stop offset="50%" stop-color="#22c55e"/>
-      <stop offset="90%" stop-color="#15803d"/>
-      <stop offset="100%" stop-color="#14532d"/>
+    <!-- Rich warm velvet mole fur gradient -->
+    <radialGradient id="mole_fur_grad" cx="38%" cy="32%" r="68%">
+      <stop offset="0%" stop-color="#a16207"/>
+      <stop offset="35%" stop-color="#854d0e"/>
+      <stop offset="75%" stop-color="#543007"/>
+      <stop offset="100%" stop-color="#2e1704"/>
     </radialGradient>
+    <!-- Soft cream velvet belly -->
+    <radialGradient id="mole_belly_grad" cx="50%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="60%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </radialGradient>
+    <!-- Royal gold epaulet gradient -->
+    <linearGradient id="gold_epaulet_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#a16207"/>
+    </linearGradient>
   </defs>
-  <!-- Massive Oversized Plump Round Green Body -->
-  <circle cx="140" cy="144" r="120" fill="url(#king_pig_grad)" stroke="#052e16" stroke-width="10"/>
-  <!-- Pig Round Ears -->
-  <ellipse cx="50" cy="54" rx="28" ry="24" transform="rotate(-30 50 54)" fill="#22c55e" stroke="#052e16" stroke-width="6"/>
-  <ellipse cx="50" cy="54" rx="16" ry="12" transform="rotate(-30 50 54)" fill="#14532d"/>
-  <ellipse cx="230" cy="54" rx="28" ry="24" transform="rotate(30 230 54)" fill="#22c55e" stroke="#052e16" stroke-width="6"/>
-  <ellipse cx="230" cy="54" rx="16" ry="12" transform="rotate(30 230 54)" fill="#14532d"/>
+
+  <!-- Furry Mole Ears with Soft Rose Interior -->
+  <g id="ears">
+    <!-- Left Ear -->
+    <ellipse cx="64" cy="68" rx="26" ry="24" transform="rotate(-25 64 68)" fill="#713f12" stroke="#261203" stroke-width="7"/>
+    <ellipse cx="64" cy="68" rx="16" ry="14" transform="rotate(-25 64 68)" fill="#f472b6"/>
+    <!-- Right Ear -->
+    <ellipse cx="216" cy="68" rx="26" ry="24" transform="rotate(25 216 68)" fill="#713f12" stroke="#261203" stroke-width="7"/>
+    <ellipse cx="216" cy="68" rx="16" ry="14" transform="rotate(25 216 68)" fill="#f472b6"/>
+  </g>
+
+  <!-- Massive Plump Royal Mole Body (Non-Pig, Chestnut Velvet Fur) -->
+  <ellipse cx="140" cy="148" rx="118" ry="114" fill="url(#mole_fur_grad)" stroke="#261203" stroke-width="9"/>
+
+  <!-- Plump Furry Chest / Belly Patch -->
+  <path d="M72 165 C72 205 102 245 140 245 C178 245 208 205 208 165 C208 135 178 120 140 120 C102 120 72 135 72 165 Z" 
+        fill="url(#mole_belly_grad)" stroke="#261203" stroke-width="5"/>
+
+  <!-- Gold Commander Epaulets on Shoulders -->
+  <!-- Left Epaulet -->
+  <path d="M22 135 Q18 110 42 114 Q52 122 46 142 Z" fill="url(#gold_epaulet_grad)" stroke="#261203" stroke-width="4"/>
+  <line x1="24" y1="138" x2="16" y2="155" stroke="#ca8a04" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="32" y1="140" x2="26" y2="158" stroke="#ca8a04" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="40" y1="140" x2="36" y2="158" stroke="#ca8a04" stroke-width="3.5" stroke-linecap="round"/>
+
+  <!-- Right Epaulet -->
+  <path d="M258 135 Q262 110 238 114 Q228 122 234 142 Z" fill="url(#gold_epaulet_grad)" stroke="#261203" stroke-width="4"/>
+  <line x1="256" y1="138" x2="264" y2="155" stroke="#ca8a04" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="248" y1="140" x2="254" y2="158" stroke="#ca8a04" stroke-width="3.5" stroke-linecap="round"/>
+  <line x1="240" y1="140" x2="244" y2="158" stroke="#ca8a04" stroke-width="3.5" stroke-linecap="round"/>
+
+  <!-- Top Head Tuft -->
+  <path d="M130 36 C136 24 144 24 150 36" stroke="#713f12" stroke-width="6" stroke-linecap="round" fill="none"/>
 </svg>

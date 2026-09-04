@@ -21,10 +21,17 @@ func _ready() -> void:
 
 	set_deferred("freeze", true)
 	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
-	mass = 25.0
+	mass = 8.0
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_impact)
+
+	var pmat = PhysicsMaterial.new()
+	pmat.friction = 0.95
+	pmat.bounce = 0.05
+	physics_material_override = pmat
+	angular_damp = 4.0
+	linear_damp = 1.2
 
 func _physics_process(_delta: float) -> void:
 	if dust_fx:
@@ -39,7 +46,8 @@ func wake_up() -> void:
 	set_deferred("freeze", false)
 
 func _on_impact(body: Node) -> void:
-	if not is_awake: wake_up()
+	if not is_awake:
+		wake_up()
 
 	if body.has_method("wake_up"):
 		body.wake_up()

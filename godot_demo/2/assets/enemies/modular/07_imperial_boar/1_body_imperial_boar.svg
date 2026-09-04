@@ -1,11 +1,37 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
   <defs>
-    <radialGradient id="boar_grad" cx="40%" cy="35%" r="65%">
-      <stop offset="0%" stop-color="#831843"/>
-      <stop offset="70%" stop-color="#500724"/>
-      <stop offset="100%" stop-color="#1f020e"/>
+    <!-- Heavy ironclad rhino steel body gradient -->
+    <radialGradient id="rhino_steel_grad" cx="38%" cy="34%" r="66%">
+      <stop offset="0%" stop-color="#94a3b8"/>
+      <stop offset="45%" stop-color="#64748b"/>
+      <stop offset="80%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#1e293b"/>
     </radialGradient>
+    <!-- Riveted plate gradient -->
+    <linearGradient id="plate_steel_grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#cbd5e1"/>
+      <stop offset="50%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
   </defs>
-  <!-- Rotund imperial boar body -->
-  <circle cx="128" cy="136" r="102" fill="url(#boar_grad)" stroke="#1a020d" stroke-width="9"/>
+
+  <!-- Armored Rhino Pointy Ears -->
+  <polygon points="46,75 22,35 62,55" fill="#475569" stroke="#0f172a" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="48,70 32,45 58,58" fill="#1e293b"/>
+  <polygon points="210,75 234,35 194,55" fill="#475569" stroke="#0f172a" stroke-width="6" stroke-linejoin="round"/>
+  <polygon points="208,70 224,45 198,58" fill="#1e293b"/>
+
+  <!-- Heavy Heavy Plated Rhino Body -->
+  <circle cx="128" cy="138" r="98" fill="url(#rhino_steel_grad)" stroke="#0f172a" stroke-width="9"/>
+
+  <!-- Reinforced Chest Armor Plate -->
+  <path d="M68 150 Q128 175 188 150 Q178 225 128 232 Q78 225 68 150 Z" 
+        fill="url(#plate_steel_grad)" stroke="#0f172a" stroke-width="6"/>
+
+  <!-- Steel Armor Rivets -->
+  <circle cx="82" cy="162" r="4.5" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+  <circle cx="174" cy="162" r="4.5" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+  <circle cx="128" cy="220" r="4.5" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+  <circle cx="95" cy="195" r="4" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
+  <circle cx="161" cy="195" r="4" fill="#f1f5f9" stroke="#0f172a" stroke-width="2"/>
 </svg>

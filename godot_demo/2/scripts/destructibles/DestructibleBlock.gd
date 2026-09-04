@@ -55,6 +55,14 @@ func _ready() -> void:
 	max_contacts_reported = 4
 	body_entered.connect(_on_impact)
 
+	linear_damp = 1.2
+	angular_damp = 4.0
+
+	var pmat = PhysicsMaterial.new()
+	pmat.friction = 0.95
+	pmat.bounce = 0.02
+	physics_material_override = pmat
+
 	if fracture_particles:
 		ParticleHelper.apply_smoke_fx(fracture_particles, 0.25, 0.5)
 
@@ -184,7 +192,7 @@ func _wake_up_neighbors() -> void:
 	if not space_state: return
 	var query = PhysicsShapeQueryParameters2D.new()
 	var sphere = CircleShape2D.new()
-	sphere.radius = max(block_size.x, block_size.y) * 0.8 + 65.0
+	sphere.radius = max(block_size.x, block_size.y) * 0.5 + 20.0
 	query.shape = sphere
 	query.transform = Transform2D(0, global_position)
 	query.collide_with_bodies = true

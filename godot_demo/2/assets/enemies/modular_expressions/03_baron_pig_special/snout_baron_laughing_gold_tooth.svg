@@ -1,14 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 140" width="220" height="140">
-  <!-- Royal Pig Snout -->
-  <ellipse cx="110" cy="46" rx="58" ry="40" fill="#4ade80" stroke="#052e16" stroke-width="7"/>
-  <ellipse cx="86" cy="46" rx="14" ry="20" fill="#052e16"/>
-  <ellipse cx="134" cy="46" rx="14" ry="20" fill="#052e16"/>
-  <!-- Curly Golden Mustache -->
-  <path d="M110 66 C80 60 40 66 26 90 C20 102 40 110 52 96 C70 80 90 76 110 80 C130 76 150 80 168 96 C180 110 200 102 194 90 C180 66 140 60 110 66 Z" fill="#facc15" stroke="#713f12" stroke-width="5"/>
+  <defs>
+    <linearGradient id="mustache_gold_laugh" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="30%" stop-color="#eab308"/>
+      <stop offset="70%" stop-color="#ca8a04"/>
+      <stop offset="100%" stop-color="#854d0e"/>
+    </linearGradient>
+    <radialGradient id="muzzle_laugh_grad" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="60%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fed7aa"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Muzzle Fur Patch -->
+  <path d="M46 40 Q110 20 174 40 Q190 70 160 92 Q110 106 60 92 Q30 70 46 40 Z" 
+        fill="url(#muzzle_laugh_grad)" stroke="#261203" stroke-width="5"/>
+
+  <!-- Whiskers -->
+  <line x1="40" y1="50" x2="10" y2="42" stroke="#261203" stroke-width="3" stroke-linecap="round"/>
+  <line x1="40" y1="62" x2="8" y2="66" stroke="#261203" stroke-width="3" stroke-linecap="round"/>
+  <line x1="180" y1="50" x2="210" y2="42" stroke="#261203" stroke-width="3" stroke-linecap="round"/>
+  <line x1="180" y1="62" x2="212" y2="66" stroke="#261203" stroke-width="3" stroke-linecap="round"/>
+
   <!-- Wide Open Laughing Mouth -->
-  <path d="M60 88 Q110 136 160 88 Z" fill="#450a0a" stroke="#052e16" stroke-width="5"/>
-  <!-- Golden Tooth Highlight -->
-  <polygon points="76,88 88,88 88,104 76,104" fill="#fbbf24" stroke="#78350f" stroke-width="2"/>
+  <path d="M68 76 Q110 134 152 76 Z" fill="#450a0a" stroke="#261203" stroke-width="5"/>
   <!-- Pink Tongue -->
-  <path d="M96 112 Q110 98 124 112 Z" fill="#fb7185"/>
+  <path d="M92 108 Q110 94 128 108 Z" fill="#fb7185"/>
+  <!-- Golden Tooth Highlight -->
+  <polygon points="82,76 96,76 92,94 82,94" fill="#fbbf24" stroke="#78350f" stroke-width="2"/>
+
+  <!-- Glossy Black Triangular Mole Nose -->
+  <path d="M96 32 Q110 28 124 32 Q128 44 110 50 Q92 44 96 32 Z" fill="#18181b" stroke="#09090b" stroke-width="3"/>
+  <ellipse cx="106" cy="34" rx="4" ry="2.5" fill="#ffffff" opacity="0.8"/>
+
+  <!-- Curly Laughing Mustache -->
+  <path d="M110 50 C86 44 46 48 26 70 C18 82 38 90 52 78 C68 66 90 62 110 66 C130 62 152 66 168 78 C182 90 202 82 194 70 C174 48 134 44 110 50 Z" 
+        fill="url(#mustache_gold_laugh)" stroke="#451a03" stroke-width="4.5" stroke-linejoin="round"/>
 </svg>

@@ -1,6 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 110" width="160" height="110">
-  <!-- Boar Snout with Big Nostrils -->
-  <ellipse cx="80" cy="55" rx="54" ry="40" fill="#9d174d" stroke="#1f020e" stroke-width="7"/>
-  <ellipse cx="58" cy="55" rx="14" ry="20" fill="#1f020e"/>
-  <ellipse cx="102" cy="55" rx="14" ry="20" fill="#1f020e"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 120" width="170" height="120">
+  <defs>
+    <!-- Steel horn gradient -->
+    <linearGradient id="rhino_horn_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="30%" stop-color="#e2e8f0"/>
+      <stop offset="70%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+    <!-- Heavy snout iron plate -->
+    <radialGradient id="rhino_snout_plate" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#64748b"/>
+      <stop offset="70%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Tough Rhino Muzzle Base (Iron Plated) -->
+  <path d="M40 50 Q85 32 130 50 Q145 80 120 95 Q85 105 50 95 Q25 80 40 50 Z" 
+        fill="url(#rhino_snout_plate)" stroke="#0f172a" stroke-width="6"/>
+
+  <!-- Heavy Steel Ramming Horn (NO PIG NOSE!) -->
+  <path d="M72 58 Q85 -5 98 58 Q85 52 72 58 Z" 
+        fill="url(#rhino_horn_grad)" stroke="#0f172a" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Horn Highlight Ridge -->
+  <path d="M85 8 L85 50" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- Steel Rivets on Muzzle Plate -->
+  <circle cx="48" cy="65" r="4" fill="#cbd5e1" stroke="#0f172a" stroke-width="2"/>
+  <circle cx="122" cy="65" r="4" fill="#cbd5e1" stroke="#0f172a" stroke-width="2"/>
+  <circle cx="85" cy="94" r="3.5" fill="#cbd5e1" stroke="#0f172a" stroke-width="2"/>
+
+  <!-- Grimacing Warrior Mouth Line with Steel Guards -->
+  <path d="M58 82 Q85 92 112 82" stroke="#0f172a" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <!-- Steel lower tusk horns -->
+  <polygon points="62,82 66,74 70,82" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.5"/>
+  <polygon points="100,82 104,74 108,82" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.5"/>
 </svg>

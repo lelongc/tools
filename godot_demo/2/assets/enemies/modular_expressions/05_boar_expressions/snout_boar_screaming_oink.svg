@@ -1,11 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 110" width="160" height="110">
-  <!-- Screaming Oinking Boar Snout with Flared Nostrils & Wide Open Mouth -->
-  <!-- Snout Base -->
-  <ellipse cx="80" cy="40" rx="54" ry="32" fill="#9d174d" stroke="#1f020e" stroke-width="7"/>
-  <ellipse cx="58" cy="40" rx="14" ry="18" fill="#1f020e"/>
-  <ellipse cx="102" cy="40" rx="14" ry="18" fill="#1f020e"/>
-  <!-- Wide Open Screaming Mouth below snout -->
-  <ellipse cx="80" cy="80" rx="34" ry="22" fill="#000000" stroke="#1f020e" stroke-width="5"/>
-  <!-- Tongue -->
-  <ellipse cx="80" cy="90" rx="20" ry="10" fill="#f43f5e"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 130" width="170" height="130">
+  <defs>
+    <linearGradient id="rhino_horn_scream" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="30%" stop-color="#e2e8f0"/>
+      <stop offset="70%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+    <radialGradient id="rhino_snout_scream" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#64748b"/>
+      <stop offset="70%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Muzzle Plate -->
+  <path d="M40 45 Q85 28 130 45 Q145 72 120 85 Q85 92 50 85 Q25 72 40 45 Z" 
+        fill="url(#rhino_snout_scream)" stroke="#0f172a" stroke-width="6"/>
+
+  <!-- Steel Horn -->
+  <path d="M72 52 Q85 -8 98 52 Q85 46 72 52 Z" 
+        fill="url(#rhino_horn_scream)" stroke="#0f172a" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M85 5 L85 45" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- Steel Rivets -->
+  <circle cx="48" cy="58" r="4" fill="#cbd5e1" stroke="#0f172a" stroke-width="2"/>
+  <circle cx="122" cy="58" r="4" fill="#cbd5e1" stroke="#0f172a" stroke-width="2"/>
+
+  <!-- Roaring Open Screaming Mouth (NO PIG OINK!) -->
+  <ellipse cx="85" cy="94" rx="30" ry="24" fill="#0f172a" stroke="#020617" stroke-width="5"/>
+  <!-- Red Tongue -->
+  <ellipse cx="85" cy="104" rx="18" ry="12" fill="#ef4444"/>
+  <!-- Lower Steel Fangs -->
+  <polygon points="68,90 72,82 76,90" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5"/>
+  <polygon points="94,90 98,82 102,90" fill="#f1f5f9" stroke="#0f172a" stroke-width="1.5"/>
 </svg>
