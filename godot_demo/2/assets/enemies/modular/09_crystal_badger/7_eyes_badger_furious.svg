@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60" width="120" height="60">
+  <!-- Crystal Badger Furious Blazing Eyes -->
+  <!-- Left Angry Slanted Eye -->
+  <path d="M 24,34 Q 40,20 54,28 Q 44,44 24,34 Z" fill="#ffffff" stroke="#020617" stroke-width="3"/>
+  <circle cx="42" cy="30" r="6" fill="#ec4899"/>
+  <circle cx="42" cy="30" r="3" fill="#020617"/>
+  <!-- Right Angry Slanted Eye -->
+  <path d="M 96,34 Q 80,20 66,28 Q 76,44 96,34 Z" fill="#ffffff" stroke="#020617" stroke-width="3"/>
+  <circle cx="78" cy="30" r="6" fill="#ec4899"/>
+  <circle cx="78" cy="30" r="3" fill="#020617"/>
+  <!-- Heavy Furrowed Brows -->
+  <polygon points="20,18 56,26 54,32 18,24" fill="#020617"/>
+  <polygon points="100,18 64,26 66,32 102,24" fill="#020617"/>
+</svg>

@@ -51,7 +51,7 @@ func _ready() -> void:
 	_setup_level()
 
 func _setup_level() -> void:
-	var world_id = int(float(level_id - 1) / 15.0) + 1
+	var world_id = clamp(int(float(level_id - 1) / 20.0) + 1, 1, 5)
 	var egg_loadout: Array[String] = []
 
 	# 1. Bảng màu mỹ thuật theo từng Thế Giới
@@ -76,23 +76,29 @@ func _setup_level() -> void:
 			bg_dirt.color = Color(0.18, 0.06, 0.08)
 			bg_cavern.color = Color(0.08, 0.03, 0.05)
 			if bg_cavern_backdrop: bg_cavern_backdrop.modulate = Color(0.95, 0.70, 0.65)
+		5: # World 5: Crystal Void Citadel (Thánh địa pha lê tím huyền bí)
+			bg_sky.color = Color(0.14, 0.04, 0.24)
+			bg_dirt.color = Color(0.18, 0.10, 0.28)
+			bg_cavern.color = Color(0.08, 0.02, 0.14)
+			if bg_cavern_backdrop: bg_cavern_backdrop.modulate = Color(0.85, 0.70, 0.98)
 
 	# 2. Quy mô công trình CỰC ĐẠI THEO THẾ GIỚI & GIAI ĐOẠN
-	var world_stage = (level_id - 1) % 15 + 1
+	var world_stage = (level_id - 1) % 20 + 1
 	var cavern_half_width = 260.0
 	match world_id:
-		1: cavern_half_width = 260.0 + (world_stage - 1) * 4.0 # 260 -> 316 (Rộng 520 -> 632)
-		2: cavern_half_width = 340.0 + (world_stage - 1) * 5.0 # 340 -> 410 (Rộng 680 -> 820)
-		3: cavern_half_width = 410.0 + (world_stage - 1) * 5.0 # 410 -> 480 (Rộng 820 -> 960)
-		4: cavern_half_width = 480.0 + (world_stage - 1) * 5.0 # 480 -> 550 (Rộng 960 -> 1100)
+		1: cavern_half_width = 260.0 + (world_stage - 1) * 3.0 # 260 -> 317 (Rộng 520 -> 634)
+		2: cavern_half_width = 330.0 + (world_stage - 1) * 4.0 # 330 -> 406 (Rộng 660 -> 812)
+		3: cavern_half_width = 400.0 + (world_stage - 1) * 4.0 # 400 -> 476 (Rộng 800 -> 952)
+		4: cavern_half_width = 470.0 + (world_stage - 1) * 4.0 # 470 -> 546 (Rộng 940 -> 1092)
+		5: cavern_half_width = 520.0 + (world_stage - 1) * 5.0 # 520 -> 615 (Rộng 1040 -> 1230)
 
 	var left_edge_x = 30.0
 	var cx = left_edge_x + cavern_half_width
 	var right_edge_x = left_edge_x + cavern_half_width * 2.0
 	var total_w = right_edge_x + 30.0
 
-	var floor_y = 840.0 + (world_id - 1) * 20.0 # W1: 840, W2: 860, W3: 880, W4: 900
-	var cavern_top_y = clamp(380.0 - (world_id * 25.0) - (world_stage * 3.0), 210.0, 380.0)
+	var floor_y = 840.0 + (world_id - 1) * 16.0 # W1: 840, W2: 856, W3: 872, W4: 888, W5: 904
+	var cavern_top_y = clamp(380.0 - (world_id * 20.0) - (world_stage * 2.5), 210.0, 380.0)
 	var cavern_bottom_y = floor_y
 	intro_target_y = (cavern_bottom_y - 20.0 + cavern_top_y) * 0.5
 
@@ -229,6 +235,12 @@ func _setup_level() -> void:
 		heavy_mat = "obsidian"
 		enemy_grunt = "imperial_boar"
 		enemy_elite = "imperial_boar"
+	elif world_id == 5:
+		primary_mat = "steel"
+		secondary_mat = "glass"
+		heavy_mat = "obsidian"
+		enemy_grunt = "crystal_badger"
+		enemy_elite = "imperial_boar"
 
 	# 4. Xây dựng công trình đại hầm & kho đạn
 	egg_loadout = _generate_grand_bunker(level_id, world_id, cx, floor_y, primary_mat, secondary_mat, heavy_mat, enemy_grunt, enemy_elite)
@@ -258,7 +270,7 @@ func _spawn_bastion_tier(center_x: float, base_y: float, span: float, pillar_h: 
 		var e_y_offset = 20.0
 		if enemy_type == "boss_baron_pig":
 			e_y_offset = 27.0
-		elif enemy_type in ["imperial_boar", "mine_wolf", "spike_hound"]:
+		elif enemy_type in ["imperial_boar", "mine_wolf", "spike_hound", "crystal_badger"]:
 			e_y_offset = 23.0
 
 		if tnt_mode > 0:
@@ -284,12 +296,12 @@ func _spawn_connecting_bridge(x_from: float, x_to: float, y_level: float, span_f
 		var tt = has_tier2_from; has_tier2_from = has_tier2_to; has_tier2_to = tt
 		var t2s = t2_span_from; t2_span_from = t2_span_to; t2_span_to = t2s
 
-	var s_from = t2_span_from if (has_tier2_from and t2_span_from > 0.0) else span_from
-	var s_to = t2_span_to if (has_tier2_to and t2_span_to > 0.0) else span_to
+	var s_from = max(span_from, t2_span_from if has_tier2_from else 0.0)
+	var s_to = max(span_to, t2_span_to if has_tier2_to else 0.0)
 
-	# Vị trí an toàn tuyệt đối bên ngoài trụ của 2 tháp (cách trụ tối thiểu 4px)
-	var start_x = x_from + s_from * 0.5 + 16.0
-	var end_x = x_to - s_to * 0.5 - 16.0
+	# Vị trí an toàn tuyệt đối bên ngoài dầm ngang của 2 tháp (dầm nhô ra span*0.5 + 18px)
+	var start_x = x_from + s_from * 0.5 + 20.0
+	var end_x = x_to - s_to * 0.5 - 20.0
 
 	var bridge_w = end_x - start_x
 	if bridge_w < 16.0: return
@@ -322,8 +334,8 @@ func _spawn_boulder(pos: Vector2, span: float = 80.0, mat: String = "stone") -> 
 
 func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat1: String, mat2: String, mat_heavy: String, e_grunt: String, e_elite: String) -> Array[String]:
 	var loadout: Array[String] = []
-	var is_boss_level = (lvl % 15 == 0)
-	var world_stage = (lvl - 1) % 15 + 1
+	var is_boss_level = (lvl % 20 == 0)
+	var world_stage = (lvl - 1) % 20 + 1
 
 	match world:
 		1:
@@ -386,9 +398,9 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 				loadout = ["normal", "bomb", "normal", "drill", "bomb"]
 			elif world_stage <= 9:
 				loadout = ["normal", "bomb", "drill", "normal", "drill", "bomb"]
-			elif world_stage < 15:
+			elif world_stage < 20:
 				loadout = ["normal", "bomb", "drill", "normal", "drill", "bomb", "bomb"]
-			else:
+			else: # Boss Level 20
 				loadout = ["bomb", "drill", "normal", "drill", "bomb", "bomb", "bomb"]
 
 		2:
@@ -436,9 +448,9 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 				loadout = ["drill", "frost", "bomb", "normal", "drill"]
 			elif world_stage <= 9:
 				loadout = ["drill", "frost", "bomb", "drill", "frost", "bomb"]
-			elif world_stage < 15:
+			elif world_stage < 20:
 				loadout = ["drill", "frost", "bomb", "bomb", "drill", "frost", "bomb"]
-			else:
+			else: # Boss Level 40
 				loadout = ["drill", "frost", "bomb", "bomb", "drill", "frost", "bomb", "bomb"]
 
 		3:
@@ -483,9 +495,9 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 				loadout = ["acid", "cluster", "drill", "bomb", "acid", "cluster"]
 			elif world_stage <= 9:
 				loadout = ["acid", "cluster", "drill", "bomb", "cluster", "acid", "bomb"]
-			elif world_stage < 15:
+			elif world_stage < 20:
 				loadout = ["acid", "drill", "bomb", "cluster", "acid", "drill", "bomb", "bomb"]
-			else:
+			else: # Boss Level 60
 				loadout = ["acid", "drill", "bomb", "cluster", "acid", "drill", "blackhole", "bomb"]
 
 		4:
@@ -534,10 +546,70 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 				loadout = ["blackhole", "acid", "drill", "bomb", "blackhole", "bomb"]
 			elif world_stage <= 9:
 				loadout = ["blackhole", "acid", "drill", "bomb", "blackhole", "acid", "bomb"]
-			elif world_stage < 15:
+			elif world_stage < 20:
 				loadout = ["blackhole", "acid", "drill", "bomb", "blackhole", "drill", "acid", "bomb"]
-			else: # Final Level 60
+			else: # Boss Level 80
 				loadout = ["blackhole", "bomb", "drill", "acid", "blackhole", "drill", "acid", "bomb"]
+
+		5:
+			# =========================================================================
+			# WORLD 5: CRYSTAL VOID CITADEL (Thánh Địa Pha Lê Tối Cao) - Màn 81 đến 100
+			# =========================================================================
+			var c5_w2 = cx - 410.0
+			var c5_w1 = cx - 210.0
+			var c5_e1 = cx + 210.0
+			var c5_e2 = cx + 410.0
+
+			# 1. Hầm Updraft Khí Lưu Tinh Thể
+			_spawn_updraft(Vector2(c5_w2 - 50.0, floor_y))
+			if world_stage >= 5:
+				_spawn_updraft(Vector2(c5_e2 + 50.0, floor_y))
+
+			# 2. Tháp Tiền Tiêu Thạch Anh Tây
+			var rw_1 = _spawn_bastion_tier(c5_w2, floor_y, 116.0, 120.0, mat1, e_grunt, 1)
+			var rw_2 = rw_1
+			if world_stage >= 4:
+				rw_2 = _spawn_bastion_tier(c5_w2, rw_1, 88.0, 88.0, mat2, e_elite, 0)
+				_spawn_boulder(Vector2(c5_w2, rw_2 - 28.0), 88.0, mat_heavy)
+
+			# 3. Pháo Đài Cánh Trái
+			var r_wl1 = _spawn_bastion_tier(c5_w1, floor_y, 120.0, 110.0, mat1, e_grunt, 0)
+			_spawn_connecting_bridge(c5_w2, c5_w1, rw_1, 116.0, 120.0, mat1, floor_y, world_stage >= 4, false, 88.0, 0.0)
+
+			# 4. ĐẠI ĐIỆN VỰC THẲM TRUNG TÂM (Grand Void Sanctum - 3 Tầng Kiên Cố)
+			var final_boss = "boss_baron_pig" if is_boss_level else (e_elite if world_stage >= 10 else e_grunt)
+			var rc_1 = _spawn_bastion_tier(cx, floor_y, 160.0, 120.0, mat_heavy, final_boss, 2)
+			var rc_2 = _spawn_bastion_tier(cx, rc_1, 126.0, 96.0, mat1, e_elite if (world_stage >= 6 and not is_boss_level) else e_grunt, 1)
+			var rc_3 = _spawn_bastion_tier(cx, rc_2, 92.0, 84.0, mat2, e_grunt if world_stage >= 12 else "", 0)
+			_spawn_boulder(Vector2(cx, rc_3 - 28.0), 92.0, mat_heavy)
+
+			_spawn_connecting_bridge(c5_w1, cx, r_wl1, 120.0, 160.0, mat1, floor_y, false, true, 0.0, 126.0)
+
+			# 5. Pháo Đài Cánh Phải
+			var r_el1 = _spawn_bastion_tier(c5_e1, floor_y, 120.0, 110.0, mat1, e_grunt, 0)
+			_spawn_connecting_bridge(cx, c5_e1, rc_1, 160.0, 120.0, mat1, floor_y, true, false, 126.0, 0.0)
+
+			# 6. Tháp Vũ Khí Pha Lê Đông
+			var re_1 = _spawn_bastion_tier(c5_e2, floor_y, 116.0, 120.0, mat1, e_elite, 2)
+			var re_2 = re_1
+			if world_stage >= 6:
+				re_2 = _spawn_bastion_tier(c5_e2, re_1, 88.0, 88.0, mat_heavy, e_grunt, 0)
+				_spawn_boulder(Vector2(c5_e2, re_2 - 28.0), 88.0, mat_heavy)
+			_spawn_connecting_bridge(c5_e1, c5_e2, r_el1, 120.0, 116.0, mat1, floor_y, false, world_stage >= 6, 0.0, 88.0)
+
+			# 7. Lồng Gà Giải Cứu
+			if world_stage % 4 == 1 and r_wl1 < floor_y:
+				_spawn_rescue_cage(Vector2(c5_w1, r_wl1 - 22.0))
+
+			# 8. Kho Đạn Trứng World 5
+			if world_stage <= 5:
+				loadout = ["blackhole", "acid", "drill", "cluster", "bomb", "blackhole"]
+			elif world_stage <= 12:
+				loadout = ["blackhole", "acid", "drill", "cluster", "bomb", "acid", "blackhole"]
+			elif world_stage < 20:
+				loadout = ["blackhole", "drill", "acid", "cluster", "bomb", "drill", "acid", "blackhole"]
+			else: # Final Level 100: Đại Chiến Đỉnh Cao
+				loadout = ["blackhole", "drill", "acid", "cluster", "bomb", "blackhole", "drill", "blackhole"]
 
 	return loadout
 

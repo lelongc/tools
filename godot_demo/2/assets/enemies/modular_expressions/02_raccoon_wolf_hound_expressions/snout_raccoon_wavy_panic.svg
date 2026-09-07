@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80" width="120" height="80">
+  <!-- Raccoon Wavy Panic Scream Muzzle -->
+  <defs>
+    <linearGradient id="furRaccoon" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <!-- Muzzle Fur Base -->
+  <ellipse cx="60" cy="40" rx="44" ry="28" fill="url(#furRaccoon)" stroke="#0f172a" stroke-width="4"/>
+  <!-- Creamy Snout Mound -->
+  <ellipse cx="60" cy="38" rx="34" ry="20" fill="#f8fafc" stroke="#334155" stroke-width="3"/>
+  <!-- Black Triangular Nose -->
+  <polygon points="60,26 50,38 70,38" fill="#0f172a" stroke="#0f172a" stroke-width="2" stroke-linejoin="round"/>
+  <ellipse cx="57" cy="30" rx="3" ry="2" fill="#ffffff" opacity="0.8"/>
+  <!-- Wavy Screaming Mouth Hole -->
+  <path d="M 44,48 Q 52,42 60,49 Q 68,42 76,48 Q 72,68 60,67 Q 48,68 44,48 Z" fill="#7f1d1d" stroke="#0f172a" stroke-width="3.5"/>
+  <!-- Panicked Chattering Teeth -->
+  <rect x="52" y="47" width="7" height="6" rx="1.5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+  <rect x="61" y="47" width="7" height="6" rx="1.5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+  <rect x="56" y="60" width="8" height="5" rx="1.5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+  <!-- Whiskers -->
+  <line x1="28" y1="36" x2="8" y2="30" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+  <line x1="28" y1="42" x2="6" y2="44" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+  <line x1="92" y1="36" x2="112" y2="30" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+  <line x1="92" y1="42" x2="114" y2="44" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Crystal Void Badger Body: Amethyst & Slate-Indigo Fur with Badger Face Stripes -->
+  <defs>
+    <radialGradient id="badgerBody" cx="40%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="60%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#0f0e26"/>
+    </radialGradient>
+    <linearGradient id="badgerStripe" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+  </defs>
+  <!-- Main Rounded Body -->
+  <circle cx="100" cy="100" r="92" fill="url(#badgerBody)" stroke="#020617" stroke-width="7"/>
+  <!-- Silver Badger Cheek & Forehead Stripes -->
+  <path d="M 68,12 Q 100,20 132,12 L 138,50 Q 100,56 62,50 Z" fill="url(#badgerStripe)" stroke="#020617" stroke-width="4"/>
+  <path d="M 40,40 Q 56,80 54,120 L 32,110 Q 30,70 34,40 Z" fill="url(#badgerStripe)" stroke="#020617" stroke-width="3"/>
+  <path d="M 160,40 Q 144,80 146,120 L 168,110 Q 170,70 166,40 Z" fill="url(#badgerStripe)" stroke="#020617" stroke-width="3"/>
+  <!-- Violet Belly Fur Patch -->
+  <ellipse cx="100" cy="142" rx="46" ry="36" fill="#312e81" stroke="#020617" stroke-width="3.5"/>
+  <!-- Badger Little Rounded Ears -->
+  <circle cx="28" cy="40" r="18" fill="#1e1b4b" stroke="#020617" stroke-width="4.5"/>
+  <circle cx="28" cy="40" r="10" fill="#a855f7"/>
+  <circle cx="172" cy="40" r="18" fill="#1e1b4b" stroke="#020617" stroke-width="4.5"/>
+  <circle cx="172" cy="40" r="10" fill="#a855f7"/>
+</svg>

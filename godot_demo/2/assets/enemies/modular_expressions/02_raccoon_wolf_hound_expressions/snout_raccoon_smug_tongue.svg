@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80" width="120" height="80">
+  <!-- Raccoon Cheeky Smug Raspberry Tongue Muzzle -->
+  <ellipse cx="60" cy="40" rx="44" ry="28" fill="#334155" stroke="#0f172a" stroke-width="4"/>
+  <ellipse cx="60" cy="38" rx="34" ry="20" fill="#f8fafc" stroke="#334155" stroke-width="3"/>
+  <!-- Black Nose -->
+  <polygon points="60,26 50,38 70,38" fill="#0f172a" stroke="#0f172a" stroke-width="2" stroke-linejoin="round"/>
+  <ellipse cx="57" cy="30" rx="3" ry="2" fill="#ffffff" opacity="0.8"/>
+  <!-- Smug Smirk Opening -->
+  <path d="M 42,48 Q 60,42 78,48 Q 72,60 58,60 Q 46,60 42,48 Z" fill="#881337" stroke="#0f172a" stroke-width="3"/>
+  <!-- Cheeky Sticking Tongue -->
+  <path d="M 52,52 Q 62,50 68,52 C 72,66 56,76 48,66 C 45,60 48,54 52,52 Z" fill="#f43f5e" stroke="#0f172a" stroke-width="2.5"/>
+  <line x1="58" y1="53" x2="56" y2="65" stroke="#be123c" stroke-width="2"/>
+  <!-- Whiskers -->
+  <line x1="28" y1="36" x2="8" y2="30" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+  <line x1="28" y1="42" x2="6" y2="44" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+  <line x1="92" y1="36" x2="112" y2="30" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+  <line x1="92" y1="42" x2="114" y2="44" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 100" width="140" height="100">
+  <!-- Ironclad Rhino Smug Victory Muzzle with Giant Horn -->
+  <defs>
+    <linearGradient id="steelRhino3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#94a3b8"/>
+      <stop offset="50%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="hornRhino3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="60%" stop-color="#ca8a04"/>
+      <stop offset="100%" stop-color="#854d0e"/>
+    </linearGradient>
+  </defs>
+  <!-- Armored Heavy Snout Plate -->
+  <path d="M 30,35 L 110,35 L 120,72 L 20,72 Z" fill="url(#steelRhino3)" stroke="#0f172a" stroke-width="4" stroke-linejoin="round"/>
+  <!-- Smug Warrior Smile -->
+  <path d="M 38,70 Q 70,64 102,70 C 98,88 80,94 70,94 C 60,94 42,88 38,70 Z" fill="#881337" stroke="#0f172a" stroke-width="3"/>
+  <!-- Confident Gold Tooth -->
+  <rect x="58" y="70" width="8" height="8" rx="1.5" fill="#facc15" stroke="#0f172a" stroke-width="1.5"/>
+  <rect x="68" y="70" width="8" height="8" rx="1.5" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+  <!-- Golden Glinting Horn Tip -->
+  <path d="M 52,45 C 50,26 66,2 70,0 C 74,2 90,26 88,45 Z" fill="url(#hornRhino3)" stroke="#0f172a" stroke-width="4"/>
+  <!-- Sparkle Star on Horn -->
+  <polygon points="70,-4 72,0 76,2 72,4 70,8 68,4 64,2 68,0" fill="#ffffff"/>
+  <!-- Rivets -->
+  <circle cx="28" cy="42" r="3.5" fill="#f8fafc" stroke="#0f172a" stroke-width="1.5"/>
+  <circle cx="112" cy="42" r="3.5" fill="#f8fafc" stroke="#0f172a" stroke-width="1.5"/>
+</svg>

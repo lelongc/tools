@@ -90,7 +90,7 @@ func record_level_result(level_id: int, stars: int, score: int) -> void:
 		save_data["level_scores"][lvl_key] = score
 
 	if level_id + 1 > save_data.get("highest_unlocked_level", 1):
-		save_data["highest_unlocked_level"] = min(level_id + 1, 60)
+		save_data["highest_unlocked_level"] = min(level_id + 1, 100)
 
 	save_game()
 

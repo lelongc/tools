@@ -26,16 +26,16 @@ var translations: Dictionary = {
 		"fr": "CLUCK & DROP", "ru": "CLUCK & DROP"
 	},
 	"KEY_SUBTITLE": {
-		"en": "BUNKER BUSTER 60 LEVELS",
-		"vi": "CHIẾN DỊCH 60 MÀN HẦM NGỤC",
-		"ja": "地下バンカーバスター 60ステージ",
-		"ko": "지하 벙커 버스터 60레벨",
-		"zh_CN": "地下地堡破坏者 60关",
-		"es": "DESTRUCTOR DE BÚNKER 60 NIVELES",
-		"pt_BR": "DESTRUIDOR DE BUNKER 60 FASES",
-		"de": "BUNKER-BRECHER 60 LEVEL",
-		"fr": "CASSEUR DE BUNKER 60 NIVEAUX",
-		"ru": "БУНКЕР БАСТЕР 60 УРОВНЕЙ"
+		"en": "BUNKER BUSTER 100 LEVELS",
+		"vi": "CHIẾN DỊCH 100 MÀN HẦM NGỤC",
+		"ja": "地下バンカーバスター 100ステージ",
+		"ko": "지하 벙커 버스터 100레벨",
+		"zh_CN": "地下地堡破坏者 100关",
+		"es": "DESTRUCTOR DE BÚNKER 100 NIVELES",
+		"pt_BR": "DESTRUIDOR DE BUNKER 100 FASES",
+		"de": "BUNKER-BRECHER 100 LEVEL",
+		"fr": "CASSEUR DE BUNKER 100 NIVEAUX",
+		"ru": "БУНКЕР БАСТЕР 100 УРОВНЕЙ"
 	},
 	"KEY_PLAY": {
 		"en": "PLAY NOW", "vi": "CHƠI NGAY", "ja": "プレイ", "ko": "지금 플레이",
@@ -124,32 +124,39 @@ var translations: Dictionary = {
 		"de": "GLÜCKSRAD", "fr": "ROUE DE LA CHANCE", "ru": "КОЛЕСО УДАЧИ"
 	},
 	"KEY_WORLD_1": {
-		"en": "WORLD 1: FARM CAVERN (1 - 15)", "vi": "THẾ GIỚI 1: NÔNG TRẠI (1 - 15)",
-		"ja": "ワールド1: 農場洞窟 (1 - 15)", "ko": "월드 1: 농장 동굴 (1 - 15)",
-		"zh_CN": "世界 1: 农场洞穴 (1 - 15)", "es": "MUNDO 1: CAVERNA GRANJA (1 - 15)",
-		"pt_BR": "MUNDO 1: CAVERNA FAZENDA (1 - 15)", "de": "WELT 1: FARM-HÖHLE (1 - 15)",
-		"fr": "MONDE 1 : CAVERNE FERME (1 - 15)", "ru": "МИР 1: ФЕРМЕРСКАЯ ПЕЩЕРА (1 - 15)"
+		"en": "WORLD 1: FARM CAVERN (1 - 20)", "vi": "THẾ GIỚI 1: NÔNG TRẠI (1 - 20)",
+		"ja": "ワールド1: 農場洞窟 (1 - 20)", "ko": "월드 1: 농장 동굴 (1 - 20)",
+		"zh_CN": "世界 1: 农场洞穴 (1 - 20)", "es": "MUNDO 1: CAVERNA GRANJA (1 - 20)",
+		"pt_BR": "MUNDO 1: CAVERNA FAZENDA (1 - 20)", "de": "WELT 1: FARM-HÖHLE (1 - 20)",
+		"fr": "MONDE 1 : CAVERNE FERME (1 - 20)", "ru": "МИР 1: ФЕРМЕРСКАЯ ПЕЩЕРА (1 - 20)"
 	},
 	"KEY_WORLD_2": {
-		"en": "WORLD 2: STONE QUARRY (16 - 30)", "vi": "THẾ GIỚI 2: MỎ ĐÁ BÊ TÔNG (16 - 30)",
-		"ja": "ワールド2: 採石場 (16 - 30)", "ko": "월드 2: 채석장 (16 - 30)",
-		"zh_CN": "世界 2: 采石场 (16 - 30)", "es": "MUNDO 2: CANTERA (16 - 30)",
-		"pt_BR": "MUNDO 2: PEDREIRA (16 - 30)", "de": "WELT 2: STEINBRUCH (16 - 30)",
-		"fr": "MONDE 2 : CARRIÈRE (16 - 30)", "ru": "МИР 2: КАМЕННЫЙ КАРЬЕР (16 - 30)"
+		"en": "WORLD 2: STONE QUARRY (21 - 40)", "vi": "THẾ GIỚI 2: MỎ ĐÁ BÊ TÔNG (21 - 40)",
+		"ja": "ワールド2: 採石場 (21 - 40)", "ko": "월드 2: 채석장 (21 - 40)",
+		"zh_CN": "世界 2: 采石场 (21 - 40)", "es": "MUNDO 2: CANTERA (21 - 40)",
+		"pt_BR": "MUNDO 2: PEDREIRA (21 - 40)", "de": "WELT 2: STEINBRUCH (21 - 40)",
+		"fr": "MONDE 2 : CARRIÈRE (21 - 40)", "ru": "МИР 2: КАМЕННЫЙ КАРЬЕР (21 - 40)"
 	},
 	"KEY_WORLD_3": {
-		"en": "WORLD 3: TOXIC FACTORY (31 - 45)", "vi": "THẾ GIỚI 3: NHÀ MÁY ĐỘC (31 - 45)",
-		"ja": "ワールド3: 毒薬工場 (31 - 45)", "ko": "월드 3: 독극물 공장 (31 - 45)",
-		"zh_CN": "世界 3: 毒气工厂 (31 - 45)", "es": "MUNDO 3: FÁBRICA TÓXICA (31 - 45)",
-		"pt_BR": "MUNDO 3: FÁBRICA TÓXICA (31 - 45)", "de": "WELT 3: GIFT-FABRIK (31 - 45)",
-		"fr": "MONDE 3 : USINE TOXIQUE (31 - 45)", "ru": "МИР 3: ХИМИЧЕСКИЙ ЗАВОД (31 - 45)"
+		"en": "WORLD 3: TOXIC FACTORY (41 - 60)", "vi": "THẾ GIỚI 3: NHÀ MÁY ĐỘC (41 - 60)",
+		"ja": "ワールド3: 毒薬工場 (41 - 60)", "ko": "월드 3: 독극물 공장 (41 - 60)",
+		"zh_CN": "世界 3: 毒气工厂 (41 - 60)", "es": "MUNDO 3: FÁBRICA TÓXICA (41 - 60)",
+		"pt_BR": "MUNDO 3: FÁBRICA TÓXICA (41 - 60)", "de": "WELT 3: GIFT-FABRIK (41 - 60)",
+		"fr": "MONDE 3 : USINE TOXIQUE (41 - 60)", "ru": "МИР 3: ХИМИЧЕСКИЙ ЗАВОД (41 - 60)"
 	},
 	"KEY_WORLD_4": {
-		"en": "WORLD 4: LAVA CORE (46 - 60)", "vi": "THẾ GIỚI 4: HẦM NÚI LỬA (46 - 60)",
-		"ja": "ワールド4: 溶岩コア (46 - 60)", "ko": "월드 4: 용암 요새 (46 - 60)",
-		"zh_CN": "世界 4: 熔岩地堡 (46 - 60)", "es": "MUNDO 4: NÚCLEO DE LAVA (46 - 60)",
-		"pt_BR": "MUNDO 4: NÚCLEO DE LAVA (46 - 60)", "de": "WELT 4: LAVA-KERN (46 - 60)",
-		"fr": "MONDE 4 : COEUR DE LAVE (46 - 60)", "ru": "МИР 4: ЛАВОВОЕ ЯДРО (46 - 60)"
+		"en": "WORLD 4: LAVA CORE (61 - 80)", "vi": "THẾ GIỚI 4: HẦM NÚI LỬA (61 - 80)",
+		"ja": "ワールド4: 溶岩コア (61 - 80)", "ko": "월드 4: 용암 요새 (61 - 80)",
+		"zh_CN": "世界 4: 熔岩地堡 (61 - 80)", "es": "MUNDO 4: NÚCLEO DE LAVA (61 - 80)",
+		"pt_BR": "MUNDO 4: NÚCLEO DE LAVA (61 - 80)", "de": "WELT 4: LAVA-KERN (61 - 80)",
+		"fr": "MONDE 4 : COEUR DE LAVE (61 - 80)", "ru": "МИР 4: ЛАВОВОЕ ЯДРО (61 - 80)"
+	},
+	"KEY_WORLD_5": {
+		"en": "WORLD 5: CRYSTAL CITADEL (81 - 100)", "vi": "THẾ GIỚI 5: THÁNH ĐỊA PHA LÊ (81 - 100)",
+		"ja": "ワールド5: 水晶の要塞 (81 - 100)", "ko": "월드 5: 크리스탈 성채 (81 - 100)",
+		"zh_CN": "世界 5: 水晶城堡 (81 - 100)", "es": "MUNDO 5: CIUDADELA CRISTAL (81 - 100)",
+		"pt_BR": "MUNDO 5: CIDADELA DE CRISTAL (81 - 100)", "de": "WELT 5: KRISTALL-ZITADELLE (81 - 100)",
+		"fr": "MONDE 5 : CITADELLE DE CRISTAL (81 - 100)", "ru": "МИР 5: КРИСТАЛЬНАЯ ЦИТАДЕЛЬ (81 - 100)"
 	},
 	"KEY_PREV_WORLD": {
 		"en": "◀ PREV", "vi": "◀ TRƯỚC", "ja": "◀ 前へ", "ko": "◀ 이전",

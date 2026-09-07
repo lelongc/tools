@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 90" width="130" height="90">
+  <!-- Mine Wolf Smug One-Sided Grin Muzzle -->
+  <defs>
+    <linearGradient id="wolfFur3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <!-- Main Wolf Snout Bridge -->
+  <path d="M 40,15 L 90,15 L 100,45 L 86,78 L 44,78 L 30,45 Z" fill="url(#wolfFur3)" stroke="#0f172a" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- Nose with gleam -->
+  <path d="M 52,32 Q 65,28 78,32 L 72,44 Q 65,47 58,44 Z" fill="#020617" stroke="#020617" stroke-width="2"/>
+  <circle cx="58" cy="38" r="2" fill="#ffffff" opacity="0.7"/>
+  <!-- Cocky Crooked Smug Smile -->
+  <path d="M 42,56 Q 65,58 92,46 Q 80,68 56,66 Q 44,64 42,56 Z" fill="#7f1d1d" stroke="#0f172a" stroke-width="3"/>
+  <!-- Cocky Single Fang Exposed -->
+  <polygon points="80,48 88,46 86,60" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+  <polygon points="46,55 52,56 49,63" fill="#ffffff" stroke="#0f172a" stroke-width="1.2"/>
+  <!-- Cheek Smug Fur Curl -->
+  <path d="M 94,44 Q 99,40 102,46" fill="none" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

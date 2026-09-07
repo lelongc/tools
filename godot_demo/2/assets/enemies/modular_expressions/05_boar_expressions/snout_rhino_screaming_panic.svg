@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 100" width="140" height="100">
+  <!-- Ironclad Rhino Screaming Panic Muzzle with Giant Horn -->
+  <defs>
+    <linearGradient id="steelRhino2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#94a3b8"/>
+      <stop offset="50%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="hornRhino2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e2e8f0"/>
+      <stop offset="60%" stop-color="#64748b"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+  </defs>
+  <!-- Armored Snout Plate -->
+  <path d="M 32,32 L 108,32 L 118,65 L 22,65 Z" fill="url(#steelRhino2)" stroke="#0f172a" stroke-width="4" stroke-linejoin="round"/>
+  <!-- Giant Screaming Roar Mouth -->
+  <ellipse cx="70" cy="74" rx="36" ry="22" fill="#4c0519" stroke="#0f172a" stroke-width="4"/>
+  <!-- Panicked Tongue -->
+  <path d="M 54,80 Q 70,72 86,80 C 88,94 80,98 70,98 C 60,98 52,94 54,80 Z" fill="#fb7185" stroke="#0f172a" stroke-width="2.5"/>
+  <!-- Terrified Chattering Steel Fangs -->
+  <polygon points="46,58 52,58 49,70" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+  <polygon points="94,58 88,58 91,70" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+  <polygon points="56,92 62,92 59,82" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+  <polygon points="84,92 78,92 81,82" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+  <!-- GIANT STEEL HORN -->
+  <path d="M 54,42 C 52,24 66,2 70,0 C 74,2 88,24 86,42 Z" fill="url(#hornRhino2)" stroke="#0f172a" stroke-width="4"/>
+  <!-- Rivets -->
+  <circle cx="28" cy="40" r="3" fill="#f8fafc" stroke="#0f172a" stroke-width="1.5"/>
+  <circle cx="112" cy="40" r="3" fill="#f8fafc" stroke="#0f172a" stroke-width="1.5"/>
+</svg>

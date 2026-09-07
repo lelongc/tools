@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 85" width="130" height="85">
+  <!-- Crystal Badger Rugged Normal Muzzle -->
+  <defs>
+    <linearGradient id="badgerMuzzleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#cbd5e1"/>
+    </linearGradient>
+  </defs>
+  <!-- Main Muzzle Mound -->
+  <ellipse cx="65" cy="42" rx="42" ry="26" fill="url(#badgerMuzzleGrad)" stroke="#020617" stroke-width="4"/>
+  <!-- Black Triangular Leather Nose -->
+  <polygon points="65,24 50,38 80,38" fill="#020617" stroke="#020617" stroke-width="2" stroke-linejoin="round"/>
+  <ellipse cx="61" cy="28" rx="3" ry="2" fill="#ffffff" opacity="0.8"/>
+  <!-- Rugged Stoic Mouth Line -->
+  <path d="M 65,38 L 65,48 M 46,52 Q 65,58 84,52" fill="none" stroke="#020617" stroke-width="3" stroke-linecap="round"/>
+  <!-- Small Badger Lower Fangs -->
+  <polygon points="52,51 56,51 54,46" fill="#f8fafc" stroke="#020617" stroke-width="1.2"/>
+  <polygon points="78,51 74,51 76,46" fill="#f8fafc" stroke="#020617" stroke-width="1.2"/>
+  <!-- Whiskers -->
+  <line x1="30" y1="38" x2="8" y2="34" stroke="#020617" stroke-width="2" stroke-linecap="round"/>
+  <line x1="30" y1="44" x2="6" y2="48" stroke="#020617" stroke-width="2" stroke-linecap="round"/>
+  <line x1="100" y1="38" x2="122" y2="34" stroke="#020617" stroke-width="2" stroke-linecap="round"/>
+  <line x1="100" y1="44" x2="124" y2="48" stroke="#020617" stroke-width="2" stroke-linecap="round"/>
+</svg>

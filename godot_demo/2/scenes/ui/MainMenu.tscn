@@ -124,7 +124,7 @@ theme_override_colors/font_color = Color(1, 0.45, 0.35, 1)
 theme_override_colors/font_shadow_color = Color(0.1, 0, 0, 1)
 theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 18
-text = "BUNKER BUSTER 60 LEVELS"
+text = "BUNKER BUSTER 100 LEVELS"
 horizontal_alignment = 1
 
 [node name="Spacer" type="Control" parent="CenterContainer/VBoxContainer"]

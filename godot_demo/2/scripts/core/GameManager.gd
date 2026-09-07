@@ -9,7 +9,7 @@ signal last_stand_offered(enemies_left)
 signal score_updated(new_score)
 
 var current_level: int = 1
-var total_levels: int = 60
+var total_levels: int = 100
 
 var current_score: int = 0
 var remaining_enemies: int = 0

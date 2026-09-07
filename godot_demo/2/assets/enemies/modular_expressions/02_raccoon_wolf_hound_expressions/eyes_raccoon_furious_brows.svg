@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60" width="120" height="60">
+  <!-- Raccoon Furious Angled Brows Eyes -->
+  <defs>
+    <linearGradient id="banditMask" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <!-- Bandit Mask Overlay (Black Eye Mask) -->
+  <path d="M 12,30 Q 38,10 60,25 Q 82,10 108,30 Q 85,50 60,35 Q 35,50 12,30 Z" fill="url(#banditMask)" stroke="#020617" stroke-width="3"/>
+  <!-- Left Eye Outer (Angry Angled Top) -->
+  <path d="M 30,36 Q 44,22 50,32 Q 44,46 30,36 Z" fill="#ffffff" stroke="#0f172a" stroke-width="2.5"/>
+  <circle cx="41" cy="33" r="4.5" fill="#e11d48"/>
+  <circle cx="41" cy="33" r="2.5" fill="#0f172a"/>
+  <circle cx="39" cy="31" r="1.5" fill="#ffffff"/>
+  <!-- Right Eye Outer (Angry Angled Top) -->
+  <path d="M 90,36 Q 76,22 70,32 Q 76,46 90,36 Z" fill="#ffffff" stroke="#0f172a" stroke-width="2.5"/>
+  <circle cx="79" cy="33" r="4.5" fill="#e11d48"/>
+  <circle cx="79" cy="33" r="2.5" fill="#0f172a"/>
+  <circle cx="77" cy="31" r="1.5" fill="#ffffff"/>
+  <!-- Furious V-Eyebrows -->
+  <polygon points="26,18 52,28 50,33 24,23" fill="#0f172a"/>
+  <polygon points="94,18 68,28 70,33 96,23" fill="#0f172a"/>
+</svg>

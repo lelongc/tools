@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130 90" width="130" height="90">
+  <!-- Mine Wolf Gasp Shock Agaped Muzzle -->
+  <defs>
+    <linearGradient id="wolfFur2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+  <!-- Main Wolf Snout Bridge -->
+  <path d="M 40,15 L 90,15 L 100,42 L 86,85 L 44,85 L 30,42 Z" fill="url(#wolfFur2)" stroke="#0f172a" stroke-width="3.5" stroke-linejoin="round"/>
+  <!-- Nose -->
+  <path d="M 52,32 Q 65,28 78,32 L 72,42 Q 65,45 58,42 Z" fill="#020617" stroke="#020617" stroke-width="2"/>
+  <!-- Agaped Shock Hole (Tall open mouth) -->
+  <ellipse cx="65" cy="62" rx="20" ry="18" fill="#450a0a" stroke="#0f172a" stroke-width="3.5"/>
+  <!-- Hanging Tongue in Shock -->
+  <path d="M 58,68 Q 65,65 72,68 C 74,78 68,82 65,82 C 62,82 56,78 58,68 Z" fill="#f43f5e" stroke="#0f172a" stroke-width="2"/>
+  <!-- Upper Fangs Peeking -->
+  <polygon points="49,48 55,48 52,58" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+  <polygon points="81,48 75,48 78,58" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+</svg>

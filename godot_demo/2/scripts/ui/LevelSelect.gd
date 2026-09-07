@@ -23,7 +23,7 @@ func _ready() -> void:
 func _update_total_stars() -> void:
 	if has_node("/root/SaveManager") and total_stars_label:
 		var stars = get_node("/root/SaveManager").save_data.get("total_stars", 0)
-		total_stars_label.text = "%d / 180" % stars
+		total_stars_label.text = "%d / 300" % stars
 
 func _prev_world() -> void:
 	if current_world > 1:
@@ -31,7 +31,7 @@ func _prev_world() -> void:
 		_render_world_levels()
 
 func _next_world() -> void:
-	if current_world < 4:
+	if current_world < 5:
 		current_world += 1
 		_render_world_levels()
 
@@ -42,20 +42,20 @@ func _render_world_levels() -> void:
 		btn_back.text = lm.t("KEY_MENU")
 
 	btn_prev_world.disabled = (current_world <= 1)
-	btn_next_world.disabled = (current_world >= 4)
+	btn_next_world.disabled = (current_world >= 5)
 
 	# Xóa các nút cũ
 	for child in grid.get_children():
 		child.queue_free()
 
-	var start_lvl = (current_world - 1) * 15 + 1
-	var end_lvl = start_lvl + 14
+	var start_lvl = (current_world - 1) * 20 + 1
+	var end_lvl = start_lvl + 19
 
 	var tex_star_full = preload("res://assets/ui/icons/icon_star.svg")
 
 	for lvl in range(start_lvl, end_lvl + 1):
 		var btn = Button.new()
-		btn.custom_minimum_size = Vector2(140, 95)
+		btn.custom_minimum_size = Vector2(106, 88)
 		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		btn.text = "" # Không dùng text thô với emoji!
 

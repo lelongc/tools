@@ -86,7 +86,7 @@ func _update_language_ui() -> void:
 func _update_star_count() -> void:
 	if has_node("/root/SaveManager") and total_stars_label:
 		var stars = get_node("/root/SaveManager").save_data.get("total_stars", 0)
-		total_stars_label.text = "%d / 180" % stars
+		total_stars_label.text = "%d / 300" % stars
 
 func _update_coin_count() -> void:
 	if has_node("/root/SaveManager") and total_coins_label:
