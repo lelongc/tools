@@ -1,0 +1,582 @@
+// ==UserScript==
+// @name         Shopee Voucher Save - Android
+// @namespace    local.shopee.voucher
+// @version      1.2.1
+// @author       Qui Nguyễn
+// @copyright    2026 Qui Nguyễn
+// @license      Personal use only
+// @description  Lưu voucher trực tiếp mỗi 0,5 giây trên Android.
+// @match        https://shopee.vn/*
+// @run-at       document-start
+// @inject-into  page
+// @weight       999
+// @grant        none
+// @noframes
+// ==/UserScript==
+
+/*
+ * Copyright © 2026 Qui Nguyễn.
+ * Phát triển và tùy chỉnh bởi Qui Nguyễn
+ * Người dùng tự chịu trách nhiệm tuân thủ quy định của Shopee và mọi rủi ro
+ * phát sinh; tác giả không chịu trách nhiệm nếu tài khoản bị giới hạn hoặc khóa.
+ */
+
+(() => {
+  "use strict";
+
+  const TARGET = {
+    voucher_code: "SVIPDDV0109MC900KH",
+    voucher_promotionid: 1496076691869696,
+    signature:
+      "2192c04fb50724e0c8d71b17d9780c6b5cedf33f188483f978643b88d4e7f654",
+    signature_source: "0",
+    caller_source: 6
+  };
+
+  // 500 ms = thử mỗi 0,5 giây.
+  const INTERVAL_MS = 500;
+
+  // 140 lần ≈ tối đa 70 giây.
+  const MAX_ATTEMPTS = 140;
+
+  const FP_KEY = "shopee_voucher_device_fingerprint";
+
+  let running = false;
+  let stopRequested = false;
+  let statusBox;
+  let startButton;
+
+  const sleep = ms =>
+    new Promise(resolve => setTimeout(resolve, ms));
+
+  function getCookie(name) {
+    const row = document.cookie
+      .split("; ")
+      .find(item => item.startsWith(`${name}=`));
+
+    return row
+      ? decodeURIComponent(
+          row.split("=").slice(1).join("=")
+        )
+      : "";
+  }
+
+  function setStatus(message, color = "#222") {
+    console.log("[Shopee Voucher]", message);
+
+    if (statusBox) {
+      statusBox.textContent = message;
+      statusBox.style.color = color;
+    }
+  }
+
+  function getFingerprint() {
+    return localStorage.getItem(FP_KEY) || "";
+  }
+
+  function rememberFingerprint(value) {
+    if (
+      typeof value !== "string" ||
+      !value.includes("|")
+    ) {
+      return;
+    }
+
+    localStorage.setItem(FP_KEY, value.trim());
+
+    setStatus(
+      "Đã lấy fingerprint – sẵn sàng lưu",
+      "#087f23"
+    );
+  }
+
+  function inspectSaveRequest(url, body) {
+    if (
+      !String(url || "").includes(
+        "/api/v4/microsite/save_voucher"
+      )
+    ) {
+      return;
+    }
+
+    try {
+      const payload =
+        typeof body === "string"
+          ? JSON.parse(body)
+          : body;
+
+      rememberFingerprint(
+        payload?.security_device_fingerprint
+      );
+    } catch (_) {
+      // Bỏ qua dữ liệu không phải JSON.
+    }
+  }
+
+  function hookFetch() {
+    const originalFetch = window.fetch;
+
+    if (
+      typeof originalFetch !== "function" ||
+      originalFetch.__androidVoucherHook
+    ) {
+      return;
+    }
+
+    const wrappedFetch = function(input, init) {
+      const url =
+        typeof input === "string"
+          ? input
+          : input?.url;
+
+      inspectSaveRequest(url, init?.body);
+
+      return originalFetch.apply(
+        this,
+        arguments
+      );
+    };
+
+    Object.defineProperty(
+      wrappedFetch,
+      "__androidVoucherHook",
+      { value: true }
+    );
+
+    window.fetch = wrappedFetch;
+  }
+
+  function hookXHR() {
+    if (
+      XMLHttpRequest.prototype
+        .__androidVoucherHook
+    ) {
+      return;
+    }
+
+    const originalOpen =
+      XMLHttpRequest.prototype.open;
+
+    const originalSend =
+      XMLHttpRequest.prototype.send;
+
+    XMLHttpRequest.prototype.open =
+      function(method, url) {
+        this.__androidVoucherUrl = url;
+
+        return originalOpen.apply(
+          this,
+          arguments
+        );
+      };
+
+    XMLHttpRequest.prototype.send =
+      function(body) {
+        inspectSaveRequest(
+          this.__androidVoucherUrl,
+          body
+        );
+
+        return originalSend.apply(
+          this,
+          arguments
+        );
+      };
+
+    Object.defineProperty(
+      XMLHttpRequest.prototype,
+      "__androidVoucherHook",
+      { value: true }
+    );
+  }
+
+  hookFetch();
+  hookXHR();
+
+  /*
+   * Shopee có thể thay window.fetch
+   * sau khi trang bắt đầu chạy.
+   */
+  setInterval(hookFetch, 1000);
+
+  async function saveOnce(attempt) {
+    const fingerprint = getFingerprint();
+
+    if (!fingerprint) {
+      return {
+        stop: true,
+        message:
+          "Chưa có fingerprint – hãy lưu một voucher bình thường"
+      };
+    }
+
+    const response = await fetch(
+      "/api/v4/microsite/save_voucher",
+      {
+        method: "POST",
+        credentials: "include",
+        cache: "no-store",
+
+        headers: {
+          accept: "application/json",
+          "content-type": "application/json",
+          "cache-control": "no-cache",
+          pragma: "no-cache",
+          "x-api-source": "pc",
+          "x-requested-with":
+            "XMLHttpRequest",
+          "x-csrftoken":
+            getCookie("csrftoken")
+        },
+
+        body: JSON.stringify({
+          ...TARGET,
+          security_device_fingerprint:
+            fingerprint
+        })
+      }
+    );
+
+    const requestId =
+      response.headers.get("x-request-id");
+
+    const serverDate =
+      response.headers.get("date");
+
+    if (
+      response.status === 403 ||
+      response.status === 418
+    ) {
+      return {
+        stop: true,
+        message:
+          `Shopee yêu cầu xác minh ` +
+          `(HTTP ${response.status})`
+      };
+    }
+
+    let result;
+
+    try {
+      result = await response.json();
+    } catch (_) {
+      return {
+        retry: true,
+        message:
+          `Phản hồi tạm thời không hợp lệ ` +
+          `(HTTP ${response.status})`
+      };
+    }
+
+    const invalidCode =
+      result.data?.invalid_message_code;
+
+    console.log("[SAVE_CHECK]", {
+      attempt,
+      client_time:
+        new Date().toISOString(),
+      server_date: serverDate,
+      request_id: requestId,
+      http: response.status,
+      error: result.error,
+      invalid_code: invalidCode,
+      message: result.error_msg
+    });
+
+    /*
+     * Voucher đã được lưu vào kho.
+     */
+    if (
+      result.error === 0 &&
+      result.data?.voucher
+        ?.is_claimed_before === true
+    ) {
+      return {
+        success: true
+      };
+    }
+
+    /*
+     * Voucher hết lượt:
+     * tiếp tục thử để đón lúc back.
+     */
+    if (
+      result.error === 14 &&
+      invalidCode === 4
+    ) {
+      return {
+        retry: true
+      };
+    }
+
+    /*
+     * Tài khoản không đủ điều kiện,
+     * ví dụ không có ShopeeVIP.
+     */
+    if (
+      result.error === 14 &&
+      invalidCode === 10
+    ) {
+      return {
+        stop: true,
+        message:
+          result.data?.error_config
+            ?.content ||
+          result.error_msg ||
+          "Tài khoản không đủ điều kiện"
+      };
+    }
+
+    return {
+      stop: true,
+      message:
+        result.data?.error_config
+          ?.content ||
+        result.error_msg ||
+        `Lỗi Shopee ${result.error}`
+    };
+  }
+
+  async function startSaving() {
+    if (running) {
+      setStatus(
+        "Script đang chạy",
+        "#ad6800"
+      );
+
+      return;
+    }
+
+    if (!getFingerprint()) {
+      setStatus(
+        "Chưa có fingerprint",
+        "#b42318"
+      );
+
+      alert(
+        "Hãy bấm Lưu một voucher bình thường " +
+        "trên Firefox này trước."
+      );
+
+      return;
+    }
+
+    running = true;
+    stopRequested = false;
+    startButton.disabled = true;
+
+    for (
+      let attempt = 1;
+      attempt <= MAX_ATTEMPTS;
+      attempt += 1
+    ) {
+      if (stopRequested) {
+        setStatus(
+          "Đã dừng thủ công",
+          "#555"
+        );
+
+        break;
+      }
+
+      const startedAt = Date.now();
+
+      setStatus(
+        `Đang thử ${attempt}/${MAX_ATTEMPTS}…`,
+        "#0057b8"
+      );
+
+      try {
+        const outcome =
+          await saveOnce(attempt);
+
+        if (outcome.success) {
+          setStatus(
+            "LƯU VOUCHER THÀNH CÔNG",
+            "#087f23"
+          );
+
+          alert(
+            "Đã lưu thành công: " +
+              TARGET.voucher_code
+          );
+
+          break;
+        }
+
+        if (outcome.stop) {
+          setStatus(
+            "Đã dừng: " +
+              outcome.message,
+            "#b42318"
+          );
+
+          break;
+        }
+
+        setStatus(
+          "Voucher đang hết lượt – tiếp tục chờ…",
+          "#ad6800"
+        );
+      } catch (error) {
+        console.warn(
+          "[SAVE_CHECK]",
+          error
+        );
+
+        setStatus(
+          "Lỗi mạng tạm thời – vẫn tiếp tục",
+          "#ad6800"
+        );
+      }
+
+      if (
+        attempt < MAX_ATTEMPTS
+      ) {
+        const elapsed =
+          Date.now() - startedAt;
+
+        await sleep(
+          Math.max(
+            0,
+            INTERVAL_MS - elapsed
+          )
+        );
+      }
+    }
+
+    running = false;
+    startButton.disabled = false;
+  }
+
+  function createPanel() {
+    if (
+      document.getElementById(
+        "shopee-android-voucher-panel"
+      )
+    ) {
+      return;
+    }
+
+    const panel =
+      document.createElement("div");
+
+    panel.id =
+      "shopee-android-voucher-panel";
+
+    panel.style.cssText = [
+      "position:fixed",
+      "top:70px",
+      "right:8px",
+      "z-index:2147483647",
+      "width:220px",
+      "padding:10px",
+      "border-radius:10px",
+      "background:rgba(255,255,255,.97)",
+      "box-shadow:0 2px 12px rgba(0,0,0,.3)",
+      "font:13px Arial,sans-serif",
+      "color:#222"
+    ].join(";");
+
+    const title =
+      document.createElement("div");
+
+    title.textContent =
+      "Voucher: " +
+      TARGET.voucher_code;
+
+    title.style.cssText =
+      "font-weight:700;" +
+      "margin-bottom:6px";
+
+    statusBox =
+      document.createElement("div");
+
+    statusBox.textContent =
+      getFingerprint()
+        ? "Đã có fingerprint – sẵn sàng lưu"
+        : "Chưa có fingerprint";
+
+    statusBox.style.cssText =
+      "margin-bottom:8px;" +
+      "word-break:break-word";
+
+    startButton =
+      document.createElement("button");
+
+    startButton.textContent =
+      "Bắt đầu";
+
+    startButton.style.cssText =
+      "margin-right:6px;" +
+      "padding:7px 10px;" +
+      "background:#ee4d2d;" +
+      "color:white;" +
+      "border:0;" +
+      "border-radius:6px";
+
+    startButton.addEventListener(
+      "click",
+      startSaving
+    );
+
+    const stopButton =
+      document.createElement("button");
+
+    stopButton.textContent =
+      "Dừng";
+
+    stopButton.style.cssText =
+      "padding:7px 10px;" +
+      "border:1px solid #aaa;" +
+      "border-radius:6px";
+
+    stopButton.addEventListener(
+      "click",
+      () => {
+        stopRequested = true;
+
+        if (running) {
+          setStatus(
+            "Đang yêu cầu dừng…",
+            "#555"
+          );
+        }
+      }
+    );
+
+    const credit =
+      document.createElement("div");
+
+    credit.textContent =
+      "© 2026 Qui Nguyễn";
+
+    credit.style.cssText =
+      "margin-top:8px;" +
+      "font-size:11px;" +
+      "color:#888;" +
+      "text-align:center";
+
+    panel.append(
+      title,
+      statusBox,
+      startButton,
+      stopButton,
+      credit
+    );
+
+    document.body.appendChild(panel);
+  }
+
+  if (
+    document.readyState === "loading"
+  ) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      createPanel,
+      { once: true }
+    );
+  } else {
+    createPanel();
+  }
+})();
