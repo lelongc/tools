@@ -52,6 +52,9 @@ corner_radius_top_left = 24
 corner_radius_top_right = 24
 corner_radius_bottom_right = 24
 corner_radius_bottom_left = 24
+shadow_color = Color(0, 0, 0, 0.65)
+shadow_size = 14
+shadow_offset = Vector2(0, 8)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_FailModal"]
 bg_color = Color(0.18, 0.04, 0.12, 0.98)
@@ -64,6 +67,9 @@ corner_radius_top_left = 24
 corner_radius_top_right = 24
 corner_radius_bottom_right = 24
 corner_radius_bottom_left = 24
+shadow_color = Color(0, 0, 0, 0.65)
+shadow_size = 14
+shadow_offset = Vector2(0, 8)
 
 [node name="GameHUD" type="CanvasLayer"]
 process_mode = 3
@@ -219,6 +225,15 @@ layout_mode = 2
 theme_override_constants/separation = 8
 alignment = 1
 
+[node name="ModalDimmer" type="ColorRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.04, 0.08, 0.72)
+
 [node name="VictoryModal" type="PanelContainer" parent="."]
 visible = false
 anchors_preset = 8
@@ -242,10 +257,12 @@ alignment = 1
 
 [node name="Title" type="Label" parent="VictoryModal/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_colors/font_color = Color(1, 0.88, 0.2, 1)
+theme_override_colors/font_outline_color = Color(0.38, 0.20, 0, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 6
 theme_override_constants/shadow_offset_y = 3
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 26
 text = "CHIẾN THẮNG!"
 horizontal_alignment = 1
 
@@ -367,10 +384,12 @@ alignment = 1
 
 [node name="Title" type="Label" parent="LastStandModal/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 0.88, 0.2, 1)
+theme_override_colors/font_outline_color = Color(0.40, 0.16, 0.0, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 6
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 24
 text = "CƠ HỘI CUỐI!"
 horizontal_alignment = 1
 
@@ -400,13 +419,13 @@ script = ExtResource("2_btn")
 is_gold_action = true
 
 [node name="BtnLastStandSkip" type="Button" parent="LastStandModal/VBox"]
-custom_minimum_size = Vector2(160, 40)
+custom_minimum_size = Vector2(160, 42)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_font_sizes/font_size = 14
 text = "BỎ QUA"
 script = ExtResource("2_btn")
-is_wood_brown = true
+is_danger_red = true
 
 [node name="FailModal" type="PanelContainer" parent="."]
 visible = false
@@ -431,10 +450,12 @@ alignment = 1
 
 [node name="Title" type="Label" parent="FailModal/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
-theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 0.38, 0.38, 1)
+theme_override_colors/font_outline_color = Color(0.36, 0.06, 0.06, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 6
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 26
 text = "HẾT TRỨNG RỒI!"
 horizontal_alignment = 1
 
@@ -483,8 +504,12 @@ alignment = 1
 
 [node name="Title" type="Label" parent="PauseModal/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(1, 0.88, 0.2, 1)
+theme_override_colors/font_outline_color = Color(0.38, 0.20, 0, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 6
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 26
 text = "TẠM DỪNG"
 horizontal_alignment = 1
 

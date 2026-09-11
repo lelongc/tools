@@ -169,16 +169,136 @@ var translations: Dictionary = {
 		"de": "WEITER ▶", "fr": "SUIVANT ▶", "ru": "ВПЕРЁД ▶"
 	},
 	"KEY_FOOTER": {
-		"en": "Physics Destruction • 7 Mutant Eggs • 4 Worlds",
-		"vi": "Vật lý phá hủy • 7 Loại Trứng Dị Biến • 4 Thế Giới",
-		"ja": "物理破壊パズル • 7種の変異タマゴ • 4つの世界",
-		"ko": "물리 파괴 퍼즐 • 7종의 변종 알 • 4개 월드",
-		"zh_CN": "物理破坏解谜 • 7种变异蛋 • 4个世界",
-		"es": "Destrucción Física • 7 Huevos Mutantes • 4 Mundos",
-		"pt_BR": "Destruição Física • 7 Ovos Mutantes • 4 Mundos",
-		"de": "Physik-Zerstörung • 7 Mutierte Eier • 4 Welten",
-		"fr": "Destruction Physique • 7 Oeufs Mutants • 4 Mondes",
-		"ru": "Физическое Разрушение • 7 Яиц-Мутантов • 4 Мира"
+		"en": "Physics Destruction • 7 Mutant Eggs • 5 Worlds",
+		"vi": "Vật lý phá hủy • 7 Loại Trứng Dị Biến • 5 Thế Giới",
+		"ja": "物理破壊パズル • 7種の変異タマゴ • 5つの世界",
+		"ko": "물리 파괴 퍼즐 • 7종의 변종 알 • 5개 월드",
+		"zh_CN": "物理破坏解谜 • 7种变异蛋 • 5个世界",
+		"es": "Destrucción Física • 7 Huevos Mutantes • 5 Mundos",
+		"pt_BR": "Destruição Física • 7 Ovos Mutantes • 5 Mundos",
+		"de": "Physik-Zerstörung • 7 Mutierte Eier • 5 Welten",
+		"fr": "Destruction Physique • 7 Oeufs Mutants • 5 Mondes",
+		"ru": "Физическое Разрушение • 7 Яиц-Мутантов • 5 Миров"
+	},
+	"KEY_LOCKED": {
+		"en": "LOCKED", "vi": "CHƯA MỞ", "ja": "ロック中", "ko": "잠김",
+		"zh_CN": "未解锁", "es": "BLOQUEADO", "pt_BR": "BLOQUEADO", "de": "GESPERRT",
+		"fr": "VERROUILLÉ", "ru": "ЗАКРЫТО"
+	},
+	"KEY_GOLD_REWARD": {
+		"en": "+%d GOLD", "vi": "+%d VÀNG", "ja": "+%d コイン", "ko": "+%d 골드",
+		"zh_CN": "+%d 金币", "es": "+%d ORO", "pt_BR": "+%d OURO", "de": "+%d GOLD",
+		"fr": "+%d OR", "ru": "+%d ЗОЛОТА"
+	},
+	"KEY_CLAIM_TRIPLE": {
+		"en": "CLAIM X3 GOLD (+%d)", "vi": "NHẬN X3 VÀNG (+%d)",
+		"ja": "3倍ゴールド獲得 (+%d)", "ko": "골드 3배 받기 (+%d)",
+		"zh_CN": "领取3倍金币 (+%d)", "es": "RECLAMAR X3 ORO (+%d)",
+		"pt_BR": "RECEBER 3X OURO (+%d)", "de": "3X GOLD ERHALTEN (+%d)",
+		"fr": "RÉCLAMER 3X OR (+%d)", "ru": "ЗАБРАТЬ X3 ЗОЛОТА (+%d)"
+	},
+	"KEY_CONTINUE_REWARD": {
+		"en": "CONTINUE (+%d Gold)", "vi": "TIẾP TỤC (+%d Vàng)",
+		"ja": "続ける (+%d コイン)", "ko": "계속하기 (+%d 골드)",
+		"zh_CN": "继续 (+%d 金币)", "es": "CONTINUAR (+%d Oro)",
+		"pt_BR": "CONTINUAR (+%d Ouro)", "de": "WEITER (+%d Gold)",
+		"fr": "CONTINUER (+%d Or)", "ru": "ПРОДОЛЖИТЬ (+%d Золота)"
+	},
+	"KEY_LAST_STAND_TITLE": {
+		"en": "LAST CHANCE!", "vi": "CƠ HỘI CUỐI!",
+		"ja": "ラストチャンス!", "ko": "마지막 기회!",
+		"zh_CN": "最后机会!", "es": "¡ÚLTIMA OPORTUNIDAD!",
+		"pt_BR": "ÚLTIMA CHANCE!", "de": "LETZTE CHANCE!",
+		"fr": "DERNIÈRE CHANCE !", "ru": "ПОСЛЕДНИЙ ШАНС!"
+	},
+	"KEY_LAST_STAND_SUB": {
+		"en": "Only %d monster left! Don't give up!",
+		"vi": "Chỉ còn %d quái vật! Đừng bỏ cuộc!",
+		"ja": "残りモンスターあと%d体! 諦めるな!",
+		"ko": "몬스터가 %d마리 남았습니다! 포기하지 마세요!",
+		"zh_CN": "仅剩%d只怪物! 不要放弃!",
+		"es": "¡Solo queda %d monstruo! ¡No te rindas!",
+		"pt_BR": "Resta apenas %d monstro! Não desista!",
+		"de": "Nur noch %d Monster übrig! Gib nicht auf!",
+		"fr": "Plus que %d monstre ! N'abandonne pas !",
+		"ru": "Остался всего %d монстр! Не сдавайся!"
+	},
+	"KEY_LAST_STAND_AD": {
+		"en": "+1 BOMB EGG TO RESCUE", "vi": "+1 TRỨNG NỔ CỨU THUA",
+		"ja": "+1 爆弾タマゴで救済", "ko": "+1 폭탄 알로 구출",
+		"zh_CN": "+1 炸弹蛋救援", "es": "+1 HUEVO BOMBA AL RESCATE",
+		"pt_BR": "+1 OVO BOMBA DE RESGATE", "de": "+1 BOMBEN-EI ZUR RETTUNG",
+		"fr": "+1 OEUF BOMBE DE SECOURS", "ru": "+1 БОМБОВОЕ ЯЙЦО ДЛЯ СПАСЕНИЯ"
+	},
+	"KEY_SKIP": {
+		"en": "SKIP", "vi": "BỎ QUA", "ja": "スキップ", "ko": "건너뛰기",
+		"zh_CN": "跳过", "es": "SALTAR", "pt_BR": "PULAR", "de": "ÜBERSPRINGEN",
+		"fr": "PASSER", "ru": "ПРОПУСТИТЬ"
+	},
+	"KEY_WHEEL_TITLE": {
+		"en": "LUCKY WHEEL", "vi": "VÒNG QUAY MAY MẮN", "ja": "ラッキーホイール", "ko": "행운의 룰렛",
+		"zh_CN": "幸运转盘", "es": "RULETA DE LA SUERTE", "pt_BR": "ROLETA DA SORTE",
+		"de": "GLÜCKSRAD", "fr": "ROUE DE LA CHANCE", "ru": "КОЛЕСО УДАЧИ"
+	},
+	"KEY_WHEEL_SPIN_FREE": {
+		"en": "SPIN FOR FREE", "vi": "QUAY MIỄN PHÍ", "ja": "無料スピン", "ko": "무료 스핀",
+		"zh_CN": "免费旋转", "es": "GIRAR GRATIS", "pt_BR": "GIRAR GRÁTIS", "de": "GRATIS DREHEN",
+		"fr": "TOURNER GRATUIT", "ru": "КРУТИТЬ БЕСПЛАТНО"
+	},
+	"KEY_WHEEL_SPIN_AD": {
+		"en": "WATCH AD TO SPIN (%d/4)", "vi": "XEM VIDEO QUAY THÊM (%d/4)",
+		"ja": "広告を見てスピン (%d/4)", "ko": "광고 보고 스핀 (%d/4)",
+		"zh_CN": "看广告旋转 (%d/4)", "es": "VER ANUNCIO (%d/4)",
+		"pt_BR": "VER ANÚNCIO (%d/4)", "de": "WERBUNG SEHEN (%d/4)",
+		"fr": "REGARDER PUB (%d/4)", "ru": "РЕКЛАМА ДЛЯ ВРАЩЕНИЯ (%d/4)"
+	},
+	"KEY_WHEEL_EXHAUSTED": {
+		"en": "OUT OF SPINS TODAY", "vi": "ĐÃ HẾT LƯỢT HÔM NAY",
+		"ja": "本日のスピン終了", "ko": "오늘 스핀 소진",
+		"zh_CN": "今日次数已用尽", "es": "SIN GIROS POR HOY",
+		"pt_BR": "SEM GIROS HOJE", "de": "KEINE DREHUNGEN MEHR",
+		"fr": "PLUS DE TOURS", "ru": "НЕТ ВРАЩЕНИЙ СЕГОДНЯ"
+	},
+	"KEY_WHEEL_STATUS_FREE": {
+		"en": "First daily spin: 100% FREE!",
+		"vi": "Lượt quay đầu tiên trong ngày: MIỄN PHÍ!",
+		"ja": "本日の初回スピンは無料です!",
+		"ko": "오늘 첫 번째 스핀은 100% 무료!",
+		"zh_CN": "每日首次旋转完全免费!",
+		"es": "¡Primer giro diario: GRATIS!",
+		"pt_BR": "Primeiro giro do dia: GRÁTIS!",
+		"de": "Erster täglicher Dreh: GRATIS!",
+		"fr": "Premier tour du jour : GRATUIT !",
+		"ru": "Первое вращение дня: БЕСПЛАТНО!"
+	},
+	"KEY_WHEEL_STATUS_AD": {
+		"en": "Watch a short ad for an extra spin!",
+		"vi": "Xem 1 video ngắn để nhận thêm lượt quay!",
+		"ja": "短い動画を見て追加スピンを獲得!",
+		"ko": "짧은 광고를 보고 추가 스핀을 받으세요!",
+		"zh_CN": "观看简短广告获得额外旋转机会!",
+		"es": "¡Mira un anuncio corto para otro giro!",
+		"pt_BR": "Assista a um anúncio para um giro extra!",
+		"de": "Sieh ein kurzes Video für einen weiteren Dreh!",
+		"fr": "Regardez une pub pour un tour supplémentaire !",
+		"ru": "Посмотрите видео для дополнительного вращения!"
+	},
+	"KEY_WHEEL_STATUS_DONE": {
+		"en": "All 4 spins used today. Come back tomorrow!",
+		"vi": "Đã dùng hết 4 lượt quay hôm nay. Hãy quay lại vào ngày mai!",
+		"ja": "本日の4回スピンは終了しました。また明日!",
+		"ko": "오늘 4번의 스핀을 모두 사용했습니다. 내일 다시 오세요!",
+		"zh_CN": "今日4次旋转已用尽，明天再来吧!",
+		"es": "¡Usaste los 4 giros de hoy! ¡Vuelve mañana!",
+		"pt_BR": "Você usou os 4 giros de hoje. Volte amanhã!",
+		"de": "Alle 4 Drehungen für heute genutzt. Bis morgen!",
+		"fr": "Tous les 4 tours utilisés aujourd'hui. À demain !",
+		"ru": "Все 4 вращения использованы. Приходите завтра!"
+	},
+	"KEY_WHEEL_CLOSE": {
+		"en": "CLOSE", "vi": "ĐÓNG", "ja": "閉じる", "ko": "닫기",
+		"zh_CN": "关闭", "es": "CERRAR", "pt_BR": "FECHAR", "de": "SCHLIESSEN",
+		"fr": "FERMER", "ru": "ЗАКРЫТЬ"
 	}
 }
 

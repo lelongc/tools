@@ -22,6 +22,20 @@ extends Control
 var wheel_modal_instance: Node = null
 
 func _ready() -> void:
+	var bg_sky = get_node_or_null("Background/SkyPanorama") as TextureRect
+	if bg_sky:
+		var t_sky = ParticleHelper._safe_load("res://assets/sprites/environment/sky_clouds_panorama.svg")
+		if t_sky:
+			bg_sky.texture = t_sky
+			bg_sky.modulate = Color(0.9, 0.82, 0.98, 0.7)
+
+	var bg_cav = get_node_or_null("Background/CavernBackdrop") as TextureRect
+	if bg_cav:
+		var t_cav = ParticleHelper._safe_load("res://assets/sprites/environment/cavern_backdrop_dungeon.svg")
+		if t_cav:
+			bg_cav.texture = t_cav
+			bg_cav.modulate = Color(0.92, 0.88, 1.0, 0.85)
+
 	if mascot_body:
 		var tb = ParticleHelper._safe_load("res://assets/sprites/player/chicken_aviator_body.svg")
 		if tb: mascot_body.texture = tb

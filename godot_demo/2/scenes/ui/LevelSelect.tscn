@@ -43,11 +43,30 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.11, 0.03, 0.21, 1)
+mouse_filter = 2
+color = Color(0.12, 0.04, 0.22, 1)
 
-[node name="CavernGlow" type="Polygon2D" parent="Background"]
-color = Color(0.25, 0.1, 0.38, 0.5)
-polygon = PackedVector2Array(0, 200, 540, 160, 540, 800, 0, 840)
+[node name="SkyPanorama" type="TextureRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 300.0
+grow_horizontal = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
+
+[node name="CavernBackdrop" type="TextureRect" parent="Background"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 180.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 6
 
 [node name="TopBar" type="PanelContainer" parent="."]
 layout_mode = 1

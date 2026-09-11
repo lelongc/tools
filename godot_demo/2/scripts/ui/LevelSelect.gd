@@ -14,6 +14,20 @@ func _ready() -> void:
 	btn_prev_world.pressed.connect(_prev_world)
 	btn_next_world.pressed.connect(_next_world)
 
+	var sky_rect = get_node_or_null("Background/SkyPanorama")
+	if sky_rect:
+		var t_sky = ParticleHelper._safe_load("res://assets/sprites/environment/sky_clouds_panorama.svg")
+		if t_sky:
+			sky_rect.texture = t_sky
+			sky_rect.modulate = Color(0.35, 0.2, 0.5, 0.45)
+
+	var cav_rect = get_node_or_null("Background/CavernBackdrop")
+	if cav_rect:
+		var t_cav = ParticleHelper._safe_load("res://assets/sprites/environment/cavern_backdrop_dungeon.svg")
+		if t_cav:
+			cav_rect.texture = t_cav
+			cav_rect.modulate = Color(0.5, 0.35, 0.7, 0.55)
+
 	if has_node("/root/LocalizationManager"):
 		get_node("/root/LocalizationManager").language_changed.connect(func(_c): _render_world_levels())
 
@@ -39,7 +53,16 @@ func _render_world_levels() -> void:
 	if has_node("/root/LocalizationManager"):
 		var lm = get_node("/root/LocalizationManager")
 		world_title.text = lm.t("KEY_WORLD_%d" % current_world)
-		btn_back.text = lm.t("KEY_MENU")
+		btn_back.text = " " + lm.t("KEY_MENU")
+
+	var cav_rect = get_node_or_null("Background/CavernBackdrop")
+	if cav_rect:
+		match current_world:
+			1: cav_rect.modulate = Color(0.5, 0.35, 0.7, 0.55)
+			2: cav_rect.modulate = Color(0.35, 0.55, 0.35, 0.55)
+			3: cav_rect.modulate = Color(0.3, 0.6, 0.25, 0.6)
+			4: cav_rect.modulate = Color(0.7, 0.3, 0.2, 0.6)
+			5: cav_rect.modulate = Color(0.55, 0.3, 0.8, 0.65)
 
 	btn_prev_world.disabled = (current_world <= 1)
 	btn_next_world.disabled = (current_world >= 5)
@@ -124,9 +147,19 @@ func _render_world_levels() -> void:
 			style_press.border_width_right = 2
 			style_press.border_color = Color(0.8, 0.65, 0.0)
 
+			btn.pivot_offset = Vector2(53, 44)
 			btn.add_theme_stylebox_override("normal", style_norm)
 			btn.add_theme_stylebox_override("hover", style_norm)
 			btn.add_theme_stylebox_override("pressed", style_press)
+
+			btn.button_down.connect(func():
+				var tw = btn.create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+				tw.tween_property(btn, "scale", Vector2(0.93, 0.93), 0.08)
+			)
+			btn.button_up.connect(func():
+				var tw = btn.create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+				tw.tween_property(btn, "scale", Vector2.ONE, 0.15)
+			)
 
 			var target_lvl = lvl
 			btn.pressed.connect(func():
@@ -138,7 +171,8 @@ func _render_world_levels() -> void:
 			lvl_lbl.add_theme_color_override("font_color", Color(0.5, 0.45, 0.6))
 
 			var lock_lbl = Label.new()
-			lock_lbl.text = "CHƯA MỞ"
+			var lm = get_node_or_null("/root/LocalizationManager")
+			lock_lbl.text = lm.t("KEY_LOCKED") if lm else "LOCKED"
 			lock_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			lock_lbl.add_theme_font_size_override("font_size", 12)
 			lock_lbl.add_theme_color_override("font_color", Color(0.45, 0.4, 0.55))

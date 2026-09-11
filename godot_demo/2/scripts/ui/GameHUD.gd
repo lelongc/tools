@@ -20,6 +20,7 @@ const EGG_TEXTURES: Dictionary = {
 @onready var btn_restart: Button = $TopBar/Margin/HBox/BtnRestart
 
 # Modals
+@onready var modal_dimmer: ColorRect = get_node_or_null("ModalDimmer")
 @onready var victory_modal: PanelContainer = $VictoryModal
 @onready var victory_title: Label = $VictoryModal/VBox/Title
 @onready var victory_score: Label = $VictoryModal/VBox/ScoreLabel
@@ -53,6 +54,7 @@ var current_base_coins: int = 50
 var last_stand_tween: Tween = null
 
 func _ready() -> void:
+	if modal_dimmer: modal_dimmer.visible = false
 	if victory_modal: victory_modal.visible = false
 	if fail_modal: fail_modal.visible = false
 	if pause_modal: pause_modal.visible = false
@@ -118,14 +120,16 @@ func _update_coin_display(amount: int) -> void:
 func _toggle_pause() -> void:
 	var is_p = not get_tree().paused
 	get_tree().paused = is_p
+	if modal_dimmer:
+		modal_dimmer.visible = is_p
 	if pause_modal:
 		pause_modal.visible = is_p
 		if is_p and has_node("/root/LocalizationManager"):
 			var lm = get_node("/root/LocalizationManager")
 			if pause_title: pause_title.text = lm.t("KEY_PAUSE")
-			if resume_btn: resume_btn.text = lm.t("KEY_RESUME")
-			if pause_retry_btn: pause_retry_btn.text = lm.t("KEY_RETRY")
-			if pause_levels_btn: pause_levels_btn.text = lm.t("KEY_SELECT_LEVEL")
+			if resume_btn: resume_btn.text = " " + lm.t("KEY_RESUME")
+			if pause_retry_btn: pause_retry_btn.text = " " + lm.t("KEY_RETRY")
+			if pause_levels_btn: pause_levels_btn.text = " " + lm.t("KEY_SELECT_LEVEL")
 
 func _update_ui() -> void:
 	var lm = get_node_or_null("/root/LocalizationManager")
@@ -209,9 +213,21 @@ func _on_vip_trial_pressed() -> void:
 # ==========================================
 func _on_last_stand_offered(enemies_left: int) -> void:
 	if not last_stand_modal: return
+	if modal_dimmer: modal_dimmer.visible = true
 	last_stand_modal.visible = true
+
+	var lm = get_node_or_null("/root/LocalizationManager")
+	if last_stand_title and lm:
+		last_stand_title.text = lm.t("KEY_LAST_STAND_TITLE")
 	if last_stand_sub:
-		last_stand_sub.text = "Chỉ còn %d quái vật! Đừng bỏ cuộc!" % enemies_left
+		if lm:
+			last_stand_sub.text = lm.t("KEY_LAST_STAND_SUB") % enemies_left
+		else:
+			last_stand_sub.text = "Chỉ còn %d quái vật! Đừng bỏ cuộc!" % enemies_left
+	if btn_last_stand_ad and lm:
+		btn_last_stand_ad.text = lm.t("KEY_LAST_STAND_AD")
+	if btn_last_stand_skip and lm:
+		btn_last_stand_skip.text = lm.t("KEY_SKIP")
 
 	var tween_modal = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	last_stand_modal.scale = Vector2(0.6, 0.6)
@@ -230,6 +246,7 @@ func _on_last_stand_offered(enemies_left: int) -> void:
 func _on_last_stand_timeout() -> void:
 	if last_stand_modal and last_stand_modal.visible:
 		last_stand_modal.visible = false
+		if modal_dimmer: modal_dimmer.visible = false
 		GameManager.is_level_active = false
 		GameManager.level_failed.emit()
 
@@ -245,6 +262,7 @@ func _on_last_stand_ad_pressed() -> void:
 			1,
 			func():
 				if last_stand_modal: last_stand_modal.visible = false
+				if modal_dimmer: modal_dimmer.visible = false
 				_refresh_egg_icons(),
 			func():
 				# Nếu hủy ad, tiếp tục đếm ngược còn lại hoặc fail
@@ -261,6 +279,7 @@ func _on_last_stand_skip_pressed() -> void:
 # ==========================================
 func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> void:
 	current_base_coins = base_coins
+	if modal_dimmer: modal_dimmer.visible = true
 
 	if victory_modal:
 		victory_modal.visible = true
@@ -296,24 +315,33 @@ func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> 
 					st.tween_property(s_node, "scale", Vector2(0.85, 0.85), 0.22)
 
 		if coin_reward_label:
-			coin_reward_label.text = "+%d VÀNG" % base_coins
+			if lm: coin_reward_label.text = lm.t("KEY_GOLD_REWARD") % base_coins
+			else: coin_reward_label.text = "+%d VÀNG" % base_coins
 
 		# Grace Period: Màn 1 đến 5 không có nút xem x3 ad
 		if GameManager.current_level <= 5:
 			if btn_claim_triple: btn_claim_triple.visible = false
-			if next_level_btn: next_level_btn.text = " TIẾP TỤC (+%d Vàng)" % base_coins
+			if next_level_btn:
+				if lm: next_level_btn.text = " " + (lm.t("KEY_CONTINUE_REWARD") % base_coins)
+				else: next_level_btn.text = " TIẾP TỤC (+%d Vàng)" % base_coins
 		else:
 			if btn_claim_triple:
 				btn_claim_triple.visible = true
-				btn_claim_triple.text = "NHẬN X3 VÀNG (+%d)" % (base_coins * 3)
+				if lm: btn_claim_triple.text = lm.t("KEY_CLAIM_TRIPLE") % (base_coins * 3)
+				else: btn_claim_triple.text = "NHẬN X3 VÀNG (+%d)" % (base_coins * 3)
 			if next_level_btn:
-				next_level_btn.text = " TIẾP THEO"
+				if lm: next_level_btn.text = " " + lm.t("KEY_NEXT_LEVEL")
+				else: next_level_btn.text = " TIẾP THEO"
+
+		if victory_levels_btn and lm:
+			victory_levels_btn.text = " " + lm.t("KEY_SELECT_LEVEL")
 
 		var tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		victory_modal.scale = Vector2(0.5, 0.5)
 		tween.tween_property(victory_modal, "scale", Vector2.ONE, 0.3)
 
 func _on_claim_triple_pressed() -> void:
+	if modal_dimmer: modal_dimmer.visible = false
 	if not has_node("/root/AdsManager"): return
 	var am = get_node("/root/AdsManager")
 	am.show_rewarded_ad(
@@ -325,6 +353,7 @@ func _on_claim_triple_pressed() -> void:
 	)
 
 func _on_claim_normal_and_next() -> void:
+	if modal_dimmer: modal_dimmer.visible = false
 	if has_node("/root/SaveManager"):
 		get_node("/root/SaveManager").add_coins(current_base_coins)
 	GameManager.next_level()
@@ -334,11 +363,12 @@ func _on_claim_normal_and_next() -> void:
 # ==========================================
 func _on_level_failed() -> void:
 	if fail_modal:
+		if modal_dimmer: modal_dimmer.visible = true
 		fail_modal.visible = true
 		var lm = get_node_or_null("/root/LocalizationManager")
 		if fail_title and lm: fail_title.text = lm.t("KEY_FAIL")
-		if retry_btn and lm: retry_btn.text = lm.t("KEY_RETRY")
-		if fail_levels_btn and lm: fail_levels_btn.text = lm.t("KEY_SELECT_LEVEL")
+		if retry_btn and lm: retry_btn.text = " " + lm.t("KEY_RETRY")
+		if fail_levels_btn and lm: fail_levels_btn.text = " " + lm.t("KEY_SELECT_LEVEL")
 
 		var tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		fail_modal.scale = Vector2(0.5, 0.5)
