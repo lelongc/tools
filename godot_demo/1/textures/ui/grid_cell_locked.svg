@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <rect x="2" y="2" width="60" height="60" rx="8" fill="#0a0c14" stroke="#1c2236" stroke-width="2"/>
+  <!-- Padlock -->
+  <rect x="22" y="30" width="20" height="18" rx="3" fill="#3f4b6e" stroke="#5c6e9e" stroke-width="1.5"/>
+  <path d="M26 30 V24 A6 6 0 0 1 38 24 V30" fill="none" stroke="#5c6e9e" stroke-width="2"/>
+  <circle cx="32" cy="38" r="2" fill="#ffd700"/>
+</svg>

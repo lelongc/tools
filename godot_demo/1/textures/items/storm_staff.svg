@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="256" viewBox="0 0 64 256">
+  <rect x="2" y="2" width="60" height="252" rx="10" fill="#1b2033" stroke="#7c4dff" stroke-width="2.5"/>
+  <!-- Staff shaft -->
+  <rect x="28" y="48" width="8" height="190" rx="3" fill="#4e342e" stroke="#7c4dff" stroke-width="1.5"/>
+  <!-- Lightning Orb at head -->
+  <circle cx="32" cy="36" r="20" fill="#d500f9" fill-opacity="0.3" stroke="#e040fb" stroke-width="2"/>
+  <circle cx="32" cy="36" r="10" fill="#ffffff"/>
+  <!-- Lightning bolt sparks -->
+  <polygon points="32,20 36,34 30,34 34,48 24,38 30,38" fill="#ffff00"/>
+</svg>

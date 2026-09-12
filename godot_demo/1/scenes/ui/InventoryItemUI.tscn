@@ -1,0 +1,61 @@
+[gd_scene load_steps=2 format=3 uid="uid://item_ui_node_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/InventoryItemUI.gd" id="1_item_script"]
+
+[node name="InventoryItemUI" type="Control"]
+custom_minimum_size = Vector2(54, 54)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 54.0
+offset_bottom = 54.0
+mouse_filter = 0
+script = ExtResource("1_item_script")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="GlowBorder" type="ReferenceRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+border_color = Color(0.0, 0.94, 1.0, 0.8)
+border_width = 2.0
+editor_only = false
+
+[node name="NameLabel" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_font_sizes/font_size = 9
+horizontal_alignment = 1
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="RotateBtn" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -18.0
+offset_bottom = 18.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 10
+text = "⟳"
+flat = true

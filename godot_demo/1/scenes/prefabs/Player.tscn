@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://player_node_01"]
+
+[ext_resource type="Script" path="res://scripts/game/Player.gd" id="1_player_script"]
+[ext_resource type="Texture2D" path="res://textures/entities/player.svg" id="2_player_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_plr"]
+radius = 18.0
+
+[node name="Player" type="CharacterBody2D" groups=["player"]]
+collision_layer = 1
+collision_mask = 2
+motion_mode = 1
+script = ExtResource("1_player_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_plr")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_player_tex")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <!-- Bat Wings -->
+  <path d="M24 26 L6 14 Q14 30 20 32 L24 26 Z" fill="#7b1fa2" stroke="#e1bee7" stroke-width="1.5"/>
+  <path d="M24 26 L42 14 Q34 30 28 32 L24 26 Z" fill="#7b1fa2" stroke="#e1bee7" stroke-width="1.5"/>
+  <!-- Bat Body & Ears -->
+  <circle cx="24" cy="26" r="8" fill="#4a148c" stroke="#ba68c8" stroke-width="1.5"/>
+  <polygon points="18,20 16,12 22,18" fill="#4a148c"/>
+  <polygon points="30,20 32,12 26,18" fill="#4a148c"/>
+  <!-- Red Eyes -->
+  <circle cx="21" cy="24" r="2" fill="#ff1744"/>
+  <circle cx="27" cy="24" r="2" fill="#ff1744"/>
+</svg>

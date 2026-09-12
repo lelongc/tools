@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="128" viewBox="0 0 64 128">
+  <rect x="2" y="2" width="60" height="124" rx="8" fill="#1b2033" stroke="#00e5ff" stroke-width="2"/>
+  <!-- Mirror frame and crystal surface -->
+  <polygon points="32,16 52,64 32,112 12,64" fill="#84ffff" fill-opacity="0.4" stroke="#00e5ff" stroke-width="2.5"/>
+  <line x1="32" y1="16" x2="32" y2="112" stroke="#ffffff" stroke-width="1.5"/>
+  <circle cx="32" cy="64" r="6" fill="#ffffff"/>
+</svg>

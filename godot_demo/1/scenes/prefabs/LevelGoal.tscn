@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://level_goal_node_01"]
+
+[ext_resource type="Script" path="res://scripts/game/LevelGoal.gd" id="1_goal_script"]
+[ext_resource type="Texture2D" path="res://textures/env/level_goal_vortex.svg" id="2_vortex_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_gol"]
+radius = 32.0
+
+[node name="LevelGoal" type="Area2D"]
+collision_layer = 8
+collision_mask = 1
+script = ExtResource("1_goal_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_gol")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_vortex_tex")

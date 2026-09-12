@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://puffy_player_node_01"]
+
+[ext_resource type="Script" path="res://scripts/game/PuffyPlayer.gd" id="1_player_script"]
+[ext_resource type="Texture2D" path="res://textures/entities/puffy_normal.svg" id="2_normal_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_puffy"]
+radius = 20.0
+
+[node name="PuffyPlayer" type="CharacterBody2D" groups=["puffy"]]
+collision_layer = 1
+collision_mask = 6
+motion_mode = 1
+script = ExtResource("1_player_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_puffy")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_normal_tex")

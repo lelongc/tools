@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect x="3" y="3" width="122" height="122" rx="12" fill="#1b2033" stroke="#b0bec5" stroke-width="2.5"/>
+  <!-- Circular shield -->
+  <circle cx="64" cy="64" r="48" fill="#455a64" stroke="#cfd8dc" stroke-width="4"/>
+  <circle cx="64" cy="64" r="28" fill="#263238" stroke="#90a4ae" stroke-width="3"/>
+  <!-- Central Spike -->
+  <polygon points="64,36 74,64 64,92 54,64" fill="#eceff1"/>
+  <circle cx="64" cy="64" r="8" fill="#b0bec5"/>
+  <!-- 4 Corner Spikes -->
+  <polygon points="64,18 68,26 60,26" fill="#eceff1"/>
+  <polygon points="64,110 68,102 60,102" fill="#eceff1"/>
+  <polygon points="18,64 26,60 26,68" fill="#eceff1"/>
+  <polygon points="110,64 102,60 102,68" fill="#eceff1"/>
+</svg>

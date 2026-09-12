@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48">
+  <!-- Slime Body -->
+  <path d="M8 38 C8 20 18 10 24 10 C30 10 40 20 40 38 C40 44 8 44 8 38 Z" fill="#00e676" fill-opacity="0.85" stroke="#b9f6ca" stroke-width="2"/>
+  <!-- Evil Cute Eyes -->
+  <ellipse cx="18" cy="26" rx="4" ry="5" fill="#1b5e20"/>
+  <ellipse cx="30" cy="26" rx="4" ry="5" fill="#1b5e20"/>
+  <circle cx="19" cy="24" r="1.5" fill="#ffffff"/>
+  <circle cx="31" cy="24" r="1.5" fill="#ffffff"/>
+  <!-- Internal Runic Sparkle -->
+  <circle cx="24" cy="34" r="3" fill="#ffffff" fill-opacity="0.7"/>
+</svg>

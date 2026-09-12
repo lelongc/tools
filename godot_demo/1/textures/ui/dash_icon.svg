@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="30" fill="#141829" fill-opacity="0.75" stroke="#00f0ff" stroke-width="2.5"/>
+  <!-- Dash double arrows -->
+  <path d="M22 18 L36 32 L22 46" fill="none" stroke="#00f0ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M34 18 L48 32 L34 46" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

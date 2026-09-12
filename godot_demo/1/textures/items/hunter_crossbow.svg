@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect x="3" y="3" width="122" height="122" rx="12" fill="#1b2033" stroke="#2e7d32" stroke-width="2.5"/>
+  <!-- Crossbow Bow Arc -->
+  <path d="M16 48 Q64 12 112 48" fill="none" stroke="#8d6e63" stroke-width="8" stroke-linecap="round"/>
+  <!-- Bow String -->
+  <line x1="16" y1="48" x2="64" y2="82" stroke="#eeeeee" stroke-width="2.5"/>
+  <line x1="112" y1="48" x2="64" y2="82" stroke="#eeeeee" stroke-width="2.5"/>
+  <!-- Stock / Body -->
+  <rect x="58" y="36" width="12" height="74" rx="4" fill="#5d4037" stroke="#3e2723" stroke-width="2"/>
+  <!-- Loaded Bolt -->
+  <line x1="64" y1="20" x2="64" y2="78" stroke="#00e676" stroke-width="3.5"/>
+  <polygon points="64,14 60,26 68,26" fill="#00e676"/>
+</svg>

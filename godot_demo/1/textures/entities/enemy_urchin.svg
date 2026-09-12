@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <radialGradient id="urchinBody" cx="45%" cy="45%" r="55%">
+      <stop offset="0%" stop-color="#9C27B0" />
+      <stop offset="70%" stop-color="#4A148C" />
+      <stop offset="100%" stop-color="#1A0033" />
+    </radialGradient>
+    <linearGradient id="spikeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFEB3B" />
+      <stop offset="50%" stop-color="#BA68C8" />
+      <stop offset="100%" stop-color="#4A148C" />
+    </linearGradient>
+  </defs>
+
+  <!-- Gai nhọn xòe tròn quanh thân -->
+  <polygon points="50,2 45,28 55,28" fill="url(#spikeGrad)" />
+  <polygon points="50,98 45,72 55,72" fill="url(#spikeGrad)" />
+  <polygon points="2,50 28,45 28,55" fill="url(#spikeGrad)" />
+  <polygon points="98,50 72,45 72,55" fill="url(#spikeGrad)" />
+  
+  <polygon points="16,16 36,34 30,40" fill="url(#spikeGrad)" />
+  <polygon points="84,16 64,34 70,40" fill="url(#spikeGrad)" />
+  <polygon points="16,84 36,66 30,60" fill="url(#spikeGrad)" />
+  <polygon points="84,84 64,66 70,60" fill="url(#spikeGrad)" />
+
+  <polygon points="30,8 38,30 46,28" fill="url(#spikeGrad)" />
+  <polygon points="70,8 62,30 54,28" fill="url(#spikeGrad)" />
+  <polygon points="30,92 38,70 46,72" fill="url(#spikeGrad)" />
+  <polygon points="70,92 62,70 54,72" fill="url(#spikeGrad)" />
+
+  <!-- Thân tròn nhím biển -->
+  <circle cx="50" cy="50" r="32" fill="url(#urchinBody)" stroke="#E1BEE7" stroke-width="2.5" />
+
+  <!-- Mắt lườm nguy hiểm -->
+  <ellipse cx="40" cy="46" rx="7" ry="9" fill="#FFF" />
+  <circle cx="42" cy="46" r="4.5" fill="#E91E63" />
+  <circle cx="44" cy="44" r="1.5" fill="#FFF" />
+
+  <ellipse cx="60" cy="46" rx="7" ry="9" fill="#FFF" />
+  <circle cx="58" cy="46" r="4.5" fill="#E91E63" />
+  <circle cx="56" cy="44" r="1.5" fill="#FFF" />
+
+  <!-- Lông mày nhăn cau có -->
+  <path d="M 34 38 L 47 42" stroke="#1A0033" stroke-width="3" stroke-linecap="round" />
+  <path d="M 66 38 L 53 42" stroke="#1A0033" stroke-width="3" stroke-linecap="round" />
+
+  <!-- Miệng gầm gừ nhỏ -->
+  <path d="M 43 62 Q 50 57 57 62" stroke="#FF80AB" stroke-width="2.5" fill="none" stroke-linecap="round" />
+</svg>

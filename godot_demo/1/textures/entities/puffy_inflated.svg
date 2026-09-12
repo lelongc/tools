@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- Spikes all around circumference -->
+  <!-- Top spikes -->
+  <polygon points="64,8 60,0 68,0" fill="#ff6f00"/>
+  <polygon points="44,12 36,4 48,6" fill="#ff6f00"/>
+  <polygon points="84,12 92,4 80,6" fill="#ff6f00"/>
+  <!-- Right spikes -->
+  <polygon points="116,44 126,38 122,50" fill="#ff6f00"/>
+  <polygon points="120,64 128,60 128,68" fill="#ff6f00"/>
+  <polygon points="116,84 126,90 122,78" fill="#ff6f00"/>
+  <!-- Left spikes -->
+  <polygon points="12,44 2,38 6,50" fill="#ff6f00"/>
+  <polygon points="8,64 0,60 0,68" fill="#ff6f00"/>
+  <polygon points="12,84 2,90 6,78" fill="#ff6f00"/>
+  <!-- Bottom spikes -->
+  <polygon points="64,120 60,128 68,128" fill="#ff6f00"/>
+  <polygon points="44,116 36,124 48,122" fill="#ff6f00"/>
+  <polygon points="84,116 92,124 80,122" fill="#ff6f00"/>
+
+  <!-- Giant Round Puffed Body -->
+  <circle cx="64" cy="64" r="54" fill="#ffb300" stroke="#e65100" stroke-width="4"/>
+  <!-- Stretched Light Belly -->
+  <circle cx="64" cy="74" r="36" fill="#fff59d"/>
+
+  <!-- Little Flapping Fins -->
+  <ellipse cx="22" cy="70" rx="8" ry="5" fill="#ffa000"/>
+  <ellipse cx="106" cy="70" rx="8" ry="5" fill="#ffa000"/>
+
+  <!-- Huge Thrilled Googly Eyes -->
+  <circle cx="50" cy="50" r="16" fill="#ffffff" stroke="#e65100" stroke-width="2.5"/>
+  <circle cx="78" cy="50" r="16" fill="#ffffff" stroke="#e65100" stroke-width="2.5"/>
+  <!-- Pupils looking excited -->
+  <circle cx="53" cy="48" r="8" fill="#212121"/>
+  <circle cx="75" cy="48" r="8" fill="#212121"/>
+  <circle cx="56" cy="45" r="3" fill="#ffffff"/>
+  <circle cx="78" cy="45" r="3" fill="#ffffff"/>
+
+  <!-- Huge Puffed Rosy Cheeks -->
+  <circle cx="34" cy="66" r="10" fill="#ff5252" fill-opacity="0.8"/>
+  <circle cx="94" cy="66" r="10" fill="#ff5252" fill-opacity="0.8"/>
+
+  <!-- Open round "O" mouth screaming with joy -->
+  <circle cx="64" cy="66" r="8" fill="#bf360c" stroke="#e65100" stroke-width="2"/>
+  <path d="M60 70 Q64 74 68 70" fill="#ff8a80"/>
+</svg>

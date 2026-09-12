@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Clam Shell Bottom -->
+  <path d="M12 44 Q32 58 52 44 Q48 36 32 38 Q16 36 12 44 Z" fill="#7e57c2" stroke="#512da8" stroke-width="2"/>
+  <!-- Clam Shell Top (Open) -->
+  <path d="M12 36 Q32 12 52 36 Q42 34 32 36 Q22 34 12 36 Z" fill="#9575cd" stroke="#512da8" stroke-width="2"/>
+  <!-- Glowing Pearl inside -->
+  <circle cx="32" cy="38" r="8" fill="#ffffff" stroke="#ffd54f" stroke-width="2"/>
+  <circle cx="30" cy="36" r="2.5" fill="#fff9c4"/>
+  <!-- Sparkles -->
+  <polygon points="32,24 34,28 32,32 30,28" fill="#ffd700"/>
+</svg>

@@ -1,0 +1,140 @@
+[gd_scene load_steps=7 format=3 uid="uid://hud_node_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/HUD.gd" id="1_hud_script"]
+[ext_resource type="Texture2D" path="res://textures/ui/heart_icon.svg" id="2_heart_tex"]
+[ext_resource type="Texture2D" path="res://textures/ui/shard_icon.svg" id="3_shard_tex"]
+[ext_resource type="Texture2D" path="res://textures/ui/joystick_base.svg" id="4_joy_base"]
+[ext_resource type="Texture2D" path="res://textures/ui/joystick_knob.svg" id="5_joy_knob"]
+[ext_resource type="Texture2D" path="res://textures/ui/dash_icon.svg" id="6_dash_tex"]
+
+[node name="HUD" type="CanvasLayer"]
+script = ExtResource("1_hud_script")
+
+[node name="TopBar" type="HBoxContainer" parent="."]
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = -20.0
+offset_bottom = 50.0
+grow_horizontal = 2
+theme_override_constants/separation = 25
+
+[node name="WaveLabel" type="Label" parent="TopBar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "WAVE 1"
+vertical_alignment = 1
+
+[node name="TimerLabel" type="Label" parent="TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1.0, 0.85, 0.0, 1.0)
+theme_override_font_sizes/font_size = 22
+text = "01:00"
+vertical_alignment = 1
+
+[node name="HpContainer" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HeartIcon" type="TextureRect" parent="TopBar/HpContainer"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+texture = ExtResource("2_heart_tex")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HpBar" type="ProgressBar" parent="TopBar/HpContainer"]
+custom_minimum_size = Vector2(180, 20)
+layout_mode = 2
+size_flags_vertical = 4
+value = 100.0
+show_percentage = false
+
+[node name="ShardsContainer" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ShardIcon" type="TextureRect" parent="TopBar/ShardsContainer"]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+texture = ExtResource("3_shard_tex")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ShardsLabel" type="Label" parent="TopBar/ShardsContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "15"
+vertical_alignment = 1
+
+[node name="KillsLabel" type="Label" parent="TopBar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "💀 0"
+vertical_alignment = 1
+
+[node name="Spacer" type="Control" parent="TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PauseBtn" type="Button" parent="TopBar"]
+custom_minimum_size = Vector2(44, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "⏸"
+
+[node name="MobileControls" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="JoystickBase" type="Control" parent="MobileControls"]
+visible = false
+custom_minimum_size = Vector2(120, 120)
+layout_mode = 1
+anchors_preset = 0
+offset_left = 60.0
+offset_top = 500.0
+offset_right = 180.0
+offset_bottom = 620.0
+mouse_filter = 2
+
+[node name="BaseTexture" type="TextureRect" parent="MobileControls/JoystickBase"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_joy_base")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="JoystickKnob" type="TextureRect" parent="MobileControls/JoystickBase"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_joy_knob")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DashBtn" type="TouchScreenButton" parent="MobileControls"]
+position = Vector2(1140, 560)
+texture_normal = ExtResource("6_dash_tex")
+action = "dash"
+visibility_mode = 0

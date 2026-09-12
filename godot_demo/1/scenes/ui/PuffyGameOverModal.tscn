@@ -1,0 +1,66 @@
+[gd_scene load_steps=2 format=3 uid="uid://puffy_fail_modal_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/PuffyGameOverModal.gd" id="1_fail_script"]
+
+[node name="PuffyGameOverModal" type="CanvasLayer"]
+process_mode = 3
+script = ExtResource("1_fail_script")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.2, 0, 0.1, 0.75)
+
+[node name="Panel" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(440, 280)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -140.0
+offset_right = 220.0
+offset_bottom = 140.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Title" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 26
+text = "🐡 HẾT LƯỢT BẮN RỒI! 🐡"
+horizontal_alignment = 1
+
+[node name="Desc" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 0.9)
+theme_override_font_sizes/font_size = 14
+text = "Đừng nản lòng! Hãy canh thời điểm chạm để Phồng To đúng lúc nhé!"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Buttons" type="VBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RetryBtn" type="Button" parent="Panel/VBox/Buttons"]
+custom_minimum_size = Vector2(0, 46)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "🔄 BẮN LẠI NGAY"
+
+[node name="SelectBtn" type="Button" parent="Panel/VBox/Buttons"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "🗺️ Chọn Màn Khác"

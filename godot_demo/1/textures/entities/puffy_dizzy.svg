@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <circle cx="32" cy="34" r="24" fill="#ffca28" stroke="#ff8f00" stroke-width="3"/>
+  <ellipse cx="32" cy="42" rx="16" ry="10" fill="#fff9c4"/>
+  <!-- Spiral Eyes -->
+  <circle cx="38" cy="26" r="9" fill="#ffffff" stroke="#e65100" stroke-width="1.5"/>
+  <circle cx="50" cy="26" r="8" fill="#ffffff" stroke="#e65100" stroke-width="1.5"/>
+  <!-- Spiral Lines inside eyes -->
+  <path d="M38 26 A2 2 0 0 1 36 24 A4 4 0 0 1 40 22 A6 6 0 0 1 42 28" fill="none" stroke="#212121" stroke-width="1.5"/>
+  <path d="M50 26 A2 2 0 0 1 48 24 A4 4 0 0 1 52 22 A6 6 0 0 1 54 28" fill="none" stroke="#212121" stroke-width="1.5"/>
+  <!-- Wavy Dizzy Mouth -->
+  <path d="M38 40 Q42 36 46 40 Q50 44 54 40" fill="none" stroke="#d84315" stroke-width="2"/>
+  <!-- Bump on head -->
+  <ellipse cx="26" cy="14" rx="4" ry="5" fill="#ff5252"/>
+</svg>

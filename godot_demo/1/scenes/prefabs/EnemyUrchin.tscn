@@ -1,0 +1,19 @@
+[gd_scene load_steps=4 format=3 uid="uid://enemy_urchin_prefab_01"]
+
+[ext_resource type="Script" path="res://scripts/game/EnemyUrchin.gd" id="1_urchin_script"]
+[ext_resource type="Texture2D" path="res://textures/entities/enemy_urchin.svg" id="2_urchin_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_urchin"]
+radius = 32.0
+
+[node name="EnemyUrchin" type="StaticBody2D"]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_urchin_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("2_urchin_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_urchin")

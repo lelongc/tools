@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://proj_node_01"]
+
+[ext_resource type="Script" path="res://scripts/game/Projectile.gd" id="1_proj_script"]
+[ext_resource type="Texture2D" path="res://textures/env/bullet_default.svg" id="2_bullet_tex"]
+
+[node name="Projectile" type="Node2D"]
+script = ExtResource("1_proj_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_bullet_tex")

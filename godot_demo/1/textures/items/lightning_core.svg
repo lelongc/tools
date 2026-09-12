@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <rect x="2" y="2" width="60" height="60" rx="8" fill="#1b2033" stroke="#e040fb" stroke-width="2"/>
+  <!-- Lightning Bolt -->
+  <polygon points="36,8 20,32 32,32 26,56 46,28 34,28" fill="#e040fb" stroke="#ffffff" stroke-width="1.5"/>
+</svg>

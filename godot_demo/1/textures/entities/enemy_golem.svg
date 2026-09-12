@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Rocky Body -->
+  <polygon points="12,20 28,8 48,12 56,32 48,54 20,54 8,36" fill="#455a64" stroke="#78909c" stroke-width="3"/>
+  <!-- Glowing Runic Cracks -->
+  <line x1="28" y1="16" x2="36" y2="34" stroke="#00f0ff" stroke-width="2.5"/>
+  <line x1="36" y1="34" x2="24" y2="44" stroke="#00f0ff" stroke-width="2.5"/>
+  <line x1="36" y1="34" x2="48" y2="38" stroke="#00f0ff" stroke-width="2.5"/>
+  <!-- Glowing Stone Eye -->
+  <circle cx="36" cy="24" r="5" fill="#00f0ff"/>
+  <circle cx="36" cy="24" r="2" fill="#ffffff"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="54" height="54" viewBox="0 0 54 54">
+  <!-- Spitter body -->
+  <ellipse cx="27" cy="30" rx="18" ry="16" fill="#33691e" stroke="#76ff03" stroke-width="2"/>
+  <!-- Gaping Maw -->
+  <ellipse cx="27" cy="22" rx="10" ry="7" fill="#1b5e20"/>
+  <circle cx="27" cy="22" r="4" fill="#76ff03"/>
+  <!-- Toxic pustules -->
+  <circle cx="16" cy="32" r="4" fill="#aeea00"/>
+  <circle cx="38" cy="32" r="4" fill="#aeea00"/>
+</svg>

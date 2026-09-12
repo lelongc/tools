@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect x="3" y="3" width="122" height="122" rx="12" fill="#1b2033" stroke="#d50000" stroke-width="2.5"/>
+  <!-- Beating Vampire Heart -->
+  <path d="M64 104 C24 72 12 48 12 30 A24 24 0 0 1 56 22 L64 30 L72 22 A24 24 0 0 1 116 30 C116 48 104 72 64 104 Z" fill="#b71c1c" stroke="#ff1744" stroke-width="3"/>
+  <circle cx="64" cy="54" r="12" fill="#d50000"/>
+  <!-- Blood drops -->
+  <circle cx="48" cy="42" r="4" fill="#ff5252"/>
+</svg>

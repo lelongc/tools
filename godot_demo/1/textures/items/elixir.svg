@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <rect x="2" y="2" width="60" height="60" rx="8" fill="#1b2033" stroke="#00e676" stroke-width="2"/>
+  <!-- Potion vial -->
+  <circle cx="32" cy="38" r="18" fill="#00c853" stroke="#b9f6ca" stroke-width="2"/>
+  <rect x="28" y="14" width="8" height="10" fill="#69f0ae" stroke="#b9f6ca" stroke-width="1.5"/>
+  <rect x="26" y="10" width="12" height="4" rx="1" fill="#8d6e63"/>
+  <circle cx="28" cy="36" r="3" fill="#ffffff" fill-opacity="0.8"/>
+  <circle cx="36" cy="42" r="2" fill="#ffffff" fill-opacity="0.8"/>
+</svg>

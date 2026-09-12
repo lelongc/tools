@@ -1,0 +1,168 @@
+[gd_scene load_steps=5 format=3 uid="uid://backpack_shop_node_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/BackpackShop.gd" id="1_shop_script"]
+[ext_resource type="PackedScene" path="res://scenes/ui/InventoryGrid.tscn" id="2_grid_scene"]
+[ext_resource type="Texture2D" path="res://textures/ui/shard_icon.svg" id="3_shard_icon"]
+[ext_resource type="Texture2D" path="res://textures/ui/heart_icon.svg" id="4_heart_icon"]
+
+[node name="BackpackShop" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_shop_script")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.06, 0.1, 1.0)
+
+[node name="TopBar" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = -20.0
+offset_bottom = 50.0
+grow_horizontal = 2
+theme_override_constants/separation = 25
+
+[node name="WaveLabel" type="Label" parent="TopBar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "WAVE 1 / 20"
+vertical_alignment = 1
+
+[node name="HpContainer" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HeartIcon" type="TextureRect" parent="TopBar/HpContainer"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+texture = ExtResource("4_heart_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HpBar" type="ProgressBar" parent="TopBar/HpContainer"]
+custom_minimum_size = Vector2(180, 22)
+layout_mode = 2
+size_flags_vertical = 4
+value = 100.0
+show_percentage = false
+
+[node name="ShardsContainer" type="HBoxContainer" parent="TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ShardIcon" type="TextureRect" parent="TopBar/ShardsContainer"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+texture = ExtResource("3_shard_icon")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ShardsLabel" type="Label" parent="TopBar/ShardsContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "15"
+vertical_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 60.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 30
+
+[node name="BackpackPanel" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleLabel" type="Label" parent="HBoxContainer/BackpackPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "🎒 XƯỞNG BALO RUNIC (KÉO THẢ & PHÍM R ĐỂ XOAY)"
+
+[node name="InventoryGrid" parent="HBoxContainer/BackpackPanel" instance=ExtResource("2_grid_scene")]
+layout_mode = 2
+
+[node name="TipLabel" type="Label" parent="HBoxContainer/BackpackPanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.7, 0.8, 1.0)
+theme_override_font_sizes/font_size = 11
+text = "💡 Mẹo: Đặt Ngọc Lửa/Băng/Sét cạnh Vũ khí để truyền thuộc tính nguyên tố!"
+
+[node name="RightPanel" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="StatsBox" type="PanelContainer" parent="HBoxContainer/RightPanel"]
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="HBoxContainer/RightPanel/StatsBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="DpsLabel" type="Label" parent="HBoxContainer/RightPanel/StatsBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.0, 0.94, 1.0, 1.0)
+theme_override_font_sizes/font_size = 14
+text = "ƯỚC TÍNH DPS: 25.0"
+
+[node name="SynergiesLabel" type="Label" parent="HBoxContainer/RightPanel/StatsBox/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "NGUYÊN TỐ: Không\nCOMBO KỀ CẠNH: 0 kích hoạt"
+
+[node name="ShopHeader" type="Label" parent="HBoxContainer/RightPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "🛒 CỬA HÀNG MA PHÁP (MUA VẬT PHẨM MỚI)"
+
+[node name="ShopScroll" type="ScrollContainer" parent="HBoxContainer/RightPanel"]
+custom_minimum_size = Vector2(0, 240)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ShopItemsContainer" type="VBoxContainer" parent="HBoxContainer/RightPanel/ShopScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="ShopButtons" type="HBoxContainer" parent="HBoxContainer/RightPanel"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RerollBtn" type="Button" parent="HBoxContainer/RightPanel/ShopButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "🔄 Đổi Đồ (2 💎)"
+
+[node name="BuyTileBtn" type="Button" parent="HBoxContainer/RightPanel/ShopButtons"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "➕ Mở Thêm Ô Balo (8 💎)"
+
+[node name="StartWaveBtn" type="Button" parent="HBoxContainer/RightPanel"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.0, 1.0, 0.5, 1.0)
+theme_override_font_sizes/font_size = 18
+text = "⚔️ BẮT ĐẦU CHIẾN ĐẤU WAVE 1 ⚔️"

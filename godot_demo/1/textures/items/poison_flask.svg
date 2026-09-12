@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <rect x="2" y="2" width="60" height="60" rx="8" fill="#1b2033" stroke="#76ff03" stroke-width="2"/>
+  <!-- Flask shape -->
+  <path d="M28 14 H36 V24 L48 48 A6 6 0 0 1 42 54 H22 A6 6 0 0 1 16 48 L28 24 Z" fill="#2e7d32" stroke="#76ff03" stroke-width="2"/>
+  <circle cx="32" cy="42" r="6" fill="#76ff03" fill-opacity="0.8"/>
+  <circle cx="26" cy="46" r="3" fill="#b2ff59"/>
+  <circle cx="38" cy="46" r="2" fill="#b2ff59"/>
+  <!-- Cork -->
+  <rect x="29" y="10" width="6" height="5" fill="#8d6e63"/>
+</svg>

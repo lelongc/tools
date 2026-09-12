@@ -1,0 +1,86 @@
+[gd_scene load_steps=3 format=3 uid="uid://puffy_lvl_select_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/PuffyLevelSelect.gd" id="1_lvl_script"]
+[ext_resource type="Texture2D" path="res://textures/env/bg_tropical_ocean.svg" id="2_bg_tex"]
+
+[node name="PuffyLevelSelect" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lvl_script")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bg_tex")
+expand_mode = 1
+
+[node name="HeaderContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 30.0
+offset_top = 20.0
+offset_right = -30.0
+offset_bottom = 70.0
+grow_horizontal = 2
+
+[node name="TitleLabel" type="Label" parent="HeaderContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.2, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 28
+text = "🗺️ 30 MÀN CHƠI CHIẾN DỊCH (5 VÙNG BIỂN)"
+
+[node name="Spacer" type="Control" parent="HeaderContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TotalStarsLabel" type="Label" parent="HeaderContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 22
+text = "⭐ 0 / 90"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -440.0
+offset_top = -240.0
+offset_right = 440.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="GridContainer" type="GridContainer" parent="ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 14
+columns = 6
+
+[node name="BackBtn" type="Button" parent="."]
+custom_minimum_size = Vector2(140, 44)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 30.0
+offset_top = -64.0
+offset_right = 170.0
+offset_bottom = -20.0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 15
+text = "⬅️ Quay Lại"
