@@ -1,0 +1,21 @@
+[gd_scene load_steps=4 format=3 uid="uid://mystic_clam_prefab_01"]
+
+[ext_resource type="Script" path="res://scripts/game/MysticClam.gd" id="1_clam_script"]
+[ext_resource type="Texture2D" path="res://textures/entities/enemy_clam.svg" id="2_clam_tex"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_clam"]
+radius = 24.0
+height = 56.0
+
+[node name="MysticClam" type="StaticBody2D"]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_clam_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_clam_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 4)
+rotation = 1.5708
+shape = SubResource("CapsuleShape2D_clam")

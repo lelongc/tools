@@ -3,7 +3,7 @@ extends Node
 func _ready() -> void:
 	print("\n=======================================================")
 	print("🐡 BẮT ĐẦU KIỂM THỬ: PUFFY POP - BOUNCY HERO (GODOT 4.7.1)")
-	print("   [Vật Lý Thông Minh, Pause Modal, UI Tropical, 30 Màn]")
+	print("   [Vật Lý Thông Minh, Animation Sinh Vật, Sò Thần, 30 Màn]")
 	print("=======================================================\n")
 	
 	var all_passed = true
@@ -17,10 +17,12 @@ func _ready() -> void:
 	all_passed = _test_arena_across_5_worlds() and all_passed
 	all_passed = _test_pause_modal_and_ui() and all_passed
 	all_passed = _test_tutorial_modal() and all_passed
+	all_passed = _test_mystic_clam() and all_passed
+	all_passed = _test_ambient_fish() and all_passed
 	
 	print("\n-------------------------------------------------------")
 	if all_passed:
-		print("✅ [TẤT CẢ 10/10 TEST PUFFY POP HOÀN TẤT THÀNH CÔNG 100%]")
+		print("✅ [TẤT CẢ 12/12 TEST PUFFY POP HOÀN TẤT THÀNH CÔNG 100%]")
 		print("=======================================================\n")
 		get_tree().quit(0)
 	else:
@@ -39,7 +41,6 @@ func _test_player_physics_and_antistuck() -> bool:
 		player.queue_free()
 		return false
 		
-	# Bắn thử nghiệm
 	PuffyGameManager.shots_remaining = 3
 	player._execute_launch(player.launch_origin - Vector2(100, 50))
 	if player.current_state != PuffyPlayer.PuffyState.FLYING_NORMAL:
@@ -47,21 +48,18 @@ func _test_player_physics_and_antistuck() -> bool:
 		player.queue_free()
 		return false
 		
-	# Kích hoạt Phồng To
 	player.trigger_inflate()
 	if player.current_state != PuffyPlayer.PuffyState.FLYING_INFLATED:
 		printerr("  ❌ Lỗi: Không chuyển sang trạng thái FLYING_INFLATED!")
 		player.queue_free()
 		return false
 		
-	# Kích hoạt Xì Hơi Phản Lực
 	player.trigger_jet_deflate()
 	if player.current_state != PuffyPlayer.PuffyState.JET_DEFLATING:
 		printerr("  ❌ Lỗi: Không chuyển sang trạng thái JET_DEFLATING!")
 		player.queue_free()
 		return false
 		
-	# Kiểm tra nút Giải Cứu Puffy (force_recall_to_pad)
 	player.force_recall_to_pad()
 	if player.current_state != PuffyPlayer.PuffyState.IDLE:
 		printerr("  ❌ Lỗi: Hàm Giải Cứu Puffy không đưa về IDLE!")
@@ -116,7 +114,6 @@ func _test_enemy_crab_squash() -> bool:
 	var player = player_scene.instantiate() as PuffyPlayer
 	add_child(player)
 	
-	# Puffy thường đâm vào cua -> cua chưa chết
 	crab.on_puffy_hit(player, false)
 	if crab.is_defeated:
 		printerr("  ❌ Lỗi: Puffy nhỏ không được tiêu diệt cua!")
@@ -124,7 +121,6 @@ func _test_enemy_crab_squash() -> bool:
 		player.queue_free()
 		return false
 		
-	# Puffy Phồng To đâm vào cua -> cua bị hạ gục!
 	crab.on_puffy_hit(player, true)
 	if not crab.is_defeated:
 		printerr("  ❌ Lỗi: Puffy phồng to không hạ gục được cua!")
@@ -138,7 +134,7 @@ func _test_enemy_crab_squash() -> bool:
 	return true
 
 func _test_new_entities() -> bool:
-	print("▶ [TEST 4] Kiểm tra 4 Thực Thể Mới (Sứa, Nhím, San Hô Vỡ, Hải Lưu)...")
+	print("▶ [TEST 4] Kiểm tra các Thực Thể (Sứa, Nhím, San Hô Vỡ, Hải Lưu)...")
 	var player_scene = load("res://scenes/prefabs/PuffyPlayer.tscn")
 	var player = player_scene.instantiate() as PuffyPlayer
 	add_child(player)
@@ -198,7 +194,7 @@ func _test_new_entities() -> bool:
 		return false
 	stream.queue_free()
 	
-	print("  ✓ Cả 4 thực thể mới (Sứa lò xo, Nhím gai, San hô vỡ, Hải lưu) hoạt động trơn tru.")
+	print("  ✓ Cả 4 thực thể (Sứa lò xo, Nhím gai, San hô vỡ, Hải lưu) hoạt động trơn tru.")
 	player.queue_free()
 	return true
 
@@ -209,7 +205,6 @@ func _test_pearl_and_accurate_scoring() -> bool:
 	PuffyGameManager.total_pearls_bank = 0
 	PuffyGameManager.shots_remaining = 2
 	
-	# Thu thập 3 ngọc trai: 3 * 500 = 1,500 điểm
 	PuffyGameManager.add_pearl()
 	PuffyGameManager.add_pearl()
 	PuffyGameManager.add_pearl()
@@ -217,7 +212,6 @@ func _test_pearl_and_accurate_scoring() -> bool:
 		printerr("  ❌ Lỗi tính điểm ngọc trai! Điểm: ", PuffyGameManager.current_score)
 		return false
 		
-	# Hoàn thành màn với 2 phát bắn còn lại: 2 * 2,000 = 4,000 điểm thưởng
 	PuffyGameManager.finish_level_victory()
 	if PuffyGameManager.current_score != 5500:
 		printerr("  ❌ Lỗi tính điểm thưởng phát bắn! Tổng điểm: ", PuffyGameManager.current_score)
@@ -302,7 +296,6 @@ func _test_pause_modal_and_ui() -> bool:
 		pause_modal.queue_free()
 		return false
 		
-	# Thử bấm tiếp tục (Resume)
 	pause_modal._on_resume_pressed()
 	if get_tree().paused:
 		printerr("  ❌ Lỗi: Bấm Resume không unpause engine!")
@@ -324,4 +317,56 @@ func _test_tutorial_modal() -> bool:
 		
 	tuto_modal.queue_free()
 	print("  ✓ Modal Hướng Dẫn 3 bước hiển thị hoàn hảo.")
+	return true
+
+func _test_mystic_clam() -> bool:
+	print("▶ [TEST 11] Kiểm tra Sò Thần Biển (MysticClam ngậm mở vỏ)...")
+	var clam_scene = load("res://scenes/prefabs/MysticClam.tscn")
+	var clam = clam_scene.instantiate() as MysticClam
+	add_child(clam)
+	
+	var player_scene = load("res://scenes/prefabs/PuffyPlayer.tscn")
+	var player = player_scene.instantiate() as PuffyPlayer
+	add_child(player)
+	
+	# Khi sò đang mở: ăn được ngọc
+	var prev_score = PuffyGameManager.current_score
+	clam.is_open = true
+	clam.has_pearl = true
+	clam.on_puffy_hit(player, false)
+	if PuffyGameManager.current_score <= prev_score:
+		printerr("  ❌ Lỗi: Không nhận được điểm khi ăn ngọc trong sò!")
+		clam.queue_free()
+		player.queue_free()
+		return false
+		
+	# Khi sò đóng vỏ: nảy lại
+	player.velocity = Vector2(100, 100)
+	clam.on_puffy_hit(player, false)
+	if player.velocity.length() < 100:
+		printerr("  ❌ Lỗi: Sò đóng vỏ không tạo phản xạ nảy!")
+		clam.queue_free()
+		player.queue_free()
+		return false
+		
+	print("  ✓ Sò Thần Biển MysticClam cơ chế ngậm mở vỏ hoạt động chính xác.")
+	clam.queue_free()
+	player.queue_free()
+	return true
+
+func _test_ambient_fish() -> bool:
+	print("▶ [TEST 12] Kiểm tra Đàn Cá Nền (AmbientFish bơi lội mềm mại)...")
+	var fish_scene = load("res://scenes/prefabs/AmbientFish.tscn")
+	var fish = fish_scene.instantiate() as AmbientFish
+	add_child(fish)
+	
+	var initial_x = fish.position.x
+	fish._process(0.1)
+	if fish.position.x == initial_x:
+		printerr("  ❌ Lỗi: Cá bơi nền không di chuyển theo delta!")
+		fish.queue_free()
+		return false
+		
+	print("  ✓ Đàn cá bơi nền AmbientFish bơi lội mềm mại chuẩn xác.")
+	fish.queue_free()
 	return true

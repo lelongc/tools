@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://ambient_fish_prefab_01"]
+
+[ext_resource type="Script" path="res://scripts/game/AmbientFish.gd" id="1_fish_script"]
+[ext_resource type="Texture2D" path="res://textures/env/ambient_fish.svg" id="2_fish_tex"]
+
+[node name="AmbientFish" type="Node2D"]
+script = ExtResource("1_fish_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("2_fish_tex")

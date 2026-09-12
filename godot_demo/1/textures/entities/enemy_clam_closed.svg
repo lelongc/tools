@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Clam Shell Bottom -->
+  <path d="M12 40 Q32 58 52 40 Q48 34 32 36 Q16 34 12 40 Z" fill="#7e57c2" stroke="#512da8" stroke-width="2.5"/>
+  <!-- Clam Shell Top (Closed tightly) -->
+  <path d="M12 40 Q32 20 52 40 Q48 34 32 36 Q16 34 12 40 Z" fill="#9575cd" stroke="#512da8" stroke-width="2.5"/>
+  <!-- Shell Ridge Lines -->
+  <path d="M32 21 L32 39" stroke="#512da8" stroke-width="2" stroke-linecap="round"/>
+  <path d="M22 25 L24 38" stroke="#512da8" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M42 25 L40 38" stroke="#512da8" stroke-width="1.8" stroke-linecap="round"/>
+</svg>
