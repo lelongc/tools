@@ -29,6 +29,11 @@ func _process(delta: float) -> void:
 		_pop_out()
 		return
 
+	var pos = global_position
+	if pos.y > 1400.0 or pos.y < -600.0 or abs(pos.x) > 2000.0:
+		_pop_out()
+		return
+
 	if visual and linear_velocity.length() > 20.0:
 		visual.rotation = sin(Time.get_ticks_msec() * 0.02) * 0.35
 

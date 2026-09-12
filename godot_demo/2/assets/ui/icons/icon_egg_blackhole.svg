@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <!-- Cosmic Singularity Gradient -->
+    <radialGradient id="voidCore" cx="50%" cy="55%" r="60%">
+      <stop offset="0%" stop-color="#000000"/>
+      <stop offset="35%" stop-color="#2e1065"/>
+      <stop offset="70%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </radialGradient>
+    <linearGradient id="eventHorizon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f472b6"/>
+      <stop offset="50%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Circular Badge Background -->
+  <circle cx="32" cy="32" r="30" fill="#1e1b4b" stroke="#0f172a" stroke-width="2.5"/>
+  <circle cx="32" cy="32" r="27" fill="#090514"/>
+
+  <!-- Singularity Swirl Halo -->
+  <ellipse cx="32" cy="36" rx="22" ry="8" fill="none" stroke="url(#eventHorizon)" stroke-width="3" transform="rotate(-25 32 36)" opacity="0.85"/>
+
+  <!-- Black Hole Egg Body -->
+  <path d="M32 8 C20 8, 14 26, 14 38 C14 50, 22 56, 32 56 C42 56, 50 50, 50 38 C50 26, 44 8, 32 8 Z" 
+        fill="url(#voidCore)" stroke="#05010a" stroke-width="2.5"/>
+
+  <!-- Accretion Disk Swirling Ring in front of Egg -->
+  <path d="M12 44 Q24 24, 52 28 Q44 48, 12 44 Z" fill="none" stroke="url(#eventHorizon)" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Central Absolute Black Hole Core -->
+  <circle cx="32" cy="38" r="7" fill="#000000" stroke="#f472b6" stroke-width="1.5"/>
+
+  <!-- Distorted Gravitational Starlight Particles -->
+  <circle cx="24" cy="20" r="1.2" fill="#ffffff"/>
+  <circle cx="42" cy="22" r="1.5" fill="#f472b6"/>
+  <circle cx="38" cy="48" r="1.2" fill="#38bdf8"/>
+  <circle cx="20" cy="40" r="1" fill="#ffffff"/>
+</svg>

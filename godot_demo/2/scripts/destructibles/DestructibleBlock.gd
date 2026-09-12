@@ -3,7 +3,7 @@ class_name DestructibleBlock
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 
-@export_enum("wood", "stone", "glass", "steel", "obsidian") var material_type: String = "wood"
+@export_enum("wood", "stone", "glass", "steel", "obsidian", "crystal") var material_type: String = "wood"
 @export var max_health: float = 130.0
 @export var block_size: Vector2 = Vector2(120, 24)
 
@@ -23,11 +23,15 @@ static var tex_wood: Texture2D = null
 static var tex_stone: Texture2D = null
 static var tex_glass: Texture2D = null
 static var tex_steel: Texture2D = null
+static var tex_obsidian: Texture2D = null
+static var tex_crystal: Texture2D = null
 
 static var tex_pillar_wood: Texture2D = null
 static var tex_pillar_stone: Texture2D = null
 static var tex_pillar_glass: Texture2D = null
 static var tex_girder_steel: Texture2D = null
+static var tex_pillar_obsidian: Texture2D = null
+static var tex_pillar_crystal: Texture2D = null
 
 static var tex_crack_wood_l: Texture2D = null
 static var tex_crack_wood_h: Texture2D = null
@@ -37,6 +41,10 @@ static var tex_crack_glass_l: Texture2D = null
 static var tex_crack_glass_h: Texture2D = null
 static var tex_crack_steel_l: Texture2D = null
 static var tex_crack_steel_h: Texture2D = null
+static var tex_crack_obsidian_l: Texture2D = null
+static var tex_crack_obsidian_h: Texture2D = null
+static var tex_crack_crystal_l: Texture2D = null
+static var tex_crack_crystal_h: Texture2D = null
 
 static var tex_shard_wood: Texture2D = null
 static var tex_shard_stone: Texture2D = null
@@ -72,11 +80,15 @@ func _load_textures_once() -> void:
 		tex_stone = _safe_load_tex("res://assets/sprites/obstacles/stone_block_brick.svg")
 		tex_glass = _safe_load_tex("res://assets/sprites/obstacles/glass_block_ice.svg")
 		tex_steel = _safe_load_tex("res://assets/sprites/obstacles/steel_block_beam.svg")
+		tex_obsidian = _safe_load_tex("res://assets/sprites/obstacles/obsidian_block_runic.svg")
+		tex_crystal = _safe_load_tex("res://assets/sprites/obstacles/crystal_block_prism.svg")
 
 		tex_pillar_wood = _safe_load_tex("res://assets/sprites/obstacles/wood_pillar_column.svg")
 		tex_pillar_stone = _safe_load_tex("res://assets/sprites/obstacles/stone_pillar_column.svg")
 		tex_pillar_glass = _safe_load_tex("res://assets/sprites/obstacles/glass_pillar_column.svg")
 		tex_girder_steel = _safe_load_tex("res://assets/sprites/obstacles/steel_girder_column.svg")
+		tex_pillar_obsidian = _safe_load_tex("res://assets/sprites/obstacles/obsidian_pillar_column.svg")
+		tex_pillar_crystal = _safe_load_tex("res://assets/sprites/obstacles/crystal_pillar_column.svg")
 
 		tex_crack_wood_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_wood_light.svg")
 		tex_crack_wood_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_wood_heavy.svg")
@@ -86,6 +98,10 @@ func _load_textures_once() -> void:
 		tex_crack_glass_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_glass_heavy.svg")
 		tex_crack_steel_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_steel_light.svg")
 		tex_crack_steel_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_steel_heavy.svg")
+		tex_crack_obsidian_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_obsidian_light.svg")
+		tex_crack_obsidian_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_obsidian_heavy.svg")
+		tex_crack_crystal_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_crystal_light.svg")
+		tex_crack_crystal_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_crystal_heavy.svg")
 
 		tex_shard_wood = _safe_load_tex("res://assets/sprites/vfx/debris_wood_shard.svg")
 		tex_shard_stone = _safe_load_tex("res://assets/sprites/vfx/debris_stone_shard.svg")
@@ -169,11 +185,22 @@ func _apply_block_dimensions() -> void:
 			max_health = 950.0
 			mass = (block_size.x * block_size.y) * 0.0100
 			if block_visual:
-				block_visual.texture = tex_pillar_stone if (is_vertical and tex_pillar_stone) else tex_stone
-				block_visual.modulate = Color(0.25, 0.12, 0.32, 1.0)
-			if crack_stage1: crack_stage1.texture = tex_crack_stone_l
-			if crack_stage2: crack_stage2.texture = tex_crack_stone_h
-			if fracture_particles: fracture_particles.color = Color(0.35, 0.18, 0.45)
+				block_visual.texture = tex_pillar_obsidian if (is_vertical and tex_pillar_obsidian) else tex_obsidian
+				block_visual.modulate = Color.WHITE
+			if crack_stage1: crack_stage1.texture = tex_crack_obsidian_l
+			if crack_stage2: crack_stage2.texture = tex_crack_obsidian_h
+			if fracture_particles: fracture_particles.color = Color(0.75, 0.25, 0.95)
+		"crystal":
+			max_health = 220.0
+			mass = (block_size.x * block_size.y) * 0.0022
+			if block_visual:
+				block_visual.texture = tex_pillar_crystal if (is_vertical and tex_pillar_crystal) else tex_crystal
+				block_visual.modulate = Color.WHITE
+			if crack_stage1: crack_stage1.texture = tex_crack_crystal_l
+			if crack_stage2: crack_stage2.texture = tex_crack_crystal_h
+			if fracture_particles: fracture_particles.color = Color(0.60, 0.85, 1.0, 0.9)
+
+	current_health = max_health
 
 	current_health = max_health
 
@@ -248,7 +275,7 @@ func _fracture_block() -> void:
 
 	_wake_up_neighbors()
 
-	var pts = 250 if material_type in ["steel", "obsidian"] else (150 if material_type == "stone" else 75)
+	var pts = 300 if material_type in ["steel", "obsidian"] else (200 if material_type == "crystal" else (150 if material_type == "stone" else 75))
 	GameManager.add_score(pts)
 	ComicScorePopup.spawn_score_popup(get_parent(), global_position, pts)
 
@@ -257,7 +284,7 @@ func _fracture_block() -> void:
 		match material_type:
 			"wood": snd.play_wood_break()
 			"stone", "obsidian": snd.play_stone_break()
-			"glass": snd.play_glass_break()
+			"glass", "crystal": snd.play_glass_break()
 			"steel": snd.play_wood_break()
 
 	# 1. Bắn khói Comic Puff bồng bềnh
@@ -304,7 +331,7 @@ func _spawn_flying_shards() -> void:
 	var shard_tex: Texture2D = tex_shard_wood
 	if material_type in ["stone", "obsidian"]:
 		shard_tex = tex_shard_stone
-	elif material_type == "glass":
+	elif material_type in ["glass", "crystal"]:
 		shard_tex = tex_shard_glass
 	elif material_type == "steel":
 		shard_tex = tex_shard_stone

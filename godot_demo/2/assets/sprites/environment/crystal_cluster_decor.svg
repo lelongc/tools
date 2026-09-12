@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+  <defs>
+    <!-- Amethyst crystal gradient -->
+    <linearGradient id="amethystShard" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="35%" stop-color="#c084fc"/>
+      <stop offset="75%" stop-color="#9333ea"/>
+      <stop offset="100%" stop-color="#581c87"/>
+    </linearGradient>
+
+    <!-- Bedrock matrix gradient -->
+    <linearGradient id="matrixGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ambient Glow Halo -->
+  <circle cx="40" cy="40" r="32" fill="#c084fc" opacity="0.2"/>
+
+  <!-- Bedrock Matrix Mound at Base -->
+  <path d="M6 76 Q20 64, 40 66 Q60 62, 74 76 Z" fill="url(#matrixGrad)" stroke="#0f172a" stroke-width="2.5"/>
+
+  <!-- Left Shorter Crystal Spire -->
+  <polygon points="14,70 20,40 28,34 32,70" fill="url(#amethystShard)" stroke="#1e1b4b" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="14,70 20,40 24,70" fill="#e0f2fe" opacity="0.6"/>
+  <line x1="20" y1="40" x2="22" y2="70" stroke="#ffffff" stroke-width="1.2"/>
+
+  <!-- Far Left Tiny Crystal -->
+  <polygon points="6,72 10,54 16,50 18,72" fill="url(#amethystShard)" stroke="#1e1b4b" stroke-width="1.8"/>
+
+  <!-- Right Medium Crystal Spire (Leaning right) -->
+  <polygon points="46,70 56,28 66,36 60,72" fill="url(#amethystShard)" stroke="#1e1b4b" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="46,70 56,28 58,72" fill="#f5d0fe" opacity="0.5"/>
+  <line x1="56" y1="28" x2="58" y2="72" stroke="#ffffff" stroke-width="1.2"/>
+
+  <!-- Far Right Little Crystal Shard -->
+  <polygon points="62,72 68,52 74,56 70,74" fill="url(#amethystShard)" stroke="#1e1b4b" stroke-width="1.8"/>
+
+  <!-- Main Tall Center Crystal Spire -->
+  <polygon points="26,70 38,12 46,18 48,70" fill="url(#amethystShard)" stroke="#1e1b4b" stroke-width="2.5" stroke-linejoin="round"/>
+  <polygon points="26,70 38,12 40,70" fill="#ffffff" opacity="0.6"/>
+  <polygon points="38,12 46,18 40,70" fill="#38bdf8" opacity="0.5"/>
+  <line x1="38" y1="12" x2="40" y2="70" stroke="#ffffff" stroke-width="1.5"/>
+
+  <!-- Diamond Sparkles -->
+  <polygon points="38,12 39,8 40,12 44,12 41,14 42,18 39,15 36,18 37,14 33,12" fill="#ffffff"/>
+  <polygon points="56,28 57,25 58,28 61,28 59,29 60,32 57,30 55,32 56,29 53,28" fill="#ffffff"/>
+</svg>

@@ -4,6 +4,8 @@ signal coins_updated(new_amount)
 signal consumables_updated()
 
 const SAVE_PATH = "user://savegame.json"
+const TEMP_PATH = "user://savegame.json.tmp"
+const BACKUP_PATH = "user://savegame.json.bak"
 
 var save_data: Dictionary = {
 	"highest_unlocked_level": 1,
@@ -26,6 +28,11 @@ func _ready() -> void:
 	load_game()
 	if save_data.get("version", 1) < 7:
 		reset_save()
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_WM_CLOSE_REQUEST, NOTIFICATION_WM_GO_BACK_REQUEST:
+			save_game()
 
 func reset_save() -> void:
 	save_data = {
@@ -54,29 +61,62 @@ func save_game() -> void:
 		total += int(save_data["level_stars"][lvl])
 	save_data["total_stars"] = total
 
-	var file = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
+	# 1. Ghi vào file tạm (.tmp) trước để chống ngắt đột ngột khi pin yếu/OS kill tiến trình
+	var file = FileAccess.open(TEMP_PATH, FileAccess.WRITE)
 	if file:
 		var json_str = JSON.stringify(save_data, "\t")
 		file.store_string(json_str)
+		file.flush()
 		file.close()
+
+		# 2. Tạo bản sao lưu dự phòng (.bak) từ file save hiện tại
+		var dir = DirAccess.open("user://")
+		if dir:
+			if dir.file_exists(SAVE_PATH):
+				dir.copy(SAVE_PATH, BACKUP_PATH)
+			
+			# 3. Nâng cấp file tạm thành file save chính thức (Atomic promote)
+			if dir.file_exists(SAVE_PATH):
+				dir.remove(SAVE_PATH)
+			dir.rename(TEMP_PATH, SAVE_PATH)
 
 func load_game() -> void:
-	if not FileAccess.file_exists(SAVE_PATH):
-		save_game()
-		return
+	# Thử đọc file chính thức
+	if FileAccess.file_exists(SAVE_PATH):
+		var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
+		if file:
+			var content = file.get_as_text()
+			file.close()
+			var json = JSON.new()
+			var parse_result = json.parse(content)
+			if parse_result == OK and typeof(json.data) == TYPE_DICTIONARY:
+				_apply_loaded_dict(json.data)
+				coins_updated.emit(save_data.get("coins", 0))
+				return
 
-	var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
-	if file:
-		var content = file.get_as_text()
-		file.close()
-		var json = JSON.new()
-		var parse_result = json.parse(content)
-		if parse_result == OK and typeof(json.data) == TYPE_DICTIONARY:
-			for key in save_data.keys():
-				if not json.data.has(key):
-					json.data[key] = save_data[key]
-			save_data = json.data
+	# Nếu file chính thức bị lỗi / hỏng / biến mất, kích hoạt cơ chế tự phục hồi từ bản sao lưu (.bak)
+	if FileAccess.file_exists(BACKUP_PATH):
+		var bfile = FileAccess.open(BACKUP_PATH, FileAccess.READ)
+		if bfile:
+			var bcontent = bfile.get_as_text()
+			bfile.close()
+			var bjson = JSON.new()
+			var bres = bjson.parse(bcontent)
+			if bres == OK and typeof(bjson.data) == TYPE_DICTIONARY:
+				_apply_loaded_dict(bjson.data)
+				save_game() # Phục hồi lại file chính
+				coins_updated.emit(save_data.get("coins", 0))
+				return
+
+	# Nếu hoàn toàn không có save, tạo save mới khởi đầu
+	save_game()
 	coins_updated.emit(save_data.get("coins", 0))
+
+func _apply_loaded_dict(dict: Dictionary) -> void:
+	for key in save_data.keys():
+		if not dict.has(key):
+			dict[key] = save_data[key]
+	save_data = dict
 
 func record_level_result(level_id: int, stars: int, score: int) -> void:
 	var lvl_key = str(level_id)

@@ -23,8 +23,31 @@ var settle_timer: float = 0.0
 
 var last_stand_used_in_level: bool = false
 var vip_trial_used_in_level: bool = false
+var current_session_id: int = 0
+
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_handle_mobile_back()
+
+func _handle_mobile_back() -> void:
+	var scene = get_tree().current_scene
+	if not scene: return
+	if scene.name == "CampaignLevel":
+		var hud = scene.get_node_or_null("GameHUD")
+		if hud and hud.has_method("toggle_pause"):
+			hud.toggle_pause()
+		else:
+			go_to_level_select()
+	elif scene.name == "LevelSelect":
+		go_to_main_menu()
+	elif scene.name == "MainMenu":
+		get_tree().quit()
 
 func start_level(level_id: int, enemy_count: int, egg_list: Array[String]) -> void:
+	current_session_id += 1
 	current_level = level_id
 	total_enemies = enemy_count
 	remaining_enemies = enemy_count
@@ -110,10 +133,15 @@ func _trigger_victory_delay() -> void:
 		var sm = get_node("/root/SaveManager")
 		sm.record_level_result(current_level, stars, current_score)
 
+	var session = current_session_id
 	await get_tree().create_timer(1.2).timeout
+	if session != current_session_id:
+		return # Bỏ qua nếu người chơi đã thoát hoặc đổi màn trong lúc đợi
 	level_completed.emit(stars, current_score, base_coins)
 
 func load_level(level_id: int) -> void:
+	get_tree().paused = false
+	current_session_id += 1
 	current_level = clamp(level_id, 1, total_levels)
 	get_tree().change_scene_to_file("res://scenes/levels/CampaignLevel.tscn")
 
@@ -124,10 +152,16 @@ func next_level() -> void:
 		go_to_level_select()
 
 func restart_current_level() -> void:
+	get_tree().paused = false
+	current_session_id += 1
 	get_tree().reload_current_scene()
 
 func go_to_level_select() -> void:
+	get_tree().paused = false
+	current_session_id += 1
 	get_tree().change_scene_to_file("res://scenes/ui/LevelSelect.tscn")
 
 func go_to_main_menu() -> void:
+	get_tree().paused = false
+	current_session_id += 1
 	get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")

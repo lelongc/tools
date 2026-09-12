@@ -91,8 +91,20 @@ func _start_acid_melting() -> void:
 	# Bắn hạt axit: Hơi độc xanh chuối + Vảy ăn mòn + Giọt chất độc neon
 	ParticleHelper.spawn_egg_break_fx(get_parent(), global_position, "acid", false)
 
+const MIN_DESPAWN_Y = -600.0
+const MAX_DESPAWN_Y = 1400.0
+const MAX_DESPAWN_X = 2000.0
+const MAX_AIRBORNE_LIFETIME = 8.0
+
+var total_airborne_timer: float = 0.0
+
 func _physics_process(delta: float) -> void:
 	if not is_melting:
+		total_airborne_timer += delta
+		var pos = global_position
+		if pos.y > MAX_DESPAWN_Y or pos.y < MIN_DESPAWN_Y or abs(pos.x) > MAX_DESPAWN_X or total_airborne_timer > MAX_AIRBORNE_LIFETIME:
+			_start_acid_melting()
+			return
 		if linear_velocity.length() > 30.0:
 			var target_rot = linear_velocity.angle() + PI * 0.5
 			rotation = lerp_angle(rotation, target_rot, 12.0 * delta)

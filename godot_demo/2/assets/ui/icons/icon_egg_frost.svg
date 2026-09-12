@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="frostIce" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="35%" stop-color="#7dd3fc"/>
+      <stop offset="75%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Circular Badge Background -->
+  <circle cx="32" cy="32" r="30" fill="#0369a1" stroke="#082f49" stroke-width="2.5"/>
+  <circle cx="32" cy="32" r="27" fill="#0c4a6e"/>
+
+  <!-- Frost Egg Silhouette -->
+  <path d="M32 8 C20 8, 14 26, 14 38 C14 50, 22 56, 32 56 C42 56, 50 50, 50 38 C50 26, 44 8, 32 8 Z" 
+        fill="url(#frostIce)" stroke="#082f49" stroke-width="2.5"/>
+
+  <!-- Top Frosted Ice Cap -->
+  <path d="M32 8 C26 8, 20 16, 20 22 Q24 20, 28 24 Q32 18, 36 24 Q40 20, 44 22 C44 16, 38 8, 32 8 Z" 
+        fill="#ffffff" opacity="0.85"/>
+
+  <!-- Snowflake Emblem on Egg Center -->
+  <g stroke="#ffffff" stroke-width="2" stroke-linecap="round" fill="none">
+    <line x1="32" y1="26" x2="32" y2="46"/>
+    <line x1="22" y1="36" x2="42" y2="36"/>
+    <line x1="25" y1="29" x2="39" y2="43"/>
+    <line x1="25" y1="43" x2="39" y2="29"/>
+    <!-- Snowflake Chevrons -->
+    <path d="M30 29 L32 26 L34 29"/>
+    <path d="M30 43 L32 46 L34 43"/>
+    <path d="M25 34 L22 36 L25 38"/>
+    <path d="M39 34 L42 36 L39 38"/>
+  </g>
+  <circle cx="32" cy="36" r="2.5" fill="#bae6fd"/>
+
+  <!-- Sparkle Glints -->
+  <polygon points="44,20 45,17 46,20 49,20 47,21 48,24 45,22 43,24 44,21 41,20" fill="#ffffff"/>
+  <polygon points="18,44 19,42 20,44 22,44 20,45 21,47 19,46 17,47 18,45 16,44" fill="#ffffff"/>
+</svg>

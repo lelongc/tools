@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 80" width="48" height="80">
+  <defs>
+    <!-- Flame gradients -->
+    <radialGradient id="flameHalo" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.5"/>
+      <stop offset="50%" stop-color="#ef4444" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#dc2626" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="flameBody" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="40%" stop-color="#ea580c"/>
+      <stop offset="75%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#fef08a"/>
+    </linearGradient>
+
+    <!-- Cast iron gradient -->
+    <linearGradient id="ironGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="40%" stop-color="#64748b"/>
+      <stop offset="85%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ambient Flame Glow Halo -->
+  <circle cx="24" cy="24" r="22" fill="url(#flameHalo)"/>
+
+  <!-- Wall Sconce Mount Plate -->
+  <rect x="20" y="44" width="8" height="28" rx="2" fill="url(#ironGrad)" stroke="#0f172a" stroke-width="1.8"/>
+  <circle cx="24" cy="48" r="1.8" fill="#94a3b8" stroke="#0f172a" stroke-width="0.8"/>
+  <circle cx="24" cy="68" r="1.8" fill="#94a3b8" stroke="#0f172a" stroke-width="0.8"/>
+
+  <!-- Curved Forged Iron Arm Support -->
+  <path d="M24 64 Q32 60, 30 46 Q28 42, 24 40" fill="none" stroke="#0f172a" stroke-width="3" stroke-linecap="round"/>
+  <path d="M24 64 Q32 60, 30 46 Q28 42, 24 40" fill="none" stroke="#64748b" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Torch Handle (Wood and bindings) -->
+  <polygon points="21,38 27,38 25,60 23,60" fill="#78350f" stroke="#291405" stroke-width="1.5"/>
+  <!-- Handle twine bands -->
+  <line x1="21" y1="44" x2="27" y2="44" stroke="#d97706" stroke-width="1.2"/>
+  <line x1="22" y1="50" x2="26" y2="50" stroke="#d97706" stroke-width="1.2"/>
+
+  <!-- Spiked Iron Torch Basket Head -->
+  <polygon points="17,34 31,34 28,40 20,40" fill="url(#ironGrad)" stroke="#0f172a" stroke-width="2"/>
+  <line x1="16" y1="32" x2="18" y2="40" stroke="#0f172a" stroke-width="1.8"/>
+  <line x1="32" y1="32" x2="30" y2="40" stroke="#0f172a" stroke-width="1.8"/>
+
+  <!-- Outer Cartoon Flame -->
+  <path d="M16 34 Q12 22, 20 14 Q22 6, 24 2 Q26 8, 30 14 Q36 22, 32 34 Q24 38, 16 34 Z" 
+        fill="url(#flameBody)" stroke="#7f1d1d" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Inner Hot White/Yellow Core Flame -->
+  <path d="M19 32 Q17 24, 22 18 Q23 12, 24 8 Q25 13, 27 18 Q30 24, 28 32 Q24 35, 19 32 Z" 
+        fill="#ffffff" opacity="0.9"/>
+
+  <!-- Floating Fiery Sparks -->
+  <circle cx="28" cy="6" r="1.2" fill="#fef08a"/>
+  <circle cx="16" cy="12" r="1" fill="#f97316"/>
+  <circle cx="33" cy="8" r="0.9" fill="#facc15"/>
+</svg>

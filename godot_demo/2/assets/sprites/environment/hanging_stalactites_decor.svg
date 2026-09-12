@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 80" width="180" height="80">
+  <defs>
+    <!-- Stone stalactite gradient -->
+    <linearGradient id="stalactiteGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="40%" stop-color="#334155"/>
+      <stop offset="85%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ceiling Attachment Base -->
+  <path d="M0 0 H180 V10 Q140 18, 90 12 Q40 16, 0 10 Z" fill="#1e293b" stroke="#0f172a" stroke-width="2"/>
+
+  <!-- Left Stalactite (Medium) -->
+  <polygon points="12,4 32,8 24,54 20,54" fill="url(#stalactiteGrad)" stroke="#0f172a" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="12,4 22,8 20,54" fill="#94a3b8" opacity="0.4"/>
+  <line x1="20" y1="8" x2="21" y2="48" stroke="#cbd5e1" stroke-width="1" opacity="0.6"/>
+
+  <!-- Small Stalactite -->
+  <polygon points="42,6 56,8 50,34 48,34" fill="url(#stalactiteGrad)" stroke="#0f172a" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Main Center Stalactite (Large sharp spear) -->
+  <polygon points="68,6 108,8 90,76 86,76" fill="url(#stalactiteGrad)" stroke="#0f172a" stroke-width="2.5" stroke-linejoin="round"/>
+  <polygon points="68,6 88,8 86,76" fill="#94a3b8" opacity="0.5"/>
+  <line x1="86" y1="8" x2="88" y2="70" stroke="#cbd5e1" stroke-width="1.2" opacity="0.75"/>
+  <!-- Chiseled cuts on main stalactite -->
+  <path d="M78 26 L88 32 L98 28" fill="none" stroke="#0f172a" stroke-width="1.8"/>
+  <path d="M82 48 L88 52 L94 46" fill="none" stroke="#0f172a" stroke-width="1.5"/>
+
+  <!-- Water Drip at the tip -->
+  <circle cx="88" cy="78" r="1.5" fill="#38bdf8" opacity="0.9"/>
+
+  <!-- Right Medium Stalactite -->
+  <polygon points="118,6 142,8 132,58 128,58" fill="url(#stalactiteGrad)" stroke="#0f172a" stroke-width="2" stroke-linejoin="round"/>
+  <polygon points="118,6 130,8 128,58" fill="#94a3b8" opacity="0.4"/>
+  <line x1="128" y1="8" x2="130" y2="52" stroke="#cbd5e1" stroke-width="1" opacity="0.6"/>
+
+  <!-- Far Right Small Stalactite -->
+  <polygon points="152,4 168,6 162,38 159,38" fill="url(#stalactiteGrad)" stroke="#0f172a" stroke-width="2" stroke-linejoin="round"/>
+</svg>

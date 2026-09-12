@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 128" width="64" height="128">
+  <defs>
+    <linearGradient id="crystalPillarGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="30%" stop-color="#38bdf8"/>
+      <stop offset="70%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#4c1d95"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Pillar Body with Deep Indigo Contour -->
+  <rect x="2" y="2" width="60" height="124" rx="6" fill="url(#crystalPillarGrad)" stroke="#1e1b4b" stroke-width="3"/>
+
+  <!-- Vertical Facet Spine -->
+  <polygon points="32,2 44,40 32,84 20,40" fill="#ffffff" opacity="0.45"/>
+  <polygon points="32,84 44,124 20,124" fill="#ffffff" opacity="0.3"/>
+  <polygon points="2,2 20,40 2,84" fill="#bae6fd" opacity="0.4"/>
+  <polygon points="62,2 44,40 62,84" fill="#7e22ce" opacity="0.4"/>
+
+  <!-- Sharp Joint Cuts -->
+  <line x1="2" y1="40" x2="62" y2="40" stroke="#ffffff" stroke-width="1.8" opacity="0.8"/>
+  <line x1="2" y1="84" x2="62" y2="84" stroke="#ffffff" stroke-width="1.8" opacity="0.8"/>
+
+  <!-- Central Prismatic Core -->
+  <polygon points="32,54 42,64 32,74 22,64" fill="#ffffff" stroke="#38bdf8" stroke-width="1.5"/>
+
+  <!-- Top and Bottom Crystal Caps -->
+  <polygon points="6,6 32,2 58,6 32,14" fill="#ffffff" opacity="0.7"/>
+  <polygon points="6,122 32,126 58,122 32,114" fill="#1e1b4b" opacity="0.6"/>
+
+  <!-- Shimmer Star -->
+  <polygon points="32,24 33,20 34,24 38,24 35,26 36,30 33,27 30,30 31,26 27,24" fill="#ffffff"/>
+  <polygon points="32,100 33,96 34,100 38,100 35,102 36,106 33,103 30,106 31,102 27,100" fill="#ffffff"/>
+</svg>

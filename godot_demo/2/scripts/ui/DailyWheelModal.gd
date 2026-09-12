@@ -110,21 +110,49 @@ func _draw_wheel_wedges() -> void:
 		poly.color = colors[i % colors.size()]
 		wheel_pivot.add_child(poly)
 
-		# Label trên mỗi nan quạt
+		# Icon & Label trên mỗi nan quạt
 		var mid_a = i * wedge_angle
-		var lbl = Label.new()
 		var p = prizes[i]
+
+		var icon_tex: Texture2D = null
+		if p["type"] == "coins":
+			if p["amount"] >= 1000:
+				icon_tex = ParticleHelper._safe_load("res://assets/sprites/vfx/gem_ruby_pickup.svg")
+			elif p["amount"] >= 500:
+				icon_tex = ParticleHelper._safe_load("res://assets/sprites/vfx/gem_emerald_pickup.svg")
+			else:
+				icon_tex = ParticleHelper._safe_load("res://assets/ui/icons/icon_coin.svg")
+		else:
+			match p["egg_type"]:
+				"bomb": icon_tex = ParticleHelper._safe_load("res://assets/ui/icons/icon_egg_bomb.svg")
+				"acid": icon_tex = ParticleHelper._safe_load("res://assets/ui/icons/icon_egg_acid.svg")
+				"drill": icon_tex = ParticleHelper._safe_load("res://assets/ui/icons/icon_egg_drill.svg")
+				"frost": icon_tex = ParticleHelper._safe_load("res://assets/ui/icons/icon_egg_frost.svg")
+				"blackhole": icon_tex = ParticleHelper._safe_load("res://assets/ui/icons/icon_egg_blackhole.svg")
+				"cluster": icon_tex = ParticleHelper._safe_load("res://assets/ui/icons/icon_egg_cluster.svg")
+
+		if icon_tex:
+			var ico_sprite = Sprite2D.new()
+			ico_sprite.texture = icon_tex
+			ico_sprite.scale = Vector2(0.44, 0.44)
+			ico_sprite.position = Vector2(cos(mid_a) * (radius * 0.42), sin(mid_a) * (radius * 0.42))
+			ico_sprite.rotation = mid_a + PI * 0.5
+			wheel_pivot.add_child(ico_sprite)
+
+		var lbl = Label.new()
 		if p["type"] == "coins":
 			lbl.text = "%d" % p["amount"]
 		else:
 			lbl.text = p["egg_type"].to_upper()
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		lbl.add_theme_font_size_override("font_size", 13)
+		lbl.add_theme_font_size_override("font_size", 12)
 		lbl.add_theme_color_override("font_color", Color.WHITE)
-		lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
-		lbl.add_theme_constant_override("outline_size", 4)
-		lbl.position = Vector2(cos(mid_a) * (radius * 0.65) - 30, sin(mid_a) * (radius * 0.65) - 10)
+		lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.95))
+		lbl.add_theme_constant_override("outline_size", 5)
+		lbl.position = Vector2(cos(mid_a) * (radius * 0.74) - 30, sin(mid_a) * (radius * 0.74) - 10)
+		lbl.pivot_offset = Vector2(30, 10)
+		lbl.rotation = mid_a + PI * 0.5
 		wheel_pivot.add_child(lbl)
 
 	# Vành kim loại vàng đồng bo tròn ngoài
@@ -139,16 +167,24 @@ func _draw_wheel_wedges() -> void:
 	rim.points = rim_pts
 	wheel_pivot.add_child(rim)
 
-	# Núm tròn vàng ở tâm vòng xoay (Hub Cap)
-	var hub = Polygon2D.new()
+	# Đĩa đế vàng bảo vệ tâm trục quay
+	var hub_base = Polygon2D.new()
 	var hub_pts = PackedVector2Array()
-	var hub_r = 18.0
+	var hub_r = 19.0
 	for s in range(20):
 		var a = (float(s) / 20.0) * TAU
 		hub_pts.append(Vector2(cos(a) * hub_r, sin(a) * hub_r))
-	hub.polygon = hub_pts
-	hub.color = Color(1.0, 0.84, 0.15)
-	wheel_pivot.add_child(hub)
+	hub_base.polygon = hub_pts
+	hub_base.color = Color(0.1, 0.05, 0.18, 0.85)
+	wheel_pivot.add_child(hub_base)
+
+	# Tâm trục quay mạ vàng đính đá thạch anh tím
+	var center_hub = Sprite2D.new()
+	var tex_hub = ParticleHelper._safe_load("res://assets/sprites/vfx/gem_amethyst_pickup.svg")
+	if tex_hub:
+		center_hub.texture = tex_hub
+		center_hub.scale = Vector2(0.68, 0.68)
+		wheel_pivot.add_child(center_hub)
 
 func _on_spin_pressed() -> void:
 	if is_spinning: return

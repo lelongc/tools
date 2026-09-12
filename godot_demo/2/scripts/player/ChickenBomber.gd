@@ -15,6 +15,7 @@ var is_aiming: bool = false
 var aim_start_pos: Vector2 = Vector2.ZERO
 var aim_vector: Vector2 = Vector2(0, 480.0)
 var current_egg_type: String = "normal"
+var drop_cooldown: float = 0.0
 
 # Visual Nodes
 @onready var visual_root: Node2D = $VisualRoot
@@ -66,6 +67,9 @@ func _ready() -> void:
 	_prepare_next_egg()
 
 func _process(delta: float) -> void:
+	if drop_cooldown > 0.0:
+		drop_cooldown -= delta
+
 	# 1. Tự động lượn ngang bầu trời nếu không chủ động ngắm
 	if not is_aiming:
 		position.x += move_speed * move_direction * delta
@@ -106,8 +110,10 @@ func _handle_aim_input() -> void:
 	# Bắt đầu chạm / click chuột để ngắm
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		if not is_aiming:
-			# Không nhận click nếu bấm đè thanh menu TopBar ở trên đỉnh
-			if mouse_pos.y < 65.0:
+			if drop_cooldown > 0.0:
+				return
+			# Không nhận click nếu bấm đè thanh menu TopBar ở trên đỉnh hoặc kệ trứng phía dưới
+			if mouse_pos.y < 65.0 or mouse_pos.y > 880.0:
 				return
 			is_aiming = true
 			aim_start_pos = mouse_pos
@@ -197,5 +203,6 @@ func _drop_egg(launch_vel: Vector2) -> void:
 	get_parent().add_child(egg)
 	
 	egg_spawned.emit(egg)
+	drop_cooldown = 0.35 # Khoảng nghỉ chống chạm nhầm 2 ngón cùng lúc
 	_prepare_next_egg()
 	GameManager.check_out_of_eggs()

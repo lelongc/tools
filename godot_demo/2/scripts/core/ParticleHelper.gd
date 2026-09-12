@@ -42,7 +42,6 @@ static func _safe_load(path: String) -> Texture2D:
 		var img = Image.load_from_file(global_path)
 		if img:
 			var tex = ImageTexture.create_from_image(img)
-			tex.resource_path = path
 			_tex_cache[path] = tex
 			return tex
 	return null

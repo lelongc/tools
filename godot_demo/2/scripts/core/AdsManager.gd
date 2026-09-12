@@ -82,9 +82,10 @@ func _create_mock_ad_overlay() -> void:
 	card.add_child(vbox)
 
 	# Header
+	var is_vi = LocalizationManager.current_lang == "vi" if has_node("/root/LocalizationManager") else false
 	var title = Label.new()
 	title.name = "AdTitle"
-	title.text = "QUẢNG CÁO NHẬN THƯỞNG"
+	title.text = "QUẢNG CÁO NHẬN THƯỞNG" if is_vi else "SPONSORED REWARD VIDEO"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 22)
 	title.add_theme_color_override("font_color", Color(0.95, 0.8, 0.2))
@@ -93,7 +94,7 @@ func _create_mock_ad_overlay() -> void:
 	# Countdown Label
 	var timer_label = Label.new()
 	timer_label.name = "TimerLabel"
-	timer_label.text = "Phần thưởng sẽ mở sau: 3s"
+	timer_label.text = "Phần thưởng sẽ mở sau: 3s" if is_vi else "Reward ready in: 3s"
 	timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	timer_label.add_theme_font_size_override("font_size", 16)
 	timer_label.add_theme_color_override("font_color", Color(0.7, 0.8, 0.9))
@@ -130,7 +131,7 @@ func _create_mock_ad_overlay() -> void:
 
 	var desc_label = Label.new()
 	desc_label.name = "RewardDesc"
-	desc_label.text = "Đang xem quảng cáo tài trợ..."
+	desc_label.text = "Đang xem quảng cáo tài trợ..." if is_vi else "Viewing sponsored video..."
 	desc_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	desc_label.add_theme_font_size_override("font_size", 18)
 	screen_vbox.add_child(desc_label)
@@ -143,13 +144,13 @@ func _create_mock_ad_overlay() -> void:
 
 	var btn_skip = Button.new()
 	btn_skip.name = "BtnSkip"
-	btn_skip.text = "Bỏ qua"
+	btn_skip.text = "Bỏ qua" if is_vi else "Skip"
 	btn_skip.custom_minimum_size = Vector2(130, 48)
 	hbox.add_child(btn_skip)
 
 	var btn_claim = Button.new()
 	btn_claim.name = "BtnClaim"
-	btn_claim.text = "Nhận Thưởng"
+	btn_claim.text = "Nhận Thưởng" if is_vi else "Claim Reward"
 	btn_claim.disabled = true
 	btn_claim.custom_minimum_size = Vector2(180, 48)
 	hbox.add_child(btn_claim)
@@ -162,6 +163,8 @@ func _play_mock_video_overlay() -> void:
 	if not ad_overlay_layer: return
 	ad_overlay_layer.visible = true
 
+	var is_vi = LocalizationManager.current_lang == "vi" if has_node("/root/LocalizationManager") else false
+	var title = ad_overlay_layer.get_node_or_null("Center/Card/VBox/AdTitle") as Label
 	var timer_label = ad_overlay_layer.get_node_or_null("Center/Card/VBox/TimerLabel") as Label
 	var pbar = ad_overlay_layer.get_node_or_null("Center/Card/VBox/ProgressBar") as ProgressBar
 	var btn_claim = ad_overlay_layer.get_node_or_null("Center/Card/VBox/HBox/BtnClaim") as Button
@@ -169,23 +172,28 @@ func _play_mock_video_overlay() -> void:
 	var icon_tex = ad_overlay_layer.get_node_or_null("Center/Card/VBox/ScreenRect/VBoxContainer/RewardIconTexture") as TextureRect
 	var desc_label = ad_overlay_layer.get_node_or_null("Center/Card/VBox/ScreenRect/VBoxContainer/RewardDesc") as Label
 
-	if btn_claim: btn_claim.disabled = true
-	if btn_skip: btn_skip.disabled = false
+	if title: title.text = "QUẢNG CÁO NHẬN THƯỞNG" if is_vi else "SPONSORED REWARD VIDEO"
+	if btn_claim:
+		btn_claim.disabled = true
+		btn_claim.text = "Nhận Thưởng" if is_vi else "Claim Reward"
+	if btn_skip:
+		btn_skip.disabled = false
+		btn_skip.text = "Bỏ qua" if is_vi else "Skip"
 	if pbar: pbar.value = 0.0
 
 	match current_placement:
 		PLACEMENT_LAST_STAND:
 			if icon_tex: icon_tex.texture = load("res://assets/ui/icons/icon_egg_bomb.svg")
-			if desc_label: desc_label.text = "Cứu thua: Tặng +1 Quả Trứng Nổ!"
+			if desc_label: desc_label.text = "Cứu thua: Tặng +1 Quả Trứng Nổ!" if is_vi else "Rescue: +1 Bomb Egg Granted!"
 		PLACEMENT_TRIPLE_COINS:
 			if icon_tex: icon_tex.texture = load("res://assets/ui/icons/icon_coin.svg")
-			if desc_label: desc_label.text = "Nhân ba phần thưởng: Nhận ngay %d Vàng!" % current_amount
+			if desc_label: desc_label.text = ("Nhân ba phần thưởng: Nhận ngay %d Vàng!" if is_vi else "Triple Reward: Receive %d Gold!") % current_amount
 		PLACEMENT_VIP_TRIAL:
 			if icon_tex: icon_tex.texture = load("res://assets/sprites/projectiles/egg_acid.svg")
-			if desc_label: desc_label.text = "Dùng thử đạn VIP: Tặng 1 Trứng Axit!"
+			if desc_label: desc_label.text = "Dùng thử đạn VIP: Tặng 1 Trứng Axit!" if is_vi else "VIP Trial: +1 Acid Egg Granted!"
 		PLACEMENT_DAILY_SPIN:
 			if icon_tex: icon_tex.texture = load("res://assets/ui/icons/icon_star.svg")
-			if desc_label: desc_label.text = "Quay thêm 1 lượt may mắn!"
+			if desc_label: desc_label.text = "Quay thêm 1 lượt may mắn!" if is_vi else "Get +1 Extra Lucky Spin!"
 
 	# Chạy đếm ngược 3 giây
 	var duration = 3.0
@@ -194,13 +202,13 @@ func _play_mock_video_overlay() -> void:
 		if pbar: pbar.value = val
 		var remaining = max(0.0, duration - val)
 		if timer_label:
-			timer_label.text = "Phần thưởng sẵn sàng sau: %d giây" % int(ceil(remaining))
+			timer_label.text = ("Phần thưởng sẵn sàng sau: %d giây" if is_vi else "Reward ready in: %d s") % int(ceil(remaining))
 	, 0.0, duration, duration)
 
 	await tween.finished
 
 	if timer_label:
-		timer_label.text = "Đã đủ điều kiện nhận thưởng!"
+		timer_label.text = "Đã đủ điều kiện nhận thưởng!" if is_vi else "Reward is ready to claim!"
 		timer_label.add_theme_color_override("font_color", Color(0.2, 0.9, 0.4))
 	if btn_claim:
 		btn_claim.disabled = false

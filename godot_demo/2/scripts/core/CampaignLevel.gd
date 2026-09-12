@@ -154,6 +154,8 @@ func _setup_level() -> void:
 			Vector2(left_edge_x, floor_y)
 		])
 
+	_spawn_environment_decorations(world_id, left_edge_x, right_edge_x, cx, cavern_top_y, floor_y)
+
 	# Cập nhật ranh giới vật lý
 	var col_wall_l = get_node_or_null("BunkerBoundaries/ColWallL")
 	var col_wall_r = get_node_or_null("BunkerBoundaries/ColWallR")
@@ -236,7 +238,7 @@ func _setup_level() -> void:
 		enemy_grunt = "imperial_boar"
 		enemy_elite = "imperial_boar"
 	elif world_id == 5:
-		primary_mat = "steel"
+		primary_mat = "crystal"
 		secondary_mat = "glass"
 		heavy_mat = "obsidian"
 		enemy_grunt = "crystal_badger"
@@ -643,3 +645,86 @@ func _spawn_updraft(pos: Vector2) -> void:
 	var u = UpdraftVentScene.instantiate()
 	u.position = pos
 	bunker_structure.add_child(u)
+
+func _spawn_environment_decorations(world_id: int, left_x: float, right_x: float, cx: float, top_y: float, floor_y: float) -> void:
+	var bg = get_node_or_null("Background")
+	if not bg: return
+
+	var decor_node = bg.get_node_or_null("Decorations")
+	if decor_node:
+		decor_node.queue_free()
+	decor_node = Node2D.new()
+	decor_node.name = "Decorations"
+	decor_node.z_index = 2
+	bg.add_child(decor_node)
+
+	var cav_w = right_x - left_x
+
+	# 1. Chiseled Bedrock Shelf along Floor
+	var tex_bedrock = _safe_load("res://assets/sprites/environment/cavern_ground_platform.svg")
+	if tex_bedrock:
+		var shelf = Sprite2D.new()
+		shelf.texture = tex_bedrock
+		shelf.position = Vector2(cx, floor_y + 12.0)
+		shelf.scale = Vector2((cav_w + 40.0) / 540.0, 1.0)
+		match world_id:
+			1: shelf.modulate = Color(0.85, 0.75, 0.65)
+			2: shelf.modulate = Color(0.80, 0.85, 0.80)
+			3: shelf.modulate = Color(0.70, 0.80, 0.70)
+			4: shelf.modulate = Color(0.95, 0.60, 0.50)
+			5: shelf.modulate = Color(0.75, 0.55, 0.95)
+		decor_node.add_child(shelf)
+
+	# 2. Hanging Stalactites on Ceiling
+	var tex_stalactites = _safe_load("res://assets/sprites/environment/hanging_stalactites_decor.svg")
+	if tex_stalactites:
+		var st_left = Sprite2D.new()
+		st_left.texture = tex_stalactites
+		st_left.position = Vector2(left_x + 90.0, top_y + 24.0)
+		st_left.scale = Vector2(0.9, 0.9)
+		decor_node.add_child(st_left)
+
+		var st_right = Sprite2D.new()
+		st_right.texture = tex_stalactites
+		st_right.position = Vector2(right_x - 90.0, top_y + 24.0)
+		st_right.scale = Vector2(-0.9, 0.9)
+		decor_node.add_child(st_right)
+
+	# 3. Wall Torches
+	var tex_torch = _safe_load("res://assets/sprites/environment/cavern_torch_sconce.svg")
+	if tex_torch:
+		var torch_l = Sprite2D.new()
+		torch_l.texture = tex_torch
+		torch_l.position = Vector2(left_x + 16.0, top_y + 110.0)
+		decor_node.add_child(torch_l)
+
+		var torch_r = Sprite2D.new()
+		torch_r.texture = tex_torch
+		torch_r.position = Vector2(right_x - 16.0, top_y + 110.0)
+		torch_r.scale = Vector2(-1.0, 1.0)
+		decor_node.add_child(torch_r)
+
+		# Fire flickering animation
+		var tw = decor_node.create_tween().set_loops()
+		tw.tween_property(torch_l, "modulate:a", 0.85, 0.12).set_trans(Tween.TRANS_SINE)
+		tw.tween_property(torch_l, "modulate:a", 1.0, 0.14).set_trans(Tween.TRANS_SINE)
+
+	# 4. Crystal Clusters for World 5 (and World 2)
+	if world_id in [2, 5]:
+		var tex_crystals = _safe_load("res://assets/sprites/environment/crystal_cluster_decor.svg")
+		if tex_crystals:
+			var cr_l = Sprite2D.new()
+			cr_l.texture = tex_crystals
+			cr_l.position = Vector2(left_x + 28.0, floor_y - 24.0)
+			cr_l.scale = Vector2(0.75, 0.75)
+			if world_id == 2:
+				cr_l.modulate = Color(0.4, 0.9, 0.7, 0.85) # Emerald cluster for World 2
+			decor_node.add_child(cr_l)
+
+			var cr_r = Sprite2D.new()
+			cr_r.texture = tex_crystals
+			cr_r.position = Vector2(right_x - 28.0, floor_y - 24.0)
+			cr_r.scale = Vector2(-0.75, 0.75)
+			if world_id == 2:
+				cr_r.modulate = Color(0.4, 0.9, 0.7, 0.85)
+			decor_node.add_child(cr_r)

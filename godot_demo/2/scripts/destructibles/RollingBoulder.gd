@@ -12,12 +12,28 @@ var is_awake: bool = false
 @onready var dust_fx: CPUParticles2D = get_node_or_null("DustFX")
 
 func _ready() -> void:
+	var current_lvl = GameManager.current_level if has_node("/root/GameManager") else 1
+	var world_id = clamp(int(float(current_lvl - 1) / 20.0) + 1, 1, 5)
+
 	if visual_sprite:
-		var tex = _load_svg("res://assets/sprites/obstacles/rolling_boulder_stone.svg")
+		var tex_path = "res://assets/sprites/obstacles/rolling_boulder_stone.svg"
+		match world_id:
+			4:
+				tex_path = "res://assets/sprites/obstacles/rolling_boulder_magma.svg"
+			5:
+				tex_path = "res://assets/sprites/obstacles/rolling_boulder_crystal.svg"
+			_:
+				tex_path = "res://assets/sprites/obstacles/rolling_boulder_stone.svg"
+
+		var tex = _load_svg(tex_path)
 		if tex: visual_sprite.texture = tex
 
 	if dust_fx:
 		ParticleHelper.apply_smoke_fx(dust_fx, 0.25, 0.5)
+		if world_id == 4:
+			dust_fx.color = Color(1.0, 0.55, 0.2, 0.7)
+		elif world_id == 5:
+			dust_fx.color = Color(0.75, 0.45, 1.0, 0.7)
 
 	set_deferred("freeze", true)
 	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC

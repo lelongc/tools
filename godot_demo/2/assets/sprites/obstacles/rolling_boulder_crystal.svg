@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="crystalBoulderGrad" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#e0e7ff"/>
+      <stop offset="30%" stop-color="#a855f7"/>
+      <stop offset="70%" stop-color="#581c87"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
+    </radialGradient>
+    <linearGradient id="facetShine" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#c084fc" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Faceted Geode Silhouette with Deep Indigo Contour -->
+  <polygon points="22,3 46,4 59,16 62,40 48,60 22,61 6,48 3,22" 
+           fill="url(#crystalBoulderGrad)" stroke="#1e1b4b" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- Top Geometric Crystal Facets -->
+  <polygon points="22,3 46,4 36,18 16,14" fill="url(#facetShine)"/>
+  <polygon points="46,4 59,16 48,30 36,18" fill="#d8b4fe" opacity="0.45"/>
+  <polygon points="16,14 36,18 28,34 6,26" fill="#38bdf8" opacity="0.4"/>
+
+  <!-- Center Core Diamond Ridge -->
+  <polygon points="36,18 48,30 38,46 28,34" fill="#ffffff" opacity="0.6"/>
+  <polygon points="28,34 38,46 22,61 14,46" fill="#3b0764" opacity="0.6"/>
+  <polygon points="48,30 62,40 48,60 38,46" fill="#1e1b4b" opacity="0.75"/>
+
+  <!-- Crystalline Spire Shards Projecting Outward -->
+  <polygon points="18,10 12,2 26,6" fill="#ffffff" stroke="#1e1b4b" stroke-width="1.5"/>
+  <polygon points="52,14 62,8 56,22" fill="#c084fc" stroke="#1e1b4b" stroke-width="1.5"/>
+
+  <!-- Crisp Internal Prism Seams -->
+  <line x1="22" y1="3" x2="36" y2="18" stroke="#ffffff" stroke-width="2" opacity="0.9"/>
+  <line x1="46" y1="4" x2="48" y2="30" stroke="#ffffff" stroke-width="1.8" opacity="0.9"/>
+  <line x1="36" y1="18" x2="38" y2="46" stroke="#ffffff" stroke-width="2" opacity="0.9"/>
+  <line x1="28" y1="34" x2="6" y2="48" stroke="#ffffff" stroke-width="1.5" opacity="0.8"/>
+
+  <!-- Diamond Sparkle Stars -->
+  <polygon points="36,18 37,14 38,18 42,18 39,20 40,24 37,21 34,24 35,20 31,18" fill="#ffffff"/>
+  <polygon points="14,32 15,30 16,32 18,32 16,33 17,35 15,34 13,35 14,33 12,32" fill="#ffffff" opacity="0.9"/>
+</svg>

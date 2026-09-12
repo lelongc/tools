@@ -4,10 +4,14 @@ class_name UpdraftVent
 @export var wind_force: float = 1400.0
 
 @onready var wind_fx: CPUParticles2D = $WindFX
+@onready var base_grate: Sprite2D = get_node_or_null("BaseGrate")
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	body_exited.connect(_on_body_exited)
+	if base_grate:
+		var tg = ParticleHelper._safe_load("res://assets/sprites/obstacles/updraft_vent_grate.svg")
+		if tg: base_grate.texture = tg
 	if wind_fx:
 		ParticleHelper.apply_wind_fx(wind_fx, 0.3, 0.6)
 

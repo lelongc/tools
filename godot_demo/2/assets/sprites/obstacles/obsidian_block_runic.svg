@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 64" width="128" height="64">
+  <defs>
+    <!-- Dark obsidian volcanic gradient -->
+    <linearGradient id="obsidianGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3b1d52"/>
+      <stop offset="35%" stop-color="#241138"/>
+      <stop offset="80%" stop-color="#140822"/>
+      <stop offset="100%" stop-color="#0a0312"/>
+    </linearGradient>
+
+    <!-- Top glass reflection -->
+    <linearGradient id="obsidianBevelTop" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#9d5bd2" stop-opacity="0.85"/>
+      <stop offset="50%" stop-color="#582a7e" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#241138" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Runic inner glow -->
+    <linearGradient id="runeGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d946ef"/>
+      <stop offset="50%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#e879f9"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Base Obsidian Body with Dark Crisp Contour -->
+  <rect x="2" y="2" width="124" height="60" rx="6" fill="url(#obsidianGrad)" stroke="#05010a" stroke-width="3"/>
+
+  <!-- Chiseled Glass Top Highlight -->
+  <path d="M4 5 H124 L118 11 H10 Z" fill="url(#obsidianBevelTop)"/>
+
+  <!-- Sharp Obsidian Chiseled Facets -->
+  <polygon points="4,5 24,20 18,38 4,32" fill="#582a7e" opacity="0.35"/>
+  <polygon points="124,5 106,18 112,42 124,35" fill="#582a7e" opacity="0.35"/>
+  <polygon points="36,60 52,48 80,48 94,60" fill="#05010a" opacity="0.6"/>
+
+  <!-- Ancient Glowing Arcane Runes (Engraved into the stone) -->
+  <!-- Left Rune: Eye of Void -->
+  <path d="M22 28 L28 22 L34 28 L28 34 Z" fill="none" stroke="url(#runeGlow)" stroke-width="2" stroke-linejoin="round"/>
+  <circle cx="28" cy="28" r="2" fill="#fae8ff"/>
+
+  <!-- Center Rune: Sigil of Imperviousness -->
+  <path d="M50 32 H78 M64 18 V46 M54 24 L74 40 M54 40 L74 24" 
+        fill="none" stroke="url(#runeGlow)" stroke-width="2.2" stroke-linecap="round"/>
+  <circle cx="64" cy="32" r="3" fill="#ffffff" stroke="#c084fc" stroke-width="1.2"/>
+
+  <!-- Right Rune: Horns of Power -->
+  <path d="M96 24 L102 34 L108 24 M98 30 H106" 
+        fill="none" stroke="url(#runeGlow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Volcanic Vitreous Glint Points -->
+  <polygon points="42,12 44,8 46,12 44,16" fill="#f5d0fe" opacity="0.8"/>
+  <polygon points="86,14 88,11 90,14 88,17" fill="#f5d0fe" opacity="0.8"/>
+
+  <!-- Obsidian Corner Brackets -->
+  <circle cx="8" cy="8" r="3" fill="#3b1d52" stroke="#a855f7" stroke-width="1.2"/>
+  <circle cx="8" cy="8" r="1" fill="#f5d0fe"/>
+  <circle cx="120" cy="8" r="3" fill="#3b1d52" stroke="#a855f7" stroke-width="1.2"/>
+  <circle cx="120" cy="8" r="1" fill="#f5d0fe"/>
+  <circle cx="8" cy="56" r="3" fill="#3b1d52" stroke="#a855f7" stroke-width="1.2"/>
+  <circle cx="8" cy="56" r="1" fill="#f5d0fe"/>
+  <circle cx="120" cy="56" r="3" fill="#3b1d52" stroke="#a855f7" stroke-width="1.2"/>
+  <circle cx="120" cy="56" r="1" fill="#f5d0fe"/>
+</svg>

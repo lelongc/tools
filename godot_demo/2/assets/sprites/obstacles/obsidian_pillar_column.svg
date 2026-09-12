@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 128" width="64" height="128">
+  <defs>
+    <linearGradient id="obsidianColGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#140822"/>
+      <stop offset="25%" stop-color="#3b1d52"/>
+      <stop offset="65%" stop-color="#241138"/>
+      <stop offset="100%" stop-color="#0a0312"/>
+    </linearGradient>
+    <linearGradient id="runeVertical" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f472b6"/>
+      <stop offset="50%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Pillar Body -->
+  <rect x="2" y="2" width="60" height="124" rx="6" fill="url(#obsidianColGrad)" stroke="#05010a" stroke-width="3"/>
+
+  <!-- Left Highlight Stripe -->
+  <rect x="6" y="5" width="4" height="118" rx="2" fill="#9d5bd2" opacity="0.65"/>
+
+  <!-- Chiseled Joint Grooves -->
+  <line x1="2" y1="42" x2="62" y2="42" stroke="#05010a" stroke-width="2.5"/>
+  <line x1="3" y1="43" x2="61" y2="43" stroke="#9d5bd2" stroke-width="1" opacity="0.4"/>
+  <line x1="2" y1="86" x2="62" y2="86" stroke="#05010a" stroke-width="2.5"/>
+  <line x1="3" y1="87" x2="61" y2="87" stroke="#9d5bd2" stroke-width="1" opacity="0.4"/>
+
+  <!-- Vertical Arcane Conduit Runes -->
+  <!-- Upper Rune -->
+  <path d="M32 12 L40 22 L32 32 L24 22 Z" fill="none" stroke="url(#runeVertical)" stroke-width="2"/>
+  <circle cx="32" cy="22" r="2.5" fill="#ffffff"/>
+
+  <!-- Center Energy Core Rune -->
+  <circle cx="32" cy="64" r="12" fill="#140822" stroke="url(#runeVertical)" stroke-width="2.2"/>
+  <path d="M32 54 V74 M22 64 H42" stroke="url(#runeVertical)" stroke-width="2"/>
+  <circle cx="32" cy="64" r="3.5" fill="#fae8ff"/>
+
+  <!-- Lower Rune -->
+  <path d="M26 100 L32 112 L38 100 M26 108 H38" fill="none" stroke="url(#runeVertical)" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Top and Bottom Metal Brackets -->
+  <rect x="4" y="4" width="56" height="6" rx="2" fill="#241138" stroke="#a855f7" stroke-width="1"/>
+  <rect x="4" y="118" width="56" height="6" rx="2" fill="#241138" stroke="#a855f7" stroke-width="1"/>
+</svg>

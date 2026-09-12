@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <linearGradient id="amethystGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e879f9"/>
+      <stop offset="35%" stop-color="#c084fc"/>
+      <stop offset="70%" stop-color="#9333ea"/>
+      <stop offset="100%" stop-color="#3b0764"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ambient Amethyst Glow -->
+  <circle cx="24" cy="24" r="20" fill="#a855f7" opacity="0.25"/>
+
+  <!-- Rhombus Diamond Gem with Dark Contour -->
+  <polygon points="24,4 44,24 24,44 4,24" fill="url(#amethystGrad)" stroke="#1e1b4b" stroke-width="2.5" stroke-linejoin="round"/>
+
+  <!-- Top Prism Table Facet -->
+  <polygon points="24,12 36,24 24,36 12,24" fill="#fae8ff" opacity="0.8" stroke="#7e22ce" stroke-width="1.2"/>
+
+  <!-- Upper Facet Triangles -->
+  <polygon points="24,4 36,24 24,12" fill="#d8b4fe" opacity="0.6"/>
+  <polygon points="24,4 12,24 24,12" fill="#ffffff" opacity="0.5"/>
+
+  <!-- Lower Facet Triangles -->
+  <polygon points="4,24 24,44 12,24" fill="#6b21a8" opacity="0.8"/>
+  <polygon points="44,24 24,44 36,24" fill="#3b0764" opacity="0.85"/>
+
+  <!-- Central Star Sparkle -->
+  <polygon points="24,14 25,10 26,14 30,14 27,16 28,20 25,17 22,20 23,16 19,14" fill="#ffffff"/>
+  <polygon points="14,24 15,21 16,24 19,24 17,25 18,28 15,26 13,28 14,25 11,24" fill="#ffffff" opacity="0.9"/>
+</svg>

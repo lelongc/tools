@@ -3,6 +3,7 @@ extends Node
 # Procedural Retro & Cartoon Audio Synthesizer for instant game audio
 var sfx_players: Array[AudioStreamPlayer] = []
 const POOL_SIZE = 12
+var sound_cache: Dictionary = {}
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -35,40 +36,48 @@ func play_synth_tone(freq_or_type = 440.0, duration: float = 0.12, type: String 
 	elif typeof(freq_or_type) in [TYPE_FLOAT, TYPE_INT]:
 		freq = float(freq_or_type)
 
-	var sample_hz = 22050
-	var total_samples = int(sample_hz * duration)
-	var data = PackedByteArray()
-	
-	for i in range(total_samples):
-		var t = float(i) / float(sample_hz)
-		var progress = float(i) / float(total_samples)
-		var env = 1.0 - progress # Decay envelope
-		var val = 0.0
+	var cache_key = "%s_%.1f_%.2f" % [type, freq, duration]
+	var stream: AudioStreamWAV = null
+
+	if sound_cache.has(cache_key):
+		stream = sound_cache[cache_key]
+	else:
+		var sample_hz = 22050
+		var total_samples = int(sample_hz * duration)
+		var data = PackedByteArray()
+		data.resize(total_samples)
 		
-		match type:
-			"sine":
-				val = sin(TAU * freq * t)
-			"noise":
-				val = randf_range(-1.0, 1.0)
-			"square":
-				val = 1.0 if sin(TAU * freq * t) > 0.0 else -1.0
-			"laser":
-				var cur_f = freq * (1.0 - progress * 0.8)
-				val = sin(TAU * cur_f * t)
-			"boom":
-				var cur_f = freq * (1.0 - progress * 0.9)
-				val = sin(TAU * cur_f * t) * 0.7 + randf_range(-0.3, 0.3)
-			"pop":
-				var cur_f = freq * (1.0 + (1.0 - progress) * 0.4)
-				val = sin(TAU * cur_f * t)
+		for i in range(total_samples):
+			var t = float(i) / float(sample_hz)
+			var progress = float(i) / float(total_samples)
+			var env = 1.0 - progress # Decay envelope
+			var val = 0.0
+			
+			match type:
+				"sine":
+					val = sin(TAU * freq * t)
+				"noise":
+					val = randf_range(-1.0, 1.0)
+				"square":
+					val = 1.0 if sin(TAU * freq * t) > 0.0 else -1.0
+				"laser":
+					var cur_f = freq * (1.0 - progress * 0.8)
+					val = sin(TAU * cur_f * t)
+				"boom":
+					var cur_f = freq * (1.0 - progress * 0.9)
+					val = sin(TAU * cur_f * t) * 0.7 + randf_range(-0.3, 0.3)
+				"pop":
+					var cur_f = freq * (1.0 + (1.0 - progress) * 0.4)
+					val = sin(TAU * cur_f * t)
 
-		var sample_byte = int(clamp((val * env * 0.8 + 1.0) * 127.5, 0, 255))
-		data.append(sample_byte)
+			var sample_byte = int(clamp((val * env * 0.8 + 1.0) * 127.5, 0, 255))
+			data[i] = sample_byte
 
-	var stream = AudioStreamWAV.new()
-	stream.format = AudioStreamWAV.FORMAT_8_BITS
-	stream.mix_rate = sample_hz
-	stream.data = data
+		stream = AudioStreamWAV.new()
+		stream.format = AudioStreamWAV.FORMAT_8_BITS
+		stream.mix_rate = sample_hz
+		stream.data = data
+		sound_cache[cache_key] = stream
 
 	var p = _get_available_player()
 	p.stream = stream

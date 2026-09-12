@@ -27,8 +27,20 @@ func _unhandled_input(event: InputEvent) -> void:
 		has_boosted = true
 		_freeze_blast()
 
+const MIN_DESPAWN_Y = -600.0
+const MAX_DESPAWN_Y = 1400.0
+const MAX_DESPAWN_X = 2000.0
+const MAX_AIRBORNE_LIFETIME = 8.0
+
+var total_airborne_timer: float = 0.0
+
 func _physics_process(delta: float) -> void:
 	if is_broken: return
+	total_airborne_timer += delta
+	var pos = global_position
+	if pos.y > MAX_DESPAWN_Y or pos.y < MIN_DESPAWN_Y or abs(pos.x) > MAX_DESPAWN_X or total_airborne_timer > MAX_AIRBORNE_LIFETIME:
+		_freeze_blast()
+		return
 	if linear_velocity.length() > 30.0:
 		var target_rot = linear_velocity.angle() + PI * 0.5
 		rotation = lerp_angle(rotation, target_rot, 12.0 * delta)

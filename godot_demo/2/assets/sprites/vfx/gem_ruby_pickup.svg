@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <linearGradient id="rubyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f87171"/>
+      <stop offset="35%" stop-color="#ef4444"/>
+      <stop offset="70%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#7f1d1d"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Ambient Ruby Glow -->
+  <circle cx="24" cy="24" r="20" fill="#ef4444" opacity="0.25"/>
+
+  <!-- Brilliant Faceted Cut Ruby -->
+  <!-- Main Body with Dark Contour -->
+  <polygon points="12,12 36,12 44,22 24,44 4,22" fill="url(#rubyGrad)" stroke="#450a0a" stroke-width="2.5" stroke-linejoin="round"/>
+
+  <!-- Top Table Facet -->
+  <polygon points="16,14 32,14 36,20 12,20" fill="#fecaca" opacity="0.8"/>
+
+  <!-- Upper Left Kite Facet -->
+  <polygon points="12,12 16,14 12,20 4,22" fill="#f87171" opacity="0.9"/>
+  <!-- Upper Right Kite Facet -->
+  <polygon points="36,12 32,14 36,20 44,22" fill="#b91c1c" opacity="0.9"/>
+
+  <!-- Center Pavilion Facet -->
+  <polygon points="12,20 36,20 24,44" fill="#ef4444" stroke="#7f1d1d" stroke-width="1.2"/>
+  <polygon points="12,20 24,20 24,44" fill="#fca5a5" opacity="0.5"/>
+
+  <!-- Lower Left Pavilion Facet -->
+  <polygon points="4,22 12,20 24,44" fill="#dc2626" stroke="#7f1d1d" stroke-width="1"/>
+  <!-- Lower Right Pavilion Facet -->
+  <polygon points="44,22 36,20 24,44" fill="#991b1b" stroke="#7f1d1d" stroke-width="1"/>
+
+  <!-- Sparkle Star -->
+  <polygon points="16,14 17,10 18,14 22,14 19,16 20,20 17,17 14,20 15,16 11,14" fill="#ffffff"/>
+  <polygon points="36,28 37,25 38,28 41,28 39,29 40,32 37,30 35,32 36,29 33,28" fill="#ffffff" opacity="0.8"/>
+</svg>

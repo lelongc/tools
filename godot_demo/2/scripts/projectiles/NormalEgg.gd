@@ -69,8 +69,21 @@ func _activate_special_ability() -> void:
 		var body = visual_root.get_node_or_null("EggBody")
 		if body: body.modulate = Color(0.3, 0.85, 1.0) # Hóa kim cương xanh óng ánh
 
+const MIN_DESPAWN_Y = -600.0
+const MAX_DESPAWN_Y = 1400.0
+const MAX_DESPAWN_X = 2000.0
+const MAX_AIRBORNE_LIFETIME = 8.0
+
+var total_airborne_timer: float = 0.0
+
 func _physics_process(delta: float) -> void:
 	if is_breaking: return
+
+	total_airborne_timer += delta
+	var pos = global_position
+	if pos.y > MAX_DESPAWN_Y or pos.y < MIN_DESPAWN_Y or abs(pos.x) > MAX_DESPAWN_X or total_airborne_timer > MAX_AIRBORNE_LIFETIME:
+		_crack_and_destroy()
+		return
 
 	# Lưu lại vận tốc thực tế của quả trứng trước khi solver can thiệp hãm vận tốc
 	if linear_velocity.length() > 30.0:

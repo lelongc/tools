@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Prismatic Ice/Crystal Fractures (Heavy) -->
+  <path d="M10 8 L24 20 L16 38 L36 46 L54 58" 
+        fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+        style="filter: drop-shadow(0px 0px 3px #38bdf8);"/>
+  <path d="M24 20 L44 14 L56 26 L48 42" 
+        fill="none" stroke="#bae6fd" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M16 38 L8 50 M36 46 L32 60" 
+        fill="none" stroke="#7dd3fc" stroke-width="2" stroke-linecap="round"/>
+  <path d="M44 14 L58 8 M28 30 L40 34" 
+        fill="none" stroke="#c084fc" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- Crystalline energy fracture points -->
+  <polygon points="24,20 26,17 28,20 26,23" fill="#ffffff"/>
+  <polygon points="44,14 46,11 48,14 46,17" fill="#ffffff"/>
+  <polygon points="36,46 38,43 40,46 38,49" fill="#ffffff"/>
+</svg>
