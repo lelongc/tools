@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://puffy_lvl_select_01"]
+[gd_scene load_steps=9 format=3 uid="uid://puffy_lvl_select_01"]
 
 [ext_resource type="Script" path="res://scripts/ui/PuffyLevelSelect.gd" id="1_lvl_script"]
 [ext_resource type="Texture2D" path="res://textures/env/bg_tropical_ocean.svg" id="2_bg_tex"]
@@ -6,6 +6,7 @@
 [ext_resource type="Texture2D" path="res://textures/ui/btn_bubble_blue.svg" id="4_btn_blue_tex"]
 [ext_resource type="Texture2D" path="res://textures/icons/icon_back.svg" id="5_back_icon"]
 [ext_resource type="Texture2D" path="res://textures/icons/icon_restart.svg" id="6_restart_icon"]
+[ext_resource type="Texture2D" path="res://textures/icons/icon_language.svg" id="7_lang_icon"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_coral"]
 texture = ExtResource("3_btn_coral_tex")
@@ -115,7 +116,7 @@ offset_right = -30.0
 offset_bottom = -14.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 
 [node name="BackBtn" type="Button" parent="BottomBar"]
 custom_minimum_size = Vector2(160, 44)
@@ -127,6 +128,18 @@ theme_override_styles/hover = SubResource("StyleBoxTexture_btn_coral")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_coral")
 text = " QUAY LẠI"
 icon = ExtResource("5_back_icon")
+expand_icon = true
+
+[node name="LangBtn" type="Button" parent="BottomBar"]
+custom_minimum_size = Vector2(120, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_blue")
+text = " 🌐 VI"
+icon = ExtResource("7_lang_icon")
 expand_icon = true
 
 [node name="Spacer" type="Control" parent="BottomBar"]

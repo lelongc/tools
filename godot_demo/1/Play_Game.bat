@@ -18,10 +18,10 @@ echo      - CHAM 2: XI HOI PHAN LUC! Puffy xi hoi "Pfffrrrttt!"
 echo                phun luong bot nuoc lao vut di nhu ten lua!
 echo.
 echo   3. NUT THAO TAC NHANH TREN THANH HUD:
-echo      - [ 🛟 Cứu ]: Giai cuu Puffy ve be phong tuc thi neu can!
-echo      - [ 🔄 ]: Choi lai man ngay lap tuc
-echo      - [ 🎵 ]: Bat / Tat nhanh nhac nen va am thanh
-echo      - [ ⏸️ ]: Menu tam dung day du (Tiep tuc, Choi lai, Chon man, Menu)
+echo      - [ Cứu ]: Icon Phao Cuu Sinh giai cuu Puffy ve be phong tuc thi neu can!
+echo      - [ Ban Lai ]: Icon Mui Ten Vang choi lai man ngay lap tuc
+echo      - [ Am Thanh ]: Icon Loa Ngoc Trai bat / tat nhanh nhac nen va am thanh
+echo      - [ Tam Dung ]: Icon Hai Vach hien menu tam dung day du
 echo.
 echo   4. 60 MAN CHIEN DICH (8 VUNG BIEN), 4 BOSS DAI DUONG VA CHE DO NAY VO TAN!
 echo =========================================================================

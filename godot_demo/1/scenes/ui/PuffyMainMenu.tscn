@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://puffy_main_menu_01"]
+[gd_scene load_steps=14 format=3 uid="uid://puffy_main_menu_01"]
 
 [ext_resource type="Script" path="res://scripts/ui/PuffyMainMenu.gd" id="1_main_script"]
 [ext_resource type="Texture2D" path="res://textures/env/bg_tropical_ocean.svg" id="2_bg_tex"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" path="res://textures/icons/icon_play.svg" id="8_play_icon"]
 [ext_resource type="Texture2D" path="res://textures/icons/icon_book.svg" id="9_book_icon"]
 [ext_resource type="Texture2D" path="res://textures/icons/icon_sound_on.svg" id="10_sound_icon"]
+[ext_resource type="Texture2D" path="res://textures/icons/icon_language.svg" id="11_lang_icon"]
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_gold"]
 texture = ExtResource("4_btn_gold_tex")
@@ -52,27 +53,27 @@ texture = ExtResource("2_bg_tex")
 expand_mode = 1
 
 [node name="VBox" type="VBoxContainer" parent="."]
-custom_minimum_size = Vector2(560, 0)
+custom_minimum_size = Vector2(600, 0)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -280.0
-offset_top = -300.0
-offset_right = 280.0
-offset_bottom = 300.0
+offset_left = -300.0
+offset_top = -310.0
+offset_right = 300.0
+offset_bottom = 310.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 14
 alignment = 1
 
 [node name="Logo" type="TextureRect" parent="VBox"]
-custom_minimum_size = Vector2(110, 110)
+custom_minimum_size = Vector2(115, 115)
 layout_mode = 2
 size_flags_horizontal = 4
-pivot_offset = Vector2(55, 55)
+pivot_offset = Vector2(57, 57)
 texture = ExtResource("3_puffy_logo")
 expand_mode = 1
 stretch_mode = 5
@@ -84,7 +85,7 @@ theme_override_colors/font_shadow_color = Color(0, 0.3, 0.45, 1)
 theme_override_constants/shadow_offset_x = 3
 theme_override_constants/shadow_offset_y = 3
 theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 44
+theme_override_font_sizes/font_size = 46
 text = "PUFFY POP"
 horizontal_alignment = 1
 
@@ -100,15 +101,15 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 1, 0.8, 1)
 theme_override_font_sizes/font_size = 15
-text = "TỔNG SAO: 0 / 180"
+text = "TỔNG SAO: 0 / 180 | KỶ LỤC: 0"
 horizontal_alignment = 1
 
-[node name="Buttons" type="VBoxContainer" parent="VBox"]
+[node name="PrimaryModes" type="VBoxContainer" parent="VBox"]
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="CampaignBtn" type="Button" parent="VBox/Buttons"]
-custom_minimum_size = Vector2(0, 56)
+[node name="CampaignBtn" type="Button" parent="VBox/PrimaryModes"]
+custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.35, 0.15, 0, 1)
 theme_override_colors/font_hover_color = Color(0.5, 0.2, 0, 1)
@@ -121,11 +122,11 @@ text = " CHIẾN DỊCH 60 MÀN (8 VÙNG BIỂN)"
 icon = ExtResource("7_map_icon")
 expand_icon = true
 
-[node name="EndlessBtn" type="Button" parent="VBox/Buttons"]
-custom_minimum_size = Vector2(0, 48)
+[node name="EndlessBtn" type="Button" parent="VBox/PrimaryModes"]
+custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_blue")
 theme_override_styles/hover = SubResource("StyleBoxTexture_btn_blue")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_blue")
@@ -133,37 +134,57 @@ text = " ĐẠI TIỆC NẢY VÔ TẬN (ENDLESS)"
 icon = ExtResource("8_play_icon")
 expand_icon = true
 
-[node name="TutorialBtn" type="Button" parent="VBox/Buttons"]
-custom_minimum_size = Vector2(0, 46)
+[node name="UtilityDock" type="HBoxContainer" parent="VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_blue")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_blue")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_blue")
-text = " HƯỚNG DẪN CÁCH CHƠI (SIÊU DỄ)"
-icon = ExtResource("9_book_icon")
-expand_icon = true
+theme_override_constants/separation = 10
+alignment = 1
 
-[node name="SoundBtn" type="Button" parent="VBox/Buttons"]
-custom_minimum_size = Vector2(0, 44)
+[node name="LangBtn" type="Button" parent="VBox/UtilityDock"]
+custom_minimum_size = Vector2(130, 46)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_blue")
 theme_override_styles/hover = SubResource("StyleBoxTexture_btn_blue")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_blue")
-text = " Âm Thanh & BGM: BẬT"
+text = " 🌐 VI"
+icon = ExtResource("11_lang_icon")
+expand_icon = true
+
+[node name="TutorialBtn" type="Button" parent="VBox/UtilityDock"]
+custom_minimum_size = Vector2(150, 46)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_blue")
+text = " Hướng Dẫn"
+icon = ExtResource("9_book_icon")
+expand_icon = true
+
+[node name="SoundBtn" type="Button" parent="VBox/UtilityDock"]
+custom_minimum_size = Vector2(145, 46)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_blue")
+text = " Âm Thanh"
 icon = ExtResource("10_sound_icon")
 expand_icon = true
 
-[node name="QuitBtn" type="Button" parent="VBox/Buttons"]
-custom_minimum_size = Vector2(0, 42)
+[node name="QuitBtn" type="Button" parent="VBox/UtilityDock"]
+custom_minimum_size = Vector2(100, 46)
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_coral")
 theme_override_styles/hover = SubResource("StyleBoxTexture_btn_coral")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_coral")
-text = "Thoát Trò Chơi"
-
+text = "Thoát"

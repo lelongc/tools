@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="globeGrad" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#E0F7FA"/>
+      <stop offset="40%" stop-color="#4DD0E1"/>
+      <stop offset="80%" stop-color="#0097A7"/>
+      <stop offset="100%" stop-color="#006064"/>
+    </radialGradient>
+    <filter id="globeShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#001824" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  <!-- Globe Sphere -->
+  <circle cx="32" cy="32" r="26" fill="url(#globeGrad)" stroke="#B2EBF2" stroke-width="2.5" filter="url(#globeShadow)"/>
+  <!-- Latitude and Longitude Grids -->
+  <ellipse cx="32" cy="32" rx="14" ry="25" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.85"/>
+  <line x1="6" y1="32" x2="58" y2="32" stroke="#FFFFFF" stroke-width="2" opacity="0.85"/>
+  <path d="M 12 20 Q 32 26 52 20" fill="none" stroke="#FFFFFF" stroke-width="1.8" opacity="0.75"/>
+  <path d="M 12 44 Q 32 38 52 44" fill="none" stroke="#FFFFFF" stroke-width="1.8" opacity="0.75"/>
+  <!-- Specular gleam -->
+  <circle cx="22" cy="18" r="3" fill="#FFFFFF" opacity="0.9"/>
+</svg>

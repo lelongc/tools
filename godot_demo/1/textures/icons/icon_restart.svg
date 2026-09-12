@@ -2,16 +2,17 @@
   <defs>
     <linearGradient id="restartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#FFFFFF"/>
-      <stop offset="60%" stop-color="#FFEBEE"/>
-      <stop offset="100%" stop-color="#FFCDD2"/>
+      <stop offset="60%" stop-color="#FFF8E1"/>
+      <stop offset="100%" stop-color="#FFE082"/>
     </linearGradient>
-    <filter id="restartShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#4A0007" flood-opacity="0.4"/>
+    <filter id="restartShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#001824" flood-opacity="0.45"/>
     </filter>
   </defs>
-  <!-- Curved Reload Arrow -->
-  <path d="M 32 12 A 20 20 0 1 1 14 36" 
-        fill="none" stroke="url(#restartGrad)" stroke-width="7" stroke-linecap="round" filter="url(#restartShadow)"/>
-  <!-- Arrow Head -->
-  <polygon points="32,4 42,14 32,24" fill="#FFFFFF" stroke="#C62828" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Replay Circular Arrow (Counter-Clockwise ↺) -->
+  <path d="M 18 36 A 16 16 0 1 0 32 18" 
+        fill="none" stroke="url(#restartGrad)" stroke-width="6.5" stroke-linecap="round" filter="url(#restartShadow)"/>
+  <!-- Replay Arrow Head pointing Left (↺ Replay / Restart) -->
+  <polygon points="32,8 18,18 32,28" 
+           fill="#FFFFFF" stroke="#FFA000" stroke-width="2" stroke-linejoin="round" filter="url(#restartShadow)"/>
 </svg>

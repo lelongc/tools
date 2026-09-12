@@ -4,7 +4,9 @@ extends Control
 @onready var grid_container: GridContainer = $ScrollContainer/GridContainer
 @onready var world_filter_bar: HBoxContainer = $WorldFilterBar
 @onready var back_btn: Button = $BottomBar/BackBtn
+@onready var lang_btn: Button = $BottomBar/LangBtn
 @onready var reset_btn: Button = $BottomBar/ResetBtn
+@onready var title_label: Label = $HeaderContainer/TitleLabel
 @onready var total_stars_label: Label = $HeaderContainer/TotalStarsLabel
 
 var tex_btn_gold = preload("res://textures/ui/btn_bubble_gold.svg")
@@ -34,11 +36,31 @@ var world_ranges = {
 func _ready() -> void:
 	_init_styles()
 	back_btn.pressed.connect(_on_back_pressed)
+	if lang_btn:
+		lang_btn.pressed.connect(_on_lang_pressed)
 	if reset_btn:
 		reset_btn.pressed.connect(_on_reset_pressed)
+		
+	PuffyLocaleManager.locale_changed.connect(_on_locale_changed)
+	_update_localized_texts()
 	_update_stars_display()
 	_build_world_filter_tabs()
 	_populate_level_buttons()
+
+func _on_locale_changed(_new_locale: String) -> void:
+	_update_localized_texts()
+	_build_world_filter_tabs()
+	_populate_level_buttons()
+
+func _update_localized_texts() -> void:
+	if title_label:
+		title_label.text = PuffyLocaleManager.tr_key("LVL_SELECT_TITLE")
+	if back_btn:
+		back_btn.text = " " + PuffyLocaleManager.tr_key("LVL_BACK")
+	if lang_btn:
+		lang_btn.text = " 🌐 %s" % PuffyLocaleManager.get_current_short_code()
+	if reset_btn:
+		reset_btn.text = " " + PuffyLocaleManager.tr_key("LVL_RESET")
 
 func _update_stars_display() -> void:
 	var max_stars = PuffyGameManager.max_levels * 3
@@ -84,7 +106,12 @@ func _build_world_filter_tabs() -> void:
 	for child in world_filter_bar.get_children():
 		child.queue_free()
 		
-	var tab_names = ["Tất Cả", "V1", "V2", "V3", "V4", "V5", "V6", "V7", "V8"]
+	var all_text = PuffyLocaleManager.tr_key("LVL_TAB_ALL")
+	var prefix = "W" if PuffyLocaleManager.current_locale != "vi" else "V"
+	var tab_names = [all_text]
+	for w in range(1, 9):
+		tab_names.append("%s%d" % [prefix, w])
+		
 	for i in range(tab_names.size()):
 		var tab_btn = Button.new()
 		tab_btn.custom_minimum_size = Vector2(90, 34)
@@ -104,6 +131,7 @@ func _build_world_filter_tabs() -> void:
 		world_filter_bar.add_child(tab_btn)
 
 func _on_world_filter_selected(w_idx: int) -> void:
+	PuffySoundManager.play_ui_click()
 	PuffySoundManager.play_stretch()
 	current_filtered_world = w_idx
 	_build_world_filter_tabs()
@@ -133,37 +161,47 @@ func _populate_level_buttons() -> void:
 		if is_boss:
 			btn.icon = tex_icon_crown
 			btn.expand_icon = true
-			btn.text = " TRÙM %d\n%s" % [i, star_str]
+			var boss_str = PuffyLocaleManager.tr_key("LVL_BOSS", [i])
+			btn.text = " %s\n%s" % [boss_str, star_str]
 			btn.add_theme_stylebox_override("normal", style_level_boss)
 			btn.add_theme_stylebox_override("hover", style_level_boss)
 			btn.add_theme_stylebox_override("pressed", style_level_boss)
 			btn.add_theme_color_override("font_color", Color(1.0, 0.95, 0.4))
 		elif stars > 0:
-			btn.text = "MÀN %d\n%s" % [i, star_str]
+			var stage_str = PuffyLocaleManager.tr_key("LVL_STAGE", [i])
+			btn.text = "%s\n%s" % [stage_str, star_str]
 			btn.add_theme_stylebox_override("normal", style_level_cleared)
 			btn.add_theme_stylebox_override("hover", style_level_cleared)
 			btn.add_theme_stylebox_override("pressed", style_level_cleared)
 			btn.add_theme_color_override("font_color", Color(0.35, 0.15, 0))
 		else:
-			btn.text = "MÀN %d\n%s" % [i, star_str]
+			var stage_str = PuffyLocaleManager.tr_key("LVL_STAGE", [i])
+			btn.text = "%s\n%s" % [stage_str, star_str]
 			btn.add_theme_stylebox_override("normal", style_level_unlocked)
 			btn.add_theme_stylebox_override("hover", style_level_unlocked)
 			btn.add_theme_stylebox_override("pressed", style_level_unlocked)
-			btn.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
+			btn.add_theme_color_override("font_color", Color.WHITE)
 			
 		btn.add_theme_font_size_override("font_size", 14)
 		btn.pressed.connect(_on_level_selected.bind(i))
 		grid_container.add_child(btn)
 
 func _on_level_selected(level_num: int) -> void:
+	PuffySoundManager.play_ui_click()
 	PuffySoundManager.play_stretch()
 	PuffyGameManager.start_campaign_level(level_num)
 
+func _on_lang_pressed() -> void:
+	PuffySoundManager.play_ui_click()
+	PuffyLocaleManager.toggle_next_locale()
+
 func _on_back_pressed() -> void:
+	PuffySoundManager.play_ui_click()
 	PuffySoundManager.play_stretch()
 	get_tree().change_scene_to_file("res://scenes/ui/PuffyMainMenu.tscn")
 
 func _on_reset_pressed() -> void:
+	PuffySoundManager.play_ui_click()
 	PuffySoundManager.play_deflate()
 	PuffyGameManager.reset_all_saved_data()
 	_update_stars_display()

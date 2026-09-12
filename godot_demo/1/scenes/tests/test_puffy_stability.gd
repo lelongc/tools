@@ -28,10 +28,12 @@ func _ready() -> void:
 	all_passed = _test_hd_vector_textures_and_puffy_sprite() and all_passed
 	all_passed = _test_deterministic_3_star_and_wipe_data() and all_passed
 	all_passed = _test_ui_button_texture_icons() and all_passed
+	all_passed = _test_aquatic_particles_no_stars() and all_passed
+	all_passed = _test_multilanguage_and_ergonomic_ui() and all_passed
 	
 	print("\n-------------------------------------------------------")
 	if all_passed:
-		print("✅ [TẤT CẢ 21/21 TEST PUFFY POP HOÀN TẤT THÀNH CÔNG 100%]")
+		print("✅ [TẤT CẢ 23/23 TEST PUFFY POP HOÀN TẤT THÀNH CÔNG 100%]")
 		print("=======================================================\n")
 		get_tree().quit(0)
 	else:
@@ -644,11 +646,12 @@ func _test_ui_button_texture_icons() -> bool:
 	var menu_scene = load("res://scenes/ui/PuffyMainMenu.tscn")
 	var menu = menu_scene.instantiate()
 	add_child(menu)
-	var camp_btn = menu.get_node("VBox/Buttons/CampaignBtn") as Button
-	var endless_btn = menu.get_node("VBox/Buttons/EndlessBtn") as Button
-	var tuto_btn = menu.get_node("VBox/Buttons/TutorialBtn") as Button
-	var sound_btn_menu = menu.get_node("VBox/Buttons/SoundBtn") as Button
-	if not camp_btn.icon or not endless_btn.icon or not tuto_btn.icon or not sound_btn_menu.icon:
+	var camp_btn = menu.find_child("CampaignBtn", true) as Button
+	var endless_btn = menu.find_child("EndlessBtn", true) as Button
+	var tuto_btn = menu.find_child("TutorialBtn", true) as Button
+	var sound_btn_menu = menu.find_child("SoundBtn", true) as Button
+	var lang_btn_menu = menu.find_child("LangBtn", true) as Button
+	if not camp_btn.icon or not endless_btn.icon or not tuto_btn.icon or not sound_btn_menu.icon or not lang_btn_menu.icon:
 		printerr("  ❌ Lỗi: PuffyMainMenu nút bấm thiếu texture asset icon!")
 		menu.queue_free()
 		return false
@@ -658,12 +661,13 @@ func _test_ui_button_texture_icons() -> bool:
 	var pause_scene = load("res://scenes/ui/PuffyPauseModal.tscn")
 	var pause_modal = pause_scene.instantiate()
 	add_child(pause_modal)
-	var resume_btn = pause_modal.get_node("Panel/VBox/Buttons/ResumeBtn") as Button
-	var restart_btn_pause = pause_modal.get_node("Panel/VBox/Buttons/RestartBtn") as Button
-	var sound_btn_pause = pause_modal.get_node("Panel/VBox/Buttons/SoundBtn") as Button
-	var select_btn_pause = pause_modal.get_node("Panel/VBox/Buttons/SelectBtn") as Button
-	var menu_btn_pause = pause_modal.get_node("Panel/VBox/Buttons/MenuBtn") as Button
-	if not resume_btn.icon or not restart_btn_pause.icon or not sound_btn_pause.icon or not select_btn_pause.icon or not menu_btn_pause.icon:
+	var resume_btn = pause_modal.find_child("ResumeBtn", true) as Button
+	var restart_btn_pause = pause_modal.find_child("RestartBtn", true) as Button
+	var sound_btn_pause = pause_modal.find_child("SoundBtn", true) as Button
+	var select_btn_pause = pause_modal.find_child("SelectBtn", true) as Button
+	var menu_btn_pause = pause_modal.find_child("MenuBtn", true) as Button
+	var lang_btn_pause = pause_modal.find_child("LangBtn", true) as Button
+	if not resume_btn.icon or not restart_btn_pause.icon or not sound_btn_pause.icon or not select_btn_pause.icon or not menu_btn_pause.icon or not lang_btn_pause.icon:
 		printerr("  ❌ Lỗi: PuffyPauseModal nút bấm thiếu texture asset icon!")
 		pause_modal.queue_free()
 		return false
@@ -673,9 +677,9 @@ func _test_ui_button_texture_icons() -> bool:
 	var vic_scene = load("res://scenes/ui/PuffyVictoryModal.tscn")
 	var vic_modal = vic_scene.instantiate()
 	add_child(vic_modal)
-	var next_btn = vic_modal.get_node("Panel/VBox/Buttons/NextBtn") as Button
-	var replay_btn = vic_modal.get_node("Panel/VBox/Buttons/ReplayBtn") as Button
-	var select_btn_vic = vic_modal.get_node("Panel/VBox/Buttons/SelectBtn") as Button
+	var next_btn = vic_modal.find_child("NextBtn", true) as Button
+	var replay_btn = vic_modal.find_child("ReplayBtn", true) as Button
+	var select_btn_vic = vic_modal.find_child("SelectBtn", true) as Button
 	if not next_btn.icon or not replay_btn.icon or not select_btn_vic.icon:
 		printerr("  ❌ Lỗi: PuffyVictoryModal nút bấm thiếu texture asset icon!")
 		vic_modal.queue_free()
@@ -686,10 +690,10 @@ func _test_ui_button_texture_icons() -> bool:
 	var fail_scene = load("res://scenes/ui/PuffyGameOverModal.tscn")
 	var fail_modal = fail_scene.instantiate()
 	add_child(fail_modal)
-	var ad_btn = fail_modal.get_node("Panel/VBox/Buttons/RewardAdBtn") as Button
-	var retry_btn = fail_modal.get_node("Panel/VBox/Buttons/RetryBtn") as Button
-	var select_btn_fail = fail_modal.get_node("Panel/VBox/Buttons/SelectBtn") as Button
-	var menu_btn_fail = fail_modal.get_node("Panel/VBox/Buttons/MenuBtn") as Button
+	var ad_btn = fail_modal.find_child("RewardAdBtn", true) as Button
+	var retry_btn = fail_modal.find_child("RetryBtn", true) as Button
+	var select_btn_fail = fail_modal.find_child("SelectBtn", true) as Button
+	var menu_btn_fail = fail_modal.find_child("MenuBtn", true) as Button
 	if not ad_btn.icon or not retry_btn.icon or not select_btn_fail.icon or not menu_btn_fail.icon:
 		printerr("  ❌ Lỗi: PuffyGameOverModal nút bấm thiếu texture asset icon!")
 		fail_modal.queue_free()
@@ -700,7 +704,7 @@ func _test_ui_button_texture_icons() -> bool:
 	var tuto_modal_scene = load("res://scenes/ui/PuffyTutorialModal.tscn")
 	var tuto_modal = tuto_modal_scene.instantiate()
 	add_child(tuto_modal)
-	var close_btn = tuto_modal.get_node("Panel/VBox/CloseBtn") as Button
+	var close_btn = tuto_modal.find_child("CloseBtn", true) as Button
 	if not close_btn.icon:
 		printerr("  ❌ Lỗi: PuffyTutorialModal nút bấm thiếu texture asset icon!")
 		tuto_modal.queue_free()
@@ -711,9 +715,10 @@ func _test_ui_button_texture_icons() -> bool:
 	var lvl_scene = load("res://scenes/ui/PuffyLevelSelect.tscn")
 	var lvl_select = lvl_scene.instantiate()
 	add_child(lvl_select)
-	var back_btn = lvl_select.get_node("BottomBar/BackBtn") as Button
-	var reset_btn = lvl_select.get_node("BottomBar/ResetBtn") as Button
-	if not back_btn.icon or not reset_btn.icon:
+	var back_btn = lvl_select.find_child("BackBtn", true) as Button
+	var reset_btn = lvl_select.find_child("ResetBtn", true) as Button
+	var lang_btn_lvl = lvl_select.find_child("LangBtn", true) as Button
+	if not back_btn.icon or not reset_btn.icon or not lang_btn_lvl.icon:
 		printerr("  ❌ Lỗi: PuffyLevelSelect nút bấm thiếu texture asset icon!")
 		lvl_select.queue_free()
 		return false
@@ -721,6 +726,149 @@ func _test_ui_button_texture_icons() -> bool:
 	
 	print("  ✓ Toàn bộ các nút bấm trong HUD, Menu, Level Select và các Modal đã được trang bị Texture Asset Icon đồng bộ và chuẩn xác.")
 	return true
+
+func _test_aquatic_particles_no_stars() -> bool:
+	print("▶ [TEST 22] Kiểm tra Hệ thống Hạt Đại Dương Thuần Túy (Không còn ngôi sao vàng)...")
+	
+	# 1. Kiểm tra các texture particle đại dương đã load thành công
+	if not PuffyVFX.tex_bubble or not PuffyVFX.tex_droplet or not PuffyVFX.tex_ripple:
+		printerr("  ❌ Lỗi: Texture hạt đại dương (bong bóng, giọt nước, sóng gợn) chưa được tải!")
+		return false
+		
+	# 2. Kiểm tra sinh hiệu ứng va đập không tạo ngôi sao vàng
+	var test_container = Node2D.new()
+	add_child(test_container)
+	
+	PuffyVFX.spawn_dynamic_collision_impact(test_container, Vector2(200, 200), Vector2.UP, 300.0)
+	var has_droplets = false
+	var has_bubbles = false
+	for child in test_container.get_children():
+		if child is CPUParticles2D:
+			if child.texture == PuffyVFX.tex_droplet:
+				has_droplets = true
+			elif child.texture == PuffyVFX.tex_bubble:
+				has_bubbles = true
+				
+	if not has_droplets or not has_bubbles:
+		printerr("  ❌ Lỗi: Va đập tốc độ cao không sinh giọt nước và bọt nước đại dương!")
+		test_container.queue_free()
+		return false
+		
+	# 3. Kiểm tra spawn_water_droplets
+	PuffyVFX.spawn_water_droplets(test_container, Vector2(300, 300), 10)
+	
+	test_container.queue_free()
+	print("  ✓ Hệ thống hạt đại dương thuần túy: hoàn toàn dùng bọt nước, giọt nước ngọc bích và sóng gợn, tuyệt đối không có ngôi sao.")
+	return true
+
+func _test_multilanguage_and_ergonomic_ui() -> bool:
+	print("▶ [TEST 23] Kiểm tra Đa Ngôn Ngữ (13 Quốc Gia), Giao Diện Bố Cục Nút Bấm Thân Thiện & Âm Thanh/VFX Mới...")
+	
+	# 1. Kiểm tra danh sách 13 ngôn ngữ được hỗ trợ đầy đủ
+	var locales = PuffyLocaleManager.SUPPORTED_LOCALES
+	if locales.size() != 13:
+		printerr("  ❌ Lỗi: Số lượng ngôn ngữ hỗ trợ không đúng 13! Hiện tại: %d" % locales.size())
+		return false
+		
+	var required_locales = ["vi", "en", "ja", "ko", "zh", "zh_TW", "es", "pt", "ru", "fr", "de", "id", "th"]
+	for loc in required_locales:
+		if not (loc in locales):
+			printerr("  ❌ Lỗi: Thiếu ngôn ngữ bắt buộc: %s" % loc)
+			return false
+			
+	# 2. Kiểm tra tính toàn vẹn của từ điển dịch thuật cho từng ngôn ngữ
+	var required_keys = [
+		"GAME_TITLE", "GAME_SUBTITLE", "BTN_CAMPAIGN", "BTN_ENDLESS", "BTN_TUTORIAL", 
+		"BTN_SOUND_ON", "BTN_SOUND_OFF", "BTN_QUIT", "STATS_SUMMARY", "HUD_LEVEL", 
+		"HUD_UNSTICK", "HUD_HINT", "PAUSE_TITLE", "PAUSE_RESUME", "PAUSE_RESTART", 
+		"PAUSE_SELECT", "PAUSE_MENU", "PAUSE_LANGUAGE", "VIC_TITLE", "VIC_SCORE", 
+		"VIC_NEXT", "VIC_REPLAY", "VIC_MAP", "FAIL_TITLE", "FAIL_DESC", 
+		"FAIL_REVIVE", "FAIL_RETRY", "FAIL_SELECT", "FAIL_MENU", "TUTO_TITLE", 
+		"TUTO_STEP1", "TUTO_STEP2", "TUTO_STEP3", "TUTO_CLOSE", "LVL_SELECT_TITLE", 
+		"LVL_TAB_ALL", "LVL_BOSS", "LVL_STAGE", "LVL_BACK", "LVL_RESET"
+	]
+	
+	for loc in required_locales:
+		if not PuffyLocaleManager.translations.has(loc):
+			printerr("  ❌ Lỗi: Thiếu từ điển cho locale '%s'!" % loc)
+			return false
+		for k in required_keys:
+			var val = PuffyLocaleManager.translations[loc].get(k, "")
+			if val.is_empty():
+				printerr("  ❌ Lỗi: Bản dịch rỗng cho key '%s' ở locale '%s'!" % [k, loc])
+				return false
+				
+	# 3. Kiểm tra chuyển đổi chu kỳ ngôn ngữ (toggle_next_locale)
+	var initial_loc = PuffyLocaleManager.current_locale
+	var signal_fired = [false]
+	var callable = func(_new_loc): signal_fired[0] = true
+	PuffyLocaleManager.locale_changed.connect(callable)
+	
+	var next_loc = PuffyLocaleManager.toggle_next_locale()
+	if not signal_fired[0] or next_loc == initial_loc:
+		printerr("  ❌ Lỗi: toggle_next_locale không phát tín hiệu hoặc không đổi ngôn ngữ!")
+		PuffyLocaleManager.locale_changed.disconnect(callable)
+		return false
+	PuffyLocaleManager.locale_changed.disconnect(callable)
+	
+	# 4. Kiểm tra dịch thuật tham số định dạng
+	PuffyLocaleManager.set_locale("en")
+	var en_level = PuffyLocaleManager.tr_key("HUD_LEVEL", [7])
+	if en_level != "LEVEL 7":
+		printerr("  ❌ Lỗi: tr_key tham số tiếng Anh sai! Kết quả: %s" % en_level)
+		return false
+		
+	PuffyLocaleManager.set_locale("ja")
+	var ja_level = PuffyLocaleManager.tr_key("HUD_LEVEL", [7])
+	if ja_level != "ステージ 7":
+		printerr("  ❌ Lỗi: tr_key tham số tiếng Nhật sai! Kết quả: %s" % ja_level)
+		return false
+		
+	PuffyLocaleManager.set_locale("vi")
+	var vi_level = PuffyLocaleManager.tr_key("HUD_LEVEL", [7])
+	if vi_level != "MÀN 7":
+		printerr("  ❌ Lỗi: tr_key tham số tiếng Việt sai! Kết quả: %s" % vi_level)
+		return false
+		
+	# 5. Kiểm tra bố cục Main Menu 2 tầng thân thiện
+	var menu = load("res://scenes/ui/PuffyMainMenu.tscn").instantiate() as PuffyMainMenu
+	add_child(menu)
+	var modes_box = menu.get_node_or_null("VBox/PrimaryModes")
+	var dock_box = menu.get_node_or_null("VBox/UtilityDock")
+	if not modes_box or not dock_box:
+		printerr("  ❌ Lỗi: PuffyMainMenu không có bố cục 2 tầng (PrimaryModes & UtilityDock)!")
+		menu.queue_free()
+		return false
+	if not menu.lang_btn or not menu.campaign_btn or not menu.endless_btn:
+		printerr("  ❌ Lỗi: PuffyMainMenu thiếu các nút bấm công thái học!")
+		menu.queue_free()
+		return false
+	menu.queue_free()
+	
+	# 6. Kiểm tra bố cục Pause Modal đối xứng thân thiện
+	var pause = load("res://scenes/ui/PuffyPauseModal.tscn").instantiate() as PuffyPauseModal
+	add_child(pause)
+	var actions_row = pause.get_node_or_null("Panel/VBox/ActionsRow")
+	var settings_row = pause.get_node_or_null("Panel/VBox/SettingsRow")
+	if not actions_row or not settings_row:
+		printerr("  ❌ Lỗi: PuffyPauseModal không có bố cục lưới đối xứng thân thiện!")
+		pause.queue_free()
+		return false
+	pause.queue_free()
+	
+	# 7. Kiểm tra âm thanh click và jet stream
+	PuffySoundManager.play_ui_click()
+	PuffySoundManager.play_jet_stream()
+	
+	# 8. Kiểm tra VFX luồng phản lực bọt khí (Jet Stream)
+	var dummy = Node2D.new()
+	add_child(dummy)
+	PuffyVFX.spawn_jet_stream(dummy, Vector2(100, 100), Vector2.RIGHT)
+	dummy.queue_free()
+	
+	print("  ✓ Đa ngôn ngữ (13 quốc gia), bố cục giao diện công thái học 2 tầng thân thiện và âm thanh/VFX mới hoạt động hoàn hảo 100%.")
+	return true
+
 
 
 

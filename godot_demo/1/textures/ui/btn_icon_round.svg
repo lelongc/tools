@@ -1,21 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80">
   <defs>
     <radialGradient id="roundBubbleBg" cx="35%" cy="30%" r="70%">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
-      <stop offset="25%" stop-color="#80DEEA" stop-opacity="0.9"/>
-      <stop offset="70%" stop-color="#00ACC1" stop-opacity="0.95"/>
-      <stop offset="100%" stop-color="#006064" stop-opacity="1.0"/>
+      <stop offset="0%" stop-color="#4DD0E1"/>
+      <stop offset="60%" stop-color="#00ACC1"/>
+      <stop offset="100%" stop-color="#006064"/>
     </radialGradient>
     <filter id="roundShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#00251A" flood-opacity="0.5"/>
+      <feDropShadow dx="0" dy="3.5" stdDeviation="2.5" flood-color="#002428" flood-opacity="0.45"/>
     </filter>
   </defs>
-
-  <!-- Outer Ring with Shadow -->
-  <circle cx="40" cy="40" r="36" fill="url(#roundBubbleBg)" stroke="#E0F7FA" stroke-width="3.5" filter="url(#roundShadow)"/>
-
-  <!-- Glossy Glass Crescent Highlight -->
-  <path d="M 14 32 C 14 18, 26 10, 40 10 C 54 10, 66 18, 66 32 C 55 24, 25 24, 14 32 Z" 
-        fill="#FFFFFF" opacity="0.65"/>
-  <circle cx="28" cy="22" r="3" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="40" cy="40" r="36" fill="url(#roundBubbleBg)" stroke="#004D40" stroke-width="3" filter="url(#roundShadow)"/>
 </svg>

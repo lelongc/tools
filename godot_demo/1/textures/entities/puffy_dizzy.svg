@@ -47,8 +47,11 @@
   <!-- Wobbly Mouth -->
   <path d="M 325 320 Q 345 305 365 325 T 395 315" stroke="#BF360C" stroke-width="6" stroke-linecap="round" fill="none"/>
 
-  <!-- Orbiting Stars around Head -->
-  <polygon points="260,70 266,85 282,85 269,94 274,109 260,99 246,109 251,94 238,85 254,85" fill="#FFD600" stroke="#FF6F00" stroke-width="2"/>
-  <polygon points="340,90 344,101 356,101 346,108 350,119 340,112 330,119 334,108 324,101 336,101" fill="#FFD600" stroke="#FF6F00" stroke-width="2"/>
-  <polygon points="190,95 194,106 206,106 196,113 200,124 190,117 180,124 184,113 174,106 186,106" fill="#FFD600" stroke="#FF6F00" stroke-width="2"/>
+  <!-- Orbiting Dizzy Bubbles around Head -->
+  <circle cx="260" cy="85" r="18" fill="#E1F5FE" stroke="#81D4FA" stroke-width="3" opacity="0.9"/>
+  <ellipse cx="254" cy="79" rx="5" ry="3" fill="#FFFFFF" opacity="0.95"/>
+  <circle cx="340" cy="102" r="14" fill="#E1F5FE" stroke="#81D4FA" stroke-width="2.5" opacity="0.85"/>
+  <ellipse cx="335" cy="97" rx="4" ry="2.5" fill="#FFFFFF" opacity="0.95"/>
+  <circle cx="190" cy="106" r="13" fill="#E1F5FE" stroke="#81D4FA" stroke-width="2.5" opacity="0.85"/>
+  <ellipse cx="186" cy="102" rx="3.5" ry="2" fill="#FFFFFF" opacity="0.95"/>
 </svg>

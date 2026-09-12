@@ -52,16 +52,16 @@ grow_vertical = 2
 color = Color(0.12, 0.02, 0.04, 0.85)
 
 [node name="Panel" type="PanelContainer" parent="."]
-custom_minimum_size = Vector2(500, 420)
+custom_minimum_size = Vector2(490, 400)
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -250.0
-offset_top = -210.0
-offset_right = 250.0
-offset_bottom = 210.0
+offset_left = -245.0
+offset_top = -200.0
+offset_right = 245.0
+offset_bottom = 200.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxTexture_fail_panel")
@@ -93,7 +93,7 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="RewardAdBtn" type="Button" parent="Panel/VBox/Buttons"]
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.35, 0.15, 0, 1)
 theme_override_colors/font_hover_color = Color(0.5, 0.2, 0, 1)
@@ -118,26 +118,32 @@ text = " BẮN LẠI TỪ ĐẦU"
 icon = ExtResource("7_restart_icon")
 expand_icon = true
 
-[node name="SelectBtn" type="Button" parent="Panel/VBox/Buttons"]
+[node name="BottomRow" type="HBoxContainer" parent="Panel/VBox/Buttons"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SelectBtn" type="Button" parent="Panel/VBox/Buttons/BottomRow"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxTexture_btn_select")
-theme_override_styles/hover = SubResource("StyleBoxTexture_btn_select")
-theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_select")
-text = " CHỌN MÀN KHÁC"
-icon = ExtResource("8_map_icon")
-expand_icon = true
-
-[node name="MenuBtn" type="Button" parent="Panel/VBox/Buttons"]
-custom_minimum_size = Vector2(0, 42)
-layout_mode = 2
+size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_select")
 theme_override_styles/hover = SubResource("StyleBoxTexture_btn_select")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_select")
-text = " VỀ TRANG CHỦ"
+text = " Chọn Màn"
+icon = ExtResource("8_map_icon")
+expand_icon = true
+
+[node name="MenuBtn" type="Button" parent="Panel/VBox/Buttons/BottomRow"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_select")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_select")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_select")
+text = " Trang Chủ"
 icon = ExtResource("9_home_icon")
 expand_icon = true
