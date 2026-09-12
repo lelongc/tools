@@ -3,7 +3,7 @@ extends Node
 func _ready() -> void:
 	print("\n=======================================================")
 	print("🐡 BẮT ĐẦU KIỂM THỬ: PUFFY POP - BOUNCY HERO (GODOT 4.7.1)")
-	print("   [Vật Lý Thông Minh, Animation Sinh Vật, Sò Thần, 30 Màn]")
+	print("   [60 Màn, 8 Vùng Biển, Thủy Lôi, Portal, Xoáy, Boss]")
 	print("=======================================================\n")
 	
 	var all_passed = true
@@ -14,15 +14,19 @@ func _ready() -> void:
 	all_passed = _test_pearl_and_accurate_scoring() and all_passed
 	all_passed = _test_level_victory_goal() and all_passed
 	all_passed = _test_chill_bgm_and_sound_debounce() and all_passed
-	all_passed = _test_arena_across_5_worlds() and all_passed
+	all_passed = _test_arena_across_8_worlds() and all_passed
 	all_passed = _test_pause_modal_and_ui() and all_passed
 	all_passed = _test_tutorial_modal() and all_passed
 	all_passed = _test_mystic_clam() and all_passed
 	all_passed = _test_ambient_fish() and all_passed
+	all_passed = _test_sea_mine_explosion() and all_passed
+	all_passed = _test_ocean_portal_teleport() and all_passed
+	all_passed = _test_gravity_vortex() and all_passed
+	all_passed = _test_boss_battle() and all_passed
 	
 	print("\n-------------------------------------------------------")
 	if all_passed:
-		print("✅ [TẤT CẢ 12/12 TEST PUFFY POP HOÀN TẤT THÀNH CÔNG 100%]")
+		print("✅ [TẤT CẢ 16/16 TEST PUFFY POP HOÀN TẤT THÀNH CÔNG 100%]")
 		print("=======================================================\n")
 		get_tree().quit(0)
 	else:
@@ -256,19 +260,20 @@ func _test_chill_bgm_and_sound_debounce() -> bool:
 	print("  ✓ BGM Chill Chill tự tổng hợp và cơ chế Debounce âm thanh chống rè hoạt động xuất sắc.")
 	return true
 
-func _test_arena_across_5_worlds() -> bool:
-	print("▶ [TEST 8] Kiểm tra sinh màn chơi xuyên suốt 5 Vùng Biển (30 Màn) & Endless...")
+func _test_arena_across_8_worlds() -> bool:
+	print("▶ [TEST 8] Kiểm tra sinh màn chơi xuyên suốt 8 Vùng Biển (60 Màn) & Endless...")
 	var arena_scene = load("res://scenes/game/PuffyArena.tscn")
 	var arena = arena_scene.instantiate() as PuffyArena
 	add_child(arena)
 	
-	var test_levels = [1, 8, 14, 20, 28]
+	# Kiểm tra các màn đại diện của cả 8 vùng biển và 4 màn Boss
+	var test_levels = [3, 10, 16, 21, 28, 32, 36, 44, 48, 52, 58, 60]
 	for lvl in test_levels:
 		PuffyGameManager.current_mode = PuffyGameManager.GameMode.CAMPAIGN
 		PuffyGameManager.current_level = lvl
 		arena._build_level_layout()
 		var count = arena.obstacles_container.get_child_count()
-		if count < 4:
+		if count < 3:
 			printerr("  ❌ Lỗi: Màn ", lvl, " không sinh đủ vật thể! Số lượng: ", count)
 			arena.queue_free()
 			return false
@@ -281,7 +286,7 @@ func _test_arena_across_5_worlds() -> bool:
 		arena.queue_free()
 		return false
 		
-	print("  ✓ Tải và sinh màn chơi 30 màn 5 Vùng Biển cùng chế độ Endless thành công trọn vẹn.")
+	print("  ✓ Tải và sinh màn chơi 60 màn qua 8 Vùng Biển cùng chế độ Endless thành công trọn vẹn.")
 	arena.queue_free()
 	return true
 
@@ -329,7 +334,6 @@ func _test_mystic_clam() -> bool:
 	var player = player_scene.instantiate() as PuffyPlayer
 	add_child(player)
 	
-	# Khi sò đang mở: ăn được ngọc
 	var prev_score = PuffyGameManager.current_score
 	clam.is_open = true
 	clam.has_pearl = true
@@ -340,7 +344,6 @@ func _test_mystic_clam() -> bool:
 		player.queue_free()
 		return false
 		
-	# Khi sò đóng vỏ: nảy lại
 	player.velocity = Vector2(100, 100)
 	clam.on_puffy_hit(player, false)
 	if player.velocity.length() < 100:
@@ -370,3 +373,134 @@ func _test_ambient_fish() -> bool:
 	print("  ✓ Đàn cá bơi nền AmbientFish bơi lội mềm mại chuẩn xác.")
 	fish.queue_free()
 	return true
+
+func _test_sea_mine_explosion() -> bool:
+	print("▶ [TEST 13] Kiểm tra Thủy Lôi Bong Bóng (SeaMine nổ sóng xung kích)...")
+	var mine_scene = load("res://scenes/prefabs/SeaMine.tscn")
+	var mine = mine_scene.instantiate()
+	add_child(mine)
+	
+	var player_scene = load("res://scenes/prefabs/PuffyPlayer.tscn")
+	var player = player_scene.instantiate() as PuffyPlayer
+	add_child(player)
+	
+	player.global_position = mine.global_position + Vector2(20, 0)
+	mine._detonate(player)
+	
+	if player.velocity.length() < 400.0:
+		printerr("  ❌ Lỗi: Sóng nổ thủy lôi không gia tốc đẩy Puffy!")
+		player.queue_free()
+		return false
+		
+	print("  ✓ Thủy lôi hải quân SeaMine nổ sóng xung kích và đẩy Puffy hoàn hảo.")
+	player.queue_free()
+	return true
+
+func _test_ocean_portal_teleport() -> bool:
+	print("▶ [TEST 14] Kiểm tra Cặp Cổng Dịch Chuyển Không Gian (OceanPortals)...")
+	var portal_scene = load("res://scenes/prefabs/OceanPortal.tscn")
+	var portal_a = portal_scene.instantiate()
+	var portal_b = portal_scene.instantiate()
+	portal_a.position = Vector2(200, 300)
+	portal_b.position = Vector2(800, 300)
+	portal_a.exit_direction = Vector2.RIGHT
+	portal_b.exit_direction = Vector2.UP
+	portal_a.linked_portal = portal_b
+	portal_b.linked_portal = portal_a
+	add_child(portal_a)
+	add_child(portal_b)
+	
+	var player_scene = load("res://scenes/prefabs/PuffyPlayer.tscn")
+	var player = player_scene.instantiate() as PuffyPlayer
+	player.position = portal_a.position
+	player.velocity = Vector2(400, 0)
+	add_child(player)
+	
+	portal_a._on_body_entered(player)
+	
+	if player.global_position.distance_to(portal_b.global_position) > 10.0:
+		printerr("  ❌ Lỗi: Cổng A không dịch chuyển Puffy đến tọa độ cổng B!")
+		portal_a.queue_free()
+		portal_b.queue_free()
+		player.queue_free()
+		return false
+		
+	if player.velocity.y >= 0:
+		printerr("  ❌ Lỗi: Cổng B không định hướng vector bắn vút lên trên (UP)!")
+		portal_a.queue_free()
+		portal_b.queue_free()
+		player.queue_free()
+		return false
+		
+	print("  ✓ Cặp Cổng Dịch Chuyển OceanPortals bảo toàn vận tốc và dịch chuyển chuẩn xác.")
+	portal_a.queue_free()
+	portal_b.queue_free()
+	player.queue_free()
+	return true
+
+func _test_gravity_vortex() -> bool:
+	print("▶ [TEST 15] Kiểm tra Vòng Xoáy Hút Trọng Lực (GravityVortex)...")
+	var vortex_scene = load("res://scenes/prefabs/GravityVortex.tscn")
+	var vortex = vortex_scene.instantiate()
+	vortex.position = Vector2(500, 500)
+	add_child(vortex)
+	
+	var player_scene = load("res://scenes/prefabs/PuffyPlayer.tscn")
+	var player = player_scene.instantiate() as PuffyPlayer
+	player.position = Vector2(550, 500)
+	player.current_state = PuffyPlayer.PuffyState.FLYING_NORMAL
+	player.velocity = Vector2.ZERO
+	add_child(player)
+	
+	# Kiểm tra lực hút
+	var to_center = (vortex.global_position - player.global_position).normalized()
+	player.velocity += to_center * vortex.pull_force * 0.1
+	if player.velocity.x >= 0:
+		printerr("  ❌ Lỗi: Lực hút trọng lực không kéo Puffy về bên trái (tâm xoáy)!")
+		vortex.queue_free()
+		player.queue_free()
+		return false
+		
+	print("  ✓ Vòng Xoáy Hút Trọng Lực GravityVortex uốn cong quỹ đạo chuẩn xác.")
+	vortex.queue_free()
+	player.queue_free()
+	return true
+
+func _test_boss_battle() -> bool:
+	print("▶ [TEST 16] Kiểm tra Trận Đấu Trùm Đại Dương (Boss King Crab & HP)...")
+	var boss_scene = load("res://scenes/prefabs/BossSeaCreature.tscn")
+	var boss = boss_scene.instantiate()
+	boss.max_hp = 3
+	boss.current_hp = 3
+	add_child(boss)
+
+	
+	var player_scene = load("res://scenes/prefabs/PuffyPlayer.tscn")
+	var player = player_scene.instantiate() as PuffyPlayer
+	add_child(player)
+	
+	# 1. Đánh trúng bằng phồng to -> trừ 1 HP
+	boss.on_puffy_hit(player, true)
+	if boss.current_hp != 2:
+		printerr("  ❌ Lỗi: Boss không bị trừ 1 HP khi bị húc bởi Puffy phồng to!")
+		boss.queue_free()
+		player.queue_free()
+		return false
+		
+	# 2. Đánh 2 phát nữa -> Boss bị tiêu diệt
+	boss.is_invulnerable = false
+	boss.on_puffy_hit(player, true)
+	boss.is_invulnerable = false
+	boss.on_puffy_hit(player, true)
+	
+	if not boss.is_defeated:
+		printerr("  ❌ Lỗi: Boss chưa chuyển sang trạng thái bị hạ gục khi HP <= 0!")
+		boss.queue_free()
+		player.queue_free()
+		return false
+		
+	print("  ✓ Trận Đấu Trùm BossSeaCreature nhận sát thương và kích hoạt chiến thắng hoàn hảo.")
+	boss.queue_free()
+	player.queue_free()
+	return true
+

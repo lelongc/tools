@@ -14,9 +14,9 @@ enum GameMode {
 
 var current_mode: GameMode = GameMode.CAMPAIGN
 
-# Dữ liệu chiến dịch 30 Màn qua 5 Vùng Biển
+# Dữ liệu chiến dịch 60 Màn qua 8 Vùng Biển
 var current_level: int = 1
-var max_levels: int = 30
+var max_levels: int = 60
 var max_shots_per_level: int = 3
 var shots_remaining: int = 3
 var level_pearls_collected: int = 0
@@ -25,6 +25,10 @@ var level_pearls_total: int = 3
 # Hệ thống điểm và Combo
 var current_score: int = 0
 var bounce_combo: int = 1
+
+# Trạng thái Siêu Sao Cầu Vồng (Golden Super Puffy)
+var is_golden_puffy: bool = false
+var golden_timer: float = 0.0
 
 # Lưu trữ sao và điểm kỷ lục
 var level_stars: Dictionary = {}
@@ -39,17 +43,64 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_load_progression()
 
-func get_world_name(lvl: int) -> String:
-	if lvl <= 6:
-		return "Rạn San Hô Ngập Nắng"
-	elif lvl <= 12:
-		return "Vịnh Cướp Biển & Cua Đỏ"
-	elif lvl <= 18:
-		return "Vực Thẳm Sứa Phát Sáng"
-	elif lvl <= 24:
-		return "Xác Tàu Cổ Bí Ẩn"
+func _process(delta: float) -> void:
+	if is_golden_puffy:
+		golden_timer -= delta
+		if golden_timer <= 0.0:
+			is_golden_puffy = false
+
+func is_boss_level(lvl: int) -> bool:
+	return lvl in [16, 32, 48, 60]
+
+func get_world_index(lvl: int) -> int:
+	if lvl <= 7:
+		return 1
+	elif lvl <= 16:
+		return 2
+	elif lvl <= 23:
+		return 3
+	elif lvl <= 32:
+		return 4
+	elif lvl <= 39:
+		return 5
+	elif lvl <= 48:
+		return 6
+	elif lvl <= 55:
+		return 7
 	else:
-		return "Rãnh Nham Thạch Núi Lửa"
+		return 8
+
+func get_world_name(lvl: int) -> String:
+	if lvl <= 7:
+		return "Vùng 1: Rạn San Hô Ngập Nắng"
+	elif lvl < 16:
+		return "Vùng 2: Vịnh Cướp Biển & Thành Lũy"
+	elif lvl == 16:
+		return "👑 BOSS 1: Sào Huyệt Cua Vua Thiết Giáp"
+	elif lvl <= 23:
+		return "Vùng 3: Vực Thẳm Sứa Phát Sáng"
+	elif lvl < 32:
+		return "Vùng 4: Xác Tàu Đắm Cổ & Kho Báu"
+	elif lvl == 32:
+		return "👑 BOSS 2: Hang Ổ Vua Bạch Tuộc Khổng Lồ"
+	elif lvl <= 39:
+		return "Vùng 5: Rãnh Nham Thạch Núi Lửa"
+	elif lvl < 48:
+		return "Vùng 6: Rừng Tảo Băng Bắc Cực"
+	elif lvl == 48:
+		return "👑 BOSS 3: Động Quái Thú Băng Giá"
+	elif lvl <= 55:
+		return "Vùng 7: Cung Điện Atlantis Cổ Đại"
+	elif lvl < 60:
+		return "Vùng 8: Rãnh Mariana - Tận Cùng Vực Thẳm"
+	else:
+		return "👑 ĐẠI CHIẾN CHUNG KẾT: THẦN BIỂN LEVIATHAN"
+
+func activate_golden_puffy(duration: float = 3.5) -> void:
+	is_golden_puffy = true
+	golden_timer = duration
+	PuffySoundManager.play_powerup()
+
 
 func start_campaign_level(lvl: int) -> void:
 	current_mode = GameMode.CAMPAIGN

@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="96" viewBox="0 0 120 96">
+  <defs>
+    <radialGradient id="bossCrabBody" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ff5252"/>
+      <stop offset="65%" stop-color="#c62828"/>
+      <stop offset="100%" stop-color="#5c0000"/>
+    </radialGradient>
+    <radialGradient id="goldCrown" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#fff59d"/>
+      <stop offset="60%" stop-color="#fbc02d"/>
+      <stop offset="100%" stop-color="#f57f17"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Heavy Walking Legs -->
+  <path d="M25 60 Q10 70 4 88" fill="none" stroke="#8e0000" stroke-width="6" stroke-linecap="round"/>
+  <path d="M35 68 Q20 82 16 94" fill="none" stroke="#8e0000" stroke-width="6" stroke-linecap="round"/>
+  <path d="M95 60 Q110 70 116 88" fill="none" stroke="#8e0000" stroke-width="6" stroke-linecap="round"/>
+  <path d="M85 68 Q100 82 104 94" fill="none" stroke="#8e0000" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Giant Left Crusher Claw -->
+  <path d="M26 44 Q8 26 2 34 C-4 18 10 10 24 24 Z" fill="#d32f2f" stroke="#5c0000" stroke-width="3"/>
+  <!-- Spikes on left claw -->
+  <polygon points="6,24 2,16 12,20" fill="#ffcdd2" stroke="#5c0000" stroke-width="1.5"/>
+  <polygon points="16,14 14,6 22,12" fill="#ffcdd2" stroke="#5c0000" stroke-width="1.5"/>
+
+  <!-- Giant Right Crusher Claw -->
+  <path d="M94 44 Q112 26 118 34 C124 18 110 10 96 24 Z" fill="#d32f2f" stroke="#5c0000" stroke-width="3"/>
+  <!-- Spikes on right claw -->
+  <polygon points="114,24 118,16 108,20" fill="#ffcdd2" stroke="#5c0000" stroke-width="1.5"/>
+  <polygon points="104,14 106,6 98,12" fill="#ffcdd2" stroke="#5c0000" stroke-width="1.5"/>
+
+  <!-- Armored Carapace Body -->
+  <ellipse cx="60" cy="56" rx="34" ry="26" fill="url(#bossCrabBody)" stroke="#5c0000" stroke-width="4"/>
+
+  <!-- Carapace Ridges & Spikes -->
+  <polygon points="60,28 54,34 66,34" fill="#8e0000"/>
+  <polygon points="40,36 34,42 44,44" fill="#8e0000"/>
+  <polygon points="80,36 86,42 76,44" fill="#8e0000"/>
+
+  <!-- Golden Crown -->
+  <polygon points="46,24 50,10 56,18 60,6 64,18 70,10 74,24" fill="url(#goldCrown)" stroke="#e65100" stroke-width="2"/>
+  <!-- Jewels on Crown -->
+  <circle cx="60" cy="16" r="3" fill="#d50000"/>
+  <circle cx="50" cy="20" r="2" fill="#00b0ff"/>
+  <circle cx="70" cy="20" r="2" fill="#00e676"/>
+
+  <!-- Fierce Eyes -->
+  <circle cx="48" cy="46" r="8" fill="#ffffff" stroke="#5c0000" stroke-width="2"/>
+  <circle cx="72" cy="46" r="8" fill="#ffffff" stroke="#5c0000" stroke-width="2"/>
+  <circle cx="50" cy="46" r="4.5" fill="#d50000"/>
+  <circle cx="70" cy="46" r="4.5" fill="#d50000"/>
+  <circle cx="51" cy="45" r="1.8" fill="#ffffff"/>
+  <circle cx="69" cy="45" r="1.8" fill="#ffffff"/>
+
+  <!-- Battle Scar -->
+  <line x1="68" y1="36" x2="78" y2="52" stroke="#ffeb3b" stroke-width="2"/>
+  <line x1="70" y1="42" x2="76" y2="40" stroke="#ffeb3b" stroke-width="1.5"/>
+</svg>

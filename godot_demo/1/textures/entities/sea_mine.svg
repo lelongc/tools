@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="mineGrad" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#455a64"/>
+      <stop offset="60%" stop-color="#263238"/>
+      <stop offset="100%" stop-color="#102027"/>
+    </radialGradient>
+    <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffeb3b"/>
+      <stop offset="45%" stop-color="#ff5722"/>
+      <stop offset="100%" stop-color="#d50000"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Spikes / Horns -->
+  <polygon points="32,4 28,16 36,16" fill="#d32f2f" stroke="#b71c1c" stroke-width="1.5"/>
+  <polygon points="32,60 28,48 36,48" fill="#d32f2f" stroke="#b71c1c" stroke-width="1.5"/>
+  <polygon points="4,32 16,28 16,36" fill="#d32f2f" stroke="#b71c1c" stroke-width="1.5"/>
+  <polygon points="60,32 48,28 48,36" fill="#d32f2f" stroke="#b71c1c" stroke-width="1.5"/>
+  
+  <polygon points="12,12 21,23 26,18" fill="#d32f2f" stroke="#b71c1c" stroke-width="1.5"/>
+  <polygon points="52,12 43,23 38,18" fill="#d32f2f" stroke="#b71c1c" stroke-width="1.5"/>
+  <polygon points="12,52 21,41 26,46" fill="#d32f2f" stroke="#b71c1c" stroke-width="1.5"/>
+  <polygon points="52,52 43,41 38,46" fill="#d32f2f" stroke="#b71c1c" stroke-width="1.5"/>
+
+  <!-- Spherical Iron Mine Shell -->
+  <circle cx="32" cy="32" r="20" fill="url(#mineGrad)" stroke="#37474f" stroke-width="2.5"/>
+  
+  <!-- Rivets & Bolts -->
+  <circle cx="22" cy="22" r="1.5" fill="#78909c"/>
+  <circle cx="42" cy="22" r="1.5" fill="#78909c"/>
+  <circle cx="22" cy="42" r="1.5" fill="#78909c"/>
+  <circle cx="42" cy="42" r="1.5" fill="#78909c"/>
+
+  <!-- Glowing Blinking Sensor Core -->
+  <circle cx="32" cy="32" r="8" fill="url(#coreGlow)" stroke="#ffe082" stroke-width="1.5"/>
+  <circle cx="30" cy="30" r="2.5" fill="#ffffff" opacity="0.85"/>
+</svg>

@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://puffy_rainbow_powerup_01"]
+
+[ext_resource type="Script" path="res://scripts/game/RainbowPowerup.gd" id="1_power_script"]
+[ext_resource type="Texture2D" path="res://textures/entities/powerup_rainbow.svg" id="2_power_tex"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_power"]
+radius = 22.0
+
+[node name="RainbowPowerup" type="Area2D" groups=["powerups"]]
+collision_layer = 8
+collision_mask = 1
+script = ExtResource("1_power_script")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_power")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_power_tex")

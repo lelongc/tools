@@ -65,6 +65,11 @@ func _pregenerate_sounds() -> void:
 	sound_cache["coral_break"] = _synth_coral_break(0.16)
 	sound_cache["speed_current"] = _synth_speed_current(0.25)
 	sound_cache["urchin"] = _synth_urchin(0.15)
+	sound_cache["explosion"] = _synth_explosion(0.35)
+	sound_cache["portal"] = _synth_portal(0.28)
+	sound_cache["boss_hit"] = _synth_boss_hit(0.22)
+	sound_cache["boss_defeat"] = _synth_boss_defeat(0.65)
+	sound_cache["powerup"] = _synth_powerup(0.32)
 
 func play_stretch() -> void:
 	_play_named("stretch", sound_cache.get("stretch"), -4.0, randf_range(0.9, 1.1), 0.06)
@@ -105,6 +110,21 @@ func play_speed_current() -> void:
 
 func play_urchin() -> void:
 	_play_named("urchin", sound_cache.get("urchin"), 0.5, randf_range(0.9, 1.1), 0.1)
+
+func play_explosion() -> void:
+	_play_named("explosion", sound_cache.get("explosion"), 2.0, randf_range(0.9, 1.1), 0.1)
+
+func play_portal() -> void:
+	_play_named("portal", sound_cache.get("portal"), 0.5, randf_range(0.95, 1.15), 0.12)
+
+func play_boss_hit() -> void:
+	_play_named("boss_hit", sound_cache.get("boss_hit"), 2.5, randf_range(0.85, 1.05), 0.1)
+
+func play_boss_defeat() -> void:
+	_play_named("boss_defeat", sound_cache.get("boss_defeat"), 3.0, 1.0, 0.4)
+
+func play_powerup() -> void:
+	_play_named("powerup", sound_cache.get("powerup"), 1.0, randf_range(0.98, 1.08), 0.15)
 
 # --- HỆ THỐNG NHẠC NỀN ĐẠI DƯƠNG CHILL CHILL (OCEAN LOFI BGM) ---
 
@@ -395,6 +415,83 @@ func _synth_fail(duration: float) -> AudioStreamWAV:
 		var s16 = int(clamp(val * 20000.0, -32767.0, 32767.0))
 		bytes.encode_s16(i * 2, s16)
 	_apply_envelope(bytes, 30, 60)
+	return _build_wav(bytes)
+
+func _synth_explosion(duration: float) -> AudioStreamWAV:
+	var total = int(sample_rate * duration)
+	var bytes = PackedByteArray()
+	bytes.resize(total * 2)
+	for i in range(total):
+		var t = float(i) / float(sample_rate)
+		var prog = float(i) / float(total)
+		var boom = sin(2.0 * PI * lerp(90.0, 30.0, prog) * t) * exp(-prog * 4.0)
+		var noise = randf_range(-0.8, 0.8) * exp(-prog * 8.0)
+		var val = boom * 0.65 + noise * 0.35
+		var s16 = int(clamp(val * 24000.0, -32767.0, 32767.0))
+		bytes.encode_s16(i * 2, s16)
+	_apply_envelope(bytes, 15, 60)
+	return _build_wav(bytes)
+
+func _synth_portal(duration: float) -> AudioStreamWAV:
+	var total = int(sample_rate * duration)
+	var bytes = PackedByteArray()
+	bytes.resize(total * 2)
+	for i in range(total):
+		var t = float(i) / float(sample_rate)
+		var prog = float(i) / float(total)
+		var freq = lerp(550.0, 1150.0, sin(prog * PI))
+		var val = sin(2.0 * PI * freq * t) * sin(prog * PI)
+		var s16 = int(clamp(val * 18000.0, -32767.0, 32767.0))
+		bytes.encode_s16(i * 2, s16)
+	_apply_envelope(bytes, 30, 40)
+	return _build_wav(bytes)
+
+func _synth_boss_hit(duration: float) -> AudioStreamWAV:
+	var total = int(sample_rate * duration)
+	var bytes = PackedByteArray()
+	bytes.resize(total * 2)
+	for i in range(total):
+		var t = float(i) / float(sample_rate)
+		var prog = float(i) / float(total)
+		var freq = lerp(260.0, 70.0, prog)
+		var val = (sin(2.0 * PI * freq * t) * 0.7 + randf_range(-0.3, 0.3)) * exp(-prog * 7.0)
+		var s16 = int(clamp(val * 22000.0, -32767.0, 32767.0))
+		bytes.encode_s16(i * 2, s16)
+	_apply_envelope(bytes, 10, 40)
+	return _build_wav(bytes)
+
+func _synth_boss_defeat(duration: float) -> AudioStreamWAV:
+	var total = int(sample_rate * duration)
+	var bytes = PackedByteArray()
+	bytes.resize(total * 2)
+	var chords = [523.25, 659.25, 783.99, 1046.50, 1318.5]
+	for i in range(total):
+		var t = float(i) / float(sample_rate)
+		var prog = float(i) / float(total)
+		var chord_idx = clamp(int(prog * 5.0), 0, 4)
+		var f = chords[chord_idx]
+		var env = 1.0 - (prog * 5.0 - float(chord_idx)) * 0.85
+		var val = (sin(2.0 * PI * f * t) + 0.4 * sin(4.0 * PI * f * t)) * env * 0.5
+		var s16 = int(clamp(val * 21000.0, -32767.0, 32767.0))
+		bytes.encode_s16(i * 2, s16)
+	_apply_envelope(bytes, 20, 60)
+	return _build_wav(bytes)
+
+func _synth_powerup(duration: float) -> AudioStreamWAV:
+	var total = int(sample_rate * duration)
+	var bytes = PackedByteArray()
+	bytes.resize(total * 2)
+	var notes = [440.0, 554.37, 659.25, 880.0, 1108.7]
+	for i in range(total):
+		var t = float(i) / float(sample_rate)
+		var prog = float(i) / float(total)
+		var note_idx = clamp(int(prog * 5.0), 0, 4)
+		var f = notes[note_idx]
+		var env = sin((prog * 5.0 - float(note_idx)) * PI)
+		var val = sin(2.0 * PI * f * t) * env
+		var s16 = int(clamp(val * 19000.0, -32767.0, 32767.0))
+		bytes.encode_s16(i * 2, s16)
+	_apply_envelope(bytes, 20, 40)
 	return _build_wav(bytes)
 
 func _build_wav(data: PackedByteArray) -> AudioStreamWAV:

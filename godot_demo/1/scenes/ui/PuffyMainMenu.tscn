@@ -161,7 +161,7 @@ theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn_campaign")
 theme_override_styles/hover = SubResource("StyleBoxFlat_btn_campaign")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_campaign")
-text = "🌴 CHIẾN DỊCH 30 MÀN CHƠI (5 VÙNG BIỂN) 🌴"
+text = "🌊 CHIẾN DỊCH 60 MÀN CHƠI (8 VÙNG BIỂN) 🌊"
 
 [node name="EndlessBtn" type="Button" parent="VBox/Buttons"]
 custom_minimum_size = Vector2(0, 48)

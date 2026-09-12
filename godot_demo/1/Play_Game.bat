@@ -23,6 +23,6 @@ echo      - [ 🔄 ]: Choi lai man ngay lap tuc
 echo      - [ 🎵 ]: Bat / Tat nhanh nhac nen va am thanh
 echo      - [ ⏸️ ]: Menu tam dung day du (Tiep tuc, Choi lai, Chon man, Menu)
 echo.
-echo   4. 30 MAN CHIEN DICH (5 VUNG BIEN) VA CHE DO NAY VO TAN!
+echo   4. 60 MAN CHIEN DICH (8 VUNG BIEN), 4 BOSS DAI DUONG VA CHE DO NAY VO TAN!
 echo =========================================================================
 start "" "D:\app\godot\Godot_v4.7.1-stable_win64.exe" --path "d:\folder\tools\godot_demo\1" --rendering-driver opengl3
