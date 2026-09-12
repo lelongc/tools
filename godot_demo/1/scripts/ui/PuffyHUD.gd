@@ -27,11 +27,12 @@ func _ready() -> void:
 	_update_sound_icon()
 	_update_hud()
 
+var icon_sound_on = preload("res://textures/icons/icon_sound_on.svg")
+var icon_sound_off = preload("res://textures/icons/icon_sound_off.svg")
+
 func _update_sound_icon() -> void:
-	if PuffySoundManager.is_muted:
-		sound_btn.text = "🔇"
-	else:
-		sound_btn.text = "🎵"
+	sound_btn.icon = icon_sound_off if PuffySoundManager.is_muted else icon_sound_on
+	sound_btn.text = ""
 
 func _update_hud() -> void:
 	var world_name = PuffyGameManager.get_world_name(PuffyGameManager.current_level)

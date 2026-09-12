@@ -1,65 +1,41 @@
-[gd_scene load_steps=6 format=3 uid="uid://puffy_vic_modal_01"]
+[gd_scene load_steps=13 format=3 uid="uid://puffy_vic_modal_01"]
 
 [ext_resource type="Script" path="res://scripts/ui/PuffyVictoryModal.gd" id="1_vic_script"]
+[ext_resource type="Texture2D" path="res://textures/ui/panel_ocean_dialog.svg" id="2_panel_tex"]
+[ext_resource type="Texture2D" path="res://textures/ui/btn_bubble_gold.svg" id="3_btn_gold_tex"]
+[ext_resource type="Texture2D" path="res://textures/ui/btn_bubble_coral.svg" id="4_btn_coral_tex"]
+[ext_resource type="Texture2D" path="res://textures/ui/btn_bubble_blue.svg" id="5_btn_blue_tex"]
+[ext_resource type="Texture2D" path="res://textures/icons/icon_play.svg" id="6_play_icon"]
+[ext_resource type="Texture2D" path="res://textures/icons/icon_restart.svg" id="7_restart_icon"]
+[ext_resource type="Texture2D" path="res://textures/icons/icon_map.svg" id="8_map_icon"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vic_panel"]
-bg_color = Color(0.04, 0.22, 0.35, 0.96)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(1, 0.85, 0.2, 1)
-corner_radius_top_left = 24
-corner_radius_top_right = 24
-corner_radius_bottom_right = 24
-corner_radius_bottom_left = 24
-shadow_color = Color(0, 0, 0, 0.5)
-shadow_size = 14
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_vic_panel"]
+texture = ExtResource("2_panel_tex")
+texture_margin_left = 36.0
+texture_margin_top = 36.0
+texture_margin_right = 36.0
+texture_margin_bottom = 36.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_next"]
-bg_color = Color(0.06, 0.68, 0.52, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.6, 1, 0.85, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
-shadow_color = Color(0, 0, 0, 0.25)
-shadow_size = 4
-shadow_offset = Vector2(0, 2)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_next"]
+texture = ExtResource("3_btn_gold_tex")
+texture_margin_left = 24.0
+texture_margin_top = 16.0
+texture_margin_right = 24.0
+texture_margin_bottom = 20.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_replay"]
-bg_color = Color(1, 0.42, 0.42, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.85, 0.85, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
-shadow_color = Color(0, 0, 0, 0.25)
-shadow_size = 4
-shadow_offset = Vector2(0, 2)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_replay"]
+texture = ExtResource("4_btn_coral_tex")
+texture_margin_left = 24.0
+texture_margin_top = 16.0
+texture_margin_right = 24.0
+texture_margin_bottom = 20.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_select"]
-bg_color = Color(0.18, 0.52, 0.87, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.7, 0.88, 1, 1)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
-shadow_color = Color(0, 0, 0, 0.25)
-shadow_size = 4
-shadow_offset = Vector2(0, 2)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_select"]
+texture = ExtResource("5_btn_blue_tex")
+texture_margin_left = 24.0
+texture_margin_top = 16.0
+texture_margin_right = 24.0
+texture_margin_bottom = 20.0
 
 [node name="PuffyVictoryModal" type="CanvasLayer"]
 process_mode = 3
@@ -72,22 +48,22 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0.16, 0.24, 0.82)
+color = Color(0, 0.12, 0.22, 0.85)
 
 [node name="Panel" type="PanelContainer" parent="."]
-custom_minimum_size = Vector2(460, 360)
+custom_minimum_size = Vector2(480, 420)
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -230.0
-offset_top = -180.0
-offset_right = 230.0
-offset_bottom = 180.0
+offset_left = -240.0
+offset_top = -210.0
+offset_right = 240.0
+offset_bottom = 210.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_vic_panel")
+theme_override_styles/panel = SubResource("StyleBoxTexture_vic_panel")
 
 [node name="VBox" type="VBoxContainer" parent="Panel"]
 layout_mode = 2
@@ -96,56 +72,66 @@ alignment = 1
 
 [node name="Title" type="Label" parent="Panel/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
-theme_override_colors/font_outline_color = Color(0.8, 0.4, 0, 1)
-theme_override_constants/outline_size = 5
+theme_override_colors/font_color = Color(1, 0.95, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0.6, 0.25, 0, 1)
+theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 28
-text = "🎉 CHIẾN THẮNG TUYỆT VỜI! 🎉"
+text = "CHIẾN THẮNG TUYỆT VỜI!"
 horizontal_alignment = 1
 
 [node name="StarsContainer" type="HBoxContainer" parent="Panel/VBox"]
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 68)
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 16
 alignment = 1
 
 [node name="ScoreLabel" type="Label" parent="Panel/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.2, 1, 0.9, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.4, 1, 0.95, 1)
+theme_override_colors/font_outline_color = Color(0, 0.2, 0.3, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 20
 text = "TỔNG ĐIỂM: 0"
 horizontal_alignment = 1
 
 [node name="Buttons" type="VBoxContainer" parent="Panel/VBox"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
 [node name="NextBtn" type="Button" parent="Panel/VBox/Buttons"]
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_next")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_next")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_next")
-text = "⏩ MÀN KẾ TIẾP"
+theme_override_colors/font_color = Color(0.35, 0.15, 0, 1)
+theme_override_colors/font_pressed_color = Color(0.2, 0.08, 0, 1)
+theme_override_colors/font_hover_color = Color(0.45, 0.2, 0, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_next")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_next")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_next")
+text = " MÀN KẾ TIẾP"
+icon = ExtResource("6_play_icon")
+expand_icon = true
 
 [node name="ReplayBtn" type="Button" parent="Panel/VBox/Buttons"]
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_replay")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_replay")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_replay")
-text = "🔄 Chơi Lại"
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_replay")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_replay")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_replay")
+text = " Chơi Lại Màn"
+icon = ExtResource("7_restart_icon")
+expand_icon = true
 
 [node name="SelectBtn" type="Button" parent="Panel/VBox/Buttons"]
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_select")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_select")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_select")
-text = "🗺️ Chọn Màn Chơi"
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_select")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_select")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_select")
+text = " Bản Đồ Vùng Biển"
+icon = ExtResource("8_map_icon")
+expand_icon = true

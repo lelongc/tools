@@ -6,6 +6,7 @@ signal pearls_changed(collected: int, total: int)
 signal score_changed(score: int, combo: int)
 signal level_completed(stars: int, final_score: int)
 signal level_failed()
+signal rewarded_shot_granted()
 
 enum GameMode {
 	CAMPAIGN,
@@ -42,6 +43,53 @@ var endless_best_score: int = 0
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_load_progression()
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_WM_GO_BACK_REQUEST:
+			_handle_android_back_request()
+		NOTIFICATION_APPLICATION_PAUSED:
+			_save_progression()
+			if PuffySoundManager.bgm_player:
+				PuffySoundManager.bgm_player.stream_paused = true
+		NOTIFICATION_APPLICATION_RESUMED:
+			if PuffySoundManager.bgm_player and not PuffySoundManager.is_bgm_muted:
+				PuffySoundManager.bgm_player.stream_paused = false
+		NOTIFICATION_WM_CLOSE_REQUEST:
+			_save_progression()
+
+func _handle_android_back_request() -> void:
+	var pause_modals = get_tree().get_nodes_in_group("pause_modal")
+	if pause_modals.size() > 0:
+		pause_modals[0]._on_resume_pressed()
+		return
+		
+	var tutorial_modals = get_tree().get_nodes_in_group("tutorial_modal")
+	if tutorial_modals.size() > 0:
+		tutorial_modals[0].queue_free()
+		return
+		
+	var current_scene = get_tree().current_scene
+	if current_scene is PuffyArena:
+		if is_instance_valid(current_scene.hud):
+			current_scene.hud._on_pause_pressed()
+	elif current_scene is PuffyLevelSelect:
+		PuffySoundManager.play_stretch()
+		get_tree().change_scene_to_file("res://scenes/ui/PuffyMainMenu.tscn")
+	elif current_scene is PuffyMainMenu:
+		_save_progression()
+		get_tree().quit()
+
+func trigger_haptic(duration_ms: int = 40) -> void:
+	if OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios"):
+		Input.vibrate_handheld(duration_ms)
+
+func grant_rewarded_shot() -> void:
+	shots_remaining += 1
+	emit_signal("shots_changed", shots_remaining)
+	emit_signal("rewarded_shot_granted")
+	PuffySoundManager.play_powerup()
+	trigger_haptic(80)
 
 func _process(delta: float) -> void:
 	if is_golden_puffy:
@@ -102,9 +150,17 @@ func activate_golden_puffy(duration: float = 3.5) -> void:
 	PuffySoundManager.play_powerup()
 
 
+func get_max_shots_for_level(lvl: int) -> int:
+	if is_boss_level(lvl):
+		return 6 if lvl >= 48 else 5
+	elif lvl >= 24:
+		return 4 # Màn giải đố quy mô lớn nhiều cơ chế
+	return 3
+
 func start_campaign_level(lvl: int) -> void:
 	current_mode = GameMode.CAMPAIGN
 	current_level = clamp(lvl, 1, max_levels)
+	max_shots_per_level = get_max_shots_for_level(current_level)
 	shots_remaining = max_shots_per_level
 	level_pearls_collected = 0
 	level_pearls_total = 3
@@ -172,17 +228,29 @@ func finish_level_victory() -> void:
 	var shot_bonus = shots_remaining * 2000
 	current_score += shot_bonus
 	
-	# QUY CHUẨN TÍNH SAO CHÍNH XÁC 100%:
-	# 1 Sao: Chạm vòng xoáy đích đến
-	# 2 Sao: Ăn ít nhất 2/3 ngọc trai
-	# 3 Sao: Ăn trọn vẹn 3/3 ngọc trai VÀ còn ít nhất 1 lần bắn dự phòng!
+	# QUY CHUẨN TÍNH 3 SAO CÔNG BẰNG & KHOA HỌC (SKILL-BASED):
 	var stars = 1
-	if level_pearls_collected >= 2:
-		stars += 1
-	if level_pearls_collected >= 3 and shots_remaining >= 1:
-		stars = 3
-	elif stars == 2 and shots_remaining >= 2:
-		stars = 2 # Nếu chưa đủ ngọc nhưng bắn xuất sắc
+	if is_boss_level(current_level):
+		# Màn Trùm:
+		# 1 Sao: Đánh bại Boss
+		# 2 Sao: Còn ít nhất 1 đạn
+		# 3 Sao: Còn >= 2 đạn HOẶC điểm cao >= 9,000 (dùng combo Thủy Lôi/Siêu Sao húc Boss)
+		if shots_remaining >= 2 or current_score >= 9000:
+			stars = 3
+		elif shots_remaining >= 1:
+			stars = 2
+	else:
+		# Màn Thường:
+		# 1 Sao: Chạm vòng xoáy đích đến thành công
+		# 2 Sao: Ăn >= 2 ngọc trai HOẶC còn >= 1 đạn
+		if level_pearls_collected >= 2 or shots_remaining >= 1:
+			stars = 2
+		# 3 Sao:
+		# - Thu thập đủ 3/3 ngọc trai (Người chơi khéo léo gom hết ngọc)
+		# - HOẶC Bắn 1 phát trúng đích đỉnh cao (Ace / Hole-in-One: còn >= 2 đạn)
+		# - HOẶC Điểm Combo nảy liên hoàn đạt mốc xuất sắc (>= 7,500 điểm)
+		if level_pearls_collected >= 3 or shots_remaining >= 2 or current_score >= 7500:
+			stars = 3
 		
 	# Lưu kỷ lục sao và điểm cao nhất
 	var prev_stars = level_stars.get(current_level, 0)
@@ -207,6 +275,20 @@ func get_total_stars() -> int:
 		total += s
 	return total
 
+const SAVE_PATH = "user://puffy_progress.cfg"
+const BACKUP_PATH = "user://puffy_progress.cfg.bak"
+
+func reset_all_saved_data() -> void:
+	level_stars.clear()
+	level_high_scores.clear()
+	total_pearls_bank = 0
+	endless_best_score = 0
+	if FileAccess.file_exists(SAVE_PATH):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(SAVE_PATH))
+	if FileAccess.file_exists(BACKUP_PATH):
+		DirAccess.remove_absolute(ProjectSettings.globalize_path(BACKUP_PATH))
+	_save_progression()
+
 func _save_progression() -> void:
 	var config = ConfigFile.new()
 	for lvl in level_stars.keys():
@@ -215,11 +297,15 @@ func _save_progression() -> void:
 		config.set_value("high_scores", str(lvl), level_high_scores[lvl])
 	config.set_value("meta", "pearls", total_pearls_bank)
 	config.set_value("meta", "endless_best", endless_best_score)
-	config.save("user://puffy_progress.cfg")
+	config.save(SAVE_PATH)
+	config.save(BACKUP_PATH)
 
 func _load_progression() -> void:
 	var config = ConfigFile.new()
-	if config.load("user://puffy_progress.cfg") == OK:
+	var err = config.load(SAVE_PATH)
+	if err != OK:
+		err = config.load(BACKUP_PATH)
+	if err == OK:
 		if config.has_section("stars"):
 			for key in config.get_section_keys("stars"):
 				level_stars[int(key)] = config.get_value("stars", key, 0)

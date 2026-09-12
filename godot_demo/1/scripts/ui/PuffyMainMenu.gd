@@ -20,8 +20,15 @@ func _ready() -> void:
 	
 	var total_stars = PuffyGameManager.get_total_stars()
 	var max_stars = PuffyGameManager.max_levels * 3
-	stats_label.text = "⭐ TỔNG SAO: %d / %d | KỶ LỤC ARCADE: %d" % [total_stars, max_stars, PuffyGameManager.endless_best_score]
-	sound_btn.text = "🎵 Âm Thanh & BGM: BẬT" if not PuffySoundManager.is_muted else "🔇 Âm Thanh: TẮT"
+	stats_label.text = "TỔNG SAO: %d / %d | KỶ LỤC ARCADE: %d" % [total_stars, max_stars, PuffyGameManager.endless_best_score]
+	_update_sound_btn()
+
+var icon_sound_on = preload("res://textures/icons/icon_sound_on.svg")
+var icon_sound_off = preload("res://textures/icons/icon_sound_off.svg")
+
+func _update_sound_btn() -> void:
+	sound_btn.icon = icon_sound_off if PuffySoundManager.is_muted else icon_sound_on
+	sound_btn.text = " Âm Thanh & BGM: TẮT" if PuffySoundManager.is_muted else " Âm Thanh & BGM: BẬT"
 	
 	if OS.has_feature("web") or OS.has_feature("ios"):
 		quit_btn.visible = false
@@ -47,7 +54,7 @@ func _on_tutorial_pressed() -> void:
 func _on_sound_pressed() -> void:
 	PuffySoundManager.is_muted = not PuffySoundManager.is_muted
 	PuffySoundManager.toggle_bgm()
-	sound_btn.text = "🎵 Âm Thanh & BGM: BẬT" if not PuffySoundManager.is_muted else "🔇 Âm Thanh: TẮT"
+	_update_sound_btn()
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()

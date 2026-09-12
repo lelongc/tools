@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="playGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="70%" stop-color="#FFF9C4"/>
+      <stop offset="100%" stop-color="#FFD54F"/>
+    </linearGradient>
+    <filter id="iconShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <!-- Rounded Play Triangle -->
+  <path d="M 20 12 C 22 10, 26 10, 28 12 L 52 28 C 55 30, 55 34, 52 36 L 28 52 C 26 54, 22 54, 20 52 C 18 50, 18 46, 18 44 L 18 20 C 18 18, 18 14, 20 12 Z" 
+        fill="url(#playGrad)" stroke="#B78103" stroke-width="2.5" stroke-linejoin="round" filter="url(#iconShadow)"/>
+</svg>

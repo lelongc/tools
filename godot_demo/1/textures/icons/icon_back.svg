@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <filter id="backShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#4A0007" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <!-- Left Arrow Body -->
+  <path d="M 38 14 L 20 32 L 38 50" fill="none" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" filter="url(#backShadow)"/>
+  <path d="M 20 32 L 48 32" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round"/>
+</svg>

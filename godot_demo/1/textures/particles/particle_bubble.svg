@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <radialGradient id="bubbleGrad" cx="35%" cy="30%" r="65%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="35%" stop-color="#B3E5FC" stop-opacity="0.6"/>
+      <stop offset="70%" stop-color="#4FC3F7" stop-opacity="0.3"/>
+      <stop offset="92%" stop-color="#0288D1" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+    </radialGradient>
+  </defs>
+  <circle cx="32" cy="32" r="28" fill="url(#bubbleGrad)" stroke="#E1F5FE" stroke-width="1.5"/>
+  <ellipse cx="23" cy="21" rx="6" ry="4" fill="#FFFFFF" opacity="0.9" transform="rotate(-25, 23, 21)"/>
+  <circle cx="39" cy="42" r="2" fill="#FFFFFF" opacity="0.6"/>
+</svg>

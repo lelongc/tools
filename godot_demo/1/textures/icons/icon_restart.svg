@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="restartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#FFEBEE"/>
+      <stop offset="100%" stop-color="#FFCDD2"/>
+    </linearGradient>
+    <filter id="restartShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#4A0007" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <!-- Curved Reload Arrow -->
+  <path d="M 32 12 A 20 20 0 1 1 14 36" 
+        fill="none" stroke="url(#restartGrad)" stroke-width="7" stroke-linecap="round" filter="url(#restartShadow)"/>
+  <!-- Arrow Head -->
+  <polygon points="32,4 42,14 32,24" fill="#FFFFFF" stroke="#C62828" stroke-width="1.5" stroke-linejoin="round"/>
+</svg>

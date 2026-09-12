@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <filter id="homeShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#00251A" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <!-- Shell/House Roof -->
+  <polygon points="32,10 8,30 14,30 14,52 50,52 50,30 56,30" 
+           fill="#E0F7FA" stroke="#00838F" stroke-width="2.5" stroke-linejoin="round" filter="url(#homeShadow)"/>
+  <!-- Doorway -->
+  <path d="M 26 52 L 26 36 C 26 33, 38 33, 38 36 L 38 52 Z" fill="#00838F"/>
+</svg>

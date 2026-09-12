@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+  <defs>
+    <radialGradient id="starEmptyBody" cx="45%" cy="40%" r="65%">
+      <stop offset="0%" stop-color="#78909C"/>
+      <stop offset="50%" stop-color="#455A64"/>
+      <stop offset="100%" stop-color="#263238"/>
+    </radialGradient>
+  </defs>
+  <polygon points="48,6 59,34 89,35 65,53 74,83 48,66 22,83 31,53 7,35 37,34" 
+           fill="url(#starEmptyBody)" stroke="#90A4AE" stroke-width="3" stroke-linejoin="round" opacity="0.6"/>
+</svg>

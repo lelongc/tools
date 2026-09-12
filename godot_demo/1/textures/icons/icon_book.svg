@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <filter id="bookShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#00251A" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <!-- Open Book Pages Left & Right -->
+  <path d="M 32 18 C 24 14, 12 16, 8 18 L 8 48 C 12 46, 24 44, 32 48 Z" 
+        fill="#FFFFFF" stroke="#00838F" stroke-width="2.5" filter="url(#bookShadow)"/>
+  <path d="M 32 18 C 40 14, 52 16, 56 18 L 56 48 C 52 46, 40 44, 32 48 Z" 
+        fill="#E0F7FA" stroke="#00838F" stroke-width="2.5"/>
+  <!-- Spine Line -->
+  <line x1="32" y1="18" x2="32" y2="48" stroke="#006064" stroke-width="3"/>
+</svg>

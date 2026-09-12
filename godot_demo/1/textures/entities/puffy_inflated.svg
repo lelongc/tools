@@ -1,45 +1,90 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-  <!-- Spikes all around circumference -->
-  <!-- Top spikes -->
-  <polygon points="64,8 60,0 68,0" fill="#ff6f00"/>
-  <polygon points="44,12 36,4 48,6" fill="#ff6f00"/>
-  <polygon points="84,12 92,4 80,6" fill="#ff6f00"/>
-  <!-- Right spikes -->
-  <polygon points="116,44 126,38 122,50" fill="#ff6f00"/>
-  <polygon points="120,64 128,60 128,68" fill="#ff6f00"/>
-  <polygon points="116,84 126,90 122,78" fill="#ff6f00"/>
-  <!-- Left spikes -->
-  <polygon points="12,44 2,38 6,50" fill="#ff6f00"/>
-  <polygon points="8,64 0,60 0,68" fill="#ff6f00"/>
-  <polygon points="12,84 2,90 6,78" fill="#ff6f00"/>
-  <!-- Bottom spikes -->
-  <polygon points="64,120 60,128 68,128" fill="#ff6f00"/>
-  <polygon points="44,116 36,124 48,122" fill="#ff6f00"/>
-  <polygon points="84,116 92,124 80,122" fill="#ff6f00"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <!-- Inflated Body Radial Glow -->
+    <radialGradient id="inflatedBodyGrad" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#FFF9C4"/>
+      <stop offset="25%" stop-color="#FFCA28"/>
+      <stop offset="65%" stop-color="#FF9800"/>
+      <stop offset="90%" stop-color="#F57C00"/>
+      <stop offset="100%" stop-color="#D84315"/>
+    </radialGradient>
 
-  <!-- Giant Round Puffed Body -->
-  <circle cx="64" cy="64" r="54" fill="#ffb300" stroke="#e65100" stroke-width="4"/>
-  <!-- Stretched Light Belly -->
-  <circle cx="64" cy="74" r="36" fill="#fff59d"/>
+    <!-- Stretched Belly Gradient -->
+    <radialGradient id="inflatedBellyGrad" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#FFF9C4"/>
+      <stop offset="100%" stop-color="#FFE082"/>
+    </radialGradient>
 
-  <!-- Little Flapping Fins -->
-  <ellipse cx="22" cy="70" rx="8" ry="5" fill="#ffa000"/>
-  <ellipse cx="106" cy="70" rx="8" ry="5" fill="#ffa000"/>
+    <!-- Sharp Spike Gradient -->
+    <linearGradient id="spikeGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#E65100"/>
+      <stop offset="70%" stop-color="#FF9800"/>
+      <stop offset="100%" stop-color="#FFEB3B"/>
+    </linearGradient>
 
-  <!-- Huge Thrilled Googly Eyes -->
-  <circle cx="50" cy="50" r="16" fill="#ffffff" stroke="#e65100" stroke-width="2.5"/>
-  <circle cx="78" cy="50" r="16" fill="#ffffff" stroke="#e65100" stroke-width="2.5"/>
-  <!-- Pupils looking excited -->
-  <circle cx="53" cy="48" r="8" fill="#212121"/>
-  <circle cx="75" cy="48" r="8" fill="#212121"/>
-  <circle cx="56" cy="45" r="3" fill="#ffffff"/>
-  <circle cx="78" cy="45" r="3" fill="#ffffff"/>
+    <!-- High Excitement Cheeks -->
+    <radialGradient id="inflatedCheekGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FF1744" stop-opacity="0.9"/>
+      <stop offset="65%" stop-color="#FF5252" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#FF5252" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
 
-  <!-- Huge Puffed Rosy Cheeks -->
-  <circle cx="34" cy="66" r="10" fill="#ff5252" fill-opacity="0.8"/>
-  <circle cx="94" cy="66" r="10" fill="#ff5252" fill-opacity="0.8"/>
+  <!-- 16 Sharp Protruding Radial Spikes -->
+  <!-- Top Spikes -->
+  <polygon points="256,12 240,65 272,65" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="180,26 172,82 202,72" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="332,26 310,72 340,82" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="112,65 118,122 144,102" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="400,65 368,102 394,122" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
 
-  <!-- Open round "O" mouth screaming with joy -->
-  <circle cx="64" cy="66" r="8" fill="#bf360c" stroke="#e65100" stroke-width="2"/>
-  <path d="M60 70 Q64 74 68 70" fill="#ff8a80"/>
+  <!-- Side Spikes (Left & Right) -->
+  <polygon points="56,135 84,180 98,154" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="456,135 414,154 428,180" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="20,225 68,245 74,215" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="492,225 438,215 444,245" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="30,315 76,305 84,335" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="482,315 428,335 436,305" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
+
+  <!-- Bottom Spikes -->
+  <polygon points="75,395 125,375 110,405" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="437,395 402,405 387,375" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="150,465 175,420 198,442" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="362,465 314,442 337,420" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
+  <polygon points="256,498 240,445 272,445" fill="url(#spikeGrad)" stroke="#BF360C" stroke-width="5" stroke-linejoin="round"/>
+
+  <!-- Giant Fully Puffed Spherical Body -->
+  <circle cx="256" cy="256" r="205" fill="url(#inflatedBodyGrad)" stroke="#BF360C" stroke-width="12"/>
+
+  <!-- Stretched Light Belly with Pressure Texture -->
+  <ellipse cx="256" cy="305" rx="145" ry="120" fill="url(#inflatedBellyGrad)" stroke="#FFA000" stroke-width="6"/>
+
+  <!-- Tiny Stretched Fins Trying To Flap -->
+  <ellipse cx="80" cy="275" rx="30" ry="18" fill="#FFA000" stroke="#E65100" stroke-width="5" transform="rotate(-15, 80, 275)"/>
+  <ellipse cx="432" cy="275" rx="30" ry="18" fill="#FFA000" stroke="#E65100" stroke-width="5" transform="rotate(15, 432, 275)"/>
+
+  <!-- Huge Thrilled Wide Googly Eyes -->
+  <!-- Left Eye -->
+  <circle cx="195" cy="190" r="62" fill="#FFFFFF" stroke="#BF360C" stroke-width="9"/>
+  <circle cx="205" cy="185" r="32" fill="#1A1A1A"/>
+  <circle cx="192" cy="168" r="14" fill="#FFFFFF"/>
+  <circle cx="218" cy="198" r="7" fill="#FFFFFF"/>
+  <circle cx="205" cy="185" r="35" fill="none" stroke="#29B6F6" stroke-width="3" opacity="0.4"/>
+
+  <!-- Right Eye -->
+  <circle cx="317" cy="190" r="62" fill="#FFFFFF" stroke="#BF360C" stroke-width="9"/>
+  <circle cx="307" cy="185" r="32" fill="#1A1A1A"/>
+  <circle cx="294" cy="168" r="14" fill="#FFFFFF"/>
+  <circle cx="320" cy="198" r="7" fill="#FFFFFF"/>
+  <circle cx="307" cy="185" r="35" fill="none" stroke="#29B6F6" stroke-width="3" opacity="0.4"/>
+
+  <!-- Puffed Crimson Cheeks Under Pressure -->
+  <circle cx="135" cy="270" r="42" fill="url(#inflatedCheekGrad)"/>
+  <circle cx="377" cy="270" r="42" fill="url(#inflatedCheekGrad)"/>
+
+  <!-- Shouting Round 'O' Mouth With Teeth Highlight -->
+  <ellipse cx="256" cy="265" rx="36" ry="42" fill="#880E4F" stroke="#BF360C" stroke-width="8"/>
+  <ellipse cx="256" cy="285" rx="24" ry="16" fill="#FF4081"/>
+  <path d="M 238 238 Q 256 248 274 238" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round" fill="none"/>
 </svg>

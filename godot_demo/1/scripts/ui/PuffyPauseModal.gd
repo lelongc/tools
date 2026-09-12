@@ -8,6 +8,7 @@ extends CanvasLayer
 @onready var menu_btn: Button = $Panel/VBox/Buttons/MenuBtn
 
 func _ready() -> void:
+	add_to_group("pause_modal")
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	get_tree().paused = true
 	
@@ -16,14 +17,18 @@ func _ready() -> void:
 	sound_btn.pressed.connect(_on_sound_pressed)
 	select_btn.pressed.connect(_on_select_pressed)
 	menu_btn.pressed.connect(_on_menu_pressed)
-	
 	_update_sound_btn_text()
+
+var icon_sound_on = preload("res://textures/icons/icon_sound_on.svg")
+var icon_sound_off = preload("res://textures/icons/icon_sound_off.svg")
 
 func _update_sound_btn_text() -> void:
 	if PuffySoundManager.is_muted:
-		sound_btn.text = "🔇 Âm Thanh: TẮT"
+		sound_btn.icon = icon_sound_off
+		sound_btn.text = " Âm Thanh: TẮT"
 	else:
-		sound_btn.text = "🎵 Âm Thanh: BẬT"
+		sound_btn.icon = icon_sound_on
+		sound_btn.text = " Âm Thanh: BẬT"
 
 func _on_resume_pressed() -> void:
 	get_tree().paused = false

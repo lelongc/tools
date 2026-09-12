@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="pauseGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#E0F7FA"/>
+      <stop offset="100%" stop-color="#80DEEA"/>
+    </linearGradient>
+    <filter id="pauseShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#00251A" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <!-- Two Rounded Pause Bars -->
+  <rect x="18" y="14" width="9" height="36" rx="4.5" ry="4.5" 
+        fill="url(#pauseGrad)" stroke="#00838F" stroke-width="2" filter="url(#pauseShadow)"/>
+  <rect x="37" y="14" width="9" height="36" rx="4.5" ry="4.5" 
+        fill="url(#pauseGrad)" stroke="#00838F" stroke-width="2" filter="url(#pauseShadow)"/>
+</svg>

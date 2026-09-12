@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <filter id="mapShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#00251A" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <!-- Folded Map Tri-Panel -->
+  <polygon points="10,16 26,10 26,48 10,54" fill="#80DEEA" stroke="#00838F" stroke-width="2" filter="url(#mapShadow)"/>
+  <polygon points="26,10 42,16 42,54 26,48" fill="#E0F7FA" stroke="#00838F" stroke-width="2"/>
+  <polygon points="42,16 54,10 54,48 42,54" fill="#80DEEA" stroke="#00838F" stroke-width="2"/>
+  <!-- Map Location Pin / Cross -->
+  <circle cx="34" cy="30" r="5" fill="#FF5252" stroke="#B71C1C" stroke-width="1.5"/>
+  <path d="M 34 35 L 34 42" stroke="#FF5252" stroke-width="3" stroke-linecap="round"/>
+</svg>

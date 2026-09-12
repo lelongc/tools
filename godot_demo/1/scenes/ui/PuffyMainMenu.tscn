@@ -1,83 +1,36 @@
-[gd_scene load_steps=10 format=3 uid="uid://puffy_main_menu_01"]
+[gd_scene load_steps=13 format=3 uid="uid://puffy_main_menu_01"]
 
 [ext_resource type="Script" path="res://scripts/ui/PuffyMainMenu.gd" id="1_main_script"]
 [ext_resource type="Texture2D" path="res://textures/env/bg_tropical_ocean.svg" id="2_bg_tex"]
 [ext_resource type="Texture2D" path="res://textures/entities/puffy_normal.svg" id="3_puffy_logo"]
+[ext_resource type="Texture2D" path="res://textures/ui/btn_bubble_gold.svg" id="4_btn_gold_tex"]
+[ext_resource type="Texture2D" path="res://textures/ui/btn_bubble_blue.svg" id="5_btn_blue_tex"]
+[ext_resource type="Texture2D" path="res://textures/ui/btn_bubble_coral.svg" id="6_btn_coral_tex"]
+[ext_resource type="Texture2D" path="res://textures/icons/icon_map.svg" id="7_map_icon"]
+[ext_resource type="Texture2D" path="res://textures/icons/icon_play.svg" id="8_play_icon"]
+[ext_resource type="Texture2D" path="res://textures/icons/icon_book.svg" id="9_book_icon"]
+[ext_resource type="Texture2D" path="res://textures/icons/icon_sound_on.svg" id="10_sound_icon"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_campaign"]
-bg_color = Color(1, 0.35, 0.35, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(1, 0.92, 0.65, 1)
-corner_radius_top_left = 24
-corner_radius_top_right = 24
-corner_radius_bottom_right = 24
-corner_radius_bottom_left = 24
-shadow_color = Color(0, 0, 0, 0.3)
-shadow_size = 5
-shadow_offset = Vector2(0, 3)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_gold"]
+texture = ExtResource("4_btn_gold_tex")
+texture_margin_left = 24.0
+texture_margin_top = 16.0
+texture_margin_right = 24.0
+texture_margin_bottom = 20.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_endless"]
-bg_color = Color(1, 0.66, 0.05, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(1, 0.95, 0.7, 1)
-corner_radius_top_left = 24
-corner_radius_top_right = 24
-corner_radius_bottom_right = 24
-corner_radius_bottom_left = 24
-shadow_color = Color(0, 0, 0, 0.3)
-shadow_size = 5
-shadow_offset = Vector2(0, 3)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_blue"]
+texture = ExtResource("5_btn_blue_tex")
+texture_margin_left = 24.0
+texture_margin_top = 16.0
+texture_margin_right = 24.0
+texture_margin_bottom = 20.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_tutorial"]
-bg_color = Color(0, 0.82, 0.83, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.85, 1, 1, 1)
-corner_radius_top_left = 24
-corner_radius_top_right = 24
-corner_radius_bottom_right = 24
-corner_radius_bottom_left = 24
-shadow_color = Color(0, 0, 0, 0.3)
-shadow_size = 5
-shadow_offset = Vector2(0, 3)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_sound"]
-bg_color = Color(0.06, 0.52, 0.89, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0.75, 0.9, 1, 1)
-corner_radius_top_left = 24
-corner_radius_top_right = 24
-corner_radius_bottom_right = 24
-corner_radius_bottom_left = 24
-shadow_color = Color(0, 0, 0, 0.3)
-shadow_size = 5
-shadow_offset = Vector2(0, 3)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_quit"]
-bg_color = Color(0.35, 0.42, 0.46, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.8, 0.85, 0.9, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-shadow_color = Color(0, 0, 0, 0.25)
-shadow_size = 4
-shadow_offset = Vector2(0, 2)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_coral"]
+texture = ExtResource("6_btn_coral_tex")
+texture_margin_left = 24.0
+texture_margin_top = 16.0
+texture_margin_right = 24.0
+texture_margin_bottom = 20.0
 
 [node name="PuffyMainMenu" type="Control"]
 layout_mode = 3
@@ -126,18 +79,19 @@ stretch_mode = 5
 
 [node name="Title" type="Label" parent="VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.95, 0.2, 1)
-theme_override_colors/font_shadow_color = Color(0, 0.4, 0.5, 1)
+theme_override_colors/font_color = Color(1, 0.95, 0.35, 1)
+theme_override_colors/font_shadow_color = Color(0, 0.3, 0.45, 1)
 theme_override_constants/shadow_offset_x = 3
 theme_override_constants/shadow_offset_y = 3
-theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 42
+theme_override_constants/outline_size = 8
+theme_override_font_sizes/font_size = 44
 text = "PUFFY POP"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_color = Color(0.9, 0.98, 1, 1)
+theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 18
 text = "CÁ NÓC BUNG LỤA - SIÊU NẢY ĐẠI CHIẾN"
 horizontal_alignment = 1
@@ -145,59 +99,71 @@ horizontal_alignment = 1
 [node name="StatsLabel" type="Label" parent="VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 1, 0.8, 1)
-theme_override_font_sizes/font_size = 14
-text = "⭐ TỔNG SAO: 0 / 90"
+theme_override_font_sizes/font_size = 15
+text = "TỔNG SAO: 0 / 180"
 horizontal_alignment = 1
 
 [node name="Buttons" type="VBoxContainer" parent="VBox"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
 [node name="CampaignBtn" type="Button" parent="VBox/Buttons"]
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_campaign")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_campaign")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_campaign")
-text = "🌊 CHIẾN DỊCH 60 MÀN CHƠI (8 VÙNG BIỂN) 🌊"
+theme_override_colors/font_color = Color(0.35, 0.15, 0, 1)
+theme_override_colors/font_hover_color = Color(0.5, 0.2, 0, 1)
+theme_override_colors/font_pressed_color = Color(0.2, 0.08, 0, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_gold")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_gold")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_gold")
+text = " CHIẾN DỊCH 60 MÀN (8 VÙNG BIỂN)"
+icon = ExtResource("7_map_icon")
+expand_icon = true
 
 [node name="EndlessBtn" type="Button" parent="VBox/Buttons"]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_endless")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_endless")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_endless")
-text = "💥 ĐẠI TIỆC NẢY VÔ TẬN (ENDLESS PINBALL)"
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_blue")
+text = " ĐẠI TIỆC NẢY VÔ TẬN (ENDLESS)"
+icon = ExtResource("8_play_icon")
+expand_icon = true
 
 [node name="TutorialBtn" type="Button" parent="VBox/Buttons"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.05, 0.2, 0.25, 1)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_tutorial")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_tutorial")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_tutorial")
-text = "📖 HƯỚNG DẪN CÁCH CHƠI (SIÊU DỄ)"
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_blue")
+text = " HƯỚNG DẪN CÁCH CHƠI (SIÊU DỄ)"
+icon = ExtResource("9_book_icon")
+expand_icon = true
 
 [node name="SoundBtn" type="Button" parent="VBox/Buttons"]
 custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_sound")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_sound")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_sound")
-text = "🎵 Âm Thanh & BGM: BẬT"
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_blue")
+text = " Âm Thanh & BGM: BẬT"
+icon = ExtResource("10_sound_icon")
+expand_icon = true
 
 [node name="QuitBtn" type="Button" parent="VBox/Buttons"]
-custom_minimum_size = Vector2(0, 38)
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_quit")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_quit")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_quit")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_coral")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_coral")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_coral")
 text = "Thoát Trò Chơi"
+

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="soundGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#E0F7FA"/>
+      <stop offset="100%" stop-color="#80DEEA"/>
+    </linearGradient>
+    <filter id="soundShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#00251A" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <!-- Speaker Cone -->
+  <path d="M 12 24 L 22 24 L 34 14 C 36 12, 38 13, 38 16 L 38 48 C 38 51, 36 52, 34 50 L 22 40 L 12 40 C 10 40, 8 38, 8 36 L 8 28 C 8 26, 10 24, 12 24 Z" 
+        fill="url(#soundGrad)" stroke="#00838F" stroke-width="2.5" stroke-linejoin="round" filter="url(#soundShadow)"/>
+  <!-- Sound Waves -->
+  <path d="M 44 22 C 48 26, 48 38, 44 42" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M 50 16 C 58 23, 58 41, 50 48" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" fill="none"/>
+</svg>

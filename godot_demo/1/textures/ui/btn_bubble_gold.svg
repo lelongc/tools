@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="80" viewBox="0 0 256 80">
+  <defs>
+    <linearGradient id="goldBg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFF59D"/>
+      <stop offset="25%" stop-color="#FFD54F"/>
+      <stop offset="70%" stop-color="#FFA000"/>
+      <stop offset="100%" stop-color="#E65100"/>
+    </linearGradient>
+    <linearGradient id="goldGloss" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0.1"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="120%">
+      <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#5D4037" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Button Base Shadow & Body -->
+  <rect x="6" y="6" width="244" height="66" rx="24" ry="24" 
+        fill="url(#goldBg)" stroke="#FFF8E1" stroke-width="4" filter="url(#shadow)"/>
+
+  <!-- Inner Stroke Highlight -->
+  <rect x="9" y="9" width="238" height="60" rx="21" ry="21" 
+        fill="none" stroke="#FFE082" stroke-width="2"/>
+
+  <!-- Top Glassy Gloss Highlight -->
+  <path d="M 12 28 C 12 18, 22 10, 34 10 L 222 10 C 234 10, 244 18, 244 28 C 210 38, 46 38, 12 28 Z" 
+        fill="url(#goldGloss)"/>
+
+  <!-- Subtle Corner Pearls -->
+  <circle cx="28" cy="24" r="3" fill="#FFFFFF" opacity="0.8"/>
+  <circle cx="228" cy="24" r="3" fill="#FFFFFF" opacity="0.8"/>
+</svg>

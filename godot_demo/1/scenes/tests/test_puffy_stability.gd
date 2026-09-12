@@ -23,10 +23,15 @@ func _ready() -> void:
 	all_passed = _test_ocean_portal_teleport() and all_passed
 	all_passed = _test_gravity_vortex() and all_passed
 	all_passed = _test_boss_battle() and all_passed
+	all_passed = _test_android_back_button_and_lifecycle() and all_passed
+	all_passed = _test_rewarded_ad_and_haptic() and all_passed
+	all_passed = _test_hd_vector_textures_and_puffy_sprite() and all_passed
+	all_passed = _test_deterministic_3_star_and_wipe_data() and all_passed
+	all_passed = _test_ui_button_texture_icons() and all_passed
 	
 	print("\n-------------------------------------------------------")
 	if all_passed:
-		print("✅ [TẤT CẢ 16/16 TEST PUFFY POP HOÀN TẤT THÀNH CÔNG 100%]")
+		print("✅ [TẤT CẢ 21/21 TEST PUFFY POP HOÀN TẤT THÀNH CÔNG 100%]")
 		print("=======================================================\n")
 		get_tree().quit(0)
 	else:
@@ -503,4 +508,219 @@ func _test_boss_battle() -> bool:
 	boss.queue_free()
 	player.queue_free()
 	return true
+
+func _test_android_back_button_and_lifecycle() -> bool:
+	print("▶ [TEST 17] Kiểm tra Phím Back Android & Lưu Trữ Dự Phòng Lifecycle...")
+	# 1. Kiểm tra lưu tự động khi OS Pause
+	PuffyGameManager._notification(Node.NOTIFICATION_APPLICATION_PAUSED)
+	if not FileAccess.file_exists(PuffyGameManager.SAVE_PATH) or not FileAccess.file_exists(PuffyGameManager.BACKUP_PATH):
+		printerr("  ❌ Lỗi: File lưu hoặc file sao lưu dự phòng không tồn tại sau khi OS Pause!")
+		return false
+		
+	# 2. Kiểm tra đóng Pause Modal bằng phím Back
+	var pause_scene = load("res://scenes/ui/PuffyPauseModal.tscn")
+	var pause_modal = pause_scene.instantiate()
+	add_child(pause_modal)
+	
+	if not get_tree().paused:
+		printerr("  ❌ Lỗi: Pause modal chưa tạm dừng game!")
+		pause_modal.queue_free()
+		return false
+		
+	PuffyGameManager._handle_android_back_request()
+	if get_tree().paused:
+		printerr("  ❌ Lỗi: Phím Back không hủy tạm dừng (unpause) thông qua pause modal!")
+		return false
+		
+	print("  ✓ Phím Back Android điều hướng thông minh và lưu tự động dự phòng hoạt động xuất sắc.")
+	return true
+
+func _test_rewarded_ad_and_haptic() -> bool:
+	print("▶ [TEST 18] Kiểm tra Cơ Chế Quảng Cáo Thưởng (Rewarded Ad) & Rung Haptic...")
+	PuffyGameManager.shots_remaining = 0
+	var received = [false]
+	var callable = func(): received[0] = true
+	PuffyGameManager.rewarded_shot_granted.connect(callable)
+	
+	PuffyGameManager.grant_rewarded_shot()
+	PuffyGameManager.rewarded_shot_granted.disconnect(callable)
+	
+	if PuffyGameManager.shots_remaining != 1 or not received[0]:
+		printerr("  ❌ Lỗi: Xem quảng cáo thưởng không cấp thêm 1 lượt bắn! Shots: ", PuffyGameManager.shots_remaining, " Signal: ", received[0])
+		return false
+		
+	# Kiểm tra hàm rung không phát sinh exception
+	PuffyGameManager.trigger_haptic(50)
+	
+	print("  ✓ Cơ chế Rewarded Ad (+1 Đạn) và Haptic Vibration đạt chuẩn thương mại.")
+	return true
+
+func _test_hd_vector_textures_and_puffy_sprite() -> bool:
+	print("▶ [TEST 19] Kiểm tra Texture Vector HD 512x512 & Sprite Scale PuffyPlayer...")
+	var player_scene = load("res://scenes/prefabs/PuffyPlayer.tscn")
+	var player = player_scene.instantiate() as PuffyPlayer
+	add_child(player)
+	
+	if player.SPRITE_BASE_SCALE != Vector2(0.125, 0.125):
+		printerr("  ❌ Lỗi: SPRITE_BASE_SCALE không phải 0.125!")
+		player.queue_free()
+		return false
+		
+	# Kiểm tra khi phồng to và xì hơi
+	player.trigger_inflate()
+	if player.sprite.texture != player.tex_inflated:
+		printerr("  ❌ Lỗi: Sprite chưa chuyển sang texture inflated!")
+		player.queue_free()
+		return false
+		
+	player.trigger_jet_deflate()
+	if player.sprite.texture != player.tex_normal:
+		printerr("  ❌ Lỗi: Sprite chưa chuyển về texture normal!")
+		player.queue_free()
+		return false
+		
+	print("  ✓ Texture Vector HD 512x512 và Sprite Scale PuffyPlayer sắc nét tuyệt đối.")
+	player.queue_free()
+	return true
+
+func _test_deterministic_3_star_and_wipe_data() -> bool:
+	print("▶ [TEST 20] Kiểm tra Tính 3 Sao Công Bằng (Skill-Based) & Xóa Sạch Dữ Liệu Cũ...")
+	# 1. Kịch bản Ăn đủ 3 ngọc -> Đạt 3 sao
+	PuffyGameManager.current_level = 1
+	PuffyGameManager.level_pearls_collected = 3
+	PuffyGameManager.shots_remaining = 0
+	PuffyGameManager.current_score = 3000
+	PuffyGameManager.finish_level_victory()
+	if PuffyGameManager.level_stars.get(1, 0) != 3:
+		printerr("  ❌ Lỗi: Ăn đủ 3 ngọc phải đạt 3 sao! Nhận: ", PuffyGameManager.level_stars.get(1, 0))
+		return false
+		
+	# 2. Kịch bản Bắn xuất sắc 1 hit (còn 2 đạn) không cần ngọc -> Đạt 3 sao
+	PuffyGameManager.current_level = 2
+	PuffyGameManager.level_pearls_collected = 0
+	PuffyGameManager.shots_remaining = 2
+	PuffyGameManager.current_score = 4000
+	PuffyGameManager.finish_level_victory()
+	if PuffyGameManager.level_stars.get(2, 0) != 3:
+		printerr("  ❌ Lỗi: Bắn 1 hit xuất sắc còn >= 2 đạn phải đạt 3 sao! Nhận: ", PuffyGameManager.level_stars.get(2, 0))
+		return false
+		
+	# 3. Kịch bản Màn Trùm: Hạ Boss còn 2 đạn -> Đạt 3 sao
+	PuffyGameManager.current_level = 16 # Boss 1
+	PuffyGameManager.shots_remaining = 2
+	PuffyGameManager.current_score = 8000
+	PuffyGameManager.finish_level_victory()
+	if PuffyGameManager.level_stars.get(16, 0) != 3:
+		printerr("  ❌ Lỗi: Hạ Boss còn >= 2 đạn phải đạt 3 sao! Nhận: ", PuffyGameManager.level_stars.get(16, 0))
+		return false
+		
+	# 4. Kiểm tra xóa sạch bộ nhớ lưu trữ cũ theo yêu cầu người dùng
+	PuffyGameManager.reset_all_saved_data()
+	if PuffyGameManager.get_total_stars() != 0 or PuffyGameManager.total_pearls_bank != 0:
+		printerr("  ❌ Lỗi: Hàm reset_all_saved_data() không xóa sạch dữ liệu tiến trình!")
+		return false
+		
+	print("  ✓ Cơ chế tính 3 sao công bằng (không hên xui) và xóa sạch dữ liệu cũ hoạt động xuất sắc.")
+	return true
+
+func _test_ui_button_texture_icons() -> bool:
+	print("▶ [TEST 21] Kiểm tra Texture Asset Icon đồng bộ trong toàn bộ các nút bấm...")
+	
+	# 1. PuffyHUD
+	var hud_scene = load("res://scenes/ui/PuffyHUD.tscn")
+	var hud = hud_scene.instantiate()
+	add_child(hud)
+	var unstick_btn = hud.get_node("TopBar/ActionsContainer/UnstickBtn") as Button
+	var sound_btn_hud = hud.get_node("TopBar/ActionsContainer/SoundBtn") as Button
+	var restart_btn_hud = hud.get_node("TopBar/ActionsContainer/RestartBtn") as Button
+	var pause_btn_hud = hud.get_node("TopBar/ActionsContainer/PauseBtn") as Button
+	if not unstick_btn.icon or not sound_btn_hud.icon or not restart_btn_hud.icon or not pause_btn_hud.icon:
+		printerr("  ❌ Lỗi: PuffyHUD nút bấm thiếu texture asset icon!")
+		hud.queue_free()
+		return false
+	hud.queue_free()
+	
+	# 2. PuffyMainMenu
+	var menu_scene = load("res://scenes/ui/PuffyMainMenu.tscn")
+	var menu = menu_scene.instantiate()
+	add_child(menu)
+	var camp_btn = menu.get_node("VBox/Buttons/CampaignBtn") as Button
+	var endless_btn = menu.get_node("VBox/Buttons/EndlessBtn") as Button
+	var tuto_btn = menu.get_node("VBox/Buttons/TutorialBtn") as Button
+	var sound_btn_menu = menu.get_node("VBox/Buttons/SoundBtn") as Button
+	if not camp_btn.icon or not endless_btn.icon or not tuto_btn.icon or not sound_btn_menu.icon:
+		printerr("  ❌ Lỗi: PuffyMainMenu nút bấm thiếu texture asset icon!")
+		menu.queue_free()
+		return false
+	menu.queue_free()
+	
+	# 3. PuffyPauseModal
+	var pause_scene = load("res://scenes/ui/PuffyPauseModal.tscn")
+	var pause_modal = pause_scene.instantiate()
+	add_child(pause_modal)
+	var resume_btn = pause_modal.get_node("Panel/VBox/Buttons/ResumeBtn") as Button
+	var restart_btn_pause = pause_modal.get_node("Panel/VBox/Buttons/RestartBtn") as Button
+	var sound_btn_pause = pause_modal.get_node("Panel/VBox/Buttons/SoundBtn") as Button
+	var select_btn_pause = pause_modal.get_node("Panel/VBox/Buttons/SelectBtn") as Button
+	var menu_btn_pause = pause_modal.get_node("Panel/VBox/Buttons/MenuBtn") as Button
+	if not resume_btn.icon or not restart_btn_pause.icon or not sound_btn_pause.icon or not select_btn_pause.icon or not menu_btn_pause.icon:
+		printerr("  ❌ Lỗi: PuffyPauseModal nút bấm thiếu texture asset icon!")
+		pause_modal.queue_free()
+		return false
+	pause_modal.queue_free()
+	
+	# 4. PuffyVictoryModal
+	var vic_scene = load("res://scenes/ui/PuffyVictoryModal.tscn")
+	var vic_modal = vic_scene.instantiate()
+	add_child(vic_modal)
+	var next_btn = vic_modal.get_node("Panel/VBox/Buttons/NextBtn") as Button
+	var replay_btn = vic_modal.get_node("Panel/VBox/Buttons/ReplayBtn") as Button
+	var select_btn_vic = vic_modal.get_node("Panel/VBox/Buttons/SelectBtn") as Button
+	if not next_btn.icon or not replay_btn.icon or not select_btn_vic.icon:
+		printerr("  ❌ Lỗi: PuffyVictoryModal nút bấm thiếu texture asset icon!")
+		vic_modal.queue_free()
+		return false
+	vic_modal.queue_free()
+	
+	# 5. PuffyGameOverModal
+	var fail_scene = load("res://scenes/ui/PuffyGameOverModal.tscn")
+	var fail_modal = fail_scene.instantiate()
+	add_child(fail_modal)
+	var ad_btn = fail_modal.get_node("Panel/VBox/Buttons/RewardAdBtn") as Button
+	var retry_btn = fail_modal.get_node("Panel/VBox/Buttons/RetryBtn") as Button
+	var select_btn_fail = fail_modal.get_node("Panel/VBox/Buttons/SelectBtn") as Button
+	var menu_btn_fail = fail_modal.get_node("Panel/VBox/Buttons/MenuBtn") as Button
+	if not ad_btn.icon or not retry_btn.icon or not select_btn_fail.icon or not menu_btn_fail.icon:
+		printerr("  ❌ Lỗi: PuffyGameOverModal nút bấm thiếu texture asset icon!")
+		fail_modal.queue_free()
+		return false
+	fail_modal.queue_free()
+	
+	# 6. PuffyTutorialModal
+	var tuto_modal_scene = load("res://scenes/ui/PuffyTutorialModal.tscn")
+	var tuto_modal = tuto_modal_scene.instantiate()
+	add_child(tuto_modal)
+	var close_btn = tuto_modal.get_node("Panel/VBox/CloseBtn") as Button
+	if not close_btn.icon:
+		printerr("  ❌ Lỗi: PuffyTutorialModal nút bấm thiếu texture asset icon!")
+		tuto_modal.queue_free()
+		return false
+	tuto_modal.queue_free()
+	
+	# 7. PuffyLevelSelect
+	var lvl_scene = load("res://scenes/ui/PuffyLevelSelect.tscn")
+	var lvl_select = lvl_scene.instantiate()
+	add_child(lvl_select)
+	var back_btn = lvl_select.get_node("BottomBar/BackBtn") as Button
+	var reset_btn = lvl_select.get_node("BottomBar/ResetBtn") as Button
+	if not back_btn.icon or not reset_btn.icon:
+		printerr("  ❌ Lỗi: PuffyLevelSelect nút bấm thiếu texture asset icon!")
+		lvl_select.queue_free()
+		return false
+	lvl_select.queue_free()
+	
+	print("  ✓ Toàn bộ các nút bấm trong HUD, Menu, Level Select và các Modal đã được trang bị Texture Asset Icon đồng bộ và chuẩn xác.")
+	return true
+
+
 

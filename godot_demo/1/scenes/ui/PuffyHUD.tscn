@@ -1,80 +1,36 @@
-[gd_scene load_steps=10 format=3 uid="uid://puffy_hud_node_01"]
+[gd_scene load_steps=12 format=3 uid="uid://puffy_hud_node_01"]
 
 [ext_resource type="Script" path="res://scripts/ui/PuffyHUD.gd" id="1_hud_script"]
 [ext_resource type="Texture2D" path="res://textures/entities/puffy_normal.svg" id="2_puffy_icon"]
 [ext_resource type="Texture2D" path="res://textures/env/bubble_pearl.svg" id="3_pearl_icon"]
+[ext_resource type="Texture2D" path="res://textures/ui/btn_bubble_gold.svg" id="4_btn_gold_tex"]
+[ext_resource type="Texture2D" path="res://textures/ui/btn_icon_round.svg" id="5_btn_round_tex"]
+[ext_resource type="Texture2D" path="res://textures/icons/icon_lifebuoy.svg" id="6_buoy_icon"]
+[ext_resource type="Texture2D" path="res://textures/icons/icon_sound_on.svg" id="7_sound_icon"]
+[ext_resource type="Texture2D" path="res://textures/icons/icon_restart.svg" id="8_restart_icon"]
+[ext_resource type="Texture2D" path="res://textures/icons/icon_pause.svg" id="9_pause_icon"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_unstick"]
-bg_color = Color(0.95, 0.61, 0.07, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.9, 0.6, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.25)
-shadow_size = 3
-shadow_offset = Vector2(0, 2)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_unstick"]
+texture = ExtResource("4_btn_gold_tex")
+texture_margin_left = 20.0
+texture_margin_top = 14.0
+texture_margin_right = 20.0
+texture_margin_bottom = 16.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_sound"]
-bg_color = Color(0.09, 0.63, 0.52, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.6, 1, 0.85, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.25)
-shadow_size = 3
-shadow_offset = Vector2(0, 2)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_restart"]
-bg_color = Color(0.91, 0.3, 0.24, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 0.8, 0.8, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.25)
-shadow_size = 3
-shadow_offset = Vector2(0, 2)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_pause"]
-bg_color = Color(0.16, 0.5, 0.73, 0.9)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.6, 0.85, 1, 1)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
-shadow_color = Color(0, 0, 0, 0.25)
-shadow_size = 3
-shadow_offset = Vector2(0, 2)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_icon"]
+texture = ExtResource("5_btn_round_tex")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hint_panel"]
-bg_color = Color(0.04, 0.18, 0.28, 0.8)
+bg_color = Color(0.04, 0.16, 0.28, 0.85)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0, 0.8, 0.85, 0.6)
-corner_radius_top_left = 18
-corner_radius_top_right = 18
-corner_radius_bottom_right = 18
-corner_radius_bottom_left = 18
+border_color = Color(0, 0.8, 0.85, 0.7)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
 
 [node name="PuffyHUD" type="CanvasLayer"]
 script = ExtResource("1_hud_script")
@@ -85,17 +41,17 @@ anchor_right = 1.0
 offset_left = 20.0
 offset_top = 12.0
 offset_right = -20.0
-offset_bottom = 58.0
+offset_bottom = 60.0
 grow_horizontal = 2
-theme_override_constants/separation = 22
+theme_override_constants/separation = 20
 
 [node name="TitleLabel" type="Label" parent="TopBar"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.95, 0.2, 1)
-theme_override_colors/font_outline_color = Color(0, 0.3, 0.5, 1)
-theme_override_constants/outline_size = 4
+theme_override_colors/font_color = Color(1, 0.95, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0, 0.25, 0.45, 1)
+theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 20
-text = "MÀN 1 / 30"
+text = "MÀN 1"
 vertical_alignment = 1
 
 [node name="ShotsContainer" type="HBoxContainer" parent="TopBar"]
@@ -103,7 +59,7 @@ layout_mode = 2
 theme_override_constants/separation = 6
 
 [node name="PuffyIcon" type="TextureRect" parent="TopBar/ShotsContainer"]
-custom_minimum_size = Vector2(32, 32)
+custom_minimum_size = Vector2(34, 34)
 layout_mode = 2
 texture = ExtResource("2_puffy_icon")
 expand_mode = 1
@@ -120,7 +76,7 @@ layout_mode = 2
 theme_override_constants/separation = 6
 
 [node name="PearlIcon" type="TextureRect" parent="TopBar/PearlsContainer"]
-custom_minimum_size = Vector2(30, 30)
+custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
 texture = ExtResource("3_pearl_icon")
 expand_mode = 1
@@ -138,53 +94,55 @@ size_flags_horizontal = 3
 
 [node name="ActionsContainer" type="HBoxContainer" parent="TopBar"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
 [node name="UnstickBtn" type="Button" parent="TopBar/ActionsContainer"]
-custom_minimum_size = Vector2(85, 38)
+custom_minimum_size = Vector2(104, 44)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 14
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_unstick")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_unstick")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_unstick")
-text = "🛟 Cứu"
+theme_override_colors/font_color = Color(0.35, 0.15, 0, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_unstick")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_unstick")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_unstick")
+text = " CỨU"
+icon = ExtResource("6_buoy_icon")
+expand_icon = true
 
 [node name="SoundBtn" type="Button" parent="TopBar/ActionsContainer"]
-custom_minimum_size = Vector2(40, 38)
+custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_sound")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_sound")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_sound")
-text = "🎵"
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_icon")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_icon")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_icon")
+icon = ExtResource("7_sound_icon")
+expand_icon = true
 
 [node name="RestartBtn" type="Button" parent="TopBar/ActionsContainer"]
-custom_minimum_size = Vector2(40, 38)
+custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_restart")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_restart")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_restart")
-text = "🔄"
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_icon")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_icon")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_icon")
+icon = ExtResource("8_restart_icon")
+expand_icon = true
 
 [node name="PauseBtn" type="Button" parent="TopBar/ActionsContainer"]
-custom_minimum_size = Vector2(40, 38)
+custom_minimum_size = Vector2(44, 44)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_pause")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_pause")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_pause")
-text = "⏸"
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_icon")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_icon")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_icon")
+icon = ExtResource("9_pause_icon")
+expand_icon = true
 
 [node name="HintContainer" type="PanelContainer" parent="."]
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 260.0
-offset_top = -48.0
-offset_right = -260.0
+offset_left = 240.0
+offset_top = -52.0
+offset_right = -240.0
 offset_bottom = -12.0
 grow_horizontal = 2
 grow_vertical = 0
@@ -195,6 +153,6 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_hint_panel")
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 0.95)
 theme_override_font_sizes/font_size = 13
-text = "👆 KÉO LÙI ĐỂ BẮN - CHẠM 1: PHỒNG TO - CHẠM 2: XÌ HƠI PHẢN LỰC!"
+text = "KÉO LÙI ĐỂ BẮN - CHẠM 1: PHỒNG TO - CHẠM 2: XÌ HƠI PHẢN LỰC"
 horizontal_alignment = 1
 vertical_alignment = 1

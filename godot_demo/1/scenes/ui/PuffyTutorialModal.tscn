@@ -1,47 +1,35 @@
-[gd_scene load_steps=5 format=3 uid="uid://puffy_tuto_modal_01"]
+[gd_scene load_steps=8 format=3 uid="uid://puffy_tuto_modal_01"]
 
 [ext_resource type="Script" path="res://scripts/ui/PuffyTutorialModal.gd" id="1_tuto_script"]
+[ext_resource type="Texture2D" path="res://textures/ui/panel_ocean_dialog.svg" id="2_panel_tex"]
+[ext_resource type="Texture2D" path="res://textures/ui/btn_bubble_gold.svg" id="3_btn_gold_tex"]
+[ext_resource type="Texture2D" path="res://textures/icons/icon_play.svg" id="4_play_icon"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tuto_panel"]
-bg_color = Color(0.05, 0.24, 0.38, 0.96)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
-border_color = Color(0, 0.85, 0.9, 1)
-corner_radius_top_left = 24
-corner_radius_top_right = 24
-corner_radius_bottom_right = 24
-corner_radius_bottom_left = 24
-shadow_color = Color(0, 0, 0, 0.5)
-shadow_size = 14
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_tuto_panel"]
+texture = ExtResource("2_panel_tex")
+texture_margin_left = 36.0
+texture_margin_top = 36.0
+texture_margin_right = 36.0
+texture_margin_bottom = 36.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_step_box"]
-bg_color = Color(0.08, 0.35, 0.52, 0.6)
+bg_color = Color(0.04, 0.2, 0.32, 0.75)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.3, 0.75, 0.95, 0.5)
+border_color = Color(0, 0.8, 0.85, 0.5)
 corner_radius_top_left = 14
 corner_radius_top_right = 14
 corner_radius_bottom_right = 14
 corner_radius_bottom_left = 14
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_close"]
-bg_color = Color(0.06, 0.68, 0.52, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.6, 1, 0.85, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-shadow_color = Color(0, 0, 0, 0.3)
-shadow_size = 4
-shadow_offset = Vector2(0, 2)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_close"]
+texture = ExtResource("3_btn_gold_tex")
+texture_margin_left = 24.0
+texture_margin_top = 16.0
+texture_margin_right = 24.0
+texture_margin_bottom = 20.0
 
 [node name="PuffyTutorialModal" type="CanvasLayer"]
 process_mode = 3
@@ -54,22 +42,22 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0.12, 0.2, 0.8)
+color = Color(0, 0.12, 0.2, 0.85)
 
 [node name="Panel" type="PanelContainer" parent="."]
-custom_minimum_size = Vector2(560, 480)
+custom_minimum_size = Vector2(580, 500)
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -280.0
-offset_top = -240.0
-offset_right = 280.0
-offset_bottom = 240.0
+offset_left = -290.0
+offset_top = -250.0
+offset_right = 290.0
+offset_bottom = 250.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_tuto_panel")
+theme_override_styles/panel = SubResource("StyleBoxTexture_tuto_panel")
 
 [node name="VBox" type="VBoxContainer" parent="Panel"]
 layout_mode = 2
@@ -78,11 +66,11 @@ alignment = 1
 
 [node name="Title" type="Label" parent="Panel/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.95, 0.2, 1)
-theme_override_colors/font_outline_color = Color(0, 0.4, 0.5, 1)
+theme_override_colors/font_color = Color(1, 0.95, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0, 0.3, 0.45, 1)
 theme_override_constants/outline_size = 6
 theme_override_font_sizes/font_size = 26
-text = "📖 CÁCH CHƠI SIÊU DỄ (3 BƯỚC)"
+text = "CÁCH CHƠI SIÊU DỄ (3 BƯỚC)"
 horizontal_alignment = 1
 
 [node name="Step1" type="PanelContainer" parent="Panel/VBox"]
@@ -119,11 +107,13 @@ text = "3. CHẠM 2 - XÌ HƠI PHẢN LỰC (JET):\nChạm tiếp lần nữa, P
 autowrap_mode = 2
 
 [node name="CloseBtn" type="Button" parent="Panel/VBox"]
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 17
-theme_override_styles/normal = SubResource("StyleBoxFlat_btn_close")
-theme_override_styles/hover = SubResource("StyleBoxFlat_btn_close")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_close")
-text = "👍 ĐÃ HIỂU - CHƠI NGAY THÔI!"
+theme_override_colors/font_color = Color(0.35, 0.15, 0, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_close")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_close")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_close")
+text = " ĐÃ HIỂU - CHƠI NGAY THÔI!"
+icon = ExtResource("4_play_icon")
+expand_icon = true
