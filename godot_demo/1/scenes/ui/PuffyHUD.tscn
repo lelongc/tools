@@ -19,6 +19,10 @@ texture_margin_bottom = 16.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_icon"]
 texture = ExtResource("5_btn_round_tex")
+texture_margin_left = 12.0
+texture_margin_top = 12.0
+texture_margin_right = 12.0
+texture_margin_bottom = 12.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hint_panel"]
 bg_color = Color(0.04, 0.16, 0.28, 0.85)
@@ -99,6 +103,7 @@ theme_override_constants/separation = 12
 [node name="UnstickBtn" type="Button" parent="TopBar/ActionsContainer"]
 custom_minimum_size = Vector2(104, 44)
 layout_mode = 2
+size_flags_vertical = 4
 theme_override_colors/font_color = Color(0.35, 0.15, 0, 1)
 theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_unstick")
@@ -109,8 +114,9 @@ icon = ExtResource("6_buoy_icon")
 expand_icon = true
 
 [node name="SoundBtn" type="Button" parent="TopBar/ActionsContainer"]
-custom_minimum_size = Vector2(44, 44)
+custom_minimum_size = Vector2(46, 46)
 layout_mode = 2
+size_flags_vertical = 4
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_icon")
 theme_override_styles/hover = SubResource("StyleBoxTexture_btn_icon")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_icon")
@@ -118,8 +124,9 @@ icon = ExtResource("7_sound_icon")
 expand_icon = true
 
 [node name="RestartBtn" type="Button" parent="TopBar/ActionsContainer"]
-custom_minimum_size = Vector2(44, 44)
+custom_minimum_size = Vector2(46, 46)
 layout_mode = 2
+size_flags_vertical = 4
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_icon")
 theme_override_styles/hover = SubResource("StyleBoxTexture_btn_icon")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_icon")
@@ -127,8 +134,9 @@ icon = ExtResource("8_restart_icon")
 expand_icon = true
 
 [node name="PauseBtn" type="Button" parent="TopBar/ActionsContainer"]
-custom_minimum_size = Vector2(44, 44)
+custom_minimum_size = Vector2(46, 46)
 layout_mode = 2
+size_flags_vertical = 4
 theme_override_styles/normal = SubResource("StyleBoxTexture_btn_icon")
 theme_override_styles/hover = SubResource("StyleBoxTexture_btn_icon")
 theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_icon")

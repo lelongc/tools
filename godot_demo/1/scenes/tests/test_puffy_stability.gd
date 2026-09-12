@@ -30,10 +30,11 @@ func _ready() -> void:
 	all_passed = _test_ui_button_texture_icons() and all_passed
 	all_passed = _test_aquatic_particles_no_stars() and all_passed
 	all_passed = _test_multilanguage_and_ergonomic_ui() and all_passed
+	all_passed = _test_touch_slingshot_precision_and_display_settings() and all_passed
 	
 	print("\n-------------------------------------------------------")
 	if all_passed:
-		print("✅ [TẤT CẢ 23/23 TEST PUFFY POP HOÀN TẤT THÀNH CÔNG 100%]")
+		print("✅ [TẤT CẢ 24/24 TEST PUFFY POP HOÀN TẤT THÀNH CÔNG 100%]")
 		print("=======================================================\n")
 		get_tree().quit(0)
 	else:
@@ -867,6 +868,134 @@ func _test_multilanguage_and_ergonomic_ui() -> bool:
 	dummy.queue_free()
 	
 	print("  ✓ Đa ngôn ngữ (13 quốc gia), bố cục giao diện công thái học 2 tầng thân thiện và âm thanh/VFX mới hoạt động hoàn hảo 100%.")
+	return true
+
+func _test_touch_slingshot_precision_and_display_settings() -> bool:
+	print("▶ [TEST 24] Kiểm tra Cảm Ứng Bắt Điểm 'Dính', Chuẩn Hướng Bắn, Dây Ná & Display Settings...")
+	
+	# 1. Kiểm tra cấu hình project.godot
+	var stretch_aspect = ProjectSettings.get_setting("display/window/stretch/aspect")
+	if stretch_aspect != "keep":
+		printerr("  ❌ Lỗi: stretch/aspect phải là 'keep' để chống méo mó! Giá trị hiện tại: %s" % stretch_aspect)
+		return false
+		
+	var orientation = ProjectSettings.get_setting("display/window/handheld/orientation")
+	if orientation != 2:
+		printerr("  ❌ Lỗi: handheld/orientation phải là 2 (Sensor Landscape)! Giá trị: %s" % orientation)
+		return false
+		
+	# 2. Kiểm tra PuffyPlayer & TrajectoryLine
+	var player_scene = load("res://scenes/prefabs/PuffyPlayer.tscn")
+	var player = player_scene.instantiate() as PuffyPlayer
+	add_child(player)
+	player.reset_to_launch_pad(Vector2(160, 520))
+	
+	var traj_scene = Node2D.new()
+	var traj = TrajectoryLine.new()
+	traj.puffy_player = player
+	traj_scene.add_child(traj)
+	add_child(traj_scene)
+	
+	# 3. Test Bắt Điểm Dính với Touch Event (Bán kính 160px)
+	var touch_start = InputEventScreenTouch.new()
+	touch_start.index = 0
+	touch_start.pressed = true
+	touch_start.position = Vector2(230, 560) # Cách 82px (trước đây trượt vì < 80)
+	player._input(touch_start)
+	
+	if player.current_state != PuffyPlayer.PuffyState.AIMING:
+		printerr("  ❌ Lỗi: Chạm trong bán kính 160px không dính (không kích hoạt AIMING)!")
+		player.queue_free()
+		traj_scene.queue_free()
+		return false
+	if player.active_touch_index != 0:
+		printerr("  ❌ Lỗi: active_touch_index không được lưu chuẩn!")
+		player.queue_free()
+		traj_scene.queue_free()
+		return false
+		
+	# 4. Test Kéo Dãn (Drag Event)
+	var touch_drag = InputEventScreenDrag.new()
+	touch_drag.index = 0
+	touch_drag.position = Vector2(80, 580) # Kéo lui về sau
+	player._input(touch_drag)
+	player._physics_process(0.016)
+	
+	# Puffy phải bị kéo thụt lùi về sau
+	if player.global_position.x >= player.launch_origin.x:
+		printerr("  ❌ Lỗi: Puffy không bị kéo thụt lùi theo hướng tay kéo!")
+		player.queue_free()
+		traj_scene.queue_free()
+		return false
+		
+	# TrajectoryLine cập nhật đồng bộ
+	traj._process(0.016)
+	if not traj.are_dots_visible:
+		printerr("  ❌ Lỗi: TrajectoryLine không hiển thị tia ngắm khi kéo!")
+		player.queue_free()
+		traj_scene.queue_free()
+		return false
+		
+	# 5. Test Huỷ Bắn An Toàn khi nhả tay gần bệ (< 25px)
+	var touch_cancel = InputEventScreenTouch.new()
+	touch_cancel.index = 0
+	touch_cancel.pressed = false
+	touch_cancel.position = Vector2(165, 520) # Rất gần bệ (< 10px)
+	PuffyGameManager.shots_remaining = 3
+	player._input(touch_cancel)
+	
+	if player.current_state != PuffyPlayer.PuffyState.IDLE:
+		printerr("  ❌ Lỗi: Nhả gần bệ không huỷ bắn về IDLE!")
+		player.queue_free()
+		traj_scene.queue_free()
+		return false
+	if PuffyGameManager.shots_remaining != 3:
+		printerr("  ❌ Lỗi: Huỷ bắn nhưng bị trừ đạn!")
+		player.queue_free()
+		traj_scene.queue_free()
+		return false
+		
+	# 6. Test Bắn Thật & Kiểm Tra Hướng Bắn Chuẩn Xác
+	player.reset_to_launch_pad(Vector2(160, 520))
+	var touch_aim2 = InputEventScreenTouch.new()
+	touch_aim2.index = 1
+	touch_aim2.pressed = true
+	touch_aim2.position = Vector2(160, 520)
+	player._input(touch_aim2)
+	
+	var touch_drag2 = InputEventScreenDrag.new()
+	touch_drag2.index = 1
+	touch_drag2.position = Vector2(60, 520) # Kéo thẳng sang trái 100px -> Bắn thẳng sang phải!
+	player._input(touch_drag2)
+	
+	var touch_release2 = InputEventScreenTouch.new()
+	touch_release2.index = 1
+	touch_release2.pressed = false
+	touch_release2.position = Vector2(60, 520)
+	player._input(touch_release2)
+	
+	if player.current_state != PuffyPlayer.PuffyState.FLYING_NORMAL:
+		printerr("  ❌ Lỗi: Thả tay không chuyển sang FLYING_NORMAL!")
+		player.queue_free()
+		traj_scene.queue_free()
+		return false
+		
+	# Hướng bắn phải sang phải (velocity.x > 0, velocity.y ~ 0)
+	if player.velocity.x <= 200.0 or abs(player.velocity.y) > 10.0:
+		printerr("  ❌ Lỗi: Hướng bắn không chuẩn xác so với góc kéo! velocity = %s" % player.velocity)
+		player.queue_free()
+		traj_scene.queue_free()
+		return false
+		
+	if player.post_launch_tap_cooldown <= 0.0:
+		printerr("  ❌ Lỗi: Không có cooldown chống kích hoạt nhầm sau khi bắn!")
+		player.queue_free()
+		traj_scene.queue_free()
+		return false
+		
+	player.queue_free()
+	traj_scene.queue_free()
+	print("  ✓ Cảm ứng chạm dính 160px, kéo dãn trực quan, hướng bắn chuẩn xác 100%, huỷ bắn an toàn và display settings chuẩn mực.")
 	return true
 
 

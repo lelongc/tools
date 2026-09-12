@@ -1,0 +1,160 @@
+[gd_scene format=3 uid="uid://dmpartyhud3d"]
+
+[ext_resource type="Script" path="res://scripts/ui/PartyHUD3D.gd" id="1_hud3d"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_order"]
+bg_color = Color(0.1, 0.12, 0.18, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.85, 0.2, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p1"]
+bg_color = Color(0.6, 0.15, 0.2, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.35, 0.45, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 14.0
+content_margin_top = 8.0
+content_margin_right = 14.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p2"]
+bg_color = Color(0.1, 0.35, 0.6, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.7, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 14.0
+content_margin_top = 8.0
+content_margin_right = 14.0
+content_margin_bottom = 8.0
+
+[node name="PartyHUD3D" type="CanvasLayer"]
+layer = 5
+script = ExtResource("1_hud3d")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopBar" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -320.0
+offset_top = 16.0
+offset_right = 320.0
+offset_bottom = 100.0
+grow_horizontal = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="TimerLabel" type="Label" parent="Root/TopBar"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 26
+text = "⏳ THỜI GIAN: 02:00"
+horizontal_alignment = 1
+
+[node name="OrdersBox" type="PanelContainer" parent="Root/TopBar"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_order")
+
+[node name="OrdersLabel" type="Label" parent="Root/TopBar/OrdersBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "📦 ĐƠN HÀNG: [ĐỎ: 0/2]  [XANH: 0/1]"
+horizontal_alignment = 1
+
+[node name="P1Card" type="PanelContainer" parent="Root"]
+layout_mode = 1
+offset_left = 24.0
+offset_top = 20.0
+offset_right = 220.0
+offset_bottom = 90.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_p1")
+
+[node name="VBox" type="VBoxContainer" parent="Root/P1Card"]
+layout_mode = 2
+
+[node name="P1Score" type="Label" parent="Root/P1Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.9, 1)
+theme_override_font_sizes/font_size = 18
+text = "ĐỎ: 0 ĐIỂM"
+
+[node name="P1Slaps" type="Label" parent="Root/P1Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.7, 0.7, 1)
+theme_override_font_sizes/font_size = 14
+text = "Tát bạn: 0 lần"
+
+[node name="P2Card" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = 20.0
+offset_right = -24.0
+offset_bottom = 90.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_p2")
+
+[node name="VBox" type="VBoxContainer" parent="Root/P2Card"]
+layout_mode = 2
+
+[node name="P2Score" type="Label" parent="Root/P2Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "XANH: 0 ĐIỂM"
+
+[node name="P2Slaps" type="Label" parent="Root/P2Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "Tát bạn: 0 lần"
+
+[node name="BottomHint" type="Label" parent="Root"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -42.0
+offset_bottom = -14.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 0.85)
+theme_override_font_sizes/font_size = 15
+text = "🔴 P1: [WASD] Di chuyển | [Space] Bắn sơn | [F] Tát bạn lộn cổ | [E] Vác/Ném    ||    🔵 P2: [Mũi tên] Di chuyển | [Enter] Bắn sơn | [R-Ctrl] Tát bạn | [L] Vác/Ném"
+horizontal_alignment = 1
