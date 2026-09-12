@@ -1,9 +1,69 @@
-[gd_scene load_steps=2 format=3 uid="uid://puffy_fail_modal_01"]
+[gd_scene load_steps=6 format=3 uid="uid://puffy_fail_modal_01"]
 
 [ext_resource type="Script" path="res://scripts/ui/PuffyGameOverModal.gd" id="1_fail_script"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fail_panel"]
+bg_color = Color(0.18, 0.08, 0.16, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.45, 0.45, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_retry"]
+bg_color = Color(1, 0.38, 0.38, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.85, 0.85, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_select"]
+bg_color = Color(0.18, 0.52, 0.87, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.7, 0.88, 1, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_menu"]
+bg_color = Color(0.35, 0.42, 0.46, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.8, 0.85, 0.9, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
 [node name="PuffyGameOverModal" type="CanvasLayer"]
 process_mode = 3
+layer = 10
 script = ExtResource("1_fail_script")
 
 [node name="Dimmer" type="ColorRect" parent="."]
@@ -12,39 +72,42 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.2, 0, 0.1, 0.75)
+color = Color(0.15, 0, 0.08, 0.82)
 
 [node name="Panel" type="PanelContainer" parent="."]
-custom_minimum_size = Vector2(440, 280)
+custom_minimum_size = Vector2(460, 320)
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -220.0
-offset_top = -140.0
-offset_right = 220.0
-offset_bottom = 140.0
+offset_left = -230.0
+offset_top = -160.0
+offset_right = 230.0
+offset_bottom = 160.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_fail_panel")
 
 [node name="VBox" type="VBoxContainer" parent="Panel"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 alignment = 1
 
 [node name="Title" type="Label" parent="Panel/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_colors/font_outline_color = Color(0.5, 0, 0.1, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 28
 text = "🐡 HẾT LƯỢT BẮN RỒI! 🐡"
 horizontal_alignment = 1
 
 [node name="Desc" type="Label" parent="Panel/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.9, 1, 0.9)
-theme_override_font_sizes/font_size = 14
-text = "Đừng nản lòng! Hãy canh thời điểm chạm để Phồng To đúng lúc nhé!"
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 0.95)
+theme_override_font_sizes/font_size = 15
+text = "Đừng nản chí! Hãy canh góc kéo thật chuẩn và chạm để Phồng To đúng khoảnh khắc nhé!"
 horizontal_alignment = 1
 autowrap_mode = 2
 
@@ -53,14 +116,31 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="RetryBtn" type="Button" parent="Panel/VBox/Buttons"]
-custom_minimum_size = Vector2(0, 46)
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_retry")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_retry")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_retry")
 text = "🔄 BẮN LẠI NGAY"
 
 [node name="SelectBtn" type="Button" parent="Panel/VBox/Buttons"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_select")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_select")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_select")
+text = "🗺️ CHỌN MÀN KHÁC"
+
+[node name="MenuBtn" type="Button" parent="Panel/VBox/Buttons"]
 custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 14
-text = "🗺️ Chọn Màn Khác"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_menu")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_menu")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_menu")
+text = "🏠 VỀ MENU CHÍNH"

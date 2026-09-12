@@ -1,7 +1,22 @@
-[gd_scene load_steps=3 format=3 uid="uid://puffy_lvl_select_01"]
+[gd_scene load_steps=4 format=3 uid="uid://puffy_lvl_select_01"]
 
 [ext_resource type="Script" path="res://scripts/ui/PuffyLevelSelect.gd" id="1_lvl_script"]
 [ext_resource type="Texture2D" path="res://textures/env/bg_tropical_ocean.svg" id="2_bg_tex"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_back"]
+bg_color = Color(0.99, 0.47, 0.66, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.85, 0.9, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
 
 [node name="PuffyLevelSelect" type="Control"]
 layout_mode = 3
@@ -27,15 +42,16 @@ layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 30.0
-offset_top = 20.0
+offset_top = 18.0
 offset_right = -30.0
-offset_bottom = 70.0
+offset_bottom = 68.0
 grow_horizontal = 2
 
 [node name="TitleLabel" type="Label" parent="HeaderContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.95, 0.2, 1)
-theme_override_constants/outline_size = 4
+theme_override_colors/font_outline_color = Color(0, 0.35, 0.5, 1)
+theme_override_constants/outline_size = 5
 theme_override_font_sizes/font_size = 28
 text = "🗺️ 30 MÀN CHƠI CHIẾN DỊCH (5 VÙNG BIỂN)"
 
@@ -46,6 +62,7 @@ size_flags_horizontal = 3
 [node name="TotalStarsLabel" type="Label" parent="HeaderContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/outline_size = 3
 theme_override_font_sizes/font_size = 22
 text = "⭐ 0 / 90"
 
@@ -72,15 +89,19 @@ theme_override_constants/v_separation = 14
 columns = 6
 
 [node name="BackBtn" type="Button" parent="."]
-custom_minimum_size = Vector2(140, 44)
+custom_minimum_size = Vector2(150, 44)
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 30.0
 offset_top = -64.0
-offset_right = 170.0
+offset_right = 180.0
 offset_bottom = -20.0
 grow_vertical = 0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_back")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_back")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_back")
 text = "⬅️ Quay Lại"

@@ -1,8 +1,83 @@
-[gd_scene load_steps=4 format=3 uid="uid://puffy_main_menu_01"]
+[gd_scene load_steps=10 format=3 uid="uid://puffy_main_menu_01"]
 
 [ext_resource type="Script" path="res://scripts/ui/PuffyMainMenu.gd" id="1_main_script"]
 [ext_resource type="Texture2D" path="res://textures/env/bg_tropical_ocean.svg" id="2_bg_tex"]
 [ext_resource type="Texture2D" path="res://textures/entities/puffy_normal.svg" id="3_puffy_logo"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_campaign"]
+bg_color = Color(1, 0.35, 0.35, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.92, 0.65, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 5
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_endless"]
+bg_color = Color(1, 0.66, 0.05, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.95, 0.7, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 5
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_tutorial"]
+bg_color = Color(0, 0.82, 0.83, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.85, 1, 1, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 5
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_sound"]
+bg_color = Color(0.06, 0.52, 0.89, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.75, 0.9, 1, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 5
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_quit"]
+bg_color = Color(0.35, 0.42, 0.46, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.8, 0.85, 0.9, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0, 0, 0, 0.25)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
 
 [node name="PuffyMainMenu" type="Control"]
 layout_mode = 3
@@ -24,20 +99,20 @@ texture = ExtResource("2_bg_tex")
 expand_mode = 1
 
 [node name="VBox" type="VBoxContainer" parent="."]
-custom_minimum_size = Vector2(540, 0)
+custom_minimum_size = Vector2(560, 0)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -270.0
-offset_top = -280.0
-offset_right = 270.0
-offset_bottom = 280.0
+offset_left = -280.0
+offset_top = -300.0
+offset_right = 280.0
+offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 alignment = 1
 
 [node name="Logo" type="TextureRect" parent="VBox"]
@@ -71,35 +146,58 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 1, 0.8, 1)
 theme_override_font_sizes/font_size = 14
-text = "⭐ TỔNG SAO: 0 / 60"
+text = "⭐ TỔNG SAO: 0 / 90"
 horizontal_alignment = 1
 
 [node name="Buttons" type="VBoxContainer" parent="VBox"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="CampaignBtn" type="Button" parent="VBox/Buttons"]
-custom_minimum_size = Vector2(0, 54)
+custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.1, 1, 0.4, 1)
-theme_override_font_sizes/font_size = 20
-text = "🌴 CHIẾN DỊCH 20 MÀN CHƠI 🌴"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_campaign")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_campaign")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_campaign")
+text = "🌴 CHIẾN DỊCH 30 MÀN CHƠI (5 VÙNG BIỂN) 🌴"
 
 [node name="EndlessBtn" type="Button" parent="VBox/Buttons"]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.8, 0.2, 1)
-theme_override_font_sizes/font_size = 18
-text = "💥 CHẾ ĐỘ NẢY VÔ TẬN (ENDLESS ARCADE)"
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_endless")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_endless")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_endless")
+text = "💥 ĐẠI TIỆC NẢY VÔ TẬN (ENDLESS PINBALL)"
+
+[node name="TutorialBtn" type="Button" parent="VBox/Buttons"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.05, 0.2, 0.25, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_tutorial")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_tutorial")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_tutorial")
+text = "📖 HƯỚNG DẪN CÁCH CHƠI (SIÊU DỄ)"
 
 [node name="SoundBtn" type="Button" parent="VBox/Buttons"]
-custom_minimum_size = Vector2(0, 42)
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 15
-text = "🔊 Âm Thanh: BẬT"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_sound")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_sound")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_sound")
+text = "🎵 Âm Thanh & BGM: BẬT"
 
 [node name="QuitBtn" type="Button" parent="VBox/Buttons"]
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "Thoát Game"
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_quit")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_quit")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_quit")
+text = "Thoát Trò Chơi"

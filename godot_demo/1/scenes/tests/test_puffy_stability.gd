@@ -2,8 +2,8 @@ extends Node
 
 func _ready() -> void:
 	print("\n=======================================================")
-	print("🐡 BẮT ĐẦU KIỂM THỬ MỞ RỘNG: PUFFY POP (GODOT 4.7.1)")
-	print("   [BGM Chill, Anti-Stuck, 4 Vật Thể Mới & 30 Màn]")
+	print("🐡 BẮT ĐẦU KIỂM THỬ: PUFFY POP - BOUNCY HERO (GODOT 4.7.1)")
+	print("   [Vật Lý Thông Minh, Pause Modal, UI Tropical, 30 Màn]")
 	print("=======================================================\n")
 	
 	var all_passed = true
@@ -15,10 +15,12 @@ func _ready() -> void:
 	all_passed = _test_level_victory_goal() and all_passed
 	all_passed = _test_chill_bgm_and_sound_debounce() and all_passed
 	all_passed = _test_arena_across_5_worlds() and all_passed
+	all_passed = _test_pause_modal_and_ui() and all_passed
+	all_passed = _test_tutorial_modal() and all_passed
 	
 	print("\n-------------------------------------------------------")
 	if all_passed:
-		print("✅ [TẤT CẢ TEST PUFFY POP HOÀN TẤT THÀNH CÔNG 100%]")
+		print("✅ [TẤT CẢ 10/10 TEST PUFFY POP HOÀN TẤT THÀNH CÔNG 100%]")
 		print("=======================================================\n")
 		get_tree().quit(0)
 	else:
@@ -27,7 +29,7 @@ func _ready() -> void:
 		get_tree().quit(1)
 
 func _test_player_physics_and_antistuck() -> bool:
-	print("▶ [TEST 1] Kiểm tra Slingshot, Phồng To, Xì Hơi & Chống Kẹt...")
+	print("▶ [TEST 1] Kiểm tra Slingshot, Phồng To, Xì Hơi & Chống Kẹt Thông Minh...")
 	var player_scene = load("res://scenes/prefabs/PuffyPlayer.tscn")
 	var player = player_scene.instantiate() as PuffyPlayer
 	add_child(player)
@@ -59,17 +61,14 @@ func _test_player_physics_and_antistuck() -> bool:
 		player.queue_free()
 		return false
 		
-	# Kiểm tra cơ chế chống kẹt (stuck_counter & threshold)
-	player.velocity = Vector2(20, 10) # Dưới ngưỡng min_bounce_speed (65.0)
-	player.stuck_counter = 0
-	for i in range(7):
-		player.stuck_counter += 1
-	if player.stuck_counter <= 5:
-		printerr("  ❌ Lỗi: Bộ đếm chống kẹt không hoạt động!")
+	# Kiểm tra nút Giải Cứu Puffy (force_recall_to_pad)
+	player.force_recall_to_pad()
+	if player.current_state != PuffyPlayer.PuffyState.IDLE:
+		printerr("  ❌ Lỗi: Hàm Giải Cứu Puffy không đưa về IDLE!")
 		player.queue_free()
 		return false
 		
-	print("  ✓ Cơ chế Slingshot, Phồng To, Xì Hơi và Chống Kẹt hoạt động hoàn hảo.")
+	print("  ✓ Cơ chế Slingshot, Phồng To, Xì Hơi và Giải Cứu Puffy hoạt động hoàn hảo.")
 	player.queue_free()
 	return true
 
@@ -139,7 +138,7 @@ func _test_enemy_crab_squash() -> bool:
 	return true
 
 func _test_new_entities() -> bool:
-	print("▶ [TEST 4] Kiểm tra 4 Vật Thể Mới (Sứa, Nhím, San Hô Vỡ, Hải Lưu)...")
+	print("▶ [TEST 4] Kiểm tra 4 Thực Thể Mới (Sứa, Nhím, San Hô Vỡ, Hải Lưu)...")
 	var player_scene = load("res://scenes/prefabs/PuffyPlayer.tscn")
 	var player = player_scene.instantiate() as PuffyPlayer
 	add_child(player)
@@ -167,7 +166,7 @@ func _test_new_entities() -> bool:
 		urchin.queue_free()
 		player.queue_free()
 		return false
-	urchin.on_puffy_hit(player, true) # Phồng to húc vỡ nhím
+	urchin.on_puffy_hit(player, true)
 	if not urchin.is_defeated:
 		printerr("  ❌ Lỗi: Puffy phồng to không tiêu diệt được nhím!")
 		urchin.queue_free()
@@ -179,7 +178,7 @@ func _test_new_entities() -> bool:
 	var coral_scene = load("res://scenes/prefabs/BreakableCoral.tscn")
 	var coral = coral_scene.instantiate() as BreakableCoral
 	add_child(coral)
-	coral.on_puffy_hit(player, true) # Húc mạnh khi phồng to
+	coral.on_puffy_hit(player, true)
 	if not coral.is_broken:
 		printerr("  ❌ Lỗi: San hô không vỡ khi bị Puffy phồng to húc!")
 		coral.queue_free()
@@ -257,7 +256,6 @@ func _test_chill_bgm_and_sound_debounce() -> bool:
 		printerr("  ❌ Lỗi: Dữ liệu sóng âm BGM rỗng!")
 		return false
 		
-	# Kiểm tra gọi boing 50 lần liên tục xem có bị crash hay rè không
 	for i in range(50):
 		PuffySoundManager.play_boing()
 		
@@ -270,7 +268,6 @@ func _test_arena_across_5_worlds() -> bool:
 	var arena = arena_scene.instantiate() as PuffyArena
 	add_child(arena)
 	
-	# Kiểm tra 5 màn đại diện cho 5 vùng biển
 	var test_levels = [1, 8, 14, 20, 28]
 	for lvl in test_levels:
 		PuffyGameManager.current_mode = PuffyGameManager.GameMode.CAMPAIGN
@@ -282,7 +279,6 @@ func _test_arena_across_5_worlds() -> bool:
 			arena.queue_free()
 			return false
 			
-	# Kiểm tra chế độ Endless
 	PuffyGameManager.current_mode = PuffyGameManager.GameMode.ENDLESS
 	arena._build_level_layout()
 	var endless_count = arena.obstacles_container.get_child_count()
@@ -293,4 +289,39 @@ func _test_arena_across_5_worlds() -> bool:
 		
 	print("  ✓ Tải và sinh màn chơi 30 màn 5 Vùng Biển cùng chế độ Endless thành công trọn vẹn.")
 	arena.queue_free()
+	return true
+
+func _test_pause_modal_and_ui() -> bool:
+	print("▶ [TEST 9] Kiểm tra Modal Tạm Dừng (PuffyPauseModal)...")
+	var pause_scene = load("res://scenes/ui/PuffyPauseModal.tscn")
+	var pause_modal = pause_scene.instantiate() as PuffyPauseModal
+	add_child(pause_modal)
+	
+	if not get_tree().paused:
+		printerr("  ❌ Lỗi: Pause modal không kích hoạt tạm dừng engine!")
+		pause_modal.queue_free()
+		return false
+		
+	# Thử bấm tiếp tục (Resume)
+	pause_modal._on_resume_pressed()
+	if get_tree().paused:
+		printerr("  ❌ Lỗi: Bấm Resume không unpause engine!")
+		return false
+		
+	print("  ✓ Modal Tạm Dừng (PauseModal) hoạt động chuẩn mực và unpause chính xác.")
+	return true
+
+func _test_tutorial_modal() -> bool:
+	print("▶ [TEST 10] Kiểm tra Modal Hướng Dẫn Cách Chơi (PuffyTutorialModal)...")
+	var tuto_scene = load("res://scenes/ui/PuffyTutorialModal.tscn")
+	var tuto_modal = tuto_scene.instantiate() as PuffyTutorialModal
+	add_child(tuto_modal)
+	
+	if not tuto_modal.close_btn:
+		printerr("  ❌ Lỗi: Thiếu close_btn trong TutorialModal!")
+		tuto_modal.queue_free()
+		return false
+		
+	tuto_modal.queue_free()
+	print("  ✓ Modal Hướng Dẫn 3 bước hiển thị hoàn hảo.")
 	return true

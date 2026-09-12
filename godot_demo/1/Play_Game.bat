@@ -2,7 +2,7 @@
 title PUFFY POP: BOUNCY HERO (CA NOC BUNG LUA - SIEU NAY DAI CHIEN)
 echo =========================================================================
 echo   🐡 PUFFY POP: BOUNCY HERO (CA NOC BUNG LUA - SIEU NAY DAI CHIEN) 🌊
-echo   🎵 Nhac Nen Ocean Lofi Chill Chill - Am Thanh Tu Tong Hop Sieu Em Diu
+echo   🎵 Nhac Nen Ocean Lofi Chill Chill - Giao Dien Tropical Bubble Tuyet Dep
 echo   ---------------------------------------------------------------------
 echo   🎮 HUONG DAN CHOI SIEU DE - AI CUNG CHOI DUOC:
 echo.
@@ -17,11 +17,12 @@ echo                huc vo gach san ho, de bep lu cua cuop bien va nhim gai!
 echo      - CHAM 2: XI HOI PHAN LUC! Puffy xi hoi "Pfffrrrttt!"
 echo                phun luong bot nuoc lao vut di nhu ten lua!
 echo.
-echo   3. CAC VAT THE MOI VA 30 MAN CHOI (5 VUNG BIEN):
-echo      - SUA BIEN PHAT SANG: Bat lo xo phong vut len cao!
-echo      - NHIM BIEN GAI: Tranh ne khi nho, dung gai de bep khi phong to!
-echo      - GACH SAN HO: Huc vo tan tanh de mo loi vao ngoc trai!
-echo      - HAI LUU TANG TOC: Luong nuoc neon phong Puffy cuc nhanh!
-echo      - 30 MAN CHIEN DICH & ARCADE VO TAN NAY LIEN TUC TANG COMBO!
+echo   3. NUT THAO TAC NHANH TREN THANH HUD:
+echo      - [ 🛟 Cứu ]: Giai cuu Puffy ve be phong tuc thi neu can!
+echo      - [ 🔄 ]: Choi lai man ngay lap tuc
+echo      - [ 🎵 ]: Bat / Tat nhanh nhac nen va am thanh
+echo      - [ ⏸️ ]: Menu tam dung day du (Tiep tuc, Choi lai, Chon man, Menu)
+echo.
+echo   4. 30 MAN CHIEN DICH (5 VUNG BIEN) VA CHE DO NAY VO TAN!
 echo =========================================================================
 start "" "D:\app\godot\Godot_v4.7.1-stable_win64.exe" --path "d:\folder\tools\godot_demo\1" --rendering-driver opengl3

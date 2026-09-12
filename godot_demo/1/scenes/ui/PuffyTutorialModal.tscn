@@ -1,0 +1,129 @@
+[gd_scene load_steps=5 format=3 uid="uid://puffy_tuto_modal_01"]
+
+[ext_resource type="Script" path="res://scripts/ui/PuffyTutorialModal.gd" id="1_tuto_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tuto_panel"]
+bg_color = Color(0.05, 0.24, 0.38, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0, 0.85, 0.9, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_step_box"]
+bg_color = Color(0.08, 0.35, 0.52, 0.6)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.3, 0.75, 0.95, 0.5)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_close"]
+bg_color = Color(0.06, 0.68, 0.52, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.6, 1, 0.85, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0, 0, 0, 0.3)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[node name="PuffyTutorialModal" type="CanvasLayer"]
+process_mode = 3
+layer = 12
+script = ExtResource("1_tuto_script")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0.12, 0.2, 0.8)
+
+[node name="Panel" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(560, 480)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -240.0
+offset_right = 280.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_tuto_panel")
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Title" type="Label" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.2, 1)
+theme_override_colors/font_outline_color = Color(0, 0.4, 0.5, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 26
+text = "📖 CÁCH CHƠI SIÊU DỄ (3 BƯỚC)"
+horizontal_alignment = 1
+
+[node name="Step1" type="PanelContainer" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_step_box")
+
+[node name="Label" type="Label" parent="Panel/VBox/Step1"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "1. KÉO & BẮN (SLINGSHOT):\nNhấp giữ vào chú cá Puffy và kéo lui, quan sát đường chấm bi vàng để nhắm và thả tay để bắn!"
+autowrap_mode = 2
+
+[node name="Step2" type="PanelContainer" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_step_box")
+
+[node name="Label" type="Label" parent="Panel/VBox/Step2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "2. CHẠM 1 - PHỒNG TO (INFLATE):\nKhi Puffy đang bay, chạm nhẹ màn hình để phồng to gấp đôi, nảy tưng bừng và húc vỡ gạch đá, đè bẹp quái!"
+autowrap_mode = 2
+
+[node name="Step3" type="PanelContainer" parent="Panel/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_step_box")
+
+[node name="Label" type="Label" parent="Panel/VBox/Step3"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "3. CHẠM 2 - XÌ HƠI PHẢN LỰC (JET):\nChạm tiếp lần nữa, Puffy xì hơi 'Pfffrrt!' phụt luồng bọt nước lao vút đi như tên lửa để lao thẳng vào đích!"
+autowrap_mode = 2
+
+[node name="CloseBtn" type="Button" parent="Panel/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_close")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_close")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_close")
+text = "👍 ĐÃ HIỂU - CHƠI NGAY THÔI!"
