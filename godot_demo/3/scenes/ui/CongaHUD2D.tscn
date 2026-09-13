@@ -1,0 +1,220 @@
+[gd_scene format=3 uid="uid://dmcongahud2d"]
+
+[ext_resource type="Script" path="res://scripts/ui/CongaHUD2D.gd" id="1_chud"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p1"]
+bg_color = Color(0.65, 0.15, 0.22, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.35, 0.45, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p2"]
+bg_color = Color(0.12, 0.35, 0.65, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.75, 1, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p3"]
+bg_color = Color(0.65, 0.55, 0.1, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.9, 0.2, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p4"]
+bg_color = Color(0.12, 0.55, 0.25, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.25, 0.95, 0.5, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+
+[node name="CongaHUD2D" type="CanvasLayer"]
+layer = 5
+script = ExtResource("1_chud")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TopCenter" type="MarginContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 16.0
+offset_right = 200.0
+offset_bottom = 60.0
+grow_horizontal = 2
+
+[node name="TimerLabel" type="Label" parent="Root/TopCenter"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 28
+text = "⏳ THỜI GIAN: 01:30"
+horizontal_alignment = 1
+
+[node name="P1Card" type="PanelContainer" parent="Root"]
+layout_mode = 1
+offset_left = 20.0
+offset_top = 16.0
+offset_right = 210.0
+offset_bottom = 80.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_p1")
+
+[node name="VBox" type="VBoxContainer" parent="Root/P1Card"]
+layout_mode = 2
+
+[node name="P1Score" type="Label" parent="Root/P1Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.95, 1)
+theme_override_font_sizes/font_size = 17
+text = "P1 ĐỎ: 0 ĐIỂM"
+
+[node name="P1Chain" type="Label" parent="Root/P1Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "Đuôi: 0 hình nhân"
+
+[node name="P2Card" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -210.0
+offset_top = 16.0
+offset_right = -20.0
+offset_bottom = 80.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_p2")
+
+[node name="VBox" type="VBoxContainer" parent="Root/P2Card"]
+layout_mode = 2
+
+[node name="P2Score" type="Label" parent="Root/P2Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.98, 1, 1)
+theme_override_font_sizes/font_size = 17
+text = "P2 XANH: 0 ĐIỂM"
+
+[node name="P2Chain" type="Label" parent="Root/P2Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "Đuôi: 0 hình nhân"
+
+[node name="P3Card" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -80.0
+offset_right = 210.0
+offset_bottom = -16.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_p3")
+
+[node name="VBox" type="VBoxContainer" parent="Root/P3Card"]
+layout_mode = 2
+
+[node name="P3Score" type="Label" parent="Root/P3Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 0.9, 1)
+theme_override_font_sizes/font_size = 17
+text = "P3 VÀNG: 0 ĐIỂM"
+
+[node name="P3Chain" type="Label" parent="Root/P3Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.7, 1)
+theme_override_font_sizes/font_size = 13
+text = "Đuôi: 0 hình nhân"
+
+[node name="P4Card" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -210.0
+offset_top = -80.0
+offset_right = -20.0
+offset_bottom = -16.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_p4")
+
+[node name="VBox" type="VBoxContainer" parent="Root/P4Card"]
+layout_mode = 2
+
+[node name="P4Score" type="Label" parent="Root/P4Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 1, 0.95, 1)
+theme_override_font_sizes/font_size = 17
+text = "P4 LÁ: 0 ĐIỂM"
+
+[node name="P4Chain" type="Label" parent="Root/P4Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 1, 0.85, 1)
+theme_override_font_sizes/font_size = 13
+text = "Đuôi: 0 hình nhân"
+
+[node name="BottomHint" type="Label" parent="Root"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -36.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 0.75)
+theme_override_font_sizes/font_size = 14
+text = "🔴 P1: [WASD]+[Space]  |  🔵 P2: [Mũi Tên]+[Enter]  |  🟡 P3: [IJKL]+[O]  |  🟢 P4: [Num 8456]+[Num 0]"
+horizontal_alignment = 1

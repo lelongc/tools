@@ -1,0 +1,127 @@
+[gd_scene format=3 uid="uid://dmcongamenu2d"]
+
+[ext_resource type="Script" path="res://scripts/ui/CongaMenu2D.gd" id="1_cmen"]
+
+[node name="CongaMenu2D" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_cmen")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.09, 0.14, 1)
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HeaderBox" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -480.0
+offset_top = 40.0
+offset_right = 480.0
+offset_bottom = 160.0
+grow_horizontal = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="TitleLabel" type="Label" parent="Root/HeaderBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.35, 0.45, 1)
+theme_override_font_sizes/font_size = 40
+text = "🐔 SPLAT CONGA: MANNEQUIN WHIP BRAWL"
+horizontal_alignment = 1
+
+[node name="SubTitleLabel" type="Label" parent="Root/HeaderBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.25, 1)
+theme_override_font_sizes/font_size = 20
+text = "Đại Chiến Nối Đuôi Roi Hình Nhân 2D - Độc Nhất Vô Nhị (1-4 Người Chơi)"
+horizontal_alignment = 1
+
+[node name="SlotBox" type="VBoxContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -140.0
+offset_right = 280.0
+offset_bottom = 120.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="P1Btn" type="Button" parent="Root/SlotBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "🔴 P1 (ĐỎ): NGƯỜI CHƠI (WASD + Space)"
+
+[node name="P2Btn" type="Button" parent="Root/SlotBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "🔵 P2 (XANH): BOT AI"
+
+[node name="P3Btn" type="Button" parent="Root/SlotBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "🟡 P3 (VÀNG): BOT AI"
+
+[node name="P4Btn" type="Button" parent="Root/SlotBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "🟢 P4 (LÁ): BOT AI"
+
+[node name="StartBtn" type="Button" parent="Root"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -180.0
+offset_right = 220.0
+offset_bottom = -120.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+theme_override_font_sizes/font_size = 24
+text = "⚔️ BẮT ĐẦU ĐẠI CHIẾN QUẤT ROI ⚔️"
+
+[node name="QuitBtn" type="Button" parent="Root"]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -120.0
+offset_top = -100.0
+offset_right = 120.0
+offset_bottom = -60.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "THOÁT (QUIT)"

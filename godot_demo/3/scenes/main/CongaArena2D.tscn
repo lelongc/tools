@@ -1,0 +1,76 @@
+[gd_scene format=3 uid="uid://dmcongaarena2d"]
+
+[ext_resource type="Script" path="res://scripts/levels/CongaArena2D.gd" id="1_arena"]
+[ext_resource type="Script" path="res://scripts/entities/ScoreBank2D.gd" id="2_bank"]
+[ext_resource type="Script" path="res://scripts/entities/CongaPlayer2D.gd" id="3_ply"]
+[ext_resource type="Script" path="res://scripts/entities/CongaMannequin2D.gd" id="4_man"]
+[ext_resource type="PackedScene" path="res://scenes/ui/CongaHUD2D.tscn" id="5_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/CongaVictory2D.tscn" id="6_vic"]
+
+[node name="CongaArena2D" type="Node2D"]
+script = ExtResource("1_arena")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+
+[node name="ScoreBank" type="Area2D" parent="."]
+script = ExtResource("2_bank")
+
+[node name="Players" type="Node2D" parent="."]
+
+[node name="Player1" type="CharacterBody2D" parent="Players"]
+position = Vector2(-360, -180)
+script = ExtResource("3_ply")
+player_id = 1
+
+[node name="Player2" type="CharacterBody2D" parent="Players"]
+position = Vector2(360, -180)
+script = ExtResource("3_ply")
+player_id = 2
+
+[node name="Player3" type="CharacterBody2D" parent="Players"]
+position = Vector2(-360, 180)
+script = ExtResource("3_ply")
+player_id = 3
+
+[node name="Player4" type="CharacterBody2D" parent="Players"]
+position = Vector2(360, 180)
+script = ExtResource("3_ply")
+player_id = 4
+
+[node name="Mannequins" type="Node2D" parent="."]
+
+[node name="Mannequin1" type="Area2D" parent="Mannequins"]
+position = Vector2(-150, -100)
+script = ExtResource("4_man")
+
+[node name="Mannequin2" type="Area2D" parent="Mannequins"]
+position = Vector2(150, -100)
+script = ExtResource("4_man")
+
+[node name="Mannequin3" type="Area2D" parent="Mannequins"]
+position = Vector2(-200, 80)
+script = ExtResource("4_man")
+
+[node name="Mannequin4" type="Area2D" parent="Mannequins"]
+position = Vector2(200, 80)
+script = ExtResource("4_man")
+
+[node name="Mannequin5" type="Area2D" parent="Mannequins"]
+position = Vector2(0, -180)
+script = ExtResource("4_man")
+
+[node name="Mannequin6" type="Area2D" parent="Mannequins"]
+position = Vector2(0, 180)
+script = ExtResource("4_man")
+
+[node name="Mannequin7" type="Area2D" parent="Mannequins"]
+position = Vector2(-100, 0)
+script = ExtResource("4_man")
+
+[node name="Mannequin8" type="Area2D" parent="Mannequins"]
+position = Vector2(100, 0)
+script = ExtResource("4_man")
+
+[node name="CongaHUD2D" parent="." instance=ExtResource("5_hud")]
+
+[node name="CongaVictory2D" parent="." instance=ExtResource("6_vic")]

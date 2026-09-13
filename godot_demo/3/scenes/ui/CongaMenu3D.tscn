@@ -1,0 +1,314 @@
+[gd_scene format=3 uid="uid://bmenu3d001"]
+
+[ext_resource type="Script" path="res://scripts/ui/CongaMenu3D.gd" id="1_menu"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.05, 0.06, 0.09, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p1"]
+bg_color = Color(0.7, 0.15, 0.25, 0.9)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.45, 0.55, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p2"]
+bg_color = Color(0.12, 0.45, 0.8, 0.9)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.35, 0.8, 1, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p3"]
+bg_color = Color(0.75, 0.62, 0.12, 0.9)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.92, 0.35, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p4"]
+bg_color = Color(0.12, 0.65, 0.3, 0.9)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.35, 0.98, 0.6, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 16.0
+content_margin_top = 16.0
+content_margin_right = 16.0
+content_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
+bg_color = Color(0.1, 0.1, 0.15, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.8, 0.8, 0.9, 0.5)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_start"]
+bg_color = Color(0.95, 0.25, 0.38, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.85, 0.25, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+content_margin_left = 30.0
+content_margin_top = 14.0
+content_margin_right = 30.0
+content_margin_bottom = 14.0
+
+[node name="CongaMenu3D" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -580.0
+offset_top = -320.0
+offset_right = 580.0
+offset_bottom = 320.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Title" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.2, 1)
+theme_override_font_sizes/font_size = 40
+text = "🐔 CLUCK & SPLAT 3D: CONGA WHIP MAYHEM 🎭"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 0.95, 0.9)
+theme_override_font_sizes/font_size = 17
+text = "Thu thập Ma-nơ-canh • Vung roi quất văng đối thủ • Cướp đuôi nạp bục vàng combo!"
+horizontal_alignment = 1
+
+[node name="SlotsHBox" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="P1Card" type="PanelContainer" parent="VBox/SlotsHBox"]
+custom_minimum_size = Vector2(265, 230)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_p1")
+
+[node name="VBox" type="VBoxContainer" parent="VBox/SlotsHBox/P1Card"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SlotTitle" type="Label" parent="VBox/SlotsHBox/P1Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "🔴 P1: ĐỎ NEON"
+horizontal_alignment = 1
+
+[node name="KeyHint" type="Label" parent="VBox/SlotsHBox/P1Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.85, 0.85)
+theme_override_font_sizes/font_size = 13
+text = "🎮 Di chuyển: W, A, S, D\n⚡ Quất Roi / Lướt: SPACE"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="VBox/SlotsHBox/P1Card/VBox"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="P1ToggleBtn" type="Button" parent="VBox/SlotsHBox/P1Card/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "👤 NGƯỜI CHƠI (HUMAN)"
+
+[node name="P2Card" type="PanelContainer" parent="VBox/SlotsHBox"]
+custom_minimum_size = Vector2(265, 230)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_p2")
+
+[node name="VBox" type="VBoxContainer" parent="VBox/SlotsHBox/P2Card"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SlotTitle" type="Label" parent="VBox/SlotsHBox/P2Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "🔵 P2: XANH NEON"
+horizontal_alignment = 1
+
+[node name="KeyHint" type="Label" parent="VBox/SlotsHBox/P2Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.92, 1, 0.85)
+theme_override_font_sizes/font_size = 13
+text = "🎮 Di chuyển: Phím Mũi Tên\n⚡ Quất Roi / Lướt: ENTER"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="VBox/SlotsHBox/P2Card/VBox"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="P2ToggleBtn" type="Button" parent="VBox/SlotsHBox/P2Card/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "🤖 MÁY TỰ ĐỘNG (BOT AI)"
+
+[node name="P3Card" type="PanelContainer" parent="VBox/SlotsHBox"]
+custom_minimum_size = Vector2(265, 230)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_p3")
+
+[node name="VBox" type="VBoxContainer" parent="VBox/SlotsHBox/P3Card"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SlotTitle" type="Label" parent="VBox/SlotsHBox/P3Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "🟡 P3: VÀNG NEON"
+horizontal_alignment = 1
+
+[node name="KeyHint" type="Label" parent="VBox/SlotsHBox/P3Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.95, 0.8, 0.85)
+theme_override_font_sizes/font_size = 13
+text = "🎮 Di chuyển: I, J, K, L\n⚡ Quất Roi / Lướt: PHÍM O"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="VBox/SlotsHBox/P3Card/VBox"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="P3ToggleBtn" type="Button" parent="VBox/SlotsHBox/P3Card/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "🤖 MÁY TỰ ĐỘNG (BOT AI)"
+
+[node name="P4Card" type="PanelContainer" parent="VBox/SlotsHBox"]
+custom_minimum_size = Vector2(265, 230)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_p4")
+
+[node name="VBox" type="VBoxContainer" parent="VBox/SlotsHBox/P4Card"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="SlotTitle" type="Label" parent="VBox/SlotsHBox/P4Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "🟢 P4: LÁ NEON"
+horizontal_alignment = 1
+
+[node name="KeyHint" type="Label" parent="VBox/SlotsHBox/P4Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 1, 0.9, 0.85)
+theme_override_font_sizes/font_size = 13
+text = "🎮 Di chuyển: Numpad 8,4,5,6\n⚡ Quất Roi / Lướt: NUMPAD 0"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="VBox/SlotsHBox/P4Card/VBox"]
+custom_minimum_size = Vector2(0, 10)
+layout_mode = 2
+
+[node name="P4ToggleBtn" type="Button" parent="VBox/SlotsHBox/P4Card/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "🤖 MÁY TỰ ĐỘNG (BOT AI)"
+
+[node name="DurationHBox" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="DurationBtn" type="Button" parent="VBox/DurationHBox"]
+custom_minimum_size = Vector2(240, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "⏱️ THỜI GIAN: 90 GIÂY"
+
+[node name="WarningLabel" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 15
+horizontal_alignment = 1
+
+[node name="StartBtn" type="Button" parent="VBox"]
+custom_minimum_size = Vector2(340, 60)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_start")
+text = "🔥 VÀO ĐẠI CHIẾN NGAY 🔥"

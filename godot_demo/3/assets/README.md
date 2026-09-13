@@ -1,23 +1,33 @@
-# 🎨 HƯỚNG DẪN THẢ 3D MODEL, TEXTURE & ÂM THANH (PLUG-AND-PLAY)
+# 🎨 HƯỚNG DẪN THAY THẾ MODEL 3D, TEXTURE & ÂM THANH (PLUG-AND-PLAY)
 
-Tựa game **"CLUCK & SPLAT 3D: MANNEQUIN COLOR BRAWL"** được xây dựng theo kiến trúc **Plug-and-Play**: Toàn bộ nhân vật và hình nhân ma-nơ-canh đã có sẵn hệ thống 3D procedural rực rỡ để chơi được ngay. Bất kỳ lúc nào bạn làm xong 3D Model bằng Blender, bạn chỉ cần thả vào đây là game tự động áp dụng!
+Tựa game **"CLUCK & SPLAT 3D: CONGA WHIP MAYHEM"** được xây dựng với hệ thống **3D Procedural Mesh & Vật lý Ragdoll**. Tựa game có thể chạy mượt mà ngay bây giờ mà không cần file ngoài, đồng thời hỗ trợ cơ chế cắm-và-chạy (Plug & Play) để bạn thả Model 3D từ Blender (`.glb`), Texture và Âm thanh vào bất cứ lúc nào:
 
 ---
 
-## 1. Thư mục Mô Hình 3D (`assets/models/`)
-Hỗ trợ định dạng `.glb`, `.gltf`, `.obj` (khuyên dùng `.glb` xuất trực tiếp từ Blender):
-- `chicken_player.glb`: Model 3D chú gà bắn sơn (Player).
-- `mannequin_dummy.glb`: Model 3D hình nhân ma-nơ-canh (Mannequin).
-- `paint_blaster.glb`: Model súng bắn sơn.
-- `bounce_pad.glb`: Model bục nhún lò xo.
-- `delivery_portal.glb`: Model cổng xuất kho giao hình nhân.
+## 1. Thư mục Model 3D (`assets/models/`)
+Bạn có thể xuất từ Blender định dạng `.glb` hoặc `.gltf`:
+- `chicken_p1.glb`: Model chú gà Đỏ Neon (P1).
+- `chicken_p2.glb`: Model chú gà Xanh Neon (P2).
+- `chicken_p3.glb`: Model chú gà Vàng Neon (P3).
+- `chicken_p4.glb`: Model chú gà Xanh Lá Neon (P4).
+- `mannequin.glb`: Model hình nhân ma-nơ-canh trắng (khớp nối lò xo).
+- `score_vault.glb`: Model đài nạp điểm trung tâm.
+- `trampoline.glb`: Model bục nhún lò xo góc đài.
+
+*(Nếu chưa có file, game sẽ tự động vẽ Model 3D Procedural hoạt hình siêu ngộ nghĩnh, mắt googly eyes lắc lư và phát sáng neon)*.
 
 ---
 
 ## 2. Thư mục Âm Thanh & Nhạc Nền (`assets/audio/`)
-Tự động nạp file `.wav`, `.mp3`, `.ogg`:
-- `splat.wav`: Tiếng đạn sơn nổ bẹp bẹp.
-- `bonk.wav`: Tiếng tát lộn cổ boing boing (Tát bạn bè).
-- `boing.wav`: Tiếng bục nhún lò xo bật nảy lên trời.
-- `order_success.wav`: Tiếng keng keng hoàn thành đơn hàng.
-- `bgm_party.ogg`: Nhạc nền tiệc tùng funk/upbeat vui nhộn.
+Hỗ trợ định dạng `.wav`, `.mp3`, `.ogg`:
+- `attach.wav`: Tiếng hút 'phập' khi dính hình nhân vào đuôi roi.
+- `dash.wav`: Tiếng gió rít vút khi lướt bẻ lái quất roi.
+- `whip_hit.wav`: Tiếng roi quất đôm đốp trúng người đối thủ.
+- `bank_score.wav`: Tiếng chuông vàng leng keng nạp điểm bùng nổ combo.
+- `steal.wav`: Tiếng 'xoẹt' khi cắt đứt và cướp đuôi đối thủ.
+- `boing.wav`: Tiếng lò xo bục nhún bật tung nhân vật lên trời.
+- `bonk.wav`: Tiếng va đập choáng váng sao bay quanh đầu.
+- `cheer.wav`: Tiếng reo hò vinh danh Vua Quất Roi.
+- `bgm.ogg`: Nhạc nền tiệc tùng arcade sôi động.
+
+*(Nếu chưa có file âm thanh bên ngoài, game sẽ tự động tạo âm thanh bằng bộ tổng hợp synth toán học nội tại chất lượng cao 60FPS)*.
