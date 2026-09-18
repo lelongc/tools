@@ -1,0 +1,149 @@
+[gd_scene format=3 uid="uid://bsumovic3d01"]
+
+[ext_resource type="Script" path="res://scripts/ui/SumoVictory3D.gd" id="1_vic"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/trophy.png" id="2_trophy"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/btn_rematch.png" id="3_rematch"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/btn_menu.png" id="4_menu"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.08, 0.1, 0.16, 0.96)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.85, 0.25, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+shadow_color = Color(0, 0, 0, 0.7)
+shadow_size = 16
+shadow_offset = Vector2(0, 8)
+content_margin_left = 40.0
+content_margin_top = 28.0
+content_margin_right = 40.0
+content_margin_bottom = 28.0
+
+[node name="SumoVictory3D" type="Control"]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_vic")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.65)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(580, 420)
+layout_mode = 2
+mouse_filter = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Trophy" type="TextureRect" parent="Center/Panel/VBox"]
+custom_minimum_size = Vector2(100, 100)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("2_trophy")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.2, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 24
+text = "VÒNG ĐẤU SUMO KẾT THÚC!"
+horizontal_alignment = 1
+
+[node name="WinnerLabel" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.3, 0.4, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 22
+text = "👑 PLAYER 1 CHIẾN THẮNG!"
+horizontal_alignment = 1
+
+[node name="StatsVBox" type="VBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Spacer" type="Control" parent="Center/Panel/VBox"]
+custom_minimum_size = Vector2(0, 8)
+layout_mode = 2
+
+[node name="ButtonsHBox" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 24
+alignment = 1
+
+[node name="RematchBtn" type="TextureButton" parent="Center/Panel/VBox/ButtonsHBox"]
+custom_minimum_size = Vector2(210, 62)
+layout_mode = 2
+texture_normal = ExtResource("3_rematch")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="RematchText" type="Label" parent="Center/Panel/VBox/ButtonsHBox/RematchBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 16
+text = "CHƠI LẠI [SPACE]"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MenuBtn" type="TextureButton" parent="Center/Panel/VBox/ButtonsHBox"]
+custom_minimum_size = Vector2(210, 62)
+layout_mode = 2
+texture_normal = ExtResource("4_menu")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="MenuText" type="Label" parent="Center/Panel/VBox/ButtonsHBox/MenuBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 16
+text = "MENU CHÍNH [ESC]"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <rect width="128" height="128" rx="28" fill="#141824"/>
+  <!-- Chameleon Body -->
+  <circle cx="64" cy="68" r="42" fill="#FF4066"/>
+  <!-- Eyes -->
+  <circle cx="44" cy="46" r="16" fill="#FFFFFF"/>
+  <circle cx="84" cy="46" r="16" fill="#FFFFFF"/>
+  <!-- Pupils looking around -->
+  <circle cx="48" cy="44" r="7" fill="#141824"/>
+  <circle cx="82" cy="48" r="7" fill="#141824"/>
+  <!-- Cute Snout and Tongue -->
+  <ellipse cx="64" cy="80" rx="16" ry="10" fill="#E62E55"/>
+  <path d="M 64 84 Q 85 92 78 114 Q 72 102 62 88 Z" fill="#FF2A7A"/>
+  <circle cx="78" cy="114" r="6" fill="#FF70A6"/>
+</svg>

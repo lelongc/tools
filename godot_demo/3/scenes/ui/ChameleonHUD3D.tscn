@@ -1,0 +1,315 @@
+[gd_scene format=3 uid="uid://bchud3d002"]
+
+[ext_resource type="Script" path="res://scripts/ui/ChameleonHUD3D.gd" id="1_hud"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_top"]
+bg_color = Color(0.08, 0.1, 0.15, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.85, 0.2, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 24.0
+content_margin_top = 8.0
+content_margin_right = 24.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p1"]
+bg_color = Color(0.75, 0.15, 0.25, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.45, 0.55, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 14.0
+content_margin_top = 8.0
+content_margin_right = 14.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p2"]
+bg_color = Color(0.12, 0.45, 0.78, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.8, 1, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 14.0
+content_margin_top = 8.0
+content_margin_right = 14.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p3"]
+bg_color = Color(0.75, 0.62, 0.1, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.92, 0.35, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 14.0
+content_margin_top = 8.0
+content_margin_right = 14.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p4"]
+bg_color = Color(0.12, 0.65, 0.3, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.98, 0.6, 1)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 14.0
+content_margin_top = 8.0
+content_margin_right = 14.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_modal"]
+bg_color = Color(0.06, 0.08, 0.12, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.85, 0.2, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+content_margin_left = 24.0
+content_margin_top = 20.0
+content_margin_right = 24.0
+content_margin_bottom = 20.0
+
+[node name="ChameleonHUD3D" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_hud")
+
+[node name="TopCenter" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -180.0
+offset_top = 16.0
+offset_right = 180.0
+offset_bottom = 80.0
+grow_horizontal = 2
+
+[node name="Panel" type="PanelContainer" parent="TopCenter"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_top")
+
+[node name="VBox" type="VBoxContainer" parent="TopCenter/Panel"]
+layout_mode = 2
+
+[node name="ModeLabel" type="Label" parent="TopCenter/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "🏆 SINH TỒN ĐỢT 1"
+horizontal_alignment = 1
+
+[node name="TimerLabel" type="Label" parent="TopCenter/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.25, 1)
+theme_override_font_sizes/font_size = 26
+text = "00:40"
+horizontal_alignment = 1
+
+[node name="Corners" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="P1Panel" type="PanelContainer" parent="Corners"]
+layout_mode = 1
+offset_left = 20.0
+offset_top = 16.0
+offset_right = 220.0
+offset_bottom = 96.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_p1")
+
+[node name="VBox" type="VBoxContainer" parent="Corners/P1Panel"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="Corners/P1Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "🔴 P1 (ĐỎ)"
+
+[node name="ScoreLabel" type="Label" parent="Corners/P1Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "0 ĐIỂM"
+
+[node name="BellyLabel" type="Label" parent="Corners/P1Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "🍔 Bụng: 0 hình nhân"
+
+[node name="P2Panel" type="PanelContainer" parent="Corners"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -220.0
+offset_top = 16.0
+offset_right = -20.0
+offset_bottom = 96.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_p2")
+
+[node name="VBox" type="VBoxContainer" parent="Corners/P2Panel"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="Corners/P2Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "🔵 P2 (XANH)"
+
+[node name="ScoreLabel" type="Label" parent="Corners/P2Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "0 ĐIỂM"
+
+[node name="BellyLabel" type="Label" parent="Corners/P2Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "🍔 Bụng: 0 hình nhân"
+
+[node name="P3Panel" type="PanelContainer" parent="Corners"]
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = -140.0
+offset_right = 220.0
+offset_bottom = -60.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_p3")
+
+[node name="VBox" type="VBoxContainer" parent="Corners/P3Panel"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="Corners/P3Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "🟡 P3 (VÀNG)"
+
+[node name="ScoreLabel" type="Label" parent="Corners/P3Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "0 ĐIỂM"
+
+[node name="BellyLabel" type="Label" parent="Corners/P3Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "🍔 Bụng: 0 hình nhân"
+
+[node name="P4Panel" type="PanelContainer" parent="Corners"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -140.0
+offset_right = -20.0
+offset_bottom = -60.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_p4")
+
+[node name="VBox" type="VBoxContainer" parent="Corners/P4Panel"]
+layout_mode = 2
+
+[node name="NameLabel" type="Label" parent="Corners/P4Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "🟢 P4 (LÁ)"
+
+[node name="ScoreLabel" type="Label" parent="Corners/P4Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "0 ĐIỂM"
+
+[node name="BellyLabel" type="Label" parent="Corners/P4Panel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "🍔 Bụng: 0 hình nhân"
+
+[node name="MutationModal" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dimmer" type="ColorRect" parent="MutationModal"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.7)
+
+[node name="Center" type="CenterContainer" parent="MutationModal"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="MutationModal/Center"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_modal")
+
+[node name="VBox" type="VBoxContainer" parent="MutationModal/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="MutationModal/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.25, 1)
+theme_override_font_sizes/font_size = 24
+text = "✨ ĐỢT QUÁI HOÀN THÀNH! CHỌN ĐỘT BIẾN ✨"
+horizontal_alignment = 1
+
+[node name="CardsHBox" type="HBoxContainer" parent="MutationModal/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1

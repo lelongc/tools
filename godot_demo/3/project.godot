@@ -10,16 +10,16 @@ config_version=5
 
 [application]
 
-config/name="Cluck & Splat 3D: Conga Whip Mayhem"
-config/description="3D Ragdoll Party Brawler: Chain mannequins into giant whips and battle 1-4 players"
-run/main_scene="res://scenes/ui/CongaMenu3D.tscn"
+config/name="Party Sumo Ragdoll 3D"
+config/description="Hilarious 3D Physics Sumo Brawler: Spring Punch, Headbutt Dash, and Yeet Opponents for Steam and Mobile"
+run/main_scene="res://scenes/ui/SumoMenu3D.tscn"
 config/features=PackedStringArray("4.7", "gl_compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
-CongaSoundManager3D="*res://scripts/core/CongaSoundManager3D.gd"
-CongaGameManager3D="*res://scripts/core/CongaGameManager3D.gd"
+SumoSoundManager="*res://scripts/core/SumoSoundManager.gd"
+SumoGameManager="*res://scripts/core/SumoGameManager.gd"
 
 [display]
 

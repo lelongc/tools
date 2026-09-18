@@ -1,0 +1,287 @@
+[gd_scene format=3 uid="uid://bsumomenu3d01"]
+
+[ext_resource type="Script" path="res://scripts/ui/SumoMenu3D.gd" id="1_menu"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/trophy.png" id="2_trophy"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/avatar_p1.png" id="3_ava1"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/banner_ribbon.png" id="4_ribbon"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/btn_primary.png" id="5_pri"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/btn_rematch.png" id="6_rematch"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.06, 0.08, 0.12, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_solo"]
+bg_color = Color(0.09, 0.14, 0.22, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.2, 0.8, 1, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 12
+shadow_offset = Vector2(0, 6)
+content_margin_left = 28.0
+content_margin_top = 24.0
+content_margin_right = 28.0
+content_margin_bottom = 24.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_party"]
+bg_color = Color(0.18, 0.09, 0.16, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.3, 0.6, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 12
+shadow_offset = Vector2(0, 6)
+content_margin_left = 28.0
+content_margin_top = 24.0
+content_margin_right = 28.0
+content_margin_bottom = 24.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_toggle"]
+bg_color = Color(0.12, 0.16, 0.24, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.5, 0.65, 0.85, 0.6)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+
+[node name="SumoMenu3D" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_menu")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center"]
+layout_mode = 2
+theme_override_constants/separation = 18
+alignment = 1
+
+[node name="HeaderContainer" type="CenterContainer" parent="Center/VBox"]
+layout_mode = 2
+
+[node name="RibbonTexture" type="TextureRect" parent="Center/VBox/HeaderContainer"]
+custom_minimum_size = Vector2(560, 90)
+layout_mode = 2
+texture = ExtResource("4_ribbon")
+expand_mode = 1
+
+[node name="Title" type="Label" parent="Center/VBox/HeaderContainer/RibbonTexture"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.25, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 34
+text = "PARTY SUMO RAGDOLL 3D"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Tagline" type="Label" parent="Center/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.92, 0.98, 0.9)
+theme_override_font_sizes/font_size = 15
+text = "Đấm Lò Xo Bẹp Dúm • Bẫy Thanh Gạt Xoay Tròn • Nhấc Bổng Đối Thủ Ném Xuống Vực (YEET!)"
+horizontal_alignment = 1
+
+[node name="ModesHBox" type="HBoxContainer" parent="Center/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 32
+alignment = 1
+
+[node name="SoloCard" type="PanelContainer" parent="Center/VBox/ModesHBox"]
+custom_minimum_size = Vector2(430, 360)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_solo")
+
+[node name="VBox" type="VBoxContainer" parent="Center/VBox/ModesHBox/SoloCard"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="TrophyIcon" type="TextureRect" parent="Center/VBox/ModesHBox/SoloCard/VBox"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("2_trophy")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ModeName" type="Label" parent="Center/VBox/ModesHBox/SoloCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 20
+text = "CHẾ ĐỘ 1 NGƯỜI (SOLO SURVIVAL)"
+horizontal_alignment = 1
+
+[node name="Desc" type="Label" parent="Center/VBox/ModesHBox/SoloCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.88, 0.95, 0.85)
+theme_override_font_sizes/font_size = 13
+text = "• Đơn thương độc mã chống lại bão táp Bot Ragdoll ngáo ngơ.\n• Né thanh gạt xoay tròn tử thần và bục bánh donut nảy bật.\n• Hạ gục bot để qua màn, sống sót càng lâu kỷ lục càng cao!"
+autowrap_mode = 3
+
+[node name="Spacer" type="Control" parent="Center/VBox/ModesHBox/SoloCard/VBox"]
+size_flags_vertical = 3
+
+[node name="SoloBtn" type="TextureButton" parent="Center/VBox/ModesHBox/SoloCard/VBox"]
+custom_minimum_size = Vector2(280, 56)
+layout_mode = 2
+size_flags_horizontal = 4
+texture_normal = ExtResource("5_pri")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="BtnLabel" type="Label" parent="Center/VBox/ModesHBox/SoloCard/VBox/SoloBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_font_sizes/font_size = 16
+text = "VÀO CHIẾN SOLO NGAY"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PartyCard" type="PanelContainer" parent="Center/VBox/ModesHBox"]
+custom_minimum_size = Vector2(450, 360)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_party")
+
+[node name="VBox" type="VBoxContainer" parent="Center/VBox/ModesHBox/PartyCard"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="PartyIcon" type="TextureRect" parent="Center/VBox/ModesHBox/PartyCard/VBox"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("3_ava1")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ModeName" type="Label" parent="Center/VBox/ModesHBox/PartyCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.4, 0.65, 1)
+theme_override_font_sizes/font_size = 20
+text = "TIỆC TÙNG 1 - 4 NGƯỜI (PARTY SUMO)"
+horizontal_alignment = 1
+
+[node name="Desc" type="Label" parent="Center/VBox/ModesHBox/PartyCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.85, 0.9, 0.85)
+theme_override_font_sizes/font_size = 13
+text = "• Mỗi người có 3 mạng sống với thanh tim UI sống động.\n• Đấm bay đối thủ hoặc nhấc bổng ném xuống vực (YEET!).\n• Đấu thủ sống sót cuối cùng trên võ đài sẽ đoạt cúp vàng!"
+autowrap_mode = 3
+
+[node name="SlotsGrid" type="GridContainer" parent="Center/VBox/ModesHBox/PartyCard/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="P1Toggle" type="Button" parent="Center/VBox/ModesHBox/PartyCard/VBox/SlotsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_toggle")
+text = "P1: NGƯỜI"
+
+[node name="P2Toggle" type="Button" parent="Center/VBox/ModesHBox/PartyCard/VBox/SlotsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_toggle")
+text = "P2: BOT AI"
+
+[node name="P3Toggle" type="Button" parent="Center/VBox/ModesHBox/PartyCard/VBox/SlotsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_toggle")
+text = "P3: BOT AI"
+
+[node name="P4Toggle" type="Button" parent="Center/VBox/ModesHBox/PartyCard/VBox/SlotsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_toggle")
+text = "P4: BOT AI"
+
+[node name="Spacer" type="Control" parent="Center/VBox/ModesHBox/PartyCard/VBox"]
+size_flags_vertical = 3
+
+[node name="PartyBtn" type="TextureButton" parent="Center/VBox/ModesHBox/PartyCard/VBox"]
+custom_minimum_size = Vector2(280, 56)
+layout_mode = 2
+size_flags_horizontal = 4
+texture_normal = ExtResource("6_rematch")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="BtnLabel" type="Label" parent="Center/VBox/ModesHBox/PartyCard/VBox/PartyBtn"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_font_sizes/font_size = 16
+text = "VÀO ĐẠI CHIẾN SUMO"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ControlHints" type="Label" parent="Center/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.82, 0.92, 0.85)
+theme_override_font_sizes/font_size = 12
+text = "Steam / PC: Di chuyển WASD • Đấm Lò Xo: SPACE • Nhấc Bổng & Ném / Húc Đầu: F hoặc SHIFT\nMobile: Cần Gạt Ảo Nổi góc trái • Nút Đấm & Ném/Húc góc phải"
+horizontal_alignment = 1

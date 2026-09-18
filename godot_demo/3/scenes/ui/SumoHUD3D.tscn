@@ -1,0 +1,337 @@
+[gd_scene format=3 uid="uid://bsumohud3d01"]
+
+[ext_resource type="Script" path="res://scripts/ui/SumoHUD3D.gd" id="1_hud"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/banner_ribbon.png" id="2_ribbon"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/card_bg_p1.png" id="3_cp1"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/card_bg_p2.png" id="4_cp2"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/card_bg_p3.png" id="5_cp3"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/card_bg_p4.png" id="6_cp4"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/avatar_p1.png" id="7_ava1"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/avatar_p2.png" id="8_ava2"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/avatar_p3.png" id="9_ava3"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/avatar_p4.png" id="10_ava4"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/crown.png" id="11_crown"]
+[ext_resource type="Texture2D" path="res://assets/textures/ui/heart_full.png" id="12_hfull"]
+
+[node name="SumoHUD3D" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_hud")
+
+[node name="TopCenter" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -220.0
+offset_top = 10.0
+offset_right = 220.0
+offset_bottom = 90.0
+grow_horizontal = 2
+
+[node name="BannerTexture" type="TextureRect" parent="TopCenter"]
+custom_minimum_size = Vector2(440, 76)
+layout_mode = 2
+texture = ExtResource("2_ribbon")
+expand_mode = 1
+
+[node name="VBox" type="VBoxContainer" parent="TopCenter/BannerTexture"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="ModeLabel" type="Label" parent="TopCenter/BannerTexture/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.4, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 14
+text = "ĐẠI CHIẾN SUMO TIỆC TÙNG"
+horizontal_alignment = 1
+
+[node name="TimerLabel" type="Label" parent="TopCenter/BannerTexture/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 24
+text = "01:30"
+horizontal_alignment = 1
+
+[node name="Corners" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="P1Panel" type="TextureRect" parent="Corners"]
+custom_minimum_size = Vector2(210, 115)
+layout_mode = 1
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 226.0
+offset_bottom = 131.0
+texture = ExtResource("3_cp1")
+expand_mode = 1
+
+[node name="ContentHBox" type="HBoxContainer" parent="Corners/P1Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Avatar" type="TextureRect" parent="Corners/P1Panel/ContentHBox"]
+custom_minimum_size = Vector2(52, 52)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("7_ava1")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBox" type="VBoxContainer" parent="Corners/P1Panel/ContentHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="NameLabel" type="Label" parent="Corners/P1Panel/ContentHBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.4, 0.5, 1)
+theme_override_font_sizes/font_size = 14
+text = "ĐỘI ĐỎ (P1)"
+
+[node name="HeartsHBox" type="HBoxContainer" parent="Corners/P1Panel/ContentHBox/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ScoreHBox" type="HBoxContainer" parent="Corners/P1Panel/ContentHBox/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CrownIcon" type="TextureRect" parent="Corners/P1Panel/ContentHBox/VBox/ScoreHBox"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+texture = ExtResource("11_crown")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ScoreLabel" type="Label" parent="Corners/P1Panel/ContentHBox/VBox/ScoreHBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "0 Đối thủ"
+
+[node name="P2Panel" type="TextureRect" parent="Corners"]
+custom_minimum_size = Vector2(210, 115)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -226.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 131.0
+grow_horizontal = 0
+texture = ExtResource("4_cp2")
+expand_mode = 1
+
+[node name="ContentHBox" type="HBoxContainer" parent="Corners/P2Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Avatar" type="TextureRect" parent="Corners/P2Panel/ContentHBox"]
+custom_minimum_size = Vector2(52, 52)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("8_ava2")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBox" type="VBoxContainer" parent="Corners/P2Panel/ContentHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="NameLabel" type="Label" parent="Corners/P2Panel/ContentHBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 14
+text = "ĐỘI XANH (P2)"
+
+[node name="HeartsHBox" type="HBoxContainer" parent="Corners/P2Panel/ContentHBox/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ScoreHBox" type="HBoxContainer" parent="Corners/P2Panel/ContentHBox/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CrownIcon" type="TextureRect" parent="Corners/P2Panel/ContentHBox/VBox/ScoreHBox"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+texture = ExtResource("11_crown")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ScoreLabel" type="Label" parent="Corners/P2Panel/ContentHBox/VBox/ScoreHBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "0 Đối thủ"
+
+[node name="P3Panel" type="TextureRect" parent="Corners"]
+custom_minimum_size = Vector2(210, 115)
+layout_mode = 1
+offset_left = 16.0
+offset_top = 145.0
+offset_right = 226.0
+offset_bottom = 260.0
+texture = ExtResource("5_cp3")
+expand_mode = 1
+
+[node name="ContentHBox" type="HBoxContainer" parent="Corners/P3Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Avatar" type="TextureRect" parent="Corners/P3Panel/ContentHBox"]
+custom_minimum_size = Vector2(52, 52)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("9_ava3")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBox" type="VBoxContainer" parent="Corners/P3Panel/ContentHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="NameLabel" type="Label" parent="Corners/P3Panel/ContentHBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.25, 1)
+theme_override_font_sizes/font_size = 14
+text = "ĐỘI VÀNG (P3)"
+
+[node name="HeartsHBox" type="HBoxContainer" parent="Corners/P3Panel/ContentHBox/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ScoreHBox" type="HBoxContainer" parent="Corners/P3Panel/ContentHBox/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CrownIcon" type="TextureRect" parent="Corners/P3Panel/ContentHBox/VBox/ScoreHBox"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+texture = ExtResource("11_crown")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ScoreLabel" type="Label" parent="Corners/P3Panel/ContentHBox/VBox/ScoreHBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "0 Đối thủ"
+
+[node name="P4Panel" type="TextureRect" parent="Corners"]
+custom_minimum_size = Vector2(210, 115)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -226.0
+offset_top = 145.0
+offset_right = -16.0
+offset_bottom = 260.0
+grow_horizontal = 0
+texture = ExtResource("6_cp4")
+expand_mode = 1
+
+[node name="ContentHBox" type="HBoxContainer" parent="Corners/P4Panel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="Avatar" type="TextureRect" parent="Corners/P4Panel/ContentHBox"]
+custom_minimum_size = Vector2(52, 52)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("10_ava4")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBox" type="VBoxContainer" parent="Corners/P4Panel/ContentHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+alignment = 1
+
+[node name="NameLabel" type="Label" parent="Corners/P4Panel/ContentHBox/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.95, 0.45, 1)
+theme_override_font_sizes/font_size = 14
+text = "ĐỘI LÁ (P4)"
+
+[node name="HeartsHBox" type="HBoxContainer" parent="Corners/P4Panel/ContentHBox/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ScoreHBox" type="HBoxContainer" parent="Corners/P4Panel/ContentHBox/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CrownIcon" type="TextureRect" parent="Corners/P4Panel/ContentHBox/VBox/ScoreHBox"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+texture = ExtResource("11_crown")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ScoreLabel" type="Label" parent="Corners/P4Panel/ContentHBox/VBox/ScoreHBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "0 Đối thủ"

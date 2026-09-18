@@ -1,31 +1,26 @@
 @echo off
-title CLUCK & SPLAT 3D: CONGA WHIP MAYHEM (1-4 PLAYERS)
+chcp 65001 > nul
+title PARTY SUMO RAGDOLL 3D (FALL GUYS / PARTY ANIMALS STYLE)
+cls
 echo =========================================================================
-echo   🐔 CLUCK & SPLAT 3D: CONGA WHIP MAYHEM 🎭
-echo   (ĐẠI CHIẾN QUẤT ROI MA-NƠ-CANH 3D VẬT LÝ VIRAL - 1 ĐẾN 4 NGƯỜI CHƠI)
+echo   🎪 PARTY SUMO RAGDOLL 3D 🥊
+echo   (ĐẤU TRƯỜNG SUMO VẬT LÝ 3D: ĐẤM LÒ XO, HÚC ĐẦU VÀ QUẲNG ĐỐI THỦ - YEET!)
 echo   ---------------------------------------------------------------------
-echo   🎮 HƯỚNG DẪN ĐIỀU KHIỂN (1-4 NGƯỜI CHƠI HOẶC CHƠI VỚI BOT AI):
+echo   ✨ ĐỒ HỌA & ÂM THANH NÂNG CẤP TOÀN DIỆN:
+echo   - Toàn bộ Texture 2D & 3D: Mặt hạt đậu mập mạp, găng da, sàn võ đài kẻ ô,
+echo     thanh gạt sọc công nghiệp, bánh donut dâu phủ kẹo cốm cầu vồng.
+echo   - Giao diện UI Texture đồ họa cao cấp: Khung thẻ bo tròn, avatar đấu thủ,
+echo     trái tim máu 3D, cúp vàng vô địch, banner giải đấu uốn lượn.
+echo   - Hiệu ứng hạt 3D rực rỡ: Sao tóe khi trúng đòn, bụi tung bay khi chạy,
+echo     mưa pháo hoa confetti khi chiến thắng.
+echo   - Âm thanh & BGM 44.1kHz cực kỳ bắt tai, tấu hài rộn rã.
 echo.
-echo   🔴 NGƯỜI CHƠI 1 (ĐỘI ĐỎ NEON):
-echo   - Di chuyển: [W], [A], [S], [D]
-echo   - LƯỚT QUẤT ROI: [SPACE] (Phím cách)
+echo   🎮 ĐIỀU KHIỂN STEAM / PC:
+echo   - Di chuyển: [W], [A], [S], [D] hoặc các phím mũi tên
+echo   - 🥊 ĐẤM LÒ XO: [SPACE] hoặc [ENTER]
+echo   - 🚀 NHẤC BỔNG & NÉM (YEET) / HÚC ĐẦU: [F] hoặc [SHIFT]
 echo.
-echo   🔵 NGƯỜI CHƠI 2 (ĐỘI XANH NEON):
-echo   - Di chuyển: [CÁC PHÍM MŨI TÊN]
-echo   - LƯỚT QUẤT ROI: [ENTER]
-echo.
-echo   🟡 NGƯỜI CHƠI 3 (ĐỘI VÀNG NEON):
-echo   - Di chuyển: [I], [J], [K], [L]
-echo   - LƯỚT QUẤT ROI: [O]
-echo.
-echo   🟢 NGƯỜI CHƠI 4 (ĐỘI XANH LÁ NEON):
-echo   - Di chuyển: [NUMPAD 8, 4, 5, 6]
-echo   - LƯỚT QUẤT ROI: [NUMPAD 0]
-echo.
-echo   🌟 CƠ CHẾ VIRAL CỰC KỲ ĐƠN GIẢN (HIỂU TRONG 3 GIÂY):
-echo   1. Chạy chạm vào ma-nơ-canh trắng để nối dài thành đuôi rắn / roi vật lý!
-echo   2. Bấm phím [LƯỚT] để bẻ góc quất cả đuôi roi văng tung toé đối thủ!
-echo   3. Nhảy lên 4 bục nhún góc đài để bật tung lên không trung nhào lộn tấu hài!
-echo   4. Dẫn đàn ma-nơ-canh vào [ĐÀI VÀNG TRUNG TÂM] để nạp điểm combo bùng nổ!
+echo   📱 ĐIỀU KHIỂN MOBILE:
+echo   - Cần gạt ảo nổi mượt mà bên trái, nút bấm Đấm & Ném texture nổi bật bên phải.
 echo =========================================================================
 start "" "D:\app\godot\Godot_v4.7.1-stable_win64.exe" --path "d:\folder\tools\godot_demo\3" --rendering-driver opengl3

@@ -37,7 +37,7 @@ func _on_body_entered(body: Node) -> void:
 	if body is CharacterBody3D:
 		var cb = body as CharacterBody3D
 		cb.velocity.y = 16.0
-		CongaSoundManager3D.play_sfx("boing", randf_range(0.9, 1.2))
+		ChameleonSoundManager.play_sfx("grapple_pull", randf_range(1.1, 1.4))
 		
 		scale = Vector3(1.3, 0.4, 1.3)
 		var tw = create_tween()
