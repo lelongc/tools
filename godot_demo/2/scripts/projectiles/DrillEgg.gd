@@ -43,6 +43,8 @@ func _activate_rocket_boost() -> void:
 	drill_speed = 950.0
 	linear_velocity = Vector2(0, 950.0)
 	CameraShake.add_trauma(0.35)
+	if has_node("/root/SoundManager"):
+		get_node("/root/SoundManager").play_drill_boost()
 	if spark_particles:
 		spark_particles.restart()
 		spark_particles.emitting = true
@@ -125,8 +127,7 @@ func _crack_and_destroy() -> void:
 	ParticleHelper.spawn_egg_break_fx(get_parent(), global_position, "drill", has_boosted)
 
 	if has_node("/root/SoundManager"):
-		get_node("/root/SoundManager").play_synth_tone(220.0, 0.10, "pop", 0.9)
-		get_node("/root/SoundManager").play_synth_tone(540.0, 0.12, "laser", 0.7)
+		get_node("/root/SoundManager").play_steel_clang()
 
 	if break_particles:
 		break_particles.restart()

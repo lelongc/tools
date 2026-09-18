@@ -283,9 +283,11 @@ func _fracture_block() -> void:
 		var snd = get_node("/root/SoundManager")
 		match material_type:
 			"wood": snd.play_wood_break()
-			"stone", "obsidian": snd.play_stone_break()
-			"glass", "crystal": snd.play_glass_break()
-			"steel": snd.play_wood_break()
+			"stone": snd.play_stone_break()
+			"obsidian": snd.play_obsidian_crack()
+			"glass": snd.play_glass_break()
+			"crystal": snd.play_crystal_shatter()
+			"steel": snd.play_steel_clang()
 
 	# 1. Bắn khói Comic Puff bồng bềnh
 	_spawn_comic_smoke_poof()

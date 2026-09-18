@@ -76,7 +76,7 @@ func _freeze_blast() -> void:
 	CameraShake.add_trauma(0.4)
 
 	if has_node("/root/SoundManager"):
-		get_node("/root/SoundManager").play_glass_break()
+		get_node("/root/SoundManager").play_frost_freeze()
 
 	set_deferred("freeze", true)
 	if visual_root: visual_root.visible = false

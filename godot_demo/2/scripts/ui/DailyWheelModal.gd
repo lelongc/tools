@@ -230,8 +230,7 @@ func _start_spin_physics() -> void:
 		if cur_sector != prev_tick_sector:
 			prev_tick_sector = cur_sector
 			if has_node("/root/SoundManager"):
-				var pitch_v = randf_range(0.95, 1.05)
-				get_node("/root/SoundManager").play_synth_tone(780.0 * pitch_v, 0.02, "pop", -6.0)
+				get_node("/root/SoundManager").play_wheel_tick()
 	, 0.0, final_rotation, 3.8)
 
 	await tween.finished
@@ -241,7 +240,7 @@ func _start_spin_physics() -> void:
 	btn_close.disabled = false
 
 	if has_node("/root/SoundManager"):
-		get_node("/root/SoundManager").play_victory()
+		get_node("/root/SoundManager").play_coin_pickup()
 
 	if has_node("/root/SaveManager"):
 		var sm = get_node("/root/SaveManager")

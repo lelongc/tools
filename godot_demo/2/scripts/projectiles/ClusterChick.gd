@@ -64,6 +64,9 @@ func _on_impact(body: Node) -> void:
 		body.take_damage(peck_damage, global_position)
 		peck_damage = max(peck_damage - 15.0, 10.0)
 
+	if has_node("/root/SoundManager") and randf() < 0.7:
+		get_node("/root/SoundManager").play_chick_chirp()
+
 	# Nhún nảy Squash & Stretch khi đập vào vật thể
 	if visual:
 		var tween = create_tween()

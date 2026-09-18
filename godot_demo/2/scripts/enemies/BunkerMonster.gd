@@ -595,7 +595,7 @@ func _handle_continuous_crushing(delta: float) -> void:
 				take_damage(crush_dps * delta, b.global_position, true)
 				if crush_audio_cooldown <= 0.0 and has_node("/root/SoundManager"):
 					crush_audio_cooldown = 0.35
-					get_node("/root/SoundManager").play_synth_tone(220.0, 0.08, "noise", -2.0)
+					get_node("/root/SoundManager").play_monster_ouch()
 					_pop_emote(tex_emote_sweat, 0.6)
 
 			# 2. TRƯỜNG HỢP VẬT NẶNG ĐÈ TĨNH (Overburden static pressure):
@@ -1274,8 +1274,7 @@ func _defeat_monster() -> void:
 
 	# Âm thanh vui nhộn khi quái thoát xác
 	if has_node("/root/SoundManager"):
-		get_node("/root/SoundManager").play_synth_tone(340.0, 0.12, "pop", 0.9)
-		get_node("/root/SoundManager").play_synth_tone(480.0, 0.15, "sine", 0.8)
+		get_node("/root/SoundManager").play_enemy_squash()
 
 	# =========================================================================
 	# HIỆU ỨNG THOÁT XÁC HOẠT HÌNH (CARTOON SHOCK JUMP & BALLOON POP)

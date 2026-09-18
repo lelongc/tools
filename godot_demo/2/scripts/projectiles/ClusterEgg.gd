@@ -56,7 +56,9 @@ func _hatch_chicks() -> void:
 
 	CameraShake.add_trauma(0.3)
 	if has_node("/root/SoundManager"):
-		get_node("/root/SoundManager").play_egg_drop()
+		var sm = get_node("/root/SoundManager")
+		sm.play_egg_crack()
+		sm.play_chick_chirp()
 
 	set_deferred("freeze", true)
 	if visual_root: visual_root.visible = false

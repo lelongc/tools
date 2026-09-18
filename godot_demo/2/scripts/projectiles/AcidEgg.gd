@@ -62,7 +62,7 @@ func _start_acid_melting() -> void:
 
 	CameraShake.add_trauma(0.35)
 	if has_node("/root/SoundManager"):
-		get_node("/root/SoundManager").play_egg_drop()
+		get_node("/root/SoundManager").play_acid_sizzle()
 
 	set_deferred("freeze", true)
 	if visual_root: visual_root.visible = false

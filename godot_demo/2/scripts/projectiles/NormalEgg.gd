@@ -148,12 +148,12 @@ func _on_body_entered(body: Node) -> void:
 		if impact_speed > 220.0:
 			CameraShake.add_trauma(0.18 if impact_speed > 500.0 else 0.10)
 		if has_node("/root/SoundManager"):
-			get_node("/root/SoundManager").play_synth_tone(240.0, 0.10, "pop", 0.9)
+			get_node("/root/SoundManager").play_egg_bounce()
 	else:
 		# Các cú nảy / lăn tiếp theo: Sát thương phụ xô đẩy
 		damage_dealt = base_damage * 0.45 * clamp(impact_speed / 180.0, 0.35, 1.8)
 		if has_node("/root/SoundManager") and impact_speed > 120.0:
-			get_node("/root/SoundManager").play_synth_tone(180.0, 0.06, "pop", 0.6)
+			get_node("/root/SoundManager").play_egg_bounce()
 
 	# Gây sát thương vật lý lên khối hoặc quái bị va chạm
 	if body.has_method("take_damage"):
@@ -180,9 +180,7 @@ func _crack_and_destroy() -> void:
 
 	# Âm thanh nứt vỡ vui nhộn
 	if has_node("/root/SoundManager"):
-		var sm = get_node("/root/SoundManager")
-		sm.play_synth_tone(420.0, 0.12, "pop", 0.95)
-		sm.play_synth_tone(580.0, 0.14, "sine", 0.8)
+		get_node("/root/SoundManager").play_egg_crack()
 
 	# 1. Hiệu ứng rung lắc nhẹ trước khi vỡ
 	if visual_root:

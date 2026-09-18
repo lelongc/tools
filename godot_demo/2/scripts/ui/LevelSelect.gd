@@ -164,7 +164,7 @@ func _render_world_levels() -> void:
 			var target_lvl = lvl
 			btn.pressed.connect(func():
 				if has_node("/root/SoundManager"):
-					get_node("/root/SoundManager").play_synth_tone(580.0, 0.08, "pop", 0.9)
+					get_node("/root/SoundManager").play_button_click()
 				GameManager.load_level(target_lvl)
 			)
 		else:

@@ -42,7 +42,7 @@ func _trigger_vortex() -> void:
 
 	CameraShake.add_trauma(0.6)
 	if has_node("/root/SoundManager"):
-		get_node("/root/SoundManager").play_synth_tone(140.0, 1.0, "laser", 3.0)
+		get_node("/root/SoundManager").play_blackhole_vortex()
 
 	set_deferred("freeze", true)
 	if visual_root: visual_root.visible = false

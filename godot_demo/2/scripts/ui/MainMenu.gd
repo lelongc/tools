@@ -153,4 +153,4 @@ func _on_btn_reset_pressed() -> void:
 		_update_star_count()
 		_update_coin_count()
 	if has_node("/root/SoundManager"):
-		get_node("/root/SoundManager").play_synth_tone(520.0, 0.08, "pop", 0.8)
+		get_node("/root/SoundManager").play_button_click()

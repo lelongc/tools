@@ -306,7 +306,7 @@ func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> 
 					var star_idx = i
 					st.tween_callback(func():
 						if has_node("/root/SoundManager"):
-							get_node("/root/SoundManager").play_synth_tone(520.0 + star_idx * 160.0, 0.12, "sine", 1.0)
+							get_node("/root/SoundManager").play_star_chime(star_idx + 1)
 					)
 				else:
 					s_node.modulate = Color(0.25, 0.18, 0.35, 0.65)

@@ -81,7 +81,7 @@ func _detonate_nuke() -> void:
 	GameManager.add_score(800)
 
 	if has_node("/root/SoundManager"):
-		get_node("/root/SoundManager").play_synth_tone(70.0, 0.8, "boom", 4.0)
+		get_node("/root/SoundManager").play_explosion()
 
 	CartoonExplosionFX.spawn_comic_explosion(get_parent(), global_position, explosion_radius)
 	# Khói độc phóng xạ neon xanh lá đặc trưng của thùng Nuke

@@ -207,5 +207,4 @@ func _on_button_up() -> void:
 
 func _on_pressed() -> void:
 	if has_node("/root/SoundManager"):
-		var pitch_rnd = randf_range(0.96, 1.05)
-		get_node("/root/SoundManager").play_synth_tone(540.0 * pitch_rnd, 0.06, "pop", 0.6)
+		get_node("/root/SoundManager").play_button_click()

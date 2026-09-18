@@ -1,39 +1,254 @@
 extends Node
 
-# Procedural Retro & Cartoon Audio Synthesizer for instant game audio
+# ==============================================================================
+# SOUND MANAGER - Studio-Grade Cartoon Audio System for Godot 4
+# ==============================================================================
+
 var sfx_players: Array[AudioStreamPlayer] = []
-const POOL_SIZE = 12
-var sound_cache: Dictionary = {}
+var bgm_player: AudioStreamPlayer = null
+const POOL_SIZE = 16
+
+var wav_cache: Dictionary = {}
+var is_bgm_active: bool = true
+
+func _init() -> void:
+	_load_all_sound_assets()
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	# 1. Khởi tạo BGM Player riêng biệt
+	bgm_player = AudioStreamPlayer.new()
+	bgm_player.name = "BGMPlayer"
+	bgm_player.volume_db = -8.0 # Âm lượng êm ái làm nền cho SFX
+	add_child(bgm_player)
+	bgm_player.finished.connect(_on_bgm_finished)
+
+	# 2. Khởi tạo Pool SFX Players cho đa âm thanh đồng thời
 	for i in range(POOL_SIZE):
 		var p = AudioStreamPlayer.new()
+		p.name = "SFXPlayer_%d" % i
 		add_child(p)
 		sfx_players.append(p)
 
-	# Tự động kết nối các tín hiệu toàn cục từ GameManager
-	GameManager.egg_dropped.connect(func(_type): play_egg_drop())
-	GameManager.enemy_defeated.connect(func(_enemy, _pts): play_enemy_squash())
-	GameManager.level_completed.connect(func(_stars, _score, _coins = 0): play_victory())
+	# 3. Nạp sẵn 24 tệp âm thanh WAV hoạt hình chuẩn phòng thu
+	_load_all_sound_assets()
+
+	# 4. Tự động kết nối các sự kiện toàn cục từ GameManager
+	if is_inside_tree() and has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		gm.egg_dropped.connect(func(_type): play_egg_drop())
+		gm.enemy_defeated.connect(func(_enemy, _pts): play_enemy_squash())
+		gm.level_completed.connect(func(_stars, _score, _coins = 0): play_victory())
+		gm.level_failed.connect(func(): play_level_fail())
+
+	# 5. Khởi động nhạc nền hoạt hình
+	play_bgm()
+
+func _load_all_sound_assets() -> void:
+	var sound_map = {
+		"chicken_cluck": "res://assets/audio/chicken_cluck.wav",
+		"egg_crack": "res://assets/audio/egg_crack.wav",
+		"egg_bounce": "res://assets/audio/egg_bounce.wav",
+		"explosion_cartoon": "res://assets/audio/explosion_cartoon.wav",
+		"wood_break": "res://assets/audio/wood_break.wav",
+		"stone_break": "res://assets/audio/stone_break.wav",
+		"glass_break": "res://assets/audio/glass_break.wav",
+		"steel_clang": "res://assets/audio/steel_clang.wav",
+		"crystal_shatter": "res://assets/audio/crystal_shatter.wav",
+		"obsidian_crack": "res://assets/audio/obsidian_crack.wav",
+		"monster_ouch": "res://assets/audio/monster_ouch.wav",
+		"monster_defeat": "res://assets/audio/monster_defeat.wav",
+		"drill_engine": "res://assets/audio/drill_engine.wav",
+		"frost_freeze": "res://assets/audio/frost_freeze.wav",
+		"acid_sizzle": "res://assets/audio/acid_sizzle.wav",
+		"blackhole_vortex": "res://assets/audio/blackhole_vortex.wav",
+		"chick_chirp": "res://assets/audio/chick_chirp.wav",
+		"button_click": "res://assets/audio/button_click.wav",
+		"wheel_tick": "res://assets/audio/wheel_tick.wav",
+		"star_chime": "res://assets/audio/star_chime.wav",
+		"victory_fanfare": "res://assets/audio/victory_fanfare.wav",
+		"level_fail": "res://assets/audio/level_fail.wav",
+		"coin_pickup": "res://assets/audio/coin_pickup.wav",
+		"cartoon_bunker_bgm": "res://assets/audio/cartoon_bunker_bgm.wav"
+	}
+
+	for key in sound_map:
+		var path = sound_map[key]
+		if ResourceLoader.exists(path):
+			var stream = load(path)
+			if stream:
+				wav_cache[key] = stream
 
 func _get_available_player() -> AudioStreamPlayer:
 	for p in sfx_players:
-		if not p.playing:
+		if is_instance_valid(p) and not p.playing:
 			return p
-	return sfx_players[0]
+	if not sfx_players.is_empty() and is_instance_valid(sfx_players[0]):
+		return sfx_players[0]
+	var fallback = AudioStreamPlayer.new()
+	fallback.name = "SFXPlayer_fallback"
+	add_child(fallback)
+	sfx_players.append(fallback)
+	return fallback
+
+func is_sound_enabled() -> bool:
+	if is_inside_tree() and has_node("/root/SaveManager"):
+		return get_node("/root/SaveManager").save_data.get("sound_enabled", true)
+	return true
+
+# ==============================================================================
+# NHẠC NỀN HOẠT HÌNH (BACKGROUND MUSIC)
+# ==============================================================================
+
+func play_bgm() -> void:
+	if not is_inside_tree(): return
+	if not bgm_player: return
+	is_bgm_active = true
+	if not is_sound_enabled(): return
+
+	if wav_cache.has("cartoon_bunker_bgm"):
+		var stream = wav_cache["cartoon_bunker_bgm"]
+		if "loop_mode" in stream:
+			stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		bgm_player.stream = stream
+		if not bgm_player.playing:
+			bgm_player.play()
+
+func stop_bgm() -> void:
+	is_bgm_active = false
+	if bgm_player and bgm_player.playing:
+		bgm_player.stop()
+
+func _on_bgm_finished() -> void:
+	if is_bgm_active and is_sound_enabled() and bgm_player:
+		bgm_player.play()
+
+# ==============================================================================
+# HIỆU ỨNG ÂM THANH HOẠT HÌNH (CARTOON SFX)
+# ==============================================================================
+
+func play_sfx(key: String, vol_db: float = 0.0, pitch_min: float = 0.94, pitch_max: float = 1.06) -> void:
+	if not is_inside_tree(): return
+	if not is_sound_enabled(): return
+	if not wav_cache.has(key): return
+
+	var stream = wav_cache[key]
+	var p = _get_available_player()
+	p.stream = stream
+	p.volume_db = vol_db
+	p.pitch_scale = randf_range(pitch_min, pitch_max)
+	p.play()
+
+# 1. GÀ ĐẺ TRỨNG & VẬT LÝ VỎ TRỨNG
+func play_egg_drop() -> void:
+	play_sfx("chicken_cluck", 1.5, 0.95, 1.05)
+
+func play_egg_bounce() -> void:
+	play_sfx("egg_bounce", 0.0, 0.92, 1.08)
+
+func play_egg_crack() -> void:
+	play_sfx("egg_crack", 1.8, 0.95, 1.05)
+
+# 2. BOM & VỤ NỔ COMIC PUNCHY
+func play_explosion() -> void:
+	play_sfx("explosion_cartoon", 3.5, 0.92, 1.06)
+
+# 3. PHÁ HỦY CÔNG TRÌNH VẬT LIỆU
+func play_wood_break() -> void:
+	play_sfx("wood_break", 1.2, 0.93, 1.07)
+
+func play_stone_break() -> void:
+	play_sfx("stone_break", 2.2, 0.92, 1.06)
+
+func play_glass_break() -> void:
+	play_sfx("glass_break", 0.8, 0.94, 1.06)
+
+func play_steel_clang() -> void:
+	play_sfx("steel_clang", 1.8, 0.95, 1.05)
+
+func play_crystal_shatter() -> void:
+	play_sfx("crystal_shatter", 1.8, 0.95, 1.05)
+
+func play_obsidian_crack() -> void:
+	play_sfx("obsidian_crack", 2.5, 0.94, 1.06)
+
+# 4. QUÁI VẬT BỊ ĐÁNH & TIÊU DIỆT
+func play_monster_ouch() -> void:
+	play_sfx("monster_ouch", 1.2, 0.92, 1.08)
+
+func play_enemy_squash() -> void:
+	play_sfx("monster_defeat", 2.5, 0.93, 1.07)
+
+# 5. KỸ NĂNG CỦA 7 LOẠI ĐẠN TRỨNG
+func play_drill_boost() -> void:
+	play_sfx("drill_engine", 1.8, 0.95, 1.05)
+
+func play_frost_freeze() -> void:
+	play_sfx("frost_freeze", 1.5, 0.95, 1.05)
+
+func play_acid_sizzle() -> void:
+	play_sfx("acid_sizzle", 0.8, 0.95, 1.05)
+
+func play_blackhole_vortex() -> void:
+	play_sfx("blackhole_vortex", 2.5, 0.95, 1.05)
+
+func play_chick_chirp() -> void:
+	play_sfx("chick_chirp", 0.5, 0.92, 1.10)
+
+# 6. GIAO DIỆN & TƯƠNG TÁC
+func play_button_click() -> void:
+	play_sfx("button_click", 0.5, 0.96, 1.04)
+
+func play_wheel_tick() -> void:
+	play_sfx("wheel_tick", -1.0, 0.95, 1.05)
+
+func play_star_chime(star_index: int = 1) -> void:
+	if not is_inside_tree(): return
+	if not is_sound_enabled(): return
+	if not wav_cache.has("star_chime"): return
+	var p = _get_available_player()
+	p.stream = wav_cache["star_chime"]
+	p.volume_db = 1.8
+	p.pitch_scale = 1.0 + float(star_index - 1) * 0.22 # C6 -> E6 -> G6
+	p.play()
+
+func play_victory() -> void:
+	play_sfx("victory_fanfare", 3.0, 1.0, 1.0)
+
+func play_level_fail() -> void:
+	play_sfx("level_fail", 2.5, 1.0, 1.0)
+
+func play_coin_pickup() -> void:
+	play_sfx("coin_pickup", 1.5, 0.96, 1.04)
+
+# ==============================================================================
+# BACKWARDS COMPATIBILITY ROUTER (Giữ tương thích tuyệt đối cho code cũ)
+# ==============================================================================
+var sound_cache: Dictionary = {}
 
 func play_synth_tone(freq_or_type = 440.0, duration: float = 0.12, type: String = "sine", vol_db: float = 0.0) -> void:
-	var freq: float = 440.0
+	if not is_inside_tree(): return
+	if not is_sound_enabled(): return
+
+	# Tự động định tuyến các âm thanh gọi synth cũ sang âm thanh WAV chất lượng cao mới
 	if typeof(freq_or_type) == TYPE_STRING:
-		type = freq_or_type
-		match type:
-			"pop": freq = 520.0
-			"boom": freq = 90.0
-			"laser": freq = 600.0
-			"noise": freq = 240.0
-			_: freq = 440.0
-	elif typeof(freq_or_type) in [TYPE_FLOAT, TYPE_INT]:
+		match freq_or_type:
+			"pop": play_button_click(); return
+			"boom": play_explosion(); return
+			"noise": play_wood_break(); return
+			"laser": play_egg_drop(); return
+
+	if type == "pop" and freq_or_type > 400.0:
+		play_button_click()
+		return
+	elif type == "boom":
+		play_explosion()
+		return
+
+	# Bộ tổng hợp dự phòng (Fallback Synthesizer)
+	var freq: float = 440.0
+	if typeof(freq_or_type) in [TYPE_FLOAT, TYPE_INT]:
 		freq = float(freq_or_type)
 
 	var cache_key = "%s_%.1f_%.2f" % [type, freq, duration]
@@ -46,30 +261,12 @@ func play_synth_tone(freq_or_type = 440.0, duration: float = 0.12, type: String 
 		var total_samples = int(sample_hz * duration)
 		var data = PackedByteArray()
 		data.resize(total_samples)
-		
+
 		for i in range(total_samples):
 			var t = float(i) / float(sample_hz)
 			var progress = float(i) / float(total_samples)
-			var env = 1.0 - progress # Decay envelope
-			var val = 0.0
-			
-			match type:
-				"sine":
-					val = sin(TAU * freq * t)
-				"noise":
-					val = randf_range(-1.0, 1.0)
-				"square":
-					val = 1.0 if sin(TAU * freq * t) > 0.0 else -1.0
-				"laser":
-					var cur_f = freq * (1.0 - progress * 0.8)
-					val = sin(TAU * cur_f * t)
-				"boom":
-					var cur_f = freq * (1.0 - progress * 0.9)
-					val = sin(TAU * cur_f * t) * 0.7 + randf_range(-0.3, 0.3)
-				"pop":
-					var cur_f = freq * (1.0 + (1.0 - progress) * 0.4)
-					val = sin(TAU * cur_f * t)
-
+			var env = 1.0 - progress
+			var val = sin(TAU * freq * t)
 			var sample_byte = int(clamp((val * env * 0.8 + 1.0) * 127.5, 0, 255))
 			data[i] = sample_byte
 
@@ -84,29 +281,3 @@ func play_synth_tone(freq_or_type = 440.0, duration: float = 0.12, type: String 
 	p.volume_db = vol_db
 	p.pitch_scale = randf_range(0.92, 1.08)
 	p.play()
-
-# Các hàm gọi hiệu ứng âm thanh cụ thể
-func play_egg_drop() -> void:
-	play_synth_tone(600.0, 0.12, "laser", -3.0)
-
-func play_explosion() -> void:
-	play_synth_tone(90.0, 0.45, "boom", 3.0)
-
-func play_wood_break() -> void:
-	play_synth_tone(240.0, 0.15, "noise", -1.0)
-
-func play_stone_break() -> void:
-	play_synth_tone(110.0, 0.25, "boom", 1.0)
-
-func play_glass_break() -> void:
-	play_synth_tone(1800.0, 0.18, "sine", 0.0)
-
-func play_enemy_squash() -> void:
-	play_synth_tone(750.0, 0.22, "laser", 2.0)
-
-func play_victory() -> void:
-	play_synth_tone(523.25, 0.2, "sine", 2.0) # C5
-	await get_tree().create_timer(0.15).timeout
-	play_synth_tone(659.25, 0.2, "sine", 2.0) # E5
-	await get_tree().create_timer(0.15).timeout
-	play_synth_tone(783.99, 0.4, "sine", 3.0) # G5
