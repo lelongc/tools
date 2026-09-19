@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 700" width="540" height="700">
+  <defs>
+    <linearGradient id="lavaCav" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1e0505"/>
+      <stop offset="100%" stop-color="#0d0202"/>
+    </linearGradient>
+    <linearGradient id="magmaStream" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ea580c"/>
+      <stop offset="50%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#eab308"/>
+    </linearGradient>
+  </defs>
+  <rect width="540" height="700" fill="url(#lavaCav)"/>
+  <!-- Hexagonal Basalt Columns -->
+  <g fill="#2d0a0a" stroke="#120202" stroke-width="3" opacity="0.75">
+    <polygon points="50,60 90,80 90,200 50,220 10,200 10,80"/>
+    <polygon points="140,40 180,60 180,240 140,260 100,240 100,60"/>
+    <polygon points="400,80 440,100 440,260 400,280 360,260 360,100"/>
+    <polygon points="490,50 530,70 530,220 490,240 450,220 450,70"/>
+    <polygon points="60,340 100,360 100,520 60,540 20,520 20,360"/>
+    <polygon points="150,380 190,400 190,580 150,600 110,580 110,400"/>
+    <polygon points="380,360 420,380 420,540 380,560 340,540 340,380"/>
+    <polygon points="470,390 510,410 510,590 470,610 430,590 430,410"/>
+  </g>
+  <!-- Molten Magma Streams running vertically -->
+  <g fill="none" stroke="url(#magmaStream)" stroke-linecap="round" filter="drop-shadow(0 0 8px #f97316)">
+    <path d="M260,0 C275,100 240,180 265,270 C280,360 250,450 270,550 C285,630 260,700 260,700" stroke-width="12"/>
+    <path d="M265,270 C310,320 330,400 315,480" stroke-width="6"/>
+  </g>
+</svg>

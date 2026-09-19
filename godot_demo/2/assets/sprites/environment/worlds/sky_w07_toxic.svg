@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 400" width="1080" height="400">
+  <defs>
+    <linearGradient id="skyGrad7" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#041408"/>
+      <stop offset="45%" stop-color="#0d3316"/>
+      <stop offset="85%" stop-color="#1b5c29"/>
+      <stop offset="100%" stop-color="#3eb057"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="400" fill="url(#skyGrad7)"/>
+  <!-- Jungle Canopy Silhouettes -->
+  <path d="M-20,400 Q120,220 280,310 T680,260 T1100,320 L1100,400 Z" fill="#051a0b" opacity="0.8"/>
+  <path d="M-20,400 Q180,280 380,350 T880,300 T1100,370 L1100,400 Z" fill="#0b2912" opacity="0.6"/>
+  <!-- Glowing Spores -->
+  <g fill="#86efac" opacity="0.75">
+    <circle cx="160" cy="180" r="4"/><circle cx="340" cy="120" r="5"/><circle cx="580" cy="200" r="4"/>
+    <circle cx="780" cy="140" r="5"/><circle cx="960" cy="170" r="4"/>
+  </g>
+</svg>

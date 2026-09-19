@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="240" height="60">
+  <defs>
+    <linearGradient id="grassGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#80db38"/>
+      <stop offset="60%" stop-color="#55a822"/>
+      <stop offset="100%" stop-color="#3c7a14"/>
+    </linearGradient>
+    <linearGradient id="cliffDirt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#543722"/>
+      <stop offset="100%" stop-color="#342013"/>
+    </linearGradient>
+  </defs>
+  <!-- Dirt Base -->
+  <rect y="18" width="240" height="42" fill="url(#cliffDirt)"/>
+  <!-- Grass Turf Overhang with Blades -->
+  <path d="M0,0 L240,0 L240,16 Q225,24 210,16 Q195,26 180,18 Q165,28 150,17 Q135,27 120,18 Q105,27 90,16 Q75,26 60,18 Q45,28 30,17 Q15,26 0,16 Z" fill="url(#grassGrad)"/>
+  <!-- Daisy flower accents -->
+  <circle cx="45" cy="8" r="4" fill="#ffffff"/>
+  <circle cx="45" cy="8" r="2" fill="#ffd166"/>
+  <circle cx="165" cy="9" r="4" fill="#ffffff"/>
+  <circle cx="165" cy="9" r="2" fill="#ffd166"/>
+</svg>

@@ -7,17 +7,34 @@ script = ExtResource("1_script")
 
 [node name="TrajectoryLine" type="Line2D" parent="."]
 width = 4.0
-default_color = Color(1, 0.88, 0.25, 0.7)
+default_color = Color(1, 0.88, 0.25, 0.75)
 joint_mode = 2
 begin_cap_mode = 2
 end_cap_mode = 2
 round_precision = 8
+
+[node name="DropPoofFX" type="CPUParticles2D" parent="."]
+position = Vector2(0, 26)
+emitting = false
+one_shot = true
+explosiveness = 0.95
+lifetime = 0.38
+spread = 180.0
+gravity = Vector2(0, 150)
+initial_velocity_min = 80.0
+initial_velocity_max = 160.0
+scale_amount_min = 0.2
+scale_amount_max = 0.5
 
 [node name="VisualRoot" type="Node2D" parent="."]
 
 [node name="Basket" type="Sprite2D" parent="VisualRoot"]
 position = Vector2(0, 22)
 scale = Vector2(0.85, 0.85)
+
+[node name="LoadedEgg" type="Sprite2D" parent="VisualRoot/Basket"]
+position = Vector2(0, -6)
+scale = Vector2(0.48, 0.48)
 
 [node name="LeftWing" type="Sprite2D" parent="VisualRoot"]
 position = Vector2(-26, 4)

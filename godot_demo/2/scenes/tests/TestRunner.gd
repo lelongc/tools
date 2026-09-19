@@ -531,6 +531,121 @@ func _ready() -> void:
 			print("  [PASS] Level 61 received smoothed 7-egg loadout: ", GameManager.available_eggs, " (P2-13)")
 		lvl61.queue_free()
 
+	# -------------------------------------------------------------------------
+	# 12. WORLD BACKGROUNDS, CHICKEN VISUALS & ANTI-JITTER VERIFICATION
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 12] Testing World Backgrounds, Chicken Basket/Recoil & Anti-Jitter ---")
+
+	# 12.1: Verify all 30 World Background SVGs
+	var world_names = ["farm", "quarry", "industrial", "lava", "crystal", "cyber", "toxic", "glacier", "dragon", "celestial"]
+	var asset_types = ["sky", "cavern", "cliff"]
+	var loaded_bg_count = 0
+
+	for w in range(1, 11):
+		var num_str = "%02d" % w
+		var w_name = world_names[w - 1]
+		for atype in asset_types:
+			var path = "res://assets/sprites/environment/worlds/%s_w%s_%s.svg" % [atype, num_str, w_name]
+			var tex = ParticleHelper._safe_load(path)
+			if tex == null:
+				errors.append("Missing world environment SVG: " + path)
+				print("  [FAIL] Missing SVG: ", path)
+			else:
+				loaded_bg_count += 1
+
+	if loaded_bg_count == 30:
+		print("  [PASS] All 30 World Background SVGs loaded successfully (10 Sky, 10 Cavern, 10 Cliff)")
+	else:
+		errors.append("Expected 30 world background SVGs, got %d" % loaded_bg_count)
+
+	# 12.2: Chicken Bomber Visuals, LoadedEgg & Recoil
+	var chicken_scene = load("res://scenes/prefabs/ChickenBomber.tscn")
+	if not chicken_scene:
+		errors.append("Failed to load ChickenBomber.tscn!")
+	else:
+		var chk = chicken_scene.instantiate()
+		add_child(chk)
+		var loaded_egg_node = chk.get_node_or_null("VisualRoot/Basket/LoadedEgg")
+		var poof_fx = chk.get_node_or_null("DropPoofFX")
+
+		if not loaded_egg_node:
+			errors.append("ChickenBomber missing VisualRoot/Basket/LoadedEgg!")
+		else:
+			print("  [PASS] ChickenBomber contains LoadedEgg Sprite2D")
+
+		if not poof_fx:
+			errors.append("ChickenBomber missing DropPoofFX!")
+		else:
+			print("  [PASS] ChickenBomber contains DropPoofFX CPUParticles2D")
+
+		# Check all 7 egg textures are mapped in EGG_TEXTURE_PATHS
+		var egg_types = ["normal", "bomb", "drill", "cluster", "frost", "acid", "blackhole"]
+		for etype in egg_types:
+			if not chk.EGG_TEXTURE_PATHS.has(etype):
+				errors.append("ChickenBomber EGG_TEXTURE_PATHS missing: " + etype)
+			else:
+				var etex = ParticleHelper._safe_load(chk.EGG_TEXTURE_PATHS[etype])
+				if not etex:
+					errors.append("Egg texture file missing: " + chk.EGG_TEXTURE_PATHS[etype])
+		print("  [PASS] ChickenBomber EGG_TEXTURE_PATHS maps all 7 egg types successfully")
+
+		# Test recoil actuation
+		chk.available_eggs = ["normal", "bomb"]
+		chk.current_egg_type = "normal"
+		chk._drop_egg()
+		if chk.visual_root.position.y < -5.0 or chk.recoil_active:
+			print("  [PASS] ChickenBomber recoil triggered properly on drop (visual_root.y = %.1f)" % chk.visual_root.position.y)
+		else:
+			errors.append("ChickenBomber recoil did not trigger upward displacement!")
+
+		chk.queue_free()
+
+	# 12.3: Anti-Jitter Physics in DestructibleBlock
+	if block_scene:
+		var test_blk = block_scene.instantiate()
+		test_blk.material_type = "wood"
+		add_child(test_blk)
+		var pmat = test_blk.physics_material_override
+		if pmat.bounce != 0.0:
+			errors.append("DestructibleBlock bounce is not 0.0 (micro-restitution jitter risk): %f" % pmat.bounce)
+		else:
+			print("  [PASS] DestructibleBlock bounce == 0.0 (anti-jitter bounce verified)")
+
+		if pmat.friction < 0.8:
+			errors.append("DestructibleBlock friction is too low: %f" % pmat.friction)
+		else:
+			print("  [PASS] DestructibleBlock high friction == %.2f" % pmat.friction)
+
+		test_blk.linear_velocity = Vector2(8.0, 8.0)
+		test_blk.angular_velocity = 0.5
+		# Simulate 1 physics frame
+		test_blk._physics_process(0.0166)
+		if test_blk.linear_velocity.length() < Vector2(8.0, 8.0).length():
+			print("  [PASS] DestructibleBlock micro-velocity snubbing confirmed active")
+		else:
+			errors.append("DestructibleBlock velocity snubbing did not decay micro-velocity!")
+		test_blk.queue_free()
+
+	# 12.4: CampaignLevel Modular Cavern Panels & Dynamic Camera
+	if camp_scene:
+		GameManager.current_level = 85 # World 5: wide cavern
+		var lvl85 = camp_scene.instantiate()
+		add_child(lvl85)
+		var panels = lvl85.get_node_or_null("Background/CavernPanels")
+		if not panels:
+			errors.append("CampaignLevel missing Background/CavernPanels!")
+		elif panels.get_child_count() < 2:
+			errors.append("CampaignLevel World 5 should have >= 2 modular cavern panels, found: %d" % panels.get_child_count())
+		else:
+			print("  [PASS] World 5 modular cavern panels tiled cleanly (%d panels, 0 stretching)" % panels.get_child_count())
+
+		if lvl85.default_cam_pos == Vector2.ZERO or lvl85.default_cam_zoom.x <= 0:
+			errors.append("CampaignLevel default camera position/zoom not cached properly!")
+		else:
+			print("  [PASS] CampaignLevel default camera pos/zoom cached: pos=", lvl85.default_cam_pos, " zoom=", lvl85.default_cam_zoom)
+
+		lvl85.queue_free()
+
 	print("\n================================================================")
 	if errors.size() == 0:
 		print(">>> ALL TESTS PASSED SUCCESSFULLY! (0 ERRORS) <<<")

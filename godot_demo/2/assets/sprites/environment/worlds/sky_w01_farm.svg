@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 400" width="1080" height="400">
+  <defs>
+    <linearGradient id="skyGrad1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#38a8e8"/>
+      <stop offset="65%" stop-color="#72ccf8"/>
+      <stop offset="100%" stop-color="#b8e8fc"/>
+    </linearGradient>
+    <linearGradient id="sunGlow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff8d0" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#fcd860" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="hillGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#78c850"/>
+      <stop offset="100%" stop-color="#4a942c"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Base -->
+  <rect width="1080" height="400" fill="url(#skyGrad1)"/>
+  
+  <!-- Sun and rays -->
+  <circle cx="880" cy="90" r="140" fill="url(#sunGlow)"/>
+  <circle cx="880" cy="90" r="48" fill="#fffbe0"/>
+
+  <!-- Distant Mountains -->
+  <path d="M-40,320 Q80,240 220,290 T480,260 T760,280 T1040,250 T1120,300 L1120,400 L-40,400 Z" fill="#68b4a0" opacity="0.45"/>
+
+  <!-- Rolling Farm Hills -->
+  <path d="M-20,340 Q140,290 320,330 T680,310 T1020,325 T1100,350 L1100,400 L-20,400 Z" fill="url(#hillGrad)" opacity="0.85"/>
+
+  <!-- Fluffy Cartoon Clouds -->
+  <!-- Cloud 1 -->
+  <g fill="#ffffff" opacity="0.92">
+    <ellipse cx="180" cy="110" rx="70" ry="34"/>
+    <circle cx="150" cy="95" r="38"/>
+    <circle cx="205" cy="90" r="46"/>
+    <circle cx="240" cy="112" r="32"/>
+  </g>
+  <!-- Cloud 2 -->
+  <g fill="#ffffff" opacity="0.88">
+    <ellipse cx="520" cy="75" rx="90" ry="40"/>
+    <circle cx="480" cy="55" r="48"/>
+    <circle cx="550" cy="50" r="54"/>
+    <circle cx="600" cy="75" r="38"/>
+  </g>
+  <!-- Cloud 3 -->
+  <g fill="#ffffff" opacity="0.95">
+    <ellipse cx="820" cy="150" rx="80" ry="36"/>
+    <circle cx="780" cy="132" r="42"/>
+    <circle cx="845" cy="128" r="46"/>
+    <circle cx="885" cy="150" r="34"/>
+  </g>
+</svg>

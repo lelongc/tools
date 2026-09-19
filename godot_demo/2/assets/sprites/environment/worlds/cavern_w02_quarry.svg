@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 700" width="540" height="700">
+  <defs>
+    <linearGradient id="quarryCav" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#382218"/>
+      <stop offset="100%" stop-color="#1e100a"/>
+    </linearGradient>
+    <linearGradient id="sandstone" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6e4530"/>
+      <stop offset="100%" stop-color="#422517"/>
+    </linearGradient>
+  </defs>
+  <rect width="540" height="700" fill="url(#quarryCav)"/>
+  <!-- Sandstone Strata Layers -->
+  <g fill="url(#sandstone)" stroke="#1a0c06" stroke-width="2" opacity="0.75">
+    <rect x="10" y="30" width="160" height="48" rx="3"/>
+    <rect x="180" y="30" width="180" height="48" rx="3"/>
+    <rect x="370" y="30" width="160" height="48" rx="3"/>
+    <rect x="5" y="88" width="110" height="52" rx="3"/>
+    <rect x="125" y="88" width="200" height="52" rx="3"/>
+    <rect x="335" y="88" width="200" height="52" rx="3"/>
+    <rect x="15" y="150" width="170" height="50" rx="3"/>
+    <rect x="195" y="150" width="160" height="50" rx="3"/>
+    <rect x="365" y="150" width="165" height="50" rx="3"/>
+    <rect x="5" y="210" width="130" height="52" rx="3"/>
+    <rect x="145" y="210" width="180" height="52" rx="3"/>
+    <rect x="335" y="210" width="200" height="52" rx="3"/>
+    <rect x="10" y="272" width="170" height="50" rx="3"/>
+    <rect x="190" y="272" width="170" height="50" rx="3"/>
+    <rect x="370" y="272" width="160" height="50" rx="3"/>
+    <rect x="5" y="332" width="120" height="52" rx="3"/>
+    <rect x="135" y="332" width="190" height="52" rx="3"/>
+    <rect x="335" y="332" width="200" height="52" rx="3"/>
+    <rect x="15" y="394" width="170" height="50" rx="3"/>
+    <rect x="195" y="394" width="160" height="50" rx="3"/>
+    <rect x="365" y="394" width="165" height="50" rx="3"/>
+    <rect x="5" y="454" width="130" height="52" rx="3"/>
+    <rect x="145" y="454" width="180" height="52" rx="3"/>
+    <rect x="335" y="454" width="200" height="52" rx="3"/>
+    <rect x="10" y="516" width="170" height="50" rx="3"/>
+    <rect x="190" y="516" width="170" height="50" rx="3"/>
+    <rect x="370" y="516" width="160" height="50" rx="3"/>
+    <rect x="5" y="576" width="120" height="52" rx="3"/>
+    <rect x="135" y="576" width="190" height="52" rx="3"/>
+    <rect x="335" y="576" width="200" height="52" rx="3"/>
+    <rect x="15" y="638" width="170" height="52" rx="3"/>
+    <rect x="195" y="638" width="160" height="52" rx="3"/>
+    <rect x="365" y="638" width="165" height="52" rx="3"/>
+  </g>
+  <!-- Mining Scaffolding & Beams -->
+  <g stroke="#26140b" stroke-width="6" opacity="0.6">
+    <line x1="80" y1="0" x2="80" y2="700"/>
+    <line x1="460" y1="0" x2="460" y2="700"/>
+    <line x1="40" y1="180" x2="120" y2="180"/>
+    <line x1="420" y1="180" x2="500" y2="180"/>
+    <line x1="40" y1="420" x2="120" y2="420"/>
+    <line x1="420" y1="420" x2="500" y2="420"/>
+  </g>
+</svg>

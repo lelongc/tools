@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="240" height="60">
+  <rect y="16" width="240" height="44" fill="#1c0505"/>
+  <path d="M0,0 L240,0 L240,16 L210,24 L180,15 L150,26 L120,16 L90,25 L50,15 L0,22 Z" fill="#380a0a"/>
+  <!-- Glowing Magma Vein on Edge -->
+  <path d="M0,4 Q40,12 80,4 T160,5 T240,4" stroke="#f97316" stroke-width="4" fill="none"/>
+</svg>

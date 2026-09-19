@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 400" width="1080" height="400">
+  <defs>
+    <linearGradient id="skyGrad10" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#020008"/>
+      <stop offset="50%" stop-color="#0d041e"/>
+      <stop offset="100%" stop-color="#1f093d"/>
+    </linearGradient>
+    <radialGradient id="singularityGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#000000"/>
+      <stop offset="60%" stop-color="#000000"/>
+      <stop offset="75%" stop-color="#f59e0b"/>
+      <stop offset="90%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1080" height="400" fill="url(#skyGrad10)"/>
+  <!-- Singularity Black Hole Vortex -->
+  <circle cx="540" cy="180" r="140" fill="url(#singularityGlow)"/>
+  <ellipse cx="540" cy="180" rx="220" ry="35" fill="none" stroke="#fbbf24" stroke-width="6" opacity="0.8" transform="rotate(-15, 540, 180)"/>
+  <!-- Starlight Shimmer -->
+  <g fill="#fef08a" opacity="0.9">
+    <circle cx="120" cy="80" r="3"/><circle cx="260" cy="150" r="2.5"/><circle cx="390" cy="60" r="3"/>
+    <circle cx="720" cy="70" r="3"/><circle cx="890" cy="140" r="2.5"/><circle cx="980" cy="60" r="3"/>
+  </g>
+</svg>

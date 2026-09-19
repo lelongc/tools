@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 400" width="1080" height="400">
+  <defs>
+    <linearGradient id="skyGrad5" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#08020f"/>
+      <stop offset="45%" stop-color="#21083d"/>
+      <stop offset="85%" stop-color="#4a157a"/>
+      <stop offset="100%" stop-color="#8023c7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="400" fill="url(#skyGrad5)"/>
+  <!-- Twin Crescent Moons -->
+  <circle cx="820" cy="110" r="42" fill="#e9d5ff"/>
+  <circle cx="835" cy="104" r="38" fill="#21083d"/>
+  <circle cx="750" cy="150" r="22" fill="#c084fc" opacity="0.8"/>
+  <circle cx="758" cy="146" r="20" fill="#21083d"/>
+  <!-- Shimmering Void Stars -->
+  <g fill="#ffffff" opacity="0.85">
+    <circle cx="120" cy="60" r="2.5"/><circle cx="280" cy="140" r="3"/><circle cx="450" cy="50" r="2"/>
+    <circle cx="610" cy="120" r="2.5"/><circle cx="940" cy="70" r="3"/><circle cx="1020" cy="160" r="2"/>
+  </g>
+  <!-- Spire Silhouettes -->
+  <path d="M-10,400 L50,280 L90,400 L220,240 L250,400 L380,260 L410,400 L620,220 L660,400 L810,250 L840,400 L980,230 L1010,400 L1100,400 Z" fill="#140424" opacity="0.7"/>
+</svg>

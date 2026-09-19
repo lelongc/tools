@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 700" width="540" height="700">
+  <defs>
+    <linearGradient id="crysCav" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#140321"/>
+      <stop offset="100%" stop-color="#09010f"/>
+    </linearGradient>
+    <linearGradient id="amethyst" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#d8b4fe"/>
+      <stop offset="50%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#581c87"/>
+    </linearGradient>
+  </defs>
+  <rect width="540" height="700" fill="url(#crysCav)"/>
+  <!-- Giant Amethyst Geodes Jutting from Walls -->
+  <polygon points="0,140 95,110 130,165 60,205 0,185" fill="url(#amethyst)" stroke="#3b0764" stroke-width="2"/>
+  <polygon points="0,320 120,280 155,345 75,395 0,370" fill="url(#amethyst)" stroke="#3b0764" stroke-width="2"/>
+  <polygon points="0,520 110,485 145,550 70,595 0,575" fill="url(#amethyst)" stroke="#3b0764" stroke-width="2"/>
+
+  <polygon points="540,180 445,150 410,205 480,245 540,225" fill="url(#amethyst)" stroke="#3b0764" stroke-width="2"/>
+  <polygon points="540,380 420,340 385,405 465,455 540,430" fill="url(#amethyst)" stroke="#3b0764" stroke-width="2"/>
+  <polygon points="540,560 430,525 395,590 470,635 540,615" fill="url(#amethyst)" stroke="#3b0764" stroke-width="2"/>
+  <!-- Soft Violet Glow Aura -->
+  <circle cx="100" cy="160" r="70" fill="#a855f7" opacity="0.15"/>
+  <circle cx="440" cy="380" r="85" fill="#a855f7" opacity="0.15"/>
+</svg>

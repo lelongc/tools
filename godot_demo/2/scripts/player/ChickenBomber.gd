@@ -21,16 +21,28 @@ var drop_cooldown: float = 0.0
 @onready var visual_root: Node2D = $VisualRoot
 @onready var body_sprite: Sprite2D = get_node_or_null("VisualRoot/Body")
 @onready var basket_sprite: Sprite2D = get_node_or_null("VisualRoot/Basket")
+@onready var loaded_egg: Sprite2D = get_node_or_null("VisualRoot/Basket/LoadedEgg")
 @onready var left_wing: Sprite2D = get_node_or_null("VisualRoot/LeftWing")
 @onready var right_wing: Sprite2D = get_node_or_null("VisualRoot/RightWing")
 @onready var trajectory_line: Line2D = $TrajectoryLine
+@onready var drop_poof_fx: CPUParticles2D = get_node_or_null("DropPoofFX")
 
 var wing_flap_time: float = 0.0
 var base_scale: Vector2 = Vector2.ONE
 var is_dropping_anim: bool = false
 var facing_scale: float = 1.0
 
-# Egg Scenes
+# Egg Scenes & Textures
+const EGG_TEXTURE_PATHS: Dictionary = {
+	"normal": "res://assets/sprites/projectiles/egg_normal.svg",
+	"bomb": "res://assets/sprites/projectiles/egg_bomb.svg",
+	"drill": "res://assets/sprites/projectiles/egg_drill.svg",
+	"frost": "res://assets/sprites/projectiles/egg_frost.svg",
+	"cluster": "res://assets/sprites/projectiles/egg_cluster.svg",
+	"acid": "res://assets/sprites/projectiles/egg_acid.svg",
+	"blackhole": "res://assets/sprites/projectiles/egg_blackhole.svg"
+}
+
 var egg_scenes: Dictionary = {
 	"normal": preload("res://scenes/prefabs/NormalEgg.tscn"),
 	"bomb": preload("res://scenes/prefabs/BombEgg.tscn"),
@@ -41,7 +53,6 @@ var egg_scenes: Dictionary = {
 	"blackhole": preload("res://scenes/prefabs/BlackHoleEgg.tscn")
 }
 
-
 func _safe_load(path: String) -> Texture2D:
 	return ParticleHelper._safe_load(path)
 
@@ -50,6 +61,10 @@ func _ready() -> void:
 	position = Vector2(270.0, default_y)
 	if trajectory_line:
 		trajectory_line.visible = false
+
+	if drop_poof_fx:
+		ParticleHelper.apply_feather_fx(drop_poof_fx, 0.25, 0.5)
+		drop_poof_fx.color = Color(1.0, 0.95, 0.85, 0.9)
 
 	# Nạp texture SVG hoạt hình Vector cao cấp
 	if body_sprite:
@@ -88,12 +103,15 @@ func _process(delta: float) -> void:
 		# Quay mặt theo hướng lượn mượt mà (Không bị bay lùi)
 		facing_scale = lerp(facing_scale, move_direction, 10.0 * delta)
 
-		# Chuyển động thứ cấp giữa thân gà và giỏ trứng treo
+		# Chuyển động thứ cấp giữa thân gà, giỏ trứng và quả trứng nạp
 		if body_sprite:
 			body_sprite.position.y = -6.0 + sin(wing_flap_time) * 1.5
 		if basket_sprite:
 			basket_sprite.position.y = 22.0 - sin(wing_flap_time) * 1.2
 			basket_sprite.rotation = lerp_angle(basket_sprite.rotation, -move_direction * 0.08, 6.0 * delta)
+		if loaded_egg and loaded_egg.visible:
+			loaded_egg.position.y = -6.0 + sin(wing_flap_time * 1.3) * 1.0
+			loaded_egg.rotation = lerp_angle(loaded_egg.rotation, -move_direction * 0.06, 6.0 * delta)
 
 		# Nghiêng người tự nhiên theo hướng lượn (Banking Tilt)
 		if visual_root:
@@ -111,6 +129,9 @@ func _process(delta: float) -> void:
 			visual_root.rotation = lerp_angle(visual_root.rotation, aim_tilt, 10.0 * delta)
 		if basket_sprite and visual_root:
 			basket_sprite.rotation = lerp_angle(basket_sprite.rotation, -visual_root.rotation * 0.7, 8.0 * delta)
+		if loaded_egg and loaded_egg.visible:
+			var tension_ratio = clamp(aim_vector.y / 850.0, 0.0, 1.0)
+			loaded_egg.position = Vector2(randf_range(-1.4, 1.4), -6.0 + randf_range(-1.4, 1.4)) * tension_ratio
 
 	# 2. Đập cánh đối xứng sinh động (Cả 2 cánh cùng nâng lên / hạ xuống nhịp nhàng)
 	wing_flap_time += delta * (24.0 if is_aiming else 11.0)
@@ -240,6 +261,17 @@ func _prepare_next_egg() -> void:
 	else:
 		current_egg_type = ""
 
+	if loaded_egg:
+		if current_egg_type != "" and EGG_TEXTURE_PATHS.has(current_egg_type):
+			var tex = _safe_load(EGG_TEXTURE_PATHS[current_egg_type])
+			if tex:
+				loaded_egg.texture = tex
+				loaded_egg.visible = true
+				loaded_egg.position = Vector2(0, -6)
+				loaded_egg.scale = Vector2(0.48, 0.48)
+		else:
+			loaded_egg.visible = false
+
 func _drop_egg(launch_vel: Vector2) -> void:
 	var egg_type = GameManager.get_next_egg()
 	if egg_type == "" or not egg_scenes.has(egg_type):
@@ -255,15 +287,42 @@ func _drop_egg(launch_vel: Vector2) -> void:
 	tween.tween_property(visual_root, "scale", Vector2(sign_x * 1.0, 1.0), 0.18)
 	tween.finished.connect(func(): is_dropping_anim = false)
 
-	# Sinh quả trứng
+	# 1. Recoil Kickback - Gà giật bắn ngược lên trên do phản lực phóng
+	var recoil_tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	recoil_tween.tween_property(self, "position:y", default_y - 18.0, 0.08)
+	recoil_tween.tween_property(self, "position:y", default_y, 0.28).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+
+	# 2. Vung giỏ con lắc cực mạnh khi trứng rời giỏ
+	if basket_sprite:
+		var basket_swing = create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+		basket_swing.tween_property(basket_sprite, "rotation", -sign_x * 0.45, 0.08)
+		basket_swing.tween_property(basket_sprite, "rotation", sign_x * 0.25, 0.15)
+		basket_swing.tween_property(basket_sprite, "rotation", 0.0, 0.25)
+
+	# 3. Nổ hiệu ứng khói và lông gà bung ra dưới giỏ
+	if drop_poof_fx:
+		drop_poof_fx.global_position = global_position + Vector2(0, 26.0)
+		drop_poof_fx.restart()
+		drop_poof_fx.emitting = true
+
+	# 4. Âm thanh gà cục tác khi đẻ trứng
+	if has_node("/root/SoundManager"):
+		get_node("/root/SoundManager").play_egg_drop()
+
+	# 5. Sinh quả trứng vật lý
 	var egg_scene = egg_scenes[egg_type]
 	var egg = egg_scene.instantiate()
 	egg.global_position = global_position + Vector2(0, 26.0)
 	egg.linear_velocity = launch_vel
 	get_parent().add_child(egg)
 	egg.add_to_group("Eggs")
+
+	# Tạm ẩn trứng trong giỏ, sau 0.22s chuẩn bị nạp quả tiếp theo
+	if loaded_egg: loaded_egg.visible = false
 	
 	egg_spawned.emit(egg)
 	drop_cooldown = 0.35 # Khoảng nghỉ chống chạm nhầm 2 ngón cùng lúc
-	_prepare_next_egg()
+	get_tree().create_timer(0.22).timeout.connect(func():
+		_prepare_next_egg()
+	)
 	GameManager.check_out_of_eggs()

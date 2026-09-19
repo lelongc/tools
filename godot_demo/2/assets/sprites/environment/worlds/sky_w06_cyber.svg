@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 400" width="1080" height="400">
+  <defs>
+    <linearGradient id="skyGrad6" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#020d18"/>
+      <stop offset="50%" stop-color="#072238"/>
+      <stop offset="100%" stop-color="#0d3d63"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="400" fill="url(#skyGrad6)"/>
+  <!-- Cyan Grid Floor on horizon -->
+  <g stroke="#06b6d4" stroke-width="1" opacity="0.25">
+    <line x1="0" y1="280" x2="1080" y2="280"/>
+    <line x1="0" y1="310" x2="1080" y2="310"/>
+    <line x1="0" y1="350" x2="1080" y2="350"/>
+    <line x1="540" y1="260" x2="0" y2="400"/>
+    <line x1="540" y1="260" x2="270" y2="400"/>
+    <line x1="540" y1="260" x2="810" y2="400"/>
+    <line x1="540" y1="260" x2="1080" y2="400"/>
+  </g>
+  <!-- Cyberpunk Megastructure Silhouettes -->
+  <path d="M-10,400 L-10,240 L80,240 L80,200 L140,200 L140,240 L220,240 L260,160 L320,160 L350,240 L480,240 L510,130 L570,130 L600,240 L720,240 L760,180 L820,180 L860,240 L980,240 L1020,150 L1070,150 L1090,240 L1090,400 Z" fill="#03111f" opacity="0.85"/>
+  <!-- Neon Light Bars on towers -->
+  <line x1="290" y1="165" x2="290" y2="230" stroke="#06b6d4" stroke-width="3"/>
+  <line x1="540" y1="135" x2="540" y2="230" stroke="#ec4899" stroke-width="3"/>
+  <line x1="790" y1="185" x2="790" y2="230" stroke="#06b6d4" stroke-width="3"/>
+  <line x1="1045" y1="155" x2="1045" y2="230" stroke="#a855f7" stroke-width="3"/>
+</svg>

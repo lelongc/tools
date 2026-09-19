@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 400" width="1080" height="400">
+  <defs>
+    <linearGradient id="skyGrad9" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#240202"/>
+      <stop offset="45%" stop-color="#590707"/>
+      <stop offset="85%" stop-color="#991b1b"/>
+      <stop offset="100%" stop-color="#b91c1c"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="400" fill="url(#skyGrad9)"/>
+  <circle cx="820" cy="120" r="50" fill="#fecaca" opacity="0.6"/>
+  <!-- Jagged Dragon Peaks -->
+  <polygon points="60,400 180,220 300,400" fill="#260404" opacity="0.85"/>
+  <polygon points="380,400 520,180 660,400" fill="#260404" opacity="0.85"/>
+  <polygon points="760,400 900,200 1040,400" fill="#260404" opacity="0.85"/>
+  <!-- Flying Dragon Silhouettes -->
+  <path d="M340,120 Q360,110 380,125 Q400,105 420,120 Q380,135 340,120 Z" fill="#140101"/>
+  <path d="M720,80 Q735,70 750,85 Q765,65 780,80 Q750,95 720,80 Z" fill="#140101"/>
+</svg>

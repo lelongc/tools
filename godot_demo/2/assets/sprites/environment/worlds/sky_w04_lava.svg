@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 400" width="1080" height="400">
+  <defs>
+    <linearGradient id="skyGrad4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#140404"/>
+      <stop offset="45%" stop-color="#4a0e0e"/>
+      <stop offset="80%" stop-color="#991b1b"/>
+      <stop offset="100%" stop-color="#f97316"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="400" fill="url(#skyGrad4)"/>
+  <!-- Volcanic Ridge Silhouettes -->
+  <path d="M-20,320 L150,230 L290,290 L420,180 L580,310 L740,210 L920,330 L1100,240 L1100,400 L-20,400 Z" fill="#260606" opacity="0.85"/>
+  <!-- Lava Glow & Lightning Streaks -->
+  <path d="M420,180 L440,230 L430,270 L460,330" stroke="#fef08a" stroke-width="4" fill="none" opacity="0.9"/>
+  <path d="M740,210 L730,260 L755,300" stroke="#ffedd5" stroke-width="3" fill="none" opacity="0.8"/>
+  <!-- Ash Clouds -->
+  <g fill="#360a0a" opacity="0.6">
+    <ellipse cx="280" cy="110" rx="140" ry="40"/>
+    <ellipse cx="620" cy="90" rx="180" ry="45"/>
+    <ellipse cx="940" cy="130" rx="130" ry="35"/>
+  </g>
+</svg>

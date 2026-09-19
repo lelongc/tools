@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 400" width="1080" height="400">
+  <defs>
+    <linearGradient id="skyGrad2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#bf502b"/>
+      <stop offset="45%" stop-color="#ea7c3f"/>
+      <stop offset="85%" stop-color="#f5b866"/>
+      <stop offset="100%" stop-color="#fae39d"/>
+    </linearGradient>
+    <linearGradient id="mesaGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#7a3422"/>
+      <stop offset="100%" stop-color="#4a1c12"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="400" fill="url(#skyGrad2)"/>
+  <circle cx="220" cy="180" r="55" fill="#fff4cc" opacity="0.9"/>
+  <!-- Distant Desert Mesas -->
+  <path d="M-20,330 L110,260 L240,260 L320,330 L450,240 L590,240 L690,340 L820,270 L960,270 L1100,340 L1100,400 L-20,400 Z" fill="url(#mesaGrad)" opacity="0.6"/>
+  <!-- Closer Quarry Ridges -->
+  <path d="M-10,350 L160,310 L260,310 L390,360 L520,290 L670,290 L780,360 L910,310 L1090,360 L1090,400 L-10,400 Z" fill="#3a160e" opacity="0.85"/>
+  <!-- Sunset Dust Clouds -->
+  <g fill="#d86e42" opacity="0.4">
+    <ellipse cx="420" cy="120" rx="140" ry="24"/>
+    <ellipse cx="780" cy="160" rx="180" ry="28"/>
+    <ellipse cx="160" cy="80" rx="100" ry="20"/>
+  </g>
+</svg>

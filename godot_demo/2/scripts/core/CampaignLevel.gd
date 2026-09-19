@@ -24,30 +24,69 @@ const UpdraftVentScene = preload("res://scenes/prefabs/UpdraftVent.tscn")
 @onready var bg_grass_cliff_r: Sprite2D = get_node_or_null("Background/GrassCliffR")
 @onready var bunker_structure: Node2D = $BunkerStructure
 
+const WORLD_ENV_ASSETS: Dictionary = {
+	1: {
+		"sky": "res://assets/sprites/environment/worlds/sky_w01_farm.svg",
+		"cavern": "res://assets/sprites/environment/worlds/cavern_w01_farm.svg",
+		"cliff": "res://assets/sprites/environment/worlds/cliff_w01_farm.svg"
+	},
+	2: {
+		"sky": "res://assets/sprites/environment/worlds/sky_w02_quarry.svg",
+		"cavern": "res://assets/sprites/environment/worlds/cavern_w02_quarry.svg",
+		"cliff": "res://assets/sprites/environment/worlds/cliff_w02_quarry.svg"
+	},
+	3: {
+		"sky": "res://assets/sprites/environment/worlds/sky_w03_industrial.svg",
+		"cavern": "res://assets/sprites/environment/worlds/cavern_w03_industrial.svg",
+		"cliff": "res://assets/sprites/environment/worlds/cliff_w03_industrial.svg"
+	},
+	4: {
+		"sky": "res://assets/sprites/environment/worlds/sky_w04_lava.svg",
+		"cavern": "res://assets/sprites/environment/worlds/cavern_w04_lava.svg",
+		"cliff": "res://assets/sprites/environment/worlds/cliff_w04_lava.svg"
+	},
+	5: {
+		"sky": "res://assets/sprites/environment/worlds/sky_w05_crystal.svg",
+		"cavern": "res://assets/sprites/environment/worlds/cavern_w05_crystal.svg",
+		"cliff": "res://assets/sprites/environment/worlds/cliff_w05_crystal.svg"
+	},
+	6: {
+		"sky": "res://assets/sprites/environment/worlds/sky_w06_cyber.svg",
+		"cavern": "res://assets/sprites/environment/worlds/cavern_w06_cyber.svg",
+		"cliff": "res://assets/sprites/environment/worlds/cliff_w06_cyber.svg"
+	},
+	7: {
+		"sky": "res://assets/sprites/environment/worlds/sky_w07_toxic.svg",
+		"cavern": "res://assets/sprites/environment/worlds/cavern_w07_toxic.svg",
+		"cliff": "res://assets/sprites/environment/worlds/cliff_w07_toxic.svg"
+	},
+	8: {
+		"sky": "res://assets/sprites/environment/worlds/sky_w08_glacier.svg",
+		"cavern": "res://assets/sprites/environment/worlds/cavern_w08_glacier.svg",
+		"cliff": "res://assets/sprites/environment/worlds/cliff_w08_glacier.svg"
+	},
+	9: {
+		"sky": "res://assets/sprites/environment/worlds/sky_w09_dragon.svg",
+		"cavern": "res://assets/sprites/environment/worlds/cavern_w09_dragon.svg",
+		"cliff": "res://assets/sprites/environment/worlds/cliff_w09_dragon.svg"
+	},
+	10: {
+		"sky": "res://assets/sprites/environment/worlds/sky_w10_celestial.svg",
+		"cavern": "res://assets/sprites/environment/worlds/cavern_w10_celestial.svg",
+		"cliff": "res://assets/sprites/environment/worlds/cliff_w10_celestial.svg"
+	}
+}
+
+var default_cam_pos: Vector2 = Vector2.ZERO
+var default_cam_zoom: Vector2 = Vector2.ONE
+var active_tracking_egg: Node2D = null
+
 func _safe_load(path: String) -> Texture2D:
 	return ParticleHelper._safe_load(path)
 
 func _ready() -> void:
 	if GameManager.current_level > 0:
 		level_id = GameManager.current_level
-
-	if bg_sky_clouds:
-		var ts = _safe_load("res://assets/sprites/environment/sky_clouds_panorama.svg")
-		if ts: bg_sky_clouds.texture = ts
-	if bg_cavern_backdrop:
-		var tc = _safe_load("res://assets/sprites/environment/cavern_backdrop_dungeon.svg")
-		if tc: bg_cavern_backdrop.texture = tc
-	if bg_dirt_wall_l:
-		var td = _safe_load("res://assets/sprites/environment/dirt_wall_strata.svg")
-		if td:
-			bg_dirt_wall_l.texture = td
-			if bg_dirt_wall_r: bg_dirt_wall_r.texture = td
-	if bg_grass_cliff_l:
-		var tgr = _safe_load("res://assets/sprites/environment/surface_grass_cliff.svg")
-		if tgr:
-			bg_grass_cliff_l.texture = tgr
-			if bg_grass_cliff_r: bg_grass_cliff_r.texture = tgr
-
 	_setup_level()
 
 func _setup_level() -> void:
@@ -138,30 +177,8 @@ func _setup_level() -> void:
 	var cav_height = cavern_bottom_y - cavern_top_y
 	var cav_width = right_edge_x - left_edge_x
 
-	# Cập nhật hình ảnh bối cảnh phong phú
-	if bg_cavern_backdrop:
-		bg_cavern_backdrop.position = Vector2(cx, cav_mid_y)
-		bg_cavern_backdrop.scale = Vector2(cav_width / 540.0, cav_height / 700.0)
-
-	if bg_dirt_wall_l:
-		bg_dirt_wall_l.position = Vector2(left_edge_x * 0.5, cav_mid_y)
-		bg_dirt_wall_l.scale = Vector2(max(left_edge_x, 15.0) / 120.0, cav_height / 700.0)
-
-	if bg_dirt_wall_r:
-		bg_dirt_wall_r.position = Vector2(right_edge_x + (total_w - right_edge_x) * 0.5, cav_mid_y)
-		bg_dirt_wall_r.scale = Vector2(max(total_w - right_edge_x, 15.0) / 120.0, cav_height / 700.0)
-
-	if bg_grass_cliff_l:
-		bg_grass_cliff_l.position = Vector2(left_edge_x * 0.5, cavern_top_y + 8.0)
-		bg_grass_cliff_l.scale = Vector2(max(left_edge_x, 20.0) / 120.0, 1.0)
-
-	if bg_grass_cliff_r:
-		bg_grass_cliff_r.position = Vector2(right_edge_x + (total_w - right_edge_x) * 0.5, cavern_top_y + 8.0)
-		bg_grass_cliff_r.scale = Vector2(max(total_w - right_edge_x, 20.0) / 120.0, 1.0)
-
-	if bg_sky_clouds:
-		bg_sky_clouds.position = Vector2(cx, cavern_top_y * 0.5)
-		bg_sky_clouds.scale = Vector2(total_w / 540.0, cavern_top_y / 400.0)
+	# Cập nhật hình ảnh bối cảnh phong phú theo từng Thế Giới
+	_apply_world_environment(world_id, left_edge_x, right_edge_x, cx, total_w, cavern_top_y, floor_y, cav_mid_y, cav_width, cav_height)
 
 	# Cập nhật hình ảnh nền mở rộng toàn cảnh
 	var bg_margin_x = 1200.0
@@ -229,11 +246,13 @@ func _setup_level() -> void:
 
 	# Camera thu phóng góc nhìn theo độ rộng thế giới
 	var target_zoom_val = clamp(540.0 / (cav_width + 60.0), 0.38, 1.0)
+	var cam_y = (cavern_top_y - 120.0 + floor_y + 60.0) * 0.5
+	default_cam_pos = Vector2(cx, cam_y)
+	default_cam_zoom = Vector2(target_zoom_val, target_zoom_val)
 	var cam = get_node_or_null("CameraShake2D") as Camera2D
 	if cam:
-		var cam_y = (cavern_top_y - 120.0 + floor_y + 60.0) * 0.5
-		cam.global_position = Vector2(cx, cam_y)
-		cam.zoom = Vector2(target_zoom_val, target_zoom_val)
+		cam.global_position = default_cam_pos
+		cam.zoom = default_cam_zoom
 
 	# Gà oanh tạc lượn theo sải cánh bầu trời tương ứng
 	var chicken = get_node_or_null("ChickenBomber")
@@ -243,6 +262,8 @@ func _setup_level() -> void:
 		chicken.default_y = cavern_top_y - 120.0
 		chicken.position = Vector2(cx, chicken.default_y)
 		chicken.move_speed = 160.0 + min((world_id - 1) * 16.0, 120.0)
+		if not chicken.egg_spawned.is_connected(_on_egg_spawned):
+			chicken.egg_spawned.connect(_on_egg_spawned)
 
 	# 3. Phân bổ quái vật & vật liệu theo 10 Thế Giới
 	var primary_mat = "wood"
@@ -1151,3 +1172,106 @@ func _spawn_environment_decorations(world_id: int, left_x: float, right_x: float
 			elif world_id == 10:
 				cr_r.modulate = Color(0.95, 0.75, 1.0, 0.95)
 			decor_node.add_child(cr_r)
+
+func _apply_world_environment(world_id: int, left_edge_x: float, right_edge_x: float, cx: float, total_w: float, cavern_top_y: float, _floor_y: float, cav_mid_y: float, cav_width: float, cav_height: float) -> void:
+	var assets = WORLD_ENV_ASSETS.get(world_id, {})
+	var tex_sky = _safe_load(assets.get("sky", ""))
+	var tex_cavern = _safe_load(assets.get("cavern", ""))
+	var tex_cliff = _safe_load(assets.get("cliff", ""))
+
+	# 1. Sky & Clouds
+	if bg_sky_clouds:
+		if tex_sky:
+			bg_sky_clouds.texture = tex_sky
+		bg_sky_clouds.position = Vector2(cx, cavern_top_y * 0.5)
+		bg_sky_clouds.scale = Vector2(total_w / 540.0, cavern_top_y / 400.0)
+
+	# 2. Cliffs & Dirt Walls
+	if bg_grass_cliff_l:
+		if tex_cliff:
+			bg_grass_cliff_l.texture = tex_cliff
+		bg_grass_cliff_l.position = Vector2(left_edge_x * 0.5, cavern_top_y + 8.0)
+		bg_grass_cliff_l.scale = Vector2(max(left_edge_x, 20.0) / 120.0, 1.0)
+
+	if bg_grass_cliff_r:
+		if tex_cliff:
+			bg_grass_cliff_r.texture = tex_cliff
+		bg_grass_cliff_r.position = Vector2(right_edge_x + (total_w - right_edge_x) * 0.5, cavern_top_y + 8.0)
+		bg_grass_cliff_r.scale = Vector2(max(total_w - right_edge_x, 20.0) / 120.0, 1.0)
+
+	if bg_dirt_wall_l:
+		bg_dirt_wall_l.position = Vector2(left_edge_x * 0.5, cav_mid_y)
+		bg_dirt_wall_l.scale = Vector2(max(left_edge_x, 15.0) / 120.0, cav_height / 700.0)
+
+	if bg_dirt_wall_r:
+		bg_dirt_wall_r.position = Vector2(right_edge_x + (total_w - right_edge_x) * 0.5, cav_mid_y)
+		bg_dirt_wall_r.scale = Vector2(max(total_w - right_edge_x, 15.0) / 120.0, cav_height / 700.0)
+
+	# 3. Modular Cavern Backdrop Panels (Zero Stretching!)
+	var bg_container = get_node_or_null("Background")
+	if bg_container:
+		var panels_group = bg_container.get_node_or_null("CavernPanels")
+		if not panels_group:
+			panels_group = Node2D.new()
+			panels_group.name = "CavernPanels"
+			panels_group.z_index = -6
+			bg_container.add_child(panels_group)
+		else:
+			for ch in panels_group.get_children():
+				ch.queue_free()
+
+		# Determine number of panels based on cavern width
+		var num_panels = max(1, int(ceil(cav_width / 540.0)))
+		var seg_w = cav_width / float(num_panels)
+		var backdrop_tex = tex_cavern if tex_cavern else (bg_cavern_backdrop.texture if bg_cavern_backdrop else null)
+
+		for i in range(num_panels):
+			var panel = Sprite2D.new()
+			panel.texture = backdrop_tex
+			panel.position = Vector2(left_edge_x + (float(i) + 0.5) * seg_w, cav_mid_y)
+			var flip_sign = -1.0 if (i % 2 == 1) else 1.0
+			panel.scale = Vector2(flip_sign * (seg_w / 540.0), cav_height / 700.0)
+			if bg_cavern_backdrop:
+				panel.modulate = bg_cavern_backdrop.modulate
+			panels_group.add_child(panel)
+
+		if bg_cavern_backdrop:
+			bg_cavern_backdrop.visible = false
+
+func _on_egg_spawned(egg_node: Node2D) -> void:
+	active_tracking_egg = egg_node
+
+func _process(delta: float) -> void:
+	_update_dynamic_camera(delta)
+
+func _update_dynamic_camera(delta: float) -> void:
+	var cam = get_node_or_null("CameraShake2D") as Camera2D
+	if not cam:
+		return
+
+	var target_pos = default_cam_pos
+	var target_zoom = default_cam_zoom
+	var chicken = get_node_or_null("ChickenBomber")
+
+	if is_instance_valid(active_tracking_egg):
+		if ("is_breaking" in active_tracking_egg and active_tracking_egg.is_breaking) or ("linear_velocity" in active_tracking_egg and active_tracking_egg.linear_velocity.length() < 15.0 and active_tracking_egg.has_first_impact):
+			active_tracking_egg = null
+		else:
+			var egg_pos = active_tracking_egg.global_position
+			var bounded_x = clamp(egg_pos.x, default_cam_pos.x - 180.0, default_cam_pos.x + 180.0)
+			var bounded_y = clamp(egg_pos.y, default_cam_pos.y - 100.0, default_cam_pos.y + 120.0)
+			target_pos = Vector2(bounded_x, bounded_y)
+			target_zoom = default_cam_zoom * 1.12
+			cam.global_position = cam.global_position.lerp(target_pos, clamp(6.0 * delta, 0.0, 1.0))
+			cam.zoom = cam.zoom.lerp(target_zoom, clamp(5.0 * delta, 0.0, 1.0))
+			return
+
+	if chicken and chicken.is_aiming:
+		var aim_x = lerp(default_cam_pos.x, chicken.global_position.x, 0.35)
+		target_pos = Vector2(aim_x, default_cam_pos.y - 20.0)
+		target_zoom = default_cam_zoom * 1.05
+		cam.global_position = cam.global_position.lerp(target_pos, clamp(4.0 * delta, 0.0, 1.0))
+		cam.zoom = cam.zoom.lerp(target_zoom, clamp(4.0 * delta, 0.0, 1.0))
+	else:
+		cam.global_position = cam.global_position.lerp(default_cam_pos, clamp(3.5 * delta, 0.0, 1.0))
+		cam.zoom = cam.zoom.lerp(default_cam_zoom, clamp(3.5 * delta, 0.0, 1.0))

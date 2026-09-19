@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 700" width="540" height="700">
+  <defs>
+    <linearGradient id="celestCav" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d031c"/>
+      <stop offset="100%" stop-color="#04010a"/>
+    </linearGradient>
+  </defs>
+  <rect width="540" height="700" fill="url(#celestCav)"/>
+  <!-- Floating Monolith Shards -->
+  <g fill="#1b0833" stroke="#f59e0b" stroke-width="2" opacity="0.8">
+    <polygon points="60,80 120,50 140,160 80,180"/>
+    <polygon points="420,120 480,90 500,200 440,220"/>
+    <polygon points="80,340 140,310 160,420 100,440"/>
+    <polygon points="400,380 460,350 480,460 420,480"/>
+    <polygon points="70,540 130,510 150,620 90,640"/>
+    <polygon points="410,560 470,530 490,640 430,660"/>
+  </g>
+  <!-- Astral Rune Circles in Center -->
+  <circle cx="270" cy="350" r="80" fill="none" stroke="#fbbf24" stroke-width="2" opacity="0.4"/>
+  <circle cx="270" cy="350" r="50" fill="none" stroke="#c084fc" stroke-width="2" opacity="0.4"/>
+</svg>

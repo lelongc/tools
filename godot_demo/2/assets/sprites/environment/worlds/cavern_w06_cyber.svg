@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 700" width="540" height="700">
+  <defs>
+    <linearGradient id="cyberCav" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#05121e"/>
+      <stop offset="100%" stop-color="#02090f"/>
+    </linearGradient>
+  </defs>
+  <rect width="540" height="700" fill="url(#cyberCav)"/>
+  <!-- Titanium Wall Panels -->
+  <g fill="#0b1e2e" stroke="#040b12" stroke-width="3">
+    <rect x="20" y="30" width="235" height="180" rx="6"/>
+    <rect x="285" y="30" width="235" height="180" rx="6"/>
+    <rect x="20" y="240" width="235" height="180" rx="6"/>
+    <rect x="285" y="240" width="235" height="180" rx="6"/>
+    <rect x="20" y="450" width="235" height="180" rx="6"/>
+    <rect x="285" y="450" width="235" height="180" rx="6"/>
+  </g>
+  <!-- Glowing Circuit Traces -->
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M40,50 L120,50 L140,80 L200,80" stroke="#06b6d4" stroke-width="3"/>
+    <circle cx="200" cy="80" r="4" fill="#06b6d4"/>
+    <path d="M500,260 L420,260 L400,300 L340,300" stroke="#ec4899" stroke-width="3"/>
+    <circle cx="340" cy="300" r="4" fill="#ec4899"/>
+    <path d="M60,480 L140,480 L160,520 L220,520" stroke="#06b6d4" stroke-width="3"/>
+    <circle cx="220" cy="520" r="4" fill="#06b6d4"/>
+    <path d="M480,480 L400,480 L380,530 L320,530" stroke="#a855f7" stroke-width="3"/>
+    <circle cx="320" cy="530" r="4" fill="#a855f7"/>
+  </g>
+</svg>

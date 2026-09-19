@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 700" width="540" height="700">
+  <defs>
+    <linearGradient id="glacierCav" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#072033"/>
+      <stop offset="100%" stop-color="#03101c"/>
+    </linearGradient>
+    <linearGradient id="iceBlock" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="50%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+  </defs>
+  <rect width="540" height="700" fill="url(#glacierCav)"/>
+  <!-- Giant Hanging Icicles from ceiling -->
+  <g fill="url(#iceBlock)" opacity="0.85">
+    <polygon points="20,0 45,0 32,180"/>
+    <polygon points="60,0 80,0 70,120"/>
+    <polygon points="110,0 145,0 128,220"/>
+    <polygon points="220,0 245,0 232,140"/>
+    <polygon points="360,0 395,0 378,210"/>
+    <polygon points="440,0 465,0 452,150"/>
+    <polygon points="490,0 520,0 505,190"/>
+  </g>
+</svg>
