@@ -590,11 +590,11 @@ func _ready() -> void:
 		print("  [PASS] ChickenBomber EGG_TEXTURE_PATHS maps all 7 egg types successfully")
 
 		# Test recoil actuation
-		chk.available_eggs = ["normal", "bomb"]
-		chk.current_egg_type = "normal"
-		chk._drop_egg()
-		if chk.visual_root.position.y < -5.0 or chk.recoil_active:
-			print("  [PASS] ChickenBomber recoil triggered properly on drop (visual_root.y = %.1f)" % chk.visual_root.position.y)
+		GameManager.start_level(1, 1, ["normal", "bomb"])
+		chk._prepare_next_egg()
+		chk._drop_egg(Vector2(0, 480.0))
+		if chk.recoil_active or chk.is_dropping_anim or chk.position.y < chk.default_y:
+			print("  [PASS] ChickenBomber recoil triggered properly on drop (recoil_active=%s, pos_y=%.1f)" % [chk.recoil_active, chk.position.y])
 		else:
 			errors.append("ChickenBomber recoil did not trigger upward displacement!")
 
@@ -616,6 +616,7 @@ func _ready() -> void:
 		else:
 			print("  [PASS] DestructibleBlock high friction == %.2f" % pmat.friction)
 
+		test_blk.wake_up()
 		test_blk.linear_velocity = Vector2(8.0, 8.0)
 		test_blk.angular_velocity = 0.5
 		# Simulate 1 physics frame

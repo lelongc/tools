@@ -30,6 +30,7 @@ var drop_cooldown: float = 0.0
 var wing_flap_time: float = 0.0
 var base_scale: Vector2 = Vector2.ONE
 var is_dropping_anim: bool = false
+var recoil_active: bool = false
 var facing_scale: float = 1.0
 
 # Egg Scenes & Textures
@@ -272,7 +273,7 @@ func _prepare_next_egg() -> void:
 		else:
 			loaded_egg.visible = false
 
-func _drop_egg(launch_vel: Vector2) -> void:
+func _drop_egg(launch_vel: Vector2 = Vector2(0, 480.0)) -> void:
 	var egg_type = GameManager.get_next_egg()
 	if egg_type == "" or not egg_scenes.has(egg_type):
 		GameManager.check_out_of_eggs()
@@ -288,9 +289,11 @@ func _drop_egg(launch_vel: Vector2) -> void:
 	tween.finished.connect(func(): is_dropping_anim = false)
 
 	# 1. Recoil Kickback - Gà giật bắn ngược lên trên do phản lực phóng
+	recoil_active = true
 	var recoil_tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	recoil_tween.tween_property(self, "position:y", default_y - 18.0, 0.08)
 	recoil_tween.tween_property(self, "position:y", default_y, 0.28).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	recoil_tween.finished.connect(func(): recoil_active = false)
 
 	# 2. Vung giỏ con lắc cực mạnh khi trứng rời giỏ
 	if basket_sprite:
@@ -314,7 +317,8 @@ func _drop_egg(launch_vel: Vector2) -> void:
 	var egg = egg_scene.instantiate()
 	egg.global_position = global_position + Vector2(0, 26.0)
 	egg.linear_velocity = launch_vel
-	get_parent().add_child(egg)
+	if get_parent():
+		get_parent().add_child(egg)
 	egg.add_to_group("Eggs")
 
 	# Tạm ẩn trứng trong giỏ, sau 0.22s chuẩn bị nạp quả tiếp theo
