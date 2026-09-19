@@ -168,6 +168,15 @@ text = "VÒNG QUAY MAY MẮN"
 script = ExtResource("2_btn")
 is_gold_action = true
 
+[node name="BtnShop" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(290, 52)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 18
+text = "🛍️ CỬA HÀNG ĐẠO CỤ"
+script = ExtResource("2_btn")
+is_wood_brown = true
+
 [node name="Footer" type="Label" parent="."]
 layout_mode = 1
 anchors_preset = 12

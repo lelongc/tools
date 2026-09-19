@@ -36,13 +36,14 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Tap-in-Flight: Chạm màn hình để kích hoạt Tên Lửa Siêu Thanh đâm cực mạnh
-	if not is_broken and not has_boosted and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():
+	if not is_broken and not has_boosted and BaseEgg.is_valid_airborne_tap(event):
 		has_boosted = true
 		_activate_rocket_boost()
 
 func _activate_rocket_boost() -> void:
 	drill_speed = 950.0
-	linear_velocity = Vector2(0, 950.0)
+	var dir = linear_velocity.normalized() if linear_velocity.length() > 30.0 else Vector2.DOWN
+	linear_velocity = dir * drill_speed
 	CameraShake.add_trauma(0.35)
 	if has_node("/root/SoundManager"):
 		get_node("/root/SoundManager").play_drill_boost()
@@ -66,8 +67,9 @@ func _on_body_entered(body: Node) -> void:
 func _start_drilling() -> void:
 	is_drilling = true
 	drill_timer = drill_duration
-	gravity_scale = 2.0
-	linear_velocity = Vector2(0, drill_speed)
+	gravity_scale = 1.0
+	var dir = linear_velocity.normalized() if linear_velocity.length() > 30.0 else Vector2.DOWN
+	linear_velocity = dir * drill_speed
 
 	if spark_particles:
 		spark_particles.restart()
@@ -95,8 +97,8 @@ func _physics_process(delta: float) -> void:
 		if visual_root:
 			visual_root.rotation += 45.0 * delta
 
-		linear_velocity.y = drill_speed
-		linear_velocity.x = move_toward(linear_velocity.x, 0.0, 300.0 * delta)
+		if linear_velocity.length() > 30.0:
+			linear_velocity = linear_velocity.normalized() * drill_speed
 
 		var space_state = get_world_2d().direct_space_state
 		var query = PhysicsShapeQueryParameters2D.new()

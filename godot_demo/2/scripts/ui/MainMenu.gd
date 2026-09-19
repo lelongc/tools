@@ -14,12 +14,14 @@ extends Control
 @onready var btn_play: Button = $CenterContainer/VBoxContainer/BtnPlay
 @onready var btn_levels: Button = $CenterContainer/VBoxContainer/BtnLevels
 @onready var btn_wheel: Button = $CenterContainer/VBoxContainer/BtnWheel
+@onready var btn_shop: Button = get_node_or_null("CenterContainer/VBoxContainer/BtnShop")
 @onready var btn_sound: Button = $TopBar/Margin/HBox/BtnSound
 @onready var btn_reset: Button = get_node_or_null("TopBar/Margin/HBox/BtnReset")
 @onready var btn_lang: Button = $TopBar/Margin/HBox/BtnLang
 @onready var footer_label: Label = $Footer
 
 var wheel_modal_instance: Node = null
+var shop_modal_instance: Node = null
 
 func _ready() -> void:
 	var bg_sky = get_node_or_null("Background/SkyPanorama") as TextureRect
@@ -74,6 +76,8 @@ func _ready() -> void:
 		btn_lang.pressed.connect(_on_btn_lang_pressed)
 	if btn_wheel:
 		btn_wheel.pressed.connect(_on_btn_wheel_pressed)
+	if btn_shop:
+		btn_shop.pressed.connect(_on_btn_shop_pressed)
 
 func _process(_delta: float) -> void:
 	if mascot_root:
@@ -93,6 +97,7 @@ func _update_language_ui() -> void:
 	if btn_play: btn_play.text = "  " + lm.t("KEY_PLAY")
 	if btn_levels: btn_levels.text = " " + lm.t("KEY_SELECT_LEVEL")
 	if btn_wheel: btn_wheel.text = lm.t("KEY_LUCKY_WHEEL")
+	if btn_shop: btn_shop.text = "🛍️ " + lm.t("KEY_SHOP")
 	if footer_label: footer_label.text = lm.t("KEY_FOOTER")
 	if btn_lang: btn_lang.text = lm.get_current_language_display()
 	_update_sound_button()
@@ -157,8 +162,6 @@ func _on_btn_reset_pressed() -> void:
 			get_node("/root/SaveManager").reset_save()
 			_update_star_count()
 			_update_coin_count()
-		if has_node("/root/SoundManager"):
-			get_node("/root/SoundManager").play_button_click()
 		reset_confirm_timer = 0.0
 		if btn_reset:
 			btn_reset.modulate = Color.WHITE
@@ -166,8 +169,6 @@ func _on_btn_reset_pressed() -> void:
 	else:
 		# Bấm lần 1 -> Cảnh báo bằng đổi màu đỏ cam và yêu cầu bấm lại
 		reset_confirm_timer = now
-		if has_node("/root/SoundManager"):
-			get_node("/root/SoundManager").play_button_click()
 		if btn_reset:
 			btn_reset.modulate = Color(1.0, 0.4, 0.4)
 			btn_reset.tooltip_text = "Bấm lại trong 3s để xác nhận xóa!"
@@ -177,3 +178,19 @@ func _on_btn_reset_pressed() -> void:
 					btn_reset.tooltip_text = "Xóa tiến trình (Reset Progress)"
 					reset_confirm_timer = 0.0
 			)
+
+func _on_btn_wheel_pressed() -> void:
+	if wheel_modal_instance and is_instance_valid(wheel_modal_instance):
+		return
+	var wheel_scene = load("res://scenes/ui/DailyWheelModal.tscn")
+	if wheel_scene:
+		wheel_modal_instance = wheel_scene.instantiate()
+		add_child(wheel_modal_instance)
+
+func _on_btn_shop_pressed() -> void:
+	if shop_modal_instance and is_instance_valid(shop_modal_instance):
+		return
+	var shop_scene = load("res://scenes/ui/ShopModal.tscn")
+	if shop_scene:
+		shop_modal_instance = shop_scene.instantiate()
+		add_child(shop_modal_instance)

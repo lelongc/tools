@@ -13,14 +13,14 @@ var is_awake: bool = false
 
 func _ready() -> void:
 	var current_lvl = GameManager.current_level if has_node("/root/GameManager") else 1
-	var world_id = clamp(int(float(current_lvl - 1) / 20.0) + 1, 1, 5)
+	var world_id = clamp(int(float(current_lvl - 1) / 20.0) + 1, 1, 10)
 
 	if visual_sprite:
 		var tex_path = "res://assets/sprites/obstacles/rolling_boulder_stone.svg"
 		match world_id:
-			4:
+			4, 9:
 				tex_path = "res://assets/sprites/obstacles/rolling_boulder_magma.svg"
-			5:
+			5, 10:
 				tex_path = "res://assets/sprites/obstacles/rolling_boulder_crystal.svg"
 			_:
 				tex_path = "res://assets/sprites/obstacles/rolling_boulder_stone.svg"
@@ -30,10 +30,16 @@ func _ready() -> void:
 
 	if dust_fx:
 		ParticleHelper.apply_smoke_fx(dust_fx, 0.25, 0.5)
-		if world_id == 4:
+		if world_id in [4, 9]:
 			dust_fx.color = Color(1.0, 0.55, 0.2, 0.7)
-		elif world_id == 5:
+		elif world_id in [5, 10]:
 			dust_fx.color = Color(0.75, 0.45, 1.0, 0.7)
+		elif world_id == 6:
+			dust_fx.color = Color(0.2, 0.9, 1.0, 0.7)
+		elif world_id == 7:
+			dust_fx.color = Color(0.4, 0.85, 0.4, 0.7)
+		elif world_id == 8:
+			dust_fx.color = Color(0.6, 0.85, 1.0, 0.7)
 
 	add_to_group("Destructibles")
 	set_deferred("freeze", true)
@@ -44,16 +50,22 @@ func _ready() -> void:
 	body_entered.connect(_on_impact)
 
 	var pmat = PhysicsMaterial.new()
-	pmat.friction = 0.95
-	pmat.bounce = 0.05
+	pmat.friction = 0.55
+	pmat.bounce = 0.12
 	physics_material_override = pmat
-	angular_damp = 4.0
-	linear_damp = 1.2
+	angular_damp = 1.2
+	linear_damp = 0.5
 
 var spawn_settle_timer: float = 0.5
 var support_check_timer: float = 0.1
 
 func _physics_process(delta: float) -> void:
+	# Tự động giải phóng khi tảng đá lọt khỏi sàn hang ngầm
+	var floor_y = GameManager.current_floor_y if has_node("/root/GameManager") else 840.0
+	if global_position.y > floor_y + 180.0 or abs(global_position.x) > 2000.0:
+		queue_free()
+		return
+
 	if dust_fx:
 		dust_fx.emitting = (is_awake and linear_velocity.length() > 65.0)
 

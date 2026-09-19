@@ -10,9 +10,10 @@ const POOL_SIZE = 16
 
 var wav_cache: Dictionary = {}
 var is_bgm_active: bool = true
+var _sfx_rr_index: int = 0
 
-func _init() -> void:
-	_load_all_sound_assets()
+var fanfare_player: AudioStreamPlayer = null
+var ui_player: AudioStreamPlayer = null
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -24,6 +25,17 @@ func _ready() -> void:
 	bgm_player.volume_db = -8.0 # Âm lượng êm ái làm nền cho SFX
 	add_child(bgm_player)
 	bgm_player.finished.connect(_on_bgm_finished)
+
+	# 1b. Khởi tạo Fanfare Player & UI Player ưu tiên độc lập (P2-11)
+	fanfare_player = AudioStreamPlayer.new()
+	fanfare_player.name = "FanfarePlayer"
+	fanfare_player.bus = "SFX" if AudioServer.get_bus_index("SFX") != -1 else "Master"
+	add_child(fanfare_player)
+
+	ui_player = AudioStreamPlayer.new()
+	ui_player.name = "UIPlayer"
+	ui_player.bus = "SFX" if AudioServer.get_bus_index("SFX") != -1 else "Master"
+	add_child(ui_player)
 
 	# 2. Khởi tạo Pool SFX Players cho đa âm thanh đồng thời
 	for i in range(POOL_SIZE):
@@ -63,6 +75,7 @@ func _notification(what: int) -> void:
 					p.stream_paused = false
 
 func _load_all_sound_assets() -> void:
+	if not wav_cache.is_empty(): return
 	var sound_map = {
 		"chicken_cluck": "res://assets/audio/chicken_cluck.wav",
 		"egg_crack": "res://assets/audio/egg_crack.wav",
@@ -101,8 +114,11 @@ func _get_available_player() -> AudioStreamPlayer:
 	for p in sfx_players:
 		if is_instance_valid(p) and not p.playing:
 			return p
-	if not sfx_players.is_empty() and is_instance_valid(sfx_players[0]):
-		return sfx_players[0]
+	if not sfx_players.is_empty():
+		_sfx_rr_index = (_sfx_rr_index + 1) % sfx_players.size()
+		var p = sfx_players[_sfx_rr_index]
+		if is_instance_valid(p):
+			return p
 	var fallback = AudioStreamPlayer.new()
 	fallback.name = "SFXPlayer_fallback"
 	fallback.bus = "SFX" if AudioServer.get_bus_index("SFX") != -1 else "Master"
@@ -246,7 +262,7 @@ func play_star_chime(star_index: int = 1) -> void:
 	if not is_inside_tree(): return
 	if not is_sound_enabled(): return
 	if not wav_cache.has("star_chime"): return
-	var p = _get_available_player()
+	var p = ui_player if is_instance_valid(ui_player) else _get_available_player()
 	p.stream = wav_cache["star_chime"]
 	p.volume_db = 1.8
 	p.pitch_scale = 1.0 + float(star_index - 1) * 0.22 # C6 -> E6 -> G6
@@ -254,21 +270,42 @@ func play_star_chime(star_index: int = 1) -> void:
 
 func play_victory() -> void:
 	if not can_play_sfx("victory_fanfare", 1.5): return
+	if not is_sound_enabled(): return
 	# Dừng các âm va chạm, vụn vỡ để khúc khải hoàn vang lên trọn vẹn, không bị đè âm
 	for p in sfx_players:
 		if is_instance_valid(p) and p.playing:
 			p.stop()
-	play_sfx("victory_fanfare", 3.0, 1.0, 1.0)
+	if is_instance_valid(fanfare_player) and wav_cache.has("victory_fanfare"):
+		fanfare_player.stream = wav_cache["victory_fanfare"]
+		fanfare_player.volume_db = 3.0
+		fanfare_player.pitch_scale = 1.0
+		fanfare_player.play()
+	else:
+		play_sfx("victory_fanfare", 3.0, 1.0, 1.0)
 
 func play_level_fail() -> void:
 	if not can_play_sfx("level_fail", 1.5): return
+	if not is_sound_enabled(): return
 	for p in sfx_players:
 		if is_instance_valid(p) and p.playing:
 			p.stop()
-	play_sfx("level_fail", 2.5, 1.0, 1.0)
+	if is_instance_valid(fanfare_player) and wav_cache.has("level_fail"):
+		fanfare_player.stream = wav_cache["level_fail"]
+		fanfare_player.volume_db = 2.5
+		fanfare_player.pitch_scale = 1.0
+		fanfare_player.play()
+	else:
+		play_sfx("level_fail", 2.5, 1.0, 1.0)
 
 func play_coin_pickup() -> void:
-	play_sfx("coin_pickup", 1.5, 0.96, 1.04)
+	if not is_sound_enabled(): return
+	if is_instance_valid(ui_player) and wav_cache.has("coin_pickup"):
+		ui_player.stream = wav_cache["coin_pickup"]
+		ui_player.volume_db = 1.5
+		ui_player.pitch_scale = randf_range(0.96, 1.04)
+		ui_player.play()
+	else:
+		play_sfx("coin_pickup", 1.5, 0.96, 1.04)
 
 # ==============================================================================
 # BACKWARDS COMPATIBILITY ROUTER (Giữ tương thích tuyệt đối cho code cũ)

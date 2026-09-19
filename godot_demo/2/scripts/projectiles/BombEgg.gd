@@ -34,7 +34,7 @@ func _ready() -> void:
 		ParticleHelper.apply_circle_fx(trail, 0.25, 0.5)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not is_broken and not has_boosted and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():
+	if not is_broken and not has_boosted and BaseEgg.is_valid_airborne_tap(event):
 		has_boosted = true
 		_detonate()
 
@@ -103,18 +103,13 @@ func _detonate() -> void:
 
 			if collider is RigidBody2D:
 				var push_impulse = dir * explosion_force * falloff
-				if push_impulse.y > -0.2:
-					push_impulse.y = -abs(push_impulse.y) * 0.7 - 200.0
 				collider.apply_central_impulse(push_impulse)
 
 			if collider.has_method("take_damage"):
 				collider.take_damage(explosion_damage * falloff, global_position)
 
 	# Thông báo cho quái vật xung quanh về vụ nổ gần kề
-	var enemies = get_tree().get_nodes_in_group("Enemies")
-	for enemy in enemies:
-		if is_instance_valid(enemy) and enemy.has_method("on_near_explosion"):
-			enemy.on_near_explosion(global_position, explosion_radius)
+	get_tree().call_group("Enemies", "on_near_explosion", global_position, explosion_radius)
 
 	await get_tree().create_timer(0.6).timeout
 	queue_free()

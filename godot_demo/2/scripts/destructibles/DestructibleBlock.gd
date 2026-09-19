@@ -11,6 +11,8 @@ var current_health: float = 130.0
 var is_destroyed: bool = false
 var is_awake: bool = false
 var spawn_settle_timer: float = 0.5
+var base_visual_pos: Vector2 = Vector2.ZERO
+var damage_flash_cooldown: float = 0.0
 
 @onready var col_shape: CollisionShape2D = $CollisionShape2D
 @onready var block_visual: NinePatchRect = $BlockVisual
@@ -166,7 +168,8 @@ func _apply_block_dimensions() -> void:
 
 	if block_visual:
 		block_visual.size = block_size
-		block_visual.position = Vector2(-hw, -hh)
+		base_visual_pos = Vector2(-hw, -hh)
+		block_visual.position = base_visual_pos
 		block_visual.modulate = Color.WHITE
 		block_visual.patch_margin_left = margin_x
 		block_visual.patch_margin_right = margin_x
@@ -295,6 +298,16 @@ func _process(delta: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	if is_destroyed: return
+
+	if damage_flash_cooldown > 0.0:
+		damage_flash_cooldown -= delta
+
+	# Tự động rã nứt khi khối rơi lọt khỏi sàn hang ngầm, triệt tiêu lỗi kẹt timer 9 giây
+	var floor_y = GameManager.current_floor_y if has_node("/root/GameManager") else 840.0
+	if global_position.y > floor_y + 180.0 or abs(global_position.x) > 2000.0:
+		_fracture_block()
+		return
+
 	if not is_awake:
 		if spawn_settle_timer > 0.0:
 			return
@@ -430,16 +443,16 @@ func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
 	if current_health <= max_health * 0.35 and crack_stage2:
 		crack_stage2.visible = true
 
-	if block_visual:
+	if block_visual and damage_flash_cooldown <= 0.0:
+		damage_flash_cooldown = 0.12 # Tối đa 8 lần/giây, chống bão tween khi ngâm trong axit
 		var orig_mod = block_visual.modulate
 		block_visual.modulate = Color(1.8, 1.8, 1.8, 1.0)
 		var flash_tween = create_tween()
 		flash_tween.tween_property(block_visual, "modulate", orig_mod, 0.07)
 
-		var orig_pos = block_visual.position
 		var jolt = Vector2(randf_range(-2.5, 2.5), randf_range(-1.5, 1.5))
-		block_visual.position = orig_pos + jolt
-		flash_tween.parallel().tween_property(block_visual, "position", orig_pos, 0.08)
+		block_visual.position = base_visual_pos + jolt
+		flash_tween.parallel().tween_property(block_visual, "position", base_visual_pos, 0.08)
 
 	if current_health <= 0.0:
 		_fracture_block()

@@ -53,7 +53,7 @@ static func _load_fx_textures() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Tap-in-Flight: Chạm màn hình khi đang bay để hóa Trứng Kim Cương Siêu Nặng
-	if not is_breaking and not has_boosted and not has_first_impact and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():
+	if not is_breaking and not has_boosted and not has_first_impact and BaseEgg.is_valid_airborne_tap(event):
 		_activate_special_ability()
 
 func _activate_special_ability() -> void:
@@ -164,7 +164,8 @@ func _on_body_entered(body: Node) -> void:
 	if body is RigidBody2D and not body.freeze:
 		var push_dir = pre_impact_velocity.normalized() if pre_impact_velocity != Vector2.ZERO else (linear_velocity.normalized() if linear_velocity != Vector2.ZERO else Vector2.DOWN)
 		var impulse_mag = min(impact_speed * mass * 0.32, 1400.0)
-		body.apply_impulse(push_dir * impulse_mag, global_position - body.global_position)
+		var local_offset = (global_position - body.global_position).rotated(-body.rotation)
+		body.apply_impulse(push_dir * impulse_mag, local_offset)
 
 	bounces += 1
 	if bounces >= max_bounces_before_break:

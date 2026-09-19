@@ -28,7 +28,7 @@ func _ready() -> void:
 		ParticleHelper.apply_acid_fx(acid_particles, 0.28, 0.58)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not is_broken and not has_boosted and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():
+	if not is_broken and not has_boosted and BaseEgg.is_valid_airborne_tap(event):
 		has_boosted = true
 		_start_acid_melting()
 

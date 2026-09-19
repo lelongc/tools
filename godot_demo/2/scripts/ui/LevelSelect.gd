@@ -31,6 +31,10 @@ func _ready() -> void:
 	if has_node("/root/LocalizationManager"):
 		get_node("/root/LocalizationManager").language_changed.connect(func(_c): _render_world_levels())
 
+	# Tự động mở trang Thế Giới tương ứng với màn chơi gần nhất của người chơi
+	var cur_lvl = GameManager.current_level if has_node("/root/GameManager") else 1
+	current_world = clamp(int(float(cur_lvl - 1) / 20.0) + 1, 1, 10)
+
 	_update_total_stars()
 	_render_world_levels()
 

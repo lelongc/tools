@@ -123,6 +123,19 @@ func get_next_egg() -> String:
 		return egg
 	return ""
 
+func add_active_booster_egg(egg_type: String) -> bool:
+	if not is_level_active: return false
+	if has_node("/root/SaveManager"):
+		var sm = get_node("/root/SaveManager")
+		if sm.use_consumable(egg_type):
+			available_eggs.insert(current_egg_index, egg_type)
+			level_started.emit(current_level, available_eggs)
+			var chicken = get_tree().get_first_node_in_group("Player")
+			if chicken and chicken.has_method("_prepare_next_egg"):
+				chicken._prepare_next_egg()
+			return true
+	return false
+
 func check_out_of_eggs() -> void:
 	if remaining_enemies > 0 and current_egg_index >= available_eggs.size():
 		is_settling = true
@@ -233,6 +246,7 @@ func _trigger_victory_delay() -> void:
 	level_completed.emit(stars, snapshot_final_score, base_coins)
 
 func load_level(level_id: int) -> void:
+	Engine.time_scale = 1.0
 	get_tree().paused = false
 	current_session_id += 1
 	current_level = clamp(level_id, 1, total_levels)
@@ -245,16 +259,19 @@ func next_level() -> void:
 		go_to_level_select()
 
 func restart_current_level() -> void:
+	Engine.time_scale = 1.0
 	get_tree().paused = false
 	current_session_id += 1
 	get_tree().reload_current_scene()
 
 func go_to_level_select() -> void:
+	Engine.time_scale = 1.0
 	get_tree().paused = false
 	current_session_id += 1
 	get_tree().change_scene_to_file("res://scenes/ui/LevelSelect.tscn")
 
 func go_to_main_menu() -> void:
+	Engine.time_scale = 1.0
 	get_tree().paused = false
 	current_session_id += 1
 	get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")

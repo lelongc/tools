@@ -24,7 +24,7 @@ func _ready() -> void:
 		ParticleHelper.apply_frost_fx(frost_particles, 0.3, 0.65)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not is_broken and not has_boosted and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():
+	if not is_broken and not has_boosted and BaseEgg.is_valid_airborne_tap(event):
 		has_boosted = true
 		_freeze_blast()
 
@@ -121,14 +121,15 @@ func _freeze_blast() -> void:
 			if col.has_method("wake_up"):
 				col.wake_up()
 
-			# Biến các khối đá/gỗ thành băng giòn dễ vỡ
+			# Biến các khối đá/gỗ thành băng giòn dễ vỡ cho quả trứng tiếp theo
 			if "material_type" in col:
 				col.material_type = "glass"
 				col.current_health = min(col.current_health, 25.0)
 				var v = col.get_node_or_null("BlockVisual")
 				if v: v.modulate = Color(0.6, 0.9, 1.0, 0.9)
-
-			if col.has_method("take_damage"):
+				if col.has_method("take_damage"):
+					col.take_damage(10.0, global_position)
+			elif col.has_method("take_damage"):
 				col.take_damage(80.0, global_position)
 
 	await get_tree().create_timer(0.5).timeout

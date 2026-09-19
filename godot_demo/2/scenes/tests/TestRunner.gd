@@ -378,6 +378,103 @@ func _ready() -> void:
 	deep_midair_block.queue_free()
 	GameManager.current_egg_index = 0
 
+	# -------------------------------------------------------------------------
+	# 9. TEST RECENT CRITICAL FIXES (P0/P1 HARDENING)
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 9] Testing Recent P0/P1 Critical Bug Fixes ---")
+	# 9.1: Test Out-of-Bounds Monster Elimination (P0-01)
+	var oob_monster = enemy_scene.instantiate()
+	oob_monster.monster_type = "sly_fox"
+	oob_monster.position = Vector2(200, 1500) # Past y > 1400.0
+	add_child(oob_monster)
+	oob_monster._physics_process(0.016)
+	if not oob_monster.is_defeated:
+		errors.append("BunkerMonster did not auto-defeat when blasted out of bounds (P0-01)!")
+		print("  [FAIL] OOB Monster not defeated!")
+	else:
+		print("  [PASS] BunkerMonster correctly auto-defeated when blasted past boundary (P0-01)")
+	oob_monster.queue_free()
+
+	# 9.2: Test DestructibleBlock Floor Drop Cleanup (P1-01)
+	var dropped_block = block_scene.instantiate()
+	dropped_block.position = Vector2(200, GameManager.current_floor_y + 200.0)
+	add_child(dropped_block)
+	dropped_block._physics_process(0.016)
+	if not dropped_block.is_destroyed:
+		errors.append("DestructibleBlock did not auto-fracture when falling below floor (P1-01)!")
+		print("  [FAIL] Dropped block not fractured!")
+	else:
+		print("  [PASS] DestructibleBlock correctly fractures when falling below cavern floor (P1-01)")
+	dropped_block.queue_free()
+
+	# 9.3: Test FrostEgg Block Brittle Preservation (P1-04)
+	var frost_test_block = block_scene.instantiate()
+	frost_test_block.material_type = "stone"
+	frost_test_block.max_health = 340.0
+	frost_test_block.current_health = 340.0
+	add_child(frost_test_block)
+	# Simulate frost egg impact logic
+	frost_test_block.material_type = "glass"
+	frost_test_block.current_health = min(frost_test_block.current_health, 25.0)
+	frost_test_block.take_damage(10.0, Vector2.ZERO)
+	if frost_test_block.is_destroyed or frost_test_block.current_health <= 0.0:
+		errors.append("FrostEgg logic immediately shattered the frozen block (P1-04)!")
+		print("  [FAIL] Frozen block immediately shattered!")
+	elif frost_test_block.current_health == 15.0:
+		print("  [PASS] Frozen block properly preserved at 15 HP brittle glass for follow-up egg (P1-04)")
+	frost_test_block.queue_free()
+
+	# 9.4: Test CameraShake2D TimeScale Safety (P0-02)
+	CameraShake2D.reset_hit_stop()
+	if Engine.time_scale != 1.0:
+		errors.append("CameraShake2D reset_hit_stop did not restore Engine.time_scale to 1.0 (P0-02)!")
+	else:
+		print("  [PASS] CameraShake2D reset_hit_stop correctly guarantees time_scale = 1.0 (P0-02)")
+
+	# -------------------------------------------------------------------------
+	# 10. TEST SHOP ECONOMY, CLOUD SYNC & AIRBORNE INPUT SAFETY
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 10] Testing Shop Economy, Cloud Sync & Input Guard ---")
+	# 10.1: Test Airborne Tap Deadzone (P2-04)
+	var top_touch = InputEventMouseButton.new()
+	top_touch.pressed = true
+	top_touch.position = Vector2(270, 50) # In top bar
+	if BaseEgg.is_valid_airborne_tap(top_touch):
+		errors.append("BaseEgg allowed airborne tap in TopBar HUD deadzone (P2-04)!")
+	else:
+		print("  [PASS] BaseEgg correctly rejected airborne tap in TopBar deadzone (P2-04)")
+
+	var valid_touch = InputEventMouseButton.new()
+	valid_touch.pressed = true
+	valid_touch.position = Vector2(270, 400) # In mid gameplay viewport
+	if not BaseEgg.is_valid_airborne_tap(valid_touch):
+		errors.append("BaseEgg rejected valid airborne tap in gameplay area (P2-04)!")
+	else:
+		print("  [PASS] BaseEgg correctly accepted airborne tap in valid gameplay area (P2-04)")
+
+	# 10.2: Test Shop Purchase & Economy Utility (P1-12)
+	SaveManager.save_data["coins"] = 500
+	var initial_bombs = SaveManager.get_consumable("bomb")
+	var spent = SaveManager.spend_coins(300)
+	if spent:
+		SaveManager.add_consumable("bomb", 1)
+	if not spent or SaveManager.get_coins() != 200 or SaveManager.get_consumable("bomb") != initial_bombs + 1:
+		errors.append("Shop economy purchase failed or desynced consumables (P1-12)!")
+	else:
+		print("  [PASS] Shop economy correctly spent coins and credited consumable inventory (P1-12)")
+
+	# 10.3: Test Cloud Save Export/Import High-Watermark Merge (P3-01)
+	var export_str = SaveManager.export_save_json()
+	if export_str.is_empty():
+		errors.append("SaveManager export_save_json produced empty string (P3-01)!")
+	else:
+		var remote_json = '{"version": 7, "highest_unlocked_level": 45, "coins": 9999, "consumables": {"bomb": 5, "drill": 2, "acid": 2}}'
+		var merge_success = SaveManager.import_save_json(remote_json)
+		if not merge_success or SaveManager.get_coins() < 9999 or SaveManager.get_highest_unlocked_level() < 45:
+			errors.append("Cloud save high-watermark merge failed (P3-01)!")
+		else:
+			print("  [PASS] Cloud save successfully imported and merged with high-watermark strategy (P3-01)")
+
 	print("\n================================================================")
 	if errors.size() == 0:
 		print(">>> ALL TESTS PASSED SUCCESSFULLY! (0 ERRORS) <<<")

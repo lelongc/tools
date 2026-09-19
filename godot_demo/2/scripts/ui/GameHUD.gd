@@ -64,33 +64,6 @@ func _ready() -> void:
 	_apply_safe_area()
 	get_viewport().size_changed.connect(_apply_safe_area)
 
-func _apply_safe_area() -> void:
-	if not is_inside_tree(): return
-	var safe_rect = DisplayServer.get_display_safe_area()
-	var win_size = DisplayServer.window_get_size()
-	if win_size.y <= 0: return
-
-	var vp_size = get_viewport().get_visible_rect().size
-	var scale_y = vp_size.y / float(win_size.y)
-	var top_inset = float(safe_rect.position.y) * scale_y
-	var bottom_inset = float(win_size.y - (safe_rect.position.y + safe_rect.size.y)) * scale_y
-
-	# Đệm thanh TopBar né camera nốt ruồi / tai thỏ
-	var top_bar = get_node_or_null("TopBar") as Control
-	if top_bar:
-		var target_top = max(8.0, top_inset + 4.0)
-		var bar_h = 52.0
-		top_bar.offset_top = target_top
-		top_bar.offset_bottom = target_top + bar_h
-
-	# Đệm Kệ Trứng né thanh cử chỉ vuốt Home của Android
-	var egg_shelf = get_node_or_null("EggShelf") as Control
-	if egg_shelf:
-		var target_bottom = min(-10.0, -(bottom_inset + 12.0))
-		var shelf_h = 42.0
-		egg_shelf.offset_bottom = target_bottom
-		egg_shelf.offset_top = target_bottom - shelf_h
-
 	GameManager.score_updated.connect(_on_score_updated)
 	GameManager.egg_dropped.connect(_on_egg_dropped)
 	GameManager.level_started.connect(func(_lvl, _eggs): _refresh_egg_icons())
@@ -140,6 +113,115 @@ func _apply_safe_area() -> void:
 	)
 
 	_update_ui()
+	_setup_booster_tray()
+
+var booster_tray: HBoxContainer = null
+
+func _setup_booster_tray() -> void:
+	if booster_tray: return
+	booster_tray = HBoxContainer.new()
+	booster_tray.name = "BoosterTray"
+	booster_tray.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	booster_tray.anchor_left = 1.0
+	booster_tray.anchor_top = 1.0
+	booster_tray.anchor_right = 1.0
+	booster_tray.anchor_bottom = 1.0
+	booster_tray.offset_left = -175.0
+	booster_tray.offset_top = -54.0
+	booster_tray.offset_right = -12.0
+	booster_tray.offset_bottom = -10.0
+	booster_tray.add_theme_constant_override("separation", 6)
+	booster_tray.alignment = BoxContainer.ALIGNMENT_END
+	add_child(booster_tray)
+	_render_booster_buttons()
+	if has_node("/root/SaveManager"):
+		get_node("/root/SaveManager").consumables_updated.connect(_render_booster_buttons)
+
+func _render_booster_buttons() -> void:
+	if not booster_tray: return
+	for child in booster_tray.get_children():
+		child.queue_free()
+
+	if not has_node("/root/SaveManager"): return
+	var sm = get_node("/root/SaveManager")
+
+	var booster_types = [
+		{"type": "bomb", "icon": "res://assets/ui/icons/icon_egg_bomb.svg"},
+		{"type": "drill", "icon": "res://assets/ui/icons/icon_egg_drill.svg"},
+		{"type": "acid", "icon": "res://assets/ui/icons/icon_egg_acid.svg"}
+	]
+
+	for b_info in booster_types:
+		var b_type = b_info["type"]
+		var count = sm.get_consumable(b_type)
+		if count <= 0: continue
+
+		var btn = Button.new()
+		btn.custom_minimum_size = Vector2(46, 42)
+		btn.text = "x%d" % count
+		btn.icon_alignment = HORIZONTAL_ALIGNMENT_LEFT
+		btn.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
+		var ico_tex = ParticleHelper._safe_load(b_info["icon"])
+		if ico_tex:
+			btn.icon = ico_tex
+			btn.expand_icon = true
+
+		var st_norm = StyleBoxFlat.new()
+		st_norm.bg_color = Color(0.18, 0.12, 0.28, 0.9)
+		st_norm.border_width_bottom = 4
+		st_norm.border_width_left = 2
+		st_norm.border_width_right = 2
+		st_norm.border_width_top = 2
+		st_norm.border_color = Color(1.0, 0.8, 0.2)
+		st_norm.corner_radius_top_left = 10
+		st_norm.corner_radius_top_right = 10
+		st_norm.corner_radius_bottom_right = 10
+		st_norm.corner_radius_bottom_left = 10
+		btn.add_theme_stylebox_override("normal", st_norm)
+		btn.add_theme_font_size_override("font_size", 11)
+		btn.add_theme_color_override("font_color", Color(1, 0.9, 0.4))
+
+		btn.pressed.connect(func():
+			if GameManager.add_active_booster_egg(b_type):
+				if has_node("/root/SoundManager"):
+					get_node("/root/SoundManager").play_button_click()
+				_refresh_egg_icons()
+				_render_booster_buttons()
+		)
+		booster_tray.add_child(btn)
+
+func _apply_safe_area() -> void:
+	if not is_inside_tree(): return
+	var safe_rect = DisplayServer.get_display_safe_area()
+	var win_size = DisplayServer.window_get_size()
+	if win_size.y <= 0: return
+
+	var vp_size = get_viewport().get_visible_rect().size
+	var scale_y = vp_size.y / float(win_size.y)
+	var top_inset = float(safe_rect.position.y) * scale_y
+	var bottom_inset = float(win_size.y - (safe_rect.position.y + safe_rect.size.y)) * scale_y
+
+	# Đệm thanh TopBar né camera nốt ruồi / tai thỏ
+	var top_bar = get_node_or_null("TopBar") as Control
+	if top_bar:
+		var target_top = max(8.0, top_inset + 4.0)
+		var bar_h = 52.0
+		top_bar.offset_top = target_top
+		top_bar.offset_bottom = target_top + bar_h
+
+	# Đệm Kệ Trứng và Khay Đạo Cụ né thanh cử chỉ vuốt Home của Android
+	var egg_shelf = get_node_or_null("EggShelf") as Control
+	if egg_shelf:
+		var target_bottom = min(-10.0, -(bottom_inset + 12.0))
+		var shelf_h = 42.0
+		egg_shelf.offset_bottom = target_bottom
+		egg_shelf.offset_top = target_bottom - shelf_h
+
+	if booster_tray:
+		var target_bottom = min(-10.0, -(bottom_inset + 12.0))
+		var tray_h = 42.0
+		booster_tray.offset_bottom = target_bottom
+		booster_tray.offset_top = target_bottom - tray_h
 
 func _update_coin_display(amount: int) -> void:
 	if coin_label:
@@ -343,7 +425,19 @@ func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> 
 			tt.tween_property(victory_title, "scale", Vector2.ONE, 0.35)
 
 		if victory_score:
-			victory_score.text = lm.t("KEY_FINAL_SCORE") % final_score if lm else "Điểm số: %d" % final_score
+			var prev_best = 0
+			if has_node("/root/SaveManager"):
+				prev_best = get_node("/root/SaveManager").get_level_score(GameManager.current_level)
+			var is_new_record = (final_score > prev_best and prev_best > 0)
+			var unused_eggs = max(0, GameManager.available_eggs.size() - GameManager.current_egg_index)
+			var egg_bonus = unused_eggs * 1000
+
+			var score_text = lm.t("KEY_FINAL_SCORE") % final_score if lm else "Tổng Điểm: %d" % final_score
+			if egg_bonus > 0:
+				score_text += "\n" + (lm.t("KEY_EGG_BONUS") % egg_bonus if lm else "Thưởng Trứng: +%d" % egg_bonus)
+			if is_new_record:
+				score_text += "\n🏆 " + (lm.t("KEY_NEW_RECORD") if lm else "KỶ LỤC MỚI!")
+			victory_score.text = score_text
 
 		# Chuỗi hoạt ảnh 3 Ngôi Sao nảy tung nhịp nhàng và điểm chuông sao trong trẻo
 		var tex_star_full = preload("res://assets/ui/icons/icon_star.svg")

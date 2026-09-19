@@ -1,9 +1,11 @@
 extends RigidBody2D
 
 
-var lifetime: float = 3.2
+var lifetime: float = 1.6
 var peck_damage: float = 50.0
 var is_poofed: bool = false
+var bounce_count: int = 0
+const MAX_BOUNCES: int = 2
 
 @onready var visual: Node2D = $Visual
 @onready var chick_sprite: Sprite2D = get_node_or_null("Visual/ChickSprite")
@@ -41,6 +43,8 @@ func _process(delta: float) -> void:
 func _pop_out() -> void:
 	if is_poofed: return
 	is_poofed = true
+	if is_in_group("Projectiles"):
+		remove_from_group("Projectiles")
 	set_deferred("freeze", true)
 	$CollisionShape2D.set_deferred("disabled", true)
 
@@ -73,6 +77,10 @@ func _on_impact(body: Node) -> void:
 		var tween = create_tween()
 		visual.scale = Vector2(1.3, 0.7)
 		tween.tween_property(visual, "scale", Vector2.ONE, 0.2).set_trans(Tween.TRANS_BOUNCE)
+
+	bounce_count += 1
+	if bounce_count >= MAX_BOUNCES and is_in_group("Projectiles"):
+		remove_from_group("Projectiles")
 
 	# Bật nảy ngẫu nhiên
 	apply_central_impulse(Vector2(randf_range(-150.0, 150.0), -200.0))

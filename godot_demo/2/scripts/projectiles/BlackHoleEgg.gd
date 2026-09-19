@@ -29,7 +29,7 @@ func _ready() -> void:
 		vortex_particles.color = Color(0.85, 0.35, 1.0, 0.95)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not is_broken and not is_singularity and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():
+	if not is_broken and not is_singularity and BaseEgg.is_valid_airborne_tap(event):
 		_trigger_vortex()
 
 func _on_body_entered(_body: Node) -> void:
@@ -79,7 +79,7 @@ func _physics_process(delta: float) -> void:
 		var circle = CircleShape2D.new()
 		circle.radius = vortex_radius
 		query.shape = circle
-		query.transform = global_transform
+		query.transform = Transform2D(0.0, global_position)
 		query.collide_with_bodies = true
 
 		for res in space_state.intersect_shape(query, 32):
@@ -117,7 +117,7 @@ func _supernova_blast() -> void:
 	var circle = CircleShape2D.new()
 	circle.radius = vortex_radius
 	query.shape = circle
-	query.transform = global_transform
+	query.transform = Transform2D(0.0, global_position)
 	query.collide_with_bodies = true
 
 	for res in space_state.intersect_shape(query, 32):

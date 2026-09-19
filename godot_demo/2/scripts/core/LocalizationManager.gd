@@ -334,6 +334,61 @@ var translations: Dictionary = {
 		"en": "CLOSE", "vi": "ĐÓNG", "ja": "閉じる", "ko": "닫기",
 		"zh_CN": "关闭", "es": "CERRAR", "pt_BR": "FECHAR", "de": "SCHLIESSEN",
 		"fr": "FERMER", "ru": "ЗАКРЫТЬ"
+	},
+	"KEY_WHEEL_REWARD_COINS": {
+		"en": "🎉 +%d COINS! 🎉", "vi": "🎉 +%d VÀNG! 🎉", "ja": "🎉 +%d コイン! 🎉", "ko": "🎉 +%d 코인! 🎉",
+		"zh_CN": "🎉 +%d 金币! 🎉", "es": "🎉 +%d MONEDAS! 🎉", "pt_BR": "🎉 +%d MOEDAS! 🎉", "de": "🎉 +%d MÜNZEN! 🎉",
+		"fr": "🎉 +%d PIÈCES! 🎉", "ru": "🎉 +%d МОНЕТ! 🎉"
+	},
+	"KEY_WHEEL_REWARD_EGG": {
+		"en": "🎉 +1 %s EGG! 🎉", "vi": "🎉 +1 TRỨNG %s! 🎉", "ja": "🎉 +1 %s たまご! 🎉", "ko": "🎉 +1 %s 알! 🎉",
+		"zh_CN": "🎉 +1 %s 蛋! 🎉", "es": "🎉 +1 HUEVO %s! 🎉", "pt_BR": "🎉 +1 OVO %s! 🎉", "de": "🎉 +1 %s-EI! 🎉",
+		"fr": "🎉 +1 ŒUF %s! 🎉", "ru": "🎉 +1 ЯЙЦО %s! 🎉"
+	},
+	"KEY_SHOP": {
+		"en": "SHOP", "vi": "CỬA HÀNG", "ja": "ショップ", "ko": "상점",
+		"zh_CN": "商店", "es": "TIENDA", "pt_BR": "LOJA", "de": "LADEN",
+		"fr": "BOUTIQUE", "ru": "МАГАЗИН"
+	},
+	"KEY_SHOP_TITLE": {
+		"en": "EGG & BOOSTER SHOP", "vi": "CỬA HÀNG ĐẠO CỤ", "ja": "タマゴ＆ブースターショップ", "ko": "알 & 부스터 상점",
+		"zh_CN": "鸡蛋与道具商店", "es": "TIENDA DE HUEVOS", "pt_BR": "LOJA DE OVOS", "de": "EIER & BOOSTER SHOP",
+		"fr": "BOUTIQUE D'OEUFS", "ru": "МАГАЗИН ЯИЦ"
+	},
+	"KEY_BUY": {
+		"en": "BUY", "vi": "MUA", "ja": "購入", "ko": "구매",
+		"zh_CN": "购买", "es": "COMPRAR", "pt_BR": "COMPRAR", "de": "KAUFEN",
+		"fr": "ACHETER", "ru": "КУПИТЬ"
+	},
+	"KEY_INVENTORY": {
+		"en": "INVENTORY: x%d", "vi": "TỒN KHO: x%d", "ja": "所持数: x%d", "ko": "보유량: x%d",
+		"zh_CN": "库存: x%d", "es": "INVENTARIO: x%d", "pt_BR": "ESTOQUE: x%d", "de": "BESTAND: x%d",
+		"fr": "INVENTAIRE: x%d", "ru": "В НАЛИЧИИ: x%d"
+	},
+	"KEY_SHOP_BOMB_DESC": {
+		"en": "Massive blast clears entire bunkers", "vi": "Sức công phá khủng khiếp, san bằng boong-ke quái"
+	},
+	"KEY_SHOP_DRILL_DESC": {
+		"en": "Hypersonic drill pierces 4 layers of steel", "vi": "Mũi khoan siêu thanh xuyên thủng 4 tầng đá thép"
+	},
+	"KEY_SHOP_ACID_DESC": {
+		"en": "Dissolves and melts barriers continuously", "vi": "Vũng axit ăn mòn tan chảy chướng ngại vật"
+	},
+	"KEY_SHOP_COMBO_DESC": {
+		"en": "Super Pack: 1 Bomb + 1 Drill + 1 Acid", "vi": "Gói Siêu Cấp: 1 Bom + 1 Khoan + 1 Axit"
+	},
+	"KEY_SHOP_NOT_ENOUGH": {
+		"en": "Not enough coins!", "vi": "Không đủ vàng!"
+	},
+	"KEY_NEW_RECORD": {
+		"en": "NEW RECORD!", "vi": "KỶ LỤC MỚI!", "ja": "新記録!", "ko": "신기록!",
+		"zh_CN": "新纪录!", "es": "¡NUEVO RÉCORD!", "pt_BR": "NOVO RECORDE!", "de": "NEUER REKORD!",
+		"fr": "NOUVEAU RECORD !", "ru": "НОВЫЙ РЕКОРД!"
+	},
+	"KEY_EGG_BONUS": {
+		"en": "Egg Bonus: +%d", "vi": "Thưởng Trứng Thừa: +%d", "ja": "タマゴボーナス: +%d", "ko": "남은 알 보너스: +%d",
+		"zh_CN": "剩余鸡蛋奖励: +%d", "es": "Bonus de Huevos: +%d", "pt_BR": "Bônus de Ovos: +%d", "de": "Eier-Bonus: +%d",
+		"fr": "Bonus d'oeufs : +%d", "ru": "Бонус за яйца: +%d"
 	}
 }
 

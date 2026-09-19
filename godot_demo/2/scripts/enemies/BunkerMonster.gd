@@ -903,6 +903,13 @@ var crush_audio_cooldown: float = 0.0
 
 func _physics_process(delta: float) -> void:
 	if is_defeated: return
+
+	# Kiểm tra Out-of-Bounds (OOB) chống quái bất tử khi bị bom hất văng khỏi map
+	var pos = global_position
+	if pos.y > 1400.0 or pos.y < -700.0 or abs(pos.x) > 1800.0:
+		take_damage(9999.0, global_position)
+		return
+
 	if has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
 		if gm.current_egg_index == 0:

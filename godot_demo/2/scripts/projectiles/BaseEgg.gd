@@ -51,6 +51,16 @@ static func _load_fx_textures() -> void:
 		tex_shell_shard = ParticleHelper._safe_load("res://assets/sprites/vfx/particle_shard_chip.svg")
 		tex_yolk_dot = ParticleHelper._safe_load("res://assets/sprites/vfx/particle_circle_smooth.svg")
 
+static func is_valid_airborne_tap(event: InputEvent) -> bool:
+	if not ((event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed()):
+		return false
+	var pos: Vector2 = event.position
+	# Bỏ qua khi người chơi chạm vùng TopBar (pause/cài đặt/điểm y < 110)
+	# hoặc chạm khay Booster ở góc dưới màn hình (y > 870 và x > 350)
+	if pos.y < 110.0 or (pos.y > 870.0 and pos.x > 350.0):
+		return false
+	return true
+
 const MIN_DESPAWN_Y = -600.0
 const MAX_DESPAWN_Y = 1400.0
 const MAX_DESPAWN_X = 2000.0

@@ -277,3 +277,56 @@ func record_daily_spin() -> void:
 	_check_and_reset_daily_spins()
 	save_data["daily_spins_count"] = save_data.get("daily_spins_count", 0) + 1
 	save_game()
+
+# ==========================================
+# ĐỒNG BỘ LƯU TRỮ ĐÁM MÂY (CLOUD SAVE - GOOGLE PLAY SNAPSHOTS READY)
+# ==========================================
+signal cloud_sync_completed(success: bool, message: String)
+
+func export_save_json() -> String:
+	return JSON.stringify(save_data, "\t")
+
+func import_save_json(json_str: String) -> bool:
+	var parsed = JSON.parse_string(json_str)
+	if parsed is Dictionary and parsed.has("version"):
+		# Chiến lược hợp nhất tiến trình cao nhất (High-Watermark Merge)
+		var local_lvl = save_data.get("highest_unlocked_level", 1)
+		var remote_lvl = parsed.get("highest_unlocked_level", 1)
+		save_data["highest_unlocked_level"] = max(local_lvl, remote_lvl)
+
+		# Hợp nhất số sao từng màn
+		var local_stars = save_data.get("level_stars", {})
+		var remote_stars = parsed.get("level_stars", {})
+		for k in remote_stars:
+			var s_remote = int(remote_stars[k])
+			var s_local = int(local_stars.get(k, 0))
+			local_stars[k] = max(s_local, s_remote)
+		save_data["level_stars"] = local_stars
+
+		# Hợp nhất điểm kỷ lục từng màn
+		var local_scores = save_data.get("level_scores", {})
+		var remote_scores = parsed.get("level_scores", {})
+		for k in remote_scores:
+			var sc_remote = int(remote_scores[k])
+			var sc_local = int(local_scores.get(k, 0))
+			local_scores[k] = max(sc_local, sc_remote)
+		save_data["level_scores"] = local_scores
+
+		# Hợp nhất tiền vàng và đạo cụ
+		save_data["coins"] = max(int(save_data.get("coins", 0)), int(parsed.get("coins", 0)))
+		var local_cons = save_data.get("consumables", {})
+		var remote_cons = parsed.get("consumables", {})
+		for c_key in ["bomb", "drill", "acid"]:
+			var c_local = int(local_cons.get(c_key, 0))
+			var c_remote = int(remote_cons.get(c_key, 0))
+			local_cons[c_key] = max(c_local, c_remote)
+		save_data["consumables"] = local_cons
+
+		save_game()
+		coins_updated.emit(save_data["coins"])
+		consumables_updated.emit()
+		cloud_sync_completed.emit(true, "Cloud save successfully merged")
+		return true
+
+	cloud_sync_completed.emit(false, "Invalid cloud save format")
+	return false

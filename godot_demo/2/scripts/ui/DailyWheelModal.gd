@@ -247,13 +247,16 @@ func _start_spin_physics() -> void:
 		sm.record_daily_spin()
 
 		var prize = prizes[winning_index]
+		var lm = get_node_or_null("/root/LocalizationManager")
 		if prize["type"] == "coins":
 			sm.add_coins(prize["amount"])
 			if result_banner:
-				result_banner.text = "🎉 +%d COINS! 🎉" % prize["amount"]
+				var template = lm.t("KEY_WHEEL_REWARD_COINS") if lm else "🎉 +%d COINS! 🎉"
+				result_banner.text = template % prize["amount"]
 		elif prize["type"] == "egg":
 			sm.add_consumable(prize["egg_type"], 1)
 			if result_banner:
-				result_banner.text = "🎉 +1 %s EGG! 🎉" % prize["egg_type"].to_upper()
+				var template = lm.t("KEY_WHEEL_REWARD_EGG") if lm else "🎉 +1 %s EGG! 🎉"
+				result_banner.text = template % prize["egg_type"].to_upper()
 
 	_update_spin_button_state()

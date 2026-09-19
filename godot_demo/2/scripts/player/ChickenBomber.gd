@@ -169,6 +169,8 @@ func _handle_aim_input() -> void:
 
 		if is_aiming:
 			var drag_delta = mouse_pos - aim_start_pos
+			var is_cancelling = (drag_delta.length() < 24.0 or drag_delta.y < -25.0)
+
 			# Di chuyển gà theo vị trí bắt đầu và độ nghiêng ngón tay
 			position.x = clamp(aim_start_pos.x + drag_delta.x * 0.3, min_x, max_x)
 			
@@ -186,17 +188,24 @@ func _handle_aim_input() -> void:
 			# Mắt liếc nhìn xuống hầm
 			_update_eye_direction(aim_vector.normalized())
 			
-			# Vẽ đường dự đoán quỹ đạo
-			_draw_trajectory(aim_vector)
+			# Vẽ đường dự đoán quỹ đạo nếu không đang trong vùng hủy
+			if is_cancelling:
+				if trajectory_line: trajectory_line.visible = false
+			else:
+				_draw_trajectory(aim_vector)
 	else:
-		# Nhả chuột / ngón tay -> Thả trứng ngay lập tức!
+		# Nhả chuột / ngón tay -> Thả trứng ngay hoặc Hủy nếu trong deadzone!
 		if is_aiming:
 			is_aiming = false
 			if trajectory_line: trajectory_line.visible = false
 			_reset_eye_direction()
-			if aim_vector == Vector2.ZERO:
-				aim_vector = Vector2(0, 480.0)
-			_drop_egg(aim_vector)
+
+			var drag_delta = mouse_pos - aim_start_pos
+			var is_cancelled = (drag_delta.length() < 24.0 or drag_delta.y < -25.0)
+			if not is_cancelled:
+				if aim_vector == Vector2.ZERO:
+					aim_vector = Vector2(0, 480.0)
+				_drop_egg(aim_vector)
 			aim_vector = Vector2(0, 480.0)
 
 func _draw_trajectory(initial_vel: Vector2) -> void:

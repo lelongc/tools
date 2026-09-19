@@ -164,9 +164,25 @@ static func setup_egg_visual(visual_root: Node, texture_path: String, scale_val:
 # =============================================================================
 # 1. HỆ THỐNG PARTICLE VÀ HERO VFX NỔ RIÊNG BIỆT THEO TỪNG LOẠI TRỨNG
 # =============================================================================
+static var _last_fx_time: float = 0.0
+static var _fx_count_window: int = 0
+
 static func spawn_egg_break_fx(parent: Node, pos: Vector2, egg_type: String, is_boosted: bool = false) -> void:
 	if not parent: return
 	_init_textures()
+
+	# Throttling & Dynamic Budgeting khi xảy ra nổ chuỗi đồng thời (P1-13)
+	var now = Time.get_ticks_msec() / 1000.0
+	if now - _last_fx_time < 0.12:
+		_fx_count_window += 1
+	else:
+		_last_fx_time = now
+		_fx_count_window = 1
+
+	var is_dense = _fx_count_window > 3
+	var smoke_count = 1 if is_dense else 3
+	var shard_count = 2 if is_dense else 5
+	var accent_count = 1 if is_dense else 4
 
 	var smoke_col = Color(1.0, 0.98, 0.92, 0.88)
 	var shard_col = Color(0.98, 0.94, 0.86, 1.0)
@@ -258,7 +274,7 @@ static func spawn_egg_break_fx(parent: Node, pos: Vector2, egg_type: String, is_
 	# 1. Khói Cartoon Puff đặc trưng từng loại trứng
 	var tex_s = tex_comic_smoke if tex_comic_smoke else tex_smoke
 	if tex_s:
-		for i in range(3):
+		for i in range(smoke_count):
 			var puff = Sprite2D.new()
 			puff.texture = tex_s
 			var offset = Vector2(randf_range(-10, 10), randf_range(-10, 10))
@@ -286,7 +302,7 @@ static func spawn_egg_break_fx(parent: Node, pos: Vector2, egg_type: String, is_
 		"blackhole": chosen_shard_tex = tex_void if tex_void else tex_spark
 
 	if chosen_shard_tex:
-		for i in range(5):
+		for i in range(shard_count):
 			var shard = Sprite2D.new()
 			shard.texture = chosen_shard_tex
 			shard.global_position = pos
@@ -317,7 +333,7 @@ static func spawn_egg_break_fx(parent: Node, pos: Vector2, egg_type: String, is_
 		tex_acc = tex_confetti
 
 	if tex_acc:
-		for i in range(4):
+		for i in range(accent_count):
 			var acc = Sprite2D.new()
 			acc.texture = tex_acc
 			acc.global_position = pos

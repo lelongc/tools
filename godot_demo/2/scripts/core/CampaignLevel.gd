@@ -663,7 +663,7 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 
 			# Loadout World 4
 			if world_stage <= 4:
-				loadout = ["blackhole", "acid", "drill", "bomb", "blackhole", "bomb"]
+				loadout = ["blackhole", "acid", "drill", "bomb", "drill", "blackhole", "bomb"]
 			elif world_stage <= 9:
 				loadout = ["blackhole", "acid", "drill", "bomb", "blackhole", "acid", "bomb"]
 			elif world_stage < 20:

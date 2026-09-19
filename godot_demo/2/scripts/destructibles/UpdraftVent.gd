@@ -28,6 +28,9 @@ func _on_body_exited(body: Node2D) -> void:
 		overlapping_bodies.erase(body)
 
 func _physics_process(_delta: float) -> void:
-	for body in overlapping_bodies:
-		if is_instance_valid(body) and not body.freeze:
+	for i in range(overlapping_bodies.size() - 1, -1, -1):
+		var body = overlapping_bodies[i]
+		if not is_instance_valid(body) or body.is_queued_for_deletion():
+			overlapping_bodies.remove_at(i)
+		elif not body.freeze:
 			body.apply_central_force(Vector2(0, -wind_force))

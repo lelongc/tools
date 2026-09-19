@@ -125,8 +125,7 @@ Tài liệu này theo dõi chi tiết từng lỗi kỹ thuật, tình huống t
 1. **Audio Bus Limiter & Cấu hình Di động**:
    - ĐÃ XỬ LÝ: Đã tạo `default_bus_layout.tres` với bộ hạn chế biên độ âm thanh Peak Limiter trần $-0.2\text{ dBFS}$ trên bus Master, khóa $60\text{ FPS}$ và kích hoạt Auto-Pause khi nhận cuộc gọi. Chi tiết tại [07 — Chuẩn hóa Mobile và CH Play](D:/folder/tools/godot_demo/2/docs/phan-tich-game/07-chuan-hoa-mobile-va-chplay.md).
 2. **Đại Kiểm Kê 18 Lỗ hổng Vật lý, Gameplay & Kinh tế Cần Cải Thiện**:
-   - Báo cáo chi tiết mới nhất về các lỗi trọng yếu như quái vật văng khỏi bản đồ bất tử (`PHY-01`), khối rơi ngoài biên kẹt timer 9s (`PHY-02`), nghịch lý Trứng Băng tự hủy khối (`BAL-01`), rò rỉ Tween khi dính Axit (`PHY-03`) và giải pháp Khay Tiếp Viện (`ECO-01`) đã được kiểm kê toàn diện tại [08 — Đại Kiểm Kê Lỗi và Đề Xuất Toàn Diện](D:/folder/tools/godot_demo/2/docs/phan-tich-game/08-dai-kiem-ke-loi-va-de-xuat-toan-dien.md).
-3. **Thừa kế BaseEgg (`scripts/projectiles/BaseEgg.gd`)**:
-   - `BaseEgg.gd` hiện đã được định nghĩa nhưng chưa được 7 script trứng kế thừa trực tiếp (vẫn đang kế thừa độc lập từ `RigidBody2D`). Cần tái cấu trúc ở đợt nâng cấp tới để giảm trùng lặp mã nguồn.
-4. **Hit-Stop Concurrency (`CameraShake2D.gd:hit_stop`)**:
-   - Khi có 2 vụ nổ bom liên tiếp trong vòng 0,05 giây, biến `Engine.time_scale` có thể bị khôi phục về `1.0` sớm bởi coroutine của vụ nổ thứ nhất. Cần bổ sung biến đếm tham chiếu `hit_stop_count` để quản lý thời gian làm chậm chính xác hơn.
+   - Báo cáo kiểm kê chi tiết về các lỗi trọng yếu như quái vật văng khỏi bản đồ bất tử (`PHY-01`), khối rơi ngoài biên kẹt timer 9s (`PHY-02`), nghịch lý Trứng Băng tự hủy khối (`BAL-01`), rò rỉ Tween khi dính Axit (`PHY-03`) và giải pháp Khay Tiếp Viện (`ECO-01`) đã được kiểm kê tại [08 — Đại Kiểm Kê Lỗi và Đề Xuất Toàn Diện](D:/folder/tools/godot_demo/2/docs/phan-tich-game/08-dai-kiem-ke-loi-va-de-xuat-toan-dien.md).
+3. **Bách khoa Toàn tập Đại phẫu 36 Lỗi & Đề xuất Cải thiện Toàn diện Toàn bộ Dự án**:
+   - Báo cáo đại phẫu sâu nhất kiểm kê toàn bộ **36 lỗi và lỗ hổng kỹ thuật** chia theo 9 hệ thống từ P0 đến P3 (kèm nguyên nhân gốc rễ, ảnh hưởng game loop, code mẫu khắc phục và sơ đồ Gantt triển khai) được lưu tại [09 — Đại Phẫu Toàn Bộ Lỗi, Lỗ Hổng Kỹ Thuật và Kế Hoạch Cải Thiện Toàn Diện](D:/folder/tools/godot_demo/2/docs/phan-tich-game/09-dai-phau-toan-bo-loi-va-de-xuat-nang-cap.md).
+

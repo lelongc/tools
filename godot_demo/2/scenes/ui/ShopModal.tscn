@@ -1,0 +1,128 @@
+[gd_scene load_steps=5 format=3 uid="uid://shopmodal001"]
+
+[ext_resource type="Script" path="res://scripts/ui/ShopModal.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ui/JuicyButton.gd" id="2_btn"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ShopPanel"]
+bg_color = Color(0.12, 0.06, 0.22, 0.98)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 8
+border_color = Color(1, 0.84, 0, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 14
+shadow_offset = Vector2(0, 8)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_CoinPill"]
+bg_color = Color(0.25, 0.15, 0.05, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.8, 0.2, 0.8)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[node name="ShopModal" type="CanvasLayer"]
+layer = 100
+script = ExtResource("1_script")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.04, 0.08, 0.88)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(460, 680)
+layout_mode = 2
+pivot_offset = Vector2(230, 340)
+theme_override_styles/panel = SubResource("StyleBoxFlat_ShopPanel")
+
+[node name="Margin" type="MarginContainer" parent="CenterContainer/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="Title" type="Label" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.2, 1)
+theme_override_colors/font_outline_color = Color(0.35, 0.18, 0, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 6
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 24
+text = "CỬA HÀNG ĐẠO CỤ"
+horizontal_alignment = 1
+
+[node name="CoinBadge" type="PanelContainer" parent="CenterContainer/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(160, 36)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_CoinPill")
+
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/CoinBadge"]
+layout_mode = 2
+alignment = 1
+
+[node name="CoinIcon" type="Label" parent="CenterContainer/Panel/Margin/VBox/CoinBadge/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "🪙"
+
+[node name="CoinsLabel" type="Label" parent="CenterContainer/Panel/Margin/VBox/CoinBadge/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.3, 1)
+theme_override_font_sizes/font_size = 18
+text = "150"
+
+[node name="FeedbackLabel" type="Label" parent="CenterContainer/Panel/Margin/VBox"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.4, 1)
+theme_override_font_sizes/font_size = 14
+text = "ĐÃ MUA THÀNH CÔNG!"
+horizontal_alignment = 1
+
+[node name="Scroll" type="ScrollContainer" parent="CenterContainer/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(420, 440)
+layout_mode = 2
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+
+[node name="ItemsContainer" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="BtnClose" type="Button" parent="CenterContainer/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(200, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "ĐÓNG"
+script = ExtResource("2_btn")

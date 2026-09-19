@@ -11,10 +11,18 @@ var trauma: float = 0.0
 var trauma_power: int = 2
 var noise_y: float = 0.0
 
+static var _hit_stop_count: int = 0
+
 func _ready() -> void:
 	instance = self
 	global_position = Vector2(270.0, 480.0)
 	zoom = Vector2.ONE
+	reset_hit_stop()
+
+func _exit_tree() -> void:
+	if instance == self:
+		reset_hit_stop()
+		instance = null
 
 func _process(delta: float) -> void:
 	if trauma > 0.0:
@@ -35,8 +43,17 @@ static func add_trauma(amount: float) -> void:
 	if instance:
 		instance.trauma = clamp(instance.trauma + amount, 0.0, 1.0)
 
+static func reset_hit_stop() -> void:
+	_hit_stop_count = 0
+	Engine.time_scale = 1.0
+
 static func hit_stop(duration_sec: float = 0.06) -> void:
 	if instance and instance.is_inside_tree():
+		_hit_stop_count += 1
 		Engine.time_scale = 0.05
-		await instance.get_tree().create_timer(duration_sec * 0.05).timeout
-		Engine.time_scale = 1.0
+		var tree = instance.get_tree()
+		if tree:
+			await tree.create_timer(duration_sec, true, false, true).timeout
+		_hit_stop_count = max(0, _hit_stop_count - 1)
+		if _hit_stop_count == 0:
+			Engine.time_scale = 1.0
