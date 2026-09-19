@@ -179,14 +179,6 @@ func _on_btn_reset_pressed() -> void:
 					reset_confirm_timer = 0.0
 			)
 
-func _on_btn_wheel_pressed() -> void:
-	if wheel_modal_instance and is_instance_valid(wheel_modal_instance):
-		return
-	var wheel_scene = load("res://scenes/ui/DailyWheelModal.tscn")
-	if wheel_scene:
-		wheel_modal_instance = wheel_scene.instantiate()
-		add_child(wheel_modal_instance)
-
 func _on_btn_shop_pressed() -> void:
 	if shop_modal_instance and is_instance_valid(shop_modal_instance):
 		return

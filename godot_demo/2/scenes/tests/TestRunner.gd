@@ -475,6 +475,62 @@ func _ready() -> void:
 		else:
 			print("  [PASS] Cloud save successfully imported and merged with high-watermark strategy (P3-01)")
 
+	# -------------------------------------------------------------------------
+	# 11. TEST END-TO-END SCENE SMOKE & LEVEL SMOOTHING VERIFICATION
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 11] Testing End-to-End Scene Smoke & Level Smoothing ---")
+	# 11.1: MainMenu & Modals instantiation
+	var mm_scene = load("res://scenes/ui/MainMenu.tscn")
+	if mm_scene == null:
+		errors.append("Failed to load res://scenes/ui/MainMenu.tscn!")
+	else:
+		var mm = mm_scene.instantiate()
+		add_child(mm)
+		var btn_shop = mm.get_node_or_null("CenterContainer/VBoxContainer/BtnShop")
+		if btn_shop == null:
+			errors.append("BtnShop missing from MainMenu.tscn (P1-12)!")
+		else:
+			mm._on_btn_shop_pressed()
+			if mm.shop_modal_instance == null or not is_instance_valid(mm.shop_modal_instance):
+				errors.append("MainMenu _on_btn_shop_pressed did not instantiate ShopModal (P1-12)!")
+			else:
+				print("  [PASS] MainMenu BtnShop successfully opened ShopModal (P1-12)")
+				mm.shop_modal_instance.queue_free()
+
+		var btn_wheel = mm.get_node_or_null("CenterContainer/VBoxContainer/BtnWheel")
+		if btn_wheel == null:
+			errors.append("BtnWheel missing from MainMenu.tscn!")
+		else:
+			mm._on_btn_wheel_pressed()
+			if mm.wheel_modal_instance == null or not is_instance_valid(mm.wheel_modal_instance):
+				errors.append("MainMenu _on_btn_wheel_pressed did not instantiate DailyWheelModal!")
+			else:
+				print("  [PASS] MainMenu BtnWheel successfully opened DailyWheelModal")
+				mm.wheel_modal_instance.queue_free()
+		mm.queue_free()
+
+	# 11.2: LevelSelect instantiation
+	var ls_scene = load("res://scenes/ui/LevelSelect.tscn")
+	if ls_scene == null:
+		errors.append("Failed to load res://scenes/ui/LevelSelect.tscn!")
+	else:
+		var ls = ls_scene.instantiate()
+		add_child(ls)
+		print("  [PASS] LevelSelect instantiated cleanly without errors")
+		ls.queue_free()
+
+	# 11.3: World 4 Level 61 loadout smoothing check (P2-13)
+	GameManager.current_level = 61
+	var camp_scene = load("res://scenes/levels/CampaignLevel.tscn")
+	if camp_scene:
+		var lvl61 = camp_scene.instantiate()
+		add_child(lvl61)
+		if GameManager.available_eggs.size() < 7:
+			errors.append("Level 61 did not receive smoothed egg loadout (P2-13)!")
+		else:
+			print("  [PASS] Level 61 received smoothed 7-egg loadout: ", GameManager.available_eggs, " (P2-13)")
+		lvl61.queue_free()
+
 	print("\n================================================================")
 	if errors.size() == 0:
 		print(">>> ALL TESTS PASSED SUCCESSFULLY! (0 ERRORS) <<<")
