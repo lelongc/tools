@@ -598,6 +598,11 @@ func _ready() -> void:
 		else:
 			errors.append("ChickenBomber recoil did not trigger upward displacement!")
 
+		# Clean up any spawned eggs from the test
+		for child in get_children():
+			if child.is_in_group("Eggs") or child.is_in_group("Projectiles"):
+				child.queue_free()
+
 		chk.queue_free()
 
 	# 12.3: Anti-Jitter Physics in DestructibleBlock

@@ -186,3 +186,22 @@ func _on_btn_shop_pressed() -> void:
 	if shop_scene:
 		shop_modal_instance = shop_scene.instantiate()
 		add_child(shop_modal_instance)
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_handle_back_button()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		_handle_back_button()
+
+func _handle_back_button() -> void:
+	if wheel_modal_instance and is_instance_valid(wheel_modal_instance):
+		wheel_modal_instance.queue_free()
+		wheel_modal_instance = null
+		return
+	if shop_modal_instance and is_instance_valid(shop_modal_instance):
+		shop_modal_instance.queue_free()
+		shop_modal_instance = null
+		return
+	get_tree().quit(0)

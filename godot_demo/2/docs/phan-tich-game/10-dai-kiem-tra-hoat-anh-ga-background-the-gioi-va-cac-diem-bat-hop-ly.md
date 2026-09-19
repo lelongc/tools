@@ -41,12 +41,15 @@ Trong quá trình trải nghiệm và rà soát thực tế game trên nền t�
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **ODD-01** | Giỏ mây không chứa trứng hiển thị | Player / Visual | Vừa | Gà bay với giỏ rỗng nhưng HUD báo còn đạn; trứng sinh ra từ hư không. | **Đã sửa** (Thêm `LoadedEgg` & đồng bộ 7 loại trứng) |
 | **ODD-02** | Thả trứng không có phản lực giật nảy | Player / Anim | Cao | Trọng lượng trứng lớn nhưng gà không bị giật bắn, cảm giác trơ lì, thiếu lực. | **Đã sửa** (Recoil giật $-18\text{px}$, vung giỏ mây, xả lông gà) |
-| **ODD-03** | Hạt khói lông gà dính chặt theo gà (`local_coords`) | VFX / Particle | Nhẹ | Khói và lông gà bay theo gà khi gà di chuyển thay vì trôi lơ lửng lại trên bầu trời. | **Đã sửa** (`local_coords = false`) |
+| **ODD-03** | Hạt khói lông gà dính chặt theo gà (`local_coords`) | VFX / Particle | Nhẹ | Khói và lông gà bay theo gà khi gà di chuyển thay vì trôi lơ lửng lại trên bầu trời. | **Đã sửa** (`local_coords = false` trong `_ready()`) |
 | **ODD-04** | Texture hang ngầm bị kéo dãn x2.65 ở World 4-10 | Environment | Cao | Gạch đá vách hang bị méo mó, mất tỷ lệ $1:1$, hình ảnh nham thạch và pha lê mờ nhoè. | **Đã sửa** (Modular Backdrop Tiling $540\text{px}$) |
 | **ODD-05** | 10 Thế giới dùng chung ảnh nền phủ màu | Environment | Cao | Người chơi qua 100 màn nhưng bối cảnh chỉ là đổi filter màu, triệt tiêu động lực khám phá. | **Đã sửa** (Sinh 30 SVG độc bản cho 10 Thế Giới) |
 | **ODD-06** | Camera tĩnh ở góc nhìn $0.38\times$ siêu nhỏ trên Mobile | Camera / UX | Cao | Màn hình điện thoại nhỏ khiến quái vật và trứng chỉ còn hạt đậu, không thấy hiệu ứng nổ. | **Đã sửa** (Dynamic 3-Phase Tracking Camera) |
 | **ODD-07** | Vi-nảy gây rung lắc thanh dầm khi bị kẹt | Physics | Nghiêm trọng | Khi công trình sập đè kẹt thanh dầm, thanh bị rung bần bật liên tục gây khó chịu mắt. | **Đã sửa** (Bounce=0.0, Micro-Velocity Snubber) |
-| **ODD-08** | Màn hình LevelSelect vẫn dùng ảnh nền cũ phủ màu | UI / Polish | Vừa | Vào chọn màn World 8 Băng giá nhưng ảnh nền vẫn là hang nông trại World 1 nhuộm xanh. | **Đã lên kế hoạch** (Đồng bộ SVG vào LevelSelect) |
+| **ODD-08** | Màn hình LevelSelect vẫn dùng ảnh nền cũ phủ màu | UI / Polish | Vừa | Vào chọn màn World 8 Băng giá nhưng ảnh nền vẫn là hang nông trại World 1 nhuộm xanh. | **Đã sửa** (Nạp trực tiếp SVG Sky/Cavern từng World) |
+| **ODD-09** | Phím Back vật lý Android bị bỏ qua trên Menu / LevelSelect | Mobile / Android | Cao | Người chơi dùng nút Back hoặc cử chỉ vuốt cạnh không thể quay lại hoặc thoát game tự nhiên. | **Đã sửa** (`NOTIFICATION_WM_GO_BACK_REQUEST` & `ui_cancel`) |
+| **ODD-10** | Trứng bay không thừa hưởng quán tính của gà | Player / Controls | Nhẹ | Người chơi mong đợi trứng thừa hưởng vận tốc bay của gà, nhưng ná kéo đứng yên theo ngón tay. | **Đã chuẩn hóa** (Khóa quán tính để đảm bảo ngắm chuẩn 100%) |
+| **ODD-11** | Áp lực âm thanh vượt ngưỡng khi nổ chuỗi Nuke/TNT | Audio / Mobile | Vừa | 5 thùng nổ cùng lúc đẩy âm lượng SFX vượt $+6\text{dB}$, gây rè loa ngoài điện thoại. | **Đã sửa** (`AudioEffectLimiter` trên Master Bus) |
 
 ---
 
@@ -263,11 +266,11 @@ if is_awake and not is_destroyed:
 
 | Hệ Thống | Hiện Trạng Sau Cải Tiến | Kiểm Chứng Tự Động | Kế Hoạch Tối Ưu Hóa Tiếp Theo |
 | :--- | :--- | :--- | :--- |
-| **Hoạt Ảnh Gà & Giỏ** | Trứng hiển thị theo loại đạn; rung ná khi kéo; giật nảy $-18\text{px}$ và vung giỏ khi thả. | Test Suite 12.2 Đạt $100\%$ | Thêm biểu cảm chớp mắt ngẫu nhiên khi gà đang bay tự do. |
-| **Bối Cảnh 10 Thế Giới** | 30 file SVG vector độc bản; phân lớp Sky/Cavern/Cliff; chia panel không méo hình. | Test Suite 12.1 Đạt 30/30 file | Đồng bộ texture thế giới trực tiếp vào `LevelSelect.gd` khi chuyển trang. |
+| **Hoạt Ảnh Gà & Giỏ** | Trứng hiển thị theo loại đạn; rung ná khi kéo; giật nảy $-18\text{px}$ và vung giỏ khi thả; lông gà trôi tự do (`local_coords = false`). | Test Suite 12.2 Đạt $100\%$ | Thêm biểu cảm chớp mắt ngẫu nhiên khi gà đang bay tự do. |
+| **Bối Cảnh 10 Thế Giới** | 30 file SVG vector độc bản; phân lớp Sky/Cavern/Cliff; chia panel không méo hình; đồng bộ sang cả `LevelSelect.tscn`. | Test Suite 12.1 Đạt 30/30 file | Đã hoàn tất đồng bộ cả trong màn chơi và màn chọn thế giới. |
 | **Quy Mô & Camera** | Pháo đài rộng tới $1430\text{px}$; Camera 3 pha zoom linh hoạt theo trứng rơi. | Test Suite 12.4 Đạt $100\%$ | Tinh chỉnh thời gian lerp mượt mà hơn khi camera hồi vị ở các màn boss. |
 | **Vật Lý Khối Kẹt** | Triệt tiêu hoàn toàn rung giật bằng Snubber; không tự sập ở thời gian chờ. | Test Suite 12.3 Đạt $100\%$ | Tiếp tục giám sát áp lực nén trên các nhịp cầu dài ở World 9 & 10. |
-| **Độ Bền Di Động CH Play** | Đệm Safe Area tai thỏ & vuốt đáy; khóa 60 FPS; Save an toàn 3 lớp. | Test Suite 8, 9, 10 Đạt $100\%$ | Chuẩn hóa Keystore và cấu hình xuất file `.aab` cho Google Play Console. |
+| **Độ Bền Di Động CH Play** | Đệm Safe Area tai thỏ & vuốt đáy; khóa 60 FPS; Save an toàn 3 lớp; hỗ trợ nút Back Android toàn diện trên Menu, LevelSelect, HUD. | Test Suite 8, 9, 10 Đạt $100\%$ | Chuẩn hóa Keystore và cấu hình xuất file `.aab` cho Google Play Console. |
 
 ---
 *Báo cáo được khởi tạo tự động và phê duyệt kỹ thuật bởi Antigravity Automated Verification Framework.*

@@ -59,19 +59,26 @@ func _render_world_levels() -> void:
 		world_title.text = lm.t("KEY_WORLD_%d" % current_world)
 		btn_back.text = " " + lm.t("KEY_MENU")
 
-	var cav_rect = get_node_or_null("Background/CavernBackdrop")
+	# Đồng bộ bối cảnh bầu trời & hang ngầm chân thực theo từng Thế Giới
+	var world_names = ["farm", "quarry", "industrial", "lava", "crystal", "cyber", "toxic", "glacier", "dragon", "celestial"]
+	var w_name = world_names[current_world - 1]
+	var num_str = "%02d" % current_world
+	var sky_path = "res://assets/sprites/environment/worlds/sky_w%s_%s.svg" % [num_str, w_name]
+	var cav_path = "res://assets/sprites/environment/worlds/cavern_w%s_%s.svg" % [num_str, w_name]
+
+	var sky_rect = get_node_or_null("Background/SkyPanorama") as TextureRect
+	if sky_rect:
+		var t_sky = ParticleHelper._safe_load(sky_path)
+		if t_sky:
+			sky_rect.texture = t_sky
+			sky_rect.modulate = Color(1.0, 1.0, 1.0, 0.65)
+
+	var cav_rect = get_node_or_null("Background/CavernBackdrop") as TextureRect
 	if cav_rect:
-		match current_world:
-			1: cav_rect.modulate = Color(0.5, 0.35, 0.7, 0.55)
-			2: cav_rect.modulate = Color(0.35, 0.55, 0.35, 0.55)
-			3: cav_rect.modulate = Color(0.3, 0.6, 0.25, 0.6)
-			4: cav_rect.modulate = Color(0.7, 0.3, 0.2, 0.6)
-			5: cav_rect.modulate = Color(0.55, 0.3, 0.8, 0.65)
-			6: cav_rect.modulate = Color(0.25, 0.45, 0.7, 0.6)
-			7: cav_rect.modulate = Color(0.25, 0.55, 0.3, 0.6)
-			8: cav_rect.modulate = Color(0.35, 0.65, 0.85, 0.65)
-			9: cav_rect.modulate = Color(0.75, 0.35, 0.15, 0.65)
-			10: cav_rect.modulate = Color(0.45, 0.2, 0.65, 0.7)
+		var t_cav = ParticleHelper._safe_load(cav_path)
+		if t_cav:
+			cav_rect.texture = t_cav
+			cav_rect.modulate = Color(1.0, 1.0, 1.0, 0.8)
 
 	btn_prev_world.disabled = (current_world <= 1)
 	btn_next_world.disabled = (current_world >= 10)
@@ -198,3 +205,11 @@ func _render_world_levels() -> void:
 			btn.add_theme_stylebox_override("disabled", style_norm)
 
 		grid.add_child(btn)
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		GameManager.go_to_main_menu()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		GameManager.go_to_main_menu()

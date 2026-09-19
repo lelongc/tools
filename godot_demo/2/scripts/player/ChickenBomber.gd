@@ -64,6 +64,7 @@ func _ready() -> void:
 		trajectory_line.visible = false
 
 	if drop_poof_fx:
+		drop_poof_fx.local_coords = false
 		ParticleHelper.apply_feather_fx(drop_poof_fx, 0.25, 0.5)
 		drop_poof_fx.color = Color(1.0, 0.95, 0.85, 0.9)
 
