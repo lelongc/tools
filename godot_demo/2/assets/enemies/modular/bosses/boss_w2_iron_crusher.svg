@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="crush_body" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#90a4ae"/>
+      <stop offset="60%" stop-color="#455a64"/>
+      <stop offset="100%" stop-color="#263238"/>
+    </radialGradient>
+  </defs>
+  <!-- Massive Boss Pig Body -->
+  <circle cx="128" cy="132" r="108" fill="url(#crush_body)" stroke="#1a2327" stroke-width="10"/>
+  <!-- Iron Riveted Crown Helmet -->
+  <path d="M30 85 L60 20 L95 48 L128 10 L161 48 L196 20 L226 85 Z" fill="#cfd8dc" stroke="#1a2327" stroke-width="8"/>
+  <circle cx="128" cy="45" r="12" fill="#ffb300" stroke="#1a2327" stroke-width="4"/>
+  <!-- Iron Crusher Snout -->
+  <ellipse cx="128" cy="165" rx="55" ry="32" fill="#37474f" stroke="#1a2327" stroke-width="7"/>
+  <rect x="90" y="152" width="16" height="26" rx="4" fill="#cfd8dc" stroke="#1a2327" stroke-width="3"/>
+  <rect x="150" y="152" width="16" height="26" rx="4" fill="#cfd8dc" stroke="#1a2327" stroke-width="3"/>
+  <!-- Fierce Eyes -->
+  <circle cx="85" cy="115" r="18" fill="#d32f2f" stroke="#1a2327" stroke-width="6"/>
+  <circle cx="88" cy="112" r="6" fill="#ffffff"/>
+  <circle cx="171" cy="115" r="18" fill="#d32f2f" stroke="#1a2327" stroke-width="6"/>
+  <circle cx="174" cy="112" r="6" fill="#ffffff"/>
+</svg>

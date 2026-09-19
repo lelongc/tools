@@ -28,6 +28,7 @@ var drop_cooldown: float = 0.0
 var wing_flap_time: float = 0.0
 var base_scale: Vector2 = Vector2.ONE
 var is_dropping_anim: bool = false
+var facing_scale: float = 1.0
 
 # Egg Scenes
 var egg_scenes: Dictionary = {
@@ -79,20 +80,49 @@ func _process(delta: float) -> void:
 		elif position.x <= min_x:
 			position.x = min_x
 			move_direction = 1.0
+
+		# Nhấp nhô cao độ bồng bềnh theo nhịp vỗ cánh (Altitude Bobbing)
+		var bob_y = default_y + sin(wing_flap_time) * 5.5
+		position.y = lerp(position.y, bob_y, 8.0 * delta)
+
+		# Quay mặt theo hướng lượn mượt mà (Không bị bay lùi)
+		facing_scale = lerp(facing_scale, move_direction, 10.0 * delta)
+
+		# Chuyển động thứ cấp giữa thân gà và giỏ trứng treo
+		if body_sprite:
+			body_sprite.position.y = -6.0 + sin(wing_flap_time) * 1.5
+		if basket_sprite:
+			basket_sprite.position.y = 22.0 - sin(wing_flap_time) * 1.2
+			basket_sprite.rotation = lerp_angle(basket_sprite.rotation, -move_direction * 0.08, 6.0 * delta)
+
+		# Nghiêng người tự nhiên theo hướng lượn (Banking Tilt)
 		if visual_root:
-			visual_root.rotation = lerp_angle(visual_root.rotation, move_direction * 0.08, 6.0 * delta)
+			var target_tilt = move_direction * 0.12
+			visual_root.rotation = lerp_angle(visual_root.rotation, target_tilt, 6.0 * delta)
 	else:
+		# Khi đang ngắm: lơ lửng tại chỗ, nghiêng theo góc kéo dây ná ngắm đạn
+		position.y = lerp(position.y, default_y, 10.0 * delta)
+		var target_aim_facing = sign(aim_vector.x) if abs(aim_vector.x) > 30.0 else sign(facing_scale)
+		if target_aim_facing == 0.0: target_aim_facing = 1.0
+		facing_scale = lerp(facing_scale, target_aim_facing, 8.0 * delta)
+
 		if visual_root:
-			visual_root.rotation = lerp_angle(visual_root.rotation, 0.0, 10.0 * delta)
+			var aim_tilt = clamp(aim_vector.x * 0.0006, -0.22, 0.22)
+			visual_root.rotation = lerp_angle(visual_root.rotation, aim_tilt, 10.0 * delta)
+		if basket_sprite and visual_root:
+			basket_sprite.rotation = lerp_angle(basket_sprite.rotation, -visual_root.rotation * 0.7, 8.0 * delta)
 
-	# 2. Đập cánh bồng bềnh
-	wing_flap_time += delta * (22.0 if is_aiming else 12.0)
-	if left_wing: left_wing.rotation = sin(wing_flap_time) * 0.45
-	if right_wing: right_wing.rotation = -sin(wing_flap_time) * 0.45
+	# 2. Đập cánh đối xứng sinh động (Cả 2 cánh cùng nâng lên / hạ xuống nhịp nhàng)
+	wing_flap_time += delta * (24.0 if is_aiming else 11.0)
+	var flap_angle = sin(wing_flap_time) * (0.50 if is_aiming else 0.40)
+	if left_wing: left_wing.rotation = flap_angle
+	if right_wing: right_wing.rotation = flap_angle
 
-	# 3. Squash & Stretch lerp
-	if not is_dropping_anim and not is_aiming:
-		visual_root.scale = visual_root.scale.lerp(Vector2.ONE, 10.0 * delta)
+	# 3. Squash & Stretch lerp nhịp nhàng kết hợp hướng quay mặt
+	if not is_dropping_anim:
+		var breath = 1.0 + sin(wing_flap_time) * 0.035
+		var target_scale = Vector2((2.0 - breath) * facing_scale, breath)
+		visual_root.scale = visual_root.scale.lerp(target_scale, 10.0 * delta)
 
 	# 4. Xử lý Input ngắm bắn
 	_handle_aim_input()
@@ -105,6 +135,7 @@ func _handle_aim_input() -> void:
 			if trajectory_line: trajectory_line.visible = false
 		return
 
+	var screen_mouse_pos = get_viewport().get_mouse_position()
 	var mouse_pos = get_global_mouse_position()
 
 	# Bắt đầu chạm / click chuột để ngắm
@@ -113,19 +144,20 @@ func _handle_aim_input() -> void:
 			if drop_cooldown > 0.0:
 				return
 			# Không nhận click nếu bấm đè thanh menu TopBar ở trên đỉnh hoặc kệ trứng phía dưới
-			if mouse_pos.y < 65.0 or mouse_pos.y > 880.0:
+			if screen_mouse_pos.y < 70.0 or screen_mouse_pos.y > 880.0:
 				return
 			is_aiming = true
 			aim_start_pos = mouse_pos
 			aim_vector = Vector2(0, 480.0)
 
 		if is_aiming:
-			# Di chuyển gà mượt mà theo vị trí X của ngón tay / chuột
-			position.x = clamp(mouse_pos.x, min_x, max_x)
+			var drag_delta = mouse_pos - aim_start_pos
+			# Di chuyển gà theo vị trí bắt đầu và độ nghiêng ngón tay
+			position.x = clamp(aim_start_pos.x + drag_delta.x * 0.3, min_x, max_x)
 			
-			# Tính toán lực và góc bắn
-			var pull_y = clamp(mouse_pos.y - global_position.y, 40.0, 320.0)
-			var pull_x = clamp((mouse_pos.x - global_position.x) * 1.6, -240.0, 240.0)
+			# Tính toán lực và góc bắn từ khoảng cách kéo ngón tay
+			var pull_y = clamp(max(drag_delta.y, 30.0), 30.0, 320.0)
+			var pull_x = clamp(drag_delta.x * 1.8, -260.0, 260.0)
 			var launch_spd_y = clamp(pull_y * 2.0 + 350.0, 350.0, 850.0)
 			aim_vector = Vector2(pull_x, launch_spd_y)
 
@@ -189,10 +221,11 @@ func _drop_egg(launch_vel: Vector2) -> void:
 
 	# Hiệu ứng rặn đẻ Squash & Stretch bùng nổ
 	is_dropping_anim = true
+	var sign_x = sign(facing_scale) if facing_scale != 0.0 else 1.0
 	var tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	visual_root.scale = Vector2(0.65, 1.45) # Bật dài người lên trên
-	tween.tween_property(visual_root, "scale", Vector2(1.2, 0.8), 0.12)
-	tween.tween_property(visual_root, "scale", Vector2.ONE, 0.18)
+	visual_root.scale = Vector2(sign_x * 0.65, 1.45) # Bật dài người lên trên
+	tween.tween_property(visual_root, "scale", Vector2(sign_x * 1.25, 0.75), 0.12)
+	tween.tween_property(visual_root, "scale", Vector2(sign_x * 1.0, 1.0), 0.18)
 	tween.finished.connect(func(): is_dropping_anim = false)
 
 	# Sinh quả trứng

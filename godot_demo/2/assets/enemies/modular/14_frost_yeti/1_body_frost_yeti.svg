@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="fy_body" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="55%" stop-color="#e1f5fe"/>
+      <stop offset="85%" stop-color="#b3e5fc"/>
+      <stop offset="100%" stop-color="#81d4fa"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="132" r="96" fill="url(#fy_body)" stroke="#01579b" stroke-width="8"/>
+  <!-- Fur Tuft Silhouettes -->
+  <path d="M42 120 Q30 135 44 148 Q32 160 48 170" fill="none" stroke="#01579b" stroke-width="6" stroke-linecap="round"/>
+  <path d="M214 120 Q226 135 212 148 Q224 160 208 170" fill="none" stroke="#01579b" stroke-width="6" stroke-linecap="round"/>
+  <ellipse cx="128" cy="162" rx="46" ry="36" fill="#81d4fa" opacity="0.45"/>
+</svg>

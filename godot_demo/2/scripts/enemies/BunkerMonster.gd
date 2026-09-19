@@ -27,7 +27,7 @@ enum IdleAction {
 	SUSPICIOUS
 }
 
-@export_enum("sly_fox", "fox_guard", "armored_raccoon", "mine_wolf", "spike_hound", "toxic_fox", "imperial_boar", "boss_baron_pig", "crystal_badger") var monster_type: String = "sly_fox"
+@export_enum("sly_fox", "fox_guard", "armored_raccoon", "mine_wolf", "spike_hound", "toxic_fox", "imperial_boar", "boss_baron_pig", "crystal_badger", "cyber_hound", "cyborg_fox", "swamp_mutant", "spore_badger", "frost_yeti", "blizzard_wolf", "magma_drake", "lava_golem", "void_wraith", "celestial_sentinel", "boss_iron_crusher", "boss_toxic_alchemist", "boss_magma_emperor", "boss_crystal_overlord", "boss_cyber_mech", "boss_swamp_hydra", "boss_frost_colossus", "boss_dragon_warlord", "boss_singularity_prime") var monster_type: String = "sly_fox"
 @export var max_health: float = 70.0
 @export var score_value: int = 800
 
@@ -52,6 +52,8 @@ var anim_phase: float = 0.0
 var pinned_check_timer: float = 0.2
 var is_currently_pinned: bool = false
 var pinned_cooldown: float = 0.0
+var hit_squash: Vector2 = Vector2.ONE
+var hit_shake_offset: Vector2 = Vector2.ZERO
 
 # Eye tracking and micro-actions
 var eye_look_offset: Vector2 = Vector2.ZERO
@@ -187,9 +189,13 @@ func _setup_monster_attributes() -> void:
 			has_armor = true
 			base_scale_val = 0.24
 		"boss_baron_pig":
-			max_health = 1800.0
+			var lvl_bonus = 0.0
+			if is_inside_tree() and has_node("/root/GameManager"):
+				var lvl = get_node("/root/GameManager").current_level
+				lvl_bonus = max(0.0, float(lvl - 20) * 10.0)
+			max_health = 1800.0 + lvl_bonus
 			mass = 16.0
-			score_value = 10000
+			score_value = 10000 + int(lvl_bonus * 2.5)
 			has_armor = true
 			base_scale_val = 0.27
 		"crystal_badger":
@@ -198,12 +204,95 @@ func _setup_monster_attributes() -> void:
 			score_value = 3500
 			has_armor = true
 			base_scale_val = 0.23
+		"cyber_hound":
+			max_health = 380.0
+			mass = 4.8
+			score_value = 2800
+			has_armor = true
+			base_scale_val = 0.22
+		"cyborg_fox":
+			max_health = 420.0
+			mass = 5.0
+			score_value = 3200
+			has_armor = true
+			base_scale_val = 0.22
+		"swamp_mutant":
+			max_health = 350.0
+			mass = 4.2
+			score_value = 2600
+			has_armor = false
+			base_scale_val = 0.22
+		"spore_badger":
+			max_health = 460.0
+			mass = 5.5
+			score_value = 3400
+			has_armor = true
+			base_scale_val = 0.23
+		"frost_yeti":
+			max_health = 390.0
+			mass = 5.2
+			score_value = 3000
+			has_armor = false
+			base_scale_val = 0.22
+		"blizzard_wolf":
+			max_health = 480.0
+			mass = 5.8
+			score_value = 3600
+			has_armor = true
+			base_scale_val = 0.23
+		"magma_drake":
+			max_health = 440.0
+			mass = 5.0
+			score_value = 3300
+			has_armor = true
+			base_scale_val = 0.22
+		"lava_golem":
+			max_health = 550.0
+			mass = 7.5
+			score_value = 4000
+			has_armor = true
+			base_scale_val = 0.24
+		"void_wraith":
+			max_health = 480.0
+			mass = 4.5
+			score_value = 3800
+			has_armor = true
+			base_scale_val = 0.23
+		"celestial_sentinel":
+			max_health = 620.0
+			mass = 8.0
+			score_value = 4800
+			has_armor = true
+			base_scale_val = 0.24
+		_:
+			if monster_type.begins_with("boss_"):
+				var lvl_bonus = 0.0
+				if is_inside_tree() and has_node("/root/GameManager"):
+					var lvl = get_node("/root/GameManager").current_level
+					lvl_bonus = max(0.0, float(lvl - 20) * 10.0)
+				max_health = 1800.0 + lvl_bonus
+				mass = 16.0
+				score_value = 10000 + int(lvl_bonus * 2.5)
+				has_armor = true
+				base_scale_val = 0.27
+			else:
+				max_health = 100.0
+				mass = 2.0
+				score_value = 1000
+				base_scale_val = 0.20
+
+	# Cân bằng độ khó theo độ sâu chiến dịch (Màn 21 -> 200)
+	if is_inside_tree() and has_node("/root/GameManager") and not monster_type.begins_with("boss_"):
+		var lvl = get_node("/root/GameManager").current_level
+		if lvl > 20:
+			var scale_ratio = 1.0 + min(float(lvl - 20) * 0.0025, 0.40)
+			max_health *= scale_ratio
 
 	# Gán collider chuẩn xác cho từng kích cỡ quái vật
 	var c_shape = CircleShape2D.new()
-	if monster_type == "boss_baron_pig":
-		c_shape.radius = 25.0
-	elif monster_type in ["imperial_boar", "mine_wolf", "spike_hound", "crystal_badger"]:
+	if monster_type.begins_with("boss_"):
+		c_shape.radius = 26.0
+	elif monster_type in ["imperial_boar", "mine_wolf", "spike_hound", "crystal_badger", "lava_golem", "celestial_sentinel", "blizzard_wolf"]:
 		c_shape.radius = 21.0
 	else:
 		c_shape.radius = 18.0
@@ -523,6 +612,258 @@ func _load_character_expression_palette() -> void:
 			base_eye_pos = Vector2(0, -20)
 			base_snout_pos = Vector2(0, 22)
 
+		"cyber_hound":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/10_cyber_hound/1_body_cyber_hound.svg")
+			head_part.texture = _load_tex("res://assets/enemies/modular/10_cyber_hound/2_ears_radar_dish.svg")
+			head_part.position = Vector2(0, -90)
+			pupils_sprite.visible = false
+			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/10_cyber_hound/3_eyes_digital_visor.svg")
+			char_tex_eyes_aiming = char_tex_eyes_normal
+			char_tex_eyes_panic = char_tex_eyes_normal
+			char_tex_eyes_hurt = char_tex_eyes_normal
+			char_tex_eyes_furious = char_tex_eyes_normal
+			char_tex_eyes_special = char_tex_eyes_normal
+			char_tex_eyes_dizzy = char_tex_eyes_normal
+			char_tex_snout_normal = _load_tex("res://assets/enemies/modular/10_cyber_hound/4_snout_cyber_grill.svg")
+			char_tex_snout_aiming = char_tex_snout_normal
+			char_tex_snout_panic = char_tex_snout_normal
+			char_tex_snout_hurt = char_tex_snout_normal
+			char_tex_snout_furious = char_tex_snout_normal
+			char_tex_snout_special = char_tex_snout_normal
+			char_tex_snout_taunt = char_tex_snout_normal
+			base_eye_pos = Vector2(0, -18)
+			base_snout_pos = Vector2(0, 24)
+
+		"cyborg_fox":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/11_cyborg_fox/1_body_cyborg_fox.svg")
+			head_part.texture = _load_tex("res://assets/enemies/modular/11_cyborg_fox/2_ears_cyborg.svg")
+			head_part.position = Vector2(0, -90)
+			pupils_sprite.visible = false
+			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/11_cyborg_fox/3_eyes_scouter_reticle.svg")
+			char_tex_eyes_aiming = char_tex_eyes_normal
+			char_tex_eyes_panic = char_tex_eyes_normal
+			char_tex_eyes_hurt = char_tex_eyes_normal
+			char_tex_eyes_furious = char_tex_eyes_normal
+			char_tex_eyes_special = char_tex_eyes_normal
+			char_tex_eyes_dizzy = char_tex_eyes_normal
+			char_tex_snout_normal = _load_tex("res://assets/enemies/modular/11_cyborg_fox/4_snout_bionic_fangs.svg")
+			char_tex_snout_aiming = char_tex_snout_normal
+			char_tex_snout_panic = char_tex_snout_normal
+			char_tex_snout_hurt = char_tex_snout_normal
+			char_tex_snout_furious = char_tex_snout_normal
+			char_tex_snout_special = char_tex_snout_normal
+			char_tex_snout_taunt = char_tex_snout_normal
+			base_eye_pos = Vector2(0, -20)
+			base_snout_pos = Vector2(0, 24)
+
+		"swamp_mutant":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/12_swamp_mutant/1_body_swamp_mutant.svg")
+			head_part.texture = _load_tex("res://assets/enemies/modular/12_swamp_mutant/2_horns_bog_roots.svg")
+			head_part.position = Vector2(0, -90)
+			pupils_sprite.visible = false
+			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/12_swamp_mutant/3_eyes_swamp_yellow.svg")
+			char_tex_eyes_aiming = char_tex_eyes_normal
+			char_tex_eyes_panic = char_tex_eyes_normal
+			char_tex_eyes_hurt = char_tex_eyes_normal
+			char_tex_eyes_furious = char_tex_eyes_normal
+			char_tex_eyes_special = char_tex_eyes_normal
+			char_tex_eyes_dizzy = char_tex_eyes_normal
+			char_tex_snout_normal = _load_tex("res://assets/enemies/modular/12_swamp_mutant/4_snout_slime_dripping.svg")
+			char_tex_snout_aiming = char_tex_snout_normal
+			char_tex_snout_panic = char_tex_snout_normal
+			char_tex_snout_hurt = char_tex_snout_normal
+			char_tex_snout_furious = char_tex_snout_normal
+			char_tex_snout_special = char_tex_snout_normal
+			char_tex_snout_taunt = char_tex_snout_normal
+			base_eye_pos = Vector2(0, -20)
+			base_snout_pos = Vector2(0, 26)
+
+		"spore_badger":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/13_spore_badger/1_body_spore_badger.svg")
+			head_part.texture = _load_tex("res://assets/enemies/modular/13_spore_badger/2_cap_glowing_mushroom.svg")
+			head_part.position = Vector2(0, -90)
+			pupils_sprite.visible = false
+			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/13_spore_badger/3_eyes_hypnotic_spore.svg")
+			char_tex_eyes_aiming = char_tex_eyes_normal
+			char_tex_eyes_panic = char_tex_eyes_normal
+			char_tex_eyes_hurt = char_tex_eyes_normal
+			char_tex_eyes_furious = char_tex_eyes_normal
+			char_tex_eyes_special = char_tex_eyes_normal
+			char_tex_eyes_dizzy = char_tex_eyes_normal
+			char_tex_snout_normal = _load_tex("res://assets/enemies/modular/13_spore_badger/4_snout_spore_puff.svg")
+			char_tex_snout_aiming = char_tex_snout_normal
+			char_tex_snout_panic = char_tex_snout_normal
+			char_tex_snout_hurt = char_tex_snout_normal
+			char_tex_snout_furious = char_tex_snout_normal
+			char_tex_snout_special = char_tex_snout_normal
+			char_tex_snout_taunt = char_tex_snout_normal
+			base_eye_pos = Vector2(0, -18)
+			base_snout_pos = Vector2(0, 24)
+
+		"frost_yeti":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/14_frost_yeti/1_body_frost_yeti.svg")
+			head_part.texture = _load_tex("res://assets/enemies/modular/14_frost_yeti/2_horns_permafrost_ice.svg")
+			head_part.position = Vector2(0, -90)
+			pupils_sprite.visible = false
+			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/14_frost_yeti/3_eyes_blizzard_frost.svg")
+			char_tex_eyes_aiming = char_tex_eyes_normal
+			char_tex_eyes_panic = char_tex_eyes_normal
+			char_tex_eyes_hurt = char_tex_eyes_normal
+			char_tex_eyes_furious = char_tex_eyes_normal
+			char_tex_eyes_special = char_tex_eyes_normal
+			char_tex_eyes_dizzy = char_tex_eyes_normal
+			char_tex_snout_normal = _load_tex("res://assets/enemies/modular/14_frost_yeti/4_snout_chattering_teeth.svg")
+			char_tex_snout_aiming = char_tex_snout_normal
+			char_tex_snout_panic = char_tex_snout_normal
+			char_tex_snout_hurt = char_tex_snout_normal
+			char_tex_snout_furious = char_tex_snout_normal
+			char_tex_snout_special = char_tex_snout_normal
+			char_tex_snout_taunt = char_tex_snout_normal
+			base_eye_pos = Vector2(0, -18)
+			base_snout_pos = Vector2(0, 24)
+
+		"blizzard_wolf":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/04_mine_wolf/1_body_mine_wolf.svg")
+			body_sprite.modulate = Color(0.85, 0.95, 1.0)
+			head_part.texture = _load_tex("res://assets/enemies/modular/14_frost_yeti/2_horns_permafrost_ice.svg")
+			head_part.position = Vector2(0, -90)
+			pupils_sprite.visible = false
+			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/14_frost_yeti/3_eyes_blizzard_frost.svg")
+			char_tex_eyes_aiming = char_tex_eyes_normal
+			char_tex_eyes_panic = char_tex_eyes_normal
+			char_tex_eyes_hurt = char_tex_eyes_normal
+			char_tex_eyes_furious = char_tex_eyes_normal
+			char_tex_eyes_special = char_tex_eyes_normal
+			char_tex_eyes_dizzy = char_tex_eyes_normal
+			char_tex_snout_normal = _load_tex("res://assets/enemies/modular/14_frost_yeti/4_snout_chattering_teeth.svg")
+			char_tex_snout_aiming = char_tex_snout_normal
+			char_tex_snout_panic = char_tex_snout_normal
+			char_tex_snout_hurt = char_tex_snout_normal
+			char_tex_snout_furious = char_tex_snout_normal
+			char_tex_snout_special = char_tex_snout_normal
+			char_tex_snout_taunt = char_tex_snout_normal
+			base_eye_pos = Vector2(0, -20)
+			base_snout_pos = Vector2(0, 24)
+
+		"magma_drake":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/16_magma_drake/1_body_magma_drake.svg")
+			head_part.texture = _load_tex("res://assets/enemies/modular/16_magma_drake/2_horns_obsidian_drake.svg")
+			head_part.position = Vector2(0, -90)
+			pupils_sprite.visible = false
+			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/16_magma_drake/3_eyes_molten_flame.svg")
+			char_tex_eyes_aiming = char_tex_eyes_normal
+			char_tex_eyes_panic = char_tex_eyes_normal
+			char_tex_eyes_hurt = char_tex_eyes_normal
+			char_tex_eyes_furious = char_tex_eyes_normal
+			char_tex_eyes_special = char_tex_eyes_normal
+			char_tex_eyes_dizzy = char_tex_eyes_normal
+			char_tex_snout_normal = _load_tex("res://assets/enemies/modular/16_magma_drake/4_snout_smoldering_jaw.svg")
+			char_tex_snout_aiming = char_tex_snout_normal
+			char_tex_snout_panic = char_tex_snout_normal
+			char_tex_snout_hurt = char_tex_snout_normal
+			char_tex_snout_furious = char_tex_snout_normal
+			char_tex_snout_special = char_tex_snout_normal
+			char_tex_snout_taunt = char_tex_snout_normal
+			base_eye_pos = Vector2(0, -20)
+			base_snout_pos = Vector2(0, 24)
+
+		"lava_golem":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/16_magma_drake/1_body_magma_drake.svg")
+			body_sprite.modulate = Color(0.65, 0.4, 0.4)
+			head_part.texture = _load_tex("res://assets/enemies/modular/16_magma_drake/2_horns_obsidian_drake.svg")
+			head_part.position = Vector2(0, -90)
+			pupils_sprite.visible = false
+			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/16_magma_drake/3_eyes_molten_flame.svg")
+			char_tex_eyes_aiming = char_tex_eyes_normal
+			char_tex_eyes_panic = char_tex_eyes_normal
+			char_tex_eyes_hurt = char_tex_eyes_normal
+			char_tex_eyes_furious = char_tex_eyes_normal
+			char_tex_eyes_special = char_tex_eyes_normal
+			char_tex_eyes_dizzy = char_tex_eyes_normal
+			char_tex_snout_normal = _load_tex("res://assets/enemies/modular/16_magma_drake/4_snout_smoldering_jaw.svg")
+			char_tex_snout_aiming = char_tex_snout_normal
+			char_tex_snout_panic = char_tex_snout_normal
+			char_tex_snout_hurt = char_tex_snout_normal
+			char_tex_snout_furious = char_tex_snout_normal
+			char_tex_snout_special = char_tex_snout_normal
+			char_tex_snout_taunt = char_tex_snout_normal
+			base_eye_pos = Vector2(0, -20)
+			base_snout_pos = Vector2(0, 24)
+
+		"void_wraith":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/18_void_wraith/1_body_void_wraith.svg")
+			head_part.texture = _load_tex("res://assets/enemies/modular/18_void_wraith/2_crown_event_horizon.svg")
+			head_part.position = Vector2(0, -90)
+			pupils_sprite.visible = false
+			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/18_void_wraith/3_eyes_singularity_void.svg")
+			char_tex_eyes_aiming = char_tex_eyes_normal
+			char_tex_eyes_panic = char_tex_eyes_normal
+			char_tex_eyes_hurt = char_tex_eyes_normal
+			char_tex_eyes_furious = char_tex_eyes_normal
+			char_tex_eyes_special = char_tex_eyes_normal
+			char_tex_eyes_dizzy = char_tex_eyes_normal
+			char_tex_snout_normal = _load_tex("res://assets/enemies/modular/18_void_wraith/4_snout_vortex_mouth.svg")
+			char_tex_snout_aiming = char_tex_snout_normal
+			char_tex_snout_panic = char_tex_snout_normal
+			char_tex_snout_hurt = char_tex_snout_normal
+			char_tex_snout_furious = char_tex_snout_normal
+			char_tex_snout_special = char_tex_snout_normal
+			char_tex_snout_taunt = char_tex_snout_normal
+			base_eye_pos = Vector2(0, -20)
+			base_snout_pos = Vector2(0, 24)
+
+		"celestial_sentinel":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/18_void_wraith/1_body_void_wraith.svg")
+			body_sprite.modulate = Color(1.4, 1.2, 0.6)
+			head_part.texture = _load_tex("res://assets/enemies/modular/18_void_wraith/2_crown_event_horizon.svg")
+			head_part.modulate = Color(1.4, 1.3, 0.4)
+			head_part.position = Vector2(0, -90)
+			pupils_sprite.visible = false
+			char_tex_eyes_normal = _load_tex("res://assets/enemies/modular/18_void_wraith/3_eyes_singularity_void.svg")
+			char_tex_eyes_aiming = char_tex_eyes_normal
+			char_tex_eyes_panic = char_tex_eyes_normal
+			char_tex_eyes_hurt = char_tex_eyes_normal
+			char_tex_eyes_furious = char_tex_eyes_normal
+			char_tex_eyes_special = char_tex_eyes_normal
+			char_tex_eyes_dizzy = char_tex_eyes_normal
+			char_tex_snout_normal = _load_tex("res://assets/enemies/modular/18_void_wraith/4_snout_vortex_mouth.svg")
+			char_tex_snout_aiming = char_tex_snout_normal
+			char_tex_snout_panic = char_tex_snout_normal
+			char_tex_snout_hurt = char_tex_snout_normal
+			char_tex_snout_furious = char_tex_snout_normal
+			char_tex_snout_special = char_tex_snout_normal
+			char_tex_snout_taunt = char_tex_snout_normal
+			base_eye_pos = Vector2(0, -20)
+			base_snout_pos = Vector2(0, 24)
+
+		"boss_iron_crusher":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/bosses/boss_w2_iron_crusher.svg")
+			pupils_sprite.visible = false
+		"boss_toxic_alchemist":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/bosses/boss_w3_toxic_alchemist.svg")
+			pupils_sprite.visible = false
+		"boss_magma_emperor":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/bosses/boss_w4_magma_emperor.svg")
+			pupils_sprite.visible = false
+		"boss_crystal_overlord":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/bosses/boss_w5_crystal_overlord.svg")
+			pupils_sprite.visible = false
+		"boss_cyber_mech":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/bosses/boss_w6_cyber_mech.svg")
+			pupils_sprite.visible = false
+		"boss_swamp_hydra":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/bosses/boss_w7_swamp_hydra.svg")
+			pupils_sprite.visible = false
+		"boss_frost_colossus":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/bosses/boss_w8_frost_colossus.svg")
+			pupils_sprite.visible = false
+		"boss_dragon_warlord":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/bosses/boss_w9_dragon_warlord.svg")
+			pupils_sprite.visible = false
+		"boss_singularity_prime":
+			body_sprite.texture = _load_tex("res://assets/enemies/modular/bosses/boss_w10_singularity_prime.svg")
+			pupils_sprite.visible = false
+
 	eyes_sprite.position = base_eye_pos
 	pupils_sprite.position = base_eye_pos
 	snout_sprite.position = base_snout_pos
@@ -551,6 +892,10 @@ func _play_spawn_bounce() -> void:
 
 func wake_up() -> void:
 	if is_awake or is_defeated: return
+	if has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		if gm.current_egg_index == 0:
+			return # Khóa tĩnh tuyệt đối lúc chưa bắn trứng
 	is_awake = true
 	set_deferred("freeze", false)
 
@@ -558,9 +903,13 @@ var crush_audio_cooldown: float = 0.0
 
 func _physics_process(delta: float) -> void:
 	if is_defeated: return
+	if has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		if gm.current_egg_index == 0:
+			return
 	if not is_awake:
 		for b in get_colliding_bodies():
-			if is_instance_valid(b) and b is RigidBody2D and (not b.freeze or b.linear_velocity.length() > 5.0):
+			if is_instance_valid(b) and b is RigidBody2D and b.linear_velocity.length() > 40.0:
 				wake_up()
 				break
 		return
@@ -783,18 +1132,6 @@ func _evaluate_base_state(delta: float) -> void:
 			var dir = (chicken.global_position - global_position).normalized()
 			eye_look_offset = dir * 5.5
 			return
-
-	# Bình thường -> IDLE (nếu còn khỏe) hoặc CRITICAL_INJURED (nếu yếu)
-	if current_health <= max_health * 0.45:
-		if current_state != State.CRITICAL_INJURED:
-			_set_state(State.CRITICAL_INJURED)
-		_update_injured_behaviors(delta)
-		return
-
-	if current_state != State.IDLE:
-		_set_state(State.IDLE)
-
-	_update_idle_micro_actions(delta)
 
 	# Bình thường -> IDLE (nếu còn khỏe) hoặc CRITICAL_INJURED (nếu yếu)
 	if current_health <= max_health * 0.45:
@@ -1152,14 +1489,28 @@ func _animate_character(delta: float) -> void:
 			visual_root.rotation = sin(t * 5.0) * 0.06
 			visual_root.scale = Vector2(base_scale_val * 1.03, base_scale_val * 0.97)
 
+	# Áp dụng đàn hồi khi trúng đòn trực tiếp và rung lắc va chạm
+	visual_root.scale *= hit_squash
+	if hit_shake_offset != Vector2.ZERO:
+		visual_root.position += hit_shake_offset
+		hit_shake_offset = hit_shake_offset.lerp(Vector2.ZERO, 15.0 * delta)
+
 func _trigger_blink() -> void:
 	if not eyes_sprite or is_blinking or current_state == State.PANIC_FALLING or current_idle_action == IdleAction.SLEEPY_NAP or current_state == State.PINNED_UNDER_DEBRIS or current_state == State.SURVIVED_RELIEF:
 		return
 	is_blinking = true
-	var blink = create_tween()
+	var was_pupils_visible = pupils_sprite.visible if pupils_sprite else false
+	var blink = create_tween().set_parallel(true)
 	blink.tween_property(eyes_sprite, "scale:y", 0.05, 0.06)
-	blink.tween_property(eyes_sprite, "scale:y", 1.0, 0.07)
-	await blink.finished
+	if pupils_sprite and was_pupils_visible:
+		blink.tween_property(pupils_sprite, "scale:y", 0.05, 0.06)
+
+	var unblink = create_tween().set_parallel(true)
+	unblink.tween_property(eyes_sprite, "scale:y", 1.0, 0.07).set_delay(0.06)
+	if pupils_sprite and was_pupils_visible:
+		unblink.tween_property(pupils_sprite, "scale:y", 1.0, 0.07).set_delay(0.06)
+
+	await unblink.finished
 	is_blinking = false
 
 func _pop_emote(tex: Texture2D, duration: float = 0.8) -> void:
@@ -1187,10 +1538,15 @@ func _on_nearby_enemy_defeated(dead_enemy: Node, _pts: int) -> void:
 
 func _on_impact(body: Node) -> void:
 	if is_defeated or spawn_settle_timer > 0.0: return
-	if not is_awake: wake_up()
+	if has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		if gm.current_egg_index == 0:
+			return # Peacetime lock
 
 	if body is RigidBody2D:
 		var rel_vel = (linear_velocity - body.linear_velocity).length()
+		if rel_vel > 65.0 and not is_awake:
+			wake_up()
 		if rel_vel > 140.0:
 			var crush_dmg = (rel_vel - 140.0) * min(body.mass * 0.35, 3.5) + 15.0
 			take_damage(crush_dmg, body.global_position)
@@ -1217,10 +1573,12 @@ func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO, is_continuous
 
 	# Hiệu ứng biến dạng và chớp đỏ chỉ khi bị đòn đánh trực tiếp (không spam 60 lần/giây khi bị đè cạ)
 	if not is_continuous_crush:
-		if visual_root:
-			var tween = create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-			visual_root.scale = Vector2(base_scale_val * 1.4, base_scale_val * 0.6)
-			tween.tween_property(visual_root, "scale", Vector2(base_scale_val, base_scale_val), 0.28)
+		var tween = create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+		hit_squash = Vector2(1.38, 0.62)
+		tween.tween_property(self, "hit_squash", Vector2(0.92, 1.12), 0.10)
+		tween.tween_property(self, "hit_squash", Vector2.ONE, 0.18)
+
+		hit_shake_offset = Vector2(randf_range(-3.5, 3.5), randf_range(-2.0, 2.0))
 
 		var flash_tween = create_tween()
 		flash_tween.tween_property(visual_root, "modulate", Color(1.0, 0.35, 0.35), 0.05)
@@ -1257,7 +1615,7 @@ func _defeat_monster() -> void:
 		get_node("/root/GameManager").register_enemy_defeat(self, score_value)
 	ComicScorePopup.spawn_score_popup(get_parent(), global_position, score_value)
 	# Cú nổ nhỏ nhẹ êm dịu khi quái tan biến
-	CameraShake.add_trauma(0.18 if monster_type == "boss_baron_pig" else 0.08)
+	CameraShake.add_trauma(0.18 if monster_type.begins_with("boss_") else 0.08)
 
 	$CollisionShape2D.set_deferred("disabled", true)
 	set_deferred("freeze", true)
@@ -1271,10 +1629,6 @@ func _defeat_monster() -> void:
 		dizzy_stars.visible = true
 		var star_tween = create_tween().set_loops(2)
 		star_tween.tween_property(dizzy_stars, "rotation", TAU, 0.25)
-
-	# Âm thanh vui nhộn khi quái thoát xác
-	if has_node("/root/SoundManager"):
-		get_node("/root/SoundManager").play_enemy_squash()
 
 	# =========================================================================
 	# HIỆU ỨNG THOÁT XÁC HOẠT HÌNH (CARTOON SHOCK JUMP & BALLOON POP)

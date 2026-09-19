@@ -37,7 +37,7 @@ func _ready() -> void:
 func _update_total_stars() -> void:
 	if has_node("/root/SaveManager") and total_stars_label:
 		var stars = get_node("/root/SaveManager").save_data.get("total_stars", 0)
-		total_stars_label.text = "%d / 300" % stars
+		total_stars_label.text = "%d / 600" % stars
 
 func _prev_world() -> void:
 	if current_world > 1:
@@ -45,7 +45,7 @@ func _prev_world() -> void:
 		_render_world_levels()
 
 func _next_world() -> void:
-	if current_world < 5:
+	if current_world < 10:
 		current_world += 1
 		_render_world_levels()
 
@@ -63,9 +63,14 @@ func _render_world_levels() -> void:
 			3: cav_rect.modulate = Color(0.3, 0.6, 0.25, 0.6)
 			4: cav_rect.modulate = Color(0.7, 0.3, 0.2, 0.6)
 			5: cav_rect.modulate = Color(0.55, 0.3, 0.8, 0.65)
+			6: cav_rect.modulate = Color(0.25, 0.45, 0.7, 0.6)
+			7: cav_rect.modulate = Color(0.25, 0.55, 0.3, 0.6)
+			8: cav_rect.modulate = Color(0.35, 0.65, 0.85, 0.65)
+			9: cav_rect.modulate = Color(0.75, 0.35, 0.15, 0.65)
+			10: cav_rect.modulate = Color(0.45, 0.2, 0.65, 0.7)
 
 	btn_prev_world.disabled = (current_world <= 1)
-	btn_next_world.disabled = (current_world >= 5)
+	btn_next_world.disabled = (current_world >= 10)
 
 	# Xóa các nút cũ
 	for child in grid.get_children():

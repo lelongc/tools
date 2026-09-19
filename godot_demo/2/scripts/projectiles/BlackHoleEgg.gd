@@ -28,7 +28,7 @@ func _ready() -> void:
 		vortex_particles.color = Color(0.85, 0.35, 1.0, 0.95)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not is_broken and not is_singularity and event is InputEventMouseButton and event.pressed:
+	if not is_broken and not is_singularity and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():
 		_trigger_vortex()
 
 func _on_body_entered(_body: Node) -> void:

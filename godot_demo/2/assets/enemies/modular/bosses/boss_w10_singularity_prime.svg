@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="prime_body" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#b388ff"/>
+      <stop offset="40%" stop-color="#651fff"/>
+      <stop offset="80%" stop-color="#311b92"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+  </defs>
+  <!-- Cosmic Event Horizon Body -->
+  <circle cx="128" cy="132" r="108" fill="url(#prime_body)" stroke="#b388ff" stroke-width="8"/>
+  <!-- Glowing Orbiting Halo -->
+  <circle cx="128" cy="132" r="122" fill="none" stroke="#ffff00" stroke-width="4" stroke-dasharray="12,12"/>
+  <!-- Singularity Crown -->
+  <polygon points="40,70 65,15 95,45 128,5 161,45 191,15 216,70" fill="#ffff00" stroke="#b388ff" stroke-width="7"/>
+  <!-- Supernova Core Snout -->
+  <circle cx="128" cy="165" r="32" fill="#000000" stroke="#00e5ff" stroke-width="6"/>
+  <circle cx="128" cy="165" r="16" fill="#ffffff"/>
+  <!-- Supernova Blazing Eyes -->
+  <circle cx="85" cy="110" r="22" fill="#ffffff" stroke="#ffff00" stroke-width="6"/>
+  <circle cx="85" cy="110" r="10" fill="#00e5ff"/>
+  <circle cx="171" cy="110" r="22" fill="#ffffff" stroke="#ffff00" stroke-width="6"/>
+  <circle cx="171" cy="110" r="10" fill="#00e5ff"/>
+</svg>

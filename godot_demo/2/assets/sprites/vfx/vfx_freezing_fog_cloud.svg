@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <circle cx="45" cy="70" r="30" fill="#e0f7fa" opacity="0.85"/>
+  <circle cx="85" cy="70" r="30" fill="#e0f7fa" opacity="0.85"/>
+  <circle cx="65" cy="48" r="34" fill="#b2ebf2" opacity="0.9"/>
+  <!-- Sparkles -->
+  <polygon points="65,30 68,38 76,41 68,44 65,52 62,44 54,41 62,38" fill="#ffffff"/>
+</svg>

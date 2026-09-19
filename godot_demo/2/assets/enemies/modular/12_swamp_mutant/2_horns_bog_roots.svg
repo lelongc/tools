@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 128" width="256" height="128">
+  <defs>
+    <linearGradient id="root_wood" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5d4037"/>
+      <stop offset="100%" stop-color="#271406"/>
+    </linearGradient>
+  </defs>
+  <!-- Left Gnarled Root Horn -->
+  <path d="M75 110 C50 80 30 50 40 25 C55 35 65 65 85 95 Z" fill="url(#root_wood)" stroke="#1a0c03" stroke-width="6"/>
+  <path d="M40 50 C20 40 10 25 15 15 C28 20 35 35 40 50 Z" fill="#3e2723" stroke="#1a0c03" stroke-width="4"/>
+  <!-- Right Gnarled Root Horn -->
+  <path d="M181 110 C206 80 226 50 216 25 C201 35 191 65 171 95 Z" fill="url(#root_wood)" stroke="#1a0c03" stroke-width="6"/>
+  <path d="M216 50 C236 40 246 25 241 15 C228 20 221 35 216 50 Z" fill="#3e2723" stroke="#1a0c03" stroke-width="4"/>
+</svg>

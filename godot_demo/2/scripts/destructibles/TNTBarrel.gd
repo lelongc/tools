@@ -42,17 +42,24 @@ func _process(delta: float) -> void:
 
 func wake_up() -> void:
 	if is_awake or is_ignited: return
+	if has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		if gm.current_egg_index == 0:
+			return # Peacetime lock
 	is_awake = true
 	set_deferred("freeze", false)
 
 func _on_impact(body: Node) -> void:
 	if is_ignited or spawn_settle_timer > 0.0: return
-
-	if not is_awake:
-		wake_up()
+	if has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		if gm.current_egg_index == 0:
+			return
 
 	if body is RigidBody2D:
 		var speed = (linear_velocity - body.linear_velocity).length()
+		if speed > 65.0 and not is_awake:
+			wake_up()
 		if speed > 150.0:
 			take_damage(50.0, global_position)
 

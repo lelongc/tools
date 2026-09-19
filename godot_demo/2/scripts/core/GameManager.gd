@@ -9,7 +9,7 @@ signal last_stand_offered(enemies_left)
 signal score_updated(new_score)
 
 var current_level: int = 1
-var total_levels: int = 100
+var total_levels: int = 200
 
 var current_score: int = 0
 var remaining_enemies: int = 0
@@ -33,18 +33,31 @@ func _notification(what: int) -> void:
 		_handle_mobile_back()
 
 func _handle_mobile_back() -> void:
+	# 1. Nếu đang hiển thị lớp quảng cáo mô phỏng thì bỏ qua quảng cáo
+	if has_node("/root/AdsManager") and get_node("/root/AdsManager").is_ad_showing:
+		get_node("/root/AdsManager")._on_ad_skipped()
+		return
+
 	var scene = get_tree().current_scene
 	if not scene: return
+
+	# 2. Điều hướng theo scene hiện hành
 	if scene.name == "CampaignLevel":
 		var hud = scene.get_node_or_null("GameHUD")
-		if hud and hud.has_method("toggle_pause"):
+		if hud and hud.has_method("handle_back_button"):
+			hud.handle_back_button()
+		elif hud and hud.has_method("toggle_pause"):
 			hud.toggle_pause()
 		else:
 			go_to_level_select()
 	elif scene.name == "LevelSelect":
 		go_to_main_menu()
 	elif scene.name == "MainMenu":
-		get_tree().quit()
+		var wheel = scene.get_node_or_null("DailyWheelModal")
+		if wheel and wheel.visible:
+			wheel.close_wheel()
+		else:
+			get_tree().quit()
 
 func start_level(level_id: int, enemy_count: int, egg_list: Array[String]) -> void:
 	current_session_id += 1

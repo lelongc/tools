@@ -24,7 +24,7 @@ func _ready() -> void:
 		hatch_particles.color = Color(1.0, 0.88, 0.25, 0.95)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not is_broken and not has_boosted and event is InputEventMouseButton and event.pressed:
+	if not is_broken and not has_boosted and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():
 		has_boosted = true
 		_hatch_chicks()
 

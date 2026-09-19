@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- White Egg Albumin Splat -->
+  <path d="M64 12 C90 8 115 35 110 65 C105 95 85 118 55 115 C25 112 8 88 12 55 C16 22 38 16 64 12 Z" fill="#ffffff" stroke="#e0e0e0" stroke-width="4"/>
+  <!-- Rich Yellow Yolk -->
+  <circle cx="62" cy="62" r="32" fill="#ffb300" stroke="#f57c00" stroke-width="5"/>
+  <ellipse cx="52" cy="52" rx="10" ry="6" fill="#fff9c4" transform="rotate(-30 52 52)"/>
+  <!-- Splatter Droplets -->
+  <circle cx="20" cy="25" r="7" fill="#ffffff"/>
+  <circle cx="105" cy="20" r="8" fill="#ffffff"/>
+  <circle cx="108" cy="98" r="6" fill="#ffb300"/>
+  <circle cx="24" cy="98" r="5" fill="#ffb300"/>
+</svg>

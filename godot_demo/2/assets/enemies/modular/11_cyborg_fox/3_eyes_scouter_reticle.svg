@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  <!-- Normal Left Eye -->
+  <ellipse cx="45" cy="40" rx="20" ry="24" fill="#ffffff" stroke="#260b03" stroke-width="5"/>
+  <circle cx="50" cy="40" r="10" fill="#ff6d00"/>
+  <circle cx="52" cy="36" r="4" fill="#ffffff"/>
+  <!-- Scouter Monocle Right Eye -->
+  <circle cx="115" cy="40" r="26" fill="#ff1744" fill-opacity="0.35" stroke="#ff1744" stroke-width="6"/>
+  <line x1="89" y1="40" x2="141" y2="40" stroke="#ff1744" stroke-width="3"/>
+  <line x1="115" y1="14" x2="115" y2="66" stroke="#ff1744" stroke-width="3"/>
+  <circle cx="115" cy="40" r="12" fill="#ff5252" stroke="#ffffff" stroke-width="3"/>
+  <line x1="115" y1="14" x2="155" y2="4" stroke="#ff1744" stroke-width="4"/>
+</svg>

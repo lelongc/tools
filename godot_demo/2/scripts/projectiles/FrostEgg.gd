@@ -23,7 +23,7 @@ func _ready() -> void:
 		ParticleHelper.apply_frost_fx(frost_particles, 0.3, 0.65)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not is_broken and not has_boosted and event is InputEventMouseButton and event.pressed:
+	if not is_broken and not has_boosted and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():
 		has_boosted = true
 		_freeze_blast()
 
@@ -124,8 +124,8 @@ func _freeze_blast() -> void:
 			if "material_type" in col:
 				col.material_type = "glass"
 				col.current_health = min(col.current_health, 25.0)
-				var v = col.get_node_or_null("Visual")
-				if v: v.color = Color(0.6, 0.9, 1.0, 0.8)
+				var v = col.get_node_or_null("BlockVisual")
+				if v: v.modulate = Color(0.6, 0.9, 1.0, 0.9)
 
 			if col.has_method("take_damage"):
 				col.take_damage(80.0, global_position)

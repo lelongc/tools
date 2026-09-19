@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="colo_body" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#e0f7fa"/>
+      <stop offset="55%" stop-color="#4dd0e1"/>
+      <stop offset="100%" stop-color="#006064"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="132" r="108" fill="url(#colo_body)" stroke="#004d40" stroke-width="10"/>
+  <!-- Glacier Iceberg Battlements Crown -->
+  <polygon points="35,80 50,15 80,45 110,10 146,10 176,45 206,15 221,80" fill="#b2ebf2" stroke="#004d40" stroke-width="7"/>
+  <!-- Giant Curved Icicle Tusks -->
+  <path d="M60 170 C40 140 30 110 45 90 C55 110 65 140 75 165 Z" fill="#ffffff" stroke="#004d40" stroke-width="5"/>
+  <path d="M196 170 C216 140 226 110 211 90 C201 110 191 140 181 165 Z" fill="#ffffff" stroke="#004d40" stroke-width="5"/>
+  <!-- Sub-Zero Glowing Eyes -->
+  <circle cx="85" cy="110" r="22" fill="#00e5ff" stroke="#004d40" stroke-width="6"/>
+  <circle cx="85" cy="110" r="8" fill="#ffffff"/>
+  <circle cx="171" cy="110" r="22" fill="#00e5ff" stroke="#004d40" stroke-width="6"/>
+  <circle cx="171" cy="110" r="8" fill="#ffffff"/>
+</svg>

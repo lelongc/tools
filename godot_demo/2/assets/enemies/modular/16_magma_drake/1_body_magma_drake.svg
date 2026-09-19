@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="md_body" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ff5722"/>
+      <stop offset="55%" stop-color="#d84315"/>
+      <stop offset="90%" stop-color="#bf360c"/>
+      <stop offset="100%" stop-color="#3e1104"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="132" r="96" fill="url(#md_body)" stroke="#2b0900" stroke-width="8"/>
+  <!-- Magma Vein Cracks Across Chest -->
+  <path d="M80 150 L110 165 L128 152 L150 170 L176 154" stroke="#ffeb3b" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M110 165 L115 195 M150 170 L145 200" stroke="#ff9800" stroke-width="4" stroke-linecap="round"/>
+  <!-- Underbelly Scales -->
+  <ellipse cx="128" cy="172" rx="42" ry="30" fill="#ffab91" opacity="0.35"/>
+</svg>

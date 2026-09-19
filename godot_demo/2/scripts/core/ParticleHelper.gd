@@ -13,6 +13,17 @@ static var tex_void: Texture2D = null
 static var tex_wind: Texture2D = null
 static var tex_confetti: Texture2D = null
 
+static var tex_egg_splat: Texture2D = null
+static var tex_fireball: Texture2D = null
+static var tex_drill_spark: Texture2D = null
+static var tex_metal_chip: Texture2D = null
+static var tex_kinetic_wave: Texture2D = null
+static var tex_freezing_fog: Texture2D = null
+static var tex_toxic_fume: Texture2D = null
+static var tex_gravity_ring: Texture2D = null
+static var tex_cosmic_star: Texture2D = null
+static var tex_eggshell_chip: Texture2D = null
+
 static func _init_textures() -> void:
 	if tex_spark == null:
 		tex_spark = _safe_load("res://assets/sprites/vfx/particle_spark_star.svg")
@@ -26,6 +37,17 @@ static func _init_textures() -> void:
 		tex_void = _safe_load("res://assets/sprites/vfx/particle_void_spiral.svg")
 		tex_wind = _safe_load("res://assets/sprites/vfx/particle_wind_streak.svg")
 		tex_confetti = _safe_load("res://assets/sprites/vfx/particle_confetti_ribbon.svg")
+
+		tex_egg_splat = _safe_load("res://assets/sprites/vfx/vfx_egg_splat_yolk.svg")
+		tex_fireball = _safe_load("res://assets/sprites/vfx/vfx_fireball_cartoon.svg")
+		tex_drill_spark = _safe_load("res://assets/sprites/vfx/particle_drill_spark.svg")
+		tex_metal_chip = _safe_load("res://assets/sprites/vfx/vfx_metal_cutting_chip.svg")
+		tex_kinetic_wave = _safe_load("res://assets/sprites/vfx/vfx_kinetic_impact_wave.svg")
+		tex_freezing_fog = _safe_load("res://assets/sprites/vfx/vfx_freezing_fog_cloud.svg")
+		tex_toxic_fume = _safe_load("res://assets/sprites/vfx/vfx_toxic_fume_smoke.svg")
+		tex_gravity_ring = _safe_load("res://assets/sprites/vfx/vfx_gravity_distortion_ring.svg")
+		tex_cosmic_star = _safe_load("res://assets/sprites/vfx/vfx_cosmic_star_dust.svg")
+		tex_eggshell_chip = _safe_load("res://assets/sprites/vfx/vfx_eggshell_shard_chip.svg")
 
 static var _tex_cache: Dictionary = {}
 
@@ -103,6 +125,20 @@ static func apply_void_fx(p: CPUParticles2D, scale_min: float = 0.35, scale_max:
 	p.scale_amount_min = scale_min
 	p.scale_amount_max = scale_max
 
+static func apply_drill_spark_fx(p: CPUParticles2D, scale_min: float = 0.25, scale_max: float = 0.55) -> void:
+	if not p: return
+	_init_textures()
+	if tex_drill_spark: p.texture = tex_drill_spark
+	p.scale_amount_min = scale_min
+	p.scale_amount_max = scale_max
+
+static func apply_metal_chip_fx(p: CPUParticles2D, scale_min: float = 0.25, scale_max: float = 0.5) -> void:
+	if not p: return
+	_init_textures()
+	if tex_metal_chip: p.texture = tex_metal_chip
+	p.scale_amount_min = scale_min
+	p.scale_amount_max = scale_max
+
 static func apply_wind_fx(p: CPUParticles2D, scale_min: float = 0.3, scale_max: float = 0.6) -> void:
 	if not p: return
 	_init_textures()
@@ -126,7 +162,7 @@ static func setup_egg_visual(visual_root: Node, texture_path: String, scale_val:
 		body.scale = Vector2(scale_val, scale_val)
 
 # =============================================================================
-# 1. HỆ THỐNG PARTICLE VỠ TRỨNG RIÊNG BIỆT THEO TỪNG LOẠI TRỨNG
+# 1. HỆ THỐNG PARTICLE VÀ HERO VFX NỔ RIÊNG BIỆT THEO TỪNG LOẠI TRỨNG
 # =============================================================================
 static func spawn_egg_break_fx(parent: Node, pos: Vector2, egg_type: String, is_boosted: bool = false) -> void:
 	if not parent: return
@@ -137,48 +173,87 @@ static func spawn_egg_break_fx(parent: Node, pos: Vector2, egg_type: String, is_
 	var accent_col = Color(1.0, 0.78, 0.12, 0.95)
 	var accent_is_star = false
 
+	# 0. Hero Impact Flash & Signature VFX Overlay
+	var hero_tex: Texture2D = null
+	var hero_scale_max = 1.0
+	var hero_color = Color.WHITE
+
 	match egg_type:
 		"normal":
+			hero_tex = tex_egg_splat
+			hero_scale_max = 0.75
+			hero_color = Color(1.0, 0.95, 0.8)
 			if is_boosted:
 				smoke_col = Color(0.4, 0.85, 1.0, 0.85)
-				shard_col = Color(0.35, 0.9, 1.0, 1.0) # Mảnh kim cương xanh
-				accent_col = Color(0.85, 1.0, 1.0, 0.95) # Sao lấp lánh
+				shard_col = Color(0.35, 0.9, 1.0, 1.0)
+				accent_col = Color(0.85, 1.0, 1.0, 0.95)
 				accent_is_star = true
 			else:
-				smoke_col = Color(1.0, 0.98, 0.92, 0.88) # Khói trắng sữa
-				shard_col = Color(0.98, 0.94, 0.86, 1.0) # Vỏ trứng trắng
-				accent_col = Color(1.0, 0.78, 0.12, 0.95) # Lòng đỏ vàng tươi
+				smoke_col = Color(1.0, 0.98, 0.92, 0.88)
+				shard_col = Color(0.98, 0.94, 0.86, 1.0)
+				accent_col = Color(1.0, 0.78, 0.12, 0.95)
 				accent_is_star = false
 		"bomb":
-			smoke_col = Color(0.24, 0.22, 0.24, 0.92) # Bồ hóng núi lửa đen
-			shard_col = Color(0.38, 0.38, 0.42, 1.0)   # Mảnh gang thép vỏ bom
-			accent_col = Color(1.0, 0.55, 0.12, 0.95)  # Tia lửa cam rực
+			hero_tex = tex_fireball
+			hero_scale_max = 1.25
+			hero_color = Color(1.0, 0.8, 0.6)
+			smoke_col = Color(0.24, 0.22, 0.24, 0.92)
+			shard_col = Color(0.38, 0.38, 0.42, 1.0)
+			accent_col = Color(1.0, 0.55, 0.12, 0.95)
 			accent_is_star = true
 		"drill":
-			smoke_col = Color(0.45, 0.48, 0.52, 0.85) # Khói cơ khí xám
-			shard_col = Color(0.72, 0.78, 0.86, 1.0)   # Mảnh thép mũi khoan
-			accent_col = Color(1.0, 0.88, 0.25, 0.95)  # Tia lửa hàn vàng kim
+			hero_tex = tex_kinetic_wave
+			hero_scale_max = 1.15
+			hero_color = Color(1.0, 0.9, 0.4)
+			smoke_col = Color(0.45, 0.48, 0.52, 0.85)
+			shard_col = Color(0.72, 0.78, 0.86, 1.0)
+			accent_col = Color(1.0, 0.88, 0.25, 0.95)
 			accent_is_star = true
 		"frost":
-			smoke_col = Color(0.65, 0.88, 1.0, 0.85)  # Hơi sương lạnh giá
-			shard_col = Color(0.75, 0.95, 1.0, 1.0)   # Tinh thể băng sắc nhọn
-			accent_col = Color(0.92, 0.98, 1.0, 0.95)  # Hoa tuyết sáng lóa
+			hero_tex = tex_freezing_fog
+			hero_scale_max = 1.1
+			hero_color = Color(0.85, 0.95, 1.0, 0.95)
+			smoke_col = Color(0.65, 0.88, 1.0, 0.85)
+			shard_col = Color(0.75, 0.95, 1.0, 1.0)
+			accent_col = Color(0.92, 0.98, 1.0, 0.95)
 			accent_is_star = true
 		"acid":
-			smoke_col = Color(0.32, 0.85, 0.22, 0.85) # Hơi độc xanh chuối
-			shard_col = Color(0.55, 0.95, 0.2, 1.0)    # Vảy axit ăn mòn
-			accent_col = Color(0.45, 1.0, 0.15, 0.95)  # Giọt chất độc neon
+			hero_tex = tex_toxic_fume
+			hero_scale_max = 1.15
+			hero_color = Color(0.8, 1.0, 0.4, 0.95)
+			smoke_col = Color(0.32, 0.85, 0.22, 0.85)
+			shard_col = Color(0.55, 0.95, 0.2, 1.0)
+			accent_col = Color(0.45, 1.0, 0.15, 0.95)
 			accent_is_star = false
 		"cluster":
-			smoke_col = Color(1.0, 0.95, 0.85, 0.85)  # Khói ổ rơm ấm
-			shard_col = Color(0.98, 0.92, 0.85, 1.0)   # Vỏ trứng gà con
-			accent_col = Color(1.0, 0.88, 0.25, 0.95)  # Lông tơ gà vàng
+			hero_tex = tex_eggshell_chip
+			hero_scale_max = 0.85
+			hero_color = Color(1.0, 0.95, 0.85)
+			smoke_col = Color(1.0, 0.95, 0.85, 0.85)
+			shard_col = Color(0.98, 0.92, 0.85, 1.0)
+			accent_col = Color(1.0, 0.88, 0.25, 0.95)
 			accent_is_star = true
 		"blackhole":
-			smoke_col = Color(0.2, 0.12, 0.28, 0.92)  # Tinh vân tím không gian
-			shard_col = Color(0.65, 0.2, 0.95, 1.0)    # Mảnh vỡ hố đen
-			accent_col = Color(0.92, 0.35, 1.0, 0.95)  # Sao hấp dẫn neon
+			hero_tex = tex_gravity_ring
+			hero_scale_max = 1.2
+			hero_color = Color(0.9, 0.6, 1.0, 0.95)
+			smoke_col = Color(0.2, 0.12, 0.28, 0.92)
+			shard_col = Color(0.65, 0.2, 0.95, 1.0)
+			accent_col = Color(0.92, 0.35, 1.0, 0.95)
 			accent_is_star = true
+
+	if hero_tex:
+		var hero_spr = Sprite2D.new()
+		hero_spr.texture = hero_tex
+		hero_spr.global_position = pos
+		hero_spr.scale = Vector2(0.25, 0.25)
+		hero_spr.modulate = hero_color
+		parent.add_child(hero_spr)
+
+		var h_tw = hero_spr.create_tween()
+		h_tw.parallel().tween_property(hero_spr, "scale", Vector2(hero_scale_max, hero_scale_max), 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		h_tw.parallel().tween_property(hero_spr, "modulate:a", 0.0, 0.35).set_delay(0.08)
+		h_tw.tween_callback(hero_spr.queue_free)
 
 	# 1. Khói Cartoon Puff đặc trưng từng loại trứng
 	var tex_s = tex_comic_smoke if tex_comic_smoke else tex_smoke
@@ -204,9 +279,10 @@ static func spawn_egg_break_fx(parent: Node, pos: Vector2, egg_type: String, is_
 	# 2. Mảnh vỏ / mảnh tinh thể / giọt độc / lông tơ văng theo loại trứng
 	var chosen_shard_tex = tex_shard
 	match egg_type:
+		"drill": chosen_shard_tex = tex_metal_chip if tex_metal_chip else tex_shard
 		"frost": chosen_shard_tex = tex_frost if tex_frost else tex_shard
 		"acid": chosen_shard_tex = tex_acid if tex_acid else tex_circle
-		"cluster": chosen_shard_tex = tex_feather if tex_feather else tex_shard
+		"cluster": chosen_shard_tex = tex_eggshell_chip if tex_eggshell_chip else tex_feather
 		"blackhole": chosen_shard_tex = tex_void if tex_void else tex_spark
 
 	if chosen_shard_tex:
@@ -231,15 +307,17 @@ static func spawn_egg_break_fx(parent: Node, pos: Vector2, egg_type: String, is_
 
 	# 3. Điểm nhấn Accent: Lòng đỏ, giọt độc, đốm sao, hoặc xoáy hư không
 	var tex_acc = tex_spark if accent_is_star else tex_circle
-	if egg_type == "acid" and tex_acid:
+	if egg_type == "drill" and tex_drill_spark:
+		tex_acc = tex_drill_spark
+	elif egg_type == "acid" and tex_acid:
 		tex_acc = tex_acid
-	elif egg_type == "blackhole" and tex_void:
-		tex_acc = tex_void
-	elif egg_type == "cluster" and tex_feather:
-		tex_acc = tex_feather
+	elif egg_type == "blackhole" and tex_cosmic_star:
+		tex_acc = tex_cosmic_star
+	elif egg_type == "cluster" and tex_confetti:
+		tex_acc = tex_confetti
 
 	if tex_acc:
-		for i in range(3):
+		for i in range(4):
 			var acc = Sprite2D.new()
 			acc.texture = tex_acc
 			acc.global_position = pos
@@ -248,7 +326,7 @@ static func spawn_egg_break_fx(parent: Node, pos: Vector2, egg_type: String, is_
 			parent.add_child(acc)
 
 			var angle = randf_range(-PI * 0.85, -PI * 0.15)
-			var dist = randf_range(20.0, 45.0)
+			var dist = randf_range(20.0, 50.0)
 			var dest = pos + Vector2(cos(angle), sin(angle)) * dist
 
 			var tween = acc.create_tween()
@@ -268,7 +346,7 @@ static func spawn_monster_defeat_fx(parent: Node, pos: Vector2, monster_type: St
 	var dust_col = Color(0.82, 0.72, 0.60, 0.85) # Bụi đất hoạt hình
 	var fur_col = Color(0.95, 0.50, 0.20)         # Lông thú
 	var star_col = Color(1.0, 0.88, 0.18, 0.95)   # Sao vàng váng đầu
-	var is_boss = (monster_type == "boss_baron_pig")
+	var is_boss = monster_type.begins_with("boss_")
 
 	match monster_type:
 		"sly_fox":
@@ -299,10 +377,55 @@ static func spawn_monster_defeat_fx(parent: Node, pos: Vector2, monster_type: St
 			dust_col = Color(0.58, 0.44, 0.36, 0.85) # Bụi heo rừng hoàng gia
 			fur_col = Color(0.54, 0.34, 0.26)        # Lông heo rừng
 			star_col = Color(0.98, 0.78, 0.20, 0.95)
-		"boss_baron_pig":
-			dust_col = Color(0.52, 0.82, 0.40, 0.85) # Bụi xanh heo trùm
-			fur_col = Color(0.48, 0.86, 0.35)        # Da xanh heo mập
-			star_col = Color(1.0, 0.85, 0.15, 0.98)  # Vàng vương miện chói lóa
+		"crystal_badger":
+			dust_col = Color(0.60, 0.45, 0.75, 0.85) # Bụi thạch anh tím
+			fur_col = Color(0.45, 0.35, 0.60)        # Lông lửng tím thạch anh
+			star_col = Color(0.50, 0.90, 1.0, 0.98)  # Tinh thể ngọc phát sáng
+		"cyber_hound":
+			dust_col = Color(0.20, 0.40, 0.55, 0.85) # Bụi titan xanh
+			fur_col = Color(0.15, 0.65, 0.85)        # Mảnh giáp cyber cyan
+			star_col = Color(0.0, 0.95, 1.0, 0.98)   # Tia lửa điện neon
+		"cyborg_fox":
+			dust_col = Color(0.35, 0.45, 0.60, 0.85)
+			fur_col = Color(0.85, 0.45, 0.20)
+			star_col = Color(0.0, 0.90, 1.0, 0.98)
+		"swamp_mutant":
+			dust_col = Color(0.25, 0.45, 0.20, 0.85) # Bụi đầm lầy rêu
+			fur_col = Color(0.20, 0.55, 0.18)        # Rêu ẩm ướt
+			star_col = Color(0.95, 0.85, 0.15, 0.98) # Đốm vàng đầm lầy
+		"spore_badger":
+			dust_col = Color(0.40, 0.55, 0.30, 0.85) # Bụi bào tử nấm
+			fur_col = Color(0.30, 0.60, 0.25)
+			star_col = Color(0.65, 1.0, 0.25, 0.98)  # Bào tử nấm phát sáng
+		"frost_yeti":
+			dust_col = Color(0.75, 0.88, 1.0, 0.90) # Bụi tuyết băng tuyết
+			fur_col = Color(0.90, 0.95, 1.0)         # Lông quái tuyết trắng
+			star_col = Color(0.45, 0.90, 1.0, 0.98)  # Tinh thể tuyết lam
+		"blizzard_wolf":
+			dust_col = Color(0.65, 0.80, 0.95, 0.85)
+			fur_col = Color(0.40, 0.65, 0.85)
+			star_col = Color(0.50, 0.88, 1.0, 0.98)
+		"magma_drake":
+			dust_col = Color(0.60, 0.25, 0.15, 0.85) # Bụi dung nham bazan
+			fur_col = Color(0.85, 0.35, 0.10)        # Vảy rồng đỏ rực
+			star_col = Color(1.0, 0.55, 0.15, 0.98)  # Tia lửa than hồng
+		"lava_golem":
+			dust_col = Color(0.40, 0.20, 0.15, 0.85)
+			fur_col = Color(0.90, 0.30, 0.10)
+			star_col = Color(1.0, 0.60, 0.10, 0.98)
+		"void_wraith":
+			dust_col = Color(0.30, 0.15, 0.45, 0.90) # Bụi điểm kỳ dị tím
+			fur_col = Color(0.20, 0.10, 0.35)
+			star_col = Color(0.85, 0.45, 1.0, 0.98)  # Ánh sao tinh tú
+		"celestial_sentinel":
+			dust_col = Color(0.50, 0.35, 0.60, 0.85)
+			fur_col = Color(0.95, 0.80, 0.30)        # Mảnh giáp vàng kim
+			star_col = Color(1.0, 0.90, 0.35, 0.98)
+		_:
+			if is_boss:
+				dust_col = Color(0.52, 0.82, 0.40, 0.85)
+				fur_col = Color(0.95, 0.65, 0.20)
+				star_col = Color(1.0, 0.88, 0.15, 1.0)
 
 	# 1. Bụi đất nhân vật Comic Dust Puffs (KHÔNG DÙNG MÀU TRỨNG TRẮNG SỮA!)
 	var tex_s = tex_comic_smoke if tex_comic_smoke else tex_smoke

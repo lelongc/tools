@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="drag_body" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#d50000"/>
+      <stop offset="55%" stop-color="#b71c1c"/>
+      <stop offset="100%" stop-color="#212121"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="132" r="108" fill="url(#drag_body)" stroke="#000000" stroke-width="10"/>
+  <!-- Quadruple Dragon Horns -->
+  <path d="M55 90 C30 50 10 30 20 5 C40 25 60 55 75 80 Z" fill="#ff9100" stroke="#000000" stroke-width="6"/>
+  <path d="M201 90 C226 50 246 30 236 5 C216 25 196 55 181 80 Z" fill="#ff9100" stroke="#000000" stroke-width="6"/>
+  <!-- Roaring Draconic Snout -->
+  <path d="M75 145 Q128 120 181 145 Q128 205 75 145 Z" fill="#37474f" stroke="#000000" stroke-width="7"/>
+  <circle cx="100" cy="155" r="8" fill="#ff1744"/>
+  <circle cx="156" cy="155" r="8" fill="#ff1744"/>
+  <!-- Dread Dragon Eyes -->
+  <circle cx="85" cy="105" r="20" fill="#ffff00" stroke="#000000" stroke-width="6"/>
+  <polygon points="85,90 80,105 85,120 90,105" fill="#d50000"/>
+  <circle cx="171" cy="105" r="20" fill="#ffff00" stroke="#000000" stroke-width="6"/>
+  <polygon points="171,90 166,105 171,120 176,105" fill="#d50000"/>
+</svg>

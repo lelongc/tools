@@ -31,11 +31,19 @@ func _ready() -> void:
 
 func wake_up() -> void:
 	if is_awake: return
+	if has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		if gm.current_egg_index == 0:
+			return # Peacetime lock
 	is_awake = true
 	set_deferred("freeze", false)
 
 func _on_impact(body: Node) -> void:
 	if is_broken: return
+	if has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		if gm.current_egg_index == 0:
+			return
 	if not is_awake: wake_up()
 
 	if body is RigidBody2D:
@@ -56,7 +64,7 @@ func _break_open() -> void:
 	ComicScorePopup.spawn_score_popup(get_parent(), global_position, 1000)
 
 	if has_node("/root/SoundManager"):
-		get_node("/root/SoundManager").play_victory()
+		get_node("/root/SoundManager").play_chick_chirp()
 
 	$CollisionShape2D.set_deferred("disabled", true)
 	set_deferred("freeze", true)

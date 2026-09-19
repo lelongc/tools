@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="tox_body" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#aed581"/>
+      <stop offset="60%" stop-color="#689f38"/>
+      <stop offset="100%" stop-color="#33691e"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="132" r="108" fill="url(#tox_body)" stroke="#1b5e20" stroke-width="10"/>
+  <!-- Gas Mask Double Filters -->
+  <ellipse cx="128" cy="155" rx="60" ry="40" fill="#212121" stroke="#000000" stroke-width="8"/>
+  <circle cx="70" cy="170" r="22" fill="#424242" stroke="#000000" stroke-width="6"/>
+  <circle cx="70" cy="170" r="10" fill="#76ff03"/>
+  <circle cx="186" cy="170" r="22" fill="#424242" stroke="#000000" stroke-width="6"/>
+  <circle cx="186" cy="170" r="10" fill="#76ff03"/>
+  <!-- Toxic Lenses -->
+  <circle cx="85" cy="110" r="26" fill="#76ff03" stroke="#000000" stroke-width="7"/>
+  <circle cx="85" cy="110" r="8" fill="#ffffff"/>
+  <circle cx="171" cy="110" r="26" fill="#76ff03" stroke="#000000" stroke-width="7"/>
+  <circle cx="171" cy="110" r="8" fill="#ffffff"/>
+</svg>

@@ -130,7 +130,7 @@ func record_level_result(level_id: int, stars: int, score: int) -> void:
 		save_data["level_scores"][lvl_key] = score
 
 	if level_id + 1 > save_data.get("highest_unlocked_level", 1):
-		save_data["highest_unlocked_level"] = min(level_id + 1, 100)
+		save_data["highest_unlocked_level"] = min(level_id + 1, 200)
 
 	save_game()
 
@@ -140,11 +140,12 @@ func get_level_stars(level_id: int) -> int:
 func get_level_score(level_id: int) -> int:
 	return save_data.get("level_scores", {}).get(str(level_id), 0)
 
-func is_level_unlocked(level_id: int) -> bool:
-	return level_id <= save_data.get("highest_unlocked_level", 1)
+func is_level_unlocked(_level_id: int) -> bool:
+	# Mở khóa toàn bộ 200 màn theo yêu cầu để kiểm thử tự do mọi màn
+	return true
 
 func get_highest_unlocked_level() -> int:
-	return save_data.get("highest_unlocked_level", 1)
+	return 200
 
 func get_total_stars() -> int:
 	return save_data.get("total_stars", 0)

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="cry_body" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ea80fc"/>
+      <stop offset="50%" stop-color="#aa00ff"/>
+      <stop offset="90%" stop-color="#4a148c"/>
+      <stop offset="100%" stop-color="#12005e"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="132" r="108" fill="url(#cry_body)" stroke="#12005e" stroke-width="10"/>
+  <!-- 5-Spire Crystal Crown -->
+  <polygon points="35,80 50,15 80,60 128,5 176,60 206,15 221,80" fill="#00e5ff" stroke="#ffffff" stroke-width="6"/>
+  <!-- Diamond Cut Snout -->
+  <polygon points="80,165 128,140 176,165 128,195" fill="#e040fb" stroke="#ffffff" stroke-width="6"/>
+  <!-- Prismatic Eyes -->
+  <circle cx="85" cy="110" r="20" fill="#00e5ff" stroke="#12005e" stroke-width="6"/>
+  <circle cx="85" cy="110" r="8" fill="#ffffff"/>
+  <circle cx="171" cy="110" r="20" fill="#00e5ff" stroke="#12005e" stroke-width="6"/>
+  <circle cx="171" cy="110" r="8" fill="#ffffff"/>
+</svg>

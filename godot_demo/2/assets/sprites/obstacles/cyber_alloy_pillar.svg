@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 128" width="64" height="128">
+  <defs>
+    <linearGradient id="ca_pil" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#37474f"/>
+      <stop offset="50%" stop-color="#607d8b"/>
+      <stop offset="100%" stop-color="#263238"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="124" rx="8" fill="url(#ca_pil)" stroke="#00e5ff" stroke-width="4"/>
+  <line x1="32" y1="12" x2="32" y2="116" stroke="#00e5ff" stroke-width="3"/>
+  <circle cx="32" cy="32" r="5" fill="#ff1744"/>
+  <circle cx="32" cy="64" r="5" fill="#76ff03"/>
+  <circle cx="32" cy="96" r="5" fill="#ff1744"/>
+</svg>

@@ -28,14 +28,14 @@ func _ready() -> void:
 	if trail:
 		ParticleHelper.apply_circle_fx(trail, 0.25, 0.5)
 	if spark_particles:
-		ParticleHelper.apply_spark_fx(spark_particles, 0.3, 0.6)
+		ParticleHelper.apply_drill_spark_fx(spark_particles, 0.3, 0.6)
 	if break_particles:
-		ParticleHelper.apply_shard_fx(break_particles, 0.3, 0.6)
+		ParticleHelper.apply_metal_chip_fx(break_particles, 0.3, 0.6)
 		break_particles.color = Color(0.75, 0.82, 0.9, 0.95)
 
 func _unhandled_input(event: InputEvent) -> void:
 	# Tap-in-Flight: Chạm màn hình để kích hoạt Tên Lửa Siêu Thanh đâm cực mạnh
-	if not is_broken and not has_boosted and event is InputEventMouseButton and event.pressed:
+	if not is_broken and not has_boosted and (event is InputEventMouseButton or event is InputEventScreenTouch) and event.is_pressed():
 		has_boosted = true
 		_activate_rocket_boost()
 

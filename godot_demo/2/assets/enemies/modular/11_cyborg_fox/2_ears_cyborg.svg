@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 128" width="256" height="128">
+  <!-- Left Fur Ear -->
+  <path d="M50 115 L45 28 L95 80 Z" fill="#e65100" stroke="#260b03" stroke-width="7"/>
+  <path d="M56 95 L52 48 L80 78 Z" fill="#ffe0b2"/>
+  <!-- Right Titanium Ear -->
+  <path d="M161 80 L211 28 L206 115 Z" fill="#78909c" stroke="#1a2327" stroke-width="7"/>
+  <line x1="175" y1="75" x2="202" y2="42" stroke="#00e5ff" stroke-width="5" stroke-linecap="round"/>
+</svg>

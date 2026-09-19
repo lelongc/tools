@@ -26,16 +26,16 @@ var translations: Dictionary = {
 		"fr": "CLUCK & DROP", "ru": "CLUCK & DROP"
 	},
 	"KEY_SUBTITLE": {
-		"en": "BUNKER BUSTER 100 LEVELS",
-		"vi": "CHIẾN DỊCH 100 MÀN HẦM NGỤC",
-		"ja": "地下バンカーバスター 100ステージ",
-		"ko": "지하 벙커 버스터 100레벨",
-		"zh_CN": "地下地堡破坏者 100关",
-		"es": "DESTRUCTOR DE BÚNKER 100 NIVELES",
-		"pt_BR": "DESTRUIDOR DE BUNKER 100 FASES",
-		"de": "BUNKER-BRECHER 100 LEVEL",
-		"fr": "CASSEUR DE BUNKER 100 NIVEAUX",
-		"ru": "БУНКЕР БАСТЕР 100 УРОВНЕЙ"
+		"en": "200 BUNKER CAMPAIGN LEVELS",
+		"vi": "CHIẾN DỊCH 200 MÀN HẦM NGỤC",
+		"ja": "地下バンカーバスター 200ステージ",
+		"ko": "지하 벙커 버스터 200레벨",
+		"zh_CN": "地下地堡破坏者 200关",
+		"es": "DESTRUCTOR DE BÚNKER 200 NIVELES",
+		"pt_BR": "DESTRUIDOR DE BUNKER 200 FASES",
+		"de": "BUNKER-BRECHER 200 LEVEL",
+		"fr": "CASSEUR DE BUNKER 200 NIVEAUX",
+		"ru": "БУНКЕР БАСТЕР 200 УРОВНЕЙ"
 	},
 	"KEY_PLAY": {
 		"en": "PLAY NOW", "vi": "CHƠI NGAY", "ja": "プレイ", "ko": "지금 플레이",
@@ -158,6 +158,41 @@ var translations: Dictionary = {
 		"pt_BR": "MUNDO 5: CIDADELA DE CRISTAL (81 - 100)", "de": "WELT 5: KRISTALL-ZITADELLE (81 - 100)",
 		"fr": "MONDE 5 : CITADELLE DE CRISTAL (81 - 100)", "ru": "МИР 5: КРИСТАЛЬНАЯ ЦИТАДЕЛЬ (81 - 100)"
 	},
+	"KEY_WORLD_6": {
+		"en": "WORLD 6: CYBER BUNKER (101 - 120)", "vi": "THẾ GIỚI 6: HẦM CÔNG NGHỆ (101 - 120)",
+		"ja": "ワールド6: サイバー要塞 (101 - 120)", "ko": "월드 6: 사이버 벙커 (101 - 120)",
+		"zh_CN": "世界 6: 赛博地堡 (101 - 120)", "es": "MUNDO 6: BÚNKER CIBER (101 - 120)",
+		"pt_BR": "MUNDO 6: BUNKER CIBERNÉTICO (101 - 120)", "de": "WELT 6: CYBER-BUNKER (101 - 120)",
+		"fr": "MONDE 6 : BUNKER CYBER (101 - 120)", "ru": "МИР 6: КИБЕР БУНКЕР (101 - 120)"
+	},
+	"KEY_WORLD_7": {
+		"en": "WORLD 7: TOXIC JUNGLE (121 - 140)", "vi": "THẾ GIỚI 7: RỪNG ĐỘC HẦM NGẦM (121 - 140)",
+		"ja": "ワールド7: 猛毒の密林 (121 - 140)", "ko": "월드 7: 맹독 정글 (121 - 140)",
+		"zh_CN": "世界 7: 剧毒丛林 (121 - 140)", "es": "MUNDO 7: JUNGLA TÓXICA (121 - 140)",
+		"pt_BR": "MUNDO 7: SELVA TÓXICA (121 - 140)", "de": "WELT 7: GIFT-DSCHUNGEL (121 - 140)",
+		"fr": "MONDE 7 : JUNGLE TOXIQUE (121 - 140)", "ru": "МИР 7: ТОКСИЧНЫЕ ДЖУНГЛИ (121 - 140)"
+	},
+	"KEY_WORLD_8": {
+		"en": "WORLD 8: GLACIER VAULT (141 - 160)", "vi": "THẾ GIỚI 8: KHO BĂNG VĨNH CỬU (141 - 160)",
+		"ja": "ワールド8: 氷河の宝物庫 (141 - 160)", "ko": "월드 8: 빙하 금고 (141 - 160)",
+		"zh_CN": "世界 8: 极寒冰窟 (141 - 160)", "es": "MUNDO 8: BÓVEDA GLACIAR (141 - 160)",
+		"pt_BR": "MUNDO 8: COFRE GLACIAL (141 - 160)", "de": "WELT 8: GLETSCHER-TRESOR (141 - 160)",
+		"fr": "MONDE 8 : CRYPTE GLACIAIRE (141 - 160)", "ru": "МИР 8: ЛЕДЯНОЙ БУНКЕР (141 - 160)"
+	},
+	"KEY_WORLD_9": {
+		"en": "WORLD 9: DRAGON ABYSS (161 - 180)", "vi": "THẾ GIỚI 9: VỰC THẲM RỒNG CỔ (161 - 180)",
+		"ja": "ワールド9: 竜の深淵 (161 - 180)", "ko": "월드 9: 드래곤 심연 (161 - 180)",
+		"zh_CN": "世界 9: 巨龙深渊 (161 - 180)", "es": "MUNDO 9: ABISMO DEL DRAGÓN (161 - 180)",
+		"pt_BR": "MUNDO 9: ABISMO DO DRAGÃO (161 - 180)", "de": "WELT 9: DRACHEN-ABGRUND (161 - 180)",
+		"fr": "MONDE 9 : ABÎME DU DRAGON (161 - 180)", "ru": "МИР 9: БЕЗДНА ДРАКОНА (161 - 180)"
+	},
+	"KEY_WORLD_10": {
+		"en": "WORLD 10: CELESTIAL NEXUS (181 - 200)", "vi": "THẾ GIỚI 10: THẦN ĐIỆN VŨ TRỤ (181 - 200)",
+		"ja": "ワールド10: 宇宙の特異点 (181 - 200)", "ko": "월드 10: 천상 넥서스 (181 - 200)",
+		"zh_CN": "世界 10: 奇点神殿 (181 - 200)", "es": "MUNDO 10: NEXO CELESTIAL (181 - 200)",
+		"pt_BR": "MUNDO 10: NEXO CELESTIAL (181 - 200)", "de": "WELT 10: KOSMISCHER NEXUS (181 - 200)",
+		"fr": "MONDE 10 : NEXUS CÉLESTE (181 - 200)", "ru": "МИР 10: КОСМИЧЕСКИЙ НЕКСУС (181 - 200)"
+	},
 	"KEY_PREV_WORLD": {
 		"en": "◀ PREV", "vi": "◀ TRƯỚC", "ja": "◀ 前へ", "ko": "◀ 이전",
 		"zh_CN": "◀ 上一个", "es": "◀ ANTERIOR", "pt_BR": "◀ ANTERIOR",
@@ -169,16 +204,16 @@ var translations: Dictionary = {
 		"de": "WEITER ▶", "fr": "SUIVANT ▶", "ru": "ВПЕРЁД ▶"
 	},
 	"KEY_FOOTER": {
-		"en": "Physics Destruction • 7 Mutant Eggs • 5 Worlds",
-		"vi": "Vật lý phá hủy • 7 Loại Trứng Dị Biến • 5 Thế Giới",
-		"ja": "物理破壊パズル • 7種の変異タマゴ • 5つの世界",
-		"ko": "물리 파괴 퍼즐 • 7종의 변종 알 • 5개 월드",
-		"zh_CN": "物理破坏解谜 • 7种变异蛋 • 5个世界",
-		"es": "Destrucción Física • 7 Huevos Mutantes • 5 Mundos",
-		"pt_BR": "Destruição Física • 7 Ovos Mutantes • 5 Mundos",
-		"de": "Physik-Zerstörung • 7 Mutierte Eier • 5 Welten",
-		"fr": "Destruction Physique • 7 Oeufs Mutants • 5 Mondes",
-		"ru": "Физическое Разрушение • 7 Яиц-Мутантов • 5 Миров"
+		"en": "Physics Destruction • 7 Mutant Eggs • 10 Worlds",
+		"vi": "Vật lý phá hủy • 7 Loại Trứng Dị Biến • 10 Thế Giới",
+		"ja": "物理破壊パズル • 7種の変異タマゴ • 10の世界",
+		"ko": "물리 파괴 퍼즐 • 7종의 변종 알 • 10개 월드",
+		"zh_CN": "物理破坏解谜 • 7种变异蛋 • 10个世界",
+		"es": "Destrucción Física • 7 Huevos Mutantes • 10 Mundos",
+		"pt_BR": "Destruição Física • 7 Ovos Mutantes • 10 Mundos",
+		"de": "Physik-Zerstörung • 7 Mutierte Eier • 10 Welten",
+		"fr": "Destruction Physique • 7 Oeufs Mutants • 10 Mondes",
+		"ru": "Физическое Разрушение • 7 Яиц-Мутантов • 10 Миров"
 	},
 	"KEY_LOCKED": {
 		"en": "LOCKED", "vi": "CHƯA MỞ", "ja": "ロック中", "ko": "잠김",
@@ -308,7 +343,7 @@ func _ready() -> void:
 
 func _init_language() -> void:
 	var saved_lang = ""
-	if has_node("/root/SaveManager"):
+	if is_inside_tree() and has_node("/root/SaveManager"):
 		saved_lang = get_node("/root/SaveManager").save_data.get("language", "")
 
 	if saved_lang != "":
@@ -338,7 +373,7 @@ func cycle_language() -> void:
 	current_lang_index = (current_lang_index + 1) % LANGUAGES.size()
 	current_lang = LANGUAGES[current_lang_index]["code"]
 
-	if has_node("/root/SaveManager"):
+	if is_inside_tree() and has_node("/root/SaveManager"):
 		var sm = get_node("/root/SaveManager")
 		sm.save_data["language"] = current_lang
 		sm.save_game()

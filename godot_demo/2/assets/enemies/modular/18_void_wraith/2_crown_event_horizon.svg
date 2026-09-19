@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 128" width="256" height="128">
+  <defs>
+    <linearGradient id="void_spikes" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e040fb"/>
+      <stop offset="50%" stop-color="#651fff"/>
+      <stop offset="100%" stop-color="#05001a"/>
+    </linearGradient>
+  </defs>
+  <polygon points="50,110 30,30 75,70 100,20 128,65 156,20 181,70 226,30 206,110" fill="url(#void_spikes)" stroke="#05001a" stroke-width="6"/>
+  <circle cx="30" cy="30" r="6" fill="#ffffff"/>
+  <circle cx="100" cy="20" r="7" fill="#00e5ff"/>
+  <circle cx="156" cy="20" r="7" fill="#00e5ff"/>
+  <circle cx="226" cy="30" r="6" fill="#ffffff"/>
+</svg>

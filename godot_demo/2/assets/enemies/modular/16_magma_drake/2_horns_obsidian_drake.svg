@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 128" width="256" height="128">
+  <defs>
+    <linearGradient id="drake_horn" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff1744"/>
+      <stop offset="30%" stop-color="#ff6d00"/>
+      <stop offset="70%" stop-color="#37474f"/>
+      <stop offset="100%" stop-color="#212121"/>
+    </linearGradient>
+  </defs>
+  <!-- Left Drake Horn -->
+  <path d="M75 110 C45 75 15 45 25 15 C45 35 60 70 85 98 Z" fill="url(#drake_horn)" stroke="#2b0900" stroke-width="7"/>
+  <!-- Right Drake Horn -->
+  <path d="M181 110 C211 75 241 45 231 15 C211 35 196 70 171 98 Z" fill="url(#drake_horn)" stroke="#2b0900" stroke-width="7"/>
+  <!-- Fiery Tips -->
+  <circle cx="25" cy="15" r="8" fill="#ffff00"/>
+  <circle cx="231" cy="15" r="8" fill="#ffff00"/>
+</svg>

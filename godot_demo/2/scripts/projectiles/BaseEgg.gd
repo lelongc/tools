@@ -125,6 +125,13 @@ func _on_body_entered(body: Node) -> void:
 		if has_node("/root/SoundManager") and impact_speed > 120.0:
 			get_node("/root/SoundManager").play_egg_bounce()
 
+	# Hiệu ứng biến dạng nảy tưng tưng cao su hoạt hình (Cartoon Elastic Bounce Squash)
+	if visual_root and impact_speed > 80.0:
+		var sq_amt = clamp(impact_speed / 550.0, 0.20, 0.45)
+		visual_root.scale = Vector2(1.0 + sq_amt, 1.0 - sq_amt * 0.7)
+		var bt = create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+		bt.tween_property(visual_root, "scale", Vector2.ONE, 0.24)
+
 	if body.has_method("take_damage"):
 		body.take_damage(damage_dealt, global_position)
 

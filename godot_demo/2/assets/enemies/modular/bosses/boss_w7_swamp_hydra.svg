@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="hydra_body" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#66bb6a"/>
+      <stop offset="55%" stop-color="#2e7d32"/>
+      <stop offset="100%" stop-color="#0b380e"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="132" r="108" fill="url(#hydra_body)" stroke="#09280b" stroke-width="10"/>
+  <!-- Toxic Bloom Crown -->
+  <path d="M50 70 Q70 10 128 35 Q186 10 206 70 Z" fill="#d500f9" stroke="#09280b" stroke-width="7"/>
+  <circle cx="128" cy="40" r="14" fill="#76ff03"/>
+  <!-- Gaping Maw with Fangs -->
+  <ellipse cx="128" cy="165" rx="60" ry="34" fill="#1b5e20" stroke="#09280b" stroke-width="7"/>
+  <polygon points="80,150 90,180 100,150" fill="#ffffff" stroke="#09280b" stroke-width="4"/>
+  <polygon points="156,150 166,180 176,150" fill="#ffffff" stroke="#09280b" stroke-width="4"/>
+  <!-- 4 Snake Eyes -->
+  <circle cx="70" cy="105" r="14" fill="#ffeb3b" stroke="#09280b" stroke-width="5"/>
+  <circle cx="100" cy="100" r="14" fill="#ffeb3b" stroke="#09280b" stroke-width="5"/>
+  <circle cx="156" cy="100" r="14" fill="#ffeb3b" stroke="#09280b" stroke-width="5"/>
+  <circle cx="186" cy="105" r="14" fill="#ffeb3b" stroke="#09280b" stroke-width="5"/>
+</svg>

@@ -81,8 +81,9 @@ func _create_mock_ad_overlay() -> void:
 	vbox.add_theme_constant_override("separation", 18)
 	card.add_child(vbox)
 
-	# Header
-	var is_vi = LocalizationManager.current_lang == "vi" if has_node("/root/LocalizationManager") else false
+	var is_vi = false
+	if is_inside_tree() and has_node("/root/LocalizationManager"):
+		is_vi = (get_node("/root/LocalizationManager").current_lang == "vi")
 	var title = Label.new()
 	title.name = "AdTitle"
 	title.text = "QUẢNG CÁO NHẬN THƯỞNG" if is_vi else "SPONSORED REWARD VIDEO"
@@ -163,7 +164,9 @@ func _play_mock_video_overlay() -> void:
 	if not ad_overlay_layer: return
 	ad_overlay_layer.visible = true
 
-	var is_vi = LocalizationManager.current_lang == "vi" if has_node("/root/LocalizationManager") else false
+	var is_vi = false
+	if is_inside_tree() and has_node("/root/LocalizationManager"):
+		is_vi = (get_node("/root/LocalizationManager").current_lang == "vi")
 	var title = ad_overlay_layer.get_node_or_null("Center/Card/VBox/AdTitle") as Label
 	var timer_label = ad_overlay_layer.get_node_or_null("Center/Card/VBox/TimerLabel") as Label
 	var pbar = ad_overlay_layer.get_node_or_null("Center/Card/VBox/ProgressBar") as ProgressBar

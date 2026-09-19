@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Billowing Toxic Fume -->
+  <circle cx="42" cy="72" r="32" fill="#76ff03" opacity="0.8"/>
+  <circle cx="86" cy="72" r="32" fill="#76ff03" opacity="0.8"/>
+  <circle cx="64" cy="45" r="36" fill="#64dd17" opacity="0.9"/>
+  <!-- Subtle Toxic Skull Face Inside Smoke -->
+  <circle cx="52" cy="42" r="6" fill="#1b5e20"/>
+  <circle cx="76" cy="42" r="6" fill="#1b5e20"/>
+  <ellipse cx="64" cy="56" rx="8" ry="4" fill="#1b5e20"/>
+</svg>

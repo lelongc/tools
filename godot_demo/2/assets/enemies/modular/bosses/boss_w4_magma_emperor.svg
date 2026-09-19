@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="mag_body" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ff3d00"/>
+      <stop offset="50%" stop-color="#dd2c00"/>
+      <stop offset="90%" stop-color="#3e1104"/>
+      <stop offset="100%" stop-color="#1a0000"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="132" r="108" fill="url(#mag_body)" stroke="#1a0000" stroke-width="10"/>
+  <!-- Blazing Obsidian Horn Crown -->
+  <path d="M40 75 L70 15 L105 45 L128 5 L151 45 L186 15 L216 75 Z" fill="#212121" stroke="#ff3d00" stroke-width="8"/>
+  <circle cx="128" cy="40" r="14" fill="#ffff00" stroke="#d50000" stroke-width="4"/>
+  <!-- Magma Tusk Snout -->
+  <ellipse cx="128" cy="165" rx="55" ry="32" fill="#bf360c" stroke="#1a0000" stroke-width="7"/>
+  <polygon points="65,160 55,130 80,150" fill="#ffff00" stroke="#1a0000" stroke-width="4"/>
+  <polygon points="191,160 201,130 176,150" fill="#ffff00" stroke="#1a0000" stroke-width="4"/>
+  <!-- Searing Eyes -->
+  <circle cx="85" cy="110" r="20" fill="#ffff00" stroke="#1a0000" stroke-width="6"/>
+  <circle cx="85" cy="110" r="8" fill="#d50000"/>
+  <circle cx="171" cy="110" r="20" fill="#ffff00" stroke="#1a0000" stroke-width="6"/>
+  <circle cx="171" cy="110" r="8" fill="#d50000"/>
+</svg>

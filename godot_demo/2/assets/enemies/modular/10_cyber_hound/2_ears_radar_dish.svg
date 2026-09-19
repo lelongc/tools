@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 128" width="256" height="128">
+  <defs>
+    <linearGradient id="ch_radar" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b0bec5"/>
+      <stop offset="100%" stop-color="#455a64"/>
+    </linearGradient>
+  </defs>
+  <!-- Left Radar Antenna -->
+  <path d="M60 110 L42 36 L70 42 Z" fill="url(#ch_radar)" stroke="#001830" stroke-width="6"/>
+  <circle cx="42" cy="36" r="12" fill="#00e5ff" stroke="#001830" stroke-width="4"/>
+  <line x1="42" y1="36" x2="30" y2="14" stroke="#00e5ff" stroke-width="4" stroke-linecap="round"/>
+  <!-- Right Radar Antenna -->
+  <path d="M196 110 L214 36 L186 42 Z" fill="url(#ch_radar)" stroke="#001830" stroke-width="6"/>
+  <circle cx="214" cy="36" r="12" fill="#00e5ff" stroke="#001830" stroke-width="4"/>
+  <line x1="214" y1="36" x2="226" y2="14" stroke="#00e5ff" stroke-width="4" stroke-linecap="round"/>
+</svg>

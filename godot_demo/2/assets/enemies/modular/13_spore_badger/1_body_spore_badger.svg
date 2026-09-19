@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="sb_body" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ba68c8"/>
+      <stop offset="60%" stop-color="#7b1fa2"/>
+      <stop offset="90%" stop-color="#4a148c"/>
+      <stop offset="100%" stop-color="#240748"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="132" r="95" fill="url(#sb_body)" stroke="#1a0033" stroke-width="8"/>
+  <!-- Badger Face Stripes -->
+  <path d="M70 60 L85 180 L105 180 L90 60 Z" fill="#e1bee7" stroke="#1a0033" stroke-width="4"/>
+  <path d="M186 60 L171 180 L151 180 L166 60 Z" fill="#e1bee7" stroke="#1a0033" stroke-width="4"/>
+</svg>

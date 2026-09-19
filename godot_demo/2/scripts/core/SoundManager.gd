@@ -39,7 +39,7 @@ func _ready() -> void:
 		var gm = get_node("/root/GameManager")
 		gm.egg_dropped.connect(func(_type): play_egg_drop())
 		gm.enemy_defeated.connect(func(_enemy, _pts): play_enemy_squash())
-		gm.level_completed.connect(func(_stars, _score, _coins = 0): play_victory())
+		# Khử âm thanh fanfare trước tiếng chuông sao theo yêu cầu người dùng
 		gm.level_failed.connect(func(): play_level_fail())
 
 	# 5. Khởi động nhạc nền hoạt hình
@@ -173,11 +173,22 @@ func play_crystal_shatter() -> void:
 func play_obsidian_crack() -> void:
 	play_sfx("obsidian_crack", 2.5, 0.94, 1.06)
 
+var sfx_cooldowns: Dictionary = {}
+
+func can_play_sfx(key: String, min_interval: float = 0.08) -> bool:
+	var now = Time.get_ticks_msec() / 1000.0
+	if sfx_cooldowns.has(key) and (now - sfx_cooldowns[key]) < min_interval:
+		return false
+	sfx_cooldowns[key] = now
+	return true
+
 # 4. QUÁI VẬT BỊ ĐÁNH & TIÊU DIỆT
 func play_monster_ouch() -> void:
+	if not can_play_sfx("monster_ouch", 0.08): return
 	play_sfx("monster_ouch", 1.2, 0.92, 1.08)
 
 func play_enemy_squash() -> void:
+	if not can_play_sfx("monster_defeat", 0.10): return
 	play_sfx("monster_defeat", 2.5, 0.93, 1.07)
 
 # 5. KỸ NĂNG CỦA 7 LOẠI ĐẠN TRỨNG
@@ -194,6 +205,7 @@ func play_blackhole_vortex() -> void:
 	play_sfx("blackhole_vortex", 2.5, 0.95, 1.05)
 
 func play_chick_chirp() -> void:
+	if not can_play_sfx("chick_chirp", 0.06): return
 	play_sfx("chick_chirp", 0.5, 0.92, 1.10)
 
 # 6. GIAO DIỆN & TƯƠNG TÁC
@@ -214,9 +226,18 @@ func play_star_chime(star_index: int = 1) -> void:
 	p.play()
 
 func play_victory() -> void:
+	if not can_play_sfx("victory_fanfare", 1.5): return
+	# Dừng các âm va chạm, vụn vỡ để khúc khải hoàn vang lên trọn vẹn, không bị đè âm
+	for p in sfx_players:
+		if is_instance_valid(p) and p.playing:
+			p.stop()
 	play_sfx("victory_fanfare", 3.0, 1.0, 1.0)
 
 func play_level_fail() -> void:
+	if not can_play_sfx("level_fail", 1.5): return
+	for p in sfx_players:
+		if is_instance_valid(p) and p.playing:
+			p.stop()
 	play_sfx("level_fail", 2.5, 1.0, 1.0)
 
 func play_coin_pickup() -> void:

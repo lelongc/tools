@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Outer Red-Orange Fire Ring -->
+  <path d="M64 6 C85 6 122 35 120 70 C118 105 90 122 64 122 C38 122 6 105 8 70 C10 35 43 6 64 6 Z" fill="#ff1744" stroke="#d50000" stroke-width="5"/>
+  <!-- Mid Yellow Fire Blast -->
+  <circle cx="64" cy="66" r="42" fill="#ff9100"/>
+  <!-- White-Hot Energy Core -->
+  <circle cx="64" cy="66" r="24" fill="#ffff00"/>
+  <circle cx="64" cy="66" r="12" fill="#ffffff"/>
+</svg>

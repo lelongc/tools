@@ -25,6 +25,11 @@ static var tex_glass: Texture2D = null
 static var tex_steel: Texture2D = null
 static var tex_obsidian: Texture2D = null
 static var tex_crystal: Texture2D = null
+static var tex_cyber_alloy: Texture2D = null
+static var tex_swamp_wood: Texture2D = null
+static var tex_permafrost: Texture2D = null
+static var tex_magma_brick: Texture2D = null
+static var tex_celestial_stone: Texture2D = null
 
 static var tex_pillar_wood: Texture2D = null
 static var tex_pillar_stone: Texture2D = null
@@ -32,6 +37,11 @@ static var tex_pillar_glass: Texture2D = null
 static var tex_girder_steel: Texture2D = null
 static var tex_pillar_obsidian: Texture2D = null
 static var tex_pillar_crystal: Texture2D = null
+static var tex_pillar_cyber: Texture2D = null
+static var tex_pillar_swamp: Texture2D = null
+static var tex_pillar_permafrost: Texture2D = null
+static var tex_pillar_magma: Texture2D = null
+static var tex_pillar_celestial: Texture2D = null
 
 static var tex_crack_wood_l: Texture2D = null
 static var tex_crack_wood_h: Texture2D = null
@@ -45,6 +55,16 @@ static var tex_crack_obsidian_l: Texture2D = null
 static var tex_crack_obsidian_h: Texture2D = null
 static var tex_crack_crystal_l: Texture2D = null
 static var tex_crack_crystal_h: Texture2D = null
+static var tex_crack_cyber_l: Texture2D = null
+static var tex_crack_cyber_h: Texture2D = null
+static var tex_crack_swamp_l: Texture2D = null
+static var tex_crack_swamp_h: Texture2D = null
+static var tex_crack_frost_l: Texture2D = null
+static var tex_crack_frost_h: Texture2D = null
+static var tex_crack_magma_l: Texture2D = null
+static var tex_crack_magma_h: Texture2D = null
+static var tex_crack_celestial_l: Texture2D = null
+static var tex_crack_celestial_h: Texture2D = null
 
 static var tex_shard_wood: Texture2D = null
 static var tex_shard_stone: Texture2D = null
@@ -82,6 +102,11 @@ func _load_textures_once() -> void:
 		tex_steel = _safe_load_tex("res://assets/sprites/obstacles/steel_block_beam.svg")
 		tex_obsidian = _safe_load_tex("res://assets/sprites/obstacles/obsidian_block_runic.svg")
 		tex_crystal = _safe_load_tex("res://assets/sprites/obstacles/crystal_block_prism.svg")
+		tex_cyber_alloy = _safe_load_tex("res://assets/sprites/obstacles/cyber_alloy_block.svg")
+		tex_swamp_wood = _safe_load_tex("res://assets/sprites/obstacles/swamp_wood_block.svg")
+		tex_permafrost = _safe_load_tex("res://assets/sprites/obstacles/permafrost_block.svg")
+		tex_magma_brick = _safe_load_tex("res://assets/sprites/obstacles/magma_brick_block.svg")
+		tex_celestial_stone = _safe_load_tex("res://assets/sprites/obstacles/celestial_stone_block.svg")
 
 		tex_pillar_wood = _safe_load_tex("res://assets/sprites/obstacles/wood_pillar_column.svg")
 		tex_pillar_stone = _safe_load_tex("res://assets/sprites/obstacles/stone_pillar_column.svg")
@@ -89,6 +114,11 @@ func _load_textures_once() -> void:
 		tex_girder_steel = _safe_load_tex("res://assets/sprites/obstacles/steel_girder_column.svg")
 		tex_pillar_obsidian = _safe_load_tex("res://assets/sprites/obstacles/obsidian_pillar_column.svg")
 		tex_pillar_crystal = _safe_load_tex("res://assets/sprites/obstacles/crystal_pillar_column.svg")
+		tex_pillar_cyber = _safe_load_tex("res://assets/sprites/obstacles/cyber_alloy_pillar.svg")
+		tex_pillar_swamp = _safe_load_tex("res://assets/sprites/obstacles/swamp_wood_pillar.svg")
+		tex_pillar_permafrost = _safe_load_tex("res://assets/sprites/obstacles/permafrost_pillar.svg")
+		tex_pillar_magma = _safe_load_tex("res://assets/sprites/obstacles/magma_brick_pillar.svg")
+		tex_pillar_celestial = _safe_load_tex("res://assets/sprites/obstacles/celestial_stone_pillar.svg")
 
 		tex_crack_wood_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_wood_light.svg")
 		tex_crack_wood_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_wood_heavy.svg")
@@ -102,6 +132,16 @@ func _load_textures_once() -> void:
 		tex_crack_obsidian_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_obsidian_heavy.svg")
 		tex_crack_crystal_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_crystal_light.svg")
 		tex_crack_crystal_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_crystal_heavy.svg")
+		tex_crack_cyber_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_cyber_light.svg")
+		tex_crack_cyber_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_cyber_heavy.svg")
+		tex_crack_swamp_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_swamp_light.svg")
+		tex_crack_swamp_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_swamp_heavy.svg")
+		tex_crack_frost_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_frost_light.svg")
+		tex_crack_frost_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_frost_heavy.svg")
+		tex_crack_magma_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_magma_light.svg")
+		tex_crack_magma_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_magma_heavy.svg")
+		tex_crack_celestial_l = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_celestial_light.svg")
+		tex_crack_celestial_h = _safe_load_tex("res://assets/sprites/obstacles/cracks/crack_celestial_heavy.svg")
 
 		tex_shard_wood = _safe_load_tex("res://assets/sprites/vfx/debris_wood_shard.svg")
 		tex_shard_stone = _safe_load_tex("res://assets/sprites/vfx/debris_stone_shard.svg")
@@ -199,49 +239,179 @@ func _apply_block_dimensions() -> void:
 			if crack_stage1: crack_stage1.texture = tex_crack_crystal_l
 			if crack_stage2: crack_stage2.texture = tex_crack_crystal_h
 			if fracture_particles: fracture_particles.color = Color(0.60, 0.85, 1.0, 0.9)
+		"cyber_alloy":
+			max_health = 750.0
+			mass = (block_size.x * block_size.y) * 0.0075
+			if block_visual:
+				block_visual.texture = tex_pillar_cyber if (is_vertical and tex_pillar_cyber) else tex_cyber_alloy
+				block_visual.modulate = Color.WHITE
+			if crack_stage1: crack_stage1.texture = tex_crack_cyber_l
+			if crack_stage2: crack_stage2.texture = tex_crack_cyber_h
+			if fracture_particles: fracture_particles.color = Color(0.0, 0.9, 1.0, 0.95)
+		"swamp_wood":
+			max_health = 190.0
+			mass = (block_size.x * block_size.y) * 0.0022
+			if block_visual:
+				block_visual.texture = tex_pillar_swamp if (is_vertical and tex_pillar_swamp) else tex_swamp_wood
+				block_visual.modulate = Color.WHITE
+			if crack_stage1: crack_stage1.texture = tex_crack_swamp_l
+			if crack_stage2: crack_stage2.texture = tex_crack_swamp_h
+			if fracture_particles: fracture_particles.color = Color(0.46, 0.85, 0.22, 0.9)
+		"permafrost":
+			max_health = 160.0
+			mass = (block_size.x * block_size.y) * 0.0018
+			if block_visual:
+				block_visual.texture = tex_pillar_permafrost if (is_vertical and tex_pillar_permafrost) else tex_permafrost
+				block_visual.modulate = Color.WHITE
+			if crack_stage1: crack_stage1.texture = tex_crack_frost_l
+			if crack_stage2: crack_stage2.texture = tex_crack_frost_h
+			if fracture_particles: fracture_particles.color = Color(0.65, 0.95, 1.0, 0.9)
+		"magma_brick":
+			max_health = 580.0
+			mass = (block_size.x * block_size.y) * 0.0065
+			if block_visual:
+				block_visual.texture = tex_pillar_magma if (is_vertical and tex_pillar_magma) else tex_magma_brick
+				block_visual.modulate = Color.WHITE
+			if crack_stage1: crack_stage1.texture = tex_crack_magma_l
+			if crack_stage2: crack_stage2.texture = tex_crack_magma_h
+			if fracture_particles: fracture_particles.color = Color(1.0, 0.40, 0.1, 0.95)
+		"celestial_stone":
+			max_health = 880.0
+			mass = (block_size.x * block_size.y) * 0.0090
+			if block_visual:
+				block_visual.texture = tex_pillar_celestial if (is_vertical and tex_pillar_celestial) else tex_celestial_stone
+				block_visual.modulate = Color.WHITE
+			if crack_stage1: crack_stage1.texture = tex_crack_celestial_l
+			if crack_stage2: crack_stage2.texture = tex_crack_celestial_h
+			if fracture_particles: fracture_particles.color = Color(1.0, 0.85, 0.25, 0.95)
 
 	current_health = max_health
 
-	current_health = max_health
+var support_check_timer: float = 0.08
 
 func _process(delta: float) -> void:
 	if spawn_settle_timer > 0.0:
 		spawn_settle_timer -= delta
 
+func _physics_process(delta: float) -> void:
+	if is_destroyed: return
+	if not is_awake:
+		if spawn_settle_timer > 0.0:
+			return
+		# KHÓA CỐ ĐỊNH 100%: Tuyệt đối không tự rã đông khi người chơi chưa bắn quả trứng nào
+		if has_node("/root/GameManager"):
+			var gm = get_node("/root/GameManager")
+			if gm.current_egg_index == 0:
+				return
+		support_check_timer -= delta
+		if support_check_timer <= 0.0:
+			support_check_timer = 0.12
+			_check_underlying_support()
+
+func _check_underlying_support() -> void:
+	var hh = block_size.y * 0.5
+	# 1. Nền móng bedrock / sàn hang động (floor_y >= 840) là bất hoại và kiên cố vĩnh cửu.
+	# Bất kỳ khối nào tiếp xúc mặt đất (y + hh >= 800.0) thì vĩnh viễn có bệ đỡ kiên cố, tuyệt đối không rã đông!
+	if global_position.y + hh >= 800.0:
+		return
+
+	var space_state = get_world_2d().direct_space_state
+	if not space_state: return
+
+	var hw = block_size.x * 0.5
+	# 2. Phân bổ đều các điểm quét xuyên suốt chiều rộng đáy khối để bắt trọn mọi cột trụ đỡ
+	# Tia bắt đầu từ bên trong khối (hh - 4.0), bắn xuống 20px (xuyên qua mép đáy 16px)
+	var test_points: Array[Vector2] = []
+	var step = 18.0
+	var x_cur = -hw + 8.0
+	while x_cur <= hw - 8.0:
+		test_points.append(global_position + Vector2(x_cur, hh - 4.0))
+		x_cur += step
+	if test_points.is_empty():
+		test_points.append(global_position + Vector2(0.0, hh - 4.0))
+
+	var has_valid_support = false
+	var ray_length = 20.0
+
+	for pt in test_points:
+		var ray_query = PhysicsRayQueryParameters2D.create(pt, pt + Vector2(0, ray_length))
+		ray_query.exclude = [get_rid()]
+		ray_query.collide_with_bodies = true
+		ray_query.collide_with_areas = false
+		ray_query.hit_from_inside = true
+
+		var hit = space_state.intersect_ray(ray_query)
+		if hit and hit.collider:
+			var col = hit.collider
+			if is_instance_valid(col) and col != self:
+				if col is StaticBody2D:
+					has_valid_support = true
+					break
+				elif col is RigidBody2D:
+					var is_failing = false
+					if "is_destroyed" in col and col.is_destroyed:
+						is_failing = true
+					elif "is_awake" in col and col.is_awake and col.linear_velocity.y > 35.0:
+						is_failing = true
+					if not is_failing:
+						has_valid_support = true
+						break
+
+	if not has_valid_support:
+		wake_up()
+
 func wake_up() -> void:
 	if is_awake or is_destroyed: return
+	# KHÓA CỐ ĐỊNH 100%: Tuyệt đối không bao giờ rã đông trong thời gian yên tĩnh (chưa bắn trứng)
+	if has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		if gm.current_egg_index == 0:
+			return
 	is_awake = true
 	set_deferred("freeze", false)
 	_wake_up_neighbors()
 
 func _wake_up_neighbors() -> void:
+	# Chỉ lan tỏa hướng lên trên khi khối này BỊ VỠ VỤN hoặc rơi với tốc độ lớn
+	# Triệt tiêu hoàn toàn việc lan truyền bán kính sang các khối bên cạnh gây sụp đổ vô lý
+	if not (is_destroyed or linear_velocity.y > 45.0):
+		return
+
 	var space_state = get_world_2d().direct_space_state
 	if not space_state: return
-	var query = PhysicsShapeQueryParameters2D.new()
-	var sphere = CircleShape2D.new()
-	sphere.radius = max(block_size.x, block_size.y) * 0.5 + 20.0
-	query.shape = sphere
-	query.transform = Transform2D(0, global_position)
-	query.collide_with_bodies = true
-	query.exclude = [get_rid()]
 
-	var hits = space_state.intersect_shape(query, 32)
-	for h in hits:
-		var b = h.collider
-		if is_instance_valid(b) and b != self:
-			if b.has_method("wake_up") and not b.is_awake:
-				b.wake_up()
+	var up_query = PhysicsShapeQueryParameters2D.new()
+	var box = RectangleShape2D.new()
+	box.size = Vector2(block_size.x * 0.9, 120.0)
+	up_query.shape = box
+	up_query.transform = Transform2D(0, global_position + Vector2(0, -65.0))
+	up_query.collide_with_bodies = true
+	up_query.exclude = [get_rid()]
+
+	var up_hits = space_state.intersect_shape(up_query, 16)
+	for uh in up_hits:
+		var ub = uh.collider
+		if is_instance_valid(ub) and ub != self:
+			if ub.has_method("wake_up") and not ub.is_awake:
+				ub.wake_up()
 
 func _on_impact(body: Node) -> void:
 	if is_destroyed or spawn_settle_timer > 0.0: return
-	if not is_awake:
-		wake_up()
+	if has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		if gm.current_egg_index == 0:
+			return
 
 	if body is RigidBody2D:
 		var b_vel = body.linear_velocity
 		if "pre_impact_velocity" in body and body.pre_impact_velocity.length() > b_vel.length():
 			b_vel = body.pre_impact_velocity
 		var rel_vel = (linear_velocity - b_vel).length()
+
+		# Chỉ thức giấc khi có va chạm thực sự với vận tốc > 65px/s (không kích hoạt khi chỉ chạm nhẹ hay đứng yên)
+		if rel_vel > 65.0 and not is_awake:
+			wake_up()
+
 		if rel_vel > 140.0:
 			var impact_dmg = (rel_vel - 140.0) * min(body.mass * 0.28, 2.5)
 			impact_dmg = min(impact_dmg, 220.0)
@@ -266,6 +436,11 @@ func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
 		var flash_tween = create_tween()
 		flash_tween.tween_property(block_visual, "modulate", orig_mod, 0.07)
 
+		var orig_pos = block_visual.position
+		var jolt = Vector2(randf_range(-2.5, 2.5), randf_range(-1.5, 1.5))
+		block_visual.position = orig_pos + jolt
+		flash_tween.parallel().tween_property(block_visual, "position", orig_pos, 0.08)
+
 	if current_health <= 0.0:
 		_fracture_block()
 
@@ -275,19 +450,19 @@ func _fracture_block() -> void:
 
 	_wake_up_neighbors()
 
-	var pts = 300 if material_type in ["steel", "obsidian"] else (200 if material_type == "crystal" else (150 if material_type == "stone" else 75))
+	var pts = 300 if material_type in ["steel", "obsidian", "cyber_alloy", "celestial_stone"] else (200 if material_type in ["crystal", "magma_brick"] else (150 if material_type in ["stone", "swamp_wood", "permafrost"] else 75))
 	GameManager.add_score(pts)
 	ComicScorePopup.spawn_score_popup(get_parent(), global_position, pts)
 
 	if has_node("/root/SoundManager"):
 		var snd = get_node("/root/SoundManager")
 		match material_type:
-			"wood": snd.play_wood_break()
-			"stone": snd.play_stone_break()
-			"obsidian": snd.play_obsidian_crack()
-			"glass": snd.play_glass_break()
+			"wood", "swamp_wood": snd.play_wood_break()
+			"stone", "magma_brick": snd.play_stone_break()
+			"obsidian", "celestial_stone": snd.play_obsidian_crack()
+			"glass", "permafrost": snd.play_glass_break()
 			"crystal": snd.play_crystal_shatter()
-			"steel": snd.play_steel_clang()
+			"steel", "cyber_alloy": snd.play_steel_clang()
 
 	# 1. Bắn khói Comic Puff bồng bềnh
 	_spawn_comic_smoke_poof()
@@ -306,7 +481,7 @@ func _fracture_block() -> void:
 	$CollisionShape2D.set_deferred("disabled", true)
 	set_deferred("freeze", true)
 
-	CameraShake.add_trauma(0.12 if material_type in ["steel", "obsidian"] else 0.08)
+	CameraShake.add_trauma(0.12 if material_type in ["steel", "obsidian", "cyber_alloy", "celestial_stone"] else 0.08)
 
 	await get_tree().create_timer(0.45).timeout
 	queue_free()
@@ -331,12 +506,12 @@ func _spawn_comic_smoke_poof() -> void:
 
 func _spawn_flying_shards() -> void:
 	var shard_tex: Texture2D = tex_shard_wood
-	if material_type in ["stone", "obsidian"]:
+	if material_type in ["stone", "obsidian", "magma_brick", "steel", "cyber_alloy"]:
 		shard_tex = tex_shard_stone
-	elif material_type in ["glass", "crystal"]:
+	elif material_type in ["glass", "crystal", "permafrost", "celestial_stone"]:
 		shard_tex = tex_shard_glass
-	elif material_type == "steel":
-		shard_tex = tex_shard_stone
+	elif material_type in ["wood", "swamp_wood"]:
+		shard_tex = tex_shard_wood
 
 	if not shard_tex: return
 	var p = get_parent()

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <radialGradient id="sm_body" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#81c784"/>
+      <stop offset="55%" stop-color="#388e3c"/>
+      <stop offset="90%" stop-color="#1b5e20"/>
+      <stop offset="100%" stop-color="#0b380e"/>
+    </radialGradient>
+  </defs>
+  <circle cx="128" cy="132" r="96" fill="url(#sm_body)" stroke="#09280b" stroke-width="8"/>
+  <!-- Toxic Warts -->
+  <circle cx="78" cy="95" r="16" fill="#aed581" stroke="#09280b" stroke-width="5"/>
+  <circle cx="180" cy="100" r="14" fill="#aed581" stroke="#09280b" stroke-width="5"/>
+  <circle cx="95" cy="180" r="12" fill="#7cb342" stroke="#09280b" stroke-width="4"/>
+  <circle cx="165" cy="175" r="18" fill="#7cb342" stroke="#09280b" stroke-width="5"/>
+  <ellipse cx="128" cy="160" rx="42" ry="32" fill="#4caf50" opacity="0.6"/>
+</svg>

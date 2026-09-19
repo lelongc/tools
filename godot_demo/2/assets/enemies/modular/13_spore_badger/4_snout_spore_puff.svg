@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 70" width="120" height="70">
+  <ellipse cx="60" cy="35" rx="42" ry="22" fill="#4a148c" stroke="#1a0033" stroke-width="5"/>
+  <circle cx="48" cy="35" r="6" fill="#000000"/>
+  <circle cx="72" cy="35" r="6" fill="#000000"/>
+  <!-- Little Spore Specks -->
+  <circle cx="28" cy="18" r="4" fill="#00e5ff"/>
+  <circle cx="92" cy="16" r="5" fill="#76ff03"/>
+  <circle cx="60" cy="55" r="4" fill="#d500f9"/>
+</svg>
