@@ -653,10 +653,18 @@ func _ready() -> void:
 		lvl85.queue_free()
 
 	print("\n================================================================")
+	# Explicitly clean up all remaining nodes in TestRunner
+	for child in get_children():
+		child.free()
+	if has_node("/root/SoundManager"):
+		get_node("/root/SoundManager").stop_all()
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+
 	if errors.size() == 0:
 		print(">>> ALL TESTS PASSED SUCCESSFULLY! (0 ERRORS) <<<")
 		print("================================================================")
-		await get_tree().process_frame
 		await get_tree().process_frame
 		get_tree().quit(0)
 	else:

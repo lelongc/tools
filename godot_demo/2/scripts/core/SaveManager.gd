@@ -12,6 +12,7 @@ var save_data: Dictionary = {
 	"level_stars": {},
 	"level_scores": {},
 	"sound_enabled": true,
+	"vibration_enabled": true,
 	"total_stars": 0,
 	"coins": 150,
 	"consumables": {
@@ -330,3 +331,17 @@ func import_save_json(json_str: String) -> bool:
 
 	cloud_sync_completed.emit(false, "Invalid cloud save format")
 	return false
+
+# ==========================================
+# RUNG XÚC GIÁC (HAPTICS VIBRATION)
+# ==========================================
+func is_vibration_enabled() -> bool:
+	return save_data.get("vibration_enabled", true)
+
+func set_vibration_enabled(enabled: bool) -> void:
+	save_data["vibration_enabled"] = enabled
+	save_game()
+
+func vibrate(duration_ms: int = 35) -> void:
+	if is_vibration_enabled():
+		Input.vibrate_handheld(duration_ms)

@@ -69,6 +69,8 @@ func _detonate() -> void:
 
 	if has_node("/root/SoundManager"):
 		get_node("/root/SoundManager").play_explosion()
+	if has_node("/root/SaveManager"):
+		get_node("/root/SaveManager").vibrate(55)
 
 	CartoonExplosionFX.spawn_comic_explosion(get_parent(), global_position, explosion_radius)
 	ParticleHelper.spawn_egg_break_fx(get_parent(), global_position, "bomb", false)

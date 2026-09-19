@@ -204,6 +204,7 @@ func _setup_level() -> void:
 		])
 
 	_spawn_environment_decorations(world_id, left_edge_x, right_edge_x, cx, cavern_top_y, floor_y)
+	_setup_ambient_atmosphere(world_id, total_w, cavern_top_y, floor_y)
 
 	# Cập nhật ranh giới vật lý
 	var col_wall_l = get_node_or_null("BunkerBoundaries/ColWallL")
@@ -1275,3 +1276,95 @@ func _update_dynamic_camera(delta: float) -> void:
 	else:
 		cam.global_position = cam.global_position.lerp(default_cam_pos, clamp(3.5 * delta, 0.0, 1.0))
 		cam.zoom = cam.zoom.lerp(default_cam_zoom, clamp(3.5 * delta, 0.0, 1.0))
+
+func _setup_ambient_atmosphere(world_id: int, total_w: float, cavern_top_y: float, floor_y: float) -> void:
+	var bg = get_node_or_null("Background")
+	if not bg: return
+
+	var old_atmo = bg.get_node_or_null("AmbientAtmosphere")
+	if old_atmo:
+		old_atmo.queue_free()
+
+	var particles = CPUParticles2D.new()
+	particles.name = "AmbientAtmosphere"
+	particles.z_index = 1
+	particles.position = Vector2(total_w * 0.5, (cavern_top_y + floor_y) * 0.5)
+	particles.emission_shape = CPUParticles2D.EMISSION_SHAPE_RECTANGLE
+	particles.emission_rect_extents = Vector2(total_w * 0.5, (floor_y - cavern_top_y) * 0.5)
+	particles.amount = 24
+	particles.lifetime = 4.5
+	particles.preprocess = 2.0
+	particles.local_coords = false
+
+	var base_col = Color.WHITE
+	match world_id:
+		1: # Farm: Dandelion seeds & pollen drift
+			ParticleHelper.apply_feather_fx(particles, 0.18, 0.35)
+			base_col = Color(1.0, 0.96, 0.82, 0.65)
+			particles.gravity = Vector2(8.0, 6.0)
+			particles.initial_velocity_min = 10.0
+			particles.initial_velocity_max = 22.0
+		2: # Quarry: Sparkling mineral dust
+			ParticleHelper.apply_spark_fx(particles, 0.15, 0.32)
+			base_col = Color(0.92, 0.88, 0.72, 0.6)
+			particles.gravity = Vector2(0.0, 5.0)
+			particles.initial_velocity_min = 8.0
+			particles.initial_velocity_max = 18.0
+		3: # Steampunk Factory: Industrial rising soot & steam
+			ParticleHelper.apply_smoke_fx(particles, 0.16, 0.35)
+			base_col = Color(0.38, 0.40, 0.35, 0.55)
+			particles.gravity = Vector2(10.0, -14.0)
+			particles.initial_velocity_min = 12.0
+			particles.initial_velocity_max = 26.0
+		4: # Lava Citadel: Fiery embers drifting up
+			ParticleHelper.apply_spark_fx(particles, 0.2, 0.42)
+			base_col = Color(1.0, 0.55, 0.15, 0.8)
+			particles.gravity = Vector2(0.0, -26.0)
+			particles.initial_velocity_min = 15.0
+			particles.initial_velocity_max = 35.0
+		5: # Crystal Void: Astral stardust
+			ParticleHelper.apply_star_fx(particles, 0.2, 0.45)
+			base_col = Color(0.85, 0.60, 1.0, 0.75)
+			particles.gravity = Vector2(0.0, -6.0)
+			particles.initial_velocity_min = 10.0
+			particles.initial_velocity_max = 24.0
+		6: # Cyber Bunker: Neon cyan data motes
+			ParticleHelper.apply_circle_fx(particles, 0.14, 0.3)
+			base_col = Color(0.12, 0.95, 1.0, 0.8)
+			particles.gravity = Vector2(0.0, -12.0)
+			particles.initial_velocity_min = 14.0
+			particles.initial_velocity_max = 28.0
+		7: # Toxic Jungle: Luminescent spores
+			ParticleHelper.apply_acid_fx(particles, 0.18, 0.38)
+			base_col = Color(0.48, 0.96, 0.28, 0.7)
+			particles.gravity = Vector2(-6.0, 8.0)
+			particles.initial_velocity_min = 8.0
+			particles.initial_velocity_max = 22.0
+		8: # Glacier Vault: Drifting snowflakes
+			ParticleHelper.apply_frost_fx(particles, 0.2, 0.42)
+			base_col = Color(0.88, 0.96, 1.0, 0.8)
+			particles.gravity = Vector2(14.0, 20.0)
+			particles.initial_velocity_min = 15.0
+			particles.initial_velocity_max = 32.0
+		9: # Dragon Abyss: Cinder sparks in thermal updrafts
+			ParticleHelper.apply_drill_spark_fx(particles, 0.2, 0.4)
+			base_col = Color(1.0, 0.38, 0.12, 0.85)
+			particles.gravity = Vector2(0.0, -30.0)
+			particles.initial_velocity_min = 18.0
+			particles.initial_velocity_max = 40.0
+		10: # Celestial Nexus: Divine cosmic stardust
+			ParticleHelper.apply_star_fx(particles, 0.24, 0.48)
+			base_col = Color(0.96, 0.88, 1.0, 0.85)
+			particles.gravity = Vector2(0.0, -8.0)
+			particles.initial_velocity_min = 12.0
+			particles.initial_velocity_max = 28.0
+
+	var grad = Gradient.new()
+	grad.set_color(0, Color(base_col.r, base_col.g, base_col.b, 0.0))
+	grad.add_point(0.2, base_col)
+	grad.add_point(0.8, base_col)
+	grad.set_color(1, Color(base_col.r, base_col.g, base_col.b, 0.0))
+	particles.color_ramp = grad
+
+	bg.add_child(particles)
+

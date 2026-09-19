@@ -32,6 +32,7 @@ var base_scale: Vector2 = Vector2.ONE
 var is_dropping_anim: bool = false
 var recoil_active: bool = false
 var facing_scale: float = 1.0
+var blink_timer: float = 3.0
 
 # Egg Scenes & Textures
 const EGG_TEXTURE_PATHS: Dictionary = {
@@ -87,6 +88,12 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if drop_cooldown > 0.0:
 		drop_cooldown -= delta
+
+	# Chớp mắt hoạt họa tự nhiên ngẫu nhiên khi bay
+	blink_timer -= delta
+	if blink_timer <= 0.0:
+		blink_timer = randf_range(2.6, 4.6)
+		_perform_blink()
 
 	# 1. Tự động lượn ngang bầu trời nếu không chủ động ngắm
 	if not is_aiming:
@@ -257,6 +264,12 @@ func _reset_eye_direction() -> void:
 	if body_sprite:
 		body_sprite.rotation = 0.0
 
+func _perform_blink() -> void:
+	if body_sprite and not is_dropping_anim and not is_aiming:
+		var tween = create_tween()
+		tween.tween_property(body_sprite, "scale:y", 0.60, 0.05).set_trans(Tween.TRANS_SINE)
+		tween.tween_property(body_sprite, "scale:y", 0.72, 0.07).set_trans(Tween.TRANS_SINE)
+
 func _prepare_next_egg() -> void:
 	if GameManager.current_egg_index < GameManager.available_eggs.size():
 		current_egg_type = GameManager.available_eggs[GameManager.current_egg_index]
@@ -309,9 +322,11 @@ func _drop_egg(launch_vel: Vector2 = Vector2(0, 480.0)) -> void:
 		drop_poof_fx.restart()
 		drop_poof_fx.emitting = true
 
-	# 4. Âm thanh gà cục tác khi đẻ trứng
+	# 4. Âm thanh gà cục tác khi đẻ trứng & rung xúc giác
 	if has_node("/root/SoundManager"):
 		get_node("/root/SoundManager").play_egg_drop()
+	if has_node("/root/SaveManager"):
+		get_node("/root/SaveManager").vibrate(28)
 
 	# 5. Sinh quả trứng vật lý
 	var egg_scene = egg_scenes[egg_type]

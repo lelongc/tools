@@ -366,3 +366,19 @@ func play_synth_tone(freq_or_type = 440.0, duration: float = 0.12, type: String 
 	p.volume_db = vol_db
 	p.pitch_scale = randf_range(0.92, 1.08)
 	p.play()
+
+func stop_all() -> void:
+	if bgm_player:
+		bgm_player.stop()
+		bgm_player.stream = null
+	if fanfare_player:
+		fanfare_player.stop()
+		fanfare_player.stream = null
+	if ui_player:
+		ui_player.stop()
+		ui_player.stream = null
+	for p in sfx_players:
+		if p:
+			p.stop()
+			p.stream = null
+

@@ -153,6 +153,14 @@ static func apply_confetti_fx(p: CPUParticles2D, scale_min: float = 0.3, scale_m
 	p.scale_amount_min = scale_min
 	p.scale_amount_max = scale_max
 
+static func apply_star_fx(p: CPUParticles2D, scale_min: float = 0.25, scale_max: float = 0.55) -> void:
+	if not p: return
+	_init_textures()
+	var s = tex_cosmic_star if tex_cosmic_star else tex_spark
+	if s: p.texture = s
+	p.scale_amount_min = scale_min
+	p.scale_amount_max = scale_max
+
 static func setup_egg_visual(visual_root: Node, texture_path: String, scale_val: float = 0.75) -> void:
 	if not visual_root: return
 	var body = visual_root.get_node_or_null("EggBody")

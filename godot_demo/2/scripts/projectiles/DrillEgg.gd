@@ -47,6 +47,8 @@ func _activate_rocket_boost() -> void:
 	CameraShake.add_trauma(0.35)
 	if has_node("/root/SoundManager"):
 		get_node("/root/SoundManager").play_drill_boost()
+	if has_node("/root/SaveManager"):
+		get_node("/root/SaveManager").vibrate(35)
 	if spark_particles:
 		spark_particles.restart()
 		spark_particles.emitting = true
@@ -70,6 +72,8 @@ func _start_drilling() -> void:
 	gravity_scale = 1.0
 	var dir = linear_velocity.normalized() if linear_velocity.length() > 30.0 else Vector2.DOWN
 	linear_velocity = dir * drill_speed
+	if has_node("/root/SaveManager"):
+		get_node("/root/SaveManager").vibrate(40)
 
 	if spark_particles:
 		spark_particles.restart()

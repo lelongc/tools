@@ -108,6 +108,8 @@ func _supernova_blast() -> void:
 	CameraShake.add_trauma(0.9)
 	if has_node("/root/SoundManager"):
 		get_node("/root/SoundManager").play_explosion()
+	if has_node("/root/SaveManager"):
+		get_node("/root/SaveManager").vibrate(85)
 
 	# Bắn hạt hố đen: Tinh vân tím không gian + Mảnh vỡ không thời gian + Sao hấp dẫn neon
 	ParticleHelper.spawn_egg_break_fx(get_parent(), global_position, "blackhole", false)
