@@ -25,6 +25,8 @@ func _ready() -> void:
 	if explosion_fx:
 		ParticleHelper.apply_smoke_fx(explosion_fx, 0.35, 0.75)
 
+	add_to_group("Destructibles")
+	add_to_group("Explosives")
 	set_deferred("freeze", true)
 	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
 	linear_damp = 1.0

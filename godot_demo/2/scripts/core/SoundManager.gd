@@ -20,6 +20,7 @@ func _ready() -> void:
 	# 1. Khởi tạo BGM Player riêng biệt
 	bgm_player = AudioStreamPlayer.new()
 	bgm_player.name = "BGMPlayer"
+	bgm_player.bus = "BGM" if AudioServer.get_bus_index("BGM") != -1 else "Master"
 	bgm_player.volume_db = -8.0 # Âm lượng êm ái làm nền cho SFX
 	add_child(bgm_player)
 	bgm_player.finished.connect(_on_bgm_finished)
@@ -28,6 +29,7 @@ func _ready() -> void:
 	for i in range(POOL_SIZE):
 		var p = AudioStreamPlayer.new()
 		p.name = "SFXPlayer_%d" % i
+		p.bus = "SFX" if AudioServer.get_bus_index("SFX") != -1 else "Master"
 		add_child(p)
 		sfx_players.append(p)
 
@@ -44,6 +46,21 @@ func _ready() -> void:
 
 	# 5. Khởi động nhạc nền hoạt hình
 	play_bgm()
+
+func _notification(what: int) -> void:
+	match what:
+		NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT:
+			if bgm_player and bgm_player.playing:
+				bgm_player.stream_paused = true
+			for p in sfx_players:
+				if is_instance_valid(p) and p.playing:
+					p.stream_paused = true
+		NOTIFICATION_APPLICATION_RESUMED, NOTIFICATION_APPLICATION_FOCUS_IN:
+			if bgm_player and bgm_player.stream_paused:
+				bgm_player.stream_paused = false
+			for p in sfx_players:
+				if is_instance_valid(p) and p.stream_paused:
+					p.stream_paused = false
 
 func _load_all_sound_assets() -> void:
 	var sound_map = {
@@ -88,6 +105,7 @@ func _get_available_player() -> AudioStreamPlayer:
 		return sfx_players[0]
 	var fallback = AudioStreamPlayer.new()
 	fallback.name = "SFXPlayer_fallback"
+	fallback.bus = "SFX" if AudioServer.get_bus_index("SFX") != -1 else "Master"
 	add_child(fallback)
 	sfx_players.append(fallback)
 	return fallback
@@ -145,32 +163,41 @@ func play_egg_drop() -> void:
 	play_sfx("chicken_cluck", 1.5, 0.95, 1.05)
 
 func play_egg_bounce() -> void:
+	if not can_play_sfx("egg_bounce", 0.06): return
 	play_sfx("egg_bounce", 0.0, 0.92, 1.08)
 
 func play_egg_crack() -> void:
+	if not can_play_sfx("egg_crack", 0.06): return
 	play_sfx("egg_crack", 1.8, 0.95, 1.05)
 
 # 2. BOM & VỤ NỔ COMIC PUNCHY
 func play_explosion() -> void:
+	if not can_play_sfx("explosion_cartoon", 0.08): return
 	play_sfx("explosion_cartoon", 3.5, 0.92, 1.06)
 
 # 3. PHÁ HỦY CÔNG TRÌNH VẬT LIỆU
 func play_wood_break() -> void:
+	if not can_play_sfx("wood_break", 0.05): return
 	play_sfx("wood_break", 1.2, 0.93, 1.07)
 
 func play_stone_break() -> void:
+	if not can_play_sfx("stone_break", 0.05): return
 	play_sfx("stone_break", 2.2, 0.92, 1.06)
 
 func play_glass_break() -> void:
+	if not can_play_sfx("glass_break", 0.05): return
 	play_sfx("glass_break", 0.8, 0.94, 1.06)
 
 func play_steel_clang() -> void:
+	if not can_play_sfx("steel_clang", 0.05): return
 	play_sfx("steel_clang", 1.8, 0.95, 1.05)
 
 func play_crystal_shatter() -> void:
+	if not can_play_sfx("crystal_shatter", 0.05): return
 	play_sfx("crystal_shatter", 1.8, 0.95, 1.05)
 
 func play_obsidian_crack() -> void:
+	if not can_play_sfx("obsidian_crack", 0.05): return
 	play_sfx("obsidian_crack", 2.5, 0.94, 1.06)
 
 var sfx_cooldowns: Dictionary = {}

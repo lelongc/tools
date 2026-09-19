@@ -27,7 +27,22 @@ var save_data: Dictionary = {
 func _ready() -> void:
 	load_game()
 	if save_data.get("version", 1) < 7:
-		reset_save()
+		_migrate_save_version()
+
+func _migrate_save_version() -> void:
+	# SAVE-01: Bảo toàn toàn bộ tiến trình người chơi thay vì reset_save
+	var cur_ver = int(save_data.get("version", 1))
+	if cur_ver < 7:
+		save_data["version"] = 7
+		if not save_data.has("highest_unlocked_level"):
+			save_data["highest_unlocked_level"] = 1
+		if not (save_data.get("level_stars") is Dictionary):
+			save_data["level_stars"] = {}
+		if not (save_data.get("level_scores") is Dictionary):
+			save_data["level_scores"] = {}
+		if not (save_data.get("consumables") is Dictionary):
+			save_data["consumables"] = {"bomb": 1, "drill": 0, "acid": 0}
+		save_game()
 
 func _notification(what: int) -> void:
 	match what:
@@ -78,10 +93,13 @@ func save_game() -> void:
 			# 3. Nâng cấp file tạm thành file save chính thức (Atomic promote)
 			if dir.file_exists(SAVE_PATH):
 				dir.remove(SAVE_PATH)
-			dir.rename(TEMP_PATH, SAVE_PATH)
+			var err = dir.rename(TEMP_PATH, SAVE_PATH)
+			if err != OK:
+				if dir.file_exists(BACKUP_PATH) and not dir.file_exists(SAVE_PATH):
+					dir.copy(BACKUP_PATH, SAVE_PATH)
 
 func load_game() -> void:
-	# Thử đọc file chính thức
+	# 1. Thử đọc file chính thức
 	if FileAccess.file_exists(SAVE_PATH):
 		var file = FileAccess.open(SAVE_PATH, FileAccess.READ)
 		if file:
@@ -94,7 +112,21 @@ func load_game() -> void:
 				coins_updated.emit(save_data.get("coins", 0))
 				return
 
-	# Nếu file chính thức bị lỗi / hỏng / biến mất, kích hoạt cơ chế tự phục hồi từ bản sao lưu (.bak)
+	# 2. Nếu file chính thức bị lỗi, thử đọc từ file tạm (.tmp) còn nguyên
+	if FileAccess.file_exists(TEMP_PATH):
+		var tfile = FileAccess.open(TEMP_PATH, FileAccess.READ)
+		if tfile:
+			var tcontent = tfile.get_as_text()
+			tfile.close()
+			var tjson = JSON.new()
+			var tres = tjson.parse(tcontent)
+			if tres == OK and typeof(tjson.data) == TYPE_DICTIONARY:
+				_apply_loaded_dict(tjson.data)
+				save_game()
+				coins_updated.emit(save_data.get("coins", 0))
+				return
+
+	# 3. Kích hoạt cơ chế tự phục hồi từ bản sao lưu (.bak)
 	if FileAccess.file_exists(BACKUP_PATH):
 		var bfile = FileAccess.open(BACKUP_PATH, FileAccess.READ)
 		if bfile:
@@ -108,14 +140,29 @@ func load_game() -> void:
 				coins_updated.emit(save_data.get("coins", 0))
 				return
 
-	# Nếu hoàn toàn không có save, tạo save mới khởi đầu
+	# 4. Nếu hoàn toàn không có save, tạo save mới khởi đầu
 	save_game()
 	coins_updated.emit(save_data.get("coins", 0))
 
 func _apply_loaded_dict(dict: Dictionary) -> void:
+	# SAVE-03: Kiểm tra tính toàn vẹn và hợp lệ của cấu trúc dữ liệu lồng nhau
 	for key in save_data.keys():
 		if not dict.has(key):
 			dict[key] = save_data[key]
+
+	if not (dict.get("level_stars") is Dictionary):
+		dict["level_stars"] = {}
+	if not (dict.get("level_scores") is Dictionary):
+		dict["level_scores"] = {}
+	if not (dict.get("consumables") is Dictionary):
+		dict["consumables"] = {"bomb": 1, "drill": 0, "acid": 0}
+
+	var coins_val = dict.get("coins", 150)
+	dict["coins"] = max(0, int(coins_val))
+
+	var lvl_val = dict.get("highest_unlocked_level", 1)
+	dict["highest_unlocked_level"] = clamp(int(lvl_val), 1, 200)
+
 	save_data = dict
 
 func record_level_result(level_id: int, stars: int, score: int) -> void:
@@ -140,12 +187,17 @@ func get_level_stars(level_id: int) -> int:
 func get_level_score(level_id: int) -> int:
 	return save_data.get("level_scores", {}).get(str(level_id), 0)
 
-func is_level_unlocked(_level_id: int) -> bool:
-	# Mở khóa toàn bộ 200 màn theo yêu cầu để kiểm thử tự do mọi màn
-	return true
+func is_level_unlocked(level_id: int) -> bool:
+	# Ở chế độ Debug/Kiểm thử: Mở khóa toàn bộ 200 màn để test tự do
+	if OS.is_debug_build():
+		return true
+	# Ở bản phát hành Release CH Play: Mở khóa tuần tự theo chiến thắng thực tế
+	return level_id <= save_data.get("highest_unlocked_level", 1)
 
 func get_highest_unlocked_level() -> int:
-	return 200
+	if OS.is_debug_build():
+		return 200
+	return save_data.get("highest_unlocked_level", 1)
 
 func get_total_stars() -> int:
 	return save_data.get("total_stars", 0)

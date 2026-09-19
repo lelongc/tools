@@ -127,9 +127,19 @@ func _process(delta: float) -> void:
 	# 4. Xử lý Input ngắm bắn
 	_handle_aim_input()
 
+func has_airborne_unboosted_egg() -> bool:
+	var tree = get_tree()
+	if not tree: return false
+	var projectiles = tree.get_nodes_in_group("Projectiles")
+	for p in projectiles:
+		if is_instance_valid(p) and not p.is_queued_for_deletion():
+			if "has_boosted" in p and not p.has_boosted and not ("is_broken" in p and p.is_broken):
+				return true
+	return false
+
 func _handle_aim_input() -> void:
 	# Bỏ qua nếu game kết thúc
-	if not GameManager.is_level_active:
+	if not GameManager.is_level_active or get_tree().paused:
 		if is_aiming:
 			is_aiming = false
 			if trajectory_line: trajectory_line.visible = false
@@ -143,8 +153,15 @@ func _handle_aim_input() -> void:
 		if not is_aiming:
 			if drop_cooldown > 0.0:
 				return
+			# Ưu tiên kích hoạt kỹ năng trên không cho quả trứng đang bay (Tap-in-Flight)
+			if has_airborne_unboosted_egg():
+				drop_cooldown = 0.25
+				return
 			# Không nhận click nếu bấm đè thanh menu TopBar ở trên đỉnh hoặc kệ trứng phía dưới
-			if screen_mouse_pos.y < 70.0 or screen_mouse_pos.y > 880.0:
+			var vp_height = get_viewport_rect().size.y
+			var top_limit = 75.0
+			var bottom_limit = max(800.0, vp_height - 75.0)
+			if screen_mouse_pos.y < top_limit or screen_mouse_pos.y > bottom_limit:
 				return
 			is_aiming = true
 			aim_start_pos = mouse_pos
@@ -163,7 +180,8 @@ func _handle_aim_input() -> void:
 
 			# Co giãn người gà theo lực kéo (Nén lò xo)
 			var tension = clamp(pull_y / 280.0, 0.0, 0.45)
-			visual_root.scale = Vector2(1.0 + tension, 1.0 - tension * 0.6)
+			var sign_x = sign(facing_scale) if facing_scale != 0.0 else 1.0
+			visual_root.scale = Vector2((1.0 + tension) * sign_x, 1.0 - tension * 0.6)
 			
 			# Mắt liếc nhìn xuống hầm
 			_update_eye_direction(aim_vector.normalized())
@@ -234,6 +252,7 @@ func _drop_egg(launch_vel: Vector2) -> void:
 	egg.global_position = global_position + Vector2(0, 26.0)
 	egg.linear_velocity = launch_vel
 	get_parent().add_child(egg)
+	egg.add_to_group("Eggs")
 	
 	egg_spawned.emit(egg)
 	drop_cooldown = 0.35 # Khoảng nghỉ chống chạm nhầm 2 ngón cùng lúc

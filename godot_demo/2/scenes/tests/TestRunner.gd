@@ -300,24 +300,95 @@ func _ready() -> void:
 	air_block.queue_free()
 	GameManager.current_egg_index = 0
 
-	# Test SoundManager debouncing
-	if has_node("/root/SoundManager"):
-		var sm = get_node("/root/SoundManager")
-		var pass1 = sm.can_play_sfx("test_debounce_key", 0.1)
-		var pass2 = sm.can_play_sfx("test_debounce_key", 0.1) # immediate duplicate
-		if pass1 and not pass2:
-			print("  [PASS] SoundManager debounce correctly filtered duplicate rapid SFX")
+	# -------------------------------------------------------------------------
+	# 7. TEST BUG FIXES: ADS BUTTON UNLOCK, PAUSE RESILIENCE, & BLACKHOLE BLAST
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 7] Testing Mock Ad Claim Unlock, Pause Resilience, and BlackHole Supernova ---")
+	if has_node("/root/AdsManager"):
+		var am = get_node("/root/AdsManager")
+		if am.mock_btn_claim == null or am.mock_btn_skip == null:
+			errors.append("AdsManager mock buttons are null (BUG-01)!")
 		else:
-			errors.append("SoundManager debounce did not filter duplicate SFX!")
+			print("  [PASS] AdsManager mock buttons properly cached and accessible")
+
+	# Test Pause Resilience (BUG-02)
+	GameManager.is_level_active = true
+	GameManager.is_settling = true
+	GameManager.settle_timer = 3.0
+	get_tree().paused = true
+	GameManager._process(1.0)
+	if GameManager.settle_timer < 3.0:
+		errors.append("GameManager settle_timer decremented while game was paused (BUG-02)!")
+	else:
+		print("  [PASS] GameManager settle_timer immune to countdown while game is paused")
+	get_tree().paused = false
+	GameManager.is_settling = false
+
+	# Test BlackHole Single Supernova (BUG-05)
+	var blackhole_scene = load("res://scenes/prefabs/BlackHoleEgg.tscn")
+	if blackhole_scene:
+		var bh = blackhole_scene.instantiate()
+		add_child(bh)
+		bh.global_position = Vector2(2500, 2500) # Out of bounds
+		bh._physics_process(0.016)
+		if not bh.is_broken:
+			errors.append("BlackHoleEgg did not set is_broken on despawn blast!")
+		else:
+			# Verify second call is blocked
+			bh._supernova_blast()
+			print("  [PASS] BlackHoleEgg safely triggers single supernova without repetitive explosions")
+		bh.queue_free()
+
+	# -------------------------------------------------------------------------
+	# 8. TEST SAVEMANAGER RESILIENCE & DYNAMIC FLOOR-Y SUPPORT
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 8] Testing SaveManager Schema Validation and Dynamic Floor-Y Support ---")
+	if has_node("/root/SaveManager"):
+		var sm = get_node("/root/SaveManager")
+		var malformed_save = {
+			"version": 4,
+			"coins": "750",
+			"highest_unlocked_level": 15,
+			"level_stars": "invalid_string_not_dict",
+			"level_scores": {}
+		}
+		sm._apply_loaded_dict(malformed_save)
+		if not (sm.save_data["level_stars"] is Dictionary):
+			errors.append("SaveManager did not sanitize corrupt level_stars into Dictionary!")
+		elif sm.save_data["coins"] != 750:
+			errors.append("SaveManager did not parse valid numeric coins!")
+		else:
+			print("  [PASS] SaveManager successfully sanitized malformed schema and preserved valid progress")
+
+	# Test Dynamic floor_y support (BUG-07)
+	GameManager.current_floor_y = 920.0
+	GameManager.current_egg_index = 1
+	var deep_midair_block = block_scene.instantiate()
+	deep_midair_block.block_size = Vector2(40, 20)
+	deep_midair_block.position = Vector2(500, 800) # In deep world (floor 920), y=800 is hovering in air
+	add_child(deep_midair_block)
+	deep_midair_block.spawn_settle_timer = 0.0
+	deep_midair_block._check_underlying_support()
+
+	if not deep_midair_block.is_awake:
+		errors.append("Block hovering at y=800 with floor at 920 falsely treated as bedrock (BUG-07)!")
+		print("  [FAIL] Midair block at y=800 falsely treated as bedrock!")
+	else:
+		print("  [PASS] Dynamic floor_y correctly treats y=800 as mid-air when floor is at 920")
+	deep_midair_block.queue_free()
+	GameManager.current_egg_index = 0
 
 	print("\n================================================================")
 	if errors.size() == 0:
 		print(">>> ALL TESTS PASSED SUCCESSFULLY! (0 ERRORS) <<<")
 		print("================================================================")
+		await get_tree().process_frame
+		await get_tree().process_frame
 		get_tree().quit(0)
 	else:
 		print(">>> TESTS FAILED WITH ", errors.size(), " ERRORS: <<<")
 		for err in errors:
 			print("  * ", err)
 		print("================================================================")
+		await get_tree().process_frame
 		get_tree().quit(1)

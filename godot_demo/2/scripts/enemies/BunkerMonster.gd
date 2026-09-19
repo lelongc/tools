@@ -1062,6 +1062,8 @@ func on_near_explosion(blast_pos: Vector2, blast_radius: float) -> void:
 func _evaluate_base_state(delta: float) -> void:
 	# 1. Quét tìm quả trứng đang bay trên bầu trời
 	var eggs = get_tree().get_nodes_in_group("Eggs")
+	if eggs.is_empty():
+		eggs = get_tree().get_nodes_in_group("Projectiles")
 	var chicken = get_tree().get_first_node_in_group("Player") as ChickenBomber
 
 	var threat_egg: RigidBody2D = null

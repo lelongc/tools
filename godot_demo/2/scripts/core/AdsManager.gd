@@ -21,10 +21,26 @@ var active_failed_callback: Callable = Callable()
 var current_placement: String = ""
 var current_reward_type: String = ""
 var current_amount: int = 0
+var mock_btn_claim: Button = null
+var mock_btn_skip: Button = null
+var mock_tween: Tween = null
+var native_admob: Object = null
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	if OS.get_name() == "Android" and Engine.has_singleton("GodotAdMob"):
+		native_admob = Engine.get_singleton("GodotAdMob")
+		_init_native_admob()
 	_create_mock_ad_overlay()
+
+func _init_native_admob() -> void:
+	if not native_admob: return
+	if native_admob.has_signal("rewarded_video_loaded"):
+		native_admob.connect("rewarded_video_loaded", func(): is_ad_cached = true)
+	if native_admob.has_signal("rewarded_video_closed"):
+		native_admob.connect("rewarded_video_closed", func(): is_ad_showing = false)
+	if native_admob.has_signal("user_earned_reward"):
+		native_admob.connect("user_earned_reward", func(_type, _amt): _on_ad_claimed())
 
 # Quy tắc Vùng An Toàn (Grace Period: Màn 1 đến 5 không có quảng cáo)
 func is_ad_allowed_for_level(level_id: int) -> bool:
@@ -52,7 +68,10 @@ func show_rewarded_ad(placement: String, reward_type: String, amount: int, on_su
 	current_amount = amount
 
 	ad_started.emit(placement)
-	_play_mock_video_overlay()
+	if native_admob and native_admob.has_method("show_rewarded_video"):
+		native_admob.call("show_rewarded_video")
+	else:
+		_play_mock_video_overlay()
 
 func _create_mock_ad_overlay() -> void:
 	ad_overlay_layer = CanvasLayer.new()
@@ -139,6 +158,7 @@ func _create_mock_ad_overlay() -> void:
 
 	# Bottom Action Buttons
 	var hbox = HBoxContainer.new()
+	hbox.name = "HBox"
 	hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 	hbox.add_theme_constant_override("separation", 16)
 	vbox.add_child(hbox)
@@ -156,6 +176,8 @@ func _create_mock_ad_overlay() -> void:
 	btn_claim.custom_minimum_size = Vector2(180, 48)
 	hbox.add_child(btn_claim)
 
+	mock_btn_claim = btn_claim
+	mock_btn_skip = btn_skip
 
 	btn_skip.pressed.connect(_on_ad_skipped)
 	btn_claim.pressed.connect(_on_ad_claimed)
@@ -171,7 +193,9 @@ func _play_mock_video_overlay() -> void:
 	var timer_label = ad_overlay_layer.get_node_or_null("Center/Card/VBox/TimerLabel") as Label
 	var pbar = ad_overlay_layer.get_node_or_null("Center/Card/VBox/ProgressBar") as ProgressBar
 	var btn_claim = ad_overlay_layer.get_node_or_null("Center/Card/VBox/HBox/BtnClaim") as Button
+	if not btn_claim: btn_claim = mock_btn_claim
 	var btn_skip = ad_overlay_layer.get_node_or_null("Center/Card/VBox/HBox/BtnSkip") as Button
+	if not btn_skip: btn_skip = mock_btn_skip
 	var icon_tex = ad_overlay_layer.get_node_or_null("Center/Card/VBox/ScreenRect/VBoxContainer/RewardIconTexture") as TextureRect
 	var desc_label = ad_overlay_layer.get_node_or_null("Center/Card/VBox/ScreenRect/VBoxContainer/RewardDesc") as Label
 
@@ -199,16 +223,19 @@ func _play_mock_video_overlay() -> void:
 			if desc_label: desc_label.text = "Quay thêm 1 lượt may mắn!" if is_vi else "Get +1 Extra Lucky Spin!"
 
 	# Chạy đếm ngược 3 giây
+	if mock_tween and mock_tween.is_valid():
+		mock_tween.kill()
+
 	var duration = 3.0
-	var tween = create_tween()
-	tween.tween_method(func(val: float):
+	mock_tween = create_tween()
+	mock_tween.tween_method(func(val: float):
 		if pbar: pbar.value = val
 		var remaining = max(0.0, duration - val)
 		if timer_label:
 			timer_label.text = ("Phần thưởng sẵn sàng sau: %d giây" if is_vi else "Reward ready in: %d s") % int(ceil(remaining))
 	, 0.0, duration, duration)
 
-	await tween.finished
+	await mock_tween.finished
 
 	if timer_label:
 		timer_label.text = "Đã đủ điều kiện nhận thưởng!" if is_vi else "Reward is ready to claim!"
@@ -220,7 +247,10 @@ func _play_mock_video_overlay() -> void:
 func _on_ad_claimed() -> void:
 	if not is_ad_showing: return
 	is_ad_showing = false
-	ad_overlay_layer.visible = false
+	if mock_tween and mock_tween.is_valid():
+		mock_tween.kill()
+	if ad_overlay_layer:
+		ad_overlay_layer.visible = false
 
 	# Kích hoạt phần thưởng
 	match current_placement:
@@ -244,7 +274,10 @@ func _on_ad_claimed() -> void:
 func _on_ad_skipped() -> void:
 	if not is_ad_showing: return
 	is_ad_showing = false
-	ad_overlay_layer.visible = false
+	if mock_tween and mock_tween.is_valid():
+		mock_tween.kill()
+	if ad_overlay_layer:
+		ad_overlay_layer.visible = false
 
 	ad_skipped.emit(current_placement)
 

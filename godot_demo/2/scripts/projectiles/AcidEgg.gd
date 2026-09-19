@@ -16,6 +16,7 @@ var melt_timer: float = 0.0
 @onready var acid_particles: CPUParticles2D = get_node_or_null("AcidFX")
 
 func _ready() -> void:
+	add_to_group("Projectiles")
 	continuous_cd = RigidBody2D.CCD_MODE_CAST_RAY
 	contact_monitor = true
 	max_contacts_reported = 4

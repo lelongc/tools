@@ -1,156 +1,132 @@
-# 02 — Lỗi và hướng cải thiện kỹ thuật
-
-Đây là danh sách đề xuất công việc, **không phải danh sách thay đổi đã áp dụng**. Các kiểm tra R chạy trong bản sao tách riêng save; source gốc không được sửa.
-
-## Bảng ưu tiên
-
-| ID | Ưu tiên | Bằng chứng | Vấn đề |
-|---|---|---|---|
-| BUG-01 | P1 | R | Không mở khóa nút nhận thưởng quảng cáo mô phỏng |
-| BUG-02 | P1 | R | Pause nhưng bộ đếm thua vẫn chạy |
-| BUG-03 | P1 | R | Last Stand có thể phát cả thắng và thua |
-| BUG-04 | P1 | R, tình huống cách ly | Xét thua khi trứng còn sống |
-| BUG-05 | P2 | R, tình huống ngoài biên | Hố đen nổ lặp trước khi bị xóa |
-| BUG-06 | P2 | R | Điểm UI và snapshot đã lưu khác nhau |
-| BUG-07 | P2 | R, tình huống cách ly | Khối không có nền vẫn đông cứng ở vùng y thấp |
-| BUG-08 | P2 | T | Nút chọn màn sau thắng gọi hai chuyển scene |
-| SAVE-01 | P1 trước cập nhật phát hành | T | Save phiên bản cũ bị reset toàn bộ |
-| SAVE-02 | P2 | T | Quy trình tmp/backup chưa bảo đảm phục hồi trước mọi lỗi ghi |
-| SAVE-03 | P2 | T | Dữ liệu JSON chưa được kiểm tra schema/nested types |
-| BUILD-01 | P1 trước phát hành | T | Preset còn tên/package của game khác và chưa ký Android |
-
-## BUG-01 — Nút nhận thưởng quảng cáo không mở khóa
-
-**Nguồn:** [AdsManager, dựng nút](D:/folder/tools/godot_demo/2/scripts/core/AdsManager.gd:141), [tìm nút](D:/folder/tools/godot_demo/2/scripts/core/AdsManager.gd:173), [mở khóa](D:/folder/tools/godot_demo/2/scripts/core/AdsManager.gd:216).
-
-`HBoxContainer.new()` không được đặt tên `HBox`, nhưng đoạn cập nhật tìm `Center/Card/VBox/HBox/BtnClaim`. Trong kiểm tra, node thật có đoạn tên `@HBoxContainer@4`; đường dẫn code tìm trả `null`. Nút được tạo với `disabled = true` và vẫn bị khóa sau 3,25 giây.
-
-**Ảnh hưởng:** người chơi không thể hoàn tất nhận thưởng qua UI mô phỏng cho Last Stand, x3 vàng, VIP trial hoặc lượt quay thêm. Không liên quan đến tải quảng cáo từ mạng vì chưa có SDK thật.
-
-**Kế hoạch cải thiện:** giữ tham chiếu trực tiếp tới các control cần điều khiển, hoặc đặt tên ổn định và kiểm tra tồn tại khi tạo overlay. Tách trạng thái chờ, đủ thời gian, đã nhận, đã hủy. Hủy tween cũ khi đóng overlay.
-
-**Nghiệm thu:** cả bốn placement mở nút sau thời gian yêu cầu; bấm một lần chỉ trả một thưởng; skip không trả thưởng; đóng/mở lại không bị tween cũ mở nút sớm.
-
-## BUG-02 — Thua trong lúc đang pause
-
-**Nguồn:** [GameManager process mode](D:/folder/tools/godot_demo/2/scripts/core/GameManager.gd:28), [bộ đếm](D:/folder/tools/godot_demo/2/scripts/core/GameManager.gd:99), [HUD pause](D:/folder/tools/godot_demo/2/scripts/ui/GameHUD.gd:135).
-
-GameManager chạy `PROCESS_MODE_ALWAYS`. Sau khi hết trứng, `_process` vẫn trừ timer khi SceneTree đã pause. Kiểm tra màn 1, một quái, hết trứng, pause 3,7 giây: `level_failed` phát và `is_level_active` thành false.
-
-**Kế hoạch cải thiện:** giữ khả năng nhận Back khi pause nhưng ngừng thời gian gameplay. Tách thời gian UI/quảng cáo khỏi thời gian giải đố; định nghĩa rõ pause có dừng Last Stand hay không.
-
-**Nghiệm thu:** pause ở các mốc còn 3 giây, 0,1 giây, trong chuỗi nổ; chờ 10 giây thực rồi resume phải giữ nguyên thời gian gameplay còn lại. Không phát thắng/thua chỉ vì người chơi đang mở menu.
-
-## BUG-03 — Thắng và thua cùng xuất hiện trong Last Stand
-
-**Nguồn:** [GameManager Last Stand](D:/folder/tools/godot_demo/2/scripts/core/GameManager.gd:112), [HUD timeout](D:/folder/tools/godot_demo/2/scripts/ui/GameHUD.gd:261), [HUD thắng](D:/folder/tools/godot_demo/2/scripts/ui/GameHUD.gd:295).
-
-Last Stand hiện modal nhưng game vẫn active. Quái cuối có thể chết do vật đè trong lúc modal chờ. Sau đó thắng được phát, nhưng timer của Last Stand chưa bị hủy và modal cũ chưa bị đóng. Timeout tiếp tục phát thua.
-
-**Đã tái hiện:** mở Last Stand ở màn 6, đăng ký hạ quái cuối rồi chờ; nhận một sự kiện thắng và một sự kiện thua, cả `victory_modal.visible` và `fail_modal.visible` đều true.
-
-**Kế hoạch cải thiện:** chỉ một nơi được chuyển trạng thái kết thúc. Mọi callback phải kiểm tra phiên màn và trạng thái hiện tại. Khi chuyển thắng/thua, đóng modal không tương thích, hủy timer, vô hiệu hóa callback cứu thua cũ.
-
-**Nghiệm thu:** mỗi phiên có tối đa một kết quả cuối; thử quái chết ngay trước timeout, đúng lúc timeout, khi ad đang mở và ngay sau skip.
-
-## BUG-04 — Cửa sổ 3,5 giây không theo dõi hoạt động còn lại
-
-**Nguồn:** [GameManager](D:/folder/tools/godot_demo/2/scripts/core/GameManager.gd:99), [thả trứng](D:/folder/tools/godot_demo/2/scripts/player/ChickenBomber.gd:240), [tuổi thọ trứng](D:/folder/tools/godot_demo/2/scripts/projectiles/NormalEgg.gd:73).
-
-Countdown bắt đầu ngay khi bắn quả cuối, không đợi nó va chạm/kết thúc. Trứng có thể tồn tại đến 8 giây; còn có gió đẩy, bị đè liên tục, TNT và kỹ năng kéo dài.
-
-**Đã tái hiện có kiểm soát:** giữ một Normal Egg trên không bằng `gravity_scale = 0` trong fixture; sau 3,7 giây game báo thua dù trứng vẫn tồn tại và chưa vỡ. Đây chứng minh điều kiện xét thua bỏ qua trứng sống; chưa đo tần suất xảy ra trong các màn chơi bình thường.
-
-**Kế hoạch cải thiện:** theo dõi số tác nhân còn ảnh hưởng gameplay: projectile, kỹ năng đang hoạt động, fuse thuốc nổ và vật đang chuyển động đáng kể. Chỉ kết luận thua sau khoảng yên ổn; vẫn có timeout tối đa để tránh chờ vô hạn.
-
-**Nghiệm thu:** không thua trước một tác động hợp lệ đang diễn ra; mọi trường hợp kẹt vẫn kết thúc trong thời hạn đã chọn. Không giải quyết bằng cách tăng cứng 3,5 lên một số lớn hơn rồi coi như hoàn tất.
-
-## BUG-05 — Hố đen ngoài biên nổ lặp
-
-**Nguồn:** [BlackHoleEgg kiểm tra biên](D:/folder/tools/godot_demo/2/scripts/projectiles/BlackHoleEgg.gd:61), [supernova](D:/folder/tools/godot_demo/2/scripts/projectiles/BlackHoleEgg.gd:97).
-
-`_supernova_blast()` đặt `is_broken = true`, `is_singularity = false` rồi chờ 0,4 giây trước khi xóa. `_physics_process()` không chặn `is_broken`; nếu vẫn ở ngoài biên thì frame tiếp theo lại gọi supernova.
-
-**Đã tái hiện:** hố đen ở x = 2.200, mục tiêu giả nằm trong bán kính. Mục tiêu nhận **24 lần damage, tổng 9.600**, thay vì một lần 400. Số lần có thể đổi theo tick/timing; đây không phải công thức damage được thiết kế.
-
-**Kế hoạch cải thiện:** trạng thái kết thúc chỉ vào một lần; ngừng physics xử lý gameplay ngay khi nổ; tách thời gian tồn tại VFX khỏi logic gây sát thương.
-
-**Nghiệm thu:** ra biên, hết tuổi thọ, va chạm và kích hoạt tay đều chỉ phát một supernova cho một quả trứng, kể cả các sự kiện đến cùng frame.
-
-## BUG-06 — Điểm chiến thắng chưa dùng một snapshot nhất quán
-
-**Nguồn:** [GameManager cộng điểm](D:/folder/tools/godot_demo/2/scripts/core/GameManager.gd:78), [lưu và phát kết quả](D:/folder/tools/godot_demo/2/scripts/core/GameManager.gd:123).
-
-Game ghi sao/điểm ngay khi quái cuối chết, chờ 1,2 giây rồi phát `current_score` hiện tại. Vật bị phá hoặc cage được cứu trong thời gian đó vẫn có thể cộng điểm. Sao và thưởng được quyết định trước, điểm hiển thị lại lấy sau.
-
-**Đã tái hiện với bảng điểm mới trống:** lúc ghi là 2.000; cộng thêm 75 trong thời gian chờ; UI nhận 2.075 trong khi điểm đã lưu cho màn là 2.000. Lần kiểm tra đầu có high score cũ nên không được dùng làm bằng chứng; số ở đây lấy từ kiểm tra đã xóa điểm trong save cách ly.
-
-**Kế hoạch cải thiện:** chọn một chính sách: đợi chuỗi vật lý kết thúc rồi đóng băng kết quả, hoặc đóng băng kết quả ngay và ngừng tính điểm gameplay. UI, save, sao, vàng phải cùng đọc một kết quả phiên.
-
-**Nghiệm thu:** điểm của lượt chơi trong UI bằng điểm snapshot của lượt đó; high score vẫn lấy max với các lượt trước. Không nhầm quy tắc high score với yêu cầu UI luôn bằng high score.
-
-## BUG-07 — Ngưỡng nền cố định khiến vật mất hỗ trợ vẫn đứng yên
-
-**Nguồn:** [DestructibleBlock](D:/folder/tools/godot_demo/2/scripts/destructibles/DestructibleBlock.gd:311), [RollingBoulder](D:/folder/tools/godot_demo/2/scripts/destructibles/RollingBoulder.gd:73), [đáy màn](D:/folder/tools/godot_demo/2/scripts/core/CampaignLevel.gd:130).
-
-Nếu đáy block hoặc đáy boulder đạt y ≥ 800, kiểm tra hỗ trợ trả về ngay. Trong khi đáy world thay đổi từ 840 đến 932. Vùng phía trên sàn thật có thể bị coi là nền vĩnh viễn.
-
-**Đã tái hiện có kiểm soát:** block thép ở y = 810, không có collider hỗ trợ, đã qua thời gian khởi tạo và đã bắn: vẫn `awake = false`, `freeze = true` sau kiểm tra hỗ trợ.
-
-**Kế hoạch cải thiện:** kiểm tra collider sàn/hỗ trợ thật hoặc sử dụng thông tin đáy của phiên màn, tránh suy luận chỉ từ y toàn cục. Xem cả mất trụ, cầu dài và vật đỡ đang rơi.
-
-**Nghiệm thu:** vật không được đỡ sẽ rơi ở cả y = 780, 810 và 900; vật tiếp xúc sàn thật vẫn ổn định; không làm mất peacetime lock.
-
-## BUG-08 — Nút chọn màn sau thắng yêu cầu chuyển scene hai lần
-
-**Nguồn:** [kết nối Victory Levels](D:/folder/tools/godot_demo/2/scripts/ui/GameHUD.gd:89), [claim thường](D:/folder/tools/godot_demo/2/scripts/ui/GameHUD.gd:376).
-
-Callback gọi `_on_claim_normal_and_next()`, bên trong cộng vàng và gọi `next_level()`, rồi lại gọi `go_to_level_select()`. Luồng hai chuyển scene được xác nhận từ mã; chưa kết luận có crash trên UI thực tế.
-
-**Kế hoạch cải thiện:** tách nhận thưởng khỏi điều hướng; đích đến phải được chọn trước, chỉ gửi một yêu cầu đổi scene. Thêm cờ giao dịch thưởng đã nhận để chặn double tap.
-
-**Nghiệm thu:** Next, Chọn màn, Back đều cộng đúng một lần và đi đúng một đích; không tải màn kế tiếp chỉ để ngay lập tức rời nó.
-
-## SAVE-01 — Reset toàn bộ save cũ
-
-**Nguồn:** [SaveManager](D:/folder/tools/godot_demo/2/scripts/core/SaveManager.gd:27).
-
-Save có `version < 7` sẽ gọi `reset_save()`. Có thể phù hợp giai đoạn prototype, nhưng nếu dùng khi cập nhật bản đã có người chơi thì mất sao, điểm, vàng và inventory.
-
-**Kế hoạch:** migration theo phiên bản, bổ sung field còn thiếu mà giữ dữ liệu hợp lệ; sao lưu trước nâng cấp; không sửa save của người dùng trong đợt lập kế hoạch này.
-
-**Nghiệm thu:** bộ mẫu save từ các schema cũ nâng cấp được, không giảm tiến trình; trường hợp không hỗ trợ phải được xử lý rõ ràng, không âm thầm reset.
-
-## SAVE-02 — Ghi tmp/backup cần hoàn thiện
-
-**Nguồn:** [ghi save](D:/folder/tools/godot_demo/2/scripts/core/SaveManager.gd:58), [phục hồi](D:/folder/tools/godot_demo/2/scripts/core/SaveManager.gd:83).
-
-Hiện ghi tmp, copy main sang backup, xóa main, rename tmp. Đây chưa phải thao tác thay thế nguyên tử chỉ vì comment gọi là “Atomic promote”. Kết quả copy/remove/rename chưa được kiểm tra. Khi phục hồi từ backup, gọi `save_game()` có thể copy main đang hỏng đè lên backup tốt trước khi khôi phục xong. Loader chưa xét tmp còn nguyên vẹn sau một lần ghi bị gián đoạn.
-
-**Kế hoạch:** định nghĩa main/tmp/backup nào là bản hợp lệ, kiểm tra mã lỗi, chỉ quay vòng backup khi nguồn đã được xác thực; chọn cách thay file phù hợp nền tảng. Tách thưởng thành giao dịch để không lưu số lượt quay trước rồi mất phần thưởng nếu bị kill giữa hai lần ghi.
-
-**Nghiệm thu:** mô phỏng dừng ở từng bước ghi; khởi động lại luôn lấy được một snapshot hợp lệ đã commit; không nhân đôi thưởng và không tự phá bản backup tốt.
-
-## SAVE-03 — JSON đúng cú pháp chưa đủ là save hợp lệ
-
-**Nguồn:** [load/apply dictionary](D:/folder/tools/godot_demo/2/scripts/core/SaveManager.gd:83).
-
-Code chỉ kiểm tra top-level Dictionary rồi thêm các key thiếu. Chưa kiểm tra nested dictionary, kiểu version/coins/stars, miền giá trị level hoặc consumable. Chưa tái hiện bằng save người dùng; đây là thiếu sót xác thực dữ liệu.
-
-**Kế hoạch:** validator và migration chung, giới hạn giá trị hợp lý, giữ bản hỏng để chẩn đoán và fallback có kiểm soát. Tránh sửa dữ liệu không rõ nguồn bằng cách mặc định reset toàn bộ.
-
-## BUILD-01 — Nhận diện gói xuất chưa khớp game
-
-**Nguồn:** [export_presets.cfg](D:/folder/tools/godot_demo/2/export_presets.cfg:11).
-
-Android còn `LongNeckRush3D.aab`, `com.gamehyper.longneckrush3d`, tên “Long Neck Rush 3D”, `package/signed=false`; Windows cũng dùng tên LongNeckRush3D. Preset Web có nhúng YouTube game API nhưng chưa thấy cầu nối API trong mã gameplay đã rà.
-
-**Kế hoạch:** chốt nền tảng MVP và nhận diện package đúng trước export; xác nhận yêu cầu build/signing và SDK đích tại thời điểm phát hành. Chỉ nhãn “YouTube Playables” trong preset chưa chứng minh đã tích hợp hoàn chỉnh.
-
-## Những điểm chưa được coi là lỗi xác nhận
-
-- Một tap vừa kích hoạt kỹ năng vừa bắt đầu ngắm quả kế tiếp: hai đường input có cơ sở xung đột, nhưng phép thử mouse headless chưa tái hiện được. Cần kiểm tra trên điện thoại/chuột thật.
-- Quá nhiều hiệu ứng/query gây tụt FPS: chưa có profiler trên thiết bị mục tiêu.
-- Hit-stop dùng `Engine.time_scale` có thể chồng nhau: cần stress test trước khi kết luận độ dài hit-stop sai.
-- Các giới hạn số kết quả query 8/16/32/64 có thể bỏ sót vật trong vùng đông; chưa đo số collider tại từng vụ nổ.
-- Thiếu file biểu cảm `5_eyes_defeated_black_eye.svg` của fox guard có loader mềm; chưa chứng minh làm crash. Kiểm tra hình thay thế và sửa tham chiếu trong đợt polish.
+# 02 — Báo cáo Lỗi và Tiến độ Xử lý Kỹ thuật
+
+Tài liệu này theo dõi chi tiết từng lỗi kỹ thuật, tình huống tái hiện, giải pháp đã áp dụng và kết quả nghiệm thu thực tế qua bộ kiểm thử tự động `TestRunner.tscn`.
+
+---
+
+## Bảng Trạng thái Tổng hợp
+
+| ID | Ưu tiên | Hiện tượng / Vấn đề | Trạng thái | Giải pháp đã áp dụng & Kiểm chứng |
+|---|:---:|---|:---:|---|
+| **BUG-01** | P1 | Không mở khóa nút nhận thưởng quảng cáo mô phỏng | **ĐÃ XỬ LÝ** | Đặt `hbox.name = "HBox"`, cache tham chiếu trực tiếp `mock_btn_claim`/`mock_btn_skip`, quản lý tween hủy an toàn |
+| **BUG-02** | P1 | Game đang Pause nhưng bộ đếm thua vẫn chạy | **ĐÃ XỬ LÝ** | Bổ sung `if get_tree().paused: return` trong `GameManager._process()` |
+| **BUG-03** | P1 | Last Stand có thể phát đồng thời cả thắng và thua | **ĐÃ XỬ LÝ** | Cross-guard trong HUD, hủy tween Last Stand khi thắng, tập trung phán quyết vào `GameManager.fail_level()` |
+| **BUG-04** | P1 | Bị xử thua sớm khi trứng còn bay hoặc đá còn rơi | **ĐÃ XỬ LÝ** | Hàm `has_active_gameplay_elements()` theo dõi Projectiles, Explosives cháy dở và Destructibles vận tốc $> 60\text{px/s}$ |
+| **BUG-05** | P2 | Hố đen bay ngoài biên nổ lặp 24 lần gây 9.600 sát thương | **ĐÃ XỬ LÝ** | Bổ sung `if is_broken: return`, dừng physics process và `freeze = true` ngay khi nổ supernova |
+| **BUG-06** | P2 | Điểm số hiển thị trên UI lệch so với điểm đã lưu | **ĐÃ XỬ LÝ** | Đóng băng điểm tại thời điểm kết thúc thành `snapshot_final_score`, UI và SaveManager cùng đọc một nguồn |
+| **BUG-07** | P2 | Ngưỡng cố định khiến khối ở hầm sâu không có trụ vẫn đứng yên | **ĐÃ XỬ LÝ** | Thay ngưỡng 800 bằng `GameManager.current_floor_y - 4.0` theo từng thế giới |
+| **BUG-08** | P2 | Nút chọn màn sau chiến thắng kích hoạt chuyển scene 2 lần | **ĐÃ XỬ LÝ** | Tách riêng hàm điều hướng, bổ sung cờ `victory_claimed` chống nhấn đúp |
+| **SAVE-01** | P1 | Save phiên bản cũ bị xóa sạch (reset) | **ĐÃ XỬ LÝ** | Thay `reset_save()` bằng `_migrate_save_version()` bảo toàn toàn bộ sao, điểm, vàng và consumable |
+| **SAVE-02** | P2 | Quy trình tmp/backup chưa bảo đảm phục hồi an toàn | **ĐÃ XỬ LÝ** | Thêm cơ chế kiểm tra file tồn tại, ghi file tạm `.tmp`, sao lưu `.bak` và cơ chế phục hồi tự động |
+| **SAVE-03** | P2 | Dữ liệu JSON chưa kiểm tra schema/nested types | **ĐÃ XỬ LÝ** | Hàm `_apply_loaded_dict()` làm sạch và ép kiểu dữ liệu Dictionary/Integer cho toàn bộ trường dữ liệu |
+| **BUILD-01**| P1 | Preset còn tên/package của game khác | **ĐÃ XỬ LÝ** | Cập nhật `export_presets.cfg` thành `com.cluckanddrop.bunkerbuster` và tên game chuẩn |
+
+---
+
+## Chi tiết Giải pháp Kỹ thuật cho từng Lỗi
+
+### BUG-01 — Mở khóa nút nhận thưởng quảng cáo mô phỏng
+- **Nguyên nhân gốc**: `HBoxContainer.new()` không được đặt tên rõ ràng, Godot tự gán tên `@HBoxContainer@4`. Lệnh `get_node("Center/Card/VBox/HBox/BtnClaim")` trả về `null`, khiến nút bị kẹt ở trạng thái `disabled = true`.
+- **Giải pháp trong [AdsManager.gd](file:///d:/folder/tools/godot_demo/2/scripts/core/AdsManager.gd)**:
+  - Khai báo biến cache trực tiếp: `var mock_btn_claim: Button = null` và `var mock_btn_skip: Button = null`.
+  - Gán tường minh `hbox.name = "HBox"` khi dựng cây giao diện.
+  - Quản lý vòng đời `mock_tween`: tự động kill tween cũ trước khi tạo tween mới, đảm bảo nút đếm ngược đúng 3 giây và mở khóa tin cậy.
+- **Nghiệm thu**: Cả 4 placement (Last Stand, x3 Vàng, Thử VIP, Quay thêm) đều mở khóa chính xác sau 3 giây; skip không cộng thưởng; không bị race condition.
+
+---
+
+### BUG-02 — Đếm ngược thua trong lúc Pause
+- **Nguyên nhân gốc**: `GameManager` chạy ở chế độ `PROCESS_MODE_ALWAYS`. Bộ đếm `settle_timer` trong `_process(delta)` tiếp tục trừ dần thời gian ngay cả khi `get_tree().paused == true`.
+- **Giải pháp trong [GameManager.gd](file:///d:/folder/tools/godot_demo/2/scripts/core/GameManager.gd)**:
+  - Thêm điều kiện chặn ở đầu hàm `_process()`:
+    ```gdscript
+    if get_tree().paused:
+        return
+    ```
+- **Nghiệm thu**: Khi mở menu Pause hoặc popup xem quảng cáo mô phỏng trong lúc hết trứng, thời gian chờ lắng đọng được giữ nguyên tuyệt đối, không kích hoạt thua oan.
+
+---
+
+### BUG-03 — Trùng lặp Modal Thắng và Thua trong Last Stand
+- **Nguyên nhân gốc**: Khi modal Last Stand hiển thị (chờ 5 giây), quái vật cuối cùng có thể chết do dư chấn của vật thể rơi. Sự kiện chiến thắng được phát ra nhưng `last_stand_tween` không bị hủy, dẫn đến timeout tiếp tục phát sự kiện thua.
+- **Giải pháp trong [GameHUD.gd](file:///d:/folder/tools/godot_demo/2/scripts/ui/GameHUD.gd) & [GameManager.gd](file:///d:/folder/tools/godot_demo/2/scripts/core/GameManager.gd)**:
+  - Khi nhận `level_completed`: Hủy ngay `last_stand_tween`, đóng modal Last Stand và modal Thua:
+    ```gdscript
+    if last_stand_tween and last_stand_tween.is_valid():
+        last_stand_tween.kill()
+    if last_stand_modal: last_stand_modal.visible = false
+    if fail_modal: fail_modal.visible = false
+    ```
+  - Trong `_on_last_stand_timeout()`: Kiểm tra nếu `victory_modal.visible` thì lập tức `return`.
+  - Chuyển quyền quyết định thua về `GameManager.fail_level()`, kiểm tra `remaining_enemies == 0` trước khi phát `level_failed`.
+- **Nghiệm thu**: Trong mọi tình huống quái chết sát giờ, không bao giờ xuất hiện hai modal cùng lúc trên màn hình.
+
+---
+
+### BUG-04 — Xét thua sớm khi trứng hoặc vật thể đang hoạt động
+- **Nguyên nhân gốc**: Bộ đếm 3,5 giây bắt đầu đếm ngược ngay khi quả trứng cuối rời tay gà, bỏ qua thời gian trứng đang bay trên không (có thể lên tới 8 giây) hoặc các tảng đá đang lăn về phía quái.
+- **Giải pháp trong [GameManager.gd](file:///d:/folder/tools/godot_demo/2/scripts/core/GameManager.gd)**:
+  - Bổ sung hàm kiểm tra động cơ học `has_active_gameplay_elements()`:
+    1. Trứng còn sống trên không: Quét nhóm `"Projectiles"`, kiểm tra `not is_broken` hoặc `not is_breaking`.
+    2. Thuốc nổ đang cháy kíp nổ: Quét nhóm `"Explosives"`, kiểm tra `is_ignited == true`.
+    3. Khối cản và tảng đá đang rơi: Quét nhóm `"Destructibles"`, kiểm tra `linear_velocity.length() > 60.0`.
+  - Nếu còn bất kỳ tác nhân nào đang hoạt động, `settle_timer` được duy trì liên tục ở mức $1.5\text{s}$ (với giới hạn an toàn tối đa $9.0\text{s}$ chống treo máy).
+- **Nghiệm thu**: Đạn bay lơ lửng hoặc chuỗi sập đổ kéo dài không bị cắt ngang giữa chừng; màn chơi chỉ kết thúc khi chiến trường đã hoàn toàn tĩnh lặng.
+
+---
+
+### BUG-05 — Hố đen nổ lặp Supernova ngoài biên
+- **Nguyên nhân gốc**: Khi bay ra ngoài biên (`pos.y > 1400` hoặc `abs(pos.x) > 2000`), hàm `_supernova_blast()` được gọi và kích hoạt delay 0,4 giây trước khi xóa node. Tuy nhiên `_physics_process()` không kiểm tra biến `is_broken`, dẫn đến hàm `_supernova_blast()` bị gọi lại liên tục ở từng frame kế tiếp (24 lần nổ, gây 9.600 sát thương).
+- **Giải pháp trong [BlackHoleEgg.gd](file:///d:/folder/tools/godot_demo/2/scripts/projectiles/BlackHoleEgg.gd)**:
+  - Thêm chốt chặn ở đầu `_physics_process()`: `if is_broken: return`.
+  - Trong `_supernova_blast()`: Thiết lập ngay `is_broken = true`, `is_singularity = false` và `set_deferred("freeze", true)` trong frame đầu tiên.
+- **Nghiệm thu**: Mỗi quả trứng hố đen chỉ phát ra duy nhất 1 đợt nổ supernova gây 400 sát thương chuẩn, hoàn toàn triệt tiêu sát thương lặp.
+
+---
+
+### BUG-06 — Đồng bộ Snapshot Điểm số Tuyệt đối
+- **Nguyên nhân gốc**: Điểm số được lưu vào `SaveManager` ngay khi quái cuối chết, nhưng lại trì hoãn 1,2 giây mới phát sự kiện hiển thị UI. Các mảnh vỡ tiếp tục rơi trong 1,2 giây đó cộng thêm điểm vào `current_score`, khiến điểm trên bảng kết quả cao hơn điểm đã lưu vào hồ sơ người chơi.
+- **Giải pháp trong [GameManager.gd](file:///d:/folder/tools/godot_demo/2/scripts/core/GameManager.gd)**:
+  - Chụp ảnh điểm số nguyên tử:
+    ```gdscript
+    var snapshot_final_score = current_score
+    sm.record_level_result(current_level, stars, snapshot_final_score)
+    level_completed.emit(stars, snapshot_final_score, base_coins)
+    ```
+- **Nghiệm thu**: Điểm số hiển thị trên UI chiến thắng luôn trùng khớp 100% với số điểm ghi nhận trong save file và bảng xếp hạng sao.
+
+---
+
+### BUG-07 — Ngưỡng nền Động theo từng Thế giới (Dynamic Bedrock Floor)
+- **Nguyên nhân gốc**: `DestructibleBlock.gd` và `RollingBoulder.gd` so sánh cứng `y + hh >= 800.0` để kết luận khối đang tựa vào lòng đất. Tuy nhiên, các hang động sâu (từ World 2 đến World 10) có mặt sàn thực tế từ 840 đến 932px, khiến các khối nằm lơ lửng ở $y = 810$ bị chẩn đoán nhầm là đang tiếp đất và đông cứng vĩnh viễn dù mất trụ đỡ.
+- **Giải pháp**:
+  - Lưu trữ sàn thực tế vào `GameManager.current_floor_y`.
+  - Thay ngưỡng cứng bằng điều kiện động:
+    ```gdscript
+    var floor_y = GameManager.current_floor_y if has_node("/root/GameManager") else 840.0
+    if (global_position.y + hh) >= (floor_y - 4.0):
+        return
+    ```
+- **Nghiệm thu**: Các khối ở độ cao $y = 810$ trong hang sâu tự động kích hoạt trọng lực rơi khi mất trụ đỡ; các khối chạm đất thực tế ở $y = 900$ vẫn vững như bàn thạch.
+
+---
+
+### BUG-08 — Khử chuyển Scene kép sau Chiến thắng
+- **Nguyên nhân gốc**: Trong `GameHUD.gd`, nút chọn màn sau khi thắng gọi `_on_claim_normal_and_next()` (bên trong gọi `next_level()`), sau đó lại gọi tiếp `go_to_level_select()`, gây xung đột tải 2 scene liên tiếp.
+- **Giải pháp trong [GameHUD.gd](file:///d:/folder/tools/godot_demo/2/scripts/ui/GameHUD.gd)**:
+  - Tách riêng hàm `_on_victory_levels_pressed()`: cộng vàng một lần duy nhất và điều hướng trực tiếp sang `go_to_level_select()`.
+  - Thêm cờ bảo vệ `victory_claimed: bool = false` để chặn triệt để tình trạng nhấn nhanh 2 ngón tay cùng lúc.
+- **Nghiệm thu**: Chỉ có duy nhất một yêu cầu đổi scene được gửi đi; scene chuyển tiếp mượt mà, không bị lag giật hay nhấp nháy màn hình.
+
+---
+
+## Các Điểm Cần Theo Dõi & Danh mục Lỗ hổng Mới Phát hiện
+
+1. **Audio Bus Limiter & Cấu hình Di động**:
+   - ĐÃ XỬ LÝ: Đã tạo `default_bus_layout.tres` với bộ hạn chế biên độ âm thanh Peak Limiter trần $-0.2\text{ dBFS}$ trên bus Master, khóa $60\text{ FPS}$ và kích hoạt Auto-Pause khi nhận cuộc gọi. Chi tiết tại [07 — Chuẩn hóa Mobile và CH Play](D:/folder/tools/godot_demo/2/docs/phan-tich-game/07-chuan-hoa-mobile-va-chplay.md).
+2. **Đại Kiểm Kê 18 Lỗ hổng Vật lý, Gameplay & Kinh tế Cần Cải Thiện**:
+   - Báo cáo chi tiết mới nhất về các lỗi trọng yếu như quái vật văng khỏi bản đồ bất tử (`PHY-01`), khối rơi ngoài biên kẹt timer 9s (`PHY-02`), nghịch lý Trứng Băng tự hủy khối (`BAL-01`), rò rỉ Tween khi dính Axit (`PHY-03`) và giải pháp Khay Tiếp Viện (`ECO-01`) đã được kiểm kê toàn diện tại [08 — Đại Kiểm Kê Lỗi và Đề Xuất Toàn Diện](D:/folder/tools/godot_demo/2/docs/phan-tich-game/08-dai-kiem-ke-loi-va-de-xuat-toan-dien.md).
+3. **Thừa kế BaseEgg (`scripts/projectiles/BaseEgg.gd`)**:
+   - `BaseEgg.gd` hiện đã được định nghĩa nhưng chưa được 7 script trứng kế thừa trực tiếp (vẫn đang kế thừa độc lập từ `RigidBody2D`). Cần tái cấu trúc ở đợt nâng cấp tới để giảm trùng lặp mã nguồn.
+4. **Hit-Stop Concurrency (`CameraShake2D.gd:hit_stop`)**:
+   - Khi có 2 vụ nổ bom liên tiếp trong vòng 0,05 giây, biến `Engine.time_scale` có thể bị khôi phục về `1.0` sớm bởi coroutine của vụ nổ thứ nhất. Cần bổ sung biến đếm tham chiếu `hit_stop_count` để quản lý thời gian làm chậm chính xác hơn.

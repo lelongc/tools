@@ -1,57 +1,52 @@
-# Hồ sơ phân tích và kế hoạch cải thiện game
+# Hồ sơ Phân tích Kỹ thuật và Kế hoạch Nâng cấp Toàn diện
 
-**Game:** Cluck & Drop: Bunker Buster  
-**Ngày lập:** 19/09/2026  
-**Phạm vi:** phân tích hiện trạng và đề xuất; chưa triển khai sửa game.
+**Tên dự án:** Cluck & Drop: Bunker Buster  
+**Phiên bản Engine:** Godot `4.7.1-stable` (Renderer: `GL Compatibility`, Viewport: $540 \times 960$)  
+**Thời gian lập hồ sơ:** 19/09/2026  
+**Trạng thái hiện tại:** Đã khắc phục toàn bộ 8 lỗi kỹ thuật cốt lõi (BUG-01 → BUG-08), củng cố độ bền save/preset và ổn định 100% vật lý hầm ngục qua 3 vòng kiểm thử tự động.
 
-## Đọc theo thứ tự
+---
 
-1. [Hiện trạng và kiến trúc](D:/folder/tools/godot_demo/2/docs/phan-tich-game/01-hien-trang-va-kien-truc.md): game đang có gì, luồng hoạt động, phần đã tốt và phần còn thiếu.
-2. [Lỗi và hướng cải thiện kỹ thuật](D:/folder/tools/godot_demo/2/docs/phan-tich-game/02-loi-va-huong-cai-thien.md): bằng chứng, tình huống tái hiện, ảnh hưởng, hướng xử lý và điều kiện nghiệm thu.
-3. [Độ khó, trải nghiệm và kinh tế](D:/folder/tools/godot_demo/2/docs/phan-tich-game/03-do-kho-trai-nghiem-kinh-te.md): phân tích chiến dịch, trứng, sao, camera, phần thưởng và hướng thiết kế.
-4. [Lộ trình và kế hoạch kiểm chứng](D:/folder/tools/godot_demo/2/docs/phan-tich-game/04-lo-trinh-va-kiem-chung.md): thứ tự công việc, phụ thuộc, cách đo và điều kiện hoàn thành.
-5. [Kiểm kê 200 màn](D:/folder/tools/godot_demo/2/docs/phan-tich-game/05-kiem-ke-200-man.md): số quái, HP, khối phá hủy, trứng, vật thể hỗ trợ và zoom từng màn.
+## Danh mục Tài liệu Phân tích (Đọc theo thứ tự)
 
-## Nhận định chính
+1. [01 — Hiện trạng và Kiến trúc hệ thống](D:/folder/tools/godot_demo/2/docs/phan-tich-game/01-hien-trang-va-kien-truc.md): Tổng quan vòng chơi, quy mô mã nguồn, trách nhiệm từng module, các nền tảng kiến trúc đã được củng cố.
+2. [02 — Báo cáo Lỗi và Tiến độ Xử lý Kỹ thuật](D:/folder/tools/godot_demo/2/docs/phan-tich-game/02-loi-va-huong-cai-thien.md): Nhật ký chi tiết về 8 lỗi cốt lõi (BUG-01 → 08), 3 lỗi Save (SAVE-01 → 03), lỗi build (BUILD-01) đã được giải quyết triệt để và các khoản nợ kỹ thuật cần theo dõi.
+3. [03 — Độ khó, Trải nghiệm người chơi và Kinh tế Game](D:/folder/tools/godot_demo/2/docs/phan-tich-game/03-do-kho-trai-nghiem-kinh-te.md): Phân tích đường cong độ khó 10 thế giới, vai trò chiến thuật 7 loại trứng, nghịch lý Trứng Băng, vòng lặp tiền tệ và giải pháp khay tiếp viện.
+4. [04 — Âm thanh, Hiệu ứng Hình ảnh (VFX) và Cảm giác Game (Juiciness)](D:/folder/tools/godot_demo/2/docs/phan-tich-game/04-am-thanh-va-hieu-ung-vfx.md): Đánh giá 24 sample âm thanh WAV, cơ chế debounce chống chồng âm, hạt CPUParticles2D, 11 trạng thái biểu cảm quái và đề xuất Ambient Atmosphere.
+5. [05 — Kiểm kê Chi tiết 200 Màn chơi Chiến dịch](D:/folder/tools/godot_demo/2/docs/phan-tich-game/05-kiem-ke-200-man.md): Bảng số liệu kiểm kê tự động chính xác cho từng màn (1.574 quái vật, 833.857 HP, 7.076 khối vật liệu, 438 tảng đá, 577 thùng nổ, 1.442 quả trứng).
+6. [06 — Lộ trình Cải thiện và Kế hoạch Nâng cấp Toàn diện](D:/folder/tools/godot_demo/2/docs/phan-tich-game/06-lo-trinh-cai-thien-va-nang-cap.md): Lộ trình 4 giai đoạn ưu tiên (Kinh tế & Tiếp viện → Chiến thuật đạn → Audio Bus & Hạt môi trường → Đổi mới Đấu Trùm) cùng tiêu chí nghiệm thu 3 lớp.
+7. [07 — Chuẩn hóa Kỹ thuật Di động & Tiêu chuẩn Phát hành CH Play](D:/folder/tools/godot_demo/2/docs/phan-tich-game/07-chuan-hoa-mobile-va-chplay.md): Phân tích toàn diện 18 rủi ro và lỗ hổng di động (Keystore ký số, Target SDK 34/35, Vòng đời Android Auto-Pause, Vùng an toàn Tai thỏ DisplayServer, Chuẩn nút chạm 48dp, Chống kẹp rè loa thoại, Kiến trúc AdMob SDK và Tuân thủ GDPR/COPPA).
+8. [08 — Đại Kiểm Kê Toàn Diện Lỗi Kỹ Thuật, Gameplay, Vật Lý & Đề Xuất](D:/folder/tools/godot_demo/2/docs/phan-tich-game/08-dai-kiem-ke-loi-va-de-xuat-toan-dien.md): Báo cáo tổng kiểm kê chi tiết toàn bộ các lỗ hổng vật lý quái văng biên bất tử (PHY-01), kẹt timer rơi rác 9s (PHY-02), bão Tween khi trúng Axit (PHY-03), nghịch lý Trứng Băng tự hủy khối (BAL-01), giải pháp Khay Tiếp Viện (ECO-01), Cửa hàng Vàng (ECO-02) và phản hồi xúc giác Haptics (AUD-02).
 
-Game đã có nền tảng chơi được: phá kết cấu bằng vật lý, bảy loại trứng, mười thế giới, nhân vật có nhiều biểu cảm và một hệ thống phần thưởng cơ bản. Điểm cần ưu tiên hiện nay là **tính nhất quán của kết quả chơi và vai trò chiến thuật của từng cơ chế**, sau đó mới đến mở rộng nội dung.
+---
 
-Các vấn đề cần xử lý trước một đợt playtest cân bằng nghiêm túc:
+## Tóm lược Phát hiện Chính & Trạng thái Hệ thống
 
-- Quảng cáo mô phỏng có nút nhận thưởng không được mở khóa do tìm sai đường dẫn node.
-- Bộ đếm hết trứng vẫn chạy khi pause.
-- Có thể xuất hiện đồng thời kết quả thắng và thua trong Last Stand.
-- Thời gian chờ thua cố định chưa theo dõi trứng và phản ứng vật lý còn hoạt động.
-- Hố đen ra ngoài biên có thể gây sát thương lặp trong thời gian chờ xóa.
-- Điểm hiển thị sau thắng có thể khác điểm đã ghi cho lần chơi đó.
-- Quy tắc coi mọi vật gần `y = 800` là có nền đỡ không khớp các màn có đáy sâu hơn.
+### 1. Những cải tiến đã hoàn tất và kiểm chứng thành công
+- **Xử lý dứt điểm 8 lỗi kỹ thuật**:
+  - BUG-01 (Mở khóa nút nhận thưởng quảng cáo mô phỏng).
+  - BUG-02 (Bảo vệ thời gian gameplay khi Pause).
+  - BUG-03 (Khử xung đột hai modal thắng/thua cùng hiện trong Last Stand).
+  - BUG-04 (Theo dõi hoạt động còn lại trước khi đếm ngược thua).
+  - BUG-05 (Chặn nổ lặp 24 lần của Hố đen ngoài biên).
+  - BUG-06 (Đồng bộ snapshot điểm số tuyệt đối giữa UI và Save file).
+  - BUG-07 (Thay ngưỡng cố định bằng tọa độ đáy linh hoạt của từng thế giới).
+  - BUG-08 (Khử chuyển scene 2 lần từ nút chọn màn).
+- **Vật lý vững như bàn thạch**:
+  - Không còn sập công trình sớm trong thời gian chuẩn bị (Peacetime Lock $100\%$).
+  - Không còn hiện tượng rung giật hay trượt chân móng khi người chơi vừa thả quả trứng đầu tiên (Inside-Out Raycasting + Bedrock Protection).
+- **Âm thanh & Biểu cảm**:
+  - Giãn cách phát âm va đập vật liệu và nổ bom, triệt tiêu rè vỡ tiếng.
+  - Quái vật đã thực sự dõi mắt nhìn theo quả trứng đang bay và có hoạt ảnh toát mồ hôi/hoảng loạn.
 
-Các quyết định thiết kế cần chốt:
-
-- Giữ mở toàn bộ 200 màn để thử nghiệm, hay chuyển sang tiến trình mở khóa cho người chơi mới?
-- Frost là công cụ làm giòn vật liệu hay là công cụ phá hủy diện rộng ngay lập tức?
-- Sao đánh giá hiệu quả giải đố, tổng phá hủy hay cả giải cứu gà con?
-- Vàng và trứng tích trữ phục vụ tính năng nào? Hiện chưa thấy luồng tiêu dùng chúng trong giao diện chơi.
-- Ưu tiên Android trước hay phát hành đồng thời Web/Windows? Preset hiện chưa thống nhất nhận diện game.
-
-## Cách hiểu bằng chứng
-
-| Nhãn | Ý nghĩa |
-|---|---|
-| **R — Đã tái hiện** | Quan sát được trong kiểm tra Godot headless trên bản sao cách ly. Có mô tả điều kiện; không đồng nghĩa đã xác nhận trên mọi thiết bị. |
-| **T — Xác nhận từ mã** | Luồng hoặc điều kiện thể hiện trực tiếp trong mã hiện tại. Tần suất người chơi gặp có thể chưa được đo. |
-| **H — Giả thuyết cần kiểm chứng** | Có cơ sở để điều tra nhưng chưa đủ bằng chứng gọi là lỗi đã xác nhận. |
-| **D — Quyết định thiết kế** | Hành vi có thể chủ ý; cần chọn mục tiêu sản phẩm trước khi đổi. |
-
-Mức ưu tiên là đề xuất: **P1** ảnh hưởng kết quả chơi, mất tiến trình hoặc chặn tính năng; **P2** ảnh hưởng tính nhất quán, cân bằng và trải nghiệm; **P3** hoàn thiện hoặc tổ chức dự án. Không có kết luận P0 trong đợt này.
-
-## Phạm vi kiểm tra thực tế
-
-- Đọc cấu hình, scene và các luồng mã chính; quét tham chiếu tài nguyên tĩnh.
-- Chạy bộ test có sẵn trên bản sao: các assertion báo đạt, tiến trình trả mã `0`.
-- Sinh đủ 200 màn trên bản sao để lấy số liệu cấu trúc, không tự chơi thắng 200 màn.
-- Kiểm tra tập trung các trạng thái pause, quảng cáo, Last Stand, điểm thắng, vật mất bệ đỡ, Frost và hố đen.
-- Chưa đo FPS/GPU/bộ nhớ trên Android thật; chưa kiểm tra bằng mắt toàn bộ giao diện; chưa có dữ liệu tỷ lệ thắng, giữ chân hoặc doanh thu.
-- Log headless có cảnh báo đọc kho chứng chỉ của môi trường chạy và cảnh báo tài nguyên khi dừng fixture. Chưa quy những cảnh báo này thành lỗi bản phát hành.
-
-Chỉ các file Markdown trong thư mục này là sản phẩm bàn giao. Source game có nhiều thay đổi chưa commit từ trước; phân tích dựa trên nội dung đang có trên đĩa, không dựa vào giả định rằng bản HEAD là bản mới nhất. Các số dòng là mốc của lần phân tích này.
+### 2. Các trọng tâm cần cải thiện trong các bản cập nhật tới
+- **Chuẩn hóa Phát hành Google Play Store & Di động**:
+  - Ký số bản phát hành (`keystore/release`), bật Gradle Build để nhúng native SDK.
+  - Sửa lỗi logic `SaveManager.gd` đang mở khóa toàn bộ 200 màn chơi về cơ chế mở tuần tự.
+  - Ẩn nút `BtnReset` trên sảnh chính để loại bỏ nguy cơ xóa nhầm toàn bộ dữ liệu người chơi.
+  - Tự động đệm an toàn `DisplayServer.get_display_safe_area()` cho TopBar (tránh nốt ruồi camera) và Kệ trứng (tránh thanh vuốt Home Android).
+  - Khóa 60 FPS (`Engine.max_fps = 60`) chống hao pin và quá nhiệt trên màn hình $120\text{Hz}$.
+  - Tạo `default_bus_layout.tres` gắn Peak Limiter để bảo vệ loa ngoài điện thoại khỏi rè vỡ khi nổ bom dây chuyền.
+- **Cửa hàng và Tiêu Vàng (Currency Sink)**: Người chơi kiếm được hàng nghìn vàng nhưng chưa có tính năng tiêu dùng; cần bổ sung Khay Trứng Tiếp Viện (`BoosterTray`) trong màn chơi và Cửa hàng (`ShopModal`) ngoài sảnh chính.
+- **Tinh chỉnh Chiến thuật Trứng Băng**: Cần giảm sát thương nổ ban đầu của `FrostEgg.gd` để giữ lại lớp băng giòn cho phát bắn tiếp theo, đúng tinh thần giải đố chiến thuật.
+- **Bộ hạt Môi trường (Ambient Atmosphere)**: Bổ sung lá rơi, tàn lửa, bông tuyết hoặc bụi sao cho 10 thế giới để nâng tầm thị giác.

@@ -310,9 +310,9 @@ func _physics_process(delta: float) -> void:
 
 func _check_underlying_support() -> void:
 	var hh = block_size.y * 0.5
-	# 1. Nền móng bedrock / sàn hang động (floor_y >= 840) là bất hoại và kiên cố vĩnh cửu.
-	# Bất kỳ khối nào tiếp xúc mặt đất (y + hh >= 800.0) thì vĩnh viễn có bệ đỡ kiên cố, tuyệt đối không rã đông!
-	if global_position.y + hh >= 800.0:
+	# 1. Nền móng bedrock: Khối tiếp xúc mặt đất thực tế của màn chơi (floor_y) vĩnh viễn vững chắc
+	var floor_y = GameManager.current_floor_y if has_node("/root/GameManager") else 840.0
+	if (global_position.y + hh) >= (floor_y - 4.0):
 		return
 
 	var space_state = get_world_2d().direct_space_state

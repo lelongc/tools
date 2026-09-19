@@ -12,6 +12,7 @@ var is_awake: bool = false
 @onready var confetti_fx: CPUParticles2D = $ConfettiFX
 
 func _ready() -> void:
+	add_to_group("Destructibles")
 	set_deferred("freeze", true)
 	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
 	contact_monitor = true

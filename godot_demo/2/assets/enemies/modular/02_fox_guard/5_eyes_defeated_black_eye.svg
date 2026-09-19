@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 80" width="160" height="80">
+  <!-- Swollen Bruised Left Eye -->
+  <ellipse cx="44" cy="40" rx="38" ry="34" fill="#3a0ca3" opacity="0.3"/>
+  <circle cx="45" cy="40" r="34" fill="#5c4d7d" stroke="#370617" stroke-width="6"/>
+  <!-- Spiral / Dizzy Pupil on bruised eye -->
+  <path d="M45 28 A12 12 0 1 1 35 44 A6 6 0 1 1 45 42" fill="none" stroke="#2b0938" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Right Eye with Dizzy X -->
+  <circle cx="115" cy="40" r="34" fill="#ffffff" stroke="#370617" stroke-width="6"/>
+  <line x1="102" y1="27" x2="128" y2="53" stroke="#d90429" stroke-width="6" stroke-linecap="round"/>
+  <line x1="128" y1="27" x2="102" y2="53" stroke="#d90429" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Bruise Bandage across brow -->
+  <g transform="rotate(-18 35 15)">
+    <rect x="20" y="8" width="36" height="14" rx="4" fill="#ffb703" stroke="#bc6c25" stroke-width="2"/>
+    <line x1="38" y1="9" x2="38" y2="21" stroke="#bc6c25" stroke-width="2"/>
+  </g>
+
+  <!-- Sweat / Tears of Defeat -->
+  <path d="M146 32 C146 38 140 42 140 36 C140 30 146 22 146 32 Z" fill="#48cae4" stroke="#03045e" stroke-width="2"/>
+</svg>

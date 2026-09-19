@@ -1,106 +1,101 @@
-# 01 — Hiện trạng và kiến trúc
+# 01 — Hiện trạng và Kiến trúc Hệ thống
 
-## 1. Bản sắc và vòng chơi
+## 1. Bản sắc và Vòng lặp Gameplay (Core Loop)
 
-Cluck & Drop là game giải đố phá hủy vật lý theo màn, màn hình dọc. Người chơi điều khiển vị trí gà, kéo để định hướng/vận tốc thả trứng, dùng kỹ năng khi trứng đang bay, rồi tận dụng vật rơi và thuốc nổ để hạ toàn bộ quái.
-
-Vòng chơi hiện có:
+Cluck & Drop là game giải đố phá hủy vật lý theo màn hình dọc ($540 \times 960$). Người chơi điều khiển vị trí bay của Gà Mẹ, kéo dây ná để định hướng và lực thả trứng, kích hoạt kỹ năng đặc biệt của đạn trên không (Tap-in-Flight), sau đó tận dụng phản ứng dây chuyền từ các khối vật liệu sập đổ, đá lăn và thùng thuốc nổ để tiêu diệt toàn bộ quái vật boong-ke.
 
 ```text
-Main Menu → Chơi tiếp hoặc Chọn màn → Sinh CampaignLevel
-  → Ngắm và thả trứng → Va chạm / kỹ năng / phản ứng dây chuyền
-  → Hạ hết quái: cộng điểm trứng dư → ghi sao/điểm → hiện chiến thắng
-  → Hết trứng: chờ 3,5 giây → Last Stand nếu đủ điều kiện, hoặc thua
-  → Nhận vàng / nhận x3 qua quảng cáo mô phỏng → màn tiếp theo
+Main Menu (Chọn màn / Chơi tiếp / Vòng quay)
+  │
+  ▼
+CampaignLevel (Khởi tạo 1 trong 10 Thế Giới, 200 màn)
+  │
+  ▼ [Thời gian chuẩn bị - Peacetime Lock 100%]
+Gà bay lượn trên bầu trời ──> Kéo ngắm (Dự đoán đường đạn + Co giãn lò xo)
+  │
+  ▼ [Thả trứng - Current Egg Index > 0]
+Trứng bay trên không ──> [Tap-in-Flight: Tăng tốc/Nổ/Tách đạn] ──> Va chạm mục tiêu
+  │
+  ▼ [Phản ứng dây chuyền]
+Khối vật liệu vỡ vụn ──> Mất bệ đỡ ──> Đá lăn đè quái ──> Kích nổ TNT / Nuke
+  │
+  ├─► Hạ hết quái: Đóng băng điểm Snapshot ──> Ghi Save ──> Modal Chiến thắng (Sao nảy + Chuông ngân)
+  │
+  └─► Hết trứng: has_active_gameplay_elements() kiên nhẫn đợi tĩnh lặng
+        │
+        ├─► Quái còn <= 2 (Màn 6+): Cứu thua Last Stand (5s đếm ngược / Xem Ad mô phỏng)
+        │
+        └─► Quái còn sống: GameManager.fail_level() ──> Modal Thất bại
 ```
 
-Giải cứu gà con hiện là hoạt động cộng điểm, chưa phải điều kiện thắng độc lập. Cơ chế hoàn thành màn chỉ đếm quái. Điều này cần được giải thích rõ trong mục tiêu màn, vì cốt truyện đặt việc cứu con ở vị trí rất nổi bật.
+---
 
-Nguồn: [GameManager](D:/folder/tools/godot_demo/2/scripts/core/GameManager.gd:82), [RescueCage](D:/folder/tools/godot_demo/2/scripts/destructibles/RescueCage.gd:56), [tài liệu thiết kế](D:/folder/tools/godot_demo/2/GAME_DESIGN_DOCUMENT.md).
+## 2. Quy mô Hệ thống Hiện tại
 
-## 2. Quy mô thực tế
-
-| Thành phần | Hiện trạng |
+| Thành phần | Thông số hiện trạng |
 |---|---|
-| Engine đã dùng để kiểm tra | Godot `4.7.1.stable.official.a13da4feb` |
-| Renderer cấu hình | `gl_compatibility` cho desktop và mobile |
-| Viewport thiết kế | 540 × 960, `canvas_items`, aspect `expand` |
-| Script trong thư mục scripts | 33 file GDScript |
-| Scene trong thư mục scenes | 22 file TSCN, gồm cả test |
-| Autoload | GameManager, SoundManager, SaveManager, LocalizationManager, AdsManager |
-| Chiến dịch | 200 chỉ số màn; 10 world, mỗi world 20 màn |
-| Loại trứng chơi | Normal, Bomb, Drill, Frost, Cluster, Acid, Black Hole |
-| Danh mục quái khai báo | 28 archetype, gồm 10 tên boss |
-| Vật liệu | Wood, Stone, Glass, Steel, Obsidian, Crystal và 5 vật liệu world mới |
-| Vật thể tương tác | TNT, Nuke, Boulder, Rescue Cage, Updraft |
-| Tiến trình | Có lưu sao, điểm cao, vàng, consumable, ngày/lượt quay và cài đặt |
-| Monetization | Bốn placement quảng cáo, hiện là mô phỏng tại máy |
+| **Engine & Renderer** | Godot Engine `4.7.1-stable` — Renderer: `GL Compatibility` (Desktop & Mobile) |
+| **Độ phân giải hiển thị** | $540 \times 960$, Stretch Mode: `canvas_items`, Aspect: `expand` |
+| **Mã nguồn GDScript** | 33 tệp kịch bản GDScript được cấu trúc theo 5 thư mục chức năng |
+| **Cảnh giao diện (TSCN)** | 22 scene TSCN bao gồm cả bộ kiểm thử tự động `TestRunner.tscn` |
+| **Autoload Đơn nhân** | `GameManager`, `SoundManager`, `SaveManager`, `LocalizationManager`, `AdsManager` |
+| **Quy mô Chiến dịch** | 200 màn chơi phân bổ đều qua 10 Thế giới độc bản (mỗi thế giới 20 màn) |
+| **Kho vũ khí đạn trứng** | 7 loại đạn: Normal, Bomb, Drill, Frost, Cluster, Acid, Black Hole |
+| **Hệ thống Quái vật** | 28 archetype quái vật (18 lính/tinh anh + 10 Boss đại diện thế giới) |
+| **Thư viện Vật liệu** | 10 loại: Wood, Stone, Glass, Steel, Obsidian, Crystal, Cyber Alloy, Swamp Wood, Permafrost, Magma Brick, Celestial Stone |
+| **Vật thể tương tác** | Thùng TNT, Thùng Nuke độc hại, Tảng đá lăn, Lồng cứu gà con, Cột khí đẩy ngược Updraft |
+| **Hạ tầng Tài nguyên** | 501 tham chiếu tài nguyên tĩnh (100% tệp tồn tại hợp lệ, 0 missing assets) |
 
-`config/features` còn nhãn Forward Plus trong khi renderer thực tế chọn Compatibility. Đây là điểm nên dọn cho nhất quán cấu hình, chưa có bằng chứng nó gây lỗi render.
+---
 
-Nguồn: [project.godot](D:/folder/tools/godot_demo/2/project.godot:11).
+## 3. Trách nhiệm và Phân tầng Kiến trúc Module
 
-## 3. Trách nhiệm của các module
+```mermaid
+graph TD
+    SM[SaveManager: Tiến trình & Wallet] --> GM[GameManager: Điều phối Phiên màn]
+    LM[LocalizationManager: Đa ngôn ngữ] --> HUD[GameHUD: Giao diện Người dùng]
+    AM[AdsManager: Quảng cáo mô phỏng] --> GM
+    SND[SoundManager: Audio Pool & Debounce]
 
-| Module | Vai trò | Nhận xét kiến trúc |
-|---|---|---|
-| CampaignLevel | Sinh nền, collider biên, kết cấu, quái, trứng và camera | Một file 1.151 dòng đang chứa cả dữ liệu thiết kế lẫn logic dựng màn. |
-| GameManager | Trạng thái màn, trứng, điểm, thắng/thua, chuyển scene | Gọn nhưng các cờ boolean chưa mô tả rõ mọi trạng thái trung gian. |
-| ChickenBomber | Bay, ngắm, dự đoán đường bay, thả trứng | Input được polling trong `_process`; cần kiểm chứng tương tác với UI và kỹ năng. |
-| Các Egg script | Từng kỹ năng và sát thương | Phần lớn kế thừa trực tiếp RigidBody2D; BaseEgg chưa là nền dùng chung của bảy trứng. |
-| DestructibleBlock | Vật liệu, nứt, phá hủy, mất bệ đỡ | Có khóa trước phát bắn và kiểm tra hỗ trợ; một số điều kiện gắn với tọa độ cố định. |
-| BunkerMonster | HP, giáp, va chạm, bị đè, biểu cảm | File 1.663 dòng, phần biểu cảm và palette chiếm đáng kể; khó chỉnh chiến đấu độc lập. |
-| GameHUD | Hiển thị và điều phối modal/reward | Đang vừa trình bày UI vừa trực tiếp quyết định một số chuyển trạng thái game. |
-| SaveManager | Đọc/ghi JSON, tiến trình, wallet, inventory | Có tmp/backup, nhưng chưa có migration bảo toàn dữ liệu và kiểm tra schema đầy đủ. |
-| AdsManager | Mô phỏng video, callback, cộng thưởng | Gắn trực tiếp reward vào GameManager/SaveManager; cần giao dịch một lần và phiên màn. |
-| ParticleHelper / SoundManager | Hiệu ứng dùng chung, texture cache, audio pool | Đã có tái sử dụng; nên đo trước khi thêm pooling phức tạp. |
+    GM --> CL[CampaignLevel: Dựng màn 1-200]
+    CL --> CB[ChickenBomber: Điều khiển bay & Ngắm]
+    CL --> BS[BunkerStructure: Khối & Quái & Đạn]
+    
+    CB --> EG[7 Loại Trứng Projectiles]
+    BS --> DB[DestructibleBlock & RollingBoulder]
+    BS --> BM[BunkerMonster: Biểu cảm & Sát thương]
+    BS --> EXP[TNTBarrel & NukeBarrel]
+    BS --> RC[RescueCage: Cứu con & Thưởng điểm]
 
-Nguồn: [CampaignLevel](D:/folder/tools/godot_demo/2/scripts/core/CampaignLevel.gd:53), [BunkerMonster](D:/folder/tools/godot_demo/2/scripts/enemies/BunkerMonster.gd:149), [ChickenBomber](D:/folder/tools/godot_demo/2/scripts/player/ChickenBomber.gd:129), [BaseEgg](D:/folder/tools/godot_demo/2/scripts/projectiles/BaseEgg.gd:1).
+    DB --> GM
+    BM --> GM
+    EG --> GM
+    GM --> HUD
+    GM --> SND
+```
 
-## 4. Những nền tảng nên giữ
+### 3.1 Nhóm Điều phối Toàn cục (Core Autoloads)
+- **`GameManager.gd`**: Đóng vai trò hạt nhân điều phối vòng đời màn chơi. Nắm giữ trạng thái duy nhất về thắng/thua qua `fail_level()` và `_trigger_victory_delay()`. Tích hợp bộ đếm an toàn `has_active_gameplay_elements()` bảo đảm không kết thúc màn khi đạn hoặc vật thể còn chuyển động.
+- **`SoundManager.gd`**: Quản lý hồ âm thanh 16 kênh (`AudioStreamPlayer`), cơ chế chống chồng âm tần số cao (`can_play_sfx`), chuỗi chuông sao chiến thắng và bộ tổng hợp âm thanh dự phòng.
+- **`SaveManager.gd`**: Quản lý lưu trữ JSON bền vững với cơ chế hoán đổi nguyên tử (`.tmp` $\to$ `.bak` $\to$ `.json`), bảo vệ dữ liệu người chơi qua hàm `_migrate_save_version()`.
+- **`LocalizationManager.gd`**: Tự động chuyển đổi ngôn ngữ linh hoạt (Tiếng Việt / Tiếng Anh) cho toàn bộ nhãn, nút bấm và thông báo.
+- **`AdsManager.gd`**: Mô phỏng xem video quảng cáo có thưởng cho 4 vị trí chiến lược, quản lý vòng đời nút bấm và tween đếm ngược.
 
-### 4.1 Phá hủy có nhiều lớp phản hồi
+### 3.2 Nhóm Gameplay & Vật lý (Physics & Entities)
+- **`ChickenBomber.gd`**: Điều khiển chuyển động tuần tra của gà trên bầu trời, tính toán góc kéo và lực bắn ná, hiển thị đường chấm bi dự đoán quỹ đạo bay, đồng thời phân tách rạch ròi giữa cú chạm Tap-in-Flight và bắt đầu ngắm quả kế tiếp.
+- **`DestructibleBlock.gd` & `RollingBoulder.gd`**: Nắm giữ các chỉ số vật liệu, độ cứng, điểm nứt và cơ chế kiểm tra bệ đỡ bên dưới (Inside-Out Raycast). Đảm bảo công trình khóa tĩnh tuyệt đối trong thời gian chuẩn bị và chỉ thức giấc khi chịu va đập thực sự hoặc mất trụ đỡ.
+- **`BunkerMonster.gd`**: Chịu trách nhiệm về máu, giáp, khối lượng và 11 trạng thái biểu cảm sống động. Quét mục tiêu bay trên không để quái vật thực sự dõi mắt nhìn theo đạn rơi và bộc lộ cảm xúc tương ứng.
+- **7 Kịch bản Trứng (`NormalEgg`, `BombEgg`, `DrillEgg`, v.v.)**: Triển khai cơ chế nổ, xuyên phá, hóa băng, rải thảm và tạo hố đen. Đều được tích hợp biên an toàn despawn và cờ chống nổ lặp ngoài biên.
 
-Các khối có giai đoạn nứt, quái thay đổi biểu cảm theo tình huống, audio va chạm được hạn chế tần suất ở một số điểm, có camera shake, điểm nổi và hiệu ứng riêng cho từng trứng. Đây là phần tạo cảm giác “đánh trúng có kết quả”, phù hợp với thể loại.
+---
 
-Khuyến nghị: bảo toàn cảm giác này trong các đợt sửa logic. Đừng giảm hiệu ứng hoặc thay công thức lực đồng loạt trước khi có số đo và video so sánh.
+## 4. Các Nền tảng Đã được Củng cố Vững chắc
 
-### 4.2 Chống kết cấu tự sập trước khi bắn
-
-Block, Boulder, Cage và Enemy có những lớp khóa/wake riêng. Bộ test hiện tại kiểm tra tám màn trong một cửa sổ ngắn trước và sau khi đổi chỉ số trứng, và các kiểm tra đó đã đạt.
-
-Giới hạn: không chứng minh mọi kết cấu ổn định lâu dài hoặc sụp đúng sau va chạm. Mục tiêu cải thiện nên là “đứng vững khi chưa tương tác, sụp có lý khi mất hỗ trợ”, không phải khóa cứng ngày càng nhiều vùng tọa độ.
-
-### 4.3 Có bảo vệ vòng đời cơ bản
-
-- Projectile chính có biên tọa độ và thời gian bay tối đa 8 giây.
-- GameManager có `current_session_id` để chặn callback chiến thắng của phiên cũ.
-- Có xử lý Android Back và lưu khi ứng dụng pause.
-- SoundManager có pool 16 player và cache audio; ParticleHelper có cache texture.
-
-Đây là nền tảng tốt. Cần mở rộng tính nhất quán của chúng sang tất cả callback và trạng thái, thay vì xây lại toàn bộ.
-
-Nguồn: [GameManager](D:/folder/tools/godot_demo/2/scripts/core/GameManager.gd:149), [SoundManager](D:/folder/tools/godot_demo/2/scripts/core/SoundManager.gd:7), [ParticleHelper](D:/folder/tools/godot_demo/2/scripts/core/ParticleHelper.gd:54).
-
-## 5. Khoảng cách giữa thiết kế và bản hiện tại
-
-| Ý tưởng/định hướng | Bản hiện tại | Hướng làm rõ |
-|---|---|---|
-| Chiến dịch phát triển kỹ năng dần | Chọn được toàn bộ màn vì hàm unlock luôn true | Tách chế độ kiểm thử khỏi cấu hình dành cho người chơi. |
-| Giải cứu đàn con | Cage cộng 1.000 điểm; thắng vẫn chỉ phụ thuộc quái | Chọn đây là mục tiêu phụ, huy hiệu hay bắt buộc ở một số màn. |
-| Nhiều boss khác nhau | Boss khác hình/palette/tên; công thức HP chung và hành vi chiến đấu chủ yếu dùng chung | Thiết kế khác biệt thông qua bố cục và điểm yếu trước khi thêm AI riêng. |
-| Rewarded ads / IAP / skin | Ads mô phỏng; chưa thấy luồng mua IAP hoặc dùng vàng/consumable | Xác định MVP; tránh coi placeholder là tính năng phát hành hoàn tất. |
-| Toàn bộ công trình rã đông khi trúng | Code hiện đánh thức cục bộ theo va chạm/mất hỗ trợ | Cập nhật GDD cho đúng hành vi muốn giữ. |
-| Cinematic intro | LevelController cũ có gọi `play_intro_pan`; CameraShake hiện không có hàm này | Scene campaign hiện không dùng LevelController; dọn hoặc sửa tài liệu về đường chạy cũ. |
-
-Nguồn đường chạy cũ: [LevelController](D:/folder/tools/godot_demo/2/scripts/core/LevelController.gd:20), [CameraShake2D](D:/folder/tools/godot_demo/2/scripts/core/CameraShake2D.gd:14). Không kết luận game hiện tại crash vì đường chạy này chưa được scene chính tham chiếu.
-
-## 6. Hướng kiến trúc đề xuất — chưa triển khai
-
-1. **Tập trung quyền quyết định kết quả màn** vào GameManager hoặc một đối tượng phiên màn. HUD gửi yêu cầu và hiển thị; không tự phát `level_failed` từ timer độc lập.
-2. **Tách dữ liệu cân bằng** thành cấu hình world, enemy, material, egg và level override. Giữ nguyên thông số trong lần tách đầu để dễ đối chiếu.
-3. **Tách BunkerMonster** thành dữ liệu chỉ số, xử lý sát thương và trình bày biểu cảm khi đã có kiểm tra bảo vệ hành vi.
-4. **Chuẩn hóa vòng đời trứng**: đang bay → kỹ năng/va chạm → kết thúc ảnh hưởng gameplay → dọn hiệu ứng. Đăng ký với phiên màn để biết khi nào được xét thua.
-5. **Tách reward khỏi UI và quảng cáo**: nhận một kết quả đã xác thực, kiểm tra phiên/giao dịch, ghi thưởng đúng một lần rồi mới cập nhật UI.
-
-Không cần viết lại toàn dự án để đạt các mục tiêu này. Ưu tiên những chỗ đang gây lỗi; tách nhỏ theo từng luồng và giữ baseline so sánh.
+1. **Khóa Tĩnh Tuyệt đối trong Thời gian Chuẩn bị (Peacetime Lock $100\%$)**:
+   - Toàn bộ khối, đá, quái và thùng nổ đều có `current_egg_index == 0` guard. Không bao giờ xảy ra hiện tượng công trình tự rung lắc hay sụp đổ trước khi người chơi thả phát đạn đầu tiên.
+2. **Khử hoàn toàn sạt lở chân móng khi vừa thả trứng**:
+   - Tia raycast kiểm tra bệ đỡ được bắn từ bên trong khối ra ngoài (`hit_from_inside = true`) kết hợp với vùng miễn nhiễm sàn bedrock (`GameManager.current_floor_y - 4.0`), bảo đảm công trình đứng vững chãi khi đạn đang rơi trên không.
+3. **Tính Nhất quán của Điểm số và Kết quả Phiên**:
+   - Loại bỏ hoàn toàn khả năng vừa hiện modal Thắng vừa hiện modal Thua. Điểm số lưu trong hồ sơ người chơi và điểm số hiển thị trên bảng vàng kết quả luôn trùng khớp 1:1 qua `snapshot_final_score`.
+4. **Hạ tầng Âm thanh Sạch sẽ, Không vỡ tiếng**:
+   - Các vụ nổ lớn và chuỗi phản ứng dây chuyền sập đổ được kiểm soát âm lượng qua debounce timer, giữ cho âm thanh đanh thép, giòn giã mà không làm chói tai hay rè màng loa.

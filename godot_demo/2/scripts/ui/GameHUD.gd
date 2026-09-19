@@ -60,6 +60,37 @@ func _ready() -> void:
 	if pause_modal: pause_modal.visible = false
 	if last_stand_modal: last_stand_modal.visible = false
 
+	# Chuẩn hóa Vùng An Toàn (Safe Area) cho điện thoại có tai thỏ và thanh vuốt đáy
+	_apply_safe_area()
+	get_viewport().size_changed.connect(_apply_safe_area)
+
+func _apply_safe_area() -> void:
+	if not is_inside_tree(): return
+	var safe_rect = DisplayServer.get_display_safe_area()
+	var win_size = DisplayServer.window_get_size()
+	if win_size.y <= 0: return
+
+	var vp_size = get_viewport().get_visible_rect().size
+	var scale_y = vp_size.y / float(win_size.y)
+	var top_inset = float(safe_rect.position.y) * scale_y
+	var bottom_inset = float(win_size.y - (safe_rect.position.y + safe_rect.size.y)) * scale_y
+
+	# Đệm thanh TopBar né camera nốt ruồi / tai thỏ
+	var top_bar = get_node_or_null("TopBar") as Control
+	if top_bar:
+		var target_top = max(8.0, top_inset + 4.0)
+		var bar_h = 52.0
+		top_bar.offset_top = target_top
+		top_bar.offset_bottom = target_top + bar_h
+
+	# Đệm Kệ Trứng né thanh cử chỉ vuốt Home của Android
+	var egg_shelf = get_node_or_null("EggShelf") as Control
+	if egg_shelf:
+		var target_bottom = min(-10.0, -(bottom_inset + 12.0))
+		var shelf_h = 42.0
+		egg_shelf.offset_bottom = target_bottom
+		egg_shelf.offset_top = target_bottom - shelf_h
+
 	GameManager.score_updated.connect(_on_score_updated)
 	GameManager.egg_dropped.connect(_on_egg_dropped)
 	GameManager.level_started.connect(func(_lvl, _eggs): _refresh_egg_icons())
@@ -86,11 +117,8 @@ func _ready() -> void:
 
 	# Nút Victory Modal
 	if btn_claim_triple: btn_claim_triple.pressed.connect(_on_claim_triple_pressed)
-	if next_level_btn: next_level_btn.pressed.connect(_on_claim_normal_and_next)
-	if victory_levels_btn: victory_levels_btn.pressed.connect(func():
-		_on_claim_normal_and_next()
-		GameManager.go_to_level_select()
-	)
+	if next_level_btn: next_level_btn.pressed.connect(_on_victory_next_pressed)
+	if victory_levels_btn: victory_levels_btn.pressed.connect(_on_victory_levels_pressed)
 	
 	# Nút Last Stand Modal
 	if btn_last_stand_ad: btn_last_stand_ad.pressed.connect(_on_last_stand_ad_pressed)
@@ -124,7 +152,7 @@ func handle_back_button() -> void:
 	if pause_modal and pause_modal.visible:
 		_toggle_pause()
 	elif victory_modal and victory_modal.visible:
-		_on_claim_normal_and_next()
+		_on_victory_next_pressed()
 	elif fail_modal and fail_modal.visible:
 		GameManager.go_to_level_select()
 	elif last_stand_modal and last_stand_modal.visible:
@@ -259,11 +287,13 @@ func _on_last_stand_offered(enemies_left: int) -> void:
 		last_stand_tween.finished.connect(_on_last_stand_timeout)
 
 func _on_last_stand_timeout() -> void:
+	# BUG-03: Nếu màn đã chiến thắng, tuyệt đối không kích hoạt thất bại
+	if victory_modal and victory_modal.visible:
+		return
 	if last_stand_modal and last_stand_modal.visible:
 		last_stand_modal.visible = false
 		if modal_dimmer: modal_dimmer.visible = false
-		GameManager.is_level_active = false
-		GameManager.level_failed.emit()
+		GameManager.fail_level()
 
 func _on_last_stand_ad_pressed() -> void:
 	if last_stand_tween and last_stand_tween.is_valid():
@@ -294,6 +324,11 @@ func _on_last_stand_skip_pressed() -> void:
 # ==========================================
 func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> void:
 	current_base_coins = base_coins
+	# BUG-03: Triệt tiêu Last Stand và Fail modal nếu chiến thắng xuất hiện
+	if last_stand_tween and last_stand_tween.is_valid():
+		last_stand_tween.kill()
+	if last_stand_modal: last_stand_modal.visible = false
+	if fail_modal: fail_modal.visible = false
 	if modal_dimmer: modal_dimmer.visible = true
 
 	if victory_modal:
@@ -361,8 +396,10 @@ func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> 
 		victory_modal.scale = Vector2(0.2, 0.2)
 		tween.tween_property(victory_modal, "scale", Vector2.ONE, 0.32)
 
+var victory_claimed: bool = false
+
 func _on_claim_triple_pressed() -> void:
-	if modal_dimmer: modal_dimmer.visible = false
+	if victory_claimed: return
 	if not has_node("/root/AdsManager"): return
 	var am = get_node("/root/AdsManager")
 	am.show_rewarded_ad(
@@ -370,19 +407,38 @@ func _on_claim_triple_pressed() -> void:
 		"coins",
 		current_base_coins * 3,
 		func():
+			victory_claimed = true
+			if modal_dimmer: modal_dimmer.visible = false
 			GameManager.next_level()
 	)
 
-func _on_claim_normal_and_next() -> void:
+func _on_victory_next_pressed() -> void:
+	if victory_claimed: return
+	victory_claimed = true
 	if modal_dimmer: modal_dimmer.visible = false
 	if has_node("/root/SaveManager"):
 		get_node("/root/SaveManager").add_coins(current_base_coins)
 	GameManager.next_level()
 
+func _on_victory_levels_pressed() -> void:
+	if victory_claimed: return
+	victory_claimed = true
+	if modal_dimmer: modal_dimmer.visible = false
+	if has_node("/root/SaveManager"):
+		get_node("/root/SaveManager").add_coins(current_base_coins)
+	GameManager.go_to_level_select()
+
 # ==========================================
 # THẤT BẠI (FAIL MODAL)
 # ==========================================
 func _on_level_failed() -> void:
+	# BUG-03: Tuyệt đối không hiện fail modal nếu người chơi đã chiến thắng
+	if victory_modal and victory_modal.visible:
+		return
+	if last_stand_tween and last_stand_tween.is_valid():
+		last_stand_tween.kill()
+	if last_stand_modal: last_stand_modal.visible = false
+
 	if fail_modal:
 		if modal_dimmer: modal_dimmer.visible = true
 		fail_modal.visible = true

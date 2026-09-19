@@ -147,10 +147,33 @@ func _on_btn_sound_pressed() -> void:
 		_update_sound_button()
 		AudioServer.set_bus_mute(0, not enabled)
 
+var reset_confirm_timer: float = 0.0
+
 func _on_btn_reset_pressed() -> void:
-	if has_node("/root/SaveManager"):
-		get_node("/root/SaveManager").reset_save()
-		_update_star_count()
-		_update_coin_count()
-	if has_node("/root/SoundManager"):
-		get_node("/root/SoundManager").play_button_click()
+	var now = Time.get_ticks_msec() / 1000.0
+	if now - reset_confirm_timer < 3.0:
+		# Bấm lần 2 trong vòng 3 giây -> Xác nhận xóa tiến trình!
+		if has_node("/root/SaveManager"):
+			get_node("/root/SaveManager").reset_save()
+			_update_star_count()
+			_update_coin_count()
+		if has_node("/root/SoundManager"):
+			get_node("/root/SoundManager").play_button_click()
+		reset_confirm_timer = 0.0
+		if btn_reset:
+			btn_reset.modulate = Color.WHITE
+			btn_reset.tooltip_text = "Đã xóa tiến trình!"
+	else:
+		# Bấm lần 1 -> Cảnh báo bằng đổi màu đỏ cam và yêu cầu bấm lại
+		reset_confirm_timer = now
+		if has_node("/root/SoundManager"):
+			get_node("/root/SoundManager").play_button_click()
+		if btn_reset:
+			btn_reset.modulate = Color(1.0, 0.4, 0.4)
+			btn_reset.tooltip_text = "Bấm lại trong 3s để xác nhận xóa!"
+			get_tree().create_timer(3.0).timeout.connect(func():
+				if is_instance_valid(btn_reset) and reset_confirm_timer != 0.0:
+					btn_reset.modulate = Color.WHITE
+					btn_reset.tooltip_text = "Xóa tiến trình (Reset Progress)"
+					reset_confirm_timer = 0.0
+			)

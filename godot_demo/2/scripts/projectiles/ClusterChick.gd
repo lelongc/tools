@@ -10,6 +10,7 @@ var is_poofed: bool = false
 @onready var poof_fx: CPUParticles2D = get_node_or_null("PoofFX")
 
 func _ready() -> void:
+	add_to_group("Projectiles")
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_impact)

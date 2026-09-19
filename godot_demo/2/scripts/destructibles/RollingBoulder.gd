@@ -35,6 +35,7 @@ func _ready() -> void:
 		elif world_id == 5:
 			dust_fx.color = Color(0.75, 0.45, 1.0, 0.7)
 
+	add_to_group("Destructibles")
 	set_deferred("freeze", true)
 	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
 	mass = 8.0
@@ -71,8 +72,9 @@ func _physics_process(delta: float) -> void:
 			_check_underlying_support()
 
 func _check_underlying_support() -> void:
-	# 1. Nền móng bedrock: Nếu tảng đá nằm trên mặt đất (y + 28.0 >= 800.0) thì không bao giờ mất bệ đỡ
-	if global_position.y + 28.0 >= 800.0:
+	# 1. Nền móng bedrock: Nếu tảng đá tiếp xúc sàn đất thực tế của màn chơi (floor_y) thì không bao giờ mất bệ đỡ
+	var floor_y = GameManager.current_floor_y if has_node("/root/GameManager") else 840.0
+	if (global_position.y + 28.0) >= (floor_y - 4.0):
 		return
 
 	var space_state = get_world_2d().direct_space_state

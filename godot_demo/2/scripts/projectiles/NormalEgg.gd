@@ -27,6 +27,7 @@ static var tex_shell_shard: Texture2D = null
 static var tex_yolk_dot: Texture2D = null
 
 func _ready() -> void:
+	add_to_group("Projectiles")
 	continuous_cd = RigidBody2D.CCD_MODE_CAST_RAY
 	contact_monitor = true
 	max_contacts_reported = 8

@@ -128,6 +128,8 @@ func _setup_level() -> void:
 	var total_w = right_edge_x + 30.0
 
 	var floor_y = 840.0 + min((world_id - 1) * 12.0, 92.0)
+	if has_node("/root/GameManager"):
+		get_node("/root/GameManager").current_floor_y = floor_y
 	var cavern_top_y = clamp(380.0 - (min(world_id, 6) * 18.0) - (world_stage * 2.0), 200.0, 380.0)
 	var cavern_bottom_y = floor_y
 	intro_target_y = (cavern_bottom_y - 20.0 + cavern_top_y) * 0.5

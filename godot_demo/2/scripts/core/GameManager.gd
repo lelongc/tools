@@ -20,17 +20,33 @@ var current_egg_index: int = 0
 var is_level_active: bool = false
 var is_settling: bool = false
 var settle_timer: float = 0.0
+var max_settle_fallback_timer: float = 0.0
+var current_floor_y: float = 840.0
 
 var last_stand_used_in_level: bool = false
 var vip_trial_used_in_level: bool = false
 var current_session_id: int = 0
 
+var last_back_press_time: float = 0.0
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
-		_handle_mobile_back()
+	match what:
+		NOTIFICATION_WM_GO_BACK_REQUEST:
+			_handle_mobile_back()
+		NOTIFICATION_APPLICATION_PAUSED, NOTIFICATION_APPLICATION_FOCUS_OUT:
+			_handle_app_paused()
+
+func _handle_app_paused() -> void:
+	# Tự động bật tạm dừng (Auto-Pause) để bảo vệ ván đấu khi có cuộc gọi hoặc chuyển app
+	if is_level_active and not get_tree().paused:
+		var scene = get_tree().current_scene
+		if scene and scene.name == "CampaignLevel":
+			var hud = scene.get_node_or_null("GameHUD")
+			if hud and hud.has_method("toggle_pause"):
+				hud.toggle_pause()
 
 func _handle_mobile_back() -> void:
 	# 1. Nếu đang hiển thị lớp quảng cáo mô phỏng thì bỏ qua quảng cáo
@@ -53,11 +69,20 @@ func _handle_mobile_back() -> void:
 	elif scene.name == "LevelSelect":
 		go_to_main_menu()
 	elif scene.name == "MainMenu":
+		# Kiểm tra modal đang mở ở MainMenu
 		var wheel = scene.get_node_or_null("DailyWheelModal")
 		if wheel and wheel.visible:
 			wheel.close_wheel()
-		else:
+			return
+
+		# Cơ chế nhấn 2 lần trong 2 giây để thoát (Double-tap back debounce)
+		var now = Time.get_ticks_msec() / 1000.0
+		if now - last_back_press_time < 2.0:
 			get_tree().quit()
+		else:
+			last_back_press_time = now
+			if has_node("/root/SoundManager"):
+				get_node("/root/SoundManager").play_button_click()
 
 func start_level(level_id: int, enemy_count: int, egg_list: Array[String]) -> void:
 	current_session_id += 1
@@ -70,12 +95,14 @@ func start_level(level_id: int, enemy_count: int, egg_list: Array[String]) -> vo
 	is_level_active = true
 	is_settling = false
 	settle_timer = 0.0
+	max_settle_fallback_timer = 0.0
 	last_stand_used_in_level = false
 	vip_trial_used_in_level = false
 	score_updated.emit(current_score)
 	level_started.emit(current_level, available_eggs)
 
 func add_score(points: int) -> void:
+	if not is_level_active: return
 	current_score += points
 	score_updated.emit(current_score)
 
@@ -99,15 +126,57 @@ func get_next_egg() -> String:
 func check_out_of_eggs() -> void:
 	if remaining_enemies > 0 and current_egg_index >= available_eggs.size():
 		is_settling = true
-		settle_timer = 3.5
+		settle_timer = 2.0
+		max_settle_fallback_timer = 9.0
+
+func has_active_gameplay_elements() -> bool:
+	var tree = get_tree()
+	if not tree: return false
+
+	# 1. Kiểm tra xem còn quả trứng nào còn sống trên không
+	var projectiles = tree.get_nodes_in_group("Projectiles")
+	for p in projectiles:
+		if is_instance_valid(p) and not p.is_queued_for_deletion():
+			if "is_breaking" in p and not p.is_breaking:
+				return true
+			elif "is_broken" in p and not p.is_broken:
+				return true
+			elif not ("is_breaking" in p or "is_broken" in p):
+				return true
+
+	# 2. Kiểm tra thuốc nổ đang cháy kíp nổ chuẩn bị nổ
+	var explosives = tree.get_nodes_in_group("Explosives")
+	for exp_obj in explosives:
+		if is_instance_valid(exp_obj) and not exp_obj.is_queued_for_deletion():
+			if "is_ignited" in exp_obj and exp_obj.is_ignited:
+				return true
+
+	# 3. Kiểm tra các khối / tảng đá đang rơi với vận tốc lớn (có thể đè trúng quái)
+	var destructibles = tree.get_nodes_in_group("Destructibles")
+	for d in destructibles:
+		if is_instance_valid(d) and not d.is_queued_for_deletion() and d is RigidBody2D:
+			if not d.freeze and d.linear_velocity.length() > 60.0:
+				return true
+
+	return false
 
 func _process(delta: float) -> void:
+	# BUG-02: Không chạy đếm ngược gameplay khi SceneTree đang tạm dừng (Pause)
+	if get_tree().paused:
+		return
+
 	if is_settling and is_level_active:
-		settle_timer -= delta
+		max_settle_fallback_timer -= delta
+		# BUG-04: Nếu còn trứng đang bay, thuốc nổ đang cháy, hoặc khối đang rơi thì kiên nhẫn đợi
+		if has_active_gameplay_elements() and max_settle_fallback_timer > 0.0:
+			settle_timer = 1.5
+		else:
+			settle_timer -= delta
+
 		if remaining_enemies == 0:
 			is_settling = false
 			_trigger_victory_delay()
-		elif settle_timer <= 0.0:
+		elif settle_timer <= 0.0 or max_settle_fallback_timer <= 0.0:
 			is_settling = false
 			if remaining_enemies > 0:
 				# Điểm chạm 1: Cứu thua "Suýt thắng" (Last Stand)
@@ -117,40 +186,51 @@ func _process(delta: float) -> void:
 					last_stand_used_in_level = true
 					last_stand_offered.emit(remaining_enemies)
 				else:
-					is_level_active = false
-					level_failed.emit()
+					fail_level()
+
+func fail_level() -> void:
+	if not is_level_active: return
+	if remaining_enemies == 0: return
+	is_level_active = false
+	level_failed.emit()
 
 func _trigger_victory_delay() -> void:
 	if not is_level_active: return
 	is_level_active = false
 	
 	var unused_eggs = available_eggs.size() - current_egg_index
-	add_score(unused_eggs * 1200)
+	# Cộng điểm thưởng trứng dư trực tiếp vào snapshot
+	var bonus_points = unused_eggs * 1200
+	current_score += bonus_points
+	score_updated.emit(current_score)
+
+	# BUG-06: Chụp snapshot điểm chính xác tại thời điểm đóng màn
+	var snapshot_final_score = current_score
 
 	var base_target = (total_enemies * 800) + 400
 	var star3_target = base_target + 1400
 	var star2_target = base_target + 600
 
 	var stars = 1
-	if current_score >= star3_target and unused_eggs >= 1:
+	if snapshot_final_score >= star3_target and unused_eggs >= 1:
 		stars = 3
-	elif current_score >= star2_target or unused_eggs >= 1:
+	elif snapshot_final_score >= star2_target or unused_eggs >= 1:
 		stars = 2
 
 	var base_coins = 50
 	if stars == 2: base_coins = 80
 	elif stars == 3: base_coins = 120
 
-	# Lưu kết quả vào SaveManager
+	# Lưu kết quả vào SaveManager bằng đúng điểm snapshot
 	if has_node("/root/SaveManager"):
 		var sm = get_node("/root/SaveManager")
-		sm.record_level_result(current_level, stars, current_score)
+		sm.record_level_result(current_level, stars, snapshot_final_score)
 
 	var session = current_session_id
 	await get_tree().create_timer(1.2).timeout
 	if session != current_session_id:
 		return # Bỏ qua nếu người chơi đã thoát hoặc đổi màn trong lúc đợi
-	level_completed.emit(stars, current_score, base_coins)
+	level_completed.emit(stars, snapshot_final_score, base_coins)
 
 func load_level(level_id: int) -> void:
 	get_tree().paused = false

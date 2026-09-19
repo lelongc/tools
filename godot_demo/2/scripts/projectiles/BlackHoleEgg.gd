@@ -16,6 +16,7 @@ var vortex_timer: float = 0.0
 @onready var vortex_particles: CPUParticles2D = get_node_or_null("VortexFX")
 
 func _ready() -> void:
+	add_to_group("Projectiles")
 	continuous_cd = RigidBody2D.CCD_MODE_CAST_RAY
 	contact_monitor = true
 	max_contacts_reported = 4
@@ -59,6 +60,7 @@ const MAX_AIRBORNE_LIFETIME = 8.0
 var total_airborne_timer: float = 0.0
 
 func _physics_process(delta: float) -> void:
+	if is_broken: return
 	if not is_singularity:
 		total_airborne_timer += delta
 		var pos = global_position
@@ -95,8 +97,12 @@ func _physics_process(delta: float) -> void:
 			_supernova_blast()
 
 func _supernova_blast() -> void:
-	is_singularity = false
+	if is_broken: return
 	is_broken = true
+	is_singularity = false
+	set_deferred("freeze", true)
+	if visual_root: visual_root.visible = false
+	if vortex_particles: vortex_particles.emitting = false
 
 	CameraShake.hit_stop(0.08)
 	CameraShake.add_trauma(0.9)
