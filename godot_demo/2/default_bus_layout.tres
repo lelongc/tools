@@ -1,13 +1,11 @@
-[gd_resource type="AudioBusLayout" load_steps=2 format=3 uid="uid://c8audiobuslayout"]
+[gd_resource type="AudioBusLayout" format=3 uid="uid://2po7evjbci40"]
 
 [sub_resource type="AudioEffectLimiter" id="AudioEffectLimiter_peak"]
 resource_name = "Limiter"
 ceiling_db = -0.2
 threshold_db = -1.5
-soft_clip_db = 2.0
 
 [resource]
-bus/0/volume_db = 0.0
 bus/0/effect/0/effect = SubResource("AudioEffectLimiter_peak")
 bus/0/effect/0/enabled = true
 bus/1/name = &"BGM"

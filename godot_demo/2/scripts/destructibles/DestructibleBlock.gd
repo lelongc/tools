@@ -13,6 +13,7 @@ var is_awake: bool = false
 var spawn_settle_timer: float = 0.5
 var base_visual_pos: Vector2 = Vector2.ZERO
 var damage_flash_cooldown: float = 0.0
+var micro_jitter_timer: float = 0.0
 
 @onready var col_shape: CollisionShape2D = $CollisionShape2D
 @onready var block_visual: NinePatchRect = $BlockVisual
@@ -89,8 +90,8 @@ func _ready() -> void:
 	angular_damp = 4.0
 
 	var pmat = PhysicsMaterial.new()
-	pmat.friction = 0.95
-	pmat.bounce = 0.02
+	pmat.friction = 0.85
+	pmat.bounce = 0.0
 	physics_material_override = pmat
 
 	if fracture_particles:
@@ -308,6 +309,28 @@ func _physics_process(delta: float) -> void:
 		_fracture_block()
 		return
 
+	# Anti-Jitter & Micro-Velocity Snubber (Triệt tiêu rung giật khi thanh công trình bị kẹt / chèn ép)
+	if is_awake and not is_destroyed:
+		var speed = linear_velocity.length()
+		var ang_speed = abs(angular_velocity)
+
+		# Khi thanh công trình nằm kẹt/chèn ép, vận tốc dao động rất nhỏ (< 32.0 px/s, xoay < 1.4 rad/s)
+		if speed < 32.0 and ang_speed < 1.4:
+			# Dập tắt xung lực vi mô lũy tiến theo từng tick vật lý
+			linear_velocity *= 0.82
+			angular_velocity *= 0.72
+			micro_jitter_timer += delta
+
+			# Nếu dao động kẹt kéo dài > 0.18s hoặc vận tốc đã triệt tiêu về gần 0 (< 3.0 px/s):
+			if micro_jitter_timer > 0.18 or (speed < 3.0 and ang_speed < 0.2):
+				linear_velocity = Vector2.ZERO
+				angular_velocity = 0.0
+				sleeping = true
+				micro_jitter_timer = 0.0
+		else:
+			# Thanh đang bay tự do, rơi dốc hoặc bị bom hất tung -> reset bộ đếm ngay
+			micro_jitter_timer = max(0.0, micro_jitter_timer - delta * 3.0)
+
 	if not is_awake:
 		if spawn_settle_timer > 0.0:
 			return
@@ -381,6 +404,8 @@ func wake_up() -> void:
 		if gm.current_egg_index == 0:
 			return
 	is_awake = true
+	sleeping = false
+	micro_jitter_timer = 0.0
 	set_deferred("freeze", false)
 	_wake_up_neighbors()
 
@@ -422,8 +447,11 @@ func _on_impact(body: Node) -> void:
 		var rel_vel = (linear_velocity - b_vel).length()
 
 		# Chỉ thức giấc khi có va chạm thực sự với vận tốc > 65px/s (không kích hoạt khi chỉ chạm nhẹ hay đứng yên)
-		if rel_vel > 65.0 and not is_awake:
-			wake_up()
+		if rel_vel > 65.0:
+			if not is_awake:
+				wake_up()
+			sleeping = false
+			micro_jitter_timer = 0.0
 
 		if rel_vel > 140.0:
 			var impact_dmg = (rel_vel - 140.0) * min(body.mass * 0.28, 2.5)
@@ -434,6 +462,8 @@ func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
 	if is_destroyed: return
 	if not is_awake:
 		wake_up()
+	sleeping = false
+	micro_jitter_timer = 0.0
 
 	current_health -= amount
 
