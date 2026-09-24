@@ -258,11 +258,20 @@ func _on_ad_claimed() -> void:
 			GameManager.available_eggs.append("bomb")
 			GameManager.is_level_active = true
 			GameManager.is_settling = false
+			GameManager.settle_timer = 2.0
+			GameManager.max_settle_fallback_timer = 9.0
+			var chicken = get_tree().get_first_node_in_group("Player")
+			if chicken and chicken.has_method("_prepare_next_egg"):
+				chicken._prepare_next_egg()
 		PLACEMENT_TRIPLE_COINS:
 			if has_node("/root/SaveManager"):
 				get_node("/root/SaveManager").add_coins(current_amount)
 		PLACEMENT_VIP_TRIAL:
 			GameManager.available_eggs.insert(GameManager.current_egg_index, "acid")
+			GameManager.vip_trial_used_in_level = true
+			var chicken = get_tree().get_first_node_in_group("Player")
+			if chicken and chicken.has_method("_prepare_next_egg"):
+				chicken._prepare_next_egg()
 		PLACEMENT_DAILY_SPIN:
 			pass
 

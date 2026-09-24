@@ -68,6 +68,17 @@
    - Khóa đuôi gà `scale.x = 0.85` dương tuyệt đối, hiệu ứng cánh nghiêng 3D (Banking Depth), không bao giờ lật bẹp dúm như tờ giấy.
    - Cơ chế điều khiển kép: Chạm nhanh (Tap-to-Drop) thả rơi tức thì & Kéo giữ (Drag-Aim) ngắm bắn góc xa.
    - Vòng đời `GameHUD._exit_tree` dọn dẹp kết nối viewport, tween và pause sạch sẽ.
+12. [21 — Báo Cáo Kiểm Tra Chuyên Sâu & Vá Toàn Diện Mọi Lỗi Tiềm Ẩn Trên Toàn Bộ Game](21-kiem-tra-chuyen-sau-fix-moi-loi-tiem-an-va-hoan-thien-mobile.md): **Triệt Tiêu Mọi Lỗ Hổng Tiềm Ẩn (Mobile Hardening)**:
+   - Phòng vệ 2 lớp (Two-Phase Guard Pattern) triệt tiêu hoàn toàn nguy cơ crash `get_tree().create_timer()` khi đổi cảnh đột ngột trên 14 vị trí.
+   - Chuẩn hóa điều hướng phím Back phần cứng Android (`NOTIFICATION_WM_GO_BACK_REQUEST`) và phím Escape trên GameHUD, ShopModal, DailyWheelModal.
+   - Chốt an toàn `if not is_spinning` trên Daily Wheel Modal chống mất quà quay thưởng khi vô tình vuốt Back.
+   - Dọn dẹp sạch sẽ kết nối `get_viewport().size_changed` trên MainMenu và LevelSelect trong `_exit_tree()`.
+   - Kiểm toán tự động toàn diện 200 Màn Chiến Dịch và 10 Đại Trùm Thế Giới (Test 16).
+13. [22 — Đại Phân Tích Toàn Diện Dự Án, Bóc Tách Mọi Điểm Cần Cải Thiện & Kế Hoạch Nâng Cấp Tổng Thể](22-dai-phan-tich-toan-dien-du-an-va-ke-hoach-cai-thien-tong-the.md): **Bách Khoa Toàn Thư Về Các Điểm Cải Tiến (Master Improvement Inventory)**:
+   - Đại phẫu 7 trục hệ thống: Vật lý phá hủy, Điều khiển ngắm bắn, Thiết kế 200 màn & Boss, Hiệu năng tản nhiệt di động, Mỹ thuật VFX/SFX, Công thái học Mobile UI/UX, và Chuẩn phát hành CH Play/YouTube Playables/LiveOps.
+   - Bảng phân rã chi tiết toàn bộ **20 điểm cải tiến cụ thể (từ I01 đến I20)** kèm vị trí tệp mã nguồn và tác động trải nghiệm.
+   - Ma trận phân loại ưu tiên 4 góc phần tư (P0/P1 Cốt lõi sống còn, P2 Quick Wins xúc cảm cao, P3 Tính năng mở rộng).
+   - Lộ trình hành động chi tiết 4 giai đoạn chuẩn bị phát hành v1.0 và phát triển dài hạn 2026.
 
 ---
 
@@ -75,8 +86,8 @@
 
 ```
 ================================================================
->>> ALL 15 TEST SUITES PASSED SUCCESSFULLY! (0 ERRORS) <<<
+>>> ALL 17 TEST SUITES PASSED SUCCESSFULLY! (0 ERRORS) <<<
 ================================================================
 ```
-- **0 Lỗi logic, 15/15 Bộ Test Tự Động Vượt Qua Tuyệt Đối, Return Code 0**.
-- Hệ sinh thái dự án đã hoàn thiện trọn vẹn **11 bộ tài liệu kỹ thuật đỉnh cao** (từ Tài liệu 10 đến Tài liệu 20), phủ kín $100\%$ các khía cạnh: engine, mỹ thuật, cân bằng, hiệu năng, lỗi tiềm ẩn, bảo mật, YouTube Playables và CH Play Store 2026.
+- **0 Lỗi logic, 17/17 Bộ Test Tự Động Vượt Qua Tuyệt Đối, Return Code 0**.
+- Hệ sinh thái dự án đã hoàn thiện trọn vẹn **13 bộ tài liệu kỹ thuật đỉnh cao** (từ Tài liệu 10 đến Tài liệu 22), phủ kín $100\%$ các khía cạnh: engine, mỹ thuật, cân bằng, hiệu năng, lỗi tiềm ẩn, bảo mật, YouTube Playables và CH Play Store 2026.

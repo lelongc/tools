@@ -132,5 +132,10 @@ func _freeze_blast() -> void:
 			elif col.has_method("take_damage"):
 				col.take_damage(80.0, global_position)
 
+	if not is_inside_tree() or not get_tree():
+		queue_free()
+		return
+
 	await get_tree().create_timer(0.5).timeout
-	queue_free()
+	if is_inside_tree():
+		queue_free()

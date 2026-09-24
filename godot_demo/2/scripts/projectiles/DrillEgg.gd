@@ -147,6 +147,11 @@ func _crack_and_destroy() -> void:
 		tween.tween_property(visual_root, "modulate:a", 0.0, 0.12)
 		await tween.finished
 
+	if not is_inside_tree() or not get_tree():
+		queue_free()
+		return
+
 	await get_tree().create_timer(0.4).timeout
-	queue_free()
+	if is_inside_tree():
+		queue_free()
 

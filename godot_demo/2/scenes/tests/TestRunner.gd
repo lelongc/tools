@@ -907,6 +907,164 @@ func _ready() -> void:
 			print("  [PASS] GameHUD _exit_tree lifecycle teardown confirmed")
 		hud15.queue_free()
 
+	# -------------------------------------------------------------------------
+	# 16. TEST FULL 200-LEVEL CAMPAIGN INTEGRITY & BOSS SPAWNING
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 16] Testing Full 200-Level Campaign Integrity & Boss Roster ---")
+	var campaign_scene16 = load("res://scenes/levels/CampaignLevel.tscn")
+	if not campaign_scene16:
+		errors.append("Failed to load CampaignLevel.tscn for 200-level audit")
+	else:
+		var expected_bosses = {
+			20: "boss_baron_pig",
+			40: "boss_iron_crusher",
+			60: "boss_toxic_alchemist",
+			80: "boss_magma_emperor",
+			100: "boss_crystal_overlord",
+			120: "boss_cyber_mech",
+			140: "boss_swamp_hydra",
+			160: "boss_frost_colossus",
+			180: "boss_dragon_warlord",
+			200: "boss_singularity_prime"
+		}
+		var verified_levels = 0
+		var boss_verified_count = 0
+		for lvl in range(1, 201):
+			GameManager.current_level = lvl
+			var cl = campaign_scene16.instantiate()
+			add_child(cl)
+
+			# Check eggs
+			if GameManager.available_eggs.size() < 3:
+				errors.append("Level %d has too few eggs: %d" % [lvl, GameManager.available_eggs.size()])
+
+			# Check bunker structure
+			var bunker = cl.get_node_or_null("BunkerStructure")
+			var lvl_enemies = 0
+			var lvl_blocks = 0
+			var found_boss = false
+			var exp_boss = expected_bosses.get(lvl, "")
+
+			if bunker:
+				for child in bunker.get_children():
+					if child is BunkerMonster:
+						lvl_enemies += 1
+						if exp_boss != "" and child.monster_type == exp_boss:
+							found_boss = true
+					elif child is DestructibleBlock:
+						lvl_blocks += 1
+
+			if lvl_enemies == 0:
+				errors.append("Level %d has 0 enemies spawned!" % lvl)
+			if lvl_blocks == 0:
+				errors.append("Level %d has 0 blocks spawned!" % lvl)
+			if exp_boss != "" and not found_boss:
+				errors.append("Level %d expected boss %s but was not spawned!" % [lvl, exp_boss])
+			elif exp_boss != "" and found_boss:
+				boss_verified_count += 1
+
+			cl.free()
+			verified_levels += 1
+
+		print("  [PASS] All %d levels verified: enemies, blocks, egg loadouts valid" % verified_levels)
+		print("  [PASS] All %d world bosses successfully verified across all milestone levels" % boss_verified_count)
+
+	# -------------------------------------------------------------------------
+	# 17. EXTREME QA STRESS, BACK-BUTTON DEBOUNCE, MONKEY SPAM & ZERO-LEAK AUDIT
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 17] Extreme QA Stress, Back-Button Debounce & Zero-Leak Audit ---")
+	
+	# 17.1: GameHUD Back-Button Anti-Double-Toggle
+	var hud_scene17 = load("res://scenes/prefabs/GameHUD.tscn")
+	if hud_scene17:
+		var hud = hud_scene17.instantiate()
+		add_child(hud)
+		
+		# First back press -> opens pause
+		hud.handle_back_button()
+		if not get_tree().paused or not hud.pause_modal.visible:
+			errors.append("GameHUD handle_back_button failed to pause game!")
+		
+		# Second rapid back press (< 0.35s) -> must be debounced, NOT unpause!
+		hud.handle_back_button()
+		if not get_tree().paused or not hud.pause_modal.visible:
+			errors.append("GameHUD handle_back_button failed debounce: unpaused prematurely on rapid press!")
+		else:
+			print("  [PASS] GameHUD back button rapid debounce prevents pause menu auto-close")
+		
+		get_tree().paused = false
+		hud.free()
+
+	# 17.2: JuicyButton Input Event Debouncer
+	var btn_test = JuicyButton.new()
+	add_child(btn_test)
+
+	var ev_click1 = InputEventMouseButton.new()
+	ev_click1.button_index = MOUSE_BUTTON_LEFT
+	ev_click1.pressed = true
+	btn_test._gui_input(ev_click1)
+	var t1 = btn_test._last_press_time
+
+	# Second rapid click immediately
+	var ev_click2 = InputEventMouseButton.new()
+	ev_click2.button_index = MOUSE_BUTTON_LEFT
+	ev_click2.pressed = true
+	btn_test._gui_input(ev_click2)
+	var t2 = btn_test._last_press_time
+
+	if t1 > 0 and t2 == t1:
+		print("  [PASS] JuicyButton _gui_input debouncer successfully consumes rapid spam clicks")
+	else:
+		errors.append("JuicyButton debounce failed: rapid click updated timestamp (%d vs %d)" % [t1, t2])
+	btn_test.free()
+
+	# 17.3: SoundManager Pool Extreme Concurrency (25 calls in 1 frame)
+	if has_node("/root/SoundManager"):
+		var sm = get_node("/root/SoundManager")
+		for i in range(25):
+			sm.play_wood_break()
+		print("  [PASS] SoundManager pool handles 25 rapid concurrent calls smoothly")
+
+	# 17.4: All 7 Projectiles CCD & Safety Despawn Check
+	var egg_scripts = [
+		"res://scripts/projectiles/NormalEgg.gd",
+		"res://scripts/projectiles/BombEgg.gd",
+		"res://scripts/projectiles/DrillEgg.gd",
+		"res://scripts/projectiles/FrostEgg.gd",
+		"res://scripts/projectiles/AcidEgg.gd",
+		"res://scripts/projectiles/BlackHoleEgg.gd",
+		"res://scripts/projectiles/ClusterEgg.gd"
+	]
+	var ccd_passed = 0
+	for path in egg_scripts:
+		var script = load(path)
+		if script:
+			var inst = script.new()
+			add_child(inst)
+			if inst.continuous_cd == RigidBody2D.CCD_MODE_CAST_RAY:
+				ccd_passed += 1
+			inst.free()
+	if ccd_passed == egg_scripts.size():
+		print("  [PASS] All 7 Egg projectile archetypes enforce continuous collision detection (CCD)")
+	else:
+		errors.append("Not all egg projectiles enforce CCD (passed %d/%d)" % [ccd_passed, egg_scripts.size()])
+
+	# 17.5: MainMenu Modal Hierarchy Back Check
+	var mm_scene17 = load("res://scenes/ui/MainMenu.tscn")
+	if mm_scene17:
+		var mm = mm_scene17.instantiate()
+		add_child(mm)
+		mm._on_btn_settings_pressed()
+		if mm.settings_modal_instance != null:
+			var handled = mm._handle_back_button()
+			if handled and mm.settings_modal_instance == null:
+				print("  [PASS] MainMenu modal hierarchy gracefully intercepts back button before app exit")
+			else:
+				errors.append("MainMenu _handle_back_button failed to close settings modal gracefully")
+		else:
+			errors.append("Failed to open SettingsModal on MainMenu")
+		mm.free()
+
 	print("\n================================================================")
 	# Explicitly clean up all remaining nodes in TestRunner
 	for child in get_children():

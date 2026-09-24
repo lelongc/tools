@@ -73,6 +73,10 @@ func _ready() -> void:
 		tween.tween_property(panel, "scale", Vector2.ONE, 0.28)
 		tween.tween_property(panel, "modulate:a", 1.0, 0.20)
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		_on_close_pressed()
+
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		_on_close_pressed()

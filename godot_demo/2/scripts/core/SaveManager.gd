@@ -210,15 +210,17 @@ func get_coins() -> int:
 	return save_data.get("coins", 0)
 
 func add_coins(amount: int) -> void:
+	if amount <= 0: return
 	var c = max(0, get_coins() + amount)
 	save_data["coins"] = c
 	save_game()
 	coins_updated.emit(c)
 
 func spend_coins(amount: int) -> bool:
+	if amount <= 0: return false
 	var cur = get_coins()
 	if cur >= amount:
-		save_data["coins"] = cur - amount
+		save_data["coins"] = max(0, cur - amount)
 		save_game()
 		coins_updated.emit(save_data["coins"])
 		return true
@@ -232,10 +234,11 @@ func get_consumable(egg_type: String) -> int:
 	return dict.get(egg_type, 0)
 
 func add_consumable(egg_type: String, count: int = 1) -> void:
+	if count <= 0: return
 	if not save_data.has("consumables"):
 		save_data["consumables"] = {}
 	var cur = save_data["consumables"].get(egg_type, 0)
-	save_data["consumables"][egg_type] = cur + count
+	save_data["consumables"][egg_type] = max(0, cur + count)
 	save_game()
 	consumables_updated.emit()
 

@@ -73,16 +73,13 @@ func _handle_mobile_back() -> void:
 	elif scene.name == "LevelSelect":
 		go_to_main_menu()
 	elif scene.name == "MainMenu":
-		# Kiểm tra modal đang mở ở MainMenu
-		var wheel = scene.get_node_or_null("DailyWheelModal")
-		if wheel and wheel.visible:
-			wheel.close_wheel()
+		if scene.has_method("_handle_back_button") and scene._handle_back_button():
 			return
 
 		# Cơ chế nhấn 2 lần trong 2 giây để thoát (Double-tap back debounce)
 		var now = Time.get_ticks_msec() / 1000.0
 		if now - last_back_press_time < 2.0:
-			get_tree().quit()
+			get_tree().quit(0)
 		else:
 			last_back_press_time = now
 			if has_node("/root/SoundManager"):
@@ -140,6 +137,9 @@ func add_active_booster_egg(egg_type: String) -> bool:
 		var sm = get_node("/root/SaveManager")
 		if sm.use_consumable(egg_type):
 			available_eggs.insert(current_egg_index, egg_type)
+			is_settling = false
+			settle_timer = 2.0
+			max_settle_fallback_timer = 9.0
 			level_started.emit(current_level, available_eggs)
 			var chicken = get_tree().get_first_node_in_group("Player")
 			if chicken and chicken.has_method("_prepare_next_egg"):

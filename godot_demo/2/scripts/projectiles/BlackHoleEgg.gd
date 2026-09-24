@@ -113,10 +113,10 @@ func _supernova_blast() -> void:
 	if has_node("/root/SaveManager"):
 		get_node("/root/SaveManager").vibrate(85)
 
-	# Bắn hạt hố đen: Tinh vân tím không gian + Mảnh vỡ không thời gian + Sao hấp dẫn neon
 	ParticleHelper.spawn_egg_break_fx(get_parent(), global_position, "blackhole", false)
 	ParticleHelper.spawn_comic_popup(get_parent(), global_position, "SUPERNOVA!", Color(0.75, 0.35, 1.0))
-	GameManager.trigger_dramatic_slowmo(0.3, 0.4)
+	if has_node("/root/GameManager"):
+		get_node("/root/GameManager").trigger_dramatic_slowmo(0.3, 0.4)
 
 	var space_state = get_world_2d().direct_space_state
 	var query = PhysicsShapeQueryParameters2D.new()
@@ -138,5 +138,10 @@ func _supernova_blast() -> void:
 			if col.has_method("take_damage"):
 				col.take_damage(blast_damage, global_position)
 
+	if not is_inside_tree() or not get_tree():
+		queue_free()
+		return
+
 	await get_tree().create_timer(0.4).timeout
-	queue_free()
+	if is_inside_tree():
+		queue_free()

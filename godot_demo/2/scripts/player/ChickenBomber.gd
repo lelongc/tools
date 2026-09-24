@@ -689,9 +689,11 @@ func _drop_egg(launch_vel: Vector2 = Vector2(0, 480.0)) -> void:
 	
 	egg_spawned.emit(egg)
 	drop_cooldown = 0.35 # Khoảng nghỉ chống chạm nhầm 2 ngón cùng lúc
-	get_tree().create_timer(0.22).timeout.connect(func():
-		_prepare_next_egg()
-	)
+	if is_inside_tree() and get_tree():
+		get_tree().create_timer(0.22).timeout.connect(func():
+			if is_instance_valid(self) and is_inside_tree():
+				_prepare_next_egg()
+		)
 	_on_aim_end(true)
 	GameManager.check_out_of_eggs()
 

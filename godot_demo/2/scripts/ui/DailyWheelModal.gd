@@ -47,6 +47,17 @@ func close_wheel() -> void:
 	visible = false
 	wheel_closed.emit()
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		if not is_spinning:
+			close_wheel()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		if not is_spinning:
+			close_wheel()
+			get_viewport().set_input_as_handled()
+
 func _update_language_ui() -> void:
 	var lm = get_node_or_null("/root/LocalizationManager")
 	if not lm: return

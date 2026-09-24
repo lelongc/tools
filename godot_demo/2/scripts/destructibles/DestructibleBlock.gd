@@ -579,8 +579,13 @@ func _fracture_block() -> void:
 
 	CameraShake.add_trauma(0.12 if material_type in ["steel", "obsidian", "cyber_alloy", "celestial_stone"] else 0.08)
 
+	if not is_inside_tree() or not get_tree():
+		queue_free()
+		return
+
 	await get_tree().create_timer(0.45).timeout
-	queue_free()
+	if is_inside_tree():
+		queue_free()
 
 func _spawn_comic_smoke_poof() -> void:
 	if not tex_smoke_puff: return

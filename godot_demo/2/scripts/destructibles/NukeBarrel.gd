@@ -198,8 +198,13 @@ func _detonate_nuke() -> void:
 			if col.has_method("take_damage"):
 				col.take_damage(explosion_damage * falloff, global_position)
 
+	if not is_inside_tree() or not get_tree():
+		queue_free()
+		return
+
 	# Thông báo cho quái vật xung quanh về vụ nổ bức xạ gần kề
 	get_tree().call_group("Enemies", "on_near_explosion", global_position, explosion_radius)
 
 	await get_tree().create_timer(0.8).timeout
-	queue_free()
+	if is_inside_tree():
+		queue_free()

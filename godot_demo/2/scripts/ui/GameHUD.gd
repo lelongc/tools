@@ -230,7 +230,14 @@ func _update_coin_display(amount: int) -> void:
 func toggle_pause() -> void:
 	_toggle_pause()
 
+var _last_back_time: float = 0.0
+
 func handle_back_button() -> void:
+	var now = Time.get_ticks_msec() * 0.001
+	if now - _last_back_time < 0.35:
+		return
+	_last_back_time = now
+
 	if pause_modal and pause_modal.visible:
 		_toggle_pause()
 	elif victory_modal and victory_modal.visible:
@@ -241,6 +248,14 @@ func handle_back_button() -> void:
 		_on_last_stand_skip_pressed()
 	else:
 		_toggle_pause()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		handle_back_button()
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		handle_back_button()
 
 func _toggle_pause() -> void:
 	var is_p = not get_tree().paused

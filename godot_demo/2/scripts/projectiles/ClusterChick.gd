@@ -57,8 +57,13 @@ func _pop_out() -> void:
 		var tween = create_tween()
 		tween.tween_property(visual, "scale", Vector2.ZERO, 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
 
+	if not is_inside_tree() or not get_tree():
+		queue_free()
+		return
+
 	await get_tree().create_timer(0.35).timeout
-	queue_free()
+	if is_inside_tree():
+		queue_free()
 
 func _on_impact(body: Node) -> void:
 	if is_poofed: return

@@ -178,28 +178,33 @@ func _on_btn_shop_pressed() -> void:
 		shop_modal_instance = shop_scene.instantiate()
 		add_child(shop_modal_instance)
 
+func _exit_tree() -> void:
+	if get_viewport() and get_viewport().size_changed.is_connected(_apply_safe_area):
+		get_viewport().size_changed.disconnect(_apply_safe_area)
+
+func _handle_back_button() -> bool:
+	if settings_modal_instance and is_instance_valid(settings_modal_instance):
+		settings_modal_instance.queue_free()
+		settings_modal_instance = null
+		return true
+	if wheel_modal_instance and is_instance_valid(wheel_modal_instance):
+		wheel_modal_instance.queue_free()
+		wheel_modal_instance = null
+		return true
+	if shop_modal_instance and is_instance_valid(shop_modal_instance):
+		shop_modal_instance.queue_free()
+		shop_modal_instance = null
+		return true
+	return false
+
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
 		_handle_back_button()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
-		_handle_back_button()
-
-func _handle_back_button() -> void:
-	if settings_modal_instance and is_instance_valid(settings_modal_instance):
-		settings_modal_instance.queue_free()
-		settings_modal_instance = null
-		return
-	if wheel_modal_instance and is_instance_valid(wheel_modal_instance):
-		wheel_modal_instance.queue_free()
-		wheel_modal_instance = null
-		return
-	if shop_modal_instance and is_instance_valid(shop_modal_instance):
-		shop_modal_instance.queue_free()
-		shop_modal_instance = null
-		return
-	get_tree().quit(0)
+		if not _handle_back_button():
+			get_tree().quit(0)
 
 func _apply_safe_area() -> void:
 	if not is_inside_tree(): return

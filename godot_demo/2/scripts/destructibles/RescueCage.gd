@@ -148,5 +148,10 @@ func _break_open() -> void:
 		var tween = create_tween()
 		tween.tween_property(cage_bars, "modulate:a", 0.0, 0.25)
 
+	if not is_inside_tree() or not get_tree():
+		queue_free()
+		return
+
 	await get_tree().create_timer(1.0).timeout
-	queue_free()
+	if is_inside_tree():
+		queue_free()

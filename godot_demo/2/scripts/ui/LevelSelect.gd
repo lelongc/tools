@@ -321,6 +321,8 @@ func _render_world_levels() -> void:
 		grid.add_child(btn)
 
 func _exit_tree() -> void:
+	if get_viewport() and get_viewport().size_changed.is_connected(_apply_safe_area):
+		get_viewport().size_changed.disconnect(_apply_safe_area)
 	ribbon_buttons.clear()
 
 func _notification(what: int) -> void:

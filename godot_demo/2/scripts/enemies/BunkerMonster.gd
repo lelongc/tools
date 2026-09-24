@@ -1719,7 +1719,15 @@ func _defeat_monster() -> void:
 		# 4. Chớp trắng báo hiệu nổ tung
 		pop_tween.tween_property(visual_root, "modulate", Color(1.3, 1.3, 1.3, 1.0), 0.18)
 
+	if not is_inside_tree() or not get_tree():
+		queue_free()
+		return
+
 	await get_tree().create_timer(0.18).timeout
+
+	if not is_inside_tree() or not get_tree():
+		queue_free()
+		return
 
 	# Quái vật tan biến ngay tức khắc khi đạt đỉnh nổ
 	if visual_root:
@@ -1733,4 +1741,5 @@ func _defeat_monster() -> void:
 		poof_fx.emitting = true
 
 	await get_tree().create_timer(0.38).timeout
-	queue_free()
+	if is_inside_tree():
+		queue_free()

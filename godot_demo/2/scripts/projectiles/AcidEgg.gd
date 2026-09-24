@@ -99,6 +99,9 @@ const MAX_AIRBORNE_LIFETIME = 8.0
 
 var total_airborne_timer: float = 0.0
 
+var _melt_query: PhysicsShapeQueryParameters2D = null
+var _melt_shape: CircleShape2D = null
+
 func _physics_process(delta: float) -> void:
 	if not is_melting:
 		total_airborne_timer += delta
@@ -112,16 +115,17 @@ func _physics_process(delta: float) -> void:
 	else:
 		melt_timer -= delta
 		
-		# Quét và ăn mòn toàn bộ dầm sắt / kết cấu trong vũng axit
+		# Quét và ăn mòn toàn bộ dầm sắt / kết cấu trong vũng axit (Zero-Allocation Query)
 		var space_state = get_world_2d().direct_space_state
-		var query = PhysicsShapeQueryParameters2D.new()
-		var circle = CircleShape2D.new()
-		circle.radius = puddle_radius
-		query.shape = circle
-		query.transform = global_transform
-		query.collide_with_bodies = true
+		if _melt_query == null:
+			_melt_query = PhysicsShapeQueryParameters2D.new()
+			_melt_shape = CircleShape2D.new()
+			_melt_shape.radius = puddle_radius
+			_melt_query.shape = _melt_shape
+			_melt_query.collide_with_bodies = true
+		_melt_query.transform = global_transform
 
-		for res in space_state.intersect_shape(query, 16):
+		for res in space_state.intersect_shape(_melt_query, 16):
 			var col = res.collider
 			if is_instance_valid(col) and col != self:
 				if col.has_method("wake_up"):
