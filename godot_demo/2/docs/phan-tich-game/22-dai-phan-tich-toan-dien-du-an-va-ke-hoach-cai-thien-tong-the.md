@@ -3,8 +3,8 @@
 > **Dự án:** Cluck & Drop: Bunker Buster  
 > **Phiên bản:** Godot `4.7.1-stable` (Renderer: `GL Compatibility`, Màn hình dọc: $540 \times 960$)  
 > **Thời gian thẩm định:** 24/09/2026  
-> **Trạng thái kiểm thử:** **16/16 Bộ Test Tự Động Vượt Qua Tuyệt Đối (0 Lỗi, Return Code 0)**  
-> **Tài liệu tham chiếu:** [README.md](file:///d:/folder/tools/godot_demo/2/docs/phan-tich-game/README.md), [11 — Tổng hợp phân tích lỗi](file:///d:/folder/tools/godot_demo/2/docs/phan-tich-game/11-tong-hop-phan-tich-loi-va-ke-hoach-cai-thien-toan-dien.md), [21 — Báo cáo kiểm tra chuyên sâu](file:///d:/folder/tools/godot_demo/2/docs/phan-tich-game/21-kiem-tra-chuyen-sau-fix-moi-loi-tiem-an-va-hoan-thien-mobile.md).
+> **Trạng thái kiểm thử:** **18/18 Bộ Test Tự Động Vượt Qua Tuyệt Đối (0 Lỗi, Return Code 0)**  
+> **Tài liệu tham chiếu:** [README.md](file:///d:/folder/tools/godot_demo/2/docs/phan-tich-game/README.md), [21 — Báo cáo kiểm tra chuyên sâu](file:///d:/folder/tools/godot_demo/2/docs/phan-tich-game/21-kiem-tra-chuyen-sau-fix-moi-loi-tiem-an-va-hoan-thien-mobile.md), [23 — Tổng kết hoàn tất toàn bộ cải tiến](file:///d:/folder/tools/godot_demo/2/docs/phan-tich-game/23-tong-ket-hoan-tat-toan-bo-cai-tien-va-dong-goi-chuan-san-xuat.md).
 
 ---
 
@@ -92,26 +92,26 @@ graph TD
 ## 2. MA TRẬN KIỂM TOÁN CHUYÊN SÂU TỪNG TRỤC HỆ THỐNG
 
 ### Trục 1: Vật Lý & Phá Hủy Cấu Trúc (Physics & Destruction Engine)
-- **Điểm mạnh hiện tại:**
+- **Điểm mạnh hiện tại & Đã giải quyết hoàn tất:**
   - Triệt tiêu hoàn toàn hiện tượng khối lơ lửng giữa không trung khi mất trụ chống nhờ hàm `_check_underlying_support()` kết hợp kiểm tra 6 trạng thái hư tổn (`is_destroyed`, `is_defeated`, `is_ignited`, `is_broken`, `is_breaking`).
   - Dầm ngang có cơ chế đòn bẩy Cantilever: thanh nhô ra quá dài mà mất 1 bên trụ sẽ mất cân bằng và lập tức đổ sập tự nhiên.
   - Chống rung vi mô (`Micro-Velocity Snubber`) chỉ kích hoạt khi thanh có điểm tựa vững chãi, không làm kẹt khối đang rơi.
-- **Điểm còn thiếu & Cần cải thiện:**
-  1. *Lỗi vòm kẹt lực (Arch Wedging Phenomenon):* Khi 2 thanh chéo đổ chụm đầu vào nhau tạo thành hình chữ V ngược, phản lực pháp tuyến giữa 2 đỉnh triệt tiêu lẫn nhau, làm cả cấu trúc "treo lơ lửng" vĩnh viễn dù bên dưới rỗng tuếch. Cần cơ chế phát hiện góc tựa ảo (Virtual Apex Solver) để ép trượt sau $3.0\text{s}$.
-  2. *Thiếu lực ma sát cuốn theo khi đá lăn:* Khi `RollingBoulder` lăn đè qua đỉnh các thanh xà, lực ma sát trượt ngang chưa đủ lớn để giật đổ thanh xà theo phương lăn mà chỉ đè nén xuống dưới.
-  3. *Mảnh vụn khối (Debris Dust):* Các khối nặng (Đá, Thép, Obsidian) khi gãy vỡ chưa sinh ra đám mây bụi mù đất đá bốc lên tại chân tháp, làm giảm độ "đã mắt" khi công trình sụp đổ.
+  - **[ĐÃ XỬ LÝ - I01]** Khắc phục triệt để hiện tượng vòm kẹt lực V-Shape nhờ thuật toán `Virtual Apex Anti-Wedging Perturbation`, tự động giải phóng nêm kẹt sau $2.0\text{s}$.
+  - **[ĐÃ XỬ LÝ - I03]** Sinh mây bụi đất đá bốc lên cuồn cuộn (`Debris Dust Cloud`) khi các khối nặng (Đá, Thép, Obsidian, Nham Thạch) vỡ vụn.
+- **Điểm mở rộng lộ trình tương lai:**
+  1. *Thiếu lực ma sát cuốn theo khi đá lăn (I02):* Tăng cường lực ma sát cuốn trượt ngang khi `RollingBoulder` lăn qua dầm xà.
 
 ---
 
 ### Trục 2: Cơ Chế Bay, Ngắm Bắn & Cảm Giác Điều Khiển (Flight, Aim & Gunplay)
-- **Điểm mạnh hiện tại:**
+- **Điểm mạnh hiện tại & Đã giải quyết hoàn tất:**
   - Hoạt ảnh bay 3D mượt mà: Độ nghiêng cánh khí động học (Aerodynamic Banking Tilt), tỷ lệ co giãn phối cảnh (Foreshortening Depth), loại bỏ hoàn toàn hiện tượng lật 2D bẹp dúm như tờ giấy.
   - Neo thân gà khi kéo ná (`aim_anchor_x`): Chấm dứt trôi dạt thân gà khi người chơi kéo dây ngắm.
   - Cơ chế kép: Nhấp nhanh (Tap-to-Drop) thả rơi tức thì & Kéo giữ (Drag-Aim) ngắm bắn góc xa.
-- **Điểm còn thiếu & Cần cải thiện:**
-  1. *Chỉ báo lực kéo trực quan (Slingshot Tension Gauge):* Hiện mới chỉ biểu đạt qua độ kéo dài của thân gà và mồ hôi. Người chơi cần một vòng cung lực đo năng lượng (% Power Arc) đổi màu từ Xanh -> Vàng -> Đỏ quanh giỏ trứng để căn chỉnh lực chuẩn xác từng milimet.
-  2. *Độ nảy dây thun khi hủy ngắm (Snap-Back Elasticity):* Khi người chơi kéo rê tay về deadzone để hủy bắn, thân gà phục hồi vị trí từ từ. Cần thêm một nhịp nảy đàn hồi (Spring Oscillation Tween) để tạo cảm giác dây ná bung về vị trí cũ sống động.
-  3. *Tùy chọn ngắm con quay hồi chuyển (Gyroscope Motion Aiming):* Trên di động, việc cho phép người chơi nghiêng nhẹ điện thoại để tinh chỉnh góc bắn (Micro-Aiming) sẽ đem lại trải nghiệm chuyên nghiệp cho người chơi khó tính.
+  - **[ĐÃ XỬ LÝ - I04]** Thước đo lực kéo ná (`Slingshot Tension Gauge Arc`) hiển thị vòng cung năng lượng đổi màu gradient trực quan (Xanh -> Vàng -> Đỏ) quanh tọa độ thả bom.
+  - **[ĐÃ XỬ LÝ - I05]** Hiệu ứng nảy dây thun đàn hồi (`Elastic Snap-Back Spring`) khi người chơi kéo ná rồi hủy ngắm bắn, đi kèm âm thanh vút gió chân thực.
+- **Điểm mở rộng lộ trình tương lai:**
+  1. *Tùy chọn ngắm con quay hồi chuyển (Gyroscope Motion Aiming - I06):* Cho phép người chơi nghiêng nhẹ thiết bị di động để tinh chỉnh góc bắn.
 
 ---
 
@@ -120,51 +120,44 @@ graph TD
   - 200 màn chơi phân tầng chuẩn xác qua 10 thế giới, độ rộng tháp mở rộng từ $540\text{px}$ lên $1430\text{px}$.
   - Mỗi thế giới có 1 Đại Trùm trấn giữ tại các màn $20, 40, 60, \dots, 200$ với HP và khối lượng khổng lồ.
   - Hệ thống tính điểm Hybrid 3 Sao: Vừa thưởng người tiết kiệm trứng, vừa thưởng người chơi phá nát $\ge 90\%$ công trình.
-- **Điểm còn thiếu & Cần cải thiện:**
-  1. *Tính đa dạng của địa hình kiến trúc:* Hiện nay hầu hết các màn chơi phát triển theo mô hình tháp 3 trụ và cầu nối. Cần bổ sung các mô hình cấu trúc mới:
-     - Tháp treo dây xích (Suspension Tower): Treo lơ lửng trên trần hang đá.
-     - Hầm chữ U / Trần thấp: Buộc người chơi phải bắn đạn nảy góc thấp xuống gầm thay vì thả từ trên cao.
-     - Cầu bập bênh (Seesaw Bridges): Thanh gỗ đặt trên một trụ đá nhọn, chỉ cần 1 quả trứng rơi lệch bên sẽ hất tung cả tổ quái bên kia.
-  2. *Hành vi tương tác của quái vật (Active Enemy AI):* Hiện tại quái vật hoàn toàn thụ động (chỉ có biểu cảm mặt). Cần nâng cấp:
-     - Quái vật đội nón sắt (Helmet Shield): Phải ăn 2 phát đạn hoặc bị khối đè mới văng nón bảo hộ.
-     - Quái vật bung dù (Parachute Raccoon): Khi rơi tự do từ trên cao xuống sẽ bung chiếc lá hoặc dù nhỏ tiếp đất an toàn nếu không bị đè bẹp.
-  3. *Tương tác môi trường theo thế giới (Hazard Mechanics):*
-     - Thế giới 4 (Lava): Các vũng nham thạch dưới sàn gây cháy tức thì cho gỗ.
-     - Thế giới 8 (Glacier): Sàn băng trơn trượt khiến các khối sau khi rơi tiếp tục trượt dài va vào nhau.
+- **Điểm mở rộng lộ trình tương lai:**
+  1. *Kiến trúc nâng cao (I07):* Tháp treo dây xích và Cầu bập bênh (Seesaw).
+  2. *AI Quái vật chủ động (I08):* Quái đội nón bảo hộ (Helmet) và Quái bung dù (Parachute).
+  3. *Bẫy môi trường tự nhiên (I09):* Sàn băng trơn trượt và hố dung nham.
 
 ---
 
 ### Trục 4: Hiệu Năng Di Động, Tản Nhiệt & Bộ Nhớ (Performance, Thermal & Memory)
-- **Điểm mạnh hiện tại:**
+- **Điểm mạnh hiện tại & Đã giải quyết hoàn tất:**
   - Đã tối ưu hóa hàm quét ăn mòn của `AcidEgg.gd` thành Zero-Allocation Physics Query (tái sử dụng đối tượng tham số, loại bỏ hoàn toàn việc cấp phát 60 lần/giây).
   - Khóa giới hạn 60 FPS, chế độ renderer GL Compatibility nhẹ nhàng, bộ đệm âm thanh tải sẵn.
-- **Điểm còn thiếu & Cần cải thiện:**
-  1. *Gom cụm hạt vỡ (Particle Pooling / Throttling):* Khi một quả bom Nuke nổ phá hủy cùng lúc 15 khối và 5 thùng TNT, hệ thống đồng thời tạo ra hàng chục `CPUParticles2D`, gây sụt khung hình tạm thời (Jank Spike) trên các máy cấu hình yếu (Helio G35, Snapdragon 680). Cần một bộ giới hạn tối đa 6 hệ hạt phát cùng lúc (`ParticleBudgetManager`).
-  2. *Physics Sleep Throttling:* Khi màn chơi đã ổn định sau cú nổ, một số khối nhỏ lăn li ti ở các góc hẻo lánh vẫn thức và tiêu tốn CPU physics tick. Cần rút ngắn thời gian cưỡng chế ngủ (`force_sleep_timer`) từ $4.0\text{s}$ xuống $2.2\text{s}$ đối với các mảnh vỡ nhỏ.
-  3. *Nén kích thước cài đặt (APK/AAB Size Optimization):* 30 tệp ảnh nền SVG và 24 tệp âm thanh WAV hiện đang chiếm phần lớn dung lượng. Chuyển đổi các tệp BGM/WAV dài sang định dạng `.ogg` chuẩn Godot sẽ giảm dung lượng game từ $48\text{MB}$ xuống còn dưới $22\text{MB}$.
+  - **[ĐÃ XỬ LÝ - I11]** Cưỡng chế ngủ sớm cho mảnh vỡ siêu nhỏ (`Micro-debris Sleep Throttling`), rút ngắn ngưỡng ngủ từ $0.18\text{s}$ xuống $0.09\text{s}$ cho các khối $\le 1200\text{px}^2$, tiết kiệm chu kỳ CPU physics trên mobile.
+- **Điểm mở rộng lộ trình tương lai:**
+  1. *Gom cụm hạt vỡ (Particle Budget Manager - I10):* Giới hạn tối đa 6 hệ hạt phát đồng thời trong các vụ nổ liên hoàn.
+  2. *Nén kích thước cài đặt (I12):* Chuyển đổi định dạng nhạc WAV sang `.ogg` chuẩn.
 
 ---
 
 ### Trục 5: Trực Quan, Hoạt Ảnh, VFX & Âm Thanh Cartoon (Visual, VFX & Audio)
-- **Điểm mạnh hiện tại:**
+- **Điểm mạnh hiện tại & Đã giải quyết hoàn tất:**
   - Đồ họa Vector sắc nét, màu sắc tươi sáng hoạt hình, hiệu ứng khói comic "KABOOM!", "CRASH!".
   - Hệ thống âm thanh 16 kênh SFX có bộ giới hạn trùng lặp âm thanh (Concurrency Limiter) chống rè loa.
-- **Điểm còn thiếu & Cần cải thiện:**
-  1. *Lớp âm nhạc kịch tính biến thiên (Dynamic Tension Music Layer):* Khi người chơi chỉ còn đúng 1 quả trứng cuối cùng trong giỏ, hoặc khi quái vật cuối cùng chỉ còn $10\%$ máu, nhạc nền BGM cần tự động đẩy nhịp trống dồn dập (Fast Percussion Layer) để tạo cảm giác nghẹt thở.
-  2. *Âm thanh đặc trưng cho 10 Đại Trùm:* Hiện các Đại Trùm vẫn dùng chung tiếng rên la của quái thường khi bị trúng đòn. Cần tiếng gầm rú cơ khí riêng cho Cyber Mech, tiếng rít độc địa cho Toxic Alchemist, và tiếng nổ hố đen vũ trụ cho Singularity Prime.
-  3. *Hiệu ứng Pháo Hoa Giấy (Confetti Cannon) ở Victory Modal:* Màn hình chiến thắng 3 sao hiện đã có chuỗi sao nảy và chuông sao trong trẻo, nhưng cần thêm 2 khẩu pháo giấy hai bên bắn ruy băng màu rực rỡ để tối đa hóa dopamine chiến thắng của người chơi.
+  - **[ĐÃ XỬ LÝ - I15]** Pháo hoa giấy Confetti rực rỡ (`Confetti Cannon Burst`) bắn tung ruy băng đa sắc từ 2 bên màn hình khi người chơi đạt chiến thắng 3 sao.
+- **Điểm mở rộng lộ trình tương lai:**
+  1. *Lớp âm nhạc kịch tính biến thiên (Dynamic Tension BGM - I13).*
+  2. *Âm thanh đặc trưng cho 10 Đại Trùm (I14).*
 
 ---
 
 ### Trục 6: Giao Diện Người Dùng & Công Thái Học Di Động (Mobile UI/UX & Hardening)
-- **Điểm mạnh hiện tại:**
+- **Điểm mạnh hiện tại & Đã giải quyết hoàn tất:**
   - Nút bấm `JuicyButton` 3D dập nổi, có độ lún mặt nút xúc giác $3\text{px}$, đã tích hợp bộ chống spam nhấp chuột (`PRESS_DEBOUNCE_MS = 250`).
   - Hỗ trợ toàn diện vùng an toàn tai thỏ (Display Safe Area) trên cả MainMenu, LevelSelect và GameHUD.
   - Phím Back Android và Escape điều hướng phân cấp trực quan, không bao giờ làm sập game.
-- **Điểm còn thiếu & Cần cải thiện:**
-  1. *Hướng dẫn tân thủ tương tác động (Interactive Gesture Tutorial):* Tại Màn 1, người chơi mới cần một bàn tay hoạt họa (Animated Bouncing Hand) hiển thị động tác chạm vào giỏ gà, kéo xuống và thả tay ra với dòng chữ nhấp nháy hướng dẫn trực quan.
-  2. *Phóng to / Thu nhỏ camera thủ công (Pinch-to-Zoom / Pan Drag):* Mặc dù camera tự động thu phóng rất tốt theo độ rộng màn chơi, việc cho phép người chơi dùng 2 ngón tay chụm mở để tự do quan sát chi tiết từng góc hầm ngầm trước khi bắn sẽ tăng tính chiến thuật.
-  3. *Huy hiệu thông báo lượt quay miễn phí (Notification Badge on Wheel Button):* Trên sảnh chính, khi bước sang ngày mới và có lượt quay miễn phí, nút Vòng Quay May Mắn cần có chấm đỏ hoặc biểu tượng quà nhấp nháy để thôi thúc người chơi mở ra nhận thưởng.
+  - **[ĐÃ XỬ LÝ - I16]** Hướng dẫn tân thủ trực quan động tại Màn 1 (`Interactive Gesture Tutorial`), hiển thị khung gợi ý bồng bềnh và tự biến mất ngay khi người chơi chạm màn hình.
+  - **[ĐÃ XỬ LÝ - I18]** Huy hiệu thông báo quà miễn phí (`FREE Badge`) nhấp nháy trên nút Vòng Quay May Mắn ở Sảnh chính.
+- **Điểm mở rộng lộ trình tương lai:**
+  1. *Phóng to / Thu nhỏ camera thủ công 2 ngón tay (Pinch-to-Zoom - I17).*
 
 ---
 
@@ -185,32 +178,32 @@ graph TD
 Dưới đây là bảng phân rã chi tiết toàn bộ **20 điểm cải tiến cụ thể** được phát hiện qua đợt đại phẫu:
 
 ```
-┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
-│                        BẢNG ĐẠI PHẪU 20 ĐIỂM CẢI TIẾN TOÀN DIỆN CỦA DỰ ÁN                              │
-├────┬──────┬────────────────────────────────────────────┬─────────────────────────────┬─────────────────┤
-│ ID │ Nhóm │ Nội dung chi tiết điểm cần cải tiến        │ Vị trí tệp mã nguồn         │ Tác động        │
-├────┼──────┼────────────────────────────────────────────┼─────────────────────────────┼─────────────────┤
-│ I01│ PHYS │ Khắc phục hiện tượng vòm kẹt lực V-Shape   │ DestructibleBlock.gd        │ Gameplay Logic  │
-│ I02│ PHYS │ Ma sát cuốn đà lăn cho tảng đá Rolling     │ RollingBoulder.gd           │ Trải nghiệm     │
-│ I03│ PHYS │ Sinh mây bụi đất đá khi khối lớn sụp đổ    │ DestructibleBlock.gd        │ Thẩm mỹ/VFX     │
-│ I04│ AIM  │ Bổ sung thước đo lực kéo ná (Tension Arc)  │ ChickenBomber.gd, Trajectory│ Cảm giác bắn    │
-│ I05│ AIM  │ Hiệu ứng nảy dây thun khi hủy ngắm bắn     │ ChickenBomber.gd            │ Độ mượt hoạt ảnh│
-│ I06│ AIM  │ Hỗ trợ ngắm con quay hồi chuyển Gyroscope  │ ChickenBomber.gd            │ Trải nghiệm Pro │
-│ I07│ LVL  │ Kiến trúc mới: Tháp treo trần & Bập bênh   │ CampaignLevel.gd            │ Đa dạng màn     │
-│ I08│ LVL  │ AI quái: Nón bảo hộ văng nón, quái bung dù │ BunkerMonster.gd            │ Thử thách game  │
-│ I09│ LVL  │ Bẫy môi trường: Sàn băng trơn, hố nham     │ CampaignLevel.gd            │ Cân bằng game   │
-│ I10│ PERF │ Giới hạn số lượng hệ hạt phát cùng lúc     │ ParticleHelper.gd           │ Tối ưu FPS máy yếu│
-│ I11│ PERF │ Cưỡng chế ngủ sớm cho mảnh vỡ siêu nhỏ     │ DestructibleBlock.gd        │ Giảm tải CPU tick│
-│ I12│ PERF │ Chuyển đổi nhạc BGM WAV sang chuẩn OGG     │ default_bus_layout, assets  │ Giảm 50% dung lượng│
-│ I13│ AUD  │ Nhạc nền biến thiên dồn dập khi sắp hết đạn│ SoundManager.gd             │ Tạo kịch tính   │
-│ I14│ AUD  │ Âm thanh trúng đòn độc bản cho 10 Đại Trùm │ SoundManager.gd             │ Uy lực Boss     │
-│ I15│ AUD  │ Pháo hoa giấy Confetti rực rỡ màn Victory  │ GameHUD.gd, ParticleHelper  │ Thưởng Dopamine │
-│ I16│ UI   │ Bàn tay chỉ dẫn hoạt họa tân thủ tại Màn 1 │ CampaignLevel.gd, GameHUD   │ Hướng dẫn chơi  │
-│ I17│ UI   │ Hỗ trợ cử chỉ phóng to / thu nhỏ 2 ngón tay│ CampaignLevel.gd            │ Tiện ích Mobile │
-│ I18│ UI   │ Chấm đỏ thông báo quà trên nút Vòng Quay   │ MainMenu.gd                 │ Tăng tương tác  │
-│ I19│ LIVE │ Chế độ Đấu Trường Vô Tận (Endless Bunker)  │ GameManager.gd, scenes      │ Giữ chân người chơi│
-│ I20│ LIVE │ Hệ thống Nhiệm Vụ Hàng Ngày (Daily Quests) │ SaveManager.gd, GameHUD     │ Retention D7/D30│
-└────┴──────┴────────────────────────────────────────────┴─────────────────────────────┴─────────────────┘
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                        BẢNG ĐẠI PHẪU 20 ĐIỂM CẢI TIẾN & TRẠNG THÁI TRIỂN KHAI CỦA DỰ ÁN                               │
+├────┬──────┬────────────────────────────────────────────┬─────────────────────────────┬──────────────────┬─────────────┤
+│ ID │ Nhóm │ Nội dung chi tiết điểm cần cải tiến        │ Vị trí tệp mã nguồn         │ Tác động         │ Trạng thái  │
+├────┼──────┼────────────────────────────────────────────┼─────────────────────────────┼──────────────────┼─────────────┤
+│ I01│ PHYS │ Khắc phục hiện tượng vòm kẹt lực V-Shape   │ DestructibleBlock.gd        │ Gameplay Logic   │ ĐÃ XỬ LÝ 100%│
+│ I02│ PHYS │ Ma sát cuốn đà lăn cho tảng đá Rolling     │ RollingBoulder.gd           │ Trải nghiệm      │ Mở rộng v1.1│
+│ I03│ PHYS │ Sinh mây bụi đất đá khi khối lớn sụp đổ    │ DestructibleBlock.gd        │ Thẩm mỹ/VFX      │ ĐÃ XỬ LÝ 100%│
+│ I04│ AIM  │ Bổ sung thước đo lực kéo ná (Tension Arc)  │ ChickenBomber.gd, Trajectory│ Cảm giác bắn     │ ĐÃ XỬ LÝ 100%│
+│ I05│ AIM  │ Hiệu ứng nảy dây thun khi hủy ngắm bắn     │ ChickenBomber.gd            │ Độ mượt hoạt ảnh │ ĐÃ XỬ LÝ 100%│
+│ I06│ AIM  │ Hỗ trợ ngắm con quay hồi chuyển Gyroscope  │ ChickenBomber.gd            │ Trải nghiệm Pro  │ Mở rộng v1.2│
+│ I07│ LVL  │ Kiến trúc mới: Tháp treo trần & Bập bênh   │ CampaignLevel.gd            │ Đa dạng màn      │ Mở rộng v1.1│
+│ I08│ LVL  │ AI quái: Nón bảo hộ văng nón, quái bung dù │ BunkerMonster.gd            │ Thử thách game   │ Mở rộng v1.1│
+│ I09│ LVL  │ Bẫy môi trường: Sàn băng trơn, hố nham     │ CampaignLevel.gd            │ Cân bằng game    │ Mở rộng v1.1│
+│ I10│ PERF │ Giới hạn số lượng hệ hạt phát cùng lúc     │ ParticleHelper.gd           │ Tối ưu FPS máy yếu│ Mở rộng v1.1│
+│ I11│ PERF │ Cưỡng chế ngủ sớm cho mảnh vỡ siêu nhỏ     │ DestructibleBlock.gd        │ Giảm tải CPU tick│ ĐÃ XỬ LÝ 100%│
+│ I12│ PERF │ Chuyển đổi nhạc BGM WAV sang chuẩn OGG     │ default_bus_layout, assets  │ Giảm 50% dung lượ│ Mở rộng v1.1│
+│ I13│ AUD  │ Nhạc nền biến thiên dồn dập khi sắp hết đạn│ SoundManager.gd             │ Tạo kịch tính    │ Mở rộng v1.1│
+│ I14│ AUD  │ Âm thanh trúng đòn độc bản cho 10 Đại Trùm │ SoundManager.gd             │ Uy lực Boss      │ Mở rộng v1.1│
+│ I15│ AUD  │ Pháo hoa giấy Confetti rực rỡ màn Victory  │ GameHUD.gd, ParticleHelper  │ Thưởng Dopamine  │ ĐÃ XỬ LÝ 100%│
+│ I16│ UI   │ Bàn tay chỉ dẫn hoạt họa tân thủ tại Màn 1 │ CampaignLevel.gd, GameHUD   │ Hướng dẫn chơi   │ ĐÃ XỬ LÝ 100%│
+│ I17│ UI   │ Hỗ trợ cử chỉ phóng to / thu nhỏ 2 ngón tay│ CampaignLevel.gd            │ Tiện ích Mobile  │ Mở rộng v1.2│
+│ I18│ UI   │ Chấm đỏ thông báo quà trên nút Vòng Quay   │ MainMenu.gd                 │ Tăng tương tác   │ ĐÃ XỬ LÝ 100%│
+│ I19│ LIVE │ Chế độ Đấu Trường Vô Tận (Endless Bunker)  │ GameManager.gd, scenes      │ Giữ chân player  │ Mở rộng v1.2│
+│ I20│ LIVE │ Hệ thống Nhiệm Vụ Hàng Ngày (Daily Quests) │ SaveManager.gd, GameHUD     │ Retention D7/D30 │ Mở rộng v1.2│
+└────┴──────┴────────────────────────────────────────────┴─────────────────────────────┴──────────────────┴─────────────┘
 ```
 
 ---

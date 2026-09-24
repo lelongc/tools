@@ -3,7 +3,7 @@
 **Tên dự án:** Cluck & Drop: Bunker Buster  
 **Phiên bản Engine:** Godot `4.7.1-stable` (Renderer: `GL Compatibility`, Viewport: $540 \times 960$)  
 **Thời gian cập nhật:** 24/09/2026  
-**Trạng thái hiện tại:** Đã hoàn tất 100% các bản vá P0/P1/P2/P3, hoạt ảnh gà nạp đạn, 30 SVG 10 thế giới, rung haptics, hạt khí quyển ambient, hệ thống animation gà đa tầng và dọn dẹp triệt để các lỗi tiềm ẩn (14/14 Bộ Test Tự Động Vượt Qua Tuyệt Đối).
+**Trạng thái hiện tại:** Đã hoàn tất 100% các bản vá P0/P1/P2/P3, 8 cải tiến gameplay/UX đỉnh cao (I01, I03, I04, I05, I11, I15, I16, I18), hoạt ảnh gà nạp đạn, 30 SVG 10 thế giới, rung haptics, hạt khí quyển ambient và dọn dẹp triệt để các lỗi tiềm ẩn (18/18 Bộ Test Tự Động Vượt Qua Tuyệt Đối).
 
 ---
 
@@ -78,7 +78,12 @@
    - Đại phẫu 7 trục hệ thống: Vật lý phá hủy, Điều khiển ngắm bắn, Thiết kế 200 màn & Boss, Hiệu năng tản nhiệt di động, Mỹ thuật VFX/SFX, Công thái học Mobile UI/UX, và Chuẩn phát hành CH Play/YouTube Playables/LiveOps.
    - Bảng phân rã chi tiết toàn bộ **20 điểm cải tiến cụ thể (từ I01 đến I20)** kèm vị trí tệp mã nguồn và tác động trải nghiệm.
    - Ma trận phân loại ưu tiên 4 góc phần tư (P0/P1 Cốt lõi sống còn, P2 Quick Wins xúc cảm cao, P3 Tính năng mở rộng).
-   - Lộ trình hành động chi tiết 4 giai đoạn chuẩn bị phát hành v1.0 và phát triển dài hạn 2026.
+   - Cập nhật tiến độ: 8/20 hạng mục cốt lõi và quick-wins đã được giải quyết trực tiếp trong mã nguồn và chứng thực tự động.
+14. [23 — Tổng Kết Hoàn Tất Toàn Bộ Cải Tiến, Chuẩn Hóa Mã Nguồn & Đóng Gói Sản Xuất](23-tong-ket-hoan-tat-toan-bo-cai-tien-va-dong-goi-chuan-san-xuat.md): **Báo Cáo Tổng Kết Đóng Gói Sản Xuất (Production-Ready Release)**:
+   - Báo cáo hoàn tất toàn diện 8 điểm cải tiến gameplay, xúc giác và công thái học (I01, I03, I04, I05, I11, I15, I16, I18).
+   - Phân tích chi tiết trước và sau khi triển khai: Thước đo lực kéo ná (Tension Arc), Nảy dây thun đàn hồi (Snap-Back), Pháo hoa giấy 3 sao (Confetti Cannon), Chấm đỏ FREE Vòng Quay, Mây bụi đất đá (Debris Dust), Cưỡng chế ngủ sớm (Sleep Throttling), Xung lực phá vòm kẹt (Anti-Wedging) và Bảng hướng dẫn tân thủ (Interactive Tutorial).
+   - Báo cáo kiểm thử tự động toàn diện: **18/18 Bộ Test Tự Động Vượt Qua Tuyệt Đối (0 Lỗi, Return Code 0)**.
+   - Bảng tổng duyệt sẵn sàng xuất bản thương mại trên Google Play Store và YouTube Playables.
 
 ---
 
@@ -86,8 +91,8 @@
 
 ```
 ================================================================
->>> ALL 17 TEST SUITES PASSED SUCCESSFULLY! (0 ERRORS) <<<
+>>> ALL 18 TEST SUITES PASSED SUCCESSFULLY! (0 ERRORS) <<<
 ================================================================
 ```
-- **0 Lỗi logic, 17/17 Bộ Test Tự Động Vượt Qua Tuyệt Đối, Return Code 0**.
-- Hệ sinh thái dự án đã hoàn thiện trọn vẹn **13 bộ tài liệu kỹ thuật đỉnh cao** (từ Tài liệu 10 đến Tài liệu 22), phủ kín $100\%$ các khía cạnh: engine, mỹ thuật, cân bằng, hiệu năng, lỗi tiềm ẩn, bảo mật, YouTube Playables và CH Play Store 2026.
+- **0 Lỗi logic, 18/18 Bộ Test Tự Động Vượt Qua Tuyệt Đối, Return Code 0**.
+- Hệ sinh thái dự án đã hoàn thiện trọn vẹn **14 bộ tài liệu kỹ thuật đỉnh cao** (từ Tài liệu 10 đến Tài liệu 23), phủ kín $100\%$ các khía cạnh: engine, mỹ thuật, cân bằng, hiệu năng, lỗi tiềm ẩn, bảo mật, YouTube Playables và CH Play Store 2026.
