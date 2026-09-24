@@ -38,17 +38,79 @@ func _ready() -> void:
 func _load_svg(path: String) -> Texture2D:
 	return ParticleHelper._safe_load(path)
 
+var support_check_timer: float = 0.12
+
 func _process(delta: float) -> void:
 	if spawn_settle_timer > 0.0:
 		spawn_settle_timer -= delta
+		return
+
+	if not is_awake:
+		if has_node("/root/GameManager"):
+			var gm = get_node("/root/GameManager")
+			if gm.current_egg_index == 0:
+				return
+		support_check_timer -= delta
+		if support_check_timer <= 0.0:
+			support_check_timer = 0.12
+			_check_underlying_support()
+	else:
+		if sleeping:
+			support_check_timer -= delta
+			if support_check_timer <= 0.0:
+				support_check_timer = 0.12
+				_check_underlying_support()
+
+func _check_underlying_support() -> void:
+	if is_ignited: return
+	var floor_y = GameManager.current_floor_y if has_node("/root/GameManager") else 840.0
+	if (global_position.y + 18.0) >= (floor_y - 4.0):
+		return # Đang chạm nền đất cứng bedrock
+
+	var space_state = get_world_2d().direct_space_state
+	if not space_state: return
+
+	var ray_query = PhysicsRayQueryParameters2D.create(global_position, global_position + Vector2(0, 28.0))
+	ray_query.exclude = [get_rid()]
+	ray_query.collide_with_bodies = true
+	ray_query.collide_with_areas = false
+	ray_query.hit_from_inside = true
+
+	var hit = space_state.intersect_ray(ray_query)
+	var has_support = false
+	if hit and hit.collider:
+		var col = hit.collider
+		if is_instance_valid(col) and col != self and not col.is_queued_for_deletion():
+			if col is StaticBody2D:
+				has_support = true
+			elif col is RigidBody2D:
+				var is_failing = false
+				if ("is_destroyed" in col and col.is_destroyed) \
+					or ("is_defeated" in col and col.is_defeated) \
+					or ("is_ignited" in col and col.is_ignited) \
+					or ("is_broken" in col and col.is_broken) \
+					or ("is_breaking" in col and col.is_breaking):
+					is_failing = true
+				elif "is_awake" in col and col.is_awake and (not col.sleeping or col.linear_velocity.y > 10.0 or col.linear_velocity.length() > 30.0):
+					is_failing = true
+				if not is_failing:
+					has_support = true
+
+	if not has_support:
+		if not is_awake:
+			wake_up()
+		elif sleeping:
+			sleeping = false
+			apply_central_impulse(Vector2(0, 20.0))
 
 func wake_up() -> void:
-	if is_awake or is_ignited: return
+	if is_ignited: return
 	if has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
 		if gm.current_egg_index == 0:
 			return # Peacetime lock
 	is_awake = true
+	sleeping = false
 	set_deferred("freeze", false)
 
 func _on_impact(body: Node) -> void:

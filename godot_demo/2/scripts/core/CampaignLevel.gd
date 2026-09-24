@@ -257,11 +257,13 @@ func _setup_level() -> void:
 
 	# Gà oanh tạc lượn theo sải cánh bầu trời tương ứng
 	var chicken = get_node_or_null("ChickenBomber")
-	if chicken:
+	if chicken and "min_x" in chicken:
 		chicken.min_x = left_edge_x + 35.0
 		chicken.max_x = right_edge_x - 35.0
 		chicken.default_y = cavern_top_y - 120.0
 		chicken.position = Vector2(cx, chicken.default_y)
+		if "aim_anchor_x" in chicken:
+			chicken.aim_anchor_x = cx
 		chicken.move_speed = 160.0 + min((world_id - 1) * 16.0, 120.0)
 		if not chicken.egg_spawned.is_connected(_on_egg_spawned):
 			chicken.egg_spawned.connect(_on_egg_spawned)
@@ -1269,7 +1271,7 @@ func _update_dynamic_camera(delta: float) -> void:
 			cam.zoom = cam.zoom.lerp(target_zoom, clamp(5.0 * delta, 0.0, 1.0))
 			return
 
-	if chicken and chicken.is_aiming:
+	if chicken and "is_aiming" in chicken and chicken.is_aiming:
 		var aim_x = lerp(default_cam_pos.x, chicken.global_position.x, 0.35)
 		target_pos = Vector2(aim_x, default_cam_pos.y - 20.0)
 		target_zoom = default_cam_zoom * 1.05

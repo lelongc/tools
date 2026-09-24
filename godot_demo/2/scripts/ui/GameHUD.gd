@@ -544,3 +544,11 @@ func _on_level_failed() -> void:
 		var tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		fail_modal.scale = Vector2(0.5, 0.5)
 		tween.tween_property(fail_modal, "scale", Vector2.ONE, 0.3)
+
+func _exit_tree() -> void:
+	if last_stand_tween and last_stand_tween.is_valid():
+		last_stand_tween.kill()
+	if get_viewport() and get_viewport().size_changed.is_connected(_apply_safe_area):
+		get_viewport().size_changed.disconnect(_apply_safe_area)
+	if get_tree().paused:
+		get_tree().paused = false

@@ -27,6 +27,21 @@ var drop_cooldown: float = 0.0
 @onready var trajectory_line: Line2D = $TrajectoryLine
 @onready var drop_poof_fx: CPUParticles2D = get_node_or_null("DropPoofFX")
 
+const TrajectoryOverlayClass = preload("res://scripts/player/TrajectoryOverlay.gd")
+var aim_anchor_x: float = 270.0
+var has_aim_dragged: bool = false
+var trajectory_overlay: Node2D = null
+
+const THEME_COLORS: Dictionary = {
+	"normal": Color(1.0, 0.85, 0.20, 0.95),   # Vàng kim
+	"bomb": Color(1.0, 0.32, 0.12, 0.95),     # Đỏ cam rực lửa
+	"drill": Color(0.20, 0.88, 1.0, 0.95),    # Xanh kim cương khoan
+	"frost": Color(0.40, 0.92, 1.0, 0.95),    # Xanh băng tuyết
+	"cluster": Color(0.35, 1.0, 0.45, 0.95),  # Xanh ngọc chùm
+	"acid": Color(0.75, 1.0, 0.15, 0.95),     # Xanh chuối axit độc
+	"blackhole": Color(0.85, 0.40, 1.0, 0.95) # Tím vũ trụ hố đen
+}
+
 # Lớp biểu cảm và chuyển động hoạt hình mới
 var eyes_sprite: Sprite2D = null
 var goggles_sprite: Sprite2D = null
@@ -83,8 +98,16 @@ func _safe_load(path: String) -> Texture2D:
 func _ready() -> void:
 	add_to_group("Player")
 	position = Vector2(270.0, default_y)
+	aim_anchor_x = position.x
 	if trajectory_line:
 		trajectory_line.visible = false
+
+	# Khởi tạo TrajectoryOverlay vẽ hạt năng lượng động và tâm ngắm tiếp đất
+	trajectory_overlay = TrajectoryOverlayClass.new()
+	trajectory_overlay.name = "TrajectoryOverlay"
+	trajectory_overlay.z_index = 25
+	trajectory_overlay.visible = false
+	add_child(trajectory_overlay)
 
 	if drop_poof_fx:
 		drop_poof_fx.local_coords = false
@@ -211,19 +234,22 @@ func _process_flying_movement(delta: float) -> void:
 	if position.x >= max_x:
 		position.x = max_x
 		move_direction = -1.0
-		bank_roll = -0.28
+		bank_roll = -0.32
 	elif position.x <= min_x:
 		position.x = min_x
 		move_direction = 1.0
-		bank_roll = 0.28
+		bank_roll = 0.32
 	elif position.x >= max_x - 35.0 and move_direction > 0.0:
 		is_near_edge = true
-		bank_roll = lerp(bank_roll, -0.22, 6.0 * delta)
+		bank_roll = lerp(bank_roll, -0.28, 7.0 * delta)
 	elif position.x <= min_x + 35.0 and move_direction < 0.0:
 		is_near_edge = true
-		bank_roll = lerp(bank_roll, 0.22, 6.0 * delta)
+		bank_roll = lerp(bank_roll, 0.28, 7.0 * delta)
 	else:
-		bank_roll = lerp(bank_roll, 0.0, 4.0 * delta)
+		bank_roll = lerp(bank_roll, 0.0, 5.0 * delta)
+
+	# Lực nâng khí động học khi vào vòng cua ôm lượn (Swoop Lift)
+	var turn_lift = 8.0 * (abs(bank_roll) / 0.32)
 
 	# CHU KỲ VỖ - LƯỢN TỰ NHIÊN (Flap-Glide Cycle: 0.45s Vỗ + 0.90s Lượn)
 	flight_cycle_timer += delta
@@ -237,37 +263,47 @@ func _process_flying_movement(delta: float) -> void:
 		# Pha vỗ cánh: 3 nhịp đập nhanh dứt khoát sinh lực nâng
 		wing_flap_time += delta * 24.0
 		flap_angle = sin(wing_flap_time) * 0.52
-		target_bob_y = default_y - 4.0 + sin(wing_flap_time) * 3.5
+		target_bob_y = default_y - 4.0 - turn_lift + sin(wing_flap_time) * 3.5
 		if body_sprite:
 			body_sprite.rotation = lerp_angle(body_sprite.rotation, -move_direction * 0.04, 8.0 * delta)
 	else:
 		# Pha lượn xoải cánh: dang rộng cánh đón gió, hạ độ cao từ từ
 		var glide_progress = (cycle_time - 0.45) / 0.90
 		flap_angle = -0.10 + sin(flight_cycle_timer * 3.5) * 0.04
-		target_bob_y = default_y + glide_progress * 5.0
+		target_bob_y = default_y + glide_progress * 5.0 - turn_lift
 		if body_sprite:
 			body_sprite.rotation = lerp_angle(body_sprite.rotation, move_direction * 0.03, 5.0 * delta)
 
 	position.y = lerp(position.y, target_bob_y, 7.0 * delta)
 
-	# Vỗ cánh đối xứng nhịp nhàng
-	if left_wing: left_wing.rotation = flap_angle
-	if right_wing: right_wing.rotation = flap_angle
+	# Vỗ cánh bất đối xứng theo góc nghiêng tạo chiều sâu thị giác (3D Banking Depth)
+	if left_wing:
+		left_wing.rotation = flap_angle - bank_roll * 0.35
+		left_wing.scale.y = 1.0 + bank_roll * 0.22
+	if right_wing:
+		right_wing.rotation = flap_angle + bank_roll * 0.35
+		right_wing.scale.y = 1.0 - bank_roll * 0.22
 
-	# Quay mặt theo hướng lượn mượt mà (Không bị giật cục khi đổi hướng)
-	facing_scale = lerp(facing_scale, move_direction, 9.0 * delta)
+	# Mắt, kính và mỏ dẫn hướng bay (Head & Gaze Leading)
+	if eyes_sprite:
+		eyes_sprite.position.x = lerp(eyes_sprite.position.x, move_direction * 3.8, 9.0 * delta)
+	if goggles_sprite:
+		goggles_sprite.position.x = lerp(goggles_sprite.position.x, move_direction * 2.6, 9.0 * delta)
+	if beak_open_sprite:
+		beak_open_sprite.position.x = lerp(beak_open_sprite.position.x, move_direction * 2.2, 9.0 * delta)
 
-	# Nghiêng người tự nhiên kết hợp góc ôm cua (Banking Tilt)
+	# Nghiêng người khí động học theo hướng bay và góc lượn (Aerodynamic Tilt)
 	if visual_root:
-		var target_tilt = move_direction * 0.10 + bank_roll
+		var target_tilt = move_direction * 0.08 + bank_roll
 		visual_root.rotation = lerp_angle(visual_root.rotation, target_tilt, 7.0 * delta)
 
-	# Chuyển động quán tính của đuôi gà (Tail Secondary Motion)
+	# Chùm lông đuôi mềm mại bay ngược hướng gió di chuyển (Tail Secondary Lag)
 	if tail_sprite:
-		var tail_rot = -move_direction * 0.12 + (sin(wing_flap_time) * 0.22 if is_flapping else sin(flight_cycle_timer * 3.0) * 0.08)
+		var target_tail_x = -move_direction * 22.0
+		tail_sprite.position.x = lerp(tail_sprite.position.x, target_tail_x, 8.0 * delta)
+		var tail_rot = -move_direction * 0.14 + (sin(wing_flap_time) * 0.22 if is_flapping else sin(flight_cycle_timer * 3.0) * 0.08)
 		tail_sprite.rotation = lerp_angle(tail_sprite.rotation, tail_rot, 8.0 * delta)
-		tail_sprite.position.x = -22.0 * (1.0 if facing_scale >= 0.0 else -1.0)
-		tail_sprite.scale.x = (0.85 if facing_scale >= 0.0 else -0.85)
+		tail_sprite.scale.x = 0.85 # Khóa scale dương cố định, chống lật 2D như tờ giấy
 
 	# Chuyển động con lắc của giỏ đan và quả trứng nạp
 	if basket_sprite:
@@ -279,26 +315,22 @@ func _process_flying_movement(delta: float) -> void:
 		loaded_egg.position.y = -6.0 + sin(flight_cycle_timer * 4.5) * 1.0
 		loaded_egg.rotation = lerp_angle(loaded_egg.rotation, -move_direction * 0.05, 6.0 * delta)
 
-	# Squash & Stretch hô hấp mềm mại theo nhịp cánh
+	# Squash & Stretch hô hấp mềm mại theo nhịp cánh kết hợp góc nghiêng 3D
 	if not is_dropping_anim:
 		var breath = 1.0 + (sin(wing_flap_time) * 0.035 if is_flapping else sin(flight_cycle_timer * 4.0) * 0.015)
-		var target_scale = Vector2((2.0 - breath) * facing_scale, breath)
+		var target_scale = Vector2((2.0 - breath) * (1.0 - abs(bank_roll) * 0.05), breath)
 		visual_root.scale = visual_root.scale.lerp(target_scale, 8.0 * delta)
 
 func _process_aiming_hover(delta: float) -> void:
 	# Khi ngắm: lơ lửng tại chỗ, cánh vỗ nhanh giữ thăng bằng
-	wing_flap_time += delta * 22.0
-	var flap_angle = sin(wing_flap_time) * 0.35
+	wing_flap_time += delta * 24.0
+	var flap_angle = sin(wing_flap_time) * 0.38
 	if left_wing: left_wing.rotation = flap_angle
 	if right_wing: right_wing.rotation = flap_angle
 
 	position.y = lerp(position.y, default_y, 9.0 * delta)
 
-	var target_aim_facing = sign(aim_vector.x) if abs(aim_vector.x) > 30.0 else sign(facing_scale)
-	if target_aim_facing == 0.0: target_aim_facing = 1.0
-	facing_scale = lerp(facing_scale, target_aim_facing, 8.0 * delta)
-
-	# Toàn thân nghiêng theo góc kéo dây ná ngắm đạn
+	# Toàn thân nghiêng nhẹ theo góc kéo dây ná ngắm đạn
 	if visual_root:
 		var aim_tilt = clamp(aim_vector.x * 0.0006, -0.25, 0.25)
 		visual_root.rotation = lerp_angle(visual_root.rotation, aim_tilt, 10.0 * delta)
@@ -315,7 +347,7 @@ func _process_aiming_hover(delta: float) -> void:
 	if body_sprite:
 		body_sprite.position.x = sin(Time.get_ticks_msec() * 0.05) * tension_ratio * 1.8
 
-	# Giọt mồ hôi hiện khi kéo lực căng lớn (> 65%)
+	# Giọt mồ hôi hiện khi kéo lực căng lớn (> 60%)
 	if sweat_sprite:
 		if tension_ratio > 0.60:
 			sweat_sprite.visible = true
@@ -323,6 +355,10 @@ func _process_aiming_hover(delta: float) -> void:
 			sweat_sprite.scale = Vector2.ONE * (0.75 + sin(Time.get_ticks_msec() * 0.03) * 0.15)
 		else:
 			sweat_sprite.visible = false
+
+	# Cập nhật luồng hạt ngọc chuyển động mượt mà 60fps
+	if trajectory_overlay and trajectory_overlay.visible:
+		trajectory_overlay.queue_redraw()
 
 func has_airborne_unboosted_egg() -> bool:
 	var tree = get_tree()
@@ -339,6 +375,7 @@ func _handle_aim_input() -> void:
 		if is_aiming:
 			is_aiming = false
 			_on_aim_end(false)
+			if trajectory_overlay: trajectory_overlay.visible = false
 			if trajectory_line: trajectory_line.visible = false
 		return
 
@@ -362,33 +399,38 @@ func _handle_aim_input() -> void:
 				return
 
 			is_aiming = true
+			has_aim_dragged = false
+			aim_anchor_x = position.x # KHÓA CHẶT TỌA ĐỘ GÀ - KHÔNG DỊCH CHUYỂN
 			aim_start_pos = mouse_pos
 			aim_vector = Vector2(0, 480.0)
 			_on_aim_start()
 
 		if is_aiming:
 			var drag_delta = mouse_pos - aim_start_pos
-			var is_cancelling = (drag_delta.length() < 24.0 or drag_delta.y < -25.0)
+			if drag_delta.length() > 20.0:
+				has_aim_dragged = true
 
-			# Di chuyển gà theo vị trí bắt đầu và độ nghiêng ngón tay
-			position.x = clamp(aim_start_pos.x + drag_delta.x * 0.3, min_x, max_x)
-			
+			var is_cancelling = (drag_delta.y < -28.0) or (has_aim_dragged and drag_delta.length() < 16.0)
+
+			# GIỮ VỮNG GÀ TẠI VỊ TRÍ THẢ NEO - KHÔNG TRƯỢT NGANG THEO TAY KÉO
+			position.x = aim_anchor_x
+
 			# Tính toán lực và góc bắn từ khoảng cách kéo ngón tay
 			var pull_y = clamp(max(drag_delta.y, 30.0), 30.0, 320.0)
 			var pull_x = clamp(drag_delta.x * 1.8, -260.0, 260.0)
 			var launch_spd_y = clamp(pull_y * 2.0 + 350.0, 350.0, 850.0)
 			aim_vector = Vector2(pull_x, launch_spd_y)
 
-			# Co giãn người gà theo lực kéo (Nén lò xo)
-			var tension = clamp(pull_y / 280.0, 0.0, 0.45)
-			var sign_x = sign(facing_scale) if facing_scale != 0.0 else 1.0
-			visual_root.scale = Vector2((1.0 + tension) * sign_x, 1.0 - tension * 0.6)
-			
-			# Mắt liếc nhìn xuống hầm
+			# Co giãn người gà theo lực kéo (Nén dây ná)
+			var tension = clamp(pull_y / 280.0, 0.0, 0.35)
+			visual_root.scale = Vector2(1.0 + tension * 0.35, 1.0 - tension * 0.35)
+
+			# Mắt liếc nhìn xuống hầm theo góc nhắm
 			_update_eye_direction(aim_vector.normalized())
-			
+
 			# Vẽ đường dự đoán quỹ đạo nếu không đang trong vùng hủy
 			if is_cancelling:
+				if trajectory_overlay: trajectory_overlay.visible = false
 				if trajectory_line: trajectory_line.visible = false
 			else:
 				_draw_trajectory(aim_vector)
@@ -396,19 +438,27 @@ func _handle_aim_input() -> void:
 		# Nhả chuột / ngón tay -> Thả trứng ngay hoặc Hủy nếu trong deadzone!
 		if is_aiming:
 			is_aiming = false
+			if trajectory_overlay:
+				trajectory_overlay.visible = false
+				trajectory_overlay.sim_points.clear()
+				trajectory_overlay.queue_redraw()
 			if trajectory_line: trajectory_line.visible = false
 			_reset_eye_direction()
 
 			var drag_delta = mouse_pos - aim_start_pos
-			var is_cancelled = (drag_delta.length() < 24.0 or drag_delta.y < -25.0)
+			var is_cancelled = (drag_delta.y < -28.0) or (has_aim_dragged and drag_delta.length() < 16.0)
 			if not is_cancelled:
-				if aim_vector == Vector2.ZERO:
+				if not has_aim_dragged:
+					# Thao tác chạm nhanh (Tap-to-Drop): Thả rơi trứng thẳng đứng tức thì
+					aim_vector = Vector2(0, 480.0)
+				elif aim_vector == Vector2.ZERO:
 					aim_vector = Vector2(0, 480.0)
 				_drop_egg(aim_vector)
 			else:
 				_on_aim_end(false)
 
 			aim_vector = Vector2(0, 480.0)
+			has_aim_dragged = false
 
 func _on_aim_start() -> void:
 	# 1. Kính phi công trượt xuống che mắt ("CLACK!")
@@ -433,32 +483,94 @@ func _on_aim_end(dropped: bool) -> void:
 		if eyes_sprite and tex_eyes_normal:
 			eyes_sprite.texture = tex_eyes_normal
 
+		# Khôi phục hình thể gà êm dịu, không bị kẹt co giãn
+		if visual_root:
+			var vt = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			vt.tween_property(visual_root, "scale", Vector2.ONE, 0.12)
+			vt.tween_property(visual_root, "rotation", 0.0, 0.12)
+
 	if sweat_sprite:
 		sweat_sprite.visible = false
 	if body_sprite:
 		body_sprite.position.x = 0.0
+	if trajectory_overlay:
+		trajectory_overlay.visible = false
+		trajectory_overlay.sim_points.clear()
 
 func _draw_trajectory(initial_vel: Vector2) -> void:
-	if not trajectory_line: return
-	trajectory_line.visible = true
-	
-	var points: PackedVector2Array = []
-	var start_p = Vector2(0, 24) # Từ bụng gà
+	if not trajectory_overlay: return
+	trajectory_overlay.visible = true
+
+	var theme_col = THEME_COLORS.get(current_egg_type, Color(1.0, 0.85, 0.20, 0.95))
+	trajectory_overlay.active_color = theme_col
+
+	var space_state = get_world_2d().direct_space_state
+	var start_p = global_position + Vector2(0, 26.0)
 	var vel = initial_vel
 	var gravity = Vector2(0, 980.0)
-	var dt = 0.025
+	var dt = 0.022
+
 	var cur_p = start_p
-	
-	for i in range(30):
-		points.append(cur_p)
-		cur_p += vel * dt
+	var sim: Array[Vector2] = [start_p]
+	var has_hit = false
+	var hit_pos = Vector2.ZERO
+	var hit_normal = Vector2.UP
+	var hit_special = false
+
+	var floor_y = GameManager.current_floor_y if has_node("/root/GameManager") else 840.0
+
+	for _i in range(38):
+		var next_p = cur_p + vel * dt
 		vel += gravity * dt
-	
-	trajectory_line.points = points
+
+		# Kiểm tra va chạm tia giữa 2 bước mô phỏng quỹ đạo
+		if space_state:
+			var query = PhysicsRayQueryParameters2D.create(cur_p, next_p)
+			query.collide_with_bodies = true
+			query.collide_with_areas = false
+
+			var hit = space_state.intersect_ray(query)
+			if hit and hit.collider:
+				var col = hit.collider
+				if is_instance_valid(col) and col != self and not col.is_queued_for_deletion():
+					# Bắt trúng khối gạch, quái vật, thùng thuốc nổ hoặc nền đất
+					has_hit = true
+					hit_pos = hit.position
+					hit_normal = hit.normal
+					if col is BunkerMonster or col is TNTBarrel or col is NukeBarrel:
+						hit_special = true
+					sim.append(hit_pos)
+					break
+
+		# Kiểm tra chạm sàn đất thực tế của màn chơi
+		if next_p.y >= floor_y:
+			has_hit = true
+			hit_pos = Vector2(next_p.x, floor_y)
+			hit_normal = Vector2.UP
+			sim.append(hit_pos)
+			break
+
+		sim.append(next_p)
+		cur_p = next_p
+
+	trajectory_overlay.sim_points = sim
+	trajectory_overlay.has_impact = has_hit
+	trajectory_overlay.impact_pos = hit_pos
+	trajectory_overlay.impact_normal = hit_normal
+	trajectory_overlay.impact_is_monster_or_tnt = hit_special
+	trajectory_overlay.queue_redraw()
+
+	# Cập nhật Line2D gốc cho tương thích ngược nếu có
+	if trajectory_line:
+		var line_pts: PackedVector2Array = []
+		for p in sim:
+			line_pts.append(to_local(p))
+		trajectory_line.points = line_pts
+		trajectory_line.visible = false
 
 func _update_eye_direction(dir: Vector2) -> void:
 	if eyes_sprite:
-		eyes_sprite.position = Vector2(dir.x * 2.5, clamp(dir.y * 3.0, 0.0, 4.0))
+		eyes_sprite.position = Vector2(dir.x * 3.5, clamp(dir.y * 3.0, 0.0, 4.0))
 
 func _reset_eye_direction() -> void:
 	if eyes_sprite:
@@ -498,6 +610,7 @@ func _prepare_next_egg() -> void:
 			loaded_egg.visible = false
 
 func _drop_egg(launch_vel: Vector2 = Vector2(0, 480.0)) -> void:
+	_on_aim_end(true)
 	var egg_type = GameManager.get_next_egg()
 	if egg_type == "" or not egg_scenes.has(egg_type):
 		GameManager.check_out_of_eggs()
@@ -517,11 +630,10 @@ func _drop_egg(launch_vel: Vector2 = Vector2(0, 480.0)) -> void:
 
 	# Hiệu ứng rặn đẻ Squash & Stretch bùng nổ
 	is_dropping_anim = true
-	var sign_x = sign(facing_scale) if facing_scale != 0.0 else 1.0
 	var tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-	visual_root.scale = Vector2(sign_x * 0.65, 1.45) # Bật dài người lên trên
-	tween.tween_property(visual_root, "scale", Vector2(sign_x * 1.25, 0.75), 0.12)
-	tween.tween_property(visual_root, "scale", Vector2(sign_x * 1.0, 1.0), 0.18)
+	visual_root.scale = Vector2(0.72, 1.38) # Bật dài người lên trên
+	tween.tween_property(visual_root, "scale", Vector2(1.22, 0.82), 0.12)
+	tween.tween_property(visual_root, "scale", Vector2.ONE, 0.18)
 	tween.finished.connect(func():
 		is_dropping_anim = false
 		if not is_aiming and not is_celebrating and not is_defeated:
@@ -541,8 +653,8 @@ func _drop_egg(launch_vel: Vector2 = Vector2(0, 480.0)) -> void:
 	# 2. Vung giỏ con lắc cực mạnh khi trứng rời giỏ
 	if basket_sprite:
 		var basket_swing = create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-		basket_swing.tween_property(basket_sprite, "rotation", -sign_x * 0.45, 0.08)
-		basket_swing.tween_property(basket_sprite, "rotation", sign_x * 0.25, 0.15)
+		basket_swing.tween_property(basket_sprite, "rotation", -move_direction * 0.45, 0.08)
+		basket_swing.tween_property(basket_sprite, "rotation", move_direction * 0.25, 0.15)
 		basket_swing.tween_property(basket_sprite, "rotation", 0.0, 0.25)
 
 	# 3. Đuôi gà ngoáy giật lên cao sau cú phóng

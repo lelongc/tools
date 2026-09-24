@@ -83,6 +83,12 @@ func _physics_process(delta: float) -> void:
 		if support_check_timer <= 0.0:
 			support_check_timer = 0.12
 			_check_underlying_support()
+	else:
+		if sleeping:
+			support_check_timer -= delta
+			if support_check_timer <= 0.0:
+				support_check_timer = 0.12
+				_check_underlying_support()
 
 func _check_underlying_support() -> void:
 	# 1. Nền móng bedrock: Nếu tảng đá tiếp xúc sàn đất thực tế của màn chơi (floor_y) thì không bao giờ mất bệ đỡ
@@ -94,14 +100,14 @@ func _check_underlying_support() -> void:
 	if not space_state: return
 
 	# Kiểm tra 3 tia phía dưới bệ đỡ tảng đá (trái, giữa, phải)
-	# Tia bắt đầu từ bên trong tảng đá (y = 16.0), bắn xuống 24px (xuyên qua đáy y=28 xuống y=40)
+	# Tia bắt đầu từ bên trong tảng đá (y = 16.0), bắn xuống 26px (xuyên qua đáy y=28)
 	var test_pts = [
 		global_position + Vector2(-14.0, 16.0),
 		global_position + Vector2(0.0, 16.0),
 		global_position + Vector2(14.0, 16.0)
 	]
 	var has_valid_support = false
-	var ray_length = 24.0
+	var ray_length = 26.0
 
 	for pt in test_pts:
 		var ray_query = PhysicsRayQueryParameters2D.create(pt, pt + Vector2(0, ray_length))
@@ -113,33 +119,41 @@ func _check_underlying_support() -> void:
 		var hit = space_state.intersect_ray(ray_query)
 		if hit and hit.collider:
 			var col = hit.collider
-			if is_instance_valid(col) and col != self:
+			if is_instance_valid(col) and col != self and not col.is_queued_for_deletion():
 				if col is StaticBody2D:
 					has_valid_support = true
 					break
 				elif col is RigidBody2D:
 					var is_failing = false
-					if "is_destroyed" in col and col.is_destroyed:
+					if ("is_destroyed" in col and col.is_destroyed) \
+						or ("is_defeated" in col and col.is_defeated) \
+						or ("is_ignited" in col and col.is_ignited) \
+						or ("is_broken" in col and col.is_broken) \
+						or ("is_breaking" in col and col.is_breaking):
 						is_failing = true
-					elif "is_awake" in col and col.is_awake and col.linear_velocity.y > 35.0:
+					elif "is_awake" in col and col.is_awake and (not col.sleeping or col.linear_velocity.y > 10.0 or col.linear_velocity.length() > 30.0):
 						is_failing = true
 					if not is_failing:
 						has_valid_support = true
 						break
 
 	if not has_valid_support:
-		wake_up()
+		if not is_awake:
+			wake_up()
+		elif sleeping:
+			sleeping = false
+			apply_central_impulse(Vector2(0, 20.0))
 
 func _load_svg(path: String) -> Texture2D:
 	return ParticleHelper._safe_load(path)
 
 func wake_up() -> void:
-	if is_awake: return
 	if has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
 		if gm.current_egg_index == 0:
 			return # Peacetime lock
 	is_awake = true
+	sleeping = false
 	set_deferred("freeze", false)
 
 func _on_impact(body: Node) -> void:

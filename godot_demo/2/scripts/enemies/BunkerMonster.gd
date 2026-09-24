@@ -891,15 +891,17 @@ func _play_spawn_bounce() -> void:
 	tween.tween_property(visual_root, "scale", target_s, 0.3)
 
 func wake_up() -> void:
-	if is_awake or is_defeated: return
+	if is_defeated: return
 	if has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
 		if gm.current_egg_index == 0:
 			return # Khóa tĩnh tuyệt đối lúc chưa bắn trứng
 	is_awake = true
+	sleeping = false
 	set_deferred("freeze", false)
 
 var crush_audio_cooldown: float = 0.0
+var support_check_timer: float = 0.12
 
 func _physics_process(delta: float) -> void:
 	if is_defeated: return
@@ -915,13 +917,75 @@ func _physics_process(delta: float) -> void:
 		if gm.current_egg_index == 0:
 			return
 	if not is_awake:
+		support_check_timer -= delta
+		if support_check_timer <= 0.0:
+			support_check_timer = 0.12
+			_check_underlying_support()
 		for b in get_colliding_bodies():
 			if is_instance_valid(b) and b is RigidBody2D and b.linear_velocity.length() > 40.0:
 				wake_up()
 				break
 		return
+	else:
+		if sleeping:
+			support_check_timer -= delta
+			if support_check_timer <= 0.0:
+				support_check_timer = 0.12
+				_check_underlying_support()
+
 	if spawn_settle_timer > 0.0: return
 	_handle_continuous_crushing(delta)
+
+func _check_underlying_support() -> void:
+	if is_defeated: return
+	var floor_y = GameManager.current_floor_y if has_node("/root/GameManager") else 840.0
+	if (global_position.y + 18.0) >= (floor_y - 4.0):
+		return # Đang chạm nền đất cứng bedrock
+
+	var space_state = get_world_2d().direct_space_state
+	if not space_state: return
+
+	var test_pts = [
+		global_position + Vector2(-10.0, 10.0),
+		global_position + Vector2(10.0, 10.0)
+	]
+	var has_support = false
+	var ray_length = 26.0
+
+	for pt in test_pts:
+		var ray_query = PhysicsRayQueryParameters2D.create(pt, pt + Vector2(0, ray_length))
+		ray_query.exclude = [get_rid()]
+		ray_query.collide_with_bodies = true
+		ray_query.collide_with_areas = false
+		ray_query.hit_from_inside = true
+
+		var hit = space_state.intersect_ray(ray_query)
+		if hit and hit.collider:
+			var col = hit.collider
+			if is_instance_valid(col) and col != self and not col.is_queued_for_deletion():
+				if col is StaticBody2D:
+					has_support = true
+					break
+				elif col is RigidBody2D:
+					var is_failing = false
+					if ("is_destroyed" in col and col.is_destroyed) \
+						or ("is_defeated" in col and col.is_defeated) \
+						or ("is_ignited" in col and col.is_ignited) \
+						or ("is_broken" in col and col.is_broken) \
+						or ("is_breaking" in col and col.is_breaking):
+						is_failing = true
+					elif "is_awake" in col and col.is_awake and (not col.sleeping or col.linear_velocity.y > 10.0 or col.linear_velocity.length() > 30.0):
+						is_failing = true
+					if not is_failing:
+						has_support = true
+						break
+
+	if not has_support:
+		if not is_awake:
+			wake_up()
+		elif sleeping:
+			sleeping = false
+			apply_central_impulse(Vector2(0, 20.0))
 
 func _handle_continuous_crushing(delta: float) -> void:
 	if crush_audio_cooldown > 0.0:

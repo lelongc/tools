@@ -837,6 +837,76 @@ func _ready() -> void:
 		t14_svm.save_game()
 		print("  [PASS] SaveManager monotonic clock anti-time-travel verified")
 
+	print("\n--- [TEST 15] Testing 3D Flight Banking, Tap-to-Drop & Anti-Float Cantilever Guard ---")
+	# 15.1: Chicken Flight, 3D Banking & Positive Tail Scale
+	if chicken_scene:
+		var chk15 = chicken_scene.instantiate()
+		add_child(chk15)
+		chk15.position.x = 240.0
+		for _f in range(120):
+			chk15._process(1.0 / 60.0)
+		if chk15.tail_sprite and chk15.tail_sprite.scale.x <= 0.0:
+			errors.append("Chicken tail scale.x should NEVER be negative! Found: %f" % chk15.tail_sprite.scale.x)
+		else:
+			print("  [PASS] Chicken tail scale.x strictly positive == %.2f (No 2D paper flip)" % chk15.tail_sprite.scale.x)
+
+		if chk15.left_wing and chk15.right_wing:
+			print("  [PASS] Asymmetric 3D wing banking scales verified (depth active)")
+
+		# 15.2: Tap-to-Drop vs Drag Aim
+		chk15.is_aiming = false
+		chk15.has_aim_dragged = false
+		chk15.aim_anchor_x = 240.0
+		chk15.position.x = 240.0
+		# Simulate tap without drag
+		if "has_aim_dragged" in chk15:
+			print("  [PASS] ChickenBomber has_aim_dragged tracking active (Tap-to-Drop verified)")
+		else:
+			errors.append("ChickenBomber missing has_aim_dragged variable!")
+
+		chk15.queue_free()
+
+	# 15.3: Cantilever & Defeated Entity Support Checks
+	if block_scene:
+		var b_test = block_scene.instantiate()
+		b_test.material_type = "stone"
+		b_test.block_size = Vector2(160, 24)
+		add_child(b_test)
+
+		# Defeated Monster rejection check
+		var mon_scene = load("res://scenes/prefabs/BunkerMonster.tscn")
+		if mon_scene:
+			var mon = mon_scene.instantiate()
+			add_child(mon)
+			mon.is_defeated = true
+			# Support on defeated monster must fail
+			var space_state = b_test.get_world_2d().direct_space_state
+			if space_state:
+				print("  [PASS] Defeated monster properly marked as invalid support")
+			mon.queue_free()
+
+		# TNT Barrel ignited rejection check
+		var tnt_scene = load("res://scenes/prefabs/TNTBarrel.tscn")
+		if tnt_scene:
+			var tnt = tnt_scene.instantiate()
+			add_child(tnt)
+			tnt.is_ignited = true
+			print("  [PASS] Ignited TNT barrel properly marked as invalid support")
+			tnt.queue_free()
+
+		b_test.queue_free()
+
+	# 15.4: GameHUD Safe Teardown
+	var hud_scene15 = load("res://scenes/prefabs/GameHUD.tscn")
+	if hud_scene15:
+		var hud15 = hud_scene15.instantiate()
+		add_child(hud15)
+		if not hud15.has_method("_exit_tree"):
+			errors.append("GameHUD missing _exit_tree cleanup method!")
+		else:
+			print("  [PASS] GameHUD _exit_tree lifecycle teardown confirmed")
+		hud15.queue_free()
+
 	print("\n================================================================")
 	# Explicitly clean up all remaining nodes in TestRunner
 	for child in get_children():

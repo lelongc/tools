@@ -315,14 +315,15 @@ func _physics_process(delta: float) -> void:
 		var ang_speed = abs(angular_velocity)
 
 		# Khi thanh công trình nằm kẹt/chèn ép, vận tốc dao động rất nhỏ (< 32.0 px/s, xoay < 1.4 rad/s)
-		if speed < 32.0 and ang_speed < 1.4:
+		# Tuyệt đối không dập lực nếu khối đang gia tốc rơi tự do xuống dưới (linear_velocity.y > 35.0)
+		if speed < 32.0 and ang_speed < 1.4 and linear_velocity.y <= 35.0:
 			# Dập tắt xung lực vi mô lũy tiến theo từng tick vật lý
-			linear_velocity *= 0.82
-			angular_velocity *= 0.72
+			linear_velocity *= 0.88
+			angular_velocity *= 0.82
 			micro_jitter_timer += delta
 
-			# Nếu dao động kẹt kéo dài > 0.18s hoặc vận tốc đã triệt tiêu về gần 0 (< 3.0 px/s):
-			if micro_jitter_timer > 0.18 or (speed < 3.0 and ang_speed < 0.2):
+			# TUYỆT ĐỐI CHỈ CHO NGỦ VÀ TRIỆT TIÊU VẬN TỐC KHI KHỐI CÓ BỆ ĐỠ VỮNG CHẮC!
+			if (micro_jitter_timer > 0.18 or (speed < 3.0 and ang_speed < 0.2)) and _has_rigid_support():
 				linear_velocity = Vector2.ZERO
 				angular_velocity = 0.0
 				sleeping = true
@@ -330,6 +331,15 @@ func _physics_process(delta: float) -> void:
 		else:
 			# Thanh đang bay tự do, rơi dốc hoặc bị bom hất tung -> reset bộ đếm ngay
 			micro_jitter_timer = max(0.0, micro_jitter_timer - delta * 3.0)
+
+		# Chống lơ lửng: Nếu khối đã ngủ (sleeping) nhưng mất bệ đỡ bên dưới -> đánh thức rơi ngay
+		if sleeping:
+			support_check_timer -= delta
+			if support_check_timer <= 0.0:
+				support_check_timer = 0.12
+				if not _has_rigid_support():
+					sleeping = false
+					apply_central_impulse(Vector2(0, 25.0))
 
 	if not is_awake:
 		if spawn_settle_timer > 0.0:
@@ -342,34 +352,42 @@ func _physics_process(delta: float) -> void:
 		support_check_timer -= delta
 		if support_check_timer <= 0.0:
 			support_check_timer = 0.12
-			_check_underlying_support()
+			if not _has_rigid_support():
+				wake_up()
 
-func _check_underlying_support() -> void:
+func _has_rigid_support() -> bool:
 	var hh = block_size.y * 0.5
 	# 1. Nền móng bedrock: Khối tiếp xúc mặt đất thực tế của màn chơi (floor_y) vĩnh viễn vững chắc
 	var floor_y = GameManager.current_floor_y if has_node("/root/GameManager") else 840.0
 	if (global_position.y + hh) >= (floor_y - 4.0):
-		return
+		return true
 
 	var space_state = get_world_2d().direct_space_state
-	if not space_state: return
+	if not space_state: return true
 
 	var hw = block_size.x * 0.5
 	# 2. Phân bổ đều các điểm quét xuyên suốt chiều rộng đáy khối để bắt trọn mọi cột trụ đỡ
-	# Tia bắt đầu từ bên trong khối (hh - 4.0), bắn xuống 20px (xuyên qua mép đáy 16px)
 	var test_points: Array[Vector2] = []
-	var step = 18.0
-	var x_cur = -hw + 8.0
-	while x_cur <= hw - 8.0:
-		test_points.append(global_position + Vector2(x_cur, hh - 4.0))
+	var test_local_x: Array[float] = []
+	var step = 16.0
+	var x_cur = -hw + 6.0
+	while x_cur <= hw - 6.0:
+		test_points.append(to_global(Vector2(x_cur, hh - 4.0)))
+		test_local_x.append(x_cur)
 		x_cur += step
 	if test_points.is_empty():
-		test_points.append(global_position + Vector2(0.0, hh - 4.0))
+		test_points.append(to_global(Vector2(0.0, hh - 4.0)))
+		test_local_x.append(0.0)
 
-	var has_valid_support = false
-	var ray_length = 20.0
+	var ray_length = 26.0
+	var has_left = false
+	var has_right = false
+	var has_center = false
+	var any_hit = false
 
-	for pt in test_points:
+	for idx in range(test_points.size()):
+		var pt = test_points[idx]
+		var lx = test_local_x[idx]
 		var ray_query = PhysicsRayQueryParameters2D.create(pt, pt + Vector2(0, ray_length))
 		ray_query.exclude = [get_rid()]
 		ray_query.collide_with_bodies = true
@@ -379,25 +397,52 @@ func _check_underlying_support() -> void:
 		var hit = space_state.intersect_ray(ray_query)
 		if hit and hit.collider:
 			var col = hit.collider
-			if is_instance_valid(col) and col != self:
+			if is_instance_valid(col) and col != self and not col.is_queued_for_deletion():
+				var is_failing = false
 				if col is StaticBody2D:
-					has_valid_support = true
-					break
+					pass # Nền đá tĩnh hoặc tường biên vững chắc
 				elif col is RigidBody2D:
-					var is_failing = false
-					if "is_destroyed" in col and col.is_destroyed:
+					if ("is_destroyed" in col and col.is_destroyed) \
+						or ("is_defeated" in col and col.is_defeated) \
+						or ("is_ignited" in col and col.is_ignited) \
+						or ("is_broken" in col and col.is_broken) \
+						or ("is_breaking" in col and col.is_breaking):
 						is_failing = true
-					elif "is_awake" in col and col.is_awake and col.linear_velocity.y > 35.0:
+					elif "is_awake" in col and col.is_awake and (not col.sleeping or col.linear_velocity.y > 10.0 or col.linear_velocity.length() > 30.0):
+						# Khối đỡ bên dưới đã thức giấc đang rơi hoặc trượt -> không còn là bệ đỡ vững chắc
 						is_failing = true
-					if not is_failing:
-						has_valid_support = true
-						break
+				else:
+					is_failing = true
 
-	if not has_valid_support:
+				if not is_failing:
+					any_hit = true
+					if lx < -hw * 0.20:
+						has_left = true
+					elif lx > hw * 0.20:
+						has_right = true
+					else:
+						has_center = true
+
+	if not any_hit:
+		return false
+
+	# Đối với khối hẹp hoặc vuông (width <= 48px): 1 điểm đỡ bất kỳ là đủ
+	if block_size.x <= 48.0:
+		return true
+
+	# Đối với khối rộng (thanh dầm ngang, cầu nối, mái vòm):
+	# Nếu chỉ có điểm tựa ở một bên mép duy nhất mà không có điểm tựa ở giữa hoặc mép đối diện -> Cantilever mất cân bằng
+	if (has_left and not has_right and not has_center) or (has_right and not has_left and not has_center):
+		return false
+
+	return true
+
+func _check_underlying_support() -> void:
+	if not _has_rigid_support():
 		wake_up()
 
 func wake_up() -> void:
-	if is_awake or is_destroyed: return
+	if is_destroyed: return
 	# KHÓA CỐ ĐỊNH 100%: Tuyệt đối không bao giờ rã đông trong thời gian yên tĩnh (chưa bắn trứng)
 	if has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
@@ -410,28 +455,35 @@ func wake_up() -> void:
 	_wake_up_neighbors()
 
 func _wake_up_neighbors() -> void:
-	# Chỉ lan tỏa hướng lên trên khi khối này BỊ VỠ VỤN hoặc rơi với tốc độ lớn
-	# Triệt tiêu hoàn toàn việc lan truyền bán kính sang các khối bên cạnh gây sụp đổ vô lý
-	if not (is_destroyed or linear_velocity.y > 45.0):
-		return
-
+	# Lan tỏa thức giấc lên trên cột để toàn bộ tháp sụp đổ đồng bộ, không bao giờ để khối trên lơ lửng
 	var space_state = get_world_2d().direct_space_state
 	if not space_state: return
 
-	var up_query = PhysicsShapeQueryParameters2D.new()
+	var hh = block_size.y * 0.5
+	var box_height = max(hh * 1.5, 140.0)
 	var box = RectangleShape2D.new()
-	box.size = Vector2(block_size.x * 0.9, 120.0)
+	var box_width = max(block_size.x + 40.0, 70.0)
+	box.size = Vector2(box_width, box_height)
+	var up_query = PhysicsShapeQueryParameters2D.new()
 	up_query.shape = box
-	up_query.transform = Transform2D(0, global_position + Vector2(0, -65.0))
+	up_query.transform = Transform2D(0, global_position + Vector2(0, -hh - box_height * 0.5 + 4.0))
 	up_query.collide_with_bodies = true
 	up_query.exclude = [get_rid()]
 
-	var up_hits = space_state.intersect_shape(up_query, 16)
+	var up_hits = space_state.intersect_shape(up_query, 32)
 	for uh in up_hits:
 		var ub = uh.collider
-		if is_instance_valid(ub) and ub != self:
-			if ub.has_method("wake_up") and not ub.is_awake:
-				ub.wake_up()
+		if is_instance_valid(ub) and ub != self and not ub.is_queued_for_deletion():
+			if ub is RigidBody2D:
+				ub.sleeping = false
+				if ub.freeze:
+					if ub.has_method("wake_up"):
+						ub.wake_up()
+					else:
+						ub.freeze = false
+				else:
+					# Đã rã đông nhưng có thể đang đứng yên, kích hoạt rơi ngay
+					ub.apply_central_impulse(Vector2(0, 20.0))
 
 func _on_impact(body: Node) -> void:
 	if is_destroyed or spawn_settle_timer > 0.0: return

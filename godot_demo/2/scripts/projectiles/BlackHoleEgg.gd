@@ -10,6 +10,7 @@ const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 
 var is_broken: bool = false
 var is_singularity: bool = false
+var has_boosted: bool = false
 var vortex_timer: float = 0.0
 
 @onready var visual_root: Node2D = get_node_or_null("VisualRoot")
@@ -29,7 +30,7 @@ func _ready() -> void:
 		vortex_particles.color = Color(0.85, 0.35, 1.0, 0.95)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not is_broken and not is_singularity and BaseEgg.is_valid_airborne_tap(event):
+	if not is_broken and not is_singularity and not has_boosted and BaseEgg.is_valid_airborne_tap(event):
 		_trigger_vortex()
 
 func _on_body_entered(_body: Node) -> void:
@@ -38,6 +39,7 @@ func _on_body_entered(_body: Node) -> void:
 
 func _trigger_vortex() -> void:
 	if is_broken or is_singularity: return
+	has_boosted = true
 	is_singularity = true
 	vortex_timer = vortex_duration
 

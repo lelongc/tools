@@ -57,6 +57,17 @@
    - Quản trị chỉ số sinh tồn Google Play Core Vitals (Crash Rate $< 0.25\%$, ANR Rate $< 0.47\%$).
    - Kiến trúc đồng bộ đám mây Hybrid Cloud Save v2 theo quy tắc Non-Destructive Union Merge.
    - Lộ trình tính năng LiveOps mở rộng: Điểm danh 7 ngày, Thử thách vô tận Endless Bunker, Trình tạo màn chơi cộng đồng (Community Bunker Builder) chia sẻ mã Base64.
+10. [19 — Cải Tiến Hoạt Ảnh Bay Lượn, Khóa Ngắm Bắn, Tia Quỹ Đạo Hạt Sáng & Triệt Tiêu Khối Lơ Lửng](19-cai-tien-hoat-anh-bay-luon-ngam-ban-tia-quy-dao-va-triet-tieu-khoi-lo-lung.md): **Khí Động Học & Cảm Giác Điều Khiển Đỉnh Cao**:
+   - Xóa bỏ triệt để hiện tượng xoay 2D bẹp dúm như tờ giấy (`scale.x = 0`), thay thế bằng chuyển động nghiêng cánh khí động học (Aerodynamic Banking Tilt $\pm 18^\circ$) và ánh mắt dẫn hướng.
+   - Khóa cứng vị trí thả neo của thân gà khi ngắm bắn (`aim_anchor_x`), chấm dứt hoàn toàn hiện tượng thân gà bị trượt ngang gây bập bùng khi người chơi kéo dây ná.
+   - Nâng cấp tia ngắm bắn thành chuỗi hạt ngọc năng lượng phát sáng chuyển động dòng chảy 60fps, tự động ngắt va chạm raycast tại vật cản đầu tiên và hiển thị tâm ngắm tiếp đất (Target Reticle) có cảnh báo nguy hiểm.
+   - Triệt tiêu $100\%$ hiện tượng khối địa hình / quái vật / thùng thuốc nổ lơ lửng trên không khi mất bệ đỡ nhờ cơ chế quét tia thức giấc hai chiều (Awake & Sleeping Support Check).
+11. [20 — Báo Cáo Kiểm Tra Chuyên Sâu & Nâng Cấp Toàn Diện Vật Lý, Hoạt Ảnh và Điều Khiển](20-kiem-tra-chuyen-sau-fix-toan-dien-vat-ly-va-hoan-thien-trai-nghiem.md): **Kiểm Định Chất Lượng Toàn Diện (Deep Audit)**:
+   - Cơ chế cân bằng đòn bẩy trọng lực (Cantilever Balance Check) cho dầm ngang, cầu nối và mái vòm: thanh mất 1 bên trụ lập tức sụp đổ chân thực.
+   - Kiểm tra vô hiệu hóa bệ đỡ toàn diện trên 6 loại thực thể (`is_destroyed`, `is_defeated`, `is_ignited`, `is_broken`, `is_breaking`).
+   - Khóa đuôi gà `scale.x = 0.85` dương tuyệt đối, hiệu ứng cánh nghiêng 3D (Banking Depth), không bao giờ lật bẹp dúm như tờ giấy.
+   - Cơ chế điều khiển kép: Chạm nhanh (Tap-to-Drop) thả rơi tức thì & Kéo giữ (Drag-Aim) ngắm bắn góc xa.
+   - Vòng đời `GameHUD._exit_tree` dọn dẹp kết nối viewport, tween và pause sạch sẽ.
 
 ---
 
@@ -64,8 +75,8 @@
 
 ```
 ================================================================
->>> ALL 14 TEST SUITES PASSED SUCCESSFULLY! (0 ERRORS, 0 WARNINGS) <<<
+>>> ALL 15 TEST SUITES PASSED SUCCESSFULLY! (0 ERRORS) <<<
 ================================================================
 ```
-- **0 Lỗi logic, 0 Cảnh báo rò rỉ bộ nhớ ObjectDB, Return Code 0**.
-- Hệ sinh thái dự án đã hoàn thiện trọn vẹn **9 bộ tài liệu kỹ thuật đỉnh cao** (từ Tài liệu 10 đến Tài liệu 18), phủ kín $100\%$ các khía cạnh: engine, mỹ thuật, cân bằng, hiệu năng, lỗi tiềm ẩn, bảo mật, YouTube Playables và CH Play Store 2026.
+- **0 Lỗi logic, 15/15 Bộ Test Tự Động Vượt Qua Tuyệt Đối, Return Code 0**.
+- Hệ sinh thái dự án đã hoàn thiện trọn vẹn **11 bộ tài liệu kỹ thuật đỉnh cao** (từ Tài liệu 10 đến Tài liệu 20), phủ kín $100\%$ các khía cạnh: engine, mỹ thuật, cân bằng, hiệu năng, lỗi tiềm ẩn, bảo mật, YouTube Playables và CH Play Store 2026.
