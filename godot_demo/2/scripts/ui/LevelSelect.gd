@@ -41,6 +41,9 @@ func _ready() -> void:
 	var cur_lvl = GameManager.current_level if has_node("/root/GameManager") else 1
 	current_world = clamp(int(float(cur_lvl - 1) / 20.0) + 1, 1, 10)
 
+	_apply_safe_area()
+	get_viewport().size_changed.connect(_apply_safe_area)
+
 	_build_world_ribbon()
 	_update_total_stars()
 	_render_world_levels()
@@ -327,3 +330,18 @@ func _notification(what: int) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		GameManager.go_to_main_menu()
+
+func _apply_safe_area() -> void:
+	if not is_inside_tree(): return
+	var safe_rect = DisplayServer.get_display_safe_area()
+	var win_size = DisplayServer.window_get_size()
+	if win_size.y <= 0: return
+
+	var vp_size = get_viewport().get_visible_rect().size
+	var scale_y = vp_size.y / float(win_size.y)
+	var top_inset = float(safe_rect.position.y) * scale_y
+
+	var top_bar = get_node_or_null("TopBar") as Control
+	if top_bar:
+		var target_top = max(10.0, top_inset + 6.0)
+		top_bar.offset_top = target_top

@@ -13,6 +13,7 @@ const MAX_BOUNCES: int = 2
 
 func _ready() -> void:
 	add_to_group("Projectiles")
+	continuous_cd = RigidBody2D.CCD_MODE_CAST_RAY
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_impact)

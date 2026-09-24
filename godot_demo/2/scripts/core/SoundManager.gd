@@ -11,6 +11,7 @@ const POOL_SIZE = 16
 var wav_cache: Dictionary = {}
 var is_bgm_active: bool = true
 var _sfx_rr_index: int = 0
+var _sfx_recent_timestamps: Dictionary = {}
 
 var fanfare_player: AudioStreamPlayer = null
 var ui_player: AudioStreamPlayer = null
@@ -166,6 +167,19 @@ func play_sfx(key: String, vol_db: float = 0.0, pitch_min: float = 0.94, pitch_m
 	if not is_inside_tree(): return
 	if not is_sound_enabled(): return
 	if not wav_cache.has(key): return
+
+	# Giới hạn số âm thanh trùng lặp trong cửa sổ 45ms (Chống nổ rè loa khi nổ dây chuyền)
+	var now = Time.get_ticks_msec()
+	var recent_data = _sfx_recent_timestamps.get(key, [0, 0])
+	var last_time = int(recent_data[0])
+	var count_in_window = int(recent_data[1])
+
+	if now - last_time < 45:
+		if count_in_window >= 2:
+			return # Đã có 2 âm thanh tương tự đang phát trong 45ms, bỏ qua để tránh clipping
+		_sfx_recent_timestamps[key] = [last_time, count_in_window + 1]
+	else:
+		_sfx_recent_timestamps[key] = [now, 1]
 
 	var stream = wav_cache[key]
 	var p = _get_available_player()

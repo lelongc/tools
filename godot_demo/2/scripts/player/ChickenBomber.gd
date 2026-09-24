@@ -27,12 +27,34 @@ var drop_cooldown: float = 0.0
 @onready var trajectory_line: Line2D = $TrajectoryLine
 @onready var drop_poof_fx: CPUParticles2D = get_node_or_null("DropPoofFX")
 
+# Lớp biểu cảm và chuyển động hoạt hình mới
+var eyes_sprite: Sprite2D = null
+var goggles_sprite: Sprite2D = null
+var beak_open_sprite: Sprite2D = null
+var tail_sprite: Sprite2D = null
+var sweat_sprite: Sprite2D = null
+
+# Cache Textures biểu cảm
+var tex_eyes_normal: Texture2D = null
+var tex_eyes_blink: Texture2D = null
+var tex_eyes_aim: Texture2D = null
+var tex_eyes_pop: Texture2D = null
+var tex_goggles: Texture2D = null
+var tex_tail: Texture2D = null
+var tex_beak_open: Texture2D = null
+var tex_sweat: Texture2D = null
+
+# Biến trạng thái hoạt họa
 var wing_flap_time: float = 0.0
+var flight_cycle_timer: float = 0.0
 var base_scale: Vector2 = Vector2.ONE
 var is_dropping_anim: bool = false
 var recoil_active: bool = false
 var facing_scale: float = 1.0
 var blink_timer: float = 3.0
+var is_celebrating: bool = false
+var is_defeated: bool = false
+var bank_roll: float = 0.0
 
 # Egg Scenes & Textures
 const EGG_TEXTURE_PATHS: Dictionary = {
@@ -69,10 +91,10 @@ func _ready() -> void:
 		ParticleHelper.apply_feather_fx(drop_poof_fx, 0.25, 0.5)
 		drop_poof_fx.color = Color(1.0, 0.95, 0.85, 0.9)
 
-	# Nạp texture SVG hoạt hình Vector cao cấp
-	if body_sprite:
-		var tb = _safe_load("res://assets/sprites/player/chicken_aviator_body.svg")
-		if tb: body_sprite.texture = tb
+	# 1. Nạp và thiết lập các lớp Sprite biểu cảm đa tầng
+	_setup_expressive_parts()
+
+	# 2. Nạp giỏ trứng và cánh
 	if basket_sprite:
 		var tk = _safe_load("res://assets/sprites/player/chicken_basket_wicker.svg")
 		if tk: basket_sprite.texture = tk
@@ -83,7 +105,79 @@ func _ready() -> void:
 		var tw = _safe_load("res://assets/sprites/player/chicken_wing_flap.svg")
 		if tw: right_wing.texture = tw
 
+	# 3. Lắng nghe các sự kiện thắng / thua màn chơi từ GameManager
+	if has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		gm.level_completed.connect(_on_level_completed)
+		gm.level_failed.connect(_on_level_failed)
+
 	_prepare_next_egg()
+
+func _setup_expressive_parts() -> void:
+	# Nạp các tài nguyên SVG biểu cảm
+	tex_eyes_normal = _safe_load("res://assets/sprites/player/chicken_eyes_normal.svg")
+	tex_eyes_blink = _safe_load("res://assets/sprites/player/chicken_eyes_blink.svg")
+	tex_eyes_aim = _safe_load("res://assets/sprites/player/chicken_eyes_aim.svg")
+	tex_eyes_pop = _safe_load("res://assets/sprites/player/chicken_eyes_pop.svg")
+	tex_goggles = _safe_load("res://assets/sprites/player/chicken_goggles.svg")
+	tex_tail = _safe_load("res://assets/sprites/player/chicken_tail_feather.svg")
+	tex_beak_open = _safe_load("res://assets/sprites/player/chicken_beak_open.svg")
+	tex_sweat = _safe_load("res://assets/sprites/player/chicken_sweat_drop.svg")
+
+	# Thiết lập thân gà nền
+	if body_sprite:
+		var tb = _safe_load("res://assets/sprites/player/chicken_base_body.svg")
+		if not tb:
+			tb = _safe_load("res://assets/sprites/player/chicken_aviator_body.svg")
+		if tb: body_sprite.texture = tb
+
+		# 1. Đôi mắt hoạt họa động
+		if tex_eyes_normal and not eyes_sprite:
+			eyes_sprite = Sprite2D.new()
+			eyes_sprite.name = "AnimatedEyes"
+			eyes_sprite.texture = tex_eyes_normal
+			eyes_sprite.z_index = 1
+			body_sprite.add_child(eyes_sprite)
+
+		# 2. Kính phi công steampunk trượt động
+		if tex_goggles and not goggles_sprite:
+			goggles_sprite = Sprite2D.new()
+			goggles_sprite.name = "SlidingGoggles"
+			goggles_sprite.texture = tex_goggles
+			goggles_sprite.position = Vector2.ZERO # Vị trí trán mặc định y=0
+			goggles_sprite.z_index = 2
+			body_sprite.add_child(goggles_sprite)
+
+		# 3. Mỏ há to kêu cục tác khi đẻ trứng
+		if tex_beak_open and not beak_open_sprite:
+			beak_open_sprite = Sprite2D.new()
+			beak_open_sprite.name = "BeakOpen"
+			beak_open_sprite.texture = tex_beak_open
+			beak_open_sprite.visible = false
+			beak_open_sprite.z_index = 3
+			body_sprite.add_child(beak_open_sprite)
+
+		# 4. Giọt mồ hôi truyện tranh khi kéo căng
+		if tex_sweat and not sweat_sprite:
+			sweat_sprite = Sprite2D.new()
+			sweat_sprite.name = "SweatDrop"
+			sweat_sprite.texture = tex_sweat
+			sweat_sprite.position = Vector2(26.0, -12.0)
+			sweat_sprite.scale = Vector2(0.8, 0.8)
+			sweat_sprite.visible = false
+			sweat_sprite.z_index = 4
+			body_sprite.add_child(sweat_sprite)
+
+	# 5. Chùm lông đuôi mềm mại phía sau thân
+	if visual_root and tex_tail and not tail_sprite:
+		tail_sprite = Sprite2D.new()
+		tail_sprite.name = "DynamicTail"
+		tail_sprite.texture = tex_tail
+		tail_sprite.position = Vector2(-22.0, 4.0)
+		tail_sprite.offset = Vector2(-16.0, 0.0)
+		tail_sprite.scale = Vector2(0.85, 0.85)
+		tail_sprite.z_index = -1 # Nằm dưới thân gà
+		visual_root.add_child(tail_sprite)
 
 func _process(delta: float) -> void:
 	if drop_cooldown > 0.0:
@@ -92,70 +186,143 @@ func _process(delta: float) -> void:
 	# Chớp mắt hoạt họa tự nhiên ngẫu nhiên khi bay
 	blink_timer -= delta
 	if blink_timer <= 0.0:
-		blink_timer = randf_range(2.6, 4.6)
+		blink_timer = randf_range(2.6, 4.8)
 		_perform_blink()
+
+	# Xử lý hoạt ảnh khi thắng ván đấu hoặc thất bại
+	if is_celebrating or is_defeated:
+		return
 
 	# 1. Tự động lượn ngang bầu trời nếu không chủ động ngắm
 	if not is_aiming:
-		position.x += move_speed * move_direction * delta
-		if position.x >= max_x:
-			position.x = max_x
-			move_direction = -1.0
-		elif position.x <= min_x:
-			position.x = min_x
-			move_direction = 1.0
-
-		# Nhấp nhô cao độ bồng bềnh theo nhịp vỗ cánh (Altitude Bobbing)
-		var bob_y = default_y + sin(wing_flap_time) * 5.5
-		position.y = lerp(position.y, bob_y, 8.0 * delta)
-
-		# Quay mặt theo hướng lượn mượt mà (Không bị bay lùi)
-		facing_scale = lerp(facing_scale, move_direction, 10.0 * delta)
-
-		# Chuyển động thứ cấp giữa thân gà, giỏ trứng và quả trứng nạp
-		if body_sprite:
-			body_sprite.position.y = -6.0 + sin(wing_flap_time) * 1.5
-		if basket_sprite:
-			basket_sprite.position.y = 22.0 - sin(wing_flap_time) * 1.2
-			basket_sprite.rotation = lerp_angle(basket_sprite.rotation, -move_direction * 0.08, 6.0 * delta)
-		if loaded_egg and loaded_egg.visible:
-			loaded_egg.position.y = -6.0 + sin(wing_flap_time * 1.3) * 1.0
-			loaded_egg.rotation = lerp_angle(loaded_egg.rotation, -move_direction * 0.06, 6.0 * delta)
-
-		# Nghiêng người tự nhiên theo hướng lượn (Banking Tilt)
-		if visual_root:
-			var target_tilt = move_direction * 0.12
-			visual_root.rotation = lerp_angle(visual_root.rotation, target_tilt, 6.0 * delta)
+		_process_flying_movement(delta)
 	else:
-		# Khi đang ngắm: lơ lửng tại chỗ, nghiêng theo góc kéo dây ná ngắm đạn
-		position.y = lerp(position.y, default_y, 10.0 * delta)
-		var target_aim_facing = sign(aim_vector.x) if abs(aim_vector.x) > 30.0 else sign(facing_scale)
-		if target_aim_facing == 0.0: target_aim_facing = 1.0
-		facing_scale = lerp(facing_scale, target_aim_facing, 8.0 * delta)
+		_process_aiming_hover(delta)
 
-		if visual_root:
-			var aim_tilt = clamp(aim_vector.x * 0.0006, -0.22, 0.22)
-			visual_root.rotation = lerp_angle(visual_root.rotation, aim_tilt, 10.0 * delta)
-		if basket_sprite and visual_root:
-			basket_sprite.rotation = lerp_angle(basket_sprite.rotation, -visual_root.rotation * 0.7, 8.0 * delta)
-		if loaded_egg and loaded_egg.visible:
-			var tension_ratio = clamp(aim_vector.y / 850.0, 0.0, 1.0)
-			loaded_egg.position = Vector2(randf_range(-1.4, 1.4), -6.0 + randf_range(-1.4, 1.4)) * tension_ratio
+	# 2. Xử lý Input ngắm bắn
+	_handle_aim_input()
 
-	# 2. Đập cánh đối xứng sinh động (Cả 2 cánh cùng nâng lên / hạ xuống nhịp nhàng)
-	wing_flap_time += delta * (24.0 if is_aiming else 11.0)
-	var flap_angle = sin(wing_flap_time) * (0.50 if is_aiming else 0.40)
+func _process_flying_movement(delta: float) -> void:
+	# Di chuyển theo hướng bay
+	position.x += move_speed * move_direction * delta
+
+	# Nhận diện mép màn hình và nghiêng cánh lượn vòng chữ U (Aerodynamic Bank Turn)
+	var is_near_edge = false
+	if position.x >= max_x:
+		position.x = max_x
+		move_direction = -1.0
+		bank_roll = -0.28
+	elif position.x <= min_x:
+		position.x = min_x
+		move_direction = 1.0
+		bank_roll = 0.28
+	elif position.x >= max_x - 35.0 and move_direction > 0.0:
+		is_near_edge = true
+		bank_roll = lerp(bank_roll, -0.22, 6.0 * delta)
+	elif position.x <= min_x + 35.0 and move_direction < 0.0:
+		is_near_edge = true
+		bank_roll = lerp(bank_roll, 0.22, 6.0 * delta)
+	else:
+		bank_roll = lerp(bank_roll, 0.0, 4.0 * delta)
+
+	# CHU KỲ VỖ - LƯỢN TỰ NHIÊN (Flap-Glide Cycle: 0.45s Vỗ + 0.90s Lượn)
+	flight_cycle_timer += delta
+	var cycle_time = fmod(flight_cycle_timer, 1.35)
+	var is_flapping = (cycle_time < 0.45)
+
+	var target_bob_y = default_y
+	var flap_angle = 0.0
+
+	if is_flapping:
+		# Pha vỗ cánh: 3 nhịp đập nhanh dứt khoát sinh lực nâng
+		wing_flap_time += delta * 24.0
+		flap_angle = sin(wing_flap_time) * 0.52
+		target_bob_y = default_y - 4.0 + sin(wing_flap_time) * 3.5
+		if body_sprite:
+			body_sprite.rotation = lerp_angle(body_sprite.rotation, -move_direction * 0.04, 8.0 * delta)
+	else:
+		# Pha lượn xoải cánh: dang rộng cánh đón gió, hạ độ cao từ từ
+		var glide_progress = (cycle_time - 0.45) / 0.90
+		flap_angle = -0.10 + sin(flight_cycle_timer * 3.5) * 0.04
+		target_bob_y = default_y + glide_progress * 5.0
+		if body_sprite:
+			body_sprite.rotation = lerp_angle(body_sprite.rotation, move_direction * 0.03, 5.0 * delta)
+
+	position.y = lerp(position.y, target_bob_y, 7.0 * delta)
+
+	# Vỗ cánh đối xứng nhịp nhàng
 	if left_wing: left_wing.rotation = flap_angle
 	if right_wing: right_wing.rotation = flap_angle
 
-	# 3. Squash & Stretch lerp nhịp nhàng kết hợp hướng quay mặt
-	if not is_dropping_anim:
-		var breath = 1.0 + sin(wing_flap_time) * 0.035
-		var target_scale = Vector2((2.0 - breath) * facing_scale, breath)
-		visual_root.scale = visual_root.scale.lerp(target_scale, 10.0 * delta)
+	# Quay mặt theo hướng lượn mượt mà (Không bị giật cục khi đổi hướng)
+	facing_scale = lerp(facing_scale, move_direction, 9.0 * delta)
 
-	# 4. Xử lý Input ngắm bắn
-	_handle_aim_input()
+	# Nghiêng người tự nhiên kết hợp góc ôm cua (Banking Tilt)
+	if visual_root:
+		var target_tilt = move_direction * 0.10 + bank_roll
+		visual_root.rotation = lerp_angle(visual_root.rotation, target_tilt, 7.0 * delta)
+
+	# Chuyển động quán tính của đuôi gà (Tail Secondary Motion)
+	if tail_sprite:
+		var tail_rot = -move_direction * 0.12 + (sin(wing_flap_time) * 0.22 if is_flapping else sin(flight_cycle_timer * 3.0) * 0.08)
+		tail_sprite.rotation = lerp_angle(tail_sprite.rotation, tail_rot, 8.0 * delta)
+		tail_sprite.position.x = -22.0 * (1.0 if facing_scale >= 0.0 else -1.0)
+		tail_sprite.scale.x = (0.85 if facing_scale >= 0.0 else -0.85)
+
+	# Chuyển động con lắc của giỏ đan và quả trứng nạp
+	if basket_sprite:
+		var target_basket_rot = -move_direction * (0.09 if is_flapping else 0.04) + bank_roll * 0.4
+		basket_sprite.position.y = 22.0 - sin(flight_cycle_timer * 4.0) * 1.2
+		basket_sprite.rotation = lerp_angle(basket_sprite.rotation, target_basket_rot, 6.0 * delta)
+
+	if loaded_egg and loaded_egg.visible:
+		loaded_egg.position.y = -6.0 + sin(flight_cycle_timer * 4.5) * 1.0
+		loaded_egg.rotation = lerp_angle(loaded_egg.rotation, -move_direction * 0.05, 6.0 * delta)
+
+	# Squash & Stretch hô hấp mềm mại theo nhịp cánh
+	if not is_dropping_anim:
+		var breath = 1.0 + (sin(wing_flap_time) * 0.035 if is_flapping else sin(flight_cycle_timer * 4.0) * 0.015)
+		var target_scale = Vector2((2.0 - breath) * facing_scale, breath)
+		visual_root.scale = visual_root.scale.lerp(target_scale, 8.0 * delta)
+
+func _process_aiming_hover(delta: float) -> void:
+	# Khi ngắm: lơ lửng tại chỗ, cánh vỗ nhanh giữ thăng bằng
+	wing_flap_time += delta * 22.0
+	var flap_angle = sin(wing_flap_time) * 0.35
+	if left_wing: left_wing.rotation = flap_angle
+	if right_wing: right_wing.rotation = flap_angle
+
+	position.y = lerp(position.y, default_y, 9.0 * delta)
+
+	var target_aim_facing = sign(aim_vector.x) if abs(aim_vector.x) > 30.0 else sign(facing_scale)
+	if target_aim_facing == 0.0: target_aim_facing = 1.0
+	facing_scale = lerp(facing_scale, target_aim_facing, 8.0 * delta)
+
+	# Toàn thân nghiêng theo góc kéo dây ná ngắm đạn
+	if visual_root:
+		var aim_tilt = clamp(aim_vector.x * 0.0006, -0.25, 0.25)
+		visual_root.rotation = lerp_angle(visual_root.rotation, aim_tilt, 10.0 * delta)
+
+	if basket_sprite and visual_root:
+		basket_sprite.rotation = lerp_angle(basket_sprite.rotation, -visual_root.rotation * 0.75, 8.0 * delta)
+
+	# Trứng trong giỏ rung lắc theo lực căng
+	var tension_ratio = clamp(aim_vector.y / 850.0, 0.0, 1.0)
+	if loaded_egg and loaded_egg.visible:
+		loaded_egg.position = Vector2(randf_range(-1.5, 1.5), -6.0 + randf_range(-1.5, 1.5)) * tension_ratio
+
+	# Thân gà rung nhẹ do lực căng dây ná (Spring Tension Shudder)
+	if body_sprite:
+		body_sprite.position.x = sin(Time.get_ticks_msec() * 0.05) * tension_ratio * 1.8
+
+	# Giọt mồ hôi hiện khi kéo lực căng lớn (> 65%)
+	if sweat_sprite:
+		if tension_ratio > 0.60:
+			sweat_sprite.visible = true
+			sweat_sprite.position.y = -12.0 + sin(Time.get_ticks_msec() * 0.02) * 2.0
+			sweat_sprite.scale = Vector2.ONE * (0.75 + sin(Time.get_ticks_msec() * 0.03) * 0.15)
+		else:
+			sweat_sprite.visible = false
 
 func has_airborne_unboosted_egg() -> bool:
 	var tree = get_tree()
@@ -168,10 +335,10 @@ func has_airborne_unboosted_egg() -> bool:
 	return false
 
 func _handle_aim_input() -> void:
-	# Bỏ qua nếu game kết thúc
 	if not GameManager.is_level_active or get_tree().paused:
 		if is_aiming:
 			is_aiming = false
+			_on_aim_end(false)
 			if trajectory_line: trajectory_line.visible = false
 		return
 
@@ -193,9 +360,11 @@ func _handle_aim_input() -> void:
 			var bottom_limit = max(800.0, vp_height - 75.0)
 			if screen_mouse_pos.y < top_limit or screen_mouse_pos.y > bottom_limit:
 				return
+
 			is_aiming = true
 			aim_start_pos = mouse_pos
 			aim_vector = Vector2(0, 480.0)
+			_on_aim_start()
 
 		if is_aiming:
 			var drag_delta = mouse_pos - aim_start_pos
@@ -236,7 +405,38 @@ func _handle_aim_input() -> void:
 				if aim_vector == Vector2.ZERO:
 					aim_vector = Vector2(0, 480.0)
 				_drop_egg(aim_vector)
+			else:
+				_on_aim_end(false)
+
 			aim_vector = Vector2(0, 480.0)
+
+func _on_aim_start() -> void:
+	# 1. Kính phi công trượt xuống che mắt ("CLACK!")
+	if goggles_sprite:
+		var gt = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		gt.tween_property(goggles_sprite, "position:y", 16.0, 0.12)
+		gt.parallel().tween_property(goggles_sprite, "scale", Vector2(1.06, 1.06), 0.08)
+		gt.tween_property(goggles_sprite, "scale", Vector2.ONE, 0.06)
+
+	# 2. Mắt đổi sang trạng thái ngắm bắn tập trung (Aiming Focus)
+	if eyes_sprite and tex_eyes_aim:
+		eyes_sprite.texture = tex_eyes_aim
+
+func _on_aim_end(dropped: bool) -> void:
+	if not dropped:
+		# Kính phi công trượt ngược lên trán êm ái
+		if goggles_sprite:
+			var gt = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			gt.tween_property(goggles_sprite, "position:y", 0.0, 0.14)
+
+		# Khôi phục mắt bình thường
+		if eyes_sprite and tex_eyes_normal:
+			eyes_sprite.texture = tex_eyes_normal
+
+	if sweat_sprite:
+		sweat_sprite.visible = false
+	if body_sprite:
+		body_sprite.position.x = 0.0
 
 func _draw_trajectory(initial_vel: Vector2) -> void:
 	if not trajectory_line: return
@@ -257,18 +457,24 @@ func _draw_trajectory(initial_vel: Vector2) -> void:
 	trajectory_line.points = points
 
 func _update_eye_direction(dir: Vector2) -> void:
-	if body_sprite:
-		body_sprite.rotation = clamp(dir.x * 0.15, -0.15, 0.15)
+	if eyes_sprite:
+		eyes_sprite.position = Vector2(dir.x * 2.5, clamp(dir.y * 3.0, 0.0, 4.0))
 
 func _reset_eye_direction() -> void:
-	if body_sprite:
-		body_sprite.rotation = 0.0
+	if eyes_sprite:
+		eyes_sprite.position = Vector2.ZERO
 
 func _perform_blink() -> void:
-	if body_sprite and not is_dropping_anim and not is_aiming:
-		var tween = create_tween()
-		tween.tween_property(body_sprite, "scale:y", 0.60, 0.05).set_trans(Tween.TRANS_SINE)
-		tween.tween_property(body_sprite, "scale:y", 0.72, 0.07).set_trans(Tween.TRANS_SINE)
+	if is_aiming or is_dropping_anim or is_celebrating or is_defeated:
+		return
+	if eyes_sprite and tex_eyes_blink:
+		eyes_sprite.texture = tex_eyes_blink
+		var bt = create_tween()
+		bt.tween_interval(0.12)
+		bt.tween_callback(func():
+			if is_instance_valid(eyes_sprite) and not is_aiming and not is_dropping_anim and not is_celebrating and not is_defeated:
+				eyes_sprite.texture = tex_eyes_normal
+		)
 
 func _prepare_next_egg() -> void:
 	if GameManager.current_egg_index < GameManager.available_eggs.size():
@@ -284,6 +490,10 @@ func _prepare_next_egg() -> void:
 				loaded_egg.visible = true
 				loaded_egg.position = Vector2(0, -6)
 				loaded_egg.scale = Vector2(0.48, 0.48)
+				# Nảy nhẹ báo hiệu nạp đạn xong
+				var tw = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+				tw.tween_property(loaded_egg, "scale", Vector2(0.56, 0.56), 0.10)
+				tw.tween_property(loaded_egg, "scale", Vector2(0.48, 0.48), 0.12)
 		else:
 			loaded_egg.visible = false
 
@@ -293,6 +503,18 @@ func _drop_egg(launch_vel: Vector2 = Vector2(0, 480.0)) -> void:
 		GameManager.check_out_of_eggs()
 		return
 
+	# Biểu cảm đẻ trứng: Mắt trố to ngạc nhiên + Mỏ há to kêu cục tác
+	if eyes_sprite and tex_eyes_pop:
+		eyes_sprite.texture = tex_eyes_pop
+	if beak_open_sprite:
+		beak_open_sprite.visible = true
+
+	# Kính phi công bật ngược lên trán nảy lò xo vui nhộn
+	if goggles_sprite:
+		var gt = create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+		gt.tween_property(goggles_sprite, "position:y", -5.0, 0.08)
+		gt.tween_property(goggles_sprite, "position:y", 0.0, 0.22)
+
 	# Hiệu ứng rặn đẻ Squash & Stretch bùng nổ
 	is_dropping_anim = true
 	var sign_x = sign(facing_scale) if facing_scale != 0.0 else 1.0
@@ -300,9 +522,16 @@ func _drop_egg(launch_vel: Vector2 = Vector2(0, 480.0)) -> void:
 	visual_root.scale = Vector2(sign_x * 0.65, 1.45) # Bật dài người lên trên
 	tween.tween_property(visual_root, "scale", Vector2(sign_x * 1.25, 0.75), 0.12)
 	tween.tween_property(visual_root, "scale", Vector2(sign_x * 1.0, 1.0), 0.18)
-	tween.finished.connect(func(): is_dropping_anim = false)
+	tween.finished.connect(func():
+		is_dropping_anim = false
+		if not is_aiming and not is_celebrating and not is_defeated:
+			if eyes_sprite and tex_eyes_normal:
+				eyes_sprite.texture = tex_eyes_normal
+			if beak_open_sprite:
+				beak_open_sprite.visible = false
+	)
 
-	# 1. Recoil Kickback - Gà giật bắn ngược lên trên do phản lực phóng
+	# 1. Recoil Kickback - Gà giật bắn ngược lên trên do phản lực phóng (Bắt buộc cho TestRunner)
 	recoil_active = true
 	var recoil_tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	recoil_tween.tween_property(self, "position:y", default_y - 18.0, 0.08)
@@ -316,19 +545,25 @@ func _drop_egg(launch_vel: Vector2 = Vector2(0, 480.0)) -> void:
 		basket_swing.tween_property(basket_sprite, "rotation", sign_x * 0.25, 0.15)
 		basket_swing.tween_property(basket_sprite, "rotation", 0.0, 0.25)
 
-	# 3. Nổ hiệu ứng khói và lông gà bung ra dưới giỏ
+	# 3. Đuôi gà ngoáy giật lên cao sau cú phóng
+	if tail_sprite:
+		var tail_tw = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tail_tw.tween_property(tail_sprite, "rotation", -0.45, 0.08)
+		tail_tw.tween_property(tail_sprite, "rotation", 0.0, 0.25)
+
+	# 4. Nổ hiệu ứng khói và lông gà bung ra dưới giỏ
 	if drop_poof_fx:
 		drop_poof_fx.global_position = global_position + Vector2(0, 26.0)
 		drop_poof_fx.restart()
 		drop_poof_fx.emitting = true
 
-	# 4. Âm thanh gà cục tác khi đẻ trứng & rung xúc giác
+	# 5. Âm thanh gà cục tác khi đẻ trứng & rung xúc giác
 	if has_node("/root/SoundManager"):
 		get_node("/root/SoundManager").play_egg_drop()
 	if has_node("/root/SaveManager"):
 		get_node("/root/SaveManager").vibrate(28)
 
-	# 5. Sinh quả trứng vật lý
+	# 6. Sinh quả trứng vật lý
 	var egg_scene = egg_scenes[egg_type]
 	var egg = egg_scene.instantiate()
 	egg.global_position = global_position + Vector2(0, 26.0)
@@ -345,4 +580,56 @@ func _drop_egg(launch_vel: Vector2 = Vector2(0, 480.0)) -> void:
 	get_tree().create_timer(0.22).timeout.connect(func():
 		_prepare_next_egg()
 	)
+	_on_aim_end(true)
 	GameManager.check_out_of_eggs()
+
+# ==============================================================================
+# HOẠT HÌNH ĂN MỪNG THẮNG TRẬN & PHẢN ỨNG THẤT BẠI
+# ==============================================================================
+
+func _on_level_completed(_stars: int = 3, _score: int = 0, _coins: int = 50) -> void:
+	if is_celebrating: return
+	is_celebrating = true
+	is_aiming = false
+
+	# Mắt cười tít vui vẻ
+	if eyes_sprite and tex_eyes_blink:
+		eyes_sprite.texture = tex_eyes_blink
+	if beak_open_sprite:
+		beak_open_sprite.visible = true
+	if goggles_sprite:
+		goggles_sprite.position.y = 0.0
+
+	# Thực hiện cú lộn vòng cung 360 độ ăn mừng (Victory 360 Loop-de-loop)
+	var victory_tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN_OUT)
+	victory_tween.tween_property(visual_root, "rotation", visual_root.rotation + TAU, 0.70)
+	victory_tween.parallel().tween_property(self, "position:y", default_y - 30.0, 0.35)
+	victory_tween.tween_property(self, "position:y", default_y, 0.35)
+
+	# Tung hoa giấy lông gà
+	if drop_poof_fx:
+		drop_poof_fx.global_position = global_position + Vector2(0, 20.0)
+		drop_poof_fx.restart()
+		drop_poof_fx.emitting = true
+
+func _on_level_failed() -> void:
+	if is_celebrating or is_defeated: return
+	is_defeated = true
+	if is_aiming:
+		is_aiming = false
+		_on_aim_end(false)
+
+	# Mắt trố buồn, vai xụi xuống
+	if eyes_sprite and tex_eyes_pop:
+		eyes_sprite.texture = tex_eyes_pop
+	if goggles_sprite:
+		# Kính lệch một bên comically
+		var gt = create_tween().set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+		gt.tween_property(goggles_sprite, "rotation", 0.25, 0.35)
+	if sweat_sprite:
+		sweat_sprite.visible = true
+		sweat_sprite.position = Vector2(24.0, 4.0)
+
+	# Hai cánh buông thõng thất vọng
+	if left_wing: left_wing.rotation = 0.58
+	if right_wing: right_wing.rotation = 0.58

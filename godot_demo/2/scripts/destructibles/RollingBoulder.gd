@@ -42,6 +42,7 @@ func _ready() -> void:
 			dust_fx.color = Color(0.6, 0.85, 1.0, 0.7)
 
 	add_to_group("Destructibles")
+	continuous_cd = RigidBody2D.CCD_MODE_CAST_SHAPE
 	set_deferred("freeze", true)
 	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
 	mass = 8.0

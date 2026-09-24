@@ -257,10 +257,21 @@ func _get_today_string() -> String:
 
 func _check_and_reset_daily_spins() -> void:
 	var today = _get_today_string()
+	var now_unix = int(Time.get_unix_time_from_system())
+	var last_known = int(save_data.get("last_known_unix", 0))
+
+	# Chống gian lận tua lùi đồng hồ: Nếu thời gian hiện tại lùi lại hơn 300s (5 phút) so với mốc đã biết
+	if last_known > 0 and now_unix < (last_known - 300):
+		# Phát hiện tua ngược đồng hồ -> Giữ nguyên trạng thái, không cấp thêm lượt
+		return
+
 	if save_data.get("daily_spins_date", "") != today:
-		save_data["daily_spins_date"] = today
-		save_data["daily_spins_count"] = 0
-		save_game()
+		if now_unix >= last_known:
+			save_data["daily_spins_date"] = today
+			save_data["daily_spins_count"] = 0
+
+	save_data["last_known_unix"] = max(last_known, now_unix)
+	save_game()
 
 func is_first_daily_spin_free() -> bool:
 	_check_and_reset_daily_spins()

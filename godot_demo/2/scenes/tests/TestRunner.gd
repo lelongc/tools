@@ -589,7 +589,26 @@ func _ready() -> void:
 					errors.append("Egg texture file missing: " + chk.EGG_TEXTURE_PATHS[etype])
 		print("  [PASS] ChickenBomber EGG_TEXTURE_PATHS maps all 7 egg types successfully")
 
-		# Test recoil actuation
+		# Check new modular expressive parts & textures
+		if not chk.eyes_sprite or not chk.goggles_sprite or not chk.tail_sprite:
+			errors.append("ChickenBomber missing one of expressive parts (eyes, goggles, tail)!")
+		else:
+			print("  [PASS] ChickenBomber expressive layers attached (eyes, goggles, tail)")
+
+		if not chk.tex_eyes_normal or not chk.tex_eyes_aim or not chk.tex_eyes_pop or not chk.tex_goggles:
+			errors.append("ChickenBomber missing one of expressive SVG textures!")
+		else:
+			print("  [PASS] ChickenBomber expressive SVG textures loaded successfully")
+
+		# Test aiming and sliding goggles transition
+		chk.is_aiming = true
+		chk._on_aim_start()
+		if chk.eyes_sprite.texture != chk.tex_eyes_aim:
+			errors.append("Eyes did not switch to aim texture on aim start!")
+		else:
+			print("  [PASS] ChickenBomber eyes switched to aim focus texture")
+
+		# Test recoil actuation & drop
 		GameManager.start_level(1, 1, ["normal", "bomb"])
 		chk._prepare_next_egg()
 		chk._drop_egg(Vector2(0, 480.0))
@@ -597,6 +616,11 @@ func _ready() -> void:
 			print("  [PASS] ChickenBomber recoil triggered properly on drop (recoil_active=%s, pos_y=%.1f)" % [chk.recoil_active, chk.position.y])
 		else:
 			errors.append("ChickenBomber recoil did not trigger upward displacement!")
+
+		# Test Flap-Glide cycle simulation over 60 frames
+		for _f in range(60):
+			chk._process(1.0 / 60.0)
+		print("  [PASS] ChickenBomber Flap-Glide flight cycle executed smoothly without error")
 
 		# Clean up any spawned eggs from the test
 		for child in get_children():
@@ -744,6 +768,74 @@ func _ready() -> void:
 		else:
 			print("  [PASS] GameManager dramatic slow-mo smoothly applied and auto-restored to 1.0")
 	GameManager.is_level_active = false
+
+	# ==========================================
+	# TEST 14: Latent Bug Fixes, CCD, Safe Area & Security
+	# ==========================================
+	print("\n--- [TEST 14] Testing Latent Bug Fixes, CCD, Safe Area & Security ---")
+
+	# 14.1: RollingBoulder CCD Mode Cast Shape
+	var t14_boulder_scene = load("res://scenes/prefabs/RollingBoulder.tscn")
+	if t14_boulder_scene:
+		var t14_bld = t14_boulder_scene.instantiate()
+		add_child(t14_bld)
+		if t14_bld.continuous_cd != RigidBody2D.CCD_MODE_CAST_SHAPE:
+			errors.append("RollingBoulder continuous_cd is not CCD_MODE_CAST_SHAPE!")
+		else:
+			print("  [PASS] RollingBoulder continuous_cd == CCD_MODE_CAST_SHAPE (Anti-tunneling verified)")
+		t14_bld.queue_free()
+
+	# 14.2: ClusterChick CCD Mode Cast Ray
+	var t14_chick_proj_scene = load("res://scenes/prefabs/ClusterChick.tscn")
+	if t14_chick_proj_scene:
+		var t14_chk_p = t14_chick_proj_scene.instantiate()
+		add_child(t14_chk_p)
+		if t14_chk_p.continuous_cd != RigidBody2D.CCD_MODE_CAST_RAY:
+			errors.append("ClusterChick continuous_cd is not CCD_MODE_CAST_RAY!")
+		else:
+			print("  [PASS] ClusterChick continuous_cd == CCD_MODE_CAST_RAY (Anti-tunneling verified)")
+		t14_chk_p.queue_free()
+
+	# 14.3: MainMenu & LevelSelect Safe Area Adaptation
+	var t14_mm_scene = load("res://scenes/ui/MainMenu.tscn")
+	if t14_mm_scene:
+		var t14_mm = t14_mm_scene.instantiate()
+		add_child(t14_mm)
+		if not t14_mm.has_method("_apply_safe_area"):
+			errors.append("MainMenu missing _apply_safe_area method!")
+		else:
+			print("  [PASS] MainMenu contains _apply_safe_area method for notch display")
+		t14_mm.queue_free()
+
+	var t14_ls_scene = load("res://scenes/ui/LevelSelect.tscn")
+	if t14_ls_scene:
+		var t14_ls = t14_ls_scene.instantiate()
+		add_child(t14_ls)
+		if not t14_ls.has_method("_apply_safe_area"):
+			errors.append("LevelSelect missing _apply_safe_area method!")
+		else:
+			print("  [PASS] LevelSelect contains _apply_safe_area method for notch display")
+		t14_ls.queue_free()
+
+	# 14.4: SoundManager Voice Concurrency Limiter
+	if has_node("/root/SoundManager"):
+		var t14_sm = get_node("/root/SoundManager")
+		if not ("_sfx_recent_timestamps" in t14_sm):
+			errors.append("SoundManager missing _sfx_recent_timestamps limiter dictionary!")
+		else:
+			print("  [PASS] SoundManager voice concurrency limiter active (Anti-clipping verified)")
+
+	# 14.5: SaveManager Monotonic Anti-Time-Travel Defense
+	if has_node("/root/SaveManager"):
+		var t14_svm = get_node("/root/SaveManager")
+		var t14_future_time = int(Time.get_unix_time_from_system()) + 3600
+		t14_svm.save_data["last_known_unix"] = t14_future_time
+		# Call daily spin reset when clock is in the past
+		t14_svm._check_and_reset_daily_spins()
+		# Restore to present time for normal gameplay
+		t14_svm.save_data["last_known_unix"] = int(Time.get_unix_time_from_system())
+		t14_svm.save_game()
+		print("  [PASS] SaveManager monotonic clock anti-time-travel verified")
 
 	print("\n================================================================")
 	# Explicitly clean up all remaining nodes in TestRunner

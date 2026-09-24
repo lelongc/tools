@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96">
+  <!-- Raised Shocked High Eyebrows -->
+  <path d="M32 34 Q39 30, 46 34" fill="none" stroke="#78350f" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M54 34 Q61 30, 68 34" fill="none" stroke="#78350f" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Left Popping Eye (Big round cartoon) -->
+  <circle cx="39" cy="49" r="10" fill="#ffffff" stroke="#78350f" stroke-width="2.2"/>
+  <circle cx="39" cy="49" r="2.6" fill="#0f172a"/>
+  <circle cx="40" cy="48" r="1.0" fill="#ffffff"/>
+
+  <!-- Right Popping Eye (Big round cartoon) -->
+  <circle cx="61" cy="49" r="10" fill="#ffffff" stroke="#78350f" stroke-width="2.2"/>
+  <circle cx="61" cy="49" r="2.6" fill="#0f172a"/>
+  <circle cx="62" cy="48" r="1.0" fill="#ffffff"/>
+</svg>

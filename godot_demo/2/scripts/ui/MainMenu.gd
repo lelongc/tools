@@ -62,6 +62,9 @@ func _ready() -> void:
 	_update_sound_button()
 	_update_language_ui()
 
+	_apply_safe_area()
+	get_viewport().size_changed.connect(_apply_safe_area)
+
 	if has_node("/root/LocalizationManager"):
 		get_node("/root/LocalizationManager").language_changed.connect(func(_code): _update_language_ui())
 
@@ -197,4 +200,25 @@ func _handle_back_button() -> void:
 		shop_modal_instance = null
 		return
 	get_tree().quit(0)
+
+func _apply_safe_area() -> void:
+	if not is_inside_tree(): return
+	var safe_rect = DisplayServer.get_display_safe_area()
+	var win_size = DisplayServer.window_get_size()
+	if win_size.y <= 0: return
+
+	var vp_size = get_viewport().get_visible_rect().size
+	var scale_y = vp_size.y / float(win_size.y)
+	var top_inset = float(safe_rect.position.y) * scale_y
+	var bottom_inset = float(win_size.y - (safe_rect.position.y + safe_rect.size.y)) * scale_y
+
+	var top_bar = get_node_or_null("TopBar") as Control
+	if top_bar:
+		var target_top = max(10.0, top_inset + 6.0)
+		top_bar.offset_top = target_top
+
+	var footer = get_node_or_null("Footer") as Control
+	if footer:
+		var target_bottom = min(-8.0, -(bottom_inset + 8.0))
+		footer.offset_bottom = target_bottom
 

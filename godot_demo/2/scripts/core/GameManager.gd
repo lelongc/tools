@@ -34,6 +34,7 @@ var last_back_press_time: float = 0.0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_setup_youtube_bridge()
 
 func _notification(what: int) -> void:
 	match what:
@@ -273,6 +274,21 @@ func trigger_dramatic_slowmo(target_scale: float = 0.35, real_duration: float = 
 			Engine.time_scale = 1.0
 	)
 
+func _setup_youtube_bridge() -> void:
+	if OS.has_feature("web"):
+		var js_bridge = Engine.get_singleton("JavaScriptBridge")
+		if js_bridge:
+			var pause_cb = JavaScriptBridge.create_callback(func(_args): _handle_app_paused())
+			var audio_cb = JavaScriptBridge.create_callback(func(args):
+				if args.size() > 0:
+					var enabled = bool(args[0])
+					AudioServer.set_bus_mute(0, not enabled)
+			)
+			var win = JavaScriptBridge.get_interface("window")
+			if win:
+				win.godot_on_pause = pause_cb
+				win.godot_on_audio_change = audio_cb
+
 func report_youtube_game_ready() -> void:
 	if OS.has_feature("web"):
 		var js_bridge = Engine.get_singleton("JavaScriptBridge")
@@ -281,6 +297,16 @@ func report_youtube_game_ready() -> void:
 				if (window.YT && window.YT.playables) {
 					window.YT.playables.firstFrameReady();
 					window.YT.playables.gameReady();
+					
+					window.YT.playables.onPause(function() {
+						if (window.godot_on_pause) window.godot_on_pause();
+					});
+					window.YT.playables.onResume(function() {
+						if (window.godot_on_resume) window.godot_on_resume();
+					});
+					window.YT.playables.onAudioEnabledChange(function(enabled) {
+						if (window.godot_on_audio_change) window.godot_on_audio_change(enabled);
+					});
 				}
 			""")
 

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <radialGradient id="tailGrad" cx="70%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="60%" stop-color="#facc15"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </radialGradient>
+  </defs>
+
+  <!-- 3 Fluffy Cartoon Tail Feathers anchored to the right edge (x=44, y=24) -->
+  <!-- Top Feather -->
+  <path d="M42 22 C30 10, 14 12, 6 18 C14 22, 26 24, 40 24 Z" 
+        fill="url(#tailGrad)" stroke="#ca8a04" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Middle Main Feather -->
+  <path d="M44 24 C28 20, 8 26, 2 30 C12 36, 28 34, 42 26 Z" 
+        fill="url(#tailGrad)" stroke="#ca8a04" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Bottom Feather -->
+  <path d="M42 26 C26 30, 16 40, 8 42 C20 44, 34 38, 42 28 Z" 
+        fill="url(#tailGrad)" stroke="#ca8a04" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Fluffy Feather Shaft Detail Lines -->
+  <path d="M38 22 Q24 18, 12 18" fill="none" stroke="#eab308" stroke-width="1.2" stroke-linecap="round"/>
+  <path d="M40 25 Q24 26, 10 30" fill="none" stroke="#eab308" stroke-width="1.2" stroke-linecap="round"/>
+</svg>
