@@ -507,7 +507,7 @@ func _ready() -> void:
 			else:
 				print("  [PASS] MainMenu BtnWheel successfully opened DailyWheelModal")
 				mm.wheel_modal_instance.queue_free()
-		mm.queue_free()
+		mm.free()
 
 	# 11.2: LevelSelect instantiation
 	var ls_scene = load("res://scenes/ui/LevelSelect.tscn")
@@ -517,7 +517,7 @@ func _ready() -> void:
 		var ls = ls_scene.instantiate()
 		add_child(ls)
 		print("  [PASS] LevelSelect instantiated cleanly without errors")
-		ls.queue_free()
+		ls.free()
 
 	# 11.3: World 4 Level 61 loadout smoothing check (P2-13)
 	GameManager.current_level = 61
@@ -650,7 +650,100 @@ func _ready() -> void:
 		else:
 			print("  [PASS] CampaignLevel default camera pos/zoom cached: pos=", lvl85.default_cam_pos, " zoom=", lvl85.default_cam_zoom)
 
-		lvl85.queue_free()
+		lvl85.free()
+
+	# -------------------------------------------------------------------------
+	# 13. SETTINGS MODAL, HYBRID 3-STAR SCORING, COMIC POPUPS & WORLD RIBBON
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 13] Testing SettingsModal, Hybrid 3-Star Scoring, Comic Popups & World Ribbon ---")
+
+	# 13.1: SettingsModal Verification
+	var settings_scene = load("res://scenes/ui/SettingsModal.tscn")
+	if not settings_scene:
+		errors.append("Failed to load res://scenes/ui/SettingsModal.tscn!")
+	else:
+		var sm = settings_scene.instantiate()
+		add_child(sm)
+		if not sm.slider_bgm or not sm.slider_sfx or not sm.btn_reset_progress or not sm.btn_close:
+			errors.append("SettingsModal missing essential UI controls!")
+		else:
+			# Test 2-step reset logic
+			sm._on_reset_clicked()
+			if not sm.confirm_box.visible:
+				errors.append("SettingsModal first reset press should show confirm_box")
+			else:
+				print("  [PASS] SettingsModal 2-step safe reset confirmation verified")
+			sm._on_cancel_reset()
+			print("  [PASS] SettingsModal instantiated and initialized cleanly")
+		sm.free()
+
+	# 13.2: LevelSelect World Ribbon & Boss Badges
+	var ls_scene2 = load("res://scenes/ui/LevelSelect.tscn")
+	if ls_scene2:
+		var ls2 = ls_scene2.instantiate()
+		add_child(ls2)
+		if ls2.ribbon_buttons.size() != 10:
+			errors.append("LevelSelect World Ribbon expected 10 buttons, found: %d" % ls2.ribbon_buttons.size())
+		else:
+			print("  [PASS] LevelSelect World Ribbon initialized with all 10 worlds (W1 to W10)")
+
+		# Check World 1 (Level 1..20): Level 20 should have BOSS badge
+		var grid_nodes = ls2.grid.get_children()
+		var lvl20_btn = grid_nodes[19] if grid_nodes.size() >= 20 else null
+		var found_boss_badge = false
+		if lvl20_btn:
+			for c in lvl20_btn.get_children():
+				if c is VBoxContainer:
+					for sub_c in c.get_children():
+						if sub_c is Label and "BOSS" in sub_c.text:
+							found_boss_badge = true
+		if found_boss_badge:
+			print("  [PASS] Level 20 contains BOSS Badge properly")
+		else:
+			errors.append("Level 20 missing BOSS badge in LevelSelect!")
+		ls2.free()
+
+	# 13.3: ParticleHelper Comic Popup
+	var dummy_holder = Node2D.new()
+	add_child(dummy_holder)
+	ParticleHelper.spawn_comic_popup(dummy_holder, Vector2(50, 50), "KABOOM!", Color.ORANGE)
+	var popup_label = null
+	for child in dummy_holder.get_children():
+		if child is Label and child.text == "KABOOM!":
+			popup_label = child
+			break
+	if popup_label:
+		print("  [PASS] ParticleHelper.spawn_comic_popup spawned animated 'KABOOM!' label successfully")
+	else:
+		errors.append("ParticleHelper.spawn_comic_popup failed to spawn popup label!")
+	dummy_holder.free()
+
+	# 13.4: GameManager Hybrid 3-Star Scoring (Break Deadlock)
+	GameManager.start_level(999, 1, ["bomb"])
+	GameManager.total_level_blocks = 10
+	GameManager.destroyed_blocks_count = 9 # 90% destruction >= 88%
+	GameManager.current_egg_index = 1 # 0 eggs remaining!
+	var completion_stars = [0]
+	var handler = func(stars, _score, _coins): completion_stars[0] = stars
+	GameManager.level_completed.connect(handler, CONNECT_ONE_SHOT)
+	await GameManager._trigger_victory_delay(true)
+	if completion_stars[0] == 3:
+		print("  [PASS] Hybrid 3-Star scoring awarded 3 stars via 90% block destruction (0 eggs left)!")
+	else:
+		errors.append("Hybrid 3-Star scoring failed! Expected 3 stars, got: %d" % completion_stars[0])
+
+	# 13.5: Dramatic Slow-Mo verification
+	GameManager.is_level_active = true
+	GameManager.trigger_dramatic_slowmo(0.4, 0.05)
+	if Engine.time_scale != 0.4:
+		errors.append("Dramatic slow-mo did not set Engine.time_scale to 0.4, was: %f" % Engine.time_scale)
+	else:
+		await get_tree().create_timer(0.08, false, false, true).timeout
+		if Engine.time_scale != 1.0:
+			errors.append("Dramatic slow-mo did not auto-restore time_scale to 1.0, was: %f" % Engine.time_scale)
+		else:
+			print("  [PASS] GameManager dramatic slow-mo smoothly applied and auto-restored to 1.0")
+	GameManager.is_level_active = false
 
 	print("\n================================================================")
 	# Explicitly clean up all remaining nodes in TestRunner
@@ -658,7 +751,7 @@ func _ready() -> void:
 		child.free()
 	if has_node("/root/SoundManager"):
 		get_node("/root/SoundManager").stop_all()
-	await get_tree().process_frame
+	await get_tree().create_timer(0.08).timeout
 	await get_tree().process_frame
 
 

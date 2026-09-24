@@ -381,4 +381,8 @@ func stop_all() -> void:
 		if p:
 			p.stop()
 			p.stream = null
+	wav_cache.clear()
+
+func _exit_tree() -> void:
+	stop_all()
 

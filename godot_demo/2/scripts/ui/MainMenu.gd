@@ -16,12 +16,13 @@ extends Control
 @onready var btn_wheel: Button = $CenterContainer/VBoxContainer/BtnWheel
 @onready var btn_shop: Button = get_node_or_null("CenterContainer/VBoxContainer/BtnShop")
 @onready var btn_sound: Button = $TopBar/Margin/HBox/BtnSound
-@onready var btn_reset: Button = get_node_or_null("TopBar/Margin/HBox/BtnReset")
+@onready var btn_settings: Button = get_node_or_null("TopBar/Margin/HBox/BtnSettings") if get_node_or_null("TopBar/Margin/HBox/BtnSettings") else get_node_or_null("TopBar/Margin/HBox/BtnReset")
 @onready var btn_lang: Button = $TopBar/Margin/HBox/BtnLang
 @onready var footer_label: Label = $Footer
 
 var wheel_modal_instance: Node = null
 var shop_modal_instance: Node = null
+var settings_modal_instance: Node = null
 
 func _ready() -> void:
 	var bg_sky = get_node_or_null("Background/SkyPanorama") as TextureRect
@@ -70,8 +71,8 @@ func _ready() -> void:
 	btn_play.pressed.connect(_on_btn_play_pressed)
 	btn_levels.pressed.connect(_on_btn_levels_pressed)
 	btn_sound.pressed.connect(_on_btn_sound_pressed)
-	if btn_reset:
-		btn_reset.pressed.connect(_on_btn_reset_pressed)
+	if btn_settings:
+		btn_settings.pressed.connect(_on_btn_settings_pressed)
 	if btn_lang:
 		btn_lang.pressed.connect(_on_btn_lang_pressed)
 	if btn_wheel:
@@ -152,32 +153,19 @@ func _on_btn_sound_pressed() -> void:
 		_update_sound_button()
 		AudioServer.set_bus_mute(0, not enabled)
 
-var reset_confirm_timer: float = 0.0
-
-func _on_btn_reset_pressed() -> void:
-	var now = Time.get_ticks_msec() / 1000.0
-	if now - reset_confirm_timer < 3.0:
-		# Bấm lần 2 trong vòng 3 giây -> Xác nhận xóa tiến trình!
-		if has_node("/root/SaveManager"):
-			get_node("/root/SaveManager").reset_save()
+func _on_btn_settings_pressed() -> void:
+	if settings_modal_instance and is_instance_valid(settings_modal_instance):
+		return
+	var settings_scene = load("res://scenes/ui/SettingsModal.tscn")
+	if settings_scene:
+		settings_modal_instance = settings_scene.instantiate()
+		add_child(settings_modal_instance)
+		settings_modal_instance.settings_closed.connect(func():
+			_update_sound_button()
 			_update_star_count()
 			_update_coin_count()
-		reset_confirm_timer = 0.0
-		if btn_reset:
-			btn_reset.modulate = Color.WHITE
-			btn_reset.tooltip_text = "Đã xóa tiến trình!"
-	else:
-		# Bấm lần 1 -> Cảnh báo bằng đổi màu đỏ cam và yêu cầu bấm lại
-		reset_confirm_timer = now
-		if btn_reset:
-			btn_reset.modulate = Color(1.0, 0.4, 0.4)
-			btn_reset.tooltip_text = "Bấm lại trong 3s để xác nhận xóa!"
-			get_tree().create_timer(3.0).timeout.connect(func():
-				if is_instance_valid(btn_reset) and reset_confirm_timer != 0.0:
-					btn_reset.modulate = Color.WHITE
-					btn_reset.tooltip_text = "Xóa tiến trình (Reset Progress)"
-					reset_confirm_timer = 0.0
-			)
+			_update_language_ui()
+		)
 
 func _on_btn_shop_pressed() -> void:
 	if shop_modal_instance and is_instance_valid(shop_modal_instance):
@@ -196,6 +184,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		_handle_back_button()
 
 func _handle_back_button() -> void:
+	if settings_modal_instance and is_instance_valid(settings_modal_instance):
+		settings_modal_instance.queue_free()
+		settings_modal_instance = null
+		return
 	if wheel_modal_instance and is_instance_valid(wheel_modal_instance):
 		wheel_modal_instance.queue_free()
 		wheel_modal_instance = null
@@ -205,3 +197,4 @@ func _handle_back_button() -> void:
 		shop_modal_instance = null
 		return
 	get_tree().quit(0)
+

@@ -2,12 +2,18 @@ extends Control
 
 @export var current_world: int = 1
 
+const WORLD_ICONS: Array[String] = ["🌾", "⛏", "⚙", "🌋", "💎", "⚡", "🧪", "❄", "🐉", "🌌"]
+
 @onready var grid: GridContainer = $ScrollContainer/GridContainer
 @onready var world_title: Label = $WorldFrame/WorldNav/WorldTitle
 @onready var total_stars_label: Label = $TopBar/Margin/HBox/StarBadge/TotalStars
 @onready var btn_back: Button = $TopBar/Margin/HBox/BtnBack
 @onready var btn_prev_world: Button = $WorldFrame/WorldNav/BtnPrevWorld
 @onready var btn_next_world: Button = $WorldFrame/WorldNav/BtnNextWorld
+@onready var world_ribbon_scroll: ScrollContainer = get_node_or_null("WorldRibbonScroll")
+@onready var world_ribbon_box: HBoxContainer = get_node_or_null("WorldRibbonScroll/WorldRibbonHBox")
+
+var ribbon_buttons: Array[Button] = []
 
 func _ready() -> void:
 	btn_back.pressed.connect(func(): GameManager.go_to_main_menu())
@@ -35,8 +41,46 @@ func _ready() -> void:
 	var cur_lvl = GameManager.current_level if has_node("/root/GameManager") else 1
 	current_world = clamp(int(float(cur_lvl - 1) / 20.0) + 1, 1, 10)
 
+	_build_world_ribbon()
 	_update_total_stars()
 	_render_world_levels()
+
+func _build_world_ribbon() -> void:
+	if not world_ribbon_box: return
+	for child in world_ribbon_box.get_children():
+		child.queue_free()
+	ribbon_buttons.clear()
+
+	for i in range(10):
+		var w_idx = i + 1
+		var btn = Button.new()
+		btn.custom_minimum_size = Vector2(56, 34)
+		btn.text = "%s W%d" % [WORLD_ICONS[i], w_idx]
+		btn.add_theme_font_size_override("font_size", 12)
+		btn.focus_mode = Control.FOCUS_NONE
+
+		var norm = StyleBoxFlat.new()
+		norm.corner_radius_top_left = 10
+		norm.corner_radius_top_right = 10
+		norm.corner_radius_bottom_right = 10
+		norm.corner_radius_bottom_left = 10
+		norm.bg_color = Color(0.18, 0.10, 0.28, 0.9)
+		norm.border_width_bottom = 2
+		norm.border_width_top = 1
+		norm.border_width_left = 1
+		norm.border_width_right = 1
+		norm.border_color = Color(0.4, 0.3, 0.55, 0.6)
+		btn.add_theme_stylebox_override("normal", norm)
+
+		btn.pressed.connect(func():
+			if current_world != w_idx:
+				current_world = w_idx
+				_render_world_levels()
+				if has_node("/root/SoundManager"):
+					get_node("/root/SoundManager").play_button_click()
+		)
+		world_ribbon_box.add_child(btn)
+		ribbon_buttons.append(btn)
 
 func _update_total_stars() -> void:
 	if has_node("/root/SaveManager") and total_stars_label:
@@ -58,6 +102,34 @@ func _render_world_levels() -> void:
 		var lm = get_node("/root/LocalizationManager")
 		world_title.text = lm.t("KEY_WORLD_%d" % current_world)
 		btn_back.text = " " + lm.t("KEY_MENU")
+
+	# Cập nhật trạng thái dải ruy băng Thế Giới (World Quick Jump Ribbon)
+	for i in range(ribbon_buttons.size()):
+		var r_btn = ribbon_buttons[i]
+		var is_active = (i + 1 == current_world)
+		var style = StyleBoxFlat.new()
+		style.corner_radius_top_left = 10
+		style.corner_radius_top_right = 10
+		style.corner_radius_bottom_right = 10
+		style.corner_radius_bottom_left = 10
+		if is_active:
+			style.bg_color = Color(0.85, 0.62, 0.12, 0.95)
+			style.border_width_bottom = 3
+			style.border_width_top = 1
+			style.border_width_left = 1
+			style.border_width_right = 1
+			style.border_color = Color(1.0, 0.95, 0.6, 1.0)
+			r_btn.add_theme_color_override("font_color", Color(0.12, 0.05, 0.02, 1.0))
+		else:
+			style.bg_color = Color(0.18, 0.10, 0.28, 0.9)
+			style.border_width_bottom = 2
+			style.border_width_top = 1
+			style.border_width_left = 1
+			style.border_width_right = 1
+			style.border_color = Color(0.4, 0.3, 0.55, 0.6)
+			r_btn.add_theme_color_override("font_color", Color(0.85, 0.8, 0.9, 0.9))
+		r_btn.add_theme_stylebox_override("normal", style)
+		r_btn.add_theme_stylebox_override("hover", style)
 
 	# Đồng bộ bối cảnh bầu trời & hang ngầm chân thực theo từng Thế Giới
 	var world_names = ["farm", "quarry", "industrial", "lava", "crystal", "cyber", "toxic", "glacier", "dragon", "celestial"]
@@ -104,6 +176,8 @@ func _render_world_levels() -> void:
 			is_unlocked = get_node("/root/SaveManager").is_level_unlocked(lvl)
 			stars = get_node("/root/SaveManager").get_level_stars(lvl)
 
+		var is_boss_level = (lvl % 20 == 0)
+
 		var style_norm = StyleBoxFlat.new()
 		var style_press = StyleBoxFlat.new()
 		style_norm.corner_radius_top_left = 14
@@ -120,19 +194,70 @@ func _render_world_levels() -> void:
 		card_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
 		card_vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		card_vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-		card_vbox.add_theme_constant_override("separation", 6)
+		card_vbox.add_theme_constant_override("separation", 2 if is_boss_level else 4)
 		btn.add_child(card_vbox)
+
+		if is_boss_level:
+			var boss_badge = Label.new()
+			boss_badge.text = "👑 BOSS"
+			boss_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			boss_badge.add_theme_font_size_override("font_size", 10)
+			boss_badge.add_theme_color_override("font_color", Color(1.0, 0.35, 0.35))
+			boss_badge.add_theme_constant_override("shadow_offset_y", 1)
+			boss_badge.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
+			card_vbox.add_child(boss_badge)
 
 		var lvl_lbl = Label.new()
 		lvl_lbl.text = str(lvl)
 		lvl_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lvl_lbl.add_theme_font_size_override("font_size", 24)
+		lvl_lbl.add_theme_font_size_override("font_size", 20 if is_boss_level else 24)
 		lvl_lbl.add_theme_constant_override("shadow_offset_y", 2)
 		lvl_lbl.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
 		card_vbox.add_child(lvl_lbl)
 
 		if is_unlocked:
-			lvl_lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.25))
+			if is_boss_level:
+				lvl_lbl.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45))
+				style_norm.bg_color = Color(0.32, 0.08, 0.18, 0.95)
+				style_norm.border_color = Color(1.0, 0.28, 0.35, 0.95)
+				style_norm.border_width_bottom = 5
+				style_norm.border_width_top = 2
+				style_norm.border_width_left = 2
+				style_norm.border_width_right = 2
+				style_press.bg_color = Color(0.24, 0.05, 0.12, 0.95)
+				style_press.border_color = Color(0.8, 0.2, 0.25)
+				style_press.border_width_bottom = 2
+				style_press.border_width_top = 2
+				style_press.border_width_left = 2
+				style_press.border_width_right = 2
+			elif stars == 3:
+				lvl_lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.4))
+				style_norm.bg_color = Color(0.26, 0.14, 0.42, 0.95)
+				style_norm.border_color = Color(1.0, 0.88, 0.22, 1.0) # Gold Shimmer border
+				style_norm.border_width_bottom = 5
+				style_norm.border_width_top = 2
+				style_norm.border_width_left = 2
+				style_norm.border_width_right = 2
+				style_press.bg_color = Color(0.20, 0.10, 0.32, 0.95)
+				style_press.border_color = Color(0.9, 0.75, 0.15)
+				style_press.border_width_bottom = 2
+				style_press.border_width_top = 2
+				style_press.border_width_left = 2
+				style_press.border_width_right = 2
+			else:
+				lvl_lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.25))
+				style_norm.bg_color = Color(0.24, 0.12, 0.38, 0.95)
+				style_norm.border_color = Color(1.0, 0.84, 0.0, 0.85)
+				style_norm.border_width_bottom = 5
+				style_norm.border_width_top = 2
+				style_norm.border_width_left = 2
+				style_norm.border_width_right = 2
+				style_press.bg_color = Color(0.18, 0.08, 0.28, 0.95)
+				style_press.border_color = Color(0.8, 0.65, 0.0)
+				style_press.border_width_bottom = 2
+				style_press.border_width_top = 2
+				style_press.border_width_left = 2
+				style_press.border_width_right = 2
 
 			var stars_hbox = HBoxContainer.new()
 			stars_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -148,20 +273,6 @@ func _render_world_levels() -> void:
 				s_rect.texture = tex_star_full
 				s_rect.modulate = Color.WHITE if (s_idx < stars) else Color(0.25, 0.18, 0.35, 0.65)
 				stars_hbox.add_child(s_rect)
-
-			style_norm.bg_color = Color(0.24, 0.12, 0.38, 0.95)
-			style_norm.border_width_bottom = 5
-			style_norm.border_width_top = 2
-			style_norm.border_width_left = 2
-			style_norm.border_width_right = 2
-			style_norm.border_color = Color(1.0, 0.84, 0.0, 0.85) # Gold border
-
-			style_press.bg_color = Color(0.18, 0.08, 0.28, 0.95)
-			style_press.border_width_bottom = 2
-			style_press.border_width_top = 2
-			style_press.border_width_left = 2
-			style_press.border_width_right = 2
-			style_press.border_color = Color(0.8, 0.65, 0.0)
 
 			btn.pivot_offset = Vector2(53, 44)
 			btn.add_theme_stylebox_override("normal", style_norm)
@@ -205,6 +316,9 @@ func _render_world_levels() -> void:
 			btn.add_theme_stylebox_override("disabled", style_norm)
 
 		grid.add_child(btn)
+
+func _exit_tree() -> void:
+	ribbon_buttons.clear()
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:

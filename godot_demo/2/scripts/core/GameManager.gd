@@ -23,6 +23,9 @@ var settle_timer: float = 0.0
 var max_settle_fallback_timer: float = 0.0
 var current_floor_y: float = 840.0
 
+var total_level_blocks: int = 0
+var destroyed_blocks_count: int = 0
+
 var last_stand_used_in_level: bool = false
 var vip_trial_used_in_level: bool = false
 var current_session_id: int = 0
@@ -92,6 +95,8 @@ func start_level(level_id: int, enemy_count: int, egg_list: Array[String]) -> vo
 	available_eggs = egg_list.duplicate()
 	current_egg_index = 0
 	current_score = 0
+	total_level_blocks = 0
+	destroyed_blocks_count = 0
 	is_level_active = true
 	is_settling = false
 	settle_timer = 0.0
@@ -100,6 +105,11 @@ func start_level(level_id: int, enemy_count: int, egg_list: Array[String]) -> vo
 	vip_trial_used_in_level = false
 	score_updated.emit(current_score)
 	level_started.emit(current_level, available_eggs)
+	report_youtube_game_ready()
+
+func register_block_destroyed() -> void:
+	if not is_level_active: return
+	destroyed_blocks_count += 1
 
 func add_score(points: int) -> void:
 	if not is_level_active: return
@@ -207,8 +217,8 @@ func fail_level() -> void:
 	is_level_active = false
 	level_failed.emit()
 
-func _trigger_victory_delay() -> void:
-	if not is_level_active: return
+func _trigger_victory_delay(skip_delay: bool = false) -> Variant:
+	if not is_level_active: return 0
 	is_level_active = false
 	
 	var unused_eggs = available_eggs.size() - current_egg_index
@@ -224,10 +234,14 @@ func _trigger_victory_delay() -> void:
 	var star3_target = base_target + 1400
 	var star2_target = base_target + 600
 
+	var destruction_ratio = float(destroyed_blocks_count) / float(max(1, total_level_blocks))
+
+	# Hệ thống chấm sao Hybrid 3-Star: Phá vỡ bế tắc 3 sao
+	# Đạt 3 sao nếu (Dư trứng VÀ đạt mốc điểm) HOẶC (Tỉ lệ tàn phá cấu trúc >= 88%)
 	var stars = 1
-	if snapshot_final_score >= star3_target and unused_eggs >= 1:
+	if (snapshot_final_score >= star3_target and unused_eggs >= 1) or destruction_ratio >= 0.88:
 		stars = 3
-	elif snapshot_final_score >= star2_target or unused_eggs >= 1:
+	elif snapshot_final_score >= star2_target or unused_eggs >= 1 or destruction_ratio >= 0.50:
 		stars = 2
 
 	var base_coins = 50
@@ -239,11 +253,42 @@ func _trigger_victory_delay() -> void:
 		var sm = get_node("/root/SaveManager")
 		sm.record_level_result(current_level, stars, snapshot_final_score)
 
-	var session = current_session_id
-	await get_tree().create_timer(1.2).timeout
-	if session != current_session_id:
-		return # Bỏ qua nếu người chơi đã thoát hoặc đổi màn trong lúc đợi
+	# Báo cáo điểm số lên YouTube Playables nếu chạy trên nền tảng Web
+	send_youtube_score(snapshot_final_score)
+
+	if not skip_delay:
+		var session = current_session_id
+		await get_tree().create_timer(1.2).timeout
+		if session != current_session_id:
+			return 0 # Bỏ qua nếu người chơi đã thoát hoặc đổi màn trong lúc đợi
 	level_completed.emit(stars, snapshot_final_score, base_coins)
+	return stars
+
+func trigger_dramatic_slowmo(target_scale: float = 0.35, real_duration: float = 0.35) -> void:
+	if not is_level_active: return
+	Engine.time_scale = clampf(target_scale, 0.1, 1.0)
+	var timer = get_tree().create_timer(real_duration, false, false, true)
+	timer.timeout.connect(func():
+		if is_level_active or not get_tree().paused:
+			Engine.time_scale = 1.0
+	)
+
+func report_youtube_game_ready() -> void:
+	if OS.has_feature("web"):
+		var js_bridge = Engine.get_singleton("JavaScriptBridge")
+		if js_bridge:
+			js_bridge.eval("""
+				if (window.YT && window.YT.playables) {
+					window.YT.playables.firstFrameReady();
+					window.YT.playables.gameReady();
+				}
+			""")
+
+func send_youtube_score(score: int) -> void:
+	if OS.has_feature("web"):
+		var js_bridge = Engine.get_singleton("JavaScriptBridge")
+		if js_bridge:
+			js_bridge.eval("if (window.YT && window.YT.playables) { window.YT.playables.sendScore({value: %d}); }" % score)
 
 func load_level(level_id: int) -> void:
 	Engine.time_scale = 1.0

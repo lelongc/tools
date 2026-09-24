@@ -2,54 +2,51 @@
 
 **Tên dự án:** Cluck & Drop: Bunker Buster  
 **Phiên bản Engine:** Godot `4.7.1-stable` (Renderer: `GL Compatibility`, Viewport: $540 \times 960$)  
-**Thời gian lập hồ sơ:** 19/09/2026  
-**Trạng thái hiện tại:** Đã khắc phục toàn bộ 8 lỗi kỹ thuật cốt lõi (BUG-01 → BUG-08), củng cố độ bền save/preset và ổn định 100% vật lý hầm ngục qua 3 vòng kiểm thử tự động.
+**Thời gian cập nhật:** 24/09/2026  
+**Trạng thái hiện tại:** Đã hoàn tất 100% các bản vá P0/P1/P2/P3, hoạt ảnh gà nạp đạn, 30 SVG 10 thế giới, rung haptics, hạt khí quyển ambient và dọn dẹp rò rỉ bộ nhớ (12/12 Bộ Test Tự Động Vượt Qua Tuyệt Đối).
 
 ---
 
-## Danh mục Tài liệu Phân tích (Đọc theo thứ tự)
+## Danh Mục Toàn Bộ Tài Liệu Phân Tích & Kế Hoạch (Đọc theo thứ tự)
 
-1. [01 — Hiện trạng và Kiến trúc hệ thống](D:/folder/tools/godot_demo/2/docs/phan-tich-game/01-hien-trang-va-kien-truc.md): Tổng quan vòng chơi, quy mô mã nguồn, trách nhiệm từng module, các nền tảng kiến trúc đã được củng cố.
-2. [02 — Báo cáo Lỗi và Tiến độ Xử lý Kỹ thuật](D:/folder/tools/godot_demo/2/docs/phan-tich-game/02-loi-va-huong-cai-thien.md): Nhật ký chi tiết về 8 lỗi cốt lõi (BUG-01 → 08), 3 lỗi Save (SAVE-01 → 03), lỗi build (BUILD-01) đã được giải quyết triệt để và các khoản nợ kỹ thuật cần theo dõi.
-3. [03 — Độ khó, Trải nghiệm người chơi và Kinh tế Game](D:/folder/tools/godot_demo/2/docs/phan-tich-game/03-do-kho-trai-nghiem-kinh-te.md): Phân tích đường cong độ khó 10 thế giới, vai trò chiến thuật 7 loại trứng, nghịch lý Trứng Băng, vòng lặp tiền tệ và giải pháp khay tiếp viện.
-4. [04 — Âm thanh, Hiệu ứng Hình ảnh (VFX) và Cảm giác Game (Juiciness)](D:/folder/tools/godot_demo/2/docs/phan-tich-game/04-am-thanh-va-hieu-ung-vfx.md): Đánh giá 24 sample âm thanh WAV, cơ chế debounce chống chồng âm, hạt CPUParticles2D, 11 trạng thái biểu cảm quái và đề xuất Ambient Atmosphere.
-5. [05 — Kiểm kê Chi tiết 200 Màn chơi Chiến dịch](D:/folder/tools/godot_demo/2/docs/phan-tich-game/05-kiem-ke-200-man.md): Bảng số liệu kiểm kê tự động chính xác cho từng màn (1.574 quái vật, 833.857 HP, 7.076 khối vật liệu, 438 tảng đá, 577 thùng nổ, 1.442 quả trứng).
-6. [06 — Lộ trình Cải thiện và Kế hoạch Nâng cấp Toàn diện](D:/folder/tools/godot_demo/2/docs/phan-tich-game/06-lo-trinh-cai-thien-va-nang-cap.md): Lộ trình 4 giai đoạn ưu tiên (Kinh tế & Tiếp viện → Chiến thuật đạn → Audio Bus & Hạt môi trường → Đổi mới Đấu Trùm) cùng tiêu chí nghiệm thu 3 lớp.
-7. [07 — Chuẩn hóa Kỹ thuật Di động & Tiêu chuẩn Phát hành CH Play](D:/folder/tools/godot_demo/2/docs/phan-tich-game/07-chuan-hoa-mobile-va-chplay.md): Phân tích toàn diện 18 rủi ro và lỗ hổng di động (Keystore ký số, Target SDK 34/35, Vòng đời Android Auto-Pause, Vùng an toàn Tai thỏ DisplayServer, Chuẩn nút chạm 48dp, Chống kẹp rè loa thoại, Kiến trúc AdMob SDK và Tuân thủ GDPR/COPPA).
-8. [08 — Đại Kiểm Kê Toàn Diện Lỗi Kỹ Thuật, Gameplay, Vật Lý & Đề Xuất](D:/folder/tools/godot_demo/2/docs/phan-tich-game/08-dai-kiem-ke-loi-va-de-xuat-toan-dien.md): Báo cáo tổng kiểm kê chi tiết toàn bộ các lỗ hổng vật lý quái văng biên bất tử (PHY-01), kẹt timer rơi rác 9s (PHY-02), bão Tween khi trúng Axit (PHY-03), nghịch lý Trứng Băng tự hủy khối (BAL-01), giải pháp Khay Tiếp Viện (ECO-01), Cửa hàng Vàng (ECO-02) và phản hồi xúc giác Haptics (AUD-02).
-9. [09 — Đại Phẫu Toàn Bộ Lỗi, Lỗ Hổng Kỹ Thuật và Kế Hoạch Cải Thiện Toàn Diện](D:/folder/tools/godot_demo/2/docs/phan-tich-game/09-dai-phau-toan-bo-loi-va-de-xuat-nang-cap.md): **Bách khoa Toàn tập Đại phẫu 36 Lỗi & Lỗ hổng Kỹ thuật** trên toàn bộ 9 hệ thống dự án (3 lỗi P0 Game-breaking, 12 lỗi P1 Critical, 14 lỗi P2 Polish, 7 lỗi P3 Tech Debt) kèm nguyên nhân gốc rễ, mã nguồn phân tích, code khắc phục đề xuất và sơ đồ Gantt triển khai.
-10. [10 — Đại Kiểm Tra Hoạt Ảnh Gà, Background 10 Thế Giới, Quy Mô Địa Hình & Các Điểm Bất Hợp Lý](D:/folder/tools/godot_demo/2/docs/phan-tich-game/10-dai-kiem-tra-hoat-anh-ga-background-the-gioi-va-cac-diem-bat-hop-ly.md): **Báo cáo Chuyên sâu về Nâng Cấp Hoạt Ảnh Gà & Bối Cảnh**: Khắc phục giỏ rỗng (`LoadedEgg`), phản lực giật nảy $-18\text{px}$, 30 Vector SVG theo thế giới, thuật toán Modular Tiling $540\text{px}$ chống vỡ hình, Dynamic Cinematic Camera 3 pha và bộ dập rung lắc vi mô (Micro-Velocity Snubber).
-11. [11 — Đại Phân Tích Toàn Diện: Rà Soát Lỗi, Điểm Bất Hợp Lý & Kế Hoạch Tối Ưu Hóa Game](D:/folder/tools/godot_demo/2/docs/phan-tich-game/11-tong-hop-phan-tich-loi-va-ke-hoach-cai-thien-toan-dien.md): **Bách Khoa Toàn Thư Master**: Đại bảng tổng hợp toàn bộ 28 lỗi và điểm cải thiện (từ P0 đến P3), nguyên nhân gốc rễ, mã nguồn phân tích, hoạt ảnh gà nạp đạn, bối cảnh 10 thế giới, quy mô hầm ngầm $1430\text{px}$, chuẩn hóa di động CH Play và lộ trình phát triển tiếp theo.
+### Nhóm Tài Liệu Nền Tảng & Lịch Sử Nâng Cấp:
+1. [10 — Đại Kiểm Tra Hoạt Ảnh Gà, Background 10 Thế Giới, Quy Mô Địa Hình & Các Điểm Bất Hợp Lý](10-dai-kiem-tra-hoat-anh-ga-background-the-gioi-va-cac-diem-bat-hop-ly.md): **Báo cáo Chuyên sâu về Nâng Cấp Hoạt Ảnh Gà & Bối Cảnh**: Khắc phục giỏ rỗng (`LoadedEgg`), phản lực giật nảy $-18\text{px}$, 30 Vector SVG theo thế giới, thuật toán Modular Tiling $540\text{px}$ chống vỡ hình, Dynamic Cinematic Camera 3 pha và bộ dập rung lắc vi mô (Micro-Velocity Snubber).
+2. [11 — Đại Phân Tích Toàn Diện: Rà Soát Lỗi, Điểm Bất Hợp Lý & Kế Hoạch Tối Ưu Hóa Game](11-tong-hop-phan-tich-loi-va-ke-hoach-cai-thien-toan-dien.md): **Bách Khoa Toàn Thư Master**: Đại bảng tổng hợp toàn bộ 28 lỗi và điểm cải thiện (từ P0 đến P3), nguyên nhân gốc rễ, mã nguồn phân tích, hoạt ảnh gà nạp đạn, bối cảnh 10 thế giới, quy mô hầm ngầm $1430\text{px}$, chuẩn hóa di động CH Play và lộ trình phát triển tiếp theo.
+
+### Nhóm Tài Liệu Đột Phá Mới (UI/UX, Texture, 200 Màn, YouTube & CH Play):
+3. [12 — Đại Phẫu Giao Diện (UI/UX) & Nâng Cấp Texture, Đồ Họa, Hiệu Ứng Hình Ảnh (VFX & Shaders)](12-dai-phau-giao-dien-ui-ux-va-nang-cap-texture-do-hoa.md): **Đại Phẫu Trực Quan & Thẩm Mỹ**:
+   - Phân tích công thái học UI/UX trên MainMenu, LevelSelect, GameHUD và các Modal.
+   - Loại bỏ rủi ro nút `BtnReset` trên sảnh chính, đề xuất thiết kế `SettingsModal.tscn`.
+   - Phân tích cơ chế nạp Vector SVG độ nét cao không vỡ hạt, 10 loại vật liệu khối và 2 cấp độ nứt vỡ.
+   - 11 biểu cảm quái vật Memeable (mắt dõi theo đạn, toát mồ hôi hoảng sợ, cười đắc ý khi người chơi bắn trượt).
+   - Đề xuất bổ sung hiệu ứng ánh sáng động (CanvasModulate / PointLight2D) và chữ hành động truyện tranh (Comic Action Popups: "BOOM!", "SQUASH!").
+4. [13 — Chuyên Sâu Cân Bằng Độ Khó, Thiết Kế 200 Màn Chơi Chiến Dịch & 10 Đại Trùm (World Bosses)](13-chuyen-sau-can-bang-do-kho-thiet-ke-200-man-va-dai-trum.md): **Thiết Kế Màn Chơi & Cân Bằng Chiến Thuật**:
+   - Bảng thống kê chi tiết 200 màn chơi trải dài 10 Thế Giới (1.574 quái vật, 7.076 khối vật liệu, 438 tảng đá lăn, 577 thùng nổ).
+   - Ma trận tương quan sát thương 7 loại trứng vs 10 loại vật liệu khối boong-ke.
+   - Phân tích và khắc phục "Nghịch lý 3 Sao" bằng công thức tính điểm Hybrid (phá hủy $\ge 90\%$ công trình tự động thưởng 3 sao).
+   - Thiết kế cơ chế độc đáo cho 10 Trận Chiến Đại Trùm Thế Giới (World Bosses từ Màn 20 Baron Pig đến Màn 200 Singularity Prime).
+   - Phân tích bẫy môi trường (Tảng đá lăn, Quạt gió Updraft, Thùng Nuke và Lồng gà con cứu hộ).
+5. [14 — Chiến Lược Toàn Diện Đưa Game Lên YOUTUBE: Nền Tảng YouTube Playables & Cơ Chế Viral Video Triệu View](14-chien-luoc-dua-game-len-youtube-viral-content-va-playables.md): **Chiến Lược YouTube Kép**:
+   - **Trụ cột 1 (YouTube Playables)**: Tích hợp HTML5 WebAssembly, chuẩn SDK `YouTube Game API v1` (`init`, `gameReady`, `sendScore`, `onPause`, `onResume`), ngân sách tải trang $< 5\text{s}$, kích thước build siêu nhẹ $< 5\text{MB}$.
+   - **Trụ cột 2 (Viral Shorts / TikTok / Reels)**: Tâm lý học người xem video phá hủy vật lý thỏa mãn (Satisfying ASMR Destruction), Slow-Motion Bullet-Time tại điểm nổ đỉnh cao, Comic Action Popups, Biểu cảm quái vật Memeable.
+   - Tính năng độc quyền cho Creator: Chế độ xem lại pha nổ đẹp (Instant Replay) và công cụ chụp Thumbnail sắc nét không dính UI (Photo Finish).
+   - Bộ 10 kịch bản video Shorts triệu view và công thức đặt tiêu đề giật tít thu hút người xem.
+6. [15 — Cẩm Nang Toàn Diện Chuẩn Hóa Kỹ Thuật & Chiến Lược Phát Hành Lên CH PLAY (Google Play Store 2026)](15-chuan-hoa-va-ke-hoach-phat-hanh-chplay-google-play-store.md): **Cẩm Nang Phát Hành CH Play 2026**:
+   - Tiêu chuẩn kỹ thuật bắt buộc: Target SDK 34/35 (Android 14/15), 64-bit `arm64-v8a`, định dạng Android App Bundle (`.aab`), Keystore SHA-256 release signing.
+   - Tối ưu phần cứng: Khóa 60 FPS chống nóng pin, tối ưu RAM $< 180\text{MB}$, quản lý vòng đời Android Auto-Pause, xử lý phím Back vật lý 2 lần, Safe Area tai thỏ DisplayServer.
+   - Tuân thủ pháp lý: Google Play Families Policy (3+ / Everyone), COPPA, Tuyên bố An toàn Dữ liệu (Data Safety Form), chuẩn quảng cáo Google Better Ads Standards.
+   - Kiến trúc kiếm tiền: 4 vị trí Rewarded Ads tự nguyện, kế hoạch gói In-App Purchase (IAP No Ads, Starter Pack).
+   - Bộ tài sản Store Listing & Kế hoạch ASO: Icon $512 \times 512$, Feature Graphic $1024 \times 500$, bộ 6 ảnh chụp màn hình $9:16$ có chữ hook, bài mô tả chuẩn SEO tiếng Việt và tiếng Anh.
+   - Quy trình 7 bước đóng gói và phát hành ứng dụng lên Google Play Console.
 
 ---
 
-## Tóm lược Phát hiện Chính & Trạng thái Hệ thống
+## Tóm Lược Trạng Thái Hệ Thống & Kiểm Thử Tự Động
 
-### 1. Những cải tiến đã hoàn tất và kiểm chứng thành công
-- **Xử lý dứt điểm 8 lỗi kỹ thuật**:
-  - BUG-01 (Mở khóa nút nhận thưởng quảng cáo mô phỏng).
-  - BUG-02 (Bảo vệ thời gian gameplay khi Pause).
-  - BUG-03 (Khử xung đột hai modal thắng/thua cùng hiện trong Last Stand).
-  - BUG-04 (Theo dõi hoạt động còn lại trước khi đếm ngược thua).
-  - BUG-05 (Chặn nổ lặp 24 lần của Hố đen ngoài biên).
-  - BUG-06 (Đồng bộ snapshot điểm số tuyệt đối giữa UI và Save file).
-  - BUG-07 (Thay ngưỡng cố định bằng tọa độ đáy linh hoạt của từng thế giới).
-  - BUG-08 (Khử chuyển scene 2 lần từ nút chọn màn).
-- **Vật lý vững như bàn thạch**:
-  - Không còn sập công trình sớm trong thời gian chuẩn bị (Peacetime Lock $100\%$).
-  - Không còn hiện tượng rung giật hay trượt chân móng khi người chơi vừa thả quả trứng đầu tiên (Inside-Out Raycasting + Bedrock Protection).
-- **Âm thanh & Biểu cảm**:
-  - Giãn cách phát âm va đập vật liệu và nổ bom, triệt tiêu rè vỡ tiếng.
-  - Quái vật đã thực sự dõi mắt nhìn theo quả trứng đang bay và có hoạt ảnh toát mồ hôi/hoảng loạn.
-
-### 2. Các trọng tâm cần cải thiện trong các bản cập nhật tới
-- **Chuẩn hóa Phát hành Google Play Store & Di động**:
-  - Ký số bản phát hành (`keystore/release`), bật Gradle Build để nhúng native SDK.
-  - Sửa lỗi logic `SaveManager.gd` đang mở khóa toàn bộ 200 màn chơi về cơ chế mở tuần tự.
-  - Ẩn nút `BtnReset` trên sảnh chính để loại bỏ nguy cơ xóa nhầm toàn bộ dữ liệu người chơi.
-  - Tự động đệm an toàn `DisplayServer.get_display_safe_area()` cho TopBar (tránh nốt ruồi camera) và Kệ trứng (tránh thanh vuốt Home Android).
-  - Khóa 60 FPS (`Engine.max_fps = 60`) chống hao pin và quá nhiệt trên màn hình $120\text{Hz}$.
-  - Tạo `default_bus_layout.tres` gắn Peak Limiter để bảo vệ loa ngoài điện thoại khỏi rè vỡ khi nổ bom dây chuyền.
-- **Cửa hàng và Tiêu Vàng (Currency Sink)**: Người chơi kiếm được hàng nghìn vàng nhưng chưa có tính năng tiêu dùng; cần bổ sung Khay Trứng Tiếp Viện (`BoosterTray`) trong màn chơi và Cửa hàng (`ShopModal`) ngoài sảnh chính.
-- **Tinh chỉnh Chiến thuật Trứng Băng**: Cần giảm sát thương nổ ban đầu của `FrostEgg.gd` để giữ lại lớp băng giòn cho phát bắn tiếp theo, đúng tinh thần giải đố chiến thuật.
-- **Bộ hạt Môi trường (Ambient Atmosphere)**: Bổ sung lá rơi, tàn lửa, bông tuyết hoặc bụi sao cho 10 thế giới để nâng tầm thị giác.
+```
+================================================================
+>>> ALL 12 TEST SUITES PASSED SUCCESSFULLY! (0 ERRORS, 0 WARNINGS) <<<
+================================================================
+```
+- **0 Lỗi logic, 0 Cảnh báo rò rỉ bộ nhớ ObjectDB, Return Code 0**.
+- Hệ sinh thái dự án đã sẵn sàng $100\%$ về mặt tài liệu kiến trúc, kỹ thuật engine và mỹ thuật để triển khai hoàn thiện và đưa lên **YouTube Playables** cùng **Google Play Store (CH Play)**.

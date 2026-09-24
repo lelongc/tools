@@ -534,3 +534,39 @@ static func spawn_monster_defeat_fx(parent: Node, pos: Vector2, monster_type: St
 			tween.parallel().tween_property(drop, "modulate:a", 0.0, 0.32).set_delay(0.08)
 			tween.tween_callback(drop.queue_free)
 
+## Hiển thị chữ hành động truyện tranh (Comic Action Text Popup: "BOOM!", "DRILL!", "SUPERNOVA!")
+static func spawn_comic_popup(parent: Node, pos: Vector2, text: String, color: Color = Color(1.0, 0.9, 0.2)) -> void:
+	if not parent or not is_instance_valid(parent): return
+
+	var label = Label.new()
+	label.text = text
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 22)
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_color_override("font_outline_color", Color(0.06, 0.04, 0.1, 1.0))
+	label.add_theme_constant_override("outline_size", 7)
+	label.add_theme_constant_override("shadow_offset_y", 3)
+	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+
+	label.custom_minimum_size = Vector2(160, 40)
+	label.pivot_offset = Vector2(80, 20)
+	label.position = pos - Vector2(80, 20)
+	label.scale = Vector2(0.3, 0.3)
+	label.rotation = randf_range(-0.15, 0.15)
+	label.z_index = 60
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	parent.add_child(label)
+
+	var tw = label.create_tween()
+	tw.set_parallel(true)
+	# Punchy cartoon pop
+	tw.tween_property(label, "scale", Vector2(1.35, 1.35), 0.15).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.chain().tween_property(label, "scale", Vector2(1.0, 1.0), 0.1).set_trans(Tween.TRANS_QUAD)
+	# Float upwards
+	tw.parallel().tween_property(label, "position:y", label.position.y - 48.0, 0.55).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	# Fade out
+	tw.parallel().tween_property(label, "modulate:a", 0.0, 0.25).set_delay(0.32)
+	tw.chain().tween_callback(label.queue_free)
+
+

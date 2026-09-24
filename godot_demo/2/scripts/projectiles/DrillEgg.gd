@@ -55,6 +55,7 @@ func _activate_rocket_boost() -> void:
 	if visual_root:
 		var tween = create_tween()
 		tween.tween_property(visual_root, "scale", Vector2(0.8, 1.6), 0.1)
+	ParticleHelper.spawn_comic_popup(get_parent(), global_position, "DRILL!", Color(1.0, 0.85, 0.15))
 
 func _on_body_entered(body: Node) -> void:
 	if is_broken: return

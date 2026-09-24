@@ -495,6 +495,7 @@ func _fracture_block() -> void:
 
 	var pts = 300 if material_type in ["steel", "obsidian", "cyber_alloy", "celestial_stone"] else (200 if material_type in ["crystal", "magma_brick"] else (150 if material_type in ["stone", "swamp_wood", "permafrost"] else 75))
 	GameManager.add_score(pts)
+	GameManager.register_block_destroyed()
 	ComicScorePopup.spawn_score_popup(get_parent(), global_position, pts)
 
 	if has_node("/root/SoundManager"):

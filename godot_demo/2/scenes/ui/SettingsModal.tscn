@@ -1,0 +1,217 @@
+[gd_scene load_steps=5 format=3 uid="uid://settingsmodal001"]
+
+[ext_resource type="Script" path="res://scripts/ui/SettingsModal.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ui/JuicyButton.gd" id="2_btn"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_SettingsPanel"]
+bg_color = Color(0.12, 0.06, 0.22, 0.98)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 8
+border_color = Color(1, 0.84, 0, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 14
+shadow_offset = Vector2(0, 8)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_DangerBox"]
+bg_color = Color(0.22, 0.05, 0.08, 0.9)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.3, 0.3, 0.8)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="SettingsModal" type="CanvasLayer"]
+layer = 100
+script = ExtResource("1_script")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.04, 0.08, 0.88)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(440, 560)
+layout_mode = 2
+pivot_offset = Vector2(220, 280)
+theme_override_styles/panel = SubResource("StyleBoxFlat_SettingsPanel")
+
+[node name="Margin" type="MarginContainer" parent="CenterContainer/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 22
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 22
+theme_override_constants/margin_bottom = 18
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.25, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 24
+text = "⚙️ CÀI ĐẶT"
+horizontal_alignment = 1
+
+[node name="AudioGrid" type="GridContainer" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+columns = 3
+
+[node name="LblBGM" type="Label" parent="CenterContainer/Panel/Margin/VBox/AudioGrid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "🎵 Nhạc nền"
+
+[node name="SliderBGM" type="HSlider" parent="CenterContainer/Panel/Margin/VBox/AudioGrid"]
+custom_minimum_size = Vector2(180, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+value = 70.0
+
+[node name="LblBGMVal" type="Label" parent="CenterContainer/Panel/Margin/VBox/AudioGrid"]
+custom_minimum_size = Vector2(45, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "70%"
+horizontal_alignment = 2
+
+[node name="LblSFX" type="Label" parent="CenterContainer/Panel/Margin/VBox/AudioGrid"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "🔊 Hiệu ứng"
+
+[node name="SliderSFX" type="HSlider" parent="CenterContainer/Panel/Margin/VBox/AudioGrid"]
+custom_minimum_size = Vector2(180, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+value = 85.0
+
+[node name="LblSFXVal" type="Label" parent="CenterContainer/Panel/Margin/VBox/AudioGrid"]
+custom_minimum_size = Vector2(45, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "85%"
+horizontal_alignment = 2
+
+[node name="HSeparator1" type="HSeparator" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="HapticsBox" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="LblVib" type="Label" parent="CenterContainer/Panel/Margin/VBox/HapticsBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 15
+text = "📳 Rung xúc giác"
+
+[node name="BtnVib" type="Button" parent="CenterContainer/Panel/Margin/VBox/HapticsBox"]
+custom_minimum_size = Vector2(80, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "  BẬT  "
+script = ExtResource("2_btn")
+is_wood_brown = true
+
+[node name="LangBox" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="LblLang" type="Label" parent="CenterContainer/Panel/Margin/VBox/LangBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 15
+text = "🌐 Ngôn ngữ"
+
+[node name="BtnLang" type="Button" parent="CenterContainer/Panel/Margin/VBox/LangBox"]
+custom_minimum_size = Vector2(140, 38)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "🇻🇳 Tiếng Việt"
+script = ExtResource("2_btn")
+is_wood_brown = true
+
+[node name="HSeparator2" type="HSeparator" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="DangerZone" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+
+[node name="BtnResetProgress" type="Button" parent="CenterContainer/Panel/Margin/VBox/DangerZone"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.45, 0.45, 1)
+theme_override_font_sizes/font_size = 13
+text = "⚠️ Xóa toàn bộ tiến trình"
+script = ExtResource("2_btn")
+is_wood_brown = true
+
+[node name="ConfirmBox" type="VBoxContainer" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LblConfirmWarn" type="Label" parent="CenterContainer/Panel/Margin/VBox/ConfirmBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.35, 0.35, 1)
+theme_override_font_sizes/font_size = 12
+text = "Toàn bộ 200 màn chơi và vàng sẽ bị xóa vĩnh viễn!"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="CenterContainer/Panel/Margin/VBox/ConfirmBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="BtnConfirmYes" type="Button" parent="CenterContainer/Panel/Margin/VBox/ConfirmBox/HBox"]
+custom_minimum_size = Vector2(110, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.2, 0.2, 1)
+theme_override_font_sizes/font_size = 13
+text = "XÁC NHẬN"
+script = ExtResource("2_btn")
+
+[node name="BtnConfirmNo" type="Button" parent="CenterContainer/Panel/Margin/VBox/ConfirmBox/HBox"]
+custom_minimum_size = Vector2(110, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "HỦY"
+script = ExtResource("2_btn")
+is_wood_brown = true
+
+[node name="Spacer" type="Control" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BtnClose" type="Button" parent="CenterContainer/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "ĐÓNG"
+script = ExtResource("2_btn")
+is_wood_brown = true

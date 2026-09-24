@@ -162,6 +162,8 @@ func _on_impact(body: Node) -> void:
 	if my_speed > 100.0 and body.has_method("take_damage"):
 		body.take_damage(crush_damage * (my_speed / 200.0), global_position)
 		CameraShake.add_trauma(0.2)
+		if body.is_in_group("Enemies") and my_speed > 160.0:
+			ParticleHelper.spawn_comic_popup(get_parent(), global_position, "CRUNCH!", Color(1.0, 0.6, 0.1))
 
 func take_damage(_amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
 	if not is_awake: wake_up()

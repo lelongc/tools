@@ -74,6 +74,7 @@ func _detonate() -> void:
 
 	CartoonExplosionFX.spawn_comic_explosion(get_parent(), global_position, explosion_radius)
 	ParticleHelper.spawn_egg_break_fx(get_parent(), global_position, "bomb", false)
+	ParticleHelper.spawn_comic_popup(get_parent(), global_position, "BOOM!", Color(1.0, 0.45, 0.15))
 
 	set_deferred("freeze", true)
 	if visual_root: visual_root.visible = false

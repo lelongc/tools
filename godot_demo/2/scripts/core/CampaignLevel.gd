@@ -336,6 +336,8 @@ func _setup_level() -> void:
 	var enemies = get_tree().get_nodes_in_group("Enemies")
 	var enemy_count = enemies.size()
 	GameManager.start_level(level_id, enemy_count, egg_loadout)
+	var destructibles = get_tree().get_nodes_in_group("Destructibles")
+	GameManager.total_level_blocks = destructibles.size()
 
 
 func _spawn_bastion_tier(center_x: float, base_y: float, span: float, pillar_h: float, mat: String, enemy_type: String = "", tnt_mode: int = 0) -> float:

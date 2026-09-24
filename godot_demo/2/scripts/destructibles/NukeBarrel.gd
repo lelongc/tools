@@ -99,6 +99,8 @@ func _detonate_nuke() -> void:
 	CartoonExplosionFX.spawn_comic_explosion(get_parent(), global_position, explosion_radius)
 	# Khói độc phóng xạ neon xanh lá đặc trưng của thùng Nuke
 	ParticleHelper.spawn_egg_break_fx(get_parent(), global_position, "acid", false)
+	ParticleHelper.spawn_comic_popup(get_parent(), global_position, "NUCLEAR!", Color(0.25, 1.0, 0.45))
+	GameManager.trigger_dramatic_slowmo(0.35, 0.4)
 
 	set_deferred("freeze", true)
 	if visual_sprite: visual_sprite.visible = false
