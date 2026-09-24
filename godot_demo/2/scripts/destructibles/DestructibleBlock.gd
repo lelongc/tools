@@ -14,6 +14,7 @@ var spawn_settle_timer: float = 0.5
 var base_visual_pos: Vector2 = Vector2.ZERO
 var damage_flash_cooldown: float = 0.0
 var micro_jitter_timer: float = 0.0
+var anti_wedge_timer: float = 0.0
 
 @onready var col_shape: CollisionShape2D = $CollisionShape2D
 @onready var block_visual: NinePatchRect = $BlockVisual
@@ -314,6 +315,10 @@ func _physics_process(delta: float) -> void:
 		var speed = linear_velocity.length()
 		var ang_speed = abs(angular_velocity)
 
+		# I11: Micro-debris early sleep throttling (khối nhỏ / mảnh vụn <= 1200px2 được cho ngủ sớm)
+		var is_micro_debris = (block_size.x * block_size.y) <= 1200.0
+		var jitter_threshold = 0.09 if is_micro_debris else 0.18
+
 		# Khi thanh công trình nằm kẹt/chèn ép, vận tốc dao động rất nhỏ (< 32.0 px/s, xoay < 1.4 rad/s)
 		# Tuyệt đối không dập lực nếu khối đang gia tốc rơi tự do xuống dưới (linear_velocity.y > 35.0)
 		if speed < 32.0 and ang_speed < 1.4 and linear_velocity.y <= 35.0:
@@ -323,14 +328,28 @@ func _physics_process(delta: float) -> void:
 			micro_jitter_timer += delta
 
 			# TUYỆT ĐỐI CHỈ CHO NGỦ VÀ TRIỆT TIÊU VẬN TỐC KHI KHỐI CÓ BỆ ĐỠ VỮNG CHẮC!
-			if (micro_jitter_timer > 0.18 or (speed < 3.0 and ang_speed < 0.2)) and _has_rigid_support():
+			if (micro_jitter_timer > jitter_threshold or (speed < 3.0 and ang_speed < 0.2)) and _has_rigid_support():
 				linear_velocity = Vector2.ZERO
 				angular_velocity = 0.0
 				sleeping = true
 				micro_jitter_timer = 0.0
+				anti_wedge_timer = 0.0
 		else:
 			# Thanh đang bay tự do, rơi dốc hoặc bị bom hất tung -> reset bộ đếm ngay
 			micro_jitter_timer = max(0.0, micro_jitter_timer - delta * 3.0)
+
+		# I01: Virtual Apex Anti-Wedging Perturbation
+		# Nếu khối nghiêng tựa góc chéo (> 15 độ), đứng im nhưng không có bệ đỡ mặt đất và bị kẹt nêm vòm > 2.0s
+		if abs(rotation) > 0.26 and speed < 15.0 and not sleeping:
+			anti_wedge_timer += delta
+			if anti_wedge_timer > 2.0:
+				anti_wedge_timer = 0.0
+				if not _has_rigid_support():
+					# Cú hích vi mô phá vỡ cân bằng giả tạo của vòm kẹt
+					var nudge_dir = 1.0 if rotation > 0 else -1.0
+					apply_central_impulse(Vector2(nudge_dir * 12.0, 18.0))
+		else:
+			anti_wedge_timer = max(0.0, anti_wedge_timer - delta * 2.0)
 
 		# Chống lơ lửng: Nếu khối đã ngủ (sleeping) nhưng mất bệ đỡ bên dưới -> đánh thức rơi ngay
 		if sleeping:
@@ -563,7 +582,10 @@ func _fracture_block() -> void:
 	# 1. Bắn khói Comic Puff bồng bềnh
 	_spawn_comic_smoke_poof()
 
-	# 2. Bắn các mảnh vỡ vật lý (Flying Shards)
+	# 2. Bắn mây bụi đất đá bốc lên cho khối nặng (I03: Debris Dust Cloud)
+	_spawn_debris_dust_cloud()
+
+	# 3. Bắn các mảnh vỡ vật lý (Flying Shards)
 	_spawn_flying_shards()
 
 	if fracture_particles:
@@ -604,6 +626,39 @@ func _spawn_comic_smoke_poof() -> void:
 	tween.parallel().tween_property(puff, "modulate:a", 0.0, 0.32).set_trans(Tween.TRANS_SINE)
 	tween.parallel().tween_property(puff, "rotation", randf_range(-0.8, 0.8), 0.32)
 	tween.tween_callback(puff.queue_free)
+
+func _spawn_debris_dust_cloud() -> void:
+	if not tex_smoke_puff: return
+	var p = get_parent()
+	if not p: return
+
+	var is_heavy = material_type in ["stone", "magma_brick", "obsidian", "celestial_stone", "steel", "cyber_alloy"] or (block_size.x * block_size.y > 2200.0)
+	if not is_heavy: return
+
+	var dust_tint = Color(0.82, 0.78, 0.72, 0.65) # Bụi đá vôi
+	if material_type in ["obsidian", "cyber_alloy", "steel"]:
+		dust_tint = Color(0.48, 0.45, 0.55, 0.70) # Bụi khói kim loại / hắc diện thạch
+	elif material_type == "magma_brick":
+		dust_tint = Color(0.85, 0.45, 0.25, 0.70) # Bụi nham thạch
+
+	for i in range(3):
+		var puff = Sprite2D.new()
+		puff.texture = tex_smoke_puff
+		var offset = Vector2(randf_range(-block_size.x * 0.45, block_size.x * 0.45), randf_range(-10, 15))
+		puff.global_position = global_position + offset
+		puff.scale = Vector2(0.25, 0.25)
+		puff.modulate = dust_tint
+		puff.z_index = 15
+		p.add_child(puff)
+
+		var tw = puff.create_tween()
+		var expand_scale = Vector2.ONE * randf_range(0.9, 1.35)
+		var drift_y = puff.global_position.y - randf_range(20.0, 45.0)
+		tw.parallel().tween_property(puff, "scale", expand_scale, 0.50).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.parallel().tween_property(puff, "position:y", drift_y, 0.50).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.parallel().tween_property(puff, "rotation", randf_range(-1.2, 1.2), 0.50)
+		tw.parallel().tween_property(puff, "modulate:a", 0.0, 0.35).set_delay(0.18)
+		tw.tween_callback(puff.queue_free)
 
 func _spawn_flying_shards() -> void:
 	var shard_tex: Texture2D = tex_shard_wood

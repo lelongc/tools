@@ -356,8 +356,9 @@ func _process_aiming_hover(delta: float) -> void:
 		else:
 			sweat_sprite.visible = false
 
-	# Cập nhật luồng hạt ngọc chuyển động mượt mà 60fps
+	# Cập nhật luồng hạt ngọc chuyển động mượt mà 60fps và thước đo lực kéo ná
 	if trajectory_overlay and trajectory_overlay.visible:
+		trajectory_overlay.pull_tension = tension_ratio
 		trajectory_overlay.queue_redraw()
 
 func has_airborne_unboosted_egg() -> bool:
@@ -430,7 +431,9 @@ func _handle_aim_input() -> void:
 
 			# Vẽ đường dự đoán quỹ đạo nếu không đang trong vùng hủy
 			if is_cancelling:
-				if trajectory_overlay: trajectory_overlay.visible = false
+				if trajectory_overlay:
+					trajectory_overlay.visible = false
+					trajectory_overlay.pull_tension = 0.0
 				if trajectory_line: trajectory_line.visible = false
 			else:
 				_draw_trajectory(aim_vector)
@@ -440,6 +443,7 @@ func _handle_aim_input() -> void:
 			is_aiming = false
 			if trajectory_overlay:
 				trajectory_overlay.visible = false
+				trajectory_overlay.pull_tension = 0.0
 				trajectory_overlay.sim_points.clear()
 				trajectory_overlay.queue_redraw()
 			if trajectory_line: trajectory_line.visible = false
@@ -483,11 +487,14 @@ func _on_aim_end(dropped: bool) -> void:
 		if eyes_sprite and tex_eyes_normal:
 			eyes_sprite.texture = tex_eyes_normal
 
-		# Khôi phục hình thể gà êm dịu, không bị kẹt co giãn
+		# Khôi phục hình thể gà với độ nảy dây thun đàn hồi (Elastic Snap-Back Spring)
 		if visual_root:
-			var vt = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-			vt.tween_property(visual_root, "scale", Vector2.ONE, 0.12)
-			vt.tween_property(visual_root, "rotation", 0.0, 0.12)
+			visual_root.scale = Vector2(0.92, 1.10)
+			var vt = create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+			vt.tween_property(visual_root, "scale", Vector2.ONE, 0.28)
+			vt.parallel().tween_property(visual_root, "rotation", 0.0, 0.18)
+			if has_node("/root/SoundManager"):
+				get_node("/root/SoundManager").play_sfx("res://assets/audio/sfx/whoosh.wav", 0.6, 1.3)
 
 	if sweat_sprite:
 		sweat_sprite.visible = false
@@ -495,6 +502,7 @@ func _on_aim_end(dropped: bool) -> void:
 		body_sprite.position.x = 0.0
 	if trajectory_overlay:
 		trajectory_overlay.visible = false
+		trajectory_overlay.pull_tension = 0.0
 		trajectory_overlay.sim_points.clear()
 
 func _draw_trajectory(initial_vel: Vector2) -> void:

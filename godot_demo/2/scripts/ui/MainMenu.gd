@@ -61,6 +61,7 @@ func _ready() -> void:
 	_update_coin_count()
 	_update_sound_button()
 	_update_language_ui()
+	_setup_wheel_badge()
 
 	_apply_safe_area()
 	get_viewport().size_changed.connect(_apply_safe_area)
@@ -117,12 +118,66 @@ func _update_coin_count() -> void:
 		total_coins_label.text = "%d" % coins
 
 
+var wheel_badge: Control = null
+
+func _setup_wheel_badge() -> void:
+	if not btn_wheel: return
+	wheel_badge = Control.new()
+	wheel_badge.name = "WheelBadge"
+	wheel_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	btn_wheel.add_child(wheel_badge)
+
+	var dot = PanelContainer.new()
+	dot.name = "Dot"
+	dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = Color(1.0, 0.22, 0.28, 1.0)
+	sb.border_width_left = 2
+	sb.border_width_right = 2
+	sb.border_width_top = 2
+	sb.border_width_bottom = 2
+	sb.border_color = Color.WHITE
+	sb.corner_radius_top_left = 8
+	sb.corner_radius_top_right = 8
+	sb.corner_radius_bottom_right = 8
+	sb.corner_radius_bottom_left = 8
+	sb.content_margin_left = 4
+	sb.content_margin_right = 4
+	sb.content_margin_top = 1
+	sb.content_margin_bottom = 1
+	dot.add_theme_stylebox_override("panel", sb)
+
+	var lbl = Label.new()
+	lbl.text = "FREE"
+	lbl.add_theme_font_size_override("font_size", 9)
+	lbl.add_theme_color_override("font_color", Color.WHITE)
+	dot.add_child(lbl)
+
+	wheel_badge.add_child(dot)
+	dot.position = Vector2(btn_wheel.size.x - 28.0, -8.0)
+
+	var tw = dot.create_tween().set_loops()
+	tw.tween_property(dot, "scale", Vector2(1.15, 1.15), 0.45).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(dot, "scale", Vector2.ONE, 0.45).set_trans(Tween.TRANS_SINE)
+
+	_update_wheel_badge()
+
+func _update_wheel_badge() -> void:
+	if not wheel_badge: return
+	var has_free = false
+	if has_node("/root/SaveManager"):
+		has_free = get_node("/root/SaveManager").is_first_daily_spin_free()
+	wheel_badge.visible = has_free
+
 func _on_btn_wheel_pressed() -> void:
 	if not wheel_modal_instance:
 		var scene = load("res://scenes/ui/DailyWheelModal.tscn")
 		wheel_modal_instance = scene.instantiate()
 		add_child(wheel_modal_instance)
-		wheel_modal_instance.wheel_closed.connect(func(): _update_coin_count())
+		wheel_modal_instance.wheel_closed.connect(func():
+			_update_coin_count()
+			_update_wheel_badge()
+		)
 	wheel_modal_instance.open_wheel()
 
 const ICON_SOUND_ON = preload("res://assets/ui/icons/btn_sound_on.svg")

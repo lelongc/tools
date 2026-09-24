@@ -7,6 +7,7 @@ var impact_pos: Vector2 = Vector2.ZERO
 var impact_normal: Vector2 = Vector2.UP
 var impact_is_monster_or_tnt: bool = false
 var active_color: Color = Color(1.0, 0.85, 0.20, 0.95)
+var pull_tension: float = 0.0
 
 func _draw() -> void:
 	if not visible or sim_points.size() < 2: return
@@ -16,6 +17,32 @@ func _draw() -> void:
 		local_points.append(to_local(p))
 
 	if local_points.size() < 2: return
+
+	# 0. Thước đo lực kéo ná (Slingshot Tension Gauge Arc)
+	if pull_tension > 0.05:
+		var origin_p = local_points[0]
+		var gauge_r = 26.0
+		var gauge_span = clamp(pull_tension, 0.05, 1.0) * (PI * 0.75)
+		var start_a = PI * 0.5 - gauge_span
+		var end_a = PI * 0.5 + gauge_span
+
+		# Vòng cung nền mờ 180 độ
+		draw_arc(origin_p, gauge_r, PI * 0.5 - PI * 0.75, PI * 0.5 + PI * 0.75, 24, Color(1, 1, 1, 0.15), 2.5, true)
+
+		# Vòng cung năng lượng đổi màu theo lực
+		var gauge_col = Color(0.25, 0.92, 0.65, 0.95)
+		if pull_tension > 0.75:
+			gauge_col = Color(1.0, 0.28, 0.32, 1.0)
+		elif pull_tension > 0.40:
+			gauge_col = Color(1.0, 0.82, 0.18, 0.95)
+
+		draw_arc(origin_p, gauge_r, start_a, end_a, 24, gauge_col, 3.5, true)
+
+		# Hai đầu hạt ngọc báo giới hạn lực
+		var p_left = origin_p + Vector2(cos(start_a), sin(start_a)) * gauge_r
+		var p_right = origin_p + Vector2(cos(end_a), sin(end_a)) * gauge_r
+		draw_circle(p_left, 3.0, Color.WHITE)
+		draw_circle(p_right, 3.0, Color.WHITE)
 
 	# 1. Đường vệt phát sáng mờ dẫn đường (Soft Glow Polyline)
 	var glow_col = Color(active_color.r, active_color.g, active_color.b, 0.24)

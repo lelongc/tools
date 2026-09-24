@@ -52,6 +52,8 @@ const EGG_TEXTURES: Dictionary = {
 
 var current_base_coins: int = 50
 var last_stand_tween: Tween = null
+var tutorial_prompt_node: Control = null
+var tutorial_dismissed: bool = false
 
 func _ready() -> void:
 	if modal_dimmer: modal_dimmer.visible = false
@@ -114,6 +116,74 @@ func _ready() -> void:
 
 	_update_ui()
 	_setup_booster_tray()
+	_setup_level_1_tutorial()
+
+func _process(_delta: float) -> void:
+	if tutorial_prompt_node and not tutorial_dismissed:
+		if GameManager.current_egg_index > 0 or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			_dismiss_tutorial()
+
+func _setup_level_1_tutorial() -> void:
+	if GameManager.current_level != 1 or GameManager.current_egg_index > 0: return
+
+	tutorial_prompt_node = Control.new()
+	tutorial_prompt_node.name = "TutorialPrompt"
+	tutorial_prompt_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tutorial_prompt_node.z_index = 40
+	add_child(tutorial_prompt_node)
+
+	var panel = PanelContainer.new()
+	panel.name = "Bubble"
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = Color(0.1, 0.08, 0.18, 0.90)
+	sb.border_width_left = 2
+	sb.border_width_right = 2
+	sb.border_width_top = 2
+	sb.border_width_bottom = 2
+	sb.border_color = Color(1.0, 0.85, 0.25, 0.95)
+	sb.corner_radius_top_left = 12
+	sb.corner_radius_top_right = 12
+	sb.corner_radius_bottom_right = 12
+	sb.corner_radius_bottom_left = 12
+	sb.content_margin_left = 14
+	sb.content_margin_right = 14
+	sb.content_margin_top = 8
+	sb.content_margin_bottom = 8
+	panel.add_theme_stylebox_override("panel", sb)
+
+	var lm = get_node_or_null("/root/LocalizationManager")
+	var prompt_txt = "👇 KÉO XUỐNG ĐỂ NGẮM & THẢ RA ĐỂ BẮN! 👇"
+	if lm and lm.current_language == "en":
+		prompt_txt = "👇 DRAG DOWN TO AIM & RELEASE TO DROP! 👇"
+
+	var lbl = Label.new()
+	lbl.name = "TutorialLabel"
+	lbl.text = prompt_txt
+	lbl.add_theme_font_size_override("font_size", 12)
+	lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.4))
+	lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	lbl.add_theme_constant_override("outline_size", 4)
+	panel.add_child(lbl)
+
+	tutorial_prompt_node.add_child(panel)
+
+	# Bố trí căn giữa bên dưới vị trí chim gà
+	panel.pivot_offset = Vector2(160, 20)
+	panel.position = Vector2(270 - 160, 155.0)
+
+	# Hoạt ảnh nhấp nháy bồng bềnh
+	var tw = panel.create_tween().set_loops()
+	tw.tween_property(panel, "position:y", 165.0, 0.55).set_trans(Tween.TRANS_SINE)
+	tw.tween_property(panel, "position:y", 150.0, 0.55).set_trans(Tween.TRANS_SINE)
+
+func _dismiss_tutorial() -> void:
+	if tutorial_dismissed: return
+	tutorial_dismissed = true
+	if tutorial_prompt_node and is_instance_valid(tutorial_prompt_node):
+		var tw = tutorial_prompt_node.create_tween()
+		tw.tween_property(tutorial_prompt_node, "modulate:a", 0.0, 0.25)
+		tw.tween_callback(tutorial_prompt_node.queue_free)
 
 var booster_tray: HBoxContainer = null
 
@@ -330,6 +400,7 @@ func _on_score_updated(new_score: int) -> void:
 		else: score_label.text = "SCORE: %d" % new_score
 
 func _on_egg_dropped(_egg_type: String) -> void:
+	_dismiss_tutorial()
 	_refresh_egg_icons()
 
 # ==========================================
@@ -471,6 +542,11 @@ func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> 
 					st.tween_callback(func():
 						if has_node("/root/SoundManager"):
 							get_node("/root/SoundManager").play_star_chime(star_idx + 1)
+						if star_idx == 2 and stars == 3:
+							var vp_size = get_viewport().get_visible_rect().size
+							var center_y = vp_size.y * 0.45
+							ParticleHelper.spawn_confetti_burst(self, Vector2(60, center_y), 32)
+							ParticleHelper.spawn_confetti_burst(self, Vector2(vp_size.x - 60, center_y), 32)
 					)
 					st.tween_property(s_node, "scale", Vector2.ONE, 0.28)
 				else:

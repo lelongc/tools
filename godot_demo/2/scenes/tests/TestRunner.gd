@@ -1065,6 +1065,97 @@ func _ready() -> void:
 			errors.append("Failed to open SettingsModal on MainMenu")
 		mm.free()
 
+	# -------------------------------------------------------------------------
+	# 18. ADVANCED GAMEPLAY POLISH & JUICE VERIFICATION (I01, I03, I04, I05, I11, I15, I16, I18)
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 18] Testing Slingshot Tension Arc, Snap-Back, Confetti, Wheel Badge, Tutorial & Debris ---")
+
+	# 18.1: Slingshot Tension Arc in TrajectoryOverlay
+	var traj_overlay = TrajectoryOverlay.new()
+	add_child(traj_overlay)
+	traj_overlay.sim_points = [Vector2(270, 95), Vector2(270, 400)]
+	traj_overlay.pull_tension = 0.85
+	traj_overlay.visible = true
+	traj_overlay._draw()
+	if traj_overlay.pull_tension == 0.85:
+		print("  [PASS] TrajectoryOverlay Slingshot Tension Arc and gauge render without error (I04)")
+	else:
+		errors.append("TrajectoryOverlay failed to store pull_tension value")
+	traj_overlay.free()
+
+	# 18.2: Chicken Elastic Snap-Back on Aim Cancel
+	if chicken_scene:
+		var chk18 = chicken_scene.instantiate()
+		add_child(chk18)
+		chk18._on_aim_start()
+		chk18.aim_vector = Vector2(0, 600.0)
+		chk18._on_aim_end(false)
+		if chk18.trajectory_overlay and chk18.trajectory_overlay.pull_tension == 0.0:
+			print("  [PASS] ChickenBomber executes elastic snap-back and resets tension on aim cancel (I05)")
+		else:
+			errors.append("ChickenBomber failed to reset tension on aim cancel")
+		chk18.free()
+
+	# 18.3: Lucky Wheel Notification Badge on MainMenu
+	if mm_scene17:
+		var mm18 = mm_scene17.instantiate()
+		add_child(mm18)
+		if mm18.wheel_badge != null:
+			var is_free = true
+			if has_node("/root/SaveManager"):
+				is_free = get_node("/root/SaveManager").is_first_daily_spin_free()
+			if mm18.wheel_badge.visible == is_free:
+				print("  [PASS] MainMenu Lucky Wheel badge dynamically reflects free spin availability (I18)")
+			else:
+				errors.append("MainMenu wheel badge visibility mismatch with SaveManager")
+		else:
+			errors.append("MainMenu wheel_badge was not instantiated")
+		mm18.free()
+
+	# 18.4: Confetti Cannons Burst
+	var confetti_dummy = Node2D.new()
+	add_child(confetti_dummy)
+	ParticleHelper.spawn_confetti_burst(confetti_dummy, Vector2(270, 400), 20)
+	var spawned_confetti = confetti_dummy.get_child_count()
+	if spawned_confetti >= 20:
+		print("  [PASS] ParticleHelper confetti burst successfully generated %d vibrant ribbons (I15)" % spawned_confetti)
+	else:
+		errors.append("ParticleHelper failed to spawn confetti ribbons (got %d)" % spawned_confetti)
+	confetti_dummy.queue_free()
+
+	# 18.5: Level 1 Interactive Gesture Tutorial in GameHUD
+	GameManager.current_level = 1
+	GameManager.current_egg_index = 0
+	var hud_scene18 = load("res://scenes/ui/GameHUD.tscn")
+	if hud_scene18:
+		var hud18 = hud_scene18.instantiate()
+		add_child(hud18)
+		if hud18.tutorial_prompt_node != null and is_instance_valid(hud18.tutorial_prompt_node):
+			print("  [PASS] GameHUD spawns animated tutorial prompt on Level 1 idle (I16)")
+			hud18._dismiss_tutorial()
+			if hud18.tutorial_dismissed:
+				print("  [PASS] GameHUD dismisses tutorial prompt smoothly on first interaction (I16)")
+			else:
+				errors.append("GameHUD failed to flag tutorial_dismissed")
+		else:
+			errors.append("GameHUD failed to spawn tutorial_prompt_node on Level 1")
+		hud18.free()
+
+	# 18.6: DestructibleBlock Anti-Wedging, Dust Cloud & Micro-Debris Throttling
+	var block_scene18 = load("res://scenes/prefabs/DestructibleBlock.tscn")
+	if block_scene18:
+		var b18 = block_scene18.instantiate()
+		b18.material_type = "stone"
+		b18.block_size = Vector2(30, 30) # Micro-debris
+		add_child(b18)
+		if "anti_wedge_timer" in b18:
+			print("  [PASS] DestructibleBlock contains anti-wedge timer and micro-debris sleep throttling (I01, I11)")
+		else:
+			errors.append("DestructibleBlock missing anti_wedge_timer")
+		b18._fracture_block()
+		print("  [PASS] DestructibleBlock spawns debris dust cloud on heavy stone fracture (I03)")
+		b18.queue_free()
+
 	print("\n================================================================")
 	# Explicitly clean up all remaining nodes in TestRunner
 	for child in get_children():

@@ -569,4 +569,46 @@ static func spawn_comic_popup(parent: Node, pos: Vector2, text: String, color: C
 	tw.parallel().tween_property(label, "modulate:a", 0.0, 0.25).set_delay(0.32)
 	tw.chain().tween_callback(label.queue_free)
 
+## Bắn pháo hoa giấy rực rỡ ăn mừng chiến thắng 3 sao (Confetti Cannon Burst)
+static func spawn_confetti_burst(parent: Node, pos: Vector2, count: int = 35) -> void:
+	if not parent or not is_instance_valid(parent): return
+	_init_textures()
+
+	var colors = [
+		Color(1.0, 0.85, 0.20), # Vàng kim
+		Color(1.0, 0.28, 0.40), # Hồng ngọc
+		Color(0.20, 0.85, 1.00), # Xanh ngọc cyan
+		Color(0.35, 0.90, 0.45), # Xanh lá tươi
+		Color(0.85, 0.40, 1.00), # Tím hoa cà
+		Color(1.0, 0.55, 0.20)  # Cam san hô
+	]
+
+	for i in range(count):
+		var ribbon = Sprite2D.new()
+		ribbon.texture = tex_confetti if tex_confetti else tex_shard
+		ribbon.global_position = pos + Vector2(randf_range(-12, 12), randf_range(-8, 8))
+		ribbon.scale = Vector2(randf_range(0.35, 0.65), randf_range(0.35, 0.65))
+		ribbon.modulate = colors[randi() % colors.size()]
+		ribbon.z_index = 80
+		parent.add_child(ribbon)
+
+		# Quỹ đạo bung nở pháo hoa hình quạt hướng lên
+		var angle = randf_range(-PI * 0.85, -PI * 0.15)
+		var speed = randf_range(160.0, 340.0)
+		var vel = Vector2(cos(angle), sin(angle)) * speed
+		var end_pos = ribbon.global_position + vel * 0.45 + Vector2(randf_range(-30, 30), randf_range(80, 160))
+
+		var tw = ribbon.create_tween()
+		tw.set_parallel(true)
+		tw.tween_property(ribbon, "global_position:x", end_pos.x, randf_range(0.8, 1.2)).set_trans(Tween.TRANS_SINE)
+		# Lượn parabol lên đỉnh rồi rơi chậm
+		var apex_y = ribbon.global_position.y + vel.y * 0.25
+		tw.chain().tween_property(ribbon, "global_position:y", apex_y, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.chain().tween_property(ribbon, "global_position:y", end_pos.y, 0.75).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		# Xoay ruy băng liên tục
+		tw.parallel().tween_property(ribbon, "rotation", randf_range(-8.0, 8.0), 1.1)
+		# Mờ dần
+		tw.parallel().tween_property(ribbon, "modulate:a", 0.0, 0.35).set_delay(0.75)
+		tw.chain().tween_callback(ribbon.queue_free)
+
 
