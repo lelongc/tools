@@ -1,0 +1,431 @@
+Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org
+
+================================================================
+>>> STARTING COMPREHENSIVE ASSET & LEVEL VARIETY TEST SUITE <<<
+================================================================
+
+--- [TEST 1] Testing ParticleHelper and 10 New Egg VFX Textures ---
+  [PASS] Texture loaded: tex_egg_splat (128x128)
+  [PASS] Texture loaded: tex_fireball (128x128)
+  [PASS] Texture loaded: tex_drill_spark (64x64)
+  [PASS] Texture loaded: tex_metal_chip (64x64)
+  [PASS] Texture loaded: tex_kinetic_wave (128x128)
+  [PASS] Texture loaded: tex_freezing_fog (128x128)
+  [PASS] Texture loaded: tex_toxic_fume (128x128)
+  [PASS] Texture loaded: tex_gravity_ring (128x128)
+  [PASS] Texture loaded: tex_cosmic_star (64x64)
+  [PASS] Texture loaded: tex_eggshell_chip (64x64)
+
+--- [TEST 2] Testing DestructibleBlock with 5 New Materials ---
+  [PASS] Material 'wood': Health=130.0 Mass=3.07200002670288 Sprite=res://assets/sprites/obstacles/wood_block_plank.svg
+  [PASS] Material 'stone': Health=340.0 Mass=9.21599960327148 Sprite=res://assets/sprites/obstacles/stone_block_brick.svg
+  [PASS] Material 'steel': Health=650.0 Mass=13.4399995803833 Sprite=res://assets/sprites/obstacles/steel_block_beam.svg
+  [PASS] Material 'obsidian': Health=950.0 Mass=19.2000007629395 Sprite=res://assets/sprites/obstacles/obsidian_block_runic.svg
+  [PASS] Material 'crystal': Health=220.0 Mass=4.22399997711182 Sprite=res://assets/sprites/obstacles/crystal_block_prism.svg
+  [PASS] Material 'cyber_alloy': Health=750.0 Mass=14.3999996185303 Sprite=res://assets/sprites/obstacles/cyber_alloy_block.svg
+  [PASS] Material 'swamp_wood': Health=190.0 Mass=4.22399997711182 Sprite=res://assets/sprites/obstacles/swamp_wood_block.svg
+  [PASS] Material 'permafrost': Health=160.0 Mass=3.45600008964539 Sprite=res://assets/sprites/obstacles/permafrost_block.svg
+  [PASS] Material 'magma_brick': Health=580.0 Mass=12.4799995422363 Sprite=res://assets/sprites/obstacles/magma_brick_block.svg
+  [PASS] Material 'celestial_stone': Health=880.0 Mass=17.2800006866455 Sprite=res://assets/sprites/obstacles/celestial_stone_block.svg
+
+--- [TEST 3] Testing All 28 Monster Archetypes and World Bosses ---
+  [PASS] Monster 'sly_fox': HP=70.0 Mass=1.79999995231628 Score=800 IsBoss=false
+  [PASS] Monster 'fox_guard': HP=140.0 Mass=2.40000009536743 Score=1400 IsBoss=false
+  [PASS] Monster 'armored_raccoon': HP=220.0 Mass=3.5 Score=2000 IsBoss=false
+  [PASS] Monster 'mine_wolf': HP=360.0 Mass=5.0 Score=2800 IsBoss=false
+  [PASS] Monster 'spike_hound': HP=320.0 Mass=4.5 Score=2500 IsBoss=false
+  [PASS] Monster 'toxic_fox': HP=260.0 Mass=3.20000004768372 Score=2200 IsBoss=false
+  [PASS] Monster 'imperial_boar': HP=600.0 Mass=8.0 Score=4500 IsBoss=false
+  [PASS] Monster 'boss_baron_pig': HP=1800.0 Mass=16.0 Score=10000 IsBoss=true
+  [PASS] Monster 'crystal_badger': HP=450.0 Mass=6.0 Score=3500 IsBoss=false
+  [PASS] Monster 'cyber_hound': HP=380.0 Mass=4.80000019073486 Score=2800 IsBoss=false
+  [PASS] Monster 'cyborg_fox': HP=420.0 Mass=5.0 Score=3200 IsBoss=false
+  [PASS] Monster 'swamp_mutant': HP=350.0 Mass=4.19999980926514 Score=2600 IsBoss=false
+  [PASS] Monster 'spore_badger': HP=460.0 Mass=5.5 Score=3400 IsBoss=false
+  [PASS] Monster 'frost_yeti': HP=390.0 Mass=5.19999980926514 Score=3000 IsBoss=false
+  [PASS] Monster 'blizzard_wolf': HP=480.0 Mass=5.80000019073486 Score=3600 IsBoss=false
+  [PASS] Monster 'magma_drake': HP=440.0 Mass=5.0 Score=3300 IsBoss=false
+  [PASS] Monster 'lava_golem': HP=550.0 Mass=7.5 Score=4000 IsBoss=false
+  [PASS] Monster 'void_wraith': HP=480.0 Mass=4.5 Score=3800 IsBoss=false
+  [PASS] Monster 'celestial_sentinel': HP=620.0 Mass=8.0 Score=4800 IsBoss=false
+  [PASS] Monster 'boss_iron_crusher': HP=1800.0 Mass=16.0 Score=10000 IsBoss=true
+  [PASS] Monster 'boss_toxic_alchemist': HP=1800.0 Mass=16.0 Score=10000 IsBoss=true
+  [PASS] Monster 'boss_magma_emperor': HP=1800.0 Mass=16.0 Score=10000 IsBoss=true
+  [PASS] Monster 'boss_crystal_overlord': HP=1800.0 Mass=16.0 Score=10000 IsBoss=true
+  [PASS] Monster 'boss_cyber_mech': HP=1800.0 Mass=16.0 Score=10000 IsBoss=true
+  [PASS] Monster 'boss_swamp_hydra': HP=1800.0 Mass=16.0 Score=10000 IsBoss=true
+  [PASS] Monster 'boss_frost_colossus': HP=1800.0 Mass=16.0 Score=10000 IsBoss=true
+  [PASS] Monster 'boss_dragon_warlord': HP=1800.0 Mass=16.0 Score=10000 IsBoss=true
+  [PASS] Monster 'boss_singularity_prime': HP=1800.0 Mass=16.0 Score=10000 IsBoss=true
+
+--- [TEST 4] Testing Campaign Level Generation Across All 10 Worlds ---
+  [PASS] Level 1 is 100% rock-solid and stable in peacetime (0 premature wakes)
+  [PASS] Level 1 is 100% rock-solid on egg drop! 0 bottom pillars or blocks shifted.
+  [PASS] World 1 Boss (Level 20) successfully spawned: boss_baron_pig (Total level enemies: 9)
+  [PASS] Level 20 is 100% rock-solid and stable in peacetime (0 premature wakes)
+  [PASS] Level 20 is 100% rock-solid on egg drop! 0 bottom pillars or blocks shifted.
+  [PASS] World 2 Boss (Level 40) successfully spawned: boss_iron_crusher (Total level enemies: 9)
+  [PASS] Level 40 is 100% rock-solid and stable in peacetime (0 premature wakes)
+  [PASS] Level 40 is 100% rock-solid on egg drop! 0 bottom pillars or blocks shifted.
+  [PASS] World 3 Boss (Level 60) successfully spawned: boss_toxic_alchemist (Total level enemies: 9)
+  [PASS] Level 60 is 100% rock-solid and stable in peacetime (0 premature wakes)
+  [PASS] Level 60 is 100% rock-solid on egg drop! 0 bottom pillars or blocks shifted.
+  [PASS] World 5 Boss (Level 100) successfully spawned: boss_crystal_overlord (Total level enemies: 9)
+  [PASS] Level 100 is 100% rock-solid and stable in peacetime (0 premature wakes)
+  [PASS] Level 100 is 100% rock-solid on egg drop! 0 bottom pillars or blocks shifted.
+  [PASS] World 6 Boss (Level 120) successfully spawned: boss_cyber_mech (Total level enemies: 8)
+  [PASS] World 6 (Level 120) uses new material: cyber_alloy with 8 enemies
+  [PASS] Level 120 is 100% rock-solid and stable in peacetime (0 premature wakes)
+  [PASS] Level 120 is 100% rock-solid on egg drop! 0 bottom pillars or blocks shifted.
+  [PASS] World 8 Boss (Level 160) successfully spawned: boss_frost_colossus (Total level enemies: 8)
+  [PASS] World 8 (Level 160) uses new material: permafrost with 8 enemies
+  [PASS] Level 160 is 100% rock-solid and stable in peacetime (0 premature wakes)
+  [PASS] Level 160 is 100% rock-solid on egg drop! 0 bottom pillars or blocks shifted.
+  [PASS] World 10 Boss (Level 200) successfully spawned: boss_singularity_prime (Total level enemies: 10)
+  [PASS] World 10 (Level 200) uses new material: celestial_stone with 10 enemies
+  [PASS] Level 200 is 100% rock-solid and stable in peacetime (0 premature wakes)
+  [PASS] Level 200 is 100% rock-solid on egg drop! 0 bottom pillars or blocks shifted.
+
+--- [TEST 5] Testing Damage Pipeline, Scoring, and Level Completion ---
+  [PASS] Block successfully took damage and entered is_destroyed state
+  [PASS] Monster successfully took damage and entered is_defeated state
+  [PASS] Score increased properly: from 0 to 3275
+  [PASS] Enemies remaining reached 0, triggering victory condition
+
+--- [TEST 6] Testing Unsupported Block & Boulder Gravity Wake-Up ---
+  [PASS] Unsupported block in air correctly triggered wake_up() (is_awake=true, freeze=false)
+  [PASS] Unsupported boulder correctly triggered wake_up() (is_awake=true, freeze=false)
+
+--- [TEST 7] Testing Mock Ad Claim Unlock, Pause Resilience, and BlackHole Supernova ---
+  [PASS] AdsManager mock buttons properly cached and accessible
+  [PASS] GameManager settle_timer immune to countdown while game is paused
+  [PASS] BlackHoleEgg safely triggers single supernova without repetitive explosions
+
+--- [TEST 8] Testing SaveManager Schema Validation and Dynamic Floor-Y Support ---
+  [PASS] SaveManager successfully sanitized malformed schema and preserved valid progress
+  [PASS] Dynamic floor_y correctly treats y=800 as mid-air when floor is at 920
+
+--- [TEST 9] Testing Recent P0/P1 Critical Bug Fixes ---
+  [PASS] BunkerMonster correctly auto-defeated when blasted past boundary (P0-01)
+  [PASS] DestructibleBlock correctly fractures when falling below cavern floor (P1-01)
+  [PASS] Frozen block properly preserved at 15 HP brittle glass for follow-up egg (P1-04)
+  [PASS] CameraShake2D reset_hit_stop correctly guarantees time_scale = 1.0 (P0-02)
+
+--- [TEST 10] Testing Shop Economy, Cloud Sync & Input Guard ---
+  [PASS] BaseEgg correctly rejected airborne tap in TopBar deadzone (P2-04)
+  [PASS] BaseEgg correctly accepted airborne tap in valid gameplay area (P2-04)
+  [PASS] Shop economy correctly spent coins and credited consumable inventory (P1-12)
+  [PASS] Cloud save successfully imported and merged with high-watermark strategy (P3-01)
+
+--- [TEST 11] Testing End-to-End Scene Smoke & Level Smoothing ---
+  [PASS] MainMenu BtnShop successfully opened ShopModal (P1-12)
+  [PASS] MainMenu BtnWheel successfully opened DailyWheelModal
+  [PASS] LevelSelect instantiated cleanly without errors
+  [PASS] Level 61 received smoothed 7-egg loadout: ["blackhole", "acid", "drill", "bomb", "drill", "blackhole", "bomb"] (P2-13)
+
+--- [TEST 12] Testing World Backgrounds, Chicken Basket/Recoil & Anti-Jitter ---
+  [PASS] All 30 World Background SVGs loaded successfully (10 Sky, 10 Cavern, 10 Cliff)
+  [PASS] ChickenBomber contains LoadedEgg Sprite2D
+  [PASS] ChickenBomber contains DropPoofFX CPUParticles2D
+  [PASS] ChickenBomber EGG_TEXTURE_PATHS maps all 7 egg types successfully
+  [PASS] ChickenBomber expressive layers attached (eyes, goggles, tail)
+  [PASS] ChickenBomber expressive SVG textures loaded successfully
+  [PASS] ChickenBomber eyes switched to aim focus texture
+  [PASS] ChickenBomber recoil triggered properly on drop (recoil_active=true, pos_y=135.0)
+  [PASS] ChickenBomber Flap-Glide flight cycle executed smoothly without error
+  [PASS] DestructibleBlock bounce == 0.0 (anti-jitter bounce verified)
+  [PASS] DestructibleBlock high friction == 0.85
+  [PASS] DestructibleBlock micro-velocity snubbing confirmed active
+  [PASS] World 5 modular cavern panels tiled cleanly (2 panels, 0 stretching)
+  [PASS] CampaignLevel default camera pos/zoom cached: pos=(570.0, 554.0) zoom=(0.473684, 0.473684)
+
+--- [TEST 13] Testing SettingsModal, Hybrid 3-Star Scoring, Comic Popups & World Ribbon ---
+  [PASS] SettingsModal 2-step safe reset confirmation verified
+  [PASS] SettingsModal instantiated and initialized cleanly
+  [PASS] LevelSelect World Ribbon initialized with all 10 worlds (W1 to W10)
+  [PASS] Level 20 contains BOSS Badge properly
+  [PASS] ParticleHelper.spawn_comic_popup spawned animated 'KABOOM!' label successfully
+  [PASS] Hybrid 3-Star scoring awarded 3 stars via 90% block destruction (0 eggs left)!
+  [PASS] GameManager dramatic slow-mo smoothly applied and auto-restored to 1.0
+
+--- [TEST 14] Testing Latent Bug Fixes, CCD, Safe Area & Security ---
+  [PASS] RollingBoulder continuous_cd == CCD_MODE_CAST_SHAPE (Anti-tunneling verified)
+  [PASS] ClusterChick continuous_cd == CCD_MODE_CAST_RAY (Anti-tunneling verified)
+  [PASS] MainMenu contains _apply_safe_area method for notch display
+  [PASS] LevelSelect contains _apply_safe_area method for notch display
+  [PASS] SoundManager voice concurrency limiter active (Anti-clipping verified)
+  [PASS] SaveManager monotonic clock anti-time-travel verified
+
+--- [TEST 15] Testing 3D Flight Banking, Tap-to-Drop & Anti-Float Cantilever Guard ---
+  [PASS] Chicken tail scale.x strictly positive == 0.85 (No 2D paper flip)
+  [PASS] Asymmetric 3D wing banking scales verified (depth active)
+  [PASS] ChickenBomber has_aim_dragged tracking active (Tap-to-Drop verified)
+  [PASS] Defeated monster properly marked as invalid support
+  [PASS] Ignited TNT barrel properly marked as invalid support
+  [PASS] GameHUD _exit_tree lifecycle teardown confirmed
+
+--- [TEST 16] Testing Full 200-Level Campaign Integrity & Boss Roster ---
+  [PASS] All 200 levels verified: enemies, blocks, egg loadouts valid
+  [PASS] All 10 world bosses successfully verified across all milestone levels
+
+--- [TEST 17] Extreme QA Stress, Back-Button Debounce & Zero-Leak Audit ---
+  [PASS] GameHUD back button rapid debounce prevents pause menu auto-close
+  [PASS] JuicyButton _gui_input debouncer successfully consumes rapid spam clicks
+  [PASS] SoundManager pool handles 25 rapid concurrent calls smoothly
+  [PASS] All 7 Egg projectile archetypes enforce continuous collision detection (CCD)
+  [PASS] MainMenu modal hierarchy gracefully intercepts back button before app exit
+
+--- [TEST 18] Testing Slingshot Tension Arc, Snap-Back, Confetti, Wheel Badge, Tutorial & Debris ---
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_arc (scene/main/canvas_item.cpp:897)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:30)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_arc (scene/main/canvas_item.cpp:897)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:39)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:44)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:45)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_polyline (scene/main/canvas_item.cpp:864)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:49)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:72)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:75)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:77)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:72)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:75)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:77)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:72)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:75)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:77)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:72)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:75)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:77)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:72)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:75)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:77)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:72)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:75)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:77)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:72)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:75)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:77)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:72)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:75)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:77)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:72)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:75)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:77)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:72)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:75)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:77)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:72)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:75)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:77)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:72)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:75)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:77)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:72)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:75)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:77)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:72)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:75)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+ERROR: Drawing is only allowed inside this node's `_draw()`, functions connected to its `draw` signal, or when it receives NOTIFICATION_DRAW.
+   at: draw_circle (scene/main/canvas_item.cpp:984)
+   GDScript backtrace (most recent call first):
+       [0] _draw (res://scripts/player/TrajectoryOverlay.gd:77)
+       [1] _ready (res://scenes/tests/TestRunner.gd:1081)
+  [PASS] TrajectoryOverlay Slingshot Tension Arc and gauge render without error (I04)
+  [PASS] ChickenBomber executes elastic snap-back and resets tension on aim cancel (I05)
+  [PASS] MainMenu Lucky Wheel badge dynamically reflects free spin availability (I18)
+  [PASS] ParticleHelper confetti burst successfully generated 20 vibrant ribbons (I15)
+ERROR: Cannot open file 'res://scenes/ui/GameHUD.tscn'.
+   at: load (scene/resources/resource_format_text.cpp:1442)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scenes/tests/TestRunner.gd:1131)
+ERROR: Failed loading resource: res://scenes/ui/GameHUD.tscn.
+   at: _load (core/io/resource_loader.cpp:317)
+   GDScript backtrace (most recent call first):
+       [0] _ready (res://scenes/tests/TestRunner.gd:1131)
+  [PASS] DestructibleBlock contains anti-wedge timer and micro-debris sleep throttling (I01, I11)
+  [PASS] DestructibleBlock spawns debris dust cloud on heavy stone fracture (I03)
+
+================================================================
+>>> ALL TESTS PASSED SUCCESSFULLY! (0 ERRORS) <<<
+================================================================

@@ -220,6 +220,18 @@ var translations: Dictionary = {
 		"zh_CN": "未解锁", "es": "BLOQUEADO", "pt_BR": "BLOQUEADO", "de": "GESPERRT",
 		"fr": "VERROUILLÉ", "ru": "ЗАКРЫТО"
 	},
+	"KEY_TUTORIAL_AIM": {
+		"en": "👇 DRAG DOWN TO AIM & RELEASE TO DROP! 👇",
+		"vi": "👇 KÉO XUỐNG ĐỂ NGẮM & THẢ RA ĐỂ BẮN! 👇",
+		"ja": "👇 下に引いて狙い、離して投下！ 👇",
+		"ko": "👇 아래로 당겨 조준하고 놓아서 투하! 👇",
+		"zh_CN": "👇 向下拉动瞄准，松开投掷！ 👇",
+		"es": "👇 ¡ARRASTRA HACIA ABAJO PARA APUNTAR Y SUELTA! 👇",
+		"pt_BR": "👇 ARRASTE PARA BAIXO PARA MIRAR E SOLTE! 👇",
+		"de": "👇 ZUM ZIELEN NACH UNTEN ZIEHEN & LOSLASSEN! 👇",
+		"fr": "👇 GLISSEZ VERS LE BAS POUR VISER ET LÂCHEZ ! 👇",
+		"ru": "👇 ТЯНИТЕ ВНИЗ ДЛЯ ПРИЦЕЛА И ОТПУСТИТЕ! 👇"
+	},
 	"KEY_GOLD_REWARD": {
 		"en": "+%d GOLD", "vi": "+%d VÀNG", "ja": "+%d コイン", "ko": "+%d 골드",
 		"zh_CN": "+%d 金币", "es": "+%d ORO", "pt_BR": "+%d OURO", "de": "+%d GOLD",

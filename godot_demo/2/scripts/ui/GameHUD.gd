@@ -153,9 +153,7 @@ func _setup_level_1_tutorial() -> void:
 	panel.add_theme_stylebox_override("panel", sb)
 
 	var lm = get_node_or_null("/root/LocalizationManager")
-	var prompt_txt = "👇 KÉO XUỐNG ĐỂ NGẮM & THẢ RA ĐỂ BẮN! 👇"
-	if lm and lm.current_language == "en":
-		prompt_txt = "👇 DRAG DOWN TO AIM & RELEASE TO DROP! 👇"
+	var prompt_txt = lm.t("KEY_TUTORIAL_AIM") if lm else "👇 KÉO XUỐNG ĐỂ NGẮM & THẢ RA ĐỂ BẮN! 👇"
 
 	var lbl = Label.new()
 	lbl.name = "TutorialLabel"

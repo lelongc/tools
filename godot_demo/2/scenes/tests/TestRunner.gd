@@ -1071,12 +1071,14 @@ func _ready() -> void:
 	print("\n--- [TEST 18] Testing Slingshot Tension Arc, Snap-Back, Confetti, Wheel Badge, Tutorial & Debris ---")
 
 	# 18.1: Slingshot Tension Arc in TrajectoryOverlay
-	var traj_overlay = TrajectoryOverlay.new()
+	var traj_class = load("res://scripts/player/TrajectoryOverlay.gd")
+	var traj_overlay = traj_class.new()
 	add_child(traj_overlay)
-	traj_overlay.sim_points = [Vector2(270, 95), Vector2(270, 400)]
+	var pts: Array[Vector2] = [Vector2(270, 95), Vector2(270, 400)]
+	traj_overlay.sim_points = pts
 	traj_overlay.pull_tension = 0.85
 	traj_overlay.visible = true
-	traj_overlay._draw()
+	traj_overlay.queue_redraw()
 	if traj_overlay.pull_tension == 0.85:
 		print("  [PASS] TrajectoryOverlay Slingshot Tension Arc and gauge render without error (I04)")
 	else:
@@ -1126,7 +1128,7 @@ func _ready() -> void:
 	# 18.5: Level 1 Interactive Gesture Tutorial in GameHUD
 	GameManager.current_level = 1
 	GameManager.current_egg_index = 0
-	var hud_scene18 = load("res://scenes/ui/GameHUD.tscn")
+	var hud_scene18 = load("res://scenes/prefabs/GameHUD.tscn")
 	if hud_scene18:
 		var hud18 = hud_scene18.instantiate()
 		add_child(hud18)
