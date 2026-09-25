@@ -471,29 +471,25 @@ func _on_egg_dropped(_egg_type: String) -> void:
 func _on_vip_trial_pressed() -> void:
 	if not has_node("/root/AdsManager"): return
 	var am = get_node("/root/AdsManager")
-	am.show_rewarded_ad(
-		AdsManager.PLACEMENT_VIP_TRIAL,
-		"egg",
-		1,
-		func():
-			GameManager.vip_trial_used_in_level = true
-			if btn_vip_trial: btn_vip_trial.visible = false
-			_refresh_egg_icons()
-			if has_node("/root/SoundManager"):
-				get_node("/root/SoundManager").play_coin_pickup()
-		func():
-			# Graceful fallback: Cho phép dùng thử ngay nếu không có kết nối quảng cáo
-			GameManager.vip_trial_used_in_level = true
-			if btn_vip_trial: btn_vip_trial.visible = false
-			var vip_type = "blackhole" if GameManager.current_level > 20 else "cluster"
-			GameManager.available_eggs.insert(GameManager.current_egg_index, vip_type)
-			var chicken = get_tree().get_first_node_in_group("Player")
-			if chicken and chicken.has_method("_prepare_next_egg"):
-				chicken._prepare_next_egg()
-			_refresh_egg_icons()
-			if has_node("/root/SoundManager"):
-				get_node("/root/SoundManager").play_coin_pickup()
-	)
+	var on_success = func():
+		GameManager.vip_trial_used_in_level = true
+		if btn_vip_trial: btn_vip_trial.visible = false
+		_refresh_egg_icons()
+		if has_node("/root/SoundManager"):
+			get_node("/root/SoundManager").play_coin_pickup()
+	var on_failed = func():
+		# Graceful fallback: Cho phép dùng thử ngay nếu không có kết nối quảng cáo
+		GameManager.vip_trial_used_in_level = true
+		if btn_vip_trial: btn_vip_trial.visible = false
+		var vip_type = "blackhole" if GameManager.current_level > 20 else "cluster"
+		GameManager.available_eggs.insert(GameManager.current_egg_index, vip_type)
+		var chicken = get_tree().get_first_node_in_group("Player")
+		if chicken and chicken.has_method("_prepare_next_egg"):
+			chicken._prepare_next_egg()
+		_refresh_egg_icons()
+		if has_node("/root/SoundManager"):
+			get_node("/root/SoundManager").play_coin_pickup()
+	am.show_rewarded_ad(AdsManager.PLACEMENT_VIP_TRIAL, "egg", 1, on_success, on_failed)
 
 # ==========================================
 # ĐIỂM CHẠM 1: CỨU THUA SUÝT THẮNG (LAST STAND)
