@@ -56,7 +56,13 @@ var tutorial_prompt_node: Control = null
 var tutorial_dismissed: bool = false
 
 func _ready() -> void:
-	if modal_dimmer: modal_dimmer.visible = false
+	if modal_dimmer:
+		modal_dimmer.visible = false
+		modal_dimmer.gui_input.connect(func(event: InputEvent):
+			if (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed()) or (event is InputEventScreenTouch and event.is_pressed()):
+				if pause_modal and pause_modal.visible:
+					_toggle_pause()
+		)
 	if victory_modal: victory_modal.visible = false
 	if fail_modal: fail_modal.visible = false
 	if pause_modal: pause_modal.visible = false
@@ -473,6 +479,20 @@ func _on_vip_trial_pressed() -> void:
 			GameManager.vip_trial_used_in_level = true
 			if btn_vip_trial: btn_vip_trial.visible = false
 			_refresh_egg_icons()
+			if has_node("/root/SoundManager"):
+				get_node("/root/SoundManager").play_coin_pickup()
+		func():
+			# Graceful fallback: Cho phép dùng thử ngay nếu không có kết nối quảng cáo
+			GameManager.vip_trial_used_in_level = true
+			if btn_vip_trial: btn_vip_trial.visible = false
+			var vip_type = "blackhole" if GameManager.current_level > 20 else "cluster"
+			GameManager.available_eggs.insert(GameManager.current_egg_index, vip_type)
+			var chicken = get_tree().get_first_node_in_group("Player")
+			if chicken and chicken.has_method("_prepare_next_egg"):
+				chicken._prepare_next_egg()
+			_refresh_egg_icons()
+			if has_node("/root/SoundManager"):
+				get_node("/root/SoundManager").play_coin_pickup()
 	)
 
 # ==========================================

@@ -1408,8 +1408,8 @@ func _ready() -> void:
 	if has_node("/root/SaveManager"):
 		var sm = get_node("/root/SaveManager")
 		sm.reset_save()
-		var has_vib = sm.save_data.has("settings") and sm.save_data.settings.has("vibration_enabled")
-		if not has_vib or sm.save_data.settings.vibration_enabled != true:
+		var has_vib = sm.save_data.has("vibration_enabled") and sm.save_data.vibration_enabled == true
+		if not has_vib:
 			errors.append("SaveManager.reset_save() missing vibration_enabled: true setting!")
 		else:
 			print("  [PASS] SaveManager.reset_save() preserves vibration_enabled: true")
@@ -1418,7 +1418,7 @@ func _ready() -> void:
 	var monster_scene = load("res://scenes/prefabs/BunkerMonster.tscn")
 	if monster_scene:
 		var boss_mon = monster_scene.instantiate()
-		boss_mon.monster_type = "boss_mech"
+		boss_mon.monster_type = "boss_baron_pig"
 		boss_mon.is_boss = true
 		add_child(boss_mon)
 		if not boss_mon.is_in_group("Bosses"):
@@ -1426,20 +1426,20 @@ func _ready() -> void:
 		else:
 			print("  [PASS] BunkerMonster boss registered in 'Bosses' group")
 
-		var signal_received = false
-		boss_mon.health_changed.connect(func(_cur, _max): signal_received = true)
-		boss_mon.take_damage(50, Vector2.ZERO)
-		if not signal_received:
+		var signal_received = [false]
+		boss_mon.health_changed.connect(func(_cur, _max): signal_received[0] = true)
+		boss_mon.take_damage(50.0, Vector2.ZERO)
+		if not signal_received[0]:
 			errors.append("BunkerMonster did not emit health_changed signal on damage!")
 		else:
 			print("  [PASS] BunkerMonster successfully emitted health_changed signal on damage")
 		boss_mon.free()
 
 	# 21.5: GameHUD Boss Health Bar
-	var hud_scene21 = load("res://scenes/ui/GameHUD.tscn")
+	var hud_scene21 = load("res://scenes/prefabs/GameHUD.tscn")
 	if hud_scene21 and monster_scene:
 		var boss_mon2 = monster_scene.instantiate()
-		boss_mon2.monster_type = "boss_lava"
+		boss_mon2.monster_type = "boss_magma_emperor"
 		boss_mon2.is_boss = true
 		add_child(boss_mon2)
 

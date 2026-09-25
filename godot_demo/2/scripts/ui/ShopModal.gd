@@ -57,6 +57,13 @@ func _ready() -> void:
 	if btn_close:
 		btn_close.pressed.connect(_on_close_pressed)
 
+	var backdrop = get_node_or_null("Backdrop")
+	if backdrop:
+		backdrop.gui_input.connect(func(event: InputEvent):
+			if (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed()) or (event is InputEventScreenTouch and event.is_pressed()):
+				_on_close_pressed()
+		)
+
 	_apply_cartoon_ui_theme()
 	_update_coins_display()
 	_build_shop_items()

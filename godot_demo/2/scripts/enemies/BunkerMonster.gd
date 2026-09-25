@@ -36,6 +36,11 @@ signal monster_defeated()
 
 var current_health: float = 70.0
 var is_defeated: bool = false
+var is_boss: bool = false:
+	set(val):
+		is_boss = val
+		if is_boss and not is_in_group("Bosses"):
+			add_to_group("Bosses")
 var is_awake: bool = false
 var has_armor: bool = false
 var base_scale_val: float = 0.22
@@ -122,7 +127,7 @@ var active_emote_tween: Tween = null
 func _ready() -> void:
 	add_to_group("Enemies")
 	if monster_type.begins_with("boss_"):
-		add_to_group("Bosses")
+		is_boss = true
 	_setup_monster_attributes()
 	_load_character_expression_palette()
 
@@ -876,17 +881,7 @@ func _load_character_expression_palette() -> void:
 	if snout_sprite and char_tex_snout_normal: snout_sprite.texture = char_tex_snout_normal
 
 func _load_tex(path: String) -> Texture2D:
-	if ResourceLoader.exists(path):
-		var res = load(path)
-		if res: return res
-	var global_path = ProjectSettings.globalize_path(path)
-	if FileAccess.file_exists(global_path):
-		var img = Image.load_from_file(global_path)
-		if img:
-			var tex = ImageTexture.create_from_image(img)
-			tex.resource_path = path
-			return tex
-	return null
+	return ParticleHelper._safe_load(path)
 
 func _play_spawn_bounce() -> void:
 	if not visual_root: return
@@ -1227,19 +1222,24 @@ func _evaluate_base_state(delta: float) -> void:
 
 	_update_idle_micro_actions(delta)
 
+static var _pinned_shape: CircleShape2D = null
+static var _pinned_query: PhysicsShapeQueryParameters2D = null
+
 func _check_is_pinned() -> bool:
 	if not is_awake: return false
 	var space_state = get_world_2d().direct_space_state
 	if not space_state: return false
-	var query = PhysicsShapeQueryParameters2D.new()
-	var ray = CircleShape2D.new()
-	ray.radius = 18.0
-	query.shape = ray
-	query.transform = Transform2D(0, global_position + Vector2(0, -16.0))
-	query.collide_with_bodies = true
-	query.exclude = [get_rid()]
+	if _pinned_shape == null:
+		_pinned_shape = CircleShape2D.new()
+		_pinned_shape.radius = 18.0
+	if _pinned_query == null:
+		_pinned_query = PhysicsShapeQueryParameters2D.new()
+		_pinned_query.shape = _pinned_shape
+		_pinned_query.collide_with_bodies = true
+	_pinned_query.transform = Transform2D(0, global_position + Vector2(0, -16.0))
+	_pinned_query.exclude = [get_rid()]
 
-	var results = space_state.intersect_shape(query, 6)
+	var results = space_state.intersect_shape(_pinned_query, 6)
 	for res in results:
 		var col = res.collider
 		if is_instance_valid(col) and col != self and col is RigidBody2D and not col.is_queued_for_deletion():

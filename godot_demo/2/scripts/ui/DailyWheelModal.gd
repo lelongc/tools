@@ -29,6 +29,13 @@ func _ready() -> void:
 	visible = false
 	if btn_close: btn_close.pressed.connect(close_wheel)
 	if btn_spin: btn_spin.pressed.connect(_on_spin_pressed)
+
+	var backdrop = get_node_or_null("Backdrop")
+	if backdrop:
+		backdrop.gui_input.connect(func(event: InputEvent):
+			if not is_spinning and ((event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed()) or (event is InputEventScreenTouch and event.is_pressed())):
+				close_wheel()
+		)
 	_apply_cartoon_ui_theme()
 	_draw_wheel_wedges()
 	_update_spin_button_state()

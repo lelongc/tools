@@ -121,12 +121,14 @@ func _get_available_player() -> AudioStreamPlayer:
 		var p = sfx_players[_sfx_rr_index]
 		if is_instance_valid(p):
 			return p
-	var fallback = AudioStreamPlayer.new()
-	fallback.name = "SFXPlayer_fallback"
-	fallback.bus = "SFX" if AudioServer.get_bus_index("SFX") != -1 else "Master"
-	add_child(fallback)
-	sfx_players.append(fallback)
-	return fallback
+	if sfx_players.size() < POOL_SIZE:
+		var fallback = AudioStreamPlayer.new()
+		fallback.name = "SFXPlayer_%d" % sfx_players.size()
+		fallback.bus = "SFX" if AudioServer.get_bus_index("SFX") != -1 else "Master"
+		add_child(fallback)
+		sfx_players.append(fallback)
+		return fallback
+	return sfx_players[0]
 
 func is_sound_enabled() -> bool:
 	if is_inside_tree() and has_node("/root/SaveManager"):

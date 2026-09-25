@@ -1,8 +1,20 @@
 extends Node
 class_name ComicScorePopup
 
+static var _last_popup_time: float = 0.0
+static var _popup_count: int = 0
+
 static func spawn_score_popup(parent: Node, pos: Vector2, pts: int) -> void:
 	if not parent or pts <= 0: return
+
+	var now = Time.get_ticks_msec() / 1000.0
+	if now - _last_popup_time < 0.08:
+		_popup_count += 1
+		if _popup_count > 3 and pts < 300:
+			return
+	else:
+		_last_popup_time = now
+		_popup_count = 1
 
 	var label = Label.new()
 	label.text = "+" + str(pts)

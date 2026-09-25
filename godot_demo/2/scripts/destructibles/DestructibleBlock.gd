@@ -74,6 +74,8 @@ static var tex_shard_wood: Texture2D = null
 static var tex_shard_stone: Texture2D = null
 static var tex_shard_glass: Texture2D = null
 static var tex_smoke_puff: Texture2D = null
+static var _last_shatter_time: float = 0.0
+static var _shatter_burst_count: int = 0
 
 func _ready() -> void:
 	add_to_group("Destructibles")
@@ -355,7 +357,7 @@ func _physics_process(delta: float) -> void:
 		if sleeping:
 			support_check_timer -= delta
 			if support_check_timer <= 0.0:
-				support_check_timer = 0.12
+				support_check_timer = 0.35
 				if not _has_rigid_support():
 					sleeping = false
 					apply_central_impulse(Vector2(0, 25.0))
@@ -385,18 +387,19 @@ func _has_rigid_support() -> bool:
 	if not space_state: return true
 
 	var hw = block_size.x * 0.5
-	# 2. Phân bổ đều các điểm quét xuyên suốt chiều rộng đáy khối để bắt trọn mọi cột trụ đỡ
+	# 2. Phân bổ điểm quét đáy khối: Tối đa 3 điểm (trái, giữa, phải) tránh raycast bão hòa
 	var test_points: Array[Vector2] = []
 	var test_local_x: Array[float] = []
-	var step = 16.0
-	var x_cur = -hw + 6.0
-	while x_cur <= hw - 6.0:
-		test_points.append(to_global(Vector2(x_cur, hh - 4.0)))
-		test_local_x.append(x_cur)
-		x_cur += step
-	if test_points.is_empty():
+	if block_size.x <= 48.0:
 		test_points.append(to_global(Vector2(0.0, hh - 4.0)))
 		test_local_x.append(0.0)
+	else:
+		test_points.append(to_global(Vector2(-hw + 8.0, hh - 4.0)))
+		test_local_x.append(-hw + 8.0)
+		test_points.append(to_global(Vector2(0.0, hh - 4.0)))
+		test_local_x.append(0.0)
+		test_points.append(to_global(Vector2(hw - 8.0, hh - 4.0)))
+		test_local_x.append(hw - 8.0)
 
 	var ray_length = 26.0
 	var has_left = false
@@ -404,14 +407,17 @@ func _has_rigid_support() -> bool:
 	var has_center = false
 	var any_hit = false
 
+	var ray_query = PhysicsRayQueryParameters2D.new()
+	ray_query.exclude = [get_rid()]
+	ray_query.collide_with_bodies = true
+	ray_query.collide_with_areas = false
+	ray_query.hit_from_inside = true
+
 	for idx in range(test_points.size()):
 		var pt = test_points[idx]
 		var lx = test_local_x[idx]
-		var ray_query = PhysicsRayQueryParameters2D.create(pt, pt + Vector2(0, ray_length))
-		ray_query.exclude = [get_rid()]
-		ray_query.collide_with_bodies = true
-		ray_query.collide_with_areas = false
-		ray_query.hit_from_inside = true
+		ray_query.from = pt
+		ray_query.to = pt + Vector2(0, ray_length)
 
 		var hit = space_state.intersect_ray(ray_query)
 		if hit and hit.collider:
@@ -579,14 +585,23 @@ func _fracture_block() -> void:
 			"crystal": snd.play_crystal_shatter()
 			"steel", "cyber_alloy": snd.play_steel_clang()
 
+	var now = Time.get_ticks_msec() / 1000.0
+	if now - _last_shatter_time < 0.15:
+		_shatter_burst_count += 1
+	else:
+		_last_shatter_time = now
+		_shatter_burst_count = 1
+
+	var is_dense = _shatter_burst_count > 2
+
 	# 1. Bắn khói Comic Puff bồng bềnh
 	_spawn_comic_smoke_poof()
 
 	# 2. Bắn mây bụi đất đá bốc lên cho khối nặng (I03: Debris Dust Cloud)
-	_spawn_debris_dust_cloud()
+	_spawn_debris_dust_cloud(is_dense)
 
 	# 3. Bắn các mảnh vỡ vật lý (Flying Shards)
-	_spawn_flying_shards()
+	_spawn_flying_shards(is_dense)
 
 	if fracture_particles:
 		fracture_particles.restart()
@@ -627,7 +642,7 @@ func _spawn_comic_smoke_poof() -> void:
 	tween.parallel().tween_property(puff, "rotation", randf_range(-0.8, 0.8), 0.32)
 	tween.tween_callback(puff.queue_free)
 
-func _spawn_debris_dust_cloud() -> void:
+func _spawn_debris_dust_cloud(is_dense: bool = false) -> void:
 	if not tex_smoke_puff: return
 	var p = get_parent()
 	if not p: return
@@ -641,7 +656,8 @@ func _spawn_debris_dust_cloud() -> void:
 	elif material_type == "magma_brick":
 		dust_tint = Color(0.85, 0.45, 0.25, 0.70) # Bụi nham thạch
 
-	for i in range(3):
+	var puff_count = 1 if is_dense else 3
+	for i in range(puff_count):
 		var puff = Sprite2D.new()
 		puff.texture = tex_smoke_puff
 		var offset = Vector2(randf_range(-block_size.x * 0.45, block_size.x * 0.45), randf_range(-10, 15))
@@ -660,7 +676,7 @@ func _spawn_debris_dust_cloud() -> void:
 		tw.parallel().tween_property(puff, "modulate:a", 0.0, 0.35).set_delay(0.18)
 		tw.tween_callback(puff.queue_free)
 
-func _spawn_flying_shards() -> void:
+func _spawn_flying_shards(is_dense: bool = false) -> void:
 	var shard_tex: Texture2D = tex_shard_wood
 	if material_type in ["stone", "obsidian", "magma_brick", "steel", "cyber_alloy"]:
 		shard_tex = tex_shard_stone
@@ -673,7 +689,8 @@ func _spawn_flying_shards() -> void:
 	var p = get_parent()
 	if not p: return
 
-	for i in range(3):
+	var shard_count = 1 if is_dense else 3
+	for i in range(shard_count):
 		var shard = Sprite2D.new()
 		shard.texture = shard_tex
 		shard.global_position = global_position + Vector2(randf_range(-15, 15), randf_range(-8, 8))

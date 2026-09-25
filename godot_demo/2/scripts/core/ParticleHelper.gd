@@ -187,10 +187,10 @@ static func spawn_egg_break_fx(parent: Node, pos: Vector2, egg_type: String, is_
 		_last_fx_time = now
 		_fx_count_window = 1
 
-	var is_dense = _fx_count_window > 3
-	var smoke_count = 1 if is_dense else 3
-	var shard_count = 2 if is_dense else 5
-	var accent_count = 1 if is_dense else 4
+	var is_dense = _fx_count_window > 1
+	var smoke_count = 1 if is_dense else 2
+	var shard_count = 2 if is_dense else 3
+	var accent_count = 1 if is_dense else 2
 
 	var smoke_col = Color(1.0, 0.98, 0.92, 0.88)
 	var shard_col = Color(0.98, 0.94, 0.86, 1.0)
@@ -363,9 +363,22 @@ static func spawn_egg_break_fx(parent: Node, pos: Vector2, egg_type: String, is_
 # 2. HỆ THỐNG PARTICLE KHI QUÁI VẬT BỊ TIÊU DIỆT (CARTOON KNOCKOUT POOF)
 # Hoàn toàn khác biệt so với trứng vỡ: Bụi đất nhân vật + Sao váng đầu + Lông thú
 # =============================================================================
+static var _last_monster_defeat_time: float = 0.0
+static var _defeat_burst_count: int = 0
+
 static func spawn_monster_defeat_fx(parent: Node, pos: Vector2, monster_type: String) -> void:
 	if not parent: return
 	_init_textures()
+
+	# Throttling & Dynamic Budgeting khi nhiều quái vật bị diệt cùng lúc trong chuỗi nổ
+	var now = Time.get_ticks_msec() / 1000.0
+	if now - _last_monster_defeat_time < 0.15:
+		_defeat_burst_count += 1
+	else:
+		_last_monster_defeat_time = now
+		_defeat_burst_count = 1
+
+	var is_dense = _defeat_burst_count > 1
 
 	var dust_col = Color(0.82, 0.72, 0.60, 0.85) # Bụi đất hoạt hình
 	var fur_col = Color(0.95, 0.50, 0.20)         # Lông thú
@@ -454,7 +467,7 @@ static func spawn_monster_defeat_fx(parent: Node, pos: Vector2, monster_type: St
 	# 1. Bụi đất nhân vật Comic Dust Puffs (KHÔNG DÙNG MÀU TRỨNG TRẮNG SỮA!)
 	var tex_s = tex_comic_smoke if tex_comic_smoke else tex_smoke
 	if tex_s:
-		var count = 5 if is_boss else 4
+		var count = (3 if is_boss else 2) if is_dense else (5 if is_boss else 4)
 		for i in range(count):
 			var puff = Sprite2D.new()
 			puff.texture = tex_s
@@ -475,7 +488,7 @@ static func spawn_monster_defeat_fx(parent: Node, pos: Vector2, monster_type: St
 
 	# 2. Chùm sao hoạt hình váng đầu (Cartoon Knockout Stars) bay xoay tròn
 	if tex_spark:
-		var star_count = 7 if is_boss else 5
+		var star_count = (4 if is_boss else 3) if is_dense else (7 if is_boss else 5)
 		for i in range(star_count):
 			var star = Sprite2D.new()
 			star.texture = tex_spark
@@ -498,7 +511,8 @@ static func spawn_monster_defeat_fx(parent: Node, pos: Vector2, monster_type: St
 	# 3. Mảnh vụn lông thú / trang bị (Fur / Armor Tufts)
 	var tex_fur_tuft = tex_feather if tex_feather else tex_shard
 	if tex_fur_tuft:
-		for i in range(5):
+		var tuft_count = 2 if is_dense else 5
+		for i in range(tuft_count):
 			var tuft = Sprite2D.new()
 			tuft.texture = tex_fur_tuft
 			tuft.global_position = pos
@@ -519,7 +533,8 @@ static func spawn_monster_defeat_fx(parent: Node, pos: Vector2, monster_type: St
 
 	# 4. Giọt mồ hôi hoảng hốt (Cartoon Shock Sweat / Tears)
 	if tex_circle:
-		for i in range(3):
+		var drop_count = 1 if is_dense else 3
+		for i in range(drop_count):
 			var drop = Sprite2D.new()
 			drop.texture = tex_circle
 			drop.global_position = pos + Vector2(randf_range(-8, 8), -15.0)
@@ -570,7 +585,7 @@ static func spawn_comic_popup(parent: Node, pos: Vector2, text: String, color: C
 	tw.chain().tween_callback(label.queue_free)
 
 ## Bắn pháo hoa giấy rực rỡ ăn mừng chiến thắng 3 sao (Confetti Cannon Burst)
-static func spawn_confetti_burst(parent: Node, pos: Vector2, count: int = 35) -> void:
+static func spawn_confetti_burst(parent: Node, pos: Vector2, count: int = 24) -> void:
 	if not parent or not is_instance_valid(parent): return
 	_init_textures()
 

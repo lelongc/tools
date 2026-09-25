@@ -159,17 +159,27 @@ func _on_button_up() -> void:
 	is_pressed_down = false
 	_animate_scale(base_scale, 0.12, Tween.TRANS_BACK)
 
-var _last_press_time: int = 0
+var _last_mouse_press_time: int = -999999
+var _last_touch_press_time: int = -999999
+var _last_press_time: int:
+	get: return _last_mouse_press_time
+	set(v): _last_mouse_press_time = v
 const PRESS_DEBOUNCE_MS: int = 250
 
 func _gui_input(event: InputEvent) -> void:
 	if disabled: return
-	if (event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed()) or (event is InputEventScreenTouch and event.is_pressed()):
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
 		var now = Time.get_ticks_msec()
-		if now - _last_press_time < PRESS_DEBOUNCE_MS:
+		if now - _last_mouse_press_time < PRESS_DEBOUNCE_MS:
 			accept_event()
 			return
-		_last_press_time = now
+		_last_mouse_press_time = now
+	elif event is InputEventScreenTouch and event.is_pressed():
+		var now = Time.get_ticks_msec()
+		if now - _last_touch_press_time < PRESS_DEBOUNCE_MS:
+			accept_event()
+			return
+		_last_touch_press_time = now
 
 func _on_pressed() -> void:
 	if has_node("/root/SoundManager"):

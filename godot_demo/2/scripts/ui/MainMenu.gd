@@ -215,6 +215,7 @@ func _on_btn_levels_pressed() -> void:
 func _on_btn_lang_pressed() -> void:
 	if has_node("/root/LocalizationManager"):
 		get_node("/root/LocalizationManager").cycle_language()
+		_update_language_ui()
 
 func _on_btn_sound_pressed() -> void:
 	if has_node("/root/SaveManager"):

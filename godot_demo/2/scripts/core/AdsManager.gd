@@ -167,6 +167,14 @@ func _create_mock_ad_overlay() -> void:
 	btn_skip.name = "BtnSkip"
 	btn_skip.text = "Bỏ qua" if is_vi else "Skip"
 	btn_skip.custom_minimum_size = Vector2(130, 48)
+	var sb_skip = StyleBoxFlat.new()
+	sb_skip.bg_color = Color(0.24, 0.12, 0.14, 0.95)
+	sb_skip.border_width_bottom = 3
+	sb_skip.border_color = Color(0.6, 0.2, 0.25)
+	sb_skip.set_corner_radius_all(12)
+	btn_skip.add_theme_stylebox_override("normal", sb_skip)
+	btn_skip.add_theme_stylebox_override("hover", sb_skip)
+	btn_skip.add_theme_font_size_override("font_size", 15)
 	hbox.add_child(btn_skip)
 
 	var btn_claim = Button.new()
@@ -174,6 +182,15 @@ func _create_mock_ad_overlay() -> void:
 	btn_claim.text = "Nhận Thưởng" if is_vi else "Claim Reward"
 	btn_claim.disabled = true
 	btn_claim.custom_minimum_size = Vector2(180, 48)
+	var sb_claim = StyleBoxFlat.new()
+	sb_claim.bg_color = Color(0.15, 0.65, 0.3, 1.0)
+	sb_claim.border_width_bottom = 4
+	sb_claim.border_color = Color(0.08, 0.4, 0.18)
+	sb_claim.set_corner_radius_all(12)
+	btn_claim.add_theme_stylebox_override("normal", sb_claim)
+	btn_claim.add_theme_stylebox_override("hover", sb_claim)
+	btn_claim.add_theme_font_size_override("font_size", 16)
+	btn_claim.add_theme_color_override("font_color", Color.WHITE)
 	hbox.add_child(btn_claim)
 
 	mock_btn_claim = btn_claim
@@ -216,8 +233,10 @@ func _play_mock_video_overlay() -> void:
 			if icon_tex: icon_tex.texture = load("res://assets/ui/icons/icon_coin.svg")
 			if desc_label: desc_label.text = ("Nhân ba phần thưởng: Nhận ngay %d Vàng!" if is_vi else "Triple Reward: Receive %d Gold!") % current_amount
 		PLACEMENT_VIP_TRIAL:
-			if icon_tex: icon_tex.texture = load("res://assets/sprites/projectiles/egg_acid.svg")
-			if desc_label: desc_label.text = "Dùng thử đạn VIP: Tặng 1 Trứng Axit!" if is_vi else "VIP Trial: +1 Acid Egg Granted!"
+			var is_late_level = GameManager.current_level > 20 if has_node("/root/GameManager") else false
+			var vip_icon = "res://assets/sprites/projectiles/egg_blackhole.svg" if is_late_level else "res://assets/sprites/projectiles/egg_cluster.svg"
+			if icon_tex: icon_tex.texture = load(vip_icon)
+			if desc_label: desc_label.text = "Dùng thử đạn VIP: Tặng 1 Quả Trứng Đỉnh Cao!" if is_vi else "VIP Trial: +1 Premium Super Egg Granted!"
 		PLACEMENT_DAILY_SPIN:
 			if icon_tex: icon_tex.texture = load("res://assets/ui/icons/icon_star.svg")
 			if desc_label: desc_label.text = "Quay thêm 1 lượt may mắn!" if is_vi else "Get +1 Extra Lucky Spin!"
@@ -228,6 +247,7 @@ func _play_mock_video_overlay() -> void:
 
 	var duration = 3.0
 	mock_tween = create_tween()
+	mock_tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 	mock_tween.tween_method(func(val: float):
 		if pbar: pbar.value = val
 		var remaining = max(0.0, duration - val)
@@ -267,7 +287,8 @@ func _on_ad_claimed() -> void:
 			if has_node("/root/SaveManager"):
 				get_node("/root/SaveManager").add_coins(current_amount)
 		PLACEMENT_VIP_TRIAL:
-			GameManager.available_eggs.insert(GameManager.current_egg_index, "acid")
+			var vip_type = "blackhole" if GameManager.current_level > 20 else "cluster"
+			GameManager.available_eggs.insert(GameManager.current_egg_index, vip_type)
 			GameManager.vip_trial_used_in_level = true
 			var chicken = get_tree().get_first_node_in_group("Player")
 			if chicken and chicken.has_method("_prepare_next_egg"):
