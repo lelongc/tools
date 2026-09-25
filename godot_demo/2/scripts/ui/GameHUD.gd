@@ -74,7 +74,7 @@ func _ready() -> void:
 
 	GameManager.score_updated.connect(_on_score_updated)
 	GameManager.egg_dropped.connect(_on_egg_dropped)
-	GameManager.level_started.connect(func(_lvl, _eggs): _refresh_egg_icons())
+	GameManager.level_started.connect(func(_lvl, _eggs): _update_ui())
 	GameManager.level_completed.connect(_on_level_completed)
 	GameManager.level_failed.connect(_on_level_failed)
 	GameManager.last_stand_offered.connect(_on_last_stand_offered)
@@ -410,6 +410,8 @@ func _update_ui() -> void:
 		else: level_label.text = "MÀN %d" % GameManager.current_level
 	if score_label:
 		score_label.text = "%d" % GameManager.current_score
+	if btn_vip_trial:
+		btn_vip_trial.visible = (GameManager.current_level > 5 and not GameManager.vip_trial_used_in_level)
 	_refresh_egg_icons()
 
 func _refresh_egg_icons() -> void:
@@ -541,17 +543,19 @@ func _on_last_stand_ad_pressed() -> void:
 
 	if has_node("/root/AdsManager"):
 		var am = get_node("/root/AdsManager")
+		var on_success = func():
+			if last_stand_modal: last_stand_modal.visible = false
+			if modal_dimmer: modal_dimmer.visible = false
+			_refresh_egg_icons()
+		var on_failed = func():
+			# Nếu hủy ad, tiếp tục đếm ngược còn lại hoặc fail
+			_on_last_stand_timeout()
 		am.show_rewarded_ad(
 			AdsManager.PLACEMENT_LAST_STAND,
 			"egg",
 			1,
-			func():
-				if last_stand_modal: last_stand_modal.visible = false
-				if modal_dimmer: modal_dimmer.visible = false
-				_refresh_egg_icons(),
-			func():
-				# Nếu hủy ad, tiếp tục đếm ngược còn lại hoặc fail
-				_on_last_stand_timeout()
+			on_success,
+			on_failed
 		)
 
 func _on_last_stand_skip_pressed() -> void:

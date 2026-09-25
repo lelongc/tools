@@ -1458,6 +1458,64 @@ func _ready() -> void:
 		hud21.free()
 		boss_mon2.free()
 
+	# -------------------------------------------------------------------------
+	# 22. TESTING 2D UI POLISH, BUTTON RESPONSIVENESS & LOCALIZATION COVERAGE
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 22] Testing 2D UI Polish, Button Responsiveness & Localization ---")
+
+	# 22.1: Short Language Display
+	if has_node("/root/LocalizationManager"):
+		var lm = get_node("/root/LocalizationManager")
+		var short_disp = lm.get_short_language_display()
+		if short_disp.length() < 3:
+			errors.append("LocalizationManager get_short_language_display returned invalid: '%s'" % short_disp)
+		else:
+			print("  [PASS] LocalizationManager get_short_language_display verified: '%s'" % short_disp)
+
+		var lang_trans = lm.t("KEY_LANGUAGE")
+		var reset_trans = lm.t("KEY_RESET_SUCCESS")
+		if lang_trans == "KEY_LANGUAGE" or reset_trans == "KEY_RESET_SUCCESS":
+			errors.append("LocalizationManager missing KEY_LANGUAGE or KEY_RESET_SUCCESS translation!")
+		else:
+			print("  [PASS] KEY_LANGUAGE ('%s') and KEY_RESET_SUCCESS ('%s') verified" % [lang_trans, reset_trans])
+
+	# 22.2: JuicyButton Focus Mode
+	var test_btn = JuicyButton.new()
+	add_child(test_btn)
+	if test_btn.focus_mode != Control.FOCUS_NONE:
+		errors.append("JuicyButton focus_mode is not FOCUS_NONE (causes sticky focus outlines on mobile)")
+	else:
+		print("  [PASS] JuicyButton focus_mode correctly set to Control.FOCUS_NONE")
+	test_btn.free()
+
+	# 22.3: LevelSelect Locked Level Card Responsiveness
+	var lvl_sel_scene = load("res://scenes/ui/LevelSelect.tscn")
+	if lvl_sel_scene:
+		var lvl_sel = lvl_sel_scene.instantiate()
+		add_child(lvl_sel)
+		var grid_c = lvl_sel.get_node_or_null("ScrollContainer/GridContainer")
+		if grid_c and grid_c.get_child_count() > 1:
+			var locked_card = grid_c.get_child(1) # Level 2 is locked on fresh save
+			if locked_card is Button:
+				if locked_card.disabled:
+					errors.append("Locked level card is disabled (causes dead click without feedback)!")
+				elif locked_card.pressed.get_connections().size() == 0:
+					errors.append("Locked level card has no pressed connection for feedback!")
+				else:
+					print("  [PASS] Locked level card responds interactively with tactile feedback and sound on click")
+		lvl_sel.free()
+
+	# 22.4: Modal Double-Click Closing Guard
+	var shop_scene22 = load("res://scenes/ui/ShopModal.tscn")
+	if shop_scene22:
+		var shop22 = shop_scene22.instantiate()
+		add_child(shop22)
+		if not ("is_closing" in shop22):
+			errors.append("ShopModal missing is_closing double-click guard!")
+		else:
+			print("  [PASS] ShopModal contains is_closing guard against rapid double-dismissal")
+		shop22.free()
+
 	print("\n================================================================")
 	# Explicitly clean up all remaining nodes in TestRunner
 	for child in get_children():

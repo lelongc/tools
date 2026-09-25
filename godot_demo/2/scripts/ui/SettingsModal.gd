@@ -187,7 +187,8 @@ func _on_confirm_reset() -> void:
 		confirm_box.visible = false
 	if btn_reset_progress:
 		btn_reset_progress.visible = true
-		btn_reset_progress.text = "✓ Đã xóa tiến trình!"
+		var lm = get_node_or_null("/root/LocalizationManager")
+		btn_reset_progress.text = "✓ " + (lm.t("KEY_RESET_SUCCESS") if lm else "Progress Reset!")
 		btn_reset_progress.disabled = true
 
 func _update_text_localization() -> void:
@@ -197,7 +198,7 @@ func _update_text_localization() -> void:
 	if lbl_bgm: lbl_bgm.text = "🎵 " + lm.t("KEY_BGM_VOLUME")
 	if lbl_sfx: lbl_sfx.text = "🔊 " + lm.t("KEY_SFX_VOLUME")
 	if lbl_vib: lbl_vib.text = "📳 " + lm.t("KEY_VIBRATION")
-	if lbl_lang: lbl_lang.text = "🌐 Ngôn ngữ"
+	if lbl_lang: lbl_lang.text = "🌐 " + lm.t("KEY_LANGUAGE")
 	if btn_lang: btn_lang.text = lm.get_current_language_display()
 	if btn_reset_progress and not btn_reset_progress.disabled:
 		btn_reset_progress.text = "⚠️ " + lm.t("KEY_RESET_PROGRESS")
@@ -210,7 +211,13 @@ func _update_text_localization() -> void:
 	if btn_close:
 		btn_close.text = lm.t("KEY_CLOSE")
 
+var is_closing: bool = false
+
 func _on_close_pressed() -> void:
+	if is_closing: return
+	is_closing = true
+	if has_node("/root/SoundManager"):
+		get_node("/root/SoundManager").play_button_click()
 	if panel:
 		var tw = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 		tw.tween_property(panel, "scale", Vector2(0.3, 0.3), 0.18)

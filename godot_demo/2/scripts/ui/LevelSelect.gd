@@ -117,11 +117,15 @@ func _update_total_stars() -> void:
 
 func _prev_world() -> void:
 	if current_world > 1:
+		if has_node("/root/SoundManager"):
+			get_node("/root/SoundManager").play_button_click()
 		current_world -= 1
 		_render_world_levels()
 
 func _next_world() -> void:
 	if current_world < 10:
+		if has_node("/root/SoundManager"):
+			get_node("/root/SoundManager").play_button_click()
 		current_world += 1
 		_render_world_levels()
 
@@ -145,6 +149,10 @@ func _render_world_levels() -> void:
 			r_btn.add_theme_stylebox_override("normal", sbt)
 			r_btn.add_theme_stylebox_override("hover", sbt)
 			r_btn.add_theme_color_override("font_color", Color(0.85, 0.8, 0.9, 0.9))
+
+	if world_ribbon_scroll and ribbon_buttons.size() >= current_world:
+		var active_btn = ribbon_buttons[current_world - 1]
+		world_ribbon_scroll.ensure_control_visible(active_btn)
 
 	# Đồng bộ bối cảnh bầu trời & hang ngầm chân thực theo từng Thế Giới
 	var world_names = ["farm", "quarry", "industrial", "lava", "crystal", "cyber", "toxic", "glacier", "dragon", "celestial"]
@@ -230,7 +238,20 @@ func _render_world_levels() -> void:
 			lock_lbl.add_theme_font_size_override("font_size", 11)
 			lock_lbl.add_theme_color_override("font_color", Color(0.55, 0.50, 0.65))
 			card_vbox.add_child(lock_lbl)
-			btn.disabled = true
+
+			btn.pivot_offset = Vector2(53, 44)
+			btn.pressed.connect(func():
+				if has_node("/root/SoundManager"):
+					get_node("/root/SoundManager").play_button_click()
+				var tw = btn.create_tween()
+				tw.tween_property(btn, "rotation", -0.07, 0.04)
+				tw.tween_property(btn, "rotation", 0.07, 0.04)
+				tw.tween_property(btn, "rotation", -0.04, 0.04)
+				tw.tween_property(btn, "rotation", 0.0, 0.04)
+				var lm_inst = get_node_or_null("/root/LocalizationManager")
+				var lock_msg = lm_inst.t("KEY_LOCKED") if lm_inst else "LOCKED"
+				ParticleHelper.spawn_comic_popup(self, btn.global_position + Vector2(53, 20), "🔒 " + lock_msg, Color(1.0, 0.4, 0.4))
+			)
 		elif is_boss_level:
 			sbt_card = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/card_level_boss.svg", 16, 16, 16, 20)
 			lvl_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.85))

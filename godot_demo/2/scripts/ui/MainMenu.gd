@@ -118,7 +118,11 @@ func _update_language_ui() -> void:
 	if btn_wheel: btn_wheel.text = lm.t("KEY_LUCKY_WHEEL")
 	if btn_shop: btn_shop.text = "  " + lm.t("KEY_SHOP")
 	if footer_label: footer_label.text = lm.t("KEY_FOOTER")
-	if btn_lang: btn_lang.text = lm.get_current_language_display()
+	if btn_lang:
+		if lm.has_method("get_short_language_display"):
+			btn_lang.text = lm.get_short_language_display()
+		else:
+			btn_lang.text = lm.get_current_language_display()
 	_update_sound_button()
 
 func _update_star_count() -> void:

@@ -235,15 +235,17 @@ func _on_spin_pressed() -> void:
 	elif sm.can_spin_daily_wheel():
 		if has_node("/root/AdsManager"):
 			var am = get_node("/root/AdsManager")
+			var on_success = func(): _start_spin_physics()
+			var on_failed = func():
+				var lm = get_node_or_null("/root/LocalizationManager")
+				if status_label:
+					status_label.text = lm.t("KEY_WHEEL_STATUS_AD") if lm else "Xem 1 video ngắn để nhận thêm lượt quay!"
 			am.show_rewarded_ad(
 				AdsManager.PLACEMENT_DAILY_SPIN,
 				"spin",
 				1,
-				func(): _start_spin_physics(),
-				func():
-					var lm = get_node_or_null("/root/LocalizationManager")
-					if status_label:
-						status_label.text = lm.t("KEY_WHEEL_STATUS_AD") if lm else "Xem 1 video ngắn để nhận thêm lượt quay!"
+				on_success,
+				on_failed
 			)
 
 func _start_spin_physics() -> void:

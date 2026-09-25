@@ -12,6 +12,7 @@ var is_pressed_down: bool = false
 var original_pos_y: float = 0.0
 
 func _ready() -> void:
+	focus_mode = Control.FOCUS_NONE
 	base_scale = scale
 	_update_pivot()
 	resized.connect(_update_pivot)
@@ -132,6 +133,8 @@ func _apply_tactile_style() -> void:
 		add_theme_stylebox_override("hover", style_hover)
 		add_theme_stylebox_override("pressed", style_pressed)
 		add_theme_stylebox_override("disabled", style_disabled)
+
+	add_theme_stylebox_override("focus", StyleBoxEmpty.new())
 
 func _animate_scale(target_scale: Vector2, duration: float, trans: Tween.TransitionType) -> void:
 	if anim_tween and anim_tween.is_valid():

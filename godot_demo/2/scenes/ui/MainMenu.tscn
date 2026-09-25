@@ -215,18 +215,18 @@ layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="StarBadge" type="PanelContainer" parent="TopBar/Margin/HBox"]
-custom_minimum_size = Vector2(105, 38)
+custom_minimum_size = Vector2(96, 38)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_StarBadge")
 
 [node name="StarMargin" type="MarginContainer" parent="TopBar/Margin/HBox/StarBadge"]
 layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_right = 10
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_right = 8
 
 [node name="StarHBox" type="HBoxContainer" parent="TopBar/Margin/HBox/StarBadge/StarMargin"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 4
 
 [node name="StarIcon" type="TextureRect" parent="TopBar/Margin/HBox/StarBadge/StarMargin/StarHBox"]
 custom_minimum_size = Vector2(18, 18)
@@ -239,24 +239,24 @@ stretch_mode = 5
 [node name="TotalStarsLabel" type="Label" parent="TopBar/Margin/HBox/StarBadge/StarMargin/StarHBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 14
 text = "0 / 600"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="CoinBadge" type="PanelContainer" parent="TopBar/Margin/HBox"]
-custom_minimum_size = Vector2(95, 38)
+custom_minimum_size = Vector2(86, 38)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_StarBadge")
 
 [node name="CoinMargin" type="MarginContainer" parent="TopBar/Margin/HBox/CoinBadge"]
 layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_right = 10
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_right = 8
 
 [node name="CoinHBox" type="HBoxContainer" parent="TopBar/Margin/HBox/CoinBadge/CoinMargin"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 4
 
 [node name="CoinIcon" type="TextureRect" parent="TopBar/Margin/HBox/CoinBadge/CoinMargin/CoinHBox"]
 custom_minimum_size = Vector2(18, 18)
@@ -269,7 +269,7 @@ stretch_mode = 5
 [node name="TotalCoinsLabel" type="Label" parent="TopBar/Margin/HBox/CoinBadge/CoinMargin/CoinHBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 14
 text = "150"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -280,10 +280,10 @@ size_flags_horizontal = 3
 mouse_filter = 2
 
 [node name="BtnLang" type="Button" parent="TopBar/Margin/HBox"]
-custom_minimum_size = Vector2(136, 38)
+custom_minimum_size = Vector2(76, 38)
 layout_mode = 2
 theme_override_font_sizes/font_size = 14
-text = "Tiếng Việt"
+text = "🇻🇳 VI"
 script = ExtResource("2_btn")
 is_wood_brown = true
 

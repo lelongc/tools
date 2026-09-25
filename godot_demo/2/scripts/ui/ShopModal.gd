@@ -296,7 +296,12 @@ func _show_feedback(text: String, color: Color) -> void:
 	tw.tween_property(feedback_label, "modulate:a", 0.0, 0.3)
 	tw.tween_callback(func(): feedback_label.visible = false)
 
+var is_closing: bool = false
+
 func _on_close_pressed() -> void:
+	if is_closing: return
+	is_closing = true
+
 	if has_node("/root/SoundManager"):
 		get_node("/root/SoundManager").play_button_click()
 

@@ -473,6 +473,17 @@ var translations: Dictionary = {
 		"en": "PURCHASED SUCCESSFULLY!", "vi": "ĐÃ MUA THÀNH CÔNG!", "ja": "購入が完了しました！", "ko": "구매 완료!",
 		"zh_CN": "购买成功！", "es": "¡COMPRA EXITOSA!", "pt_BR": "COMPRA CONCLUÍDA!", "de": "ERFOLGREICH GEKAUFT!",
 		"fr": "ACHAT RÉUSSI !", "ru": "УСПЕШНО КУПЛЕНО!"
+	},
+	"KEY_LANGUAGE": {
+		"en": "Language", "vi": "Ngôn ngữ", "ja": "言語", "ko": "언어",
+		"zh_CN": "语言", "es": "Idioma", "pt_BR": "Idioma", "de": "Sprache",
+		"fr": "Langue", "ru": "Язык"
+	},
+	"KEY_RESET_SUCCESS": {
+		"en": "Progress Reset!", "vi": "Đã xóa tiến trình!", "ja": "リセット完了！",
+		"ko": "초기화 완료!", "zh_CN": "进度已重置！", "es": "¡Progreso restablecido!",
+		"pt_BR": "Progresso redefinido!", "de": "Fortschritt zurückgesetzt!",
+		"fr": "Progression réinitialisée!", "ru": "Прогресс сброшен!"
 	}
 }
 
@@ -504,6 +515,11 @@ func _init_language() -> void:
 func get_current_language_display() -> String:
 	var cur = LANGUAGES[current_lang_index]
 	return "%s %s" % [cur["flag"], cur["name"]]
+
+func get_short_language_display() -> String:
+	var cur = LANGUAGES[current_lang_index]
+	var code_display = cur["code"].to_upper().split("_")[0]
+	return "%s %s" % [cur["flag"], code_display]
 
 func get_current_flag() -> String:
 	return LANGUAGES[current_lang_index]["flag"]
