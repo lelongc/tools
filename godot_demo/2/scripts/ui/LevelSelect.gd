@@ -44,9 +44,29 @@ func _ready() -> void:
 	_apply_safe_area()
 	get_viewport().size_changed.connect(_apply_safe_area)
 
+	_apply_cartoon_ui_theme()
 	_build_world_ribbon()
 	_update_total_stars()
 	_render_world_levels()
+
+func _apply_cartoon_ui_theme() -> void:
+	var top_bar = get_node_or_null("TopBar")
+	if top_bar:
+		var sbt = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_top_bar_hud.svg", 20, 8, 20, 16)
+		if sbt: top_bar.add_theme_stylebox_override("panel", sbt)
+
+	var star_badge = get_node_or_null("TopBar/Margin/HBox/StarBadge")
+	if star_badge:
+		var sbt = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_badge_capsule.svg", 16, 12, 16, 16)
+		if sbt: star_badge.add_theme_stylebox_override("panel", sbt)
+
+	if world_title:
+		var sbt_ribbon = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/banner_ribbon_wood.svg", 36, 12, 36, 18)
+		if sbt_ribbon:
+			world_title.add_theme_stylebox_override("normal", sbt_ribbon)
+			world_title.add_theme_color_override("font_color", Color(1.0, 0.96, 0.90))
+			world_title.add_theme_color_override("font_outline_color", Color(0.18, 0.08, 0.02))
+			world_title.add_theme_constant_override("outline_size", 6)
 
 func _build_world_ribbon() -> void:
 	if not world_ribbon_box: return
@@ -181,17 +201,6 @@ func _render_world_levels() -> void:
 
 		var is_boss_level = (lvl % 20 == 0)
 
-		var style_norm = StyleBoxFlat.new()
-		var style_press = StyleBoxFlat.new()
-		style_norm.corner_radius_top_left = 14
-		style_norm.corner_radius_top_right = 14
-		style_norm.corner_radius_bottom_right = 14
-		style_norm.corner_radius_bottom_left = 14
-		style_press.corner_radius_top_left = 14
-		style_press.corner_radius_top_right = 14
-		style_press.corner_radius_bottom_right = 14
-		style_press.corner_radius_bottom_left = 14
-
 		# Khung hiển thị nội dung thẻ màn chơi (VBoxContainer)
 		var card_vbox = VBoxContainer.new()
 		card_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
@@ -205,7 +214,7 @@ func _render_world_levels() -> void:
 			boss_badge.text = "👑 BOSS"
 			boss_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 			boss_badge.add_theme_font_size_override("font_size", 10)
-			boss_badge.add_theme_color_override("font_color", Color(1.0, 0.35, 0.35))
+			boss_badge.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45))
 			boss_badge.add_theme_constant_override("shadow_offset_y", 1)
 			boss_badge.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
 			card_vbox.add_child(boss_badge)
@@ -215,53 +224,35 @@ func _render_world_levels() -> void:
 		lvl_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lvl_lbl.add_theme_font_size_override("font_size", 20 if is_boss_level else 24)
 		lvl_lbl.add_theme_constant_override("shadow_offset_y", 2)
-		lvl_lbl.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.8))
+		lvl_lbl.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
 		card_vbox.add_child(lvl_lbl)
 
-		if is_unlocked:
-			if is_boss_level:
-				lvl_lbl.add_theme_color_override("font_color", Color(1.0, 0.45, 0.45))
-				style_norm.bg_color = Color(0.32, 0.08, 0.18, 0.95)
-				style_norm.border_color = Color(1.0, 0.28, 0.35, 0.95)
-				style_norm.border_width_bottom = 5
-				style_norm.border_width_top = 2
-				style_norm.border_width_left = 2
-				style_norm.border_width_right = 2
-				style_press.bg_color = Color(0.24, 0.05, 0.12, 0.95)
-				style_press.border_color = Color(0.8, 0.2, 0.25)
-				style_press.border_width_bottom = 2
-				style_press.border_width_top = 2
-				style_press.border_width_left = 2
-				style_press.border_width_right = 2
-			elif stars == 3:
-				lvl_lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.4))
-				style_norm.bg_color = Color(0.26, 0.14, 0.42, 0.95)
-				style_norm.border_color = Color(1.0, 0.88, 0.22, 1.0) # Gold Shimmer border
-				style_norm.border_width_bottom = 5
-				style_norm.border_width_top = 2
-				style_norm.border_width_left = 2
-				style_norm.border_width_right = 2
-				style_press.bg_color = Color(0.20, 0.10, 0.32, 0.95)
-				style_press.border_color = Color(0.9, 0.75, 0.15)
-				style_press.border_width_bottom = 2
-				style_press.border_width_top = 2
-				style_press.border_width_left = 2
-				style_press.border_width_right = 2
-			else:
-				lvl_lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.25))
-				style_norm.bg_color = Color(0.24, 0.12, 0.38, 0.95)
-				style_norm.border_color = Color(1.0, 0.84, 0.0, 0.85)
-				style_norm.border_width_bottom = 5
-				style_norm.border_width_top = 2
-				style_norm.border_width_left = 2
-				style_norm.border_width_right = 2
-				style_press.bg_color = Color(0.18, 0.08, 0.28, 0.95)
-				style_press.border_color = Color(0.8, 0.65, 0.0)
-				style_press.border_width_bottom = 2
-				style_press.border_width_top = 2
-				style_press.border_width_left = 2
-				style_press.border_width_right = 2
+		var sbt_card: StyleBoxTexture = null
+		if not is_unlocked:
+			sbt_card = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/card_level_locked.svg", 16, 16, 16, 20)
+			lvl_lbl.add_theme_color_override("font_color", Color(0.5, 0.45, 0.6))
+			var lock_lbl = Label.new()
+			var lm = get_node_or_null("/root/LocalizationManager")
+			lock_lbl.text = lm.t("KEY_LOCKED") if lm else "LOCKED"
+			lock_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			lock_lbl.add_theme_font_size_override("font_size", 11)
+			lock_lbl.add_theme_color_override("font_color", Color(0.55, 0.50, 0.65))
+			card_vbox.add_child(lock_lbl)
+			btn.disabled = true
+		elif is_boss_level:
+			sbt_card = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/card_level_boss.svg", 16, 16, 16, 20)
+			lvl_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.85))
+		else:
+			sbt_card = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/card_level_unlocked.svg", 16, 16, 16, 20)
+			lvl_lbl.add_theme_color_override("font_color", Color(1.0, 0.92, 0.35) if stars == 3 else Color(1.0, 0.98, 0.90))
 
+		if sbt_card:
+			btn.add_theme_stylebox_override("normal", sbt_card)
+			btn.add_theme_stylebox_override("hover", sbt_card)
+			btn.add_theme_stylebox_override("pressed", sbt_card)
+			btn.add_theme_stylebox_override("disabled", sbt_card)
+
+		if is_unlocked:
 			var stars_hbox = HBoxContainer.new()
 			stars_hbox.alignment = BoxContainer.ALIGNMENT_CENTER
 			stars_hbox.add_theme_constant_override("separation", 6)
@@ -278,10 +269,6 @@ func _render_world_levels() -> void:
 				stars_hbox.add_child(s_rect)
 
 			btn.pivot_offset = Vector2(53, 44)
-			btn.add_theme_stylebox_override("normal", style_norm)
-			btn.add_theme_stylebox_override("hover", style_norm)
-			btn.add_theme_stylebox_override("pressed", style_press)
-
 			btn.button_down.connect(func():
 				var tw = btn.create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 				tw.tween_property(btn, "scale", Vector2(0.93, 0.93), 0.08)
@@ -297,26 +284,6 @@ func _render_world_levels() -> void:
 					get_node("/root/SoundManager").play_button_click()
 				GameManager.load_level(target_lvl)
 			)
-		else:
-			lvl_lbl.add_theme_color_override("font_color", Color(0.5, 0.45, 0.6))
-
-			var lock_lbl = Label.new()
-			var lm = get_node_or_null("/root/LocalizationManager")
-			lock_lbl.text = lm.t("KEY_LOCKED") if lm else "LOCKED"
-			lock_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			lock_lbl.add_theme_font_size_override("font_size", 12)
-			lock_lbl.add_theme_color_override("font_color", Color(0.45, 0.4, 0.55))
-			card_vbox.add_child(lock_lbl)
-
-			style_norm.bg_color = Color(0.13, 0.08, 0.18, 0.9)
-			style_norm.border_width_bottom = 3
-			style_norm.border_width_top = 1
-			style_norm.border_width_left = 1
-			style_norm.border_width_right = 1
-			style_norm.border_color = Color(0.32, 0.22, 0.4, 0.5)
-
-			btn.disabled = true
-			btn.add_theme_stylebox_override("disabled", style_norm)
 
 		grid.add_child(btn)
 

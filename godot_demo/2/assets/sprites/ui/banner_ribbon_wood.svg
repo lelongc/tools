@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
+  <defs>
+    <!-- Gỗ sồi hoạt hình viền vàng kim -->
+    <linearGradient id="ribbonWood" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#df9648"/>
+      <stop offset="35%" stop-color="#b87333"/>
+      <stop offset="85%" stop-color="#844516"/>
+      <stop offset="100%" stop-color="#592b0c"/>
+    </linearGradient>
+    <linearGradient id="ribbonFoldWood" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3d1c04"/>
+      <stop offset="100%" stop-color="#1f0c01"/>
+    </linearGradient>
+    <linearGradient id="ribbonTailWood" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#b87333"/>
+      <stop offset="100%" stop-color="#733d14"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Bóng đổ -->
+  <path d="M 35 30 L 10 50 L 35 68 L 285 68 L 310 50 L 285 30 Z" fill="#000000" opacity="0.4"/>
+
+  <!-- ĐUÔI TRÁI -->
+  <path d="M 50 18 L 8 18 L 28 40 L 8 62 L 50 62 Z" fill="url(#ribbonTailWood)" stroke="#1f0c01" stroke-width="2"/>
+  <path d="M 45 48 L 45 68 L 60 52 Z" fill="url(#ribbonFoldWood)"/>
+
+  <!-- ĐUÔI PHẢI -->
+  <path d="M 270 18 L 312 18 L 292 40 L 312 62 L 270 62 Z" fill="url(#ribbonTailWood)" stroke="#1f0c01" stroke-width="2"/>
+  <path d="M 275 48 L 275 68 L 260 52 Z" fill="url(#ribbonFoldWood)"/>
+
+  <!-- THÂN BẢNG BIỂN GỖ CHÍNH -->
+  <path d="M 45 10 Q 160 5 275 10 L 275 52 Q 160 58 45 52 Z" fill="url(#ribbonWood)" stroke="#fed7aa" stroke-width="2.5"/>
+
+  <!-- Vân gỗ hoạt hình -->
+  <path d="M 52 24 Q 160 18 268 24" fill="none" stroke="#78380d" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <path d="M 54 38 Q 160 44 266 38" fill="none" stroke="#542807" stroke-width="1.8" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- Vệt sáng phản chiếu Gloss -->
+  <path d="M 55 13 Q 160 9 265 13 C 270 13 270 17 262 19 Q 160 25 58 19 C 50 17 50 13 55 13 Z" fill="#ffffff" opacity="0.4"/>
+
+  <!-- Đinh ốc kim loại hai đầu -->
+  <circle cx="58" cy="31" r="3.5" fill="#e2e8f0" stroke="#334155" stroke-width="1.2"/>
+  <circle cx="57" cy="30" r="1.2" fill="#ffffff"/>
+  <circle cx="262" cy="31" r="3.5" fill="#e2e8f0" stroke="#334155" stroke-width="1.2"/>
+  <circle cx="261" cy="30" r="1.2" fill="#ffffff"/>
+</svg>

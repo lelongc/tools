@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <!-- Khối đá hoa cương / sắt xám khóa -->
+    <linearGradient id="cardLocked" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="45%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="lockedRim" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#64748b"/>
+      <stop offset="50%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Bóng đổ -->
+  <rect x="5" y="8" width="118" height="114" rx="20" fill="#000000" opacity="0.35"/>
+
+  <!-- Khối đế sắt -->
+  <rect x="3" y="5" width="122" height="118" rx="20" fill="#0f172a" stroke="#020617" stroke-width="2"/>
+
+  <!-- Viền xám đá -->
+  <rect x="3" y="3" width="122" height="112" rx="18" fill="url(#lockedRim)" stroke="#334155" stroke-width="1.8"/>
+
+  <!-- Thân thẻ bài khóa -->
+  <rect x="7" y="7" width="114" height="102" rx="15" fill="url(#cardLocked)" stroke="#090d16" stroke-width="1.5"/>
+
+  <!-- Biểu tượng ổ khóa xích ở trung tâm (Padlock) -->
+  <!-- Vòng cung ổ khóa -->
+  <path d="M 52 56 V 46 A 12 12 0 0 1 76 46 V 56" fill="none" stroke="#94a3b8" stroke-width="5" stroke-linecap="round"/>
+  <!-- Thân ổ khóa vàng đồng cổ -->
+  <rect x="46" y="54" width="36" height="30" rx="6" fill="#eab308" stroke="#713f12" stroke-width="2.5"/>
+  <circle cx="64" cy="67" r="3.5" fill="#713f12"/>
+  <rect x="62.5" y="67" width="3" height="7" fill="#713f12"/>
+
+  <!-- Đinh ốc sắt 4 góc -->
+  <circle cx="15" cy="15" r="2.2" fill="#64748b" stroke="#1e293b" stroke-width="0.8"/>
+  <circle cx="113" cy="15" r="2.2" fill="#64748b" stroke="#1e293b" stroke-width="0.8"/>
+  <circle cx="15" cy="100" r="2.2" fill="#64748b" stroke="#1e293b" stroke-width="0.8"/>
+  <circle cx="113" cy="100" r="2.2" fill="#64748b" stroke="#1e293b" stroke-width="0.8"/>
+</svg>

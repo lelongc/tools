@@ -57,6 +57,7 @@ func _ready() -> void:
 	if btn_close:
 		btn_close.pressed.connect(_on_close_pressed)
 
+	_apply_cartoon_ui_theme()
 	_update_coins_display()
 	_build_shop_items()
 	_update_language()
@@ -72,6 +73,25 @@ func _ready() -> void:
 		var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tween.tween_property(panel, "scale", Vector2.ONE, 0.28)
 		tween.tween_property(panel, "modulate:a", 1.0, 0.20)
+
+func _apply_cartoon_ui_theme() -> void:
+	if panel:
+		var sbt_modal = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_modal_wood_frame.svg", 36, 36, 36, 44)
+		if sbt_modal: panel.add_theme_stylebox_override("panel", sbt_modal)
+	if title_label:
+		var sbt_ribbon = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/banner_ribbon_gold.svg", 36, 12, 36, 18)
+		if sbt_ribbon:
+			title_label.add_theme_stylebox_override("normal", sbt_ribbon)
+			title_label.add_theme_color_override("font_color", Color(0.24, 0.11, 0.0))
+			title_label.add_theme_color_override("font_outline_color", Color(1.0, 0.96, 0.75))
+			title_label.add_theme_constant_override("outline_size", 4)
+	var coin_badge = get_node_or_null("CenterContainer/Panel/Margin/VBox/CoinBadge")
+	if coin_badge:
+		var sbt_badge = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_badge_capsule.svg", 16, 12, 16, 16)
+		if sbt_badge: coin_badge.add_theme_stylebox_override("panel", sbt_badge)
+	if btn_close:
+		if btn_close is JuicyButton or btn_close.has_method("set_button_style"):
+			btn_close.set_button_style("red")
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
@@ -117,12 +137,16 @@ func _build_shop_items() -> void:
 
 	for item in shop_items:
 		var panel_card = PanelContainer.new()
-		var sb = StyleBoxFlat.new()
-		sb.bg_color = Color(0.18, 0.10, 0.28, 0.95)
-		sb.set_border_width_all(2)
-		sb.border_color = Color(1.0, 0.85, 0.3, 0.6)
-		sb.set_corner_radius_all(14)
-		panel_card.add_theme_stylebox_override("panel", sb)
+		var sbt_card = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/card_level_unlocked.svg", 16, 16, 16, 20)
+		if sbt_card:
+			panel_card.add_theme_stylebox_override("panel", sbt_card)
+		else:
+			var sb = StyleBoxFlat.new()
+			sb.bg_color = Color(0.18, 0.10, 0.28, 0.95)
+			sb.set_border_width_all(2)
+			sb.border_color = Color(1.0, 0.85, 0.3, 0.6)
+			sb.set_corner_radius_all(14)
+			panel_card.add_theme_stylebox_override("panel", sb)
 
 		var margin = MarginContainer.new()
 		margin.add_theme_constant_override("margin_left", 12)
@@ -176,6 +200,8 @@ func _build_shop_items() -> void:
 		btn_buy.set_script(JuicyButton)
 		btn_buy.custom_minimum_size = Vector2(90, 42)
 		btn_buy.text = "🪙 %d" % item["price"]
+		if btn_buy.has_method("set_button_style"):
+			btn_buy.set_button_style("gold")
 		btn_buy.pressed.connect(func(): _on_buy_item_pressed(item, panel_card))
 		hbox.add_child(btn_buy)
 

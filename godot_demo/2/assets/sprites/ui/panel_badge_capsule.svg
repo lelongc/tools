@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 48" width="128" height="48">
+  <defs>
+    <linearGradient id="badgeRim" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="60%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </linearGradient>
+    <linearGradient id="badgeInterior" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2d1547"/>
+      <stop offset="100%" stop-color="#160826"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Bóng đổ -->
+  <rect x="3" y="5" width="122" height="40" rx="16" fill="#000000" opacity="0.35"/>
+
+  <!-- Viền kim loại vàng Bevel 3px -->
+  <rect x="2" y="3" width="124" height="42" rx="16" fill="url(#badgeRim)" stroke="#451a03" stroke-width="1.2"/>
+
+  <!-- Lòng viên thuốc chứa số điểm / vàng / sao -->
+  <rect x="4" y="5" width="120" height="36" rx="14" fill="url(#badgeInterior)" stroke="#3b0764" stroke-width="1"/>
+
+  <!-- Vệt sáng bóng trên vòm -->
+  <path d="M 16 8 Q 64 12 112 8 C 118 8 119 11 116 14 Q 64 18 12 14 C 9 11 10 8 16 8 Z" fill="#ffffff" opacity="0.35"/>
+</svg>

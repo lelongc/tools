@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80">
+  <defs>
+    <!-- Dải ruy băng chính màu đỏ thẫm ruby -->
+    <linearGradient id="ribbonRed" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff7b7b"/>
+      <stop offset="25%" stop-color="#e62222"/>
+      <stop offset="85%" stop-color="#ab0909"/>
+      <stop offset="100%" stop-color="#6e0000"/>
+    </linearGradient>
+    <linearGradient id="ribbonFoldRed" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4d0000"/>
+      <stop offset="100%" stop-color="#240000"/>
+    </linearGradient>
+    <linearGradient id="ribbonTailRed" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#c71616"/>
+      <stop offset="100%" stop-color="#800303"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Bóng đổ -->
+  <path d="M 35 30 L 10 50 L 35 68 L 285 68 L 310 50 L 285 30 Z" fill="#000000" opacity="0.4"/>
+
+  <!-- ĐUÔI TRÁI -->
+  <path d="M 50 18 L 8 18 L 28 40 L 8 62 L 50 62 Z" fill="url(#ribbonTailRed)" stroke="#240000" stroke-width="2"/>
+  <path d="M 45 48 L 45 68 L 60 52 Z" fill="url(#ribbonFoldRed)"/>
+
+  <!-- ĐUÔI PHẢI -->
+  <path d="M 270 18 L 312 18 L 292 40 L 312 62 L 270 62 Z" fill="url(#ribbonTailRed)" stroke="#240000" stroke-width="2"/>
+  <path d="M 275 48 L 275 68 L 260 52 Z" fill="url(#ribbonFoldRed)"/>
+
+  <!-- THÂN DẢI RUY BĂNG CHÍNH VÒM CONG 3D -->
+  <path d="M 45 10 Q 160 5 275 10 L 275 52 Q 160 58 45 52 Z" fill="url(#ribbonRed)" stroke="#ffc9c9" stroke-width="2.5"/>
+
+  <!-- Đường chỉ thêu trang trí -->
+  <path d="M 48 16 Q 160 11 272 16" fill="none" stroke="#ffe5e5" stroke-width="1.8" stroke-dasharray="6,4"/>
+  <path d="M 48 46 Q 160 52 272 46" fill="none" stroke="#ff9999" stroke-width="1.8" stroke-dasharray="6,4"/>
+
+  <!-- Vệt sáng phản chiếu Gloss -->
+  <path d="M 55 13 Q 160 9 265 13 C 270 13 270 18 262 20 Q 160 26 58 20 C 50 18 50 13 55 13 Z" fill="#ffffff" opacity="0.55"/>
+
+  <circle cx="58" cy="31" r="3.5" fill="#ffffff" stroke="#6e0000" stroke-width="1"/>
+  <circle cx="262" cy="31" r="3.5" fill="#ffffff" stroke="#6e0000" stroke-width="1"/>
+</svg>

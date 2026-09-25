@@ -1,6 +1,8 @@
 extends CanvasLayer
 class_name DailyWheelModal
 
+const JuicyButton = preload("res://scripts/ui/JuicyButton.gd")
+
 signal wheel_closed()
 
 @onready var modal_panel: PanelContainer = $CenterContainer/Panel
@@ -27,8 +29,27 @@ func _ready() -> void:
 	visible = false
 	if btn_close: btn_close.pressed.connect(close_wheel)
 	if btn_spin: btn_spin.pressed.connect(_on_spin_pressed)
+	_apply_cartoon_ui_theme()
 	_draw_wheel_wedges()
 	_update_spin_button_state()
+
+func _apply_cartoon_ui_theme() -> void:
+	if modal_panel:
+		var sbt_modal = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_modal_wood_frame.svg", 36, 36, 36, 44)
+		if sbt_modal: modal_panel.add_theme_stylebox_override("panel", sbt_modal)
+	if title_label:
+		var sbt_ribbon = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/banner_ribbon_gold.svg", 36, 12, 36, 18)
+		if sbt_ribbon:
+			title_label.add_theme_stylebox_override("normal", sbt_ribbon)
+			title_label.add_theme_color_override("font_color", Color(0.24, 0.11, 0.0))
+			title_label.add_theme_color_override("font_outline_color", Color(1.0, 0.96, 0.75))
+			title_label.add_theme_constant_override("outline_size", 4)
+	if btn_spin:
+		if btn_spin is JuicyButton or btn_spin.has_method("set_button_style"):
+			btn_spin.set_button_style("gold")
+	if btn_close:
+		if btn_close is JuicyButton or btn_close.has_method("set_button_style"):
+			btn_close.set_button_style("red")
 
 func open_wheel() -> void:
 	visible = true

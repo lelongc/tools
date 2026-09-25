@@ -1,5 +1,7 @@
 extends CanvasLayer
 
+const JuicyButton = preload("res://scripts/ui/JuicyButton.gd")
+
 signal settings_closed()
 
 @onready var panel: PanelContainer = $CenterContainer/Panel
@@ -71,6 +73,7 @@ func _ready() -> void:
 	if btn_close:
 		btn_close.pressed.connect(_on_close_pressed)
 
+	_apply_cartoon_ui_theme()
 	_update_text_localization()
 
 	# Hoạt ảnh mở modal đàn hồi
@@ -79,6 +82,36 @@ func _ready() -> void:
 		panel.scale = Vector2(0.5, 0.5)
 		var tw = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 		tw.tween_property(panel, "scale", Vector2.ONE, 0.28)
+
+func _apply_cartoon_ui_theme() -> void:
+	if panel:
+		var sbt_modal = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_modal_wood_frame.svg", 36, 36, 36, 44)
+		if sbt_modal: panel.add_theme_stylebox_override("panel", sbt_modal)
+	if title_label:
+		var sbt_ribbon = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/banner_ribbon_wood.svg", 36, 12, 36, 18)
+		if sbt_ribbon:
+			title_label.add_theme_stylebox_override("normal", sbt_ribbon)
+			title_label.add_theme_color_override("font_color", Color(1.0, 0.96, 0.90))
+			title_label.add_theme_color_override("font_outline_color", Color(0.18, 0.08, 0.02))
+			title_label.add_theme_constant_override("outline_size", 6)
+	if btn_close:
+		if btn_close is JuicyButton or btn_close.has_method("set_button_style"):
+			btn_close.set_button_style("red")
+	if btn_reset_progress:
+		if btn_reset_progress is JuicyButton or btn_reset_progress.has_method("set_button_style"):
+			btn_reset_progress.set_button_style("red")
+	if btn_confirm_yes:
+		if btn_confirm_yes is JuicyButton or btn_confirm_yes.has_method("set_button_style"):
+			btn_confirm_yes.set_button_style("red")
+	if btn_confirm_no:
+		if btn_confirm_no is JuicyButton or btn_confirm_no.has_method("set_button_style"):
+			btn_confirm_no.set_button_style("green")
+	if btn_vib:
+		if btn_vib is JuicyButton or btn_vib.has_method("set_button_style"):
+			btn_vib.set_button_style("gold")
+	if btn_lang:
+		if btn_lang is JuicyButton or btn_lang.has_method("set_button_style"):
+			btn_lang.set_button_style("wood")
 
 func _update_slider_labels() -> void:
 	if lbl_bgm_val and slider_bgm:

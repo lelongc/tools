@@ -90,6 +90,11 @@
    - Sửa lỗ hổng đóng màn sớm trong `GameManager`: cho phép chuỗi phản ứng dây chuyền sụp đổ domino trong 1.2s delay tiếp tục ghi nhận điểm số và số khối vỡ trước khi chấm 3 sao.
    - Triệt tiêu hiện tượng kẹt đè ảo (Ghost Pinning) trên `BunkerMonster` khi khối đè phía trên vừa nổ vụn.
    - Đồng bộ chuẩn hóa tính toán điểm thưởng trứng dư 1200 điểm/quả giữa `GameManager` và `GameHUD`.
+16. [25 — Đồng Bộ Hóa Toàn Diện Giao Diện 2D: Hệ Thống Texture Nút Bấm, Khung Viền & 9-Patch Vector Theme](25-dong-bo-hoa-toan-dien-giao-dien-2d-texture-nut-bam-va-khung-vien.md): **Hệ Thống Đồ Họa Giao Diện 2D Đỉnh Cao**:
+   - Kiến tạo 20 vector SVG 9-patch cho toàn bộ nút bấm 3D vát cạnh (Xanh lục bảo, Vàng hổ phách, Gỗ sồi mộc, Đỏ san hô, Icon tròn 64x64).
+   - Bộ khung modal gỗ sồi nẹp góc đồng thau, thanh Header đá phiến đen mạ vàng, khay đựng trứng đục rãnh gỗ, viên nang huy hiệu vàng và 3 dải ruy băng 3D uốn lượn.
+   - Nâng cấp `JuicyButton` với static cache StyleBoxTexture và điều phối phong cách tập trung `set_button_style()`.
+   - Đồng bộ hóa toàn diện `GameHUD`, `MainMenu`, `LevelSelect` (200 thẻ bài chọn màn 9-patch), `ShopModal`, `SettingsModal` và `DailyWheelModal`.
 
 ---
 
@@ -97,8 +102,8 @@
 
 ```
 ================================================================
->>> ALL 19 TEST SUITES PASSED SUCCESSFULLY! (0 ERRORS) <<<
+>>> ALL 20 TEST SUITES PASSED SUCCESSFULLY! (0 ERRORS) <<<
 ================================================================
 ```
-- **0 Lỗi logic, 19/19 Bộ Test Tự Động Vượt Qua Tuyệt Đối, Return Code 0**.
-- Hệ sinh thái dự án đã hoàn thiện trọn vẹn **15 bộ tài liệu kỹ thuật đỉnh cao** (từ Tài liệu 10 đến Tài liệu 24), phủ kín $100\%$ các khía cạnh: engine, mỹ thuật, cân bằng, hiệu năng, lỗi tiềm ẩn, bảo mật, YouTube Playables và CH Play Store 2026.
+- **0 Lỗi logic, 20/20 Bộ Test Tự Động Vượt Qua Tuyệt Đối, Return Code 0**.
+- Hệ sinh thái dự án đã hoàn thiện trọn vẹn **16 bộ tài liệu kỹ thuật đỉnh cao** (từ Tài liệu 10 đến Tài liệu 25), phủ kín $100\%$ các khía cạnh: engine, mỹ thuật, cân bằng, hiệu năng, lỗi tiềm ẩn, bảo mật, YouTube Playables, CH Play Store 2026 và hệ thống giao diện 2D 9-patch vector.

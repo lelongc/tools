@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <!-- Khung gỗ sồi viền ngoài -->
+    <linearGradient id="frameWood" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#b87333"/>
+      <stop offset="30%" stop-color="#9a5a20"/>
+      <stop offset="80%" stop-color="#733d14"/>
+      <stop offset="100%" stop-color="#4d2407"/>
+    </linearGradient>
+    <!-- Lòng bảng màu tím thẫm sang trọng -->
+    <radialGradient id="innerCanvas" cx="50%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#231038"/>
+      <stop offset="70%" stop-color="#150824"/>
+      <stop offset="100%" stop-color="#0c0417"/>
+    </radialGradient>
+    <!-- Viền vàng dập nổi bên trong -->
+    <linearGradient id="goldTrim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="50%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#92400e"/>
+    </linearGradient>
+    <!-- Đế bóng 3D đáy khung -->
+    <linearGradient id="frameShadow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#240c01"/>
+      <stop offset="100%" stop-color="#0d0400"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Bóng đổ toàn khung (Outer drop shadow) -->
+  <rect x="8" y="12" width="240" height="236" rx="28" fill="#000000" opacity="0.45"/>
+
+  <!-- Đế gỗ 3D dưới đáy (Bevel 8px) -->
+  <rect x="6" y="8" width="244" height="242" rx="28" fill="url(#frameShadow)" stroke="#1a0800" stroke-width="3"/>
+
+  <!-- Thân khung gỗ chính -->
+  <rect x="6" y="6" width="244" height="236" rx="26" fill="url(#frameWood)" stroke="#3b1903" stroke-width="2"/>
+
+  <!-- Vành đai vàng kim bao quanh lòng bảng -->
+  <rect x="22" y="22" width="212" height="204" rx="18" fill="none" stroke="url(#goldTrim)" stroke-width="3.5"/>
+
+  <!-- Lòng bảng chứa nội dung dialog / modal -->
+  <rect x="25" y="25" width="206" height="198" rx="16" fill="url(#innerCanvas)" stroke="#090210" stroke-width="2"/>
+
+  <!-- 4 nẹp góc kim loại đồng vàng phong cách Cartoon (Corner Brackets) -->
+  <!-- Góc trên - Trái -->
+  <path d="M 8 36 L 8 20 A 14 14 0 0 1 20 8 L 36 8 L 36 18 L 18 18 L 18 36 Z" fill="#fbbf24" stroke="#78350f" stroke-width="1.5"/>
+  <circle cx="26" cy="26" r="2.5" fill="#fef08a" stroke="#78350f" stroke-width="1"/>
+
+  <!-- Góc trên - Phải -->
+  <path d="M 248 36 L 248 20 A 14 14 0 0 0 236 8 L 220 8 L 220 18 L 238 18 L 238 36 Z" fill="#fbbf24" stroke="#78350f" stroke-width="1.5"/>
+  <circle cx="230" cy="26" r="2.5" fill="#fef08a" stroke="#78350f" stroke-width="1"/>
+
+  <!-- Góc dưới - Trái -->
+  <path d="M 8 220 L 8 236 A 14 14 0 0 0 20 248 L 36 248 L 36 238 L 18 238 L 18 220 Z" fill="#fbbf24" stroke="#78350f" stroke-width="1.5"/>
+  <circle cx="26" cy="230" r="2.5" fill="#fef08a" stroke="#78350f" stroke-width="1"/>
+
+  <!-- Góc dưới - Phải -->
+  <path d="M 248 220 L 248 236 A 14 14 0 0 1 236 248 L 220 248 L 220 238 L 238 238 L 238 220 Z" fill="#fbbf24" stroke="#78350f" stroke-width="1.5"/>
+  <circle cx="230" cy="230" r="2.5" fill="#fef08a" stroke="#78350f" stroke-width="1"/>
+
+  <!-- Vân gỗ nổi trên viền ngang trên và dưới -->
+  <path d="M 45 13 Q 128 17 210 13" fill="none" stroke="#78350f" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+  <path d="M 50 242 Q 128 238 205 242" fill="none" stroke="#3b1903" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 64" width="256" height="64">
+  <defs>
+    <linearGradient id="topBarBase" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2a1242"/>
+      <stop offset="60%" stop-color="#190a2b"/>
+      <stop offset="100%" stop-color="#0f051c"/>
+    </linearGradient>
+    <linearGradient id="topBarGoldBevel" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="50%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Bóng đổ phía dưới thanh bar -->
+  <rect x="4" y="6" width="248" height="56" rx="16" fill="#000000" opacity="0.4"/>
+
+  <!-- Viền đế vàng Bevel dày 4px -->
+  <rect x="2" y="2" width="252" height="58" rx="16" fill="url(#topBarGoldBevel)" stroke="#451a03" stroke-width="1.5"/>
+
+  <!-- Thân thanh Bar tím thẫm thanh lịch -->
+  <rect x="4" y="3" width="248" height="52" rx="14" fill="url(#topBarBase)" stroke="#4c1d95" stroke-width="1.2"/>
+
+  <!-- Vệt bóng sáng mặt trên -->
+  <path d="M 16 6 H 240 Q 248 6 248 10 H 8 Q 8 6 16 6 Z" fill="#ffffff" opacity="0.25"/>
+
+  <!-- Đinh ốc vàng trang trí 2 mép -->
+  <circle cx="12" cy="28" r="2.5" fill="#fde047" stroke="#78350f" stroke-width="0.8"/>
+  <circle cx="244" cy="28" r="2.5" fill="#fde047" stroke="#78350f" stroke-width="0.8"/>
+</svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 64" width="192" height="64">
+  <defs>
+    <linearGradient id="redPressed" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#cc1818"/>
+      <stop offset="50%" stop-color="#9e0a0a"/>
+      <stop offset="100%" stop-color="#730404"/>
+    </linearGradient>
+    <linearGradient id="redBevelBottom" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#400202"/>
+      <stop offset="100%" stop-color="#240101"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Khối đế khi bị nhấn -->
+  <rect x="4" y="10" width="184" height="50" rx="16" fill="url(#redBevelBottom)" stroke="#240101" stroke-width="2"/>
+
+  <!-- Mặt nút lún xuống y=9 -->
+  <rect x="4" y="9" width="184" height="47" rx="16" fill="url(#redPressed)" stroke="#f87171" stroke-width="1.8"/>
+
+  <!-- Vệt bóng dập nhẹ -->
+  <path d="M 20 13 Q 96 16 172 13 C 176 13 177 16 175 20 Q 96 26 17 20 C 15 16 17 13 20 13 Z" fill="#ffffff" opacity="0.3"/>
+
+  <!-- Đinh tán góc -->
+  <circle cx="16" cy="32" r="3.2" fill="#fca5a5" stroke="#400202" stroke-width="1.2"/>
+  <circle cx="176" cy="32" r="3.2" fill="#fca5a5" stroke="#400202" stroke-width="1.2"/>
+</svg>

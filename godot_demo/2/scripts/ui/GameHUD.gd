@@ -114,9 +114,66 @@ func _ready() -> void:
 		GameManager.go_to_level_select()
 	)
 
+	_apply_cartoon_ui_theme()
 	_update_ui()
 	_setup_booster_tray()
 	_setup_level_1_tutorial()
+
+func _apply_cartoon_ui_theme() -> void:
+	# 1. TopBar với 9-Patch Header
+	var top_bar = get_node_or_null("TopBar")
+	if top_bar:
+		var sbt = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_top_bar_hud.svg", 20, 8, 20, 16)
+		if sbt: top_bar.add_theme_stylebox_override("panel", sbt)
+
+	# 2. Khay trứng EggShelf với rãnh gỗ đục trũng
+	var egg_shelf = get_node_or_null("EggShelf")
+	if egg_shelf:
+		var sbt = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/shelf_wood_grooves.svg", 20, 12, 20, 16)
+		if sbt: egg_shelf.add_theme_stylebox_override("panel", sbt)
+
+	# 3. Badges LevelBox & ScoreBox & CoinBox
+	var sbt_badge = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_badge_capsule.svg", 16, 12, 16, 16)
+	if sbt_badge:
+		var level_box = get_node_or_null("TopBar/Margin/HBox/LevelBox")
+		if level_box: level_box.add_theme_stylebox_override("panel", sbt_badge)
+		var score_box = get_node_or_null("TopBar/Margin/HBox/ScoreBox")
+		if score_box: score_box.add_theme_stylebox_override("panel", sbt_badge)
+		var coin_box = get_node_or_null("TopBar/Margin/HBox/CoinBox")
+		if coin_box: coin_box.add_theme_stylebox_override("panel", sbt_badge)
+
+	# 4. Modals (Victory, Fail, Pause, LastStand) với khung gỗ hoạt hình nẹp góc đồng vàng
+	var sbt_modal = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_modal_wood_frame.svg", 36, 36, 36, 44)
+	if sbt_modal:
+		if victory_modal: victory_modal.add_theme_stylebox_override("panel", sbt_modal)
+		if fail_modal: fail_modal.add_theme_stylebox_override("panel", sbt_modal)
+		if pause_modal: pause_modal.add_theme_stylebox_override("panel", sbt_modal)
+		if last_stand_modal: last_stand_modal.add_theme_stylebox_override("panel", sbt_modal)
+
+	# 5. Header Ribbons cho các Title
+	var sbt_ribbon_gold = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/banner_ribbon_gold.svg", 36, 12, 36, 18)
+	if sbt_ribbon_gold and victory_title:
+		victory_title.add_theme_stylebox_override("normal", sbt_ribbon_gold)
+		victory_title.add_theme_color_override("font_color", Color(0.24, 0.11, 0.0))
+		victory_title.add_theme_color_override("font_outline_color", Color(1.0, 0.96, 0.75))
+		victory_title.add_theme_constant_override("outline_size", 4)
+
+	var sbt_ribbon_red = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/banner_ribbon_red.svg", 36, 12, 36, 18)
+	if sbt_ribbon_red and fail_title:
+		fail_title.add_theme_stylebox_override("normal", sbt_ribbon_red)
+		fail_title.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
+		fail_title.add_theme_color_override("font_outline_color", Color(0.35, 0.06, 0.06))
+		fail_title.add_theme_constant_override("outline_size", 6)
+
+	var sbt_ribbon_wood = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/banner_ribbon_wood.svg", 36, 12, 36, 18)
+	if sbt_ribbon_wood:
+		if pause_title:
+			pause_title.add_theme_stylebox_override("normal", sbt_ribbon_wood)
+			pause_title.add_theme_color_override("font_color", Color(1.0, 0.96, 0.90))
+			pause_title.add_theme_color_override("font_outline_color", Color(0.18, 0.08, 0.02))
+			pause_title.add_theme_constant_override("outline_size", 6)
+		if last_stand_title:
+			last_stand_title.add_theme_stylebox_override("normal", sbt_ribbon_gold if sbt_ribbon_gold else sbt_ribbon_wood)
 
 func _process(_delta: float) -> void:
 	if tutorial_prompt_node and not tutorial_dismissed:

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <!-- Gỗ sồi hoạt hình cao cấp -->
+    <linearGradient id="cardWood" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3d1b54"/>
+      <stop offset="40%" stop-color="#2a103d"/>
+      <stop offset="100%" stop-color="#180724"/>
+    </linearGradient>
+    <linearGradient id="cardGoldBevel" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="45%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </linearGradient>
+    <linearGradient id="cardBevelBottom" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#5a2203"/>
+      <stop offset="100%" stop-color="#260c00"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Bóng đổ đáy -->
+  <rect x="5" y="8" width="118" height="114" rx="20" fill="#000000" opacity="0.4"/>
+
+  <!-- Đế 3D viền vàng dày 8px -->
+  <rect x="3" y="5" width="122" height="118" rx="20" fill="url(#cardBevelBottom)" stroke="#1f0a00" stroke-width="2"/>
+
+  <!-- Viền kim loại vàng bóng bẩy -->
+  <rect x="3" y="3" width="122" height="112" rx="18" fill="url(#cardGoldBevel)" stroke="#451a03" stroke-width="1.8"/>
+
+  <!-- Thân thẻ bài tím thẫm sang trọng -->
+  <rect x="7" y="7" width="114" height="102" rx="15" fill="url(#cardWood)" stroke="#150522" stroke-width="1.5"/>
+
+  <!-- Vệt bóng sáng mặt trên thẻ bài -->
+  <path d="M 16 10 Q 64 14 112 10 C 117 10 118 13 115 17 Q 64 24 13 17 C 10 13 11 10 16 10 Z" fill="#ffffff" opacity="0.35"/>
+
+  <!-- 4 đinh ốc vàng đính góc -->
+  <circle cx="15" cy="15" r="2.5" fill="#fef08a" stroke="#78350f" stroke-width="0.8"/>
+  <circle cx="113" cy="15" r="2.5" fill="#fef08a" stroke="#78350f" stroke-width="0.8"/>
+  <circle cx="15" cy="100" r="2.5" fill="#fef08a" stroke="#78350f" stroke-width="0.8"/>
+  <circle cx="113" cy="100" r="2.5" fill="#fef08a" stroke="#78350f" stroke-width="0.8"/>
+</svg>

@@ -1229,6 +1229,134 @@ func _ready() -> void:
 			errors.append("GameHUD victory modal displayed mismatched egg bonus: %s" % (hud19.victory_score.text if hud19.victory_score else "null"))
 		hud19.free()
 
+	# -------------------------------------------------------------------------
+	# 20. TEST 2D UI THEME, 9-PATCH TEXTURES & BUTTON SYNCHRONIZATION
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 20] Testing 2D UI Theme, 9-Patch Textures & Button Synchronization ---")
+
+	# 20.1: Verify all 20 UI SVG Assets exist and load cleanly
+	var ui_assets = [
+		"res://assets/sprites/ui/btn_primary_green_normal.svg",
+		"res://assets/sprites/ui/btn_primary_green_pressed.svg",
+		"res://assets/sprites/ui/btn_gold_action_normal.svg",
+		"res://assets/sprites/ui/btn_gold_action_pressed.svg",
+		"res://assets/sprites/ui/btn_wood_brown_normal.svg",
+		"res://assets/sprites/ui/btn_wood_brown_pressed.svg",
+		"res://assets/sprites/ui/btn_danger_red_normal.svg",
+		"res://assets/sprites/ui/btn_danger_red_pressed.svg",
+		"res://assets/sprites/ui/btn_icon_wood_normal.svg",
+		"res://assets/sprites/ui/btn_icon_wood_pressed.svg",
+		"res://assets/sprites/ui/panel_modal_wood_frame.svg",
+		"res://assets/sprites/ui/panel_top_bar_hud.svg",
+		"res://assets/sprites/ui/panel_badge_capsule.svg",
+		"res://assets/sprites/ui/shelf_wood_grooves.svg",
+		"res://assets/sprites/ui/banner_ribbon_gold.svg",
+		"res://assets/sprites/ui/banner_ribbon_red.svg",
+		"res://assets/sprites/ui/banner_ribbon_wood.svg",
+		"res://assets/sprites/ui/card_level_unlocked.svg",
+		"res://assets/sprites/ui/card_level_boss.svg",
+		"res://assets/sprites/ui/card_level_locked.svg"
+	]
+	var loaded_assets_count = 0
+	for p in ui_assets:
+		var tex = ParticleHelper._safe_load(p)
+		if tex != null:
+			loaded_assets_count += 1
+		else:
+			errors.append("UI Asset missing or invalid: " + p)
+	if loaded_assets_count == ui_assets.size():
+		print("  [PASS] All %d cartoon 2D UI SVG textures verified and loaded" % loaded_assets_count)
+	else:
+		errors.append("Failed loading UI assets: expected %d, got %d" % [ui_assets.size(), loaded_assets_count])
+
+	# 20.2: JuicyButton StyleBoxTexture Assignment across all styles
+	var styles_to_test = ["green", "gold", "red", "wood"]
+	var jb = JuicyButton.new()
+	add_child(jb)
+	for st in styles_to_test:
+		jb.set_button_style(st)
+		var sb_norm = jb.get_theme_stylebox("normal")
+		var sb_pres = jb.get_theme_stylebox("pressed")
+		if sb_norm is StyleBoxTexture and sb_pres is StyleBoxTexture:
+			print("  [PASS] JuicyButton style '%s' correctly binds 9-patch StyleBoxTexture" % st)
+		else:
+			errors.append("JuicyButton style '%s' missing StyleBoxTexture!" % st)
+	# Also test circular icon mode
+	jb.custom_minimum_size = Vector2(48, 48)
+	jb.text = ""
+	jb._apply_tactile_style()
+	var sb_icon = jb.get_theme_stylebox("normal")
+	if sb_icon is StyleBoxTexture:
+		print("  [PASS] JuicyButton square/circular icon mode correctly binds btn_icon_wood StyleBoxTexture")
+	else:
+		errors.append("JuicyButton icon mode missing StyleBoxTexture!")
+	jb.free()
+
+	# 20.3: GameHUD Theme Overrides Verification
+	var hud_scene20 = load("res://scenes/prefabs/GameHUD.tscn")
+	if hud_scene20:
+		var hud20 = hud_scene20.instantiate()
+		add_child(hud20)
+		var top_bar = hud20.get_node_or_null("TopBar")
+		var egg_shelf = hud20.get_node_or_null("EggShelf")
+		var level_box = hud20.get_node_or_null("TopBar/Margin/HBox/LevelBox")
+		var vm_panel = hud20.victory_modal
+
+		if top_bar and top_bar.get_theme_stylebox("panel") is StyleBoxTexture:
+			print("  [PASS] GameHUD TopBar successfully styled with panel_top_bar_hud StyleBoxTexture")
+		else:
+			errors.append("GameHUD TopBar missing StyleBoxTexture!")
+
+		if egg_shelf and egg_shelf.get_theme_stylebox("panel") is StyleBoxTexture:
+			print("  [PASS] GameHUD EggShelf successfully styled with shelf_wood_grooves StyleBoxTexture")
+		else:
+			errors.append("GameHUD EggShelf missing StyleBoxTexture!")
+
+		if level_box and level_box.get_theme_stylebox("panel") is StyleBoxTexture:
+			print("  [PASS] GameHUD Badge Capsule successfully styled with panel_badge_capsule StyleBoxTexture")
+		else:
+			errors.append("GameHUD LevelBox missing StyleBoxTexture!")
+
+		if vm_panel and vm_panel.get_theme_stylebox("panel") is StyleBoxTexture:
+			print("  [PASS] GameHUD Victory Modal panel successfully styled with panel_modal_wood_frame StyleBoxTexture")
+		else:
+			errors.append("GameHUD Victory Modal missing StyleBoxTexture!")
+		hud20.free()
+
+	# 20.4: Modals (ShopModal, SettingsModal, DailyWheelModal) Theme Verification
+	var shop_scene20 = load("res://scenes/ui/ShopModal.tscn")
+	if shop_scene20:
+		var shop20 = shop_scene20.instantiate()
+		add_child(shop20)
+		var p = shop20.get_node_or_null("CenterContainer/Panel")
+		if p and p.get_theme_stylebox("panel") is StyleBoxTexture:
+			print("  [PASS] ShopModal panel successfully styled with panel_modal_wood_frame StyleBoxTexture")
+		else:
+			errors.append("ShopModal panel missing StyleBoxTexture!")
+		shop20.free()
+
+	var settings_scene20 = load("res://scenes/ui/SettingsModal.tscn")
+	if settings_scene20:
+		var sm_modal20 = settings_scene20.instantiate()
+		add_child(sm_modal20)
+		var p = sm_modal20.get_node_or_null("CenterContainer/Panel")
+		if p and p.get_theme_stylebox("panel") is StyleBoxTexture:
+			print("  [PASS] SettingsModal panel successfully styled with panel_modal_wood_frame StyleBoxTexture")
+		else:
+			errors.append("SettingsModal panel missing StyleBoxTexture!")
+		sm_modal20.free()
+
+	var wheel_scene20 = load("res://scenes/ui/DailyWheelModal.tscn")
+	if wheel_scene20:
+		var wheel20 = wheel_scene20.instantiate()
+		add_child(wheel20)
+		var p = wheel20.get_node_or_null("CenterContainer/Panel")
+		if p and p.get_theme_stylebox("panel") is StyleBoxTexture:
+			print("  [PASS] DailyWheelModal panel successfully styled with panel_modal_wood_frame StyleBoxTexture")
+		else:
+			errors.append("DailyWheelModal panel missing StyleBoxTexture!")
+		wheel20.free()
+
 	print("\n================================================================")
 	# Explicitly clean up all remaining nodes in TestRunner
 	for child in get_children():
