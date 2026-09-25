@@ -99,13 +99,14 @@ func _check_underlying_support() -> void:
 			apply_central_impulse(Vector2(0, 20.0))
 
 func wake_up() -> void:
-	if is_broken: return
+	if is_broken or is_awake: return
 	if has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
 		if gm.current_egg_index == 0:
 			return # Peacetime lock
 	is_awake = true
 	sleeping = false
+	freeze = false
 	set_deferred("freeze", false)
 
 func _on_impact(body: Node) -> void:

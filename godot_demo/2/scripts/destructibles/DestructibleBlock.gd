@@ -347,28 +347,25 @@ func _physics_process(delta: float) -> void:
 			if anti_wedge_timer > 2.0:
 				anti_wedge_timer = 0.0
 				if not _has_rigid_support():
-					# Cú hích vi mô phá vỡ cân bằng giả tạo của vòm kẹt
-					var nudge_dir = 1.0 if rotation > 0 else -1.0
-					apply_central_impulse(Vector2(nudge_dir * 12.0, 18.0))
+					sleeping = false
 		else:
 			anti_wedge_timer = max(0.0, anti_wedge_timer - delta * 2.0)
 
-		# Chống lơ lửng: Nếu khối đã ngủ (sleeping) nhưng mất bệ đỡ bên dưới -> đánh thức rơi ngay
+		# Chống lơ lửng: Nếu khối đã ngủ (sleeping) nhưng mất bệ đỡ bên dưới -> đánh thức rơi tự nhiên theo trọng lực
 		if sleeping:
 			support_check_timer -= delta
 			if support_check_timer <= 0.0:
 				support_check_timer = 0.35
 				if not _has_rigid_support():
 					sleeping = false
-					apply_central_impulse(Vector2(0, 25.0))
 
 	if not is_awake:
 		if spawn_settle_timer > 0.0:
 			return
-		# KHÓA CỐ ĐỊNH 100%: Tuyệt đối không tự rã đông khi người chơi chưa bắn quả trứng nào
+		# KHÓA CỐ ĐỊNH 100%: Tuyệt đối không tự rã đông khi chưa có va chạm / nổ nào xảy ra trong ván đấu
 		if has_node("/root/GameManager"):
 			var gm = get_node("/root/GameManager")
-			if gm.current_egg_index == 0:
+			if gm.current_egg_index == 0 or not gm.has_first_impact_occurred:
 				return
 		support_check_timer -= delta
 		if support_check_timer <= 0.0:
@@ -467,7 +464,7 @@ func _check_underlying_support() -> void:
 		wake_up()
 
 func wake_up() -> void:
-	if is_destroyed: return
+	if is_destroyed or is_awake: return
 	# KHÓA CỐ ĐỊNH 100%: Tuyệt đối không bao giờ rã đông trong thời gian yên tĩnh (chưa bắn trứng)
 	if has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
@@ -475,40 +472,65 @@ func wake_up() -> void:
 			return
 	is_awake = true
 	sleeping = false
-	micro_jitter_timer = 0.0
+	freeze = false
 	set_deferred("freeze", false)
+	micro_jitter_timer = 0.0
 	_wake_up_neighbors()
 
 func _wake_up_neighbors() -> void:
-	# Lan tỏa thức giấc lên trên cột để toàn bộ tháp sụp đổ đồng bộ, không bao giờ để khối trên lơ lửng
+	# Lan tỏa thức giấc lên trên cột để toàn bộ tháp sụp đổ đồng bộ, không bao giờ để khối trên lơ lửng.
+	# Sử dụng hàng đợi BFS lặp (Iterative Queue) để triệt tiêu 100% rủi ro đệ quy sâu / Stack Overflow.
 	var space_state = get_world_2d().direct_space_state
 	if not space_state: return
 
-	var hh = block_size.y * 0.5
-	var box_height = max(hh * 1.5, 140.0)
-	var box = RectangleShape2D.new()
-	var box_width = max(block_size.x + 40.0, 70.0)
-	box.size = Vector2(box_width, box_height)
-	var up_query = PhysicsShapeQueryParameters2D.new()
-	up_query.shape = box
-	up_query.transform = Transform2D(0, global_position + Vector2(0, -hh - box_height * 0.5 + 4.0))
-	up_query.collide_with_bodies = true
-	up_query.exclude = [get_rid()]
+	var queue: Array[Node2D] = [self]
+	var visited: Dictionary = {self: true}
+	var max_iterations = 64
 
-	var up_hits = space_state.intersect_shape(up_query, 32)
-	for uh in up_hits:
-		var ub = uh.collider
-		if is_instance_valid(ub) and ub != self and not ub.is_queued_for_deletion():
-			if ub is RigidBody2D:
-				ub.sleeping = false
-				if ub.freeze:
-					if ub.has_method("wake_up"):
-						ub.wake_up()
+	while not queue.is_empty() and visited.size() <= max_iterations:
+		var current = queue.pop_front()
+		if not is_instance_valid(current) or current.is_queued_for_deletion():
+			continue
+
+		var c_size = current.block_size if "block_size" in current else Vector2(64.0, 32.0)
+		var hh = c_size.y * 0.5
+		var box_height = max(hh * 1.5, 120.0)
+		var box_width = max(c_size.x + 20.0, 50.0)
+		var box = RectangleShape2D.new()
+		box.size = Vector2(box_width, box_height)
+
+		var up_query = PhysicsShapeQueryParameters2D.new()
+		up_query.shape = box
+		# Đặt hộp truy vấn hoàn toàn nằm TRÊN đỉnh khối (từ mép trên trở lên, không chèn vào bệ đỡ bên dưới)
+		up_query.transform = Transform2D(0, current.global_position + Vector2(0, -hh - box_height * 0.5))
+		up_query.collide_with_bodies = true
+		up_query.exclude = [current.get_rid()]
+
+		var up_hits = space_state.intersect_shape(up_query, 24)
+		for uh in up_hits:
+			var ub = uh.collider
+			if is_instance_valid(ub) and ub != self and not ub.is_queued_for_deletion() and not visited.has(ub):
+				visited[ub] = true
+				if ub is RigidBody2D:
+					ub.sleeping = false
+					# Chỉ lan tỏa thức giấc cho các vật thể nằm ở trên đỉnh hoặc ngang tầm đỉnh (Y <= current.global_position.y - hh + 4.0)
+					if ub.global_position.y <= (current.global_position.y - hh + 4.0):
+						if "is_awake" in ub:
+							if not ub.is_awake:
+								ub.is_awake = true
+								ub.sleeping = false
+								ub.freeze = false
+								ub.set_deferred("freeze", false)
+								if "micro_jitter_timer" in ub:
+									ub.micro_jitter_timer = 0.0
+								queue.append(ub)
+						else:
+							ub.freeze = false
+							ub.set_deferred("freeze", false)
 					else:
-						ub.freeze = false
-				else:
-					# Đã rã đông nhưng có thể đang đứng yên, kích hoạt rơi ngay
-					ub.apply_central_impulse(Vector2(0, 20.0))
+						# Đã rã đông nhưng có thể đang đứng yên, đánh thức ngủ để rơi tự nhiên
+						ub.sleeping = false
+
 
 func _on_impact(body: Node) -> void:
 	if is_destroyed or spawn_settle_timer > 0.0: return
@@ -516,6 +538,7 @@ func _on_impact(body: Node) -> void:
 		var gm = get_node("/root/GameManager")
 		if gm.current_egg_index == 0:
 			return
+		gm.register_first_impact()
 
 	if body is RigidBody2D:
 		var b_vel = body.linear_velocity
@@ -537,6 +560,8 @@ func _on_impact(body: Node) -> void:
 
 func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
 	if is_destroyed: return
+	if has_node("/root/GameManager"):
+		get_node("/root/GameManager").register_first_impact()
 	if not is_awake:
 		wake_up()
 	sleeping = false

@@ -16,6 +16,7 @@ var remaining_enemies: int = 0
 var total_enemies: int = 0
 var available_eggs: Array[String] = []
 var current_egg_index: int = 0
+var has_first_impact_occurred: bool = false
 
 var is_level_active: bool = false
 var is_level_finishing: bool = false
@@ -93,6 +94,7 @@ func start_level(level_id: int, enemy_count: int, egg_list: Array[String]) -> vo
 	remaining_enemies = enemy_count
 	available_eggs = egg_list.duplicate()
 	current_egg_index = 0
+	has_first_impact_occurred = false
 	current_score = 0
 	total_level_blocks = 0
 	destroyed_blocks_count = 0
@@ -106,6 +108,9 @@ func start_level(level_id: int, enemy_count: int, egg_list: Array[String]) -> vo
 	score_updated.emit(current_score)
 	level_started.emit(current_level, available_eggs)
 	report_youtube_game_ready()
+
+func register_first_impact() -> void:
+	has_first_impact_occurred = true
 
 func register_block_destroyed() -> void:
 	if not is_level_active and not is_level_finishing: return

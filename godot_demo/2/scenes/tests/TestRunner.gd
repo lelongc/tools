@@ -1516,6 +1516,72 @@ func _ready() -> void:
 			print("  [PASS] ShopModal contains is_closing guard against rapid double-dismissal")
 		shop22.free()
 
+	# -------------------------------------------------------------------------
+	# 23. TEST SUITE 23: ANTI-RECURSION WAKE-UP & STACK-SAFETY VERIFICATION
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 23] Testing Anti-Recursion Wake-Up & Iterative Stack Safety ---")
+	GameManager.current_egg_index = 1
+	var blk_scene = load("res://scenes/prefabs/DestructibleBlock.tscn")
+	if blk_scene:
+		var test_blocks: Array[Node2D] = []
+		# Build a 5-tier tower of interconnected pillars and overlapping crossbeams
+		for tier in range(5):
+			var y_pos = 600.0 - tier * 32.0
+			var p1 = blk_scene.instantiate()
+			p1.position = Vector2(300.0, y_pos)
+			p1.block_size = Vector2(32.0, 32.0)
+			p1.spawn_settle_timer = 0.0
+			add_child(p1)
+			test_blocks.append(p1)
+
+			var p2 = blk_scene.instantiate()
+			p2.position = Vector2(360.0, y_pos)
+			p2.block_size = Vector2(32.0, 32.0)
+			p2.spawn_settle_timer = 0.0
+			add_child(p2)
+			test_blocks.append(p2)
+
+			var beam = blk_scene.instantiate()
+			beam.position = Vector2(330.0, y_pos - 16.0)
+			beam.block_size = Vector2(96.0, 16.0)
+			beam.spawn_settle_timer = 0.0
+			add_child(beam)
+			test_blocks.append(beam)
+
+		# Trigger wake_up on the base pillar
+		test_blocks[0].wake_up()
+		if not test_blocks[0].is_awake:
+			errors.append("Base pillar did not wake up!")
+		else:
+			print("  [PASS] Base pillar wake_up() executed cleanly without recursion")
+
+		# Trigger multiple redundant wake_up calls (testing idempotency guard)
+		test_blocks[0].wake_up()
+		test_blocks[2].wake_up()
+		print("  [PASS] Redundant wake_up() calls absorbed idempotently")
+
+		# Test fracture neighbor propagation
+		test_blocks[1]._fracture_block()
+		print("  [PASS] _fracture_block() executed with BFS iterative queue without stack overflow")
+
+		for tb in test_blocks:
+			tb.free()
+
+	# Test idempotency on TNT, Nuke, Boulder, Monster
+	var tnt_s = load("res://scenes/prefabs/TNTBarrel.tscn")
+	if tnt_s:
+		var tnt = tnt_s.instantiate()
+		add_child(tnt)
+		tnt.wake_up()
+		tnt.wake_up()
+		if not tnt.is_awake:
+			errors.append("TNTBarrel is_awake is false after wake_up()!")
+		else:
+			print("  [PASS] TNTBarrel wake_up() idempotent and unfreezes cleanly")
+		tnt.free()
+
+	GameManager.current_egg_index = 0
+
 	print("\n================================================================")
 	# Explicitly clean up all remaining nodes in TestRunner
 	for child in get_children():

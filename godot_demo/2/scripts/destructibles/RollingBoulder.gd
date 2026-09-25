@@ -153,12 +153,14 @@ func _load_svg(path: String) -> Texture2D:
 	return ParticleHelper._safe_load(path)
 
 func wake_up() -> void:
+	if is_awake: return
 	if has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
 		if gm.current_egg_index == 0:
 			return # Peacetime lock
 	is_awake = true
 	sleeping = false
+	freeze = false
 	set_deferred("freeze", false)
 
 func _on_impact(body: Node) -> void:

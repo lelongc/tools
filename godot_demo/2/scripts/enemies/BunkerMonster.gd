@@ -891,13 +891,14 @@ func _play_spawn_bounce() -> void:
 	tween.tween_property(visual_root, "scale", target_s, 0.3)
 
 func wake_up() -> void:
-	if is_defeated: return
+	if is_defeated or is_awake: return
 	if has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
 		if gm.current_egg_index == 0:
 			return # Khóa tĩnh tuyệt đối lúc chưa bắn trứng
 	is_awake = true
 	sleeping = false
+	freeze = false
 	set_deferred("freeze", false)
 
 var crush_audio_cooldown: float = 0.0
@@ -914,7 +915,7 @@ func _physics_process(delta: float) -> void:
 
 	if has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
-		if gm.current_egg_index == 0:
+		if gm.current_egg_index == 0 or not gm.has_first_impact_occurred:
 			return
 	if not is_awake:
 		support_check_timer -= delta

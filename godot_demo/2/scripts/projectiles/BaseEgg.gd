@@ -108,6 +108,8 @@ func _physics_process(delta: float) -> void:
 
 func _on_body_entered(body: Node) -> void:
 	if is_breaking: return
+	if has_node("/root/GameManager"):
+		get_node("/root/GameManager").register_first_impact()
 
 	var current_spd = linear_velocity.length()
 	var pre_spd = pre_impact_velocity.length()
