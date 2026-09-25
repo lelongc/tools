@@ -489,6 +489,7 @@ func _on_last_stand_skip_pressed() -> void:
 # ĐIỂM CHẠM 2: NHÂN BA PHẦN THƯỞNG (X3 COINS)
 # ==========================================
 func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> void:
+	victory_claimed = false
 	current_base_coins = base_coins
 	# BUG-03: Triệt tiêu Last Stand và Fail modal nếu chiến thắng xuất hiện
 	if last_stand_tween and last_stand_tween.is_valid():
@@ -514,7 +515,7 @@ func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> 
 				prev_best = get_node("/root/SaveManager").get_level_score(GameManager.current_level)
 			var is_new_record = (final_score > prev_best and prev_best > 0)
 			var unused_eggs = max(0, GameManager.available_eggs.size() - GameManager.current_egg_index)
-			var egg_bonus = unused_eggs * 1000
+			var egg_bonus = unused_eggs * 1200
 
 			var score_text = lm.t("KEY_FINAL_SCORE") % final_score if lm else "Tổng Điểm: %d" % final_score
 			if egg_bonus > 0:

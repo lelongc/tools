@@ -995,7 +995,11 @@ func _handle_continuous_crushing(delta: float) -> void:
 	var is_crushed_this_frame = false
 
 	for b in bodies:
-		if not is_instance_valid(b) or b == self: continue
+		if not is_instance_valid(b) or b == self or b.is_queued_for_deletion(): continue
+		if "is_destroyed" in b and b.is_destroyed: continue
+		if "is_defeated" in b and b.is_defeated: continue
+		if "is_broken" in b and b.is_broken: continue
+		if "is_breaking" in b and b.is_breaking: continue
 		if b is RigidBody2D:
 			# Kiểm tra xem khối có đang đè phía trên hay ép vào quái
 			var is_above = (b.global_position.y < global_position.y + 12.0)
@@ -1233,8 +1237,15 @@ func _check_is_pinned() -> bool:
 	var results = space_state.intersect_shape(query, 6)
 	for res in results:
 		var col = res.collider
-		if is_instance_valid(col) and col != self and col is RigidBody2D:
-			if col.global_position.y < global_position.y:
+		if is_instance_valid(col) and col != self and col is RigidBody2D and not col.is_queued_for_deletion():
+			var is_failing = false
+			if ("is_destroyed" in col and col.is_destroyed) \
+				or ("is_defeated" in col and col.is_defeated) \
+				or ("is_ignited" in col and col.is_ignited) \
+				or ("is_broken" in col and col.is_broken) \
+				or ("is_breaking" in col and col.is_breaking):
+				is_failing = true
+			if not is_failing and col.global_position.y < global_position.y:
 				return true
 	return false
 

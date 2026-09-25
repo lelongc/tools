@@ -18,6 +18,7 @@ var available_eggs: Array[String] = []
 var current_egg_index: int = 0
 
 var is_level_active: bool = false
+var is_level_finishing: bool = false
 var is_settling: bool = false
 var settle_timer: float = 0.0
 var max_settle_fallback_timer: float = 0.0
@@ -96,6 +97,7 @@ func start_level(level_id: int, enemy_count: int, egg_list: Array[String]) -> vo
 	total_level_blocks = 0
 	destroyed_blocks_count = 0
 	is_level_active = true
+	is_level_finishing = false
 	is_settling = false
 	settle_timer = 0.0
 	max_settle_fallback_timer = 0.0
@@ -106,11 +108,11 @@ func start_level(level_id: int, enemy_count: int, egg_list: Array[String]) -> vo
 	report_youtube_game_ready()
 
 func register_block_destroyed() -> void:
-	if not is_level_active: return
+	if not is_level_active and not is_level_finishing: return
 	destroyed_blocks_count += 1
 
 func add_score(points: int) -> void:
-	if not is_level_active: return
+	if not is_level_active and not is_level_finishing: return
 	current_score += points
 	score_updated.emit(current_score)
 
@@ -221,9 +223,19 @@ func fail_level() -> void:
 func _trigger_victory_delay(skip_delay: bool = false) -> Variant:
 	if not is_level_active: return 0
 	is_level_active = false
-	
-	var unused_eggs = available_eggs.size() - current_egg_index
-	# Cộng điểm thưởng trứng dư trực tiếp vào snapshot
+	is_level_finishing = true
+
+	if not skip_delay:
+		var session = current_session_id
+		await get_tree().create_timer(1.2).timeout
+		if session != current_session_id:
+			is_level_finishing = false
+			return 0 # Bỏ qua nếu người chơi đã thoát hoặc đổi màn trong lúc đợi
+
+	is_level_finishing = false
+
+	var unused_eggs = max(0, available_eggs.size() - current_egg_index)
+	# Cộng điểm thưởng trứng dư trực tiếp vào snapshot sau khi các khối kết thúc sập đổ
 	var bonus_points = unused_eggs * 1200
 	current_score += bonus_points
 	score_updated.emit(current_score)
@@ -257,11 +269,6 @@ func _trigger_victory_delay(skip_delay: bool = false) -> Variant:
 	# Báo cáo điểm số lên YouTube Playables nếu chạy trên nền tảng Web
 	send_youtube_score(snapshot_final_score)
 
-	if not skip_delay:
-		var session = current_session_id
-		await get_tree().create_timer(1.2).timeout
-		if session != current_session_id:
-			return 0 # Bỏ qua nếu người chơi đã thoát hoặc đổi màn trong lúc đợi
 	level_completed.emit(stars, snapshot_final_score, base_coins)
 	return stars
 

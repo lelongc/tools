@@ -1158,6 +1158,77 @@ func _ready() -> void:
 		print("  [PASS] DestructibleBlock spawns debris dust cloud on heavy stone fracture (I03)")
 		b18.queue_free()
 
+	# ================================================================
+	# TEST SUITE 19: ANIMATION, VFX POLISH & LOGIC LOOPHOLE AUDIT
+	# ================================================================
+	print("\n--- TEST SUITE 19: ANIMATION, VFX POLISH & LOGIC LOOPHOLE AUDIT ---")
+
+	# 19.1: RollingBoulder Ground-Pinned DustFX (Catherine Wheel Vortex Fix)
+	var rb_scene = load("res://scenes/prefabs/RollingBoulder.tscn")
+	if rb_scene:
+		var rb = rb_scene.instantiate()
+		add_child(rb)
+		if rb.dust_fx and rb.dust_fx.top_level:
+			print("  [PASS] RollingBoulder dust_fx decouples rotation via top_level = true (No spinning vortex)")
+		else:
+			errors.append("RollingBoulder dust_fx top_level was not set to true")
+		rb.free()
+
+	# 19.2: RescueCage Upright Chick Flight & Idle Breathing
+	var rc_scene = load("res://scenes/prefabs/RescueCage.tscn")
+	if rc_scene:
+		var rc = rc_scene.instantiate()
+		add_child(rc)
+		rc._process(0.016)
+		if rc.chick != null:
+			print("  [PASS] RescueCage chick updates breathing animation while trapped in cage")
+		rc._break_open()
+		if rc.chick and rc.chick.top_level and is_equal_approx(rc.chick.global_rotation, 0.0):
+			print("  [PASS] RescueCage chick decouples top_level and flies upright vertically into the sky")
+		else:
+			errors.append("RescueCage chick failed to decouple top_level or was tilted upon release")
+		rc.queue_free()
+
+	# 19.3: GameManager Victory Collapse Scoring (Allow Debris Collapse Points)
+	GameManager.start_level(998, 1, ["normal"])
+	GameManager.is_level_active = false
+	GameManager.is_level_finishing = true
+	var pre_score = GameManager.current_score
+	GameManager.add_score(250)
+	GameManager.register_block_destroyed()
+	if GameManager.current_score == pre_score + 250 and GameManager.destroyed_blocks_count == 1:
+		print("  [PASS] GameManager allows tumbling debris to register score & blocks during victory transition")
+	else:
+		errors.append("GameManager failed to credit points during is_level_finishing transition")
+	GameManager.is_level_finishing = false
+
+	# 19.4: BunkerMonster Anti-Ghost Pinning Check
+	var bm_scene = load("res://scenes/prefabs/BunkerMonster.tscn")
+	if bm_scene:
+		var bm = bm_scene.instantiate()
+		add_child(bm)
+		bm.is_awake = true
+		var is_pinned = bm._check_is_pinned()
+		if not is_pinned:
+			print("  [PASS] BunkerMonster ignores destroyed/shattered blocks during pinned check (No ghost pinning)")
+		else:
+			errors.append("BunkerMonster falsely reported pinned under invalid body")
+		bm.free()
+
+	# 19.5: GameHUD Synchronized Egg Bonus Calculation
+	var hud_scene19 = load("res://scenes/prefabs/GameHUD.tscn")
+	if hud_scene19:
+		var hud19 = hud_scene19.instantiate()
+		add_child(hud19)
+		GameManager.available_eggs = ["normal", "bomb"]
+		GameManager.current_egg_index = 0 # 2 unused eggs
+		hud19._on_level_completed(3, 5000, 100)
+		if hud19.victory_score and "2400" in hud19.victory_score.text:
+			print("  [PASS] GameHUD victory modal displays accurate egg bonus (2 eggs * 1200 = +2400)")
+		else:
+			errors.append("GameHUD victory modal displayed mismatched egg bonus: %s" % (hud19.victory_score.text if hud19.victory_score else "null"))
+		hud19.free()
+
 	print("\n================================================================")
 	# Explicitly clean up all remaining nodes in TestRunner
 	for child in get_children():

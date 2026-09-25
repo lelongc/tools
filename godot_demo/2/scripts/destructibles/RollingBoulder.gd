@@ -29,6 +29,7 @@ func _ready() -> void:
 		if tex: visual_sprite.texture = tex
 
 	if dust_fx:
+		dust_fx.top_level = true
 		ParticleHelper.apply_smoke_fx(dust_fx, 0.25, 0.5)
 		if world_id in [4, 9]:
 			dust_fx.color = Color(1.0, 0.55, 0.2, 0.7)
@@ -68,6 +69,10 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if dust_fx:
+		dust_fx.global_position = global_position + Vector2(0, 24.0)
+		dust_fx.global_rotation = 0.0
+		if abs(linear_velocity.x) > 20.0:
+			dust_fx.direction = Vector2(-sign(linear_velocity.x), -0.4).normalized()
 		dust_fx.emitting = (is_awake and linear_velocity.length() > 65.0)
 
 	if not is_awake:

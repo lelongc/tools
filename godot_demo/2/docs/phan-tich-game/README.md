@@ -84,6 +84,12 @@
    - Phân tích chi tiết trước và sau khi triển khai: Thước đo lực kéo ná (Tension Arc), Nảy dây thun đàn hồi (Snap-Back), Pháo hoa giấy 3 sao (Confetti Cannon), Chấm đỏ FREE Vòng Quay, Mây bụi đất đá (Debris Dust), Cưỡng chế ngủ sớm (Sleep Throttling), Xung lực phá vòm kẹt (Anti-Wedging) và Bảng hướng dẫn tân thủ (Interactive Tutorial).
    - Báo cáo kiểm thử tự động toàn diện: **18/18 Bộ Test Tự Động Vượt Qua Tuyệt Đối (0 Lỗi, Return Code 0)**.
    - Bảng tổng duyệt sẵn sàng xuất bản thương mại trên Google Play Store và YouTube Playables.
+15. [24 — Đại Phẫu Animation, Hiệu Ứng VFX & Lỗ Hổng Logic Toàn Diện](24-dai-phau-animation-hieu-ung-va-lo-hong-logic-toan-dien.md): **Hoạt Ảnh Chân Thực & Logic Chặt Chẽ Tuyệt Đối**:
+   - Xóa bỏ vòng xoáy bụi Catherine Wheel của tảng đá lăn `RollingBoulder` bằng cách neo giữ tọa độ đáy `top_level = true` và tạt bụi theo hướng di chuyển.
+   - Cố định quỹ đạo cứu hộ gà con `RescueCage` luôn bay thẳng đứng lên trời bất chấp lồng bị lăn đổ nghiêng hay úp ngược, bổ sung hoạt họa thở hồi hộp khi bị nhốt.
+   - Sửa lỗ hổng đóng màn sớm trong `GameManager`: cho phép chuỗi phản ứng dây chuyền sụp đổ domino trong 1.2s delay tiếp tục ghi nhận điểm số và số khối vỡ trước khi chấm 3 sao.
+   - Triệt tiêu hiện tượng kẹt đè ảo (Ghost Pinning) trên `BunkerMonster` khi khối đè phía trên vừa nổ vụn.
+   - Đồng bộ chuẩn hóa tính toán điểm thưởng trứng dư 1200 điểm/quả giữa `GameManager` và `GameHUD`.
 
 ---
 
@@ -91,8 +97,8 @@
 
 ```
 ================================================================
->>> ALL 18 TEST SUITES PASSED SUCCESSFULLY! (0 ERRORS) <<<
+>>> ALL 19 TEST SUITES PASSED SUCCESSFULLY! (0 ERRORS) <<<
 ================================================================
 ```
-- **0 Lỗi logic, 18/18 Bộ Test Tự Động Vượt Qua Tuyệt Đối, Return Code 0**.
-- Hệ sinh thái dự án đã hoàn thiện trọn vẹn **14 bộ tài liệu kỹ thuật đỉnh cao** (từ Tài liệu 10 đến Tài liệu 23), phủ kín $100\%$ các khía cạnh: engine, mỹ thuật, cân bằng, hiệu năng, lỗi tiềm ẩn, bảo mật, YouTube Playables và CH Play Store 2026.
+- **0 Lỗi logic, 19/19 Bộ Test Tự Động Vượt Qua Tuyệt Đối, Return Code 0**.
+- Hệ sinh thái dự án đã hoàn thiện trọn vẹn **15 bộ tài liệu kỹ thuật đỉnh cao** (từ Tài liệu 10 đến Tài liệu 24), phủ kín $100\%$ các khía cạnh: engine, mỹ thuật, cân bằng, hiệu năng, lỗi tiềm ẩn, bảo mật, YouTube Playables và CH Play Store 2026.

@@ -34,6 +34,12 @@ var support_check_timer: float = 0.12
 
 func _process(delta: float) -> void:
 	if is_broken: return
+
+	if chick:
+		var t = Time.get_ticks_msec() * 0.005
+		var breath = sin(t) * 0.05
+		chick.scale = Vector2(0.65 * (1.0 + breath), 0.65 * (1.0 - breath))
+
 	if not is_awake:
 		if has_node("/root/GameManager"):
 			var gm = get_node("/root/GameManager")
@@ -137,12 +143,16 @@ func _break_open() -> void:
 		confetti_fx.restart()
 		confetti_fx.emitting = true
 
-	# Bé gà con vui sướng bay vút lên trời
+	# Bé gà con vui sướng bay vút lên trời theo phương thẳng đứng toàn cục
 	if chick:
+		var start_global = chick.global_position
+		chick.top_level = true
+		chick.global_position = start_global
+		chick.global_rotation = 0.0
 		var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-		tween.tween_property(chick, "position:y", -180.0, 0.8)
-		tween.tween_property(chick, "scale", Vector2(1.5, 1.5), 0.4)
-		tween.tween_property(chick, "modulate:a", 0.0, 0.8)
+		tween.tween_property(chick, "global_position:y", start_global.y - 180.0, 0.85)
+		tween.tween_property(chick, "scale", Vector2(1.15, 1.15), 0.4)
+		tween.tween_property(chick, "modulate:a", 0.0, 0.85)
 
 	if cage_bars:
 		var tween = create_tween()
