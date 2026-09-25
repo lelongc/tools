@@ -63,6 +63,8 @@ func _on_body_entered(_body: Node) -> void:
 func _detonate() -> void:
 	if is_broken: return
 	is_broken = true
+	if has_node("/root/GameManager"):
+		get_node("/root/GameManager").register_first_impact()
 
 	CameraShake.hit_stop(0.06)
 	CameraShake.add_trauma(0.85)

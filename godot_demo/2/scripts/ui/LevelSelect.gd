@@ -327,3 +327,4 @@ func _apply_safe_area() -> void:
 	if top_bar:
 		var target_top = max(10.0, top_inset + 6.0)
 		top_bar.offset_top = target_top
+		top_bar.offset_bottom = target_top + 56.0

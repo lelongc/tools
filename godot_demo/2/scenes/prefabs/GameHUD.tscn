@@ -98,7 +98,7 @@ theme_override_constants/separation = 8
 alignment = 1
 
 [node name="BtnPause" type="Button" parent="TopBar/Margin/HBox"]
-custom_minimum_size = Vector2(44, 42)
+custom_minimum_size = Vector2(46, 44)
 layout_mode = 2
 icon = ExtResource("3_pause_ico")
 expand_icon = true
@@ -183,7 +183,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="BtnRestart" type="Button" parent="TopBar/Margin/HBox"]
-custom_minimum_size = Vector2(44, 42)
+custom_minimum_size = Vector2(46, 44)
 layout_mode = 2
 icon = ExtResource("4_replay_ico")
 expand_icon = true
@@ -192,7 +192,7 @@ is_wood_brown = true
 
 [node name="BtnVipTrial" type="Button" parent="TopBar/Margin/HBox"]
 visible = false
-custom_minimum_size = Vector2(68, 42)
+custom_minimum_size = Vector2(70, 44)
 layout_mode = 2
 theme_override_font_sizes/font_size = 13
 text = "VIP"

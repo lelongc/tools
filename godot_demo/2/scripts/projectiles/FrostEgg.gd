@@ -73,6 +73,8 @@ func _safe_load(path: String) -> Texture2D:
 func _freeze_blast() -> void:
 	if is_broken: return
 	is_broken = true
+	if has_node("/root/GameManager"):
+		get_node("/root/GameManager").register_first_impact()
 
 	CameraShake.hit_stop(0.05)
 	CameraShake.add_trauma(0.4)

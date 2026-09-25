@@ -986,7 +986,6 @@ func _check_underlying_support() -> void:
 			wake_up()
 		elif sleeping:
 			sleeping = false
-			apply_central_impulse(Vector2(0, 20.0))
 
 func _handle_continuous_crushing(delta: float) -> void:
 	if crush_audio_cooldown > 0.0:
@@ -1632,6 +1631,7 @@ func _on_impact(body: Node) -> void:
 		var gm = get_node("/root/GameManager")
 		if gm.current_egg_index == 0:
 			return # Peacetime lock
+		gm.register_first_impact()
 
 	if body is RigidBody2D:
 		var rel_vel = (linear_velocity - body.linear_velocity).length()
@@ -1643,6 +1643,8 @@ func _on_impact(body: Node) -> void:
 
 func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO, is_continuous_crush: bool = false) -> void:
 	if is_defeated: return
+	if has_node("/root/GameManager"):
+		get_node("/root/GameManager").register_first_impact()
 	if not is_awake: wake_up()
 
 	if has_armor:

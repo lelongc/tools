@@ -140,7 +140,7 @@ func _apply_cartoon_ui_theme() -> void:
 		if sbt: egg_shelf.add_theme_stylebox_override("panel", sbt)
 
 	# 3. Badges LevelBox & ScoreBox & CoinBox
-	var sbt_badge = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_badge_capsule.svg", 16, 12, 16, 16)
+	var sbt_badge = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_badge_capsule.svg", 16, 12, 16, 16, 8, 3, 8, 4)
 	if sbt_badge:
 		var level_box = get_node_or_null("TopBar/Margin/HBox/LevelBox")
 		if level_box: level_box.add_theme_stylebox_override("panel", sbt_badge)
@@ -337,7 +337,7 @@ func _apply_safe_area() -> void:
 	var top_bar = get_node_or_null("TopBar") as Control
 	if top_bar:
 		var target_top = max(8.0, top_inset + 4.0)
-		var bar_h = 52.0
+		var bar_h = 56.0
 		top_bar.offset_top = target_top
 		top_bar.offset_bottom = target_top + bar_h
 

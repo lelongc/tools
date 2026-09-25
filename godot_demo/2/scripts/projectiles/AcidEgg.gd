@@ -61,6 +61,8 @@ func _start_acid_melting() -> void:
 	is_broken = true
 	is_melting = true
 	melt_timer = acid_duration
+	if has_node("/root/GameManager"):
+		get_node("/root/GameManager").register_first_impact()
 
 	CameraShake.add_trauma(0.35)
 	if has_node("/root/SoundManager"):

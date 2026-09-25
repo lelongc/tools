@@ -43,6 +43,8 @@ func _trigger_vortex() -> void:
 	has_boosted = true
 	is_singularity = true
 	vortex_timer = vortex_duration
+	if has_node("/root/GameManager"):
+		get_node("/root/GameManager").register_first_impact()
 
 	CameraShake.add_trauma(0.6)
 	if has_node("/root/SoundManager"):

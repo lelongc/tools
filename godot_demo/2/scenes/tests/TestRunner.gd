@@ -269,6 +269,7 @@ func _ready() -> void:
 	# -------------------------------------------------------------------------
 	print("\n--- [TEST 6] Testing Unsupported Block & Boulder Gravity Wake-Up ---")
 	GameManager.current_egg_index = 1 # Active gameplay mode (past peacetime lock)
+	GameManager.has_first_impact_occurred = true
 
 	var air_block = block_scene.instantiate()
 	air_block.position = Vector2(500, -200) # High up in empty space
@@ -299,6 +300,7 @@ func _ready() -> void:
 
 	air_block.queue_free()
 	GameManager.current_egg_index = 0
+	GameManager.has_first_impact_occurred = false
 
 	# -------------------------------------------------------------------------
 	# 7. TEST BUG FIXES: ADS BUTTON UNLOCK, PAUSE RESILIENCE, & BLACKHOLE BLAST
@@ -1581,6 +1583,86 @@ func _ready() -> void:
 		tnt.free()
 
 	GameManager.current_egg_index = 0
+	GameManager.has_first_impact_occurred = false
+
+	# -------------------------------------------------------------------------
+	# 24. TEST SUITE 24: TOPBAR UI ERGONOMICS & PRE-IMPACT TERRAIN RIGIDITY
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 24] Testing TopBar UI Ergonomics & Pre-Impact Rigidity ---")
+
+	# 24.1: Pre-Impact Peacetime Guard: An unsupported block must NOT wake up while egg is in flight
+	GameManager.current_egg_index = 1
+	GameManager.has_first_impact_occurred = false
+	if block_scene:
+		var pre_block = block_scene.instantiate()
+		pre_block.position = Vector2(500, -200)
+		add_child(pre_block)
+		pre_block.spawn_settle_timer = 0.0
+		# Simulate physics frames while egg is in flight
+		pre_block._physics_process(0.0166)
+		pre_block._physics_process(0.15)
+		if pre_block.is_awake:
+			errors.append("Block woke up prematurely while egg was in flight before impact!")
+		else:
+			print("  [PASS] Pre-impact terrain stability confirmed: Block stayed 100% frozen in flight")
+
+		# Now trigger impact
+		GameManager.register_first_impact()
+		if not GameManager.has_first_impact_occurred:
+			errors.append("GameManager register_first_impact failed to set flag!")
+		else:
+			print("  [PASS] GameManager register_first_impact activated correctly")
+
+		pre_block._physics_process(0.15)
+		if not pre_block.is_awake:
+			errors.append("Block failed to wake up after impact occurred!")
+		else:
+			print("  [PASS] Block woke up post-impact as expected")
+		pre_block.free()
+
+	# 24.2: JuicyButton square icon content margin decoupling
+	var test_btn24 = JuicyButton.new()
+	test_btn24.custom_minimum_size = Vector2(46, 44)
+	add_child(test_btn24)
+	var sbt_ico = test_btn24.get_theme_stylebox("normal") as StyleBoxTexture
+	if sbt_ico:
+		if sbt_ico.content_margin_left > 10:
+			errors.append("JuicyButton square icon content margin is bloated: %d" % sbt_ico.content_margin_left)
+		else:
+			print("  [PASS] JuicyButton square icon content margins decoupled (content_margin_left: %d)" % sbt_ico.content_margin_left)
+	test_btn24.free()
+
+	# 24.3: GameHUD TopBar button sizes
+	var hud_sc24 = load("res://scenes/prefabs/GameHUD.tscn")
+	if hud_sc24:
+		var h24 = hud_sc24.instantiate()
+		add_child(h24)
+		var btn_p = h24.get_node_or_null("TopBar/Margin/HBox/BtnPause") as Button
+		var btn_r = h24.get_node_or_null("TopBar/Margin/HBox/BtnRestart") as Button
+		if btn_p and btn_r:
+			if btn_p.custom_minimum_size.y < 44 or btn_r.custom_minimum_size.y < 44:
+				errors.append("GameHUD TopBar buttons are too small (< 44px)!")
+			else:
+				print("  [PASS] GameHUD TopBar buttons comfortably sized (Pause: %s, Restart: %s)" % [btn_p.custom_minimum_size, btn_r.custom_minimum_size])
+		h24.free()
+
+	# 24.4: MainMenu TopBar button sizes
+	var mm_sc24 = load("res://scenes/ui/MainMenu.tscn")
+	if mm_sc24:
+		var mm24 = mm_sc24.instantiate()
+		add_child(mm24)
+		var b_snd = mm24.get_node_or_null("TopBar/Margin/HBox/BtnSound") as Button
+		var b_set = mm24.get_node_or_null("TopBar/Margin/HBox/BtnSettings") as Button
+		var b_lang = mm24.get_node_or_null("TopBar/Margin/HBox/BtnLang") as Button
+		if b_snd and b_set and b_lang:
+			if b_snd.custom_minimum_size.y < 42 or b_set.custom_minimum_size.y < 42 or b_lang.custom_minimum_size.y < 42:
+				errors.append("MainMenu TopBar buttons are too small (< 42px)!")
+			else:
+				print("  [PASS] MainMenu TopBar buttons comfortably sized (Lang: %s, Sound: %s, Set: %s)" % [b_lang.custom_minimum_size, b_snd.custom_minimum_size, b_set.custom_minimum_size])
+		mm24.free()
+
+	GameManager.current_egg_index = 0
+	GameManager.has_first_impact_occurred = false
 
 	print("\n================================================================")
 	# Explicitly clean up all remaining nodes in TestRunner

@@ -38,9 +38,10 @@ func set_button_style(style_name: String) -> void:
 
 static var _sbt_cache: Dictionary = {}
 
-static func _get_or_create_sbt(tex_path: String, ml: int, mt: int, mr: int, mb: int) -> StyleBoxTexture:
-	if _sbt_cache.has(tex_path):
-		return _sbt_cache[tex_path]
+static func _get_or_create_sbt(tex_path: String, ml: int, mt: int, mr: int, mb: int, c_ml: int = -1, c_mt: int = -1, c_mr: int = -1, c_mb: int = -1) -> StyleBoxTexture:
+	var cache_key = "%s_%d_%d_%d_%d_%d_%d_%d_%d" % [tex_path, ml, mt, mr, mb, c_ml, c_mt, c_mr, c_mb]
+	if _sbt_cache.has(cache_key):
+		return _sbt_cache[cache_key]
 	var tex = ParticleHelper._safe_load(tex_path)
 	if tex:
 		var sbt = StyleBoxTexture.new()
@@ -49,7 +50,12 @@ static func _get_or_create_sbt(tex_path: String, ml: int, mt: int, mr: int, mb: 
 		sbt.texture_margin_top = mt
 		sbt.texture_margin_right = mr
 		sbt.texture_margin_bottom = mb
-		_sbt_cache[tex_path] = sbt
+		if c_ml >= 0:
+			sbt.content_margin_left = c_ml
+			sbt.content_margin_top = c_mt
+			sbt.content_margin_right = c_mr
+			sbt.content_margin_bottom = c_mb
+		_sbt_cache[cache_key] = sbt
 		return sbt
 	return null
 
@@ -62,21 +68,21 @@ func _apply_tactile_style() -> void:
 	var radius = 16
 	var corner_r = int(clamp(size.y * 0.32, 12, 20)) if size.y > 0 else radius
 
-	var is_square_icon = (custom_minimum_size.x <= 54 and custom_minimum_size.y <= 54 and custom_minimum_size.x > 0) \
-		or (size.x <= 54 and size.y <= 54 and size.x > 0 and text.strip_edges() == "")
+	var is_square_icon = (custom_minimum_size.x <= 56 and custom_minimum_size.y <= 56 and custom_minimum_size.x > 0 and (text.strip_edges() == "" or icon != null)) \
+		or (size.x <= 56 and size.y <= 56 and size.x > 0 and text.strip_edges() == "")
 	var sbt_normal: StyleBoxTexture = null
 	var sbt_pressed: StyleBoxTexture = null
 
 	if is_square_icon:
-		sbt_normal = _get_or_create_sbt("res://assets/sprites/ui/btn_icon_wood_normal.svg", 16, 16, 16, 18)
-		sbt_pressed = _get_or_create_sbt("res://assets/sprites/ui/btn_icon_wood_pressed.svg", 16, 18, 16, 16)
+		sbt_normal = _get_or_create_sbt("res://assets/sprites/ui/btn_icon_wood_normal.svg", 16, 16, 16, 18, 6, 5, 6, 7)
+		sbt_pressed = _get_or_create_sbt("res://assets/sprites/ui/btn_icon_wood_pressed.svg", 16, 18, 16, 16, 6, 7, 6, 5)
 		add_theme_color_override("font_color", Color(1.0, 0.96, 0.90))
 		add_theme_color_override("font_outline_color", Color(0.18, 0.08, 0.02))
 		add_theme_constant_override("outline_size", 4)
 	elif is_primary_green:
 		# NÚT XANH LỤC BẢO (Play / Next Level / Resume)
-		sbt_normal = _get_or_create_sbt("res://assets/sprites/ui/btn_primary_green_normal.svg", 20, 16, 20, 22)
-		sbt_pressed = _get_or_create_sbt("res://assets/sprites/ui/btn_primary_green_pressed.svg", 20, 18, 20, 18)
+		sbt_normal = _get_or_create_sbt("res://assets/sprites/ui/btn_primary_green_normal.svg", 20, 16, 20, 22, 14, 8, 14, 10)
+		sbt_pressed = _get_or_create_sbt("res://assets/sprites/ui/btn_primary_green_pressed.svg", 20, 18, 20, 18, 14, 10, 14, 8)
 		add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
 		add_theme_color_override("font_hover_color", Color(1.0, 1.0, 0.92))
 		add_theme_color_override("font_outline_color", Color(0.04, 0.20, 0.05))
@@ -85,8 +91,8 @@ func _apply_tactile_style() -> void:
 		add_theme_constant_override("shadow_offset_y", 2)
 	elif is_gold_action:
 		# NÚT VÀNG HOÀNG KIM (Lucky Wheel / Claim 3X / Rewarded Ad)
-		sbt_normal = _get_or_create_sbt("res://assets/sprites/ui/btn_gold_action_normal.svg", 20, 16, 20, 22)
-		sbt_pressed = _get_or_create_sbt("res://assets/sprites/ui/btn_gold_action_pressed.svg", 20, 18, 20, 18)
+		sbt_normal = _get_or_create_sbt("res://assets/sprites/ui/btn_gold_action_normal.svg", 20, 16, 20, 22, 14, 8, 14, 10)
+		sbt_pressed = _get_or_create_sbt("res://assets/sprites/ui/btn_gold_action_pressed.svg", 20, 18, 20, 18, 14, 10, 14, 8)
 		add_theme_color_override("font_color", Color(0.24, 0.11, 0.0))
 		add_theme_color_override("font_hover_color", Color(0.16, 0.06, 0.0))
 		add_theme_color_override("font_outline_color", Color(1.0, 0.96, 0.75))
@@ -95,8 +101,8 @@ func _apply_tactile_style() -> void:
 		add_theme_constant_override("shadow_offset_y", 1)
 	elif is_danger_red:
 		# NÚT ĐỎ SAN HÔ (Close / Skip / Exit)
-		sbt_normal = _get_or_create_sbt("res://assets/sprites/ui/btn_danger_red_normal.svg", 20, 16, 20, 22)
-		sbt_pressed = _get_or_create_sbt("res://assets/sprites/ui/btn_danger_red_pressed.svg", 20, 18, 20, 18)
+		sbt_normal = _get_or_create_sbt("res://assets/sprites/ui/btn_danger_red_normal.svg", 20, 16, 20, 22, 14, 8, 14, 10)
+		sbt_pressed = _get_or_create_sbt("res://assets/sprites/ui/btn_danger_red_pressed.svg", 20, 18, 20, 18, 14, 10, 14, 8)
 		add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
 		add_theme_color_override("font_hover_color", Color(1.0, 0.95, 0.95))
 		add_theme_color_override("font_outline_color", Color(0.35, 0.06, 0.06))
@@ -105,8 +111,8 @@ func _apply_tactile_style() -> void:
 		add_theme_constant_override("shadow_offset_y", 2)
 	else:
 		# NÚT GỖ SỒI MỘC (Level Select / Settings / Restart / Back)
-		sbt_normal = _get_or_create_sbt("res://assets/sprites/ui/btn_wood_brown_normal.svg", 20, 16, 20, 22)
-		sbt_pressed = _get_or_create_sbt("res://assets/sprites/ui/btn_wood_brown_pressed.svg", 20, 18, 20, 18)
+		sbt_normal = _get_or_create_sbt("res://assets/sprites/ui/btn_wood_brown_normal.svg", 20, 16, 20, 22, 12, 7, 12, 9)
+		sbt_pressed = _get_or_create_sbt("res://assets/sprites/ui/btn_wood_brown_pressed.svg", 20, 18, 20, 18, 12, 9, 12, 7)
 		add_theme_color_override("font_color", Color(1.0, 0.96, 0.90))
 		add_theme_color_override("font_hover_color", Color(1.0, 1.0, 0.96))
 		add_theme_color_override("font_outline_color", Color(0.18, 0.08, 0.02))

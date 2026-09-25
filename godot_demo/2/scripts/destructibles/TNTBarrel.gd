@@ -48,7 +48,7 @@ func _process(delta: float) -> void:
 	if not is_awake:
 		if has_node("/root/GameManager"):
 			var gm = get_node("/root/GameManager")
-			if gm.current_egg_index == 0:
+			if gm.current_egg_index == 0 or not gm.has_first_impact_occurred:
 				return
 		support_check_timer -= delta
 		if support_check_timer <= 0.0:
@@ -101,7 +101,6 @@ func _check_underlying_support() -> void:
 			wake_up()
 		elif sleeping:
 			sleeping = false
-			apply_central_impulse(Vector2(0, 20.0))
 
 func wake_up() -> void:
 	if is_ignited or is_awake: return
@@ -120,6 +119,7 @@ func _on_impact(body: Node) -> void:
 		var gm = get_node("/root/GameManager")
 		if gm.current_egg_index == 0:
 			return
+		gm.register_first_impact()
 
 	if body is RigidBody2D:
 		var speed = (linear_velocity - body.linear_velocity).length()
@@ -130,6 +130,8 @@ func _on_impact(body: Node) -> void:
 
 func take_damage(_amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
 	if is_ignited: return
+	if has_node("/root/GameManager"):
+		get_node("/root/GameManager").register_first_impact()
 	if not is_awake:
 		wake_up()
 	is_ignited = true

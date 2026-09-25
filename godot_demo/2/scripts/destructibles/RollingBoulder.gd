@@ -82,7 +82,7 @@ func _physics_process(delta: float) -> void:
 		# KHÓA CỐ ĐỊNH 100%: Tuyệt đối không tự rã đông khi người chơi chưa bắn quả trứng nào
 		if has_node("/root/GameManager"):
 			var gm = get_node("/root/GameManager")
-			if gm.current_egg_index == 0:
+			if gm.current_egg_index == 0 or not gm.has_first_impact_occurred:
 				return
 		support_check_timer -= delta
 		if support_check_timer <= 0.0:
@@ -147,7 +147,6 @@ func _check_underlying_support() -> void:
 			wake_up()
 		elif sleeping:
 			sleeping = false
-			apply_central_impulse(Vector2(0, 20.0))
 
 func _load_svg(path: String) -> Texture2D:
 	return ParticleHelper._safe_load(path)
@@ -168,6 +167,7 @@ func _on_impact(body: Node) -> void:
 		var gm = get_node("/root/GameManager")
 		if gm.current_egg_index == 0:
 			return # Peacetime lock
+		gm.register_first_impact()
 
 	var my_speed = linear_velocity.length()
 	var body_speed = 0.0
@@ -188,4 +188,6 @@ func _on_impact(body: Node) -> void:
 			ParticleHelper.spawn_comic_popup(get_parent(), global_position, "CRUNCH!", Color(1.0, 0.6, 0.1))
 
 func take_damage(_amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
+	if has_node("/root/GameManager"):
+		get_node("/root/GameManager").register_first_impact()
 	if not is_awake: wake_up()
