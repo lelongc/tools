@@ -1357,6 +1357,107 @@ func _ready() -> void:
 			errors.append("DailyWheelModal panel missing StyleBoxTexture!")
 		wheel20.free()
 
+	# -------------------------------------------------------------------------
+	# 21. TEST 8 HARDENING FIXES (AUDIT DOCUMENT 26)
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 21] Testing Hardening & Bug Fixes (Doc 26) ---")
+
+	# 21.1: Audio 'whoosh.wav' & SoundManager Cache Stability
+	if has_node("/root/SoundManager"):
+		var sm = get_node("/root/SoundManager")
+		var whoosh_stream = load("res://assets/audio/whoosh.wav")
+		if whoosh_stream == null:
+			errors.append("res://assets/audio/whoosh.wav could not be loaded!")
+		else:
+			print("  [PASS] whoosh.wav loaded successfully")
+
+		# Test play_whoosh
+		sm.play_whoosh()
+		print("  [PASS] SoundManager.play_whoosh() executed without error")
+
+		# Test stop_all cache preservation
+		var cache_size_before = sm.wav_cache.size()
+		sm.stop_all()
+		var cache_size_after = sm.wav_cache.size()
+		if cache_size_after < cache_size_before:
+			errors.append("SoundManager.stop_all() purged audio cache! Before: %d, After: %d" % [cache_size_before, cache_size_after])
+		else:
+			print("  [PASS] SoundManager.stop_all() preserved wav_cache correctly (size: %d)" % cache_size_after)
+
+	# 21.2: Localization 15 Keys Coverage
+	if has_node("/root/LocalizationManager"):
+		var lm = get_node("/root/LocalizationManager")
+		var keys_to_test = [
+			"KEY_SETTINGS", "KEY_BGM_VOLUME", "KEY_SFX_VOLUME", "KEY_VIBRATION",
+			"KEY_RESET_PROGRESS", "KEY_RESET_CONFIRM_DESC", "KEY_CONFIRM", "KEY_CANCEL", "KEY_CLOSE",
+			"KEY_BOMB_BOOSTER", "KEY_DRILL_BOOSTER", "KEY_ACID_BOOSTER", "KEY_COMBO_BOOSTER", "KEY_PURCHASED",
+			"KEY_WORLD_1", "KEY_WORLD_2", "KEY_WORLD_3", "KEY_WORLD_4", "KEY_WORLD_5",
+			"KEY_WORLD_6", "KEY_WORLD_7", "KEY_WORLD_8", "KEY_WORLD_9", "KEY_WORLD_10"
+		]
+		var missing_keys: Array[String] = []
+		for k in keys_to_test:
+			var translated = lm.t(k)
+			if translated == k:
+				missing_keys.append(k)
+		if missing_keys.size() > 0:
+			errors.append("LocalizationManager missing keys: %s" % str(missing_keys))
+		else:
+			print("  [PASS] All 15+ missing localization keys successfully defined and translated")
+
+	# 21.3: SaveManager Reset Contains vibration_enabled
+	if has_node("/root/SaveManager"):
+		var sm = get_node("/root/SaveManager")
+		sm.reset_save()
+		var has_vib = sm.save_data.has("settings") and sm.save_data.settings.has("vibration_enabled")
+		if not has_vib or sm.save_data.settings.vibration_enabled != true:
+			errors.append("SaveManager.reset_save() missing vibration_enabled: true setting!")
+		else:
+			print("  [PASS] SaveManager.reset_save() preserves vibration_enabled: true")
+
+	# 21.4: BunkerMonster Boss Signals & Group
+	var monster_scene = load("res://scenes/prefabs/BunkerMonster.tscn")
+	if monster_scene:
+		var boss_mon = monster_scene.instantiate()
+		boss_mon.monster_type = "boss_mech"
+		boss_mon.is_boss = true
+		add_child(boss_mon)
+		if not boss_mon.is_in_group("Bosses"):
+			errors.append("BunkerMonster with is_boss=true not added to 'Bosses' group!")
+		else:
+			print("  [PASS] BunkerMonster boss registered in 'Bosses' group")
+
+		var signal_received = false
+		boss_mon.health_changed.connect(func(_cur, _max): signal_received = true)
+		boss_mon.take_damage(50, Vector2.ZERO)
+		if not signal_received:
+			errors.append("BunkerMonster did not emit health_changed signal on damage!")
+		else:
+			print("  [PASS] BunkerMonster successfully emitted health_changed signal on damage")
+		boss_mon.free()
+
+	# 21.5: GameHUD Boss Health Bar
+	var hud_scene21 = load("res://scenes/ui/GameHUD.tscn")
+	if hud_scene21 and monster_scene:
+		var boss_mon2 = monster_scene.instantiate()
+		boss_mon2.monster_type = "boss_lava"
+		boss_mon2.is_boss = true
+		add_child(boss_mon2)
+
+		var hud21 = hud_scene21.instantiate()
+		add_child(hud21)
+		# Allow _setup_boss_bar await get_tree().process_frame to complete
+		await get_tree().process_frame
+		await get_tree().process_frame
+
+		if hud21.boss_bar_container == null:
+			errors.append("GameHUD failed to create BossHealthBar for boss level!")
+		else:
+			print("  [PASS] GameHUD BossHealthBar created and displayed successfully")
+			if hud21.boss_hp_bar != null:
+				print("  [PASS] GameHUD Boss ProgressBar bound with max value: %d" % int(hud21.boss_hp_bar.max_value))
+		hud21.free()
+		boss_mon2.free()
+
 	print("\n================================================================")
 	# Explicitly clean up all remaining nodes in TestRunner
 	for child in get_children():

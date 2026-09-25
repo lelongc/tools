@@ -95,6 +95,14 @@
    - Bộ khung modal gỗ sồi nẹp góc đồng thau, thanh Header đá phiến đen mạ vàng, khay đựng trứng đục rãnh gỗ, viên nang huy hiệu vàng và 3 dải ruy băng 3D uốn lượn.
    - Nâng cấp `JuicyButton` với static cache StyleBoxTexture và điều phối phong cách tập trung `set_button_style()`.
    - Đồng bộ hóa toàn diện `GameHUD`, `MainMenu`, `LevelSelect` (200 thẻ bài chọn màn 9-patch), `ShopModal`, `SettingsModal` và `DailyWheelModal`.
+17. [26 — Đại Kiểm Tra Toàn Diện: Phát Hiện Bất Thường, Điểm Lỗi & Khắc Phục Triệt Để Các Lỗ Hổng Tiềm Ẩn](26-dai-kiem-tra-toan-dien-phat-hien-va-fix-triet-de-cac-lo-hong.md): **Đại Kiểm Tra & Vá Lỗ Hổng Toàn Hệ Thống**:
+   - Khởi tạo âm thanh gió rít `whoosh.wav` cho gà bổ nhào, vá triệt để lỗi âm thanh câm sau khi xóa cảnh trong `SoundManager` (`wav_cache.clear()`).
+   - Bổ sung trọn vẹn 15 khóa đa ngôn ngữ còn thiếu trong `LocalizationManager` (10 ngôn ngữ: Anh, Việt, Nhật, Hàn, Trung, Tây Ban Nha, Bồ Đào Nha, Đức, Pháp, Nga).
+   - Tích hợp cài đặt rung `vibration_enabled: true` khi reset dữ liệu người chơi trong `SaveManager`.
+   - Thiết kế và triển khai Thanh Máu Trùm Thế Giới (World Boss Health Bar) trên `GameHUD` kết nối với nhóm `Bosses` và tín hiệu `health_changed`/`monster_defeated` của `BunkerMonster`.
+   - Chặn hoàn toàn sự kiện rò rỉ chạm màn hình (`set_input_as_handled()`) khi kích hoạt kỹ năng giữa không trung trên cả 5 loại trứng kỹ năng (`BlackHoleEgg`, `DrillEgg`, `AcidEgg`, `FrostEgg`, `ClusterEgg`).
+   - Đồng bộ hóa vật liệu khối boong-ke `@export_enum` đầy đủ 11 loại trong `DestructibleBlock`.
+   - Xóa emoji hardcoded `🛍️ ` trên `MainMenu` và chuẩn hóa dải ruy băng thế giới với 9-patch trong `LevelSelect`.
 
 ---
 
@@ -102,8 +110,8 @@
 
 ```
 ================================================================
->>> ALL 20 TEST SUITES PASSED SUCCESSFULLY! (0 ERRORS) <<<
+>>> ALL 21 TEST SUITES PASSED SUCCESSFULLY! (0 ERRORS) <<<
 ================================================================
 ```
-- **0 Lỗi logic, 20/20 Bộ Test Tự Động Vượt Qua Tuyệt Đối, Return Code 0**.
-- Hệ sinh thái dự án đã hoàn thiện trọn vẹn **16 bộ tài liệu kỹ thuật đỉnh cao** (từ Tài liệu 10 đến Tài liệu 25), phủ kín $100\%$ các khía cạnh: engine, mỹ thuật, cân bằng, hiệu năng, lỗi tiềm ẩn, bảo mật, YouTube Playables, CH Play Store 2026 và hệ thống giao diện 2D 9-patch vector.
+- **0 Lỗi logic, 21/21 Bộ Test Tự Động Vượt Qua Tuyệt Đối, Return Code 0**.
+- Hệ sinh thái dự án đã hoàn thiện trọn vẹn **17 bộ tài liệu kỹ thuật đỉnh cao** (từ Tài liệu 10 đến Tài liệu 26), phủ kín $100\%$ các khía cạnh: engine, mỹ thuật, cân bằng, hiệu năng, lỗi tiềm ẩn, bảo mật, YouTube Playables, CH Play Store 2026, hệ thống giao diện 2D 9-patch vector và kiểm định toàn diện chất lượng game.

@@ -26,6 +26,7 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_broken and not has_boosted and BaseEgg.is_valid_airborne_tap(event):
+		get_viewport().set_input_as_handled()
 		has_boosted = true
 		_hatch_chicks()
 

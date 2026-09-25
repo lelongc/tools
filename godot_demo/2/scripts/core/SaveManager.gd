@@ -56,6 +56,7 @@ func reset_save() -> void:
 		"level_stars": {},
 		"level_scores": {},
 		"sound_enabled": true,
+		"vibration_enabled": true,
 		"total_stars": 0,
 		"coins": 150,
 		"consumables": {

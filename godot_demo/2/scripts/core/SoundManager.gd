@@ -101,7 +101,8 @@ func _load_all_sound_assets() -> void:
 		"victory_fanfare": "res://assets/audio/victory_fanfare.wav",
 		"level_fail": "res://assets/audio/level_fail.wav",
 		"coin_pickup": "res://assets/audio/coin_pickup.wav",
-		"cartoon_bunker_bgm": "res://assets/audio/cartoon_bunker_bgm.wav"
+		"cartoon_bunker_bgm": "res://assets/audio/cartoon_bunker_bgm.wav",
+		"whoosh": "res://assets/audio/whoosh.wav"
 	}
 
 	for key in sound_map:
@@ -166,6 +167,8 @@ func _on_bgm_finished() -> void:
 func play_sfx(key: String, vol_db: float = 0.0, pitch_min: float = 0.94, pitch_max: float = 1.06) -> void:
 	if not is_inside_tree(): return
 	if not is_sound_enabled(): return
+	if wav_cache.is_empty():
+		_load_all_sound_assets()
 	if not wav_cache.has(key): return
 
 	# Giới hạn số âm thanh trùng lặp trong cửa sổ 45ms (Chống nổ rè loa khi nổ dây chuyền)
@@ -381,6 +384,10 @@ func play_synth_tone(freq_or_type = 440.0, duration: float = 0.12, type: String 
 	p.pitch_scale = randf_range(0.92, 1.08)
 	p.play()
 
+func play_whoosh() -> void:
+	if not can_play_sfx("whoosh", 0.05): return
+	play_sfx("whoosh", 0.6, 0.95, 1.15)
+
 func stop_all() -> void:
 	if bgm_player:
 		bgm_player.stop()
@@ -395,7 +402,6 @@ func stop_all() -> void:
 		if p:
 			p.stop()
 			p.stream = null
-	wav_cache.clear()
 
 func _exit_tree() -> void:
 	stop_all()

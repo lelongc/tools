@@ -27,6 +27,9 @@ enum IdleAction {
 	SUSPICIOUS
 }
 
+signal health_changed(cur_hp: float, max_hp: float)
+signal monster_defeated()
+
 @export_enum("sly_fox", "fox_guard", "armored_raccoon", "mine_wolf", "spike_hound", "toxic_fox", "imperial_boar", "boss_baron_pig", "crystal_badger", "cyber_hound", "cyborg_fox", "swamp_mutant", "spore_badger", "frost_yeti", "blizzard_wolf", "magma_drake", "lava_golem", "void_wraith", "celestial_sentinel", "boss_iron_crusher", "boss_toxic_alchemist", "boss_magma_emperor", "boss_crystal_overlord", "boss_cyber_mech", "boss_swamp_hydra", "boss_frost_colossus", "boss_dragon_warlord", "boss_singularity_prime") var monster_type: String = "sly_fox"
 @export var max_health: float = 70.0
 @export var score_value: int = 800
@@ -118,6 +121,8 @@ var active_emote_tween: Tween = null
 
 func _ready() -> void:
 	add_to_group("Enemies")
+	if monster_type.begins_with("boss_"):
+		add_to_group("Bosses")
 	_setup_monster_attributes()
 	_load_character_expression_palette()
 
@@ -1651,6 +1656,7 @@ func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO, is_continuous
 			_set_state(State.FURIOUS_ARMOR_LOSS)
 
 	current_health -= amount
+	health_changed.emit(max(0.0, current_health), max_health)
 
 	if current_health > 0.0 and current_health <= max_health * 0.45 and not is_currently_pinned:
 		_set_state(State.CRITICAL_INJURED)
@@ -1694,6 +1700,8 @@ func _defeat_monster() -> void:
 	is_defeated = true
 	current_state = State.DEFEATED
 	_clear_emote()
+	health_changed.emit(0.0, max_health)
+	monster_defeated.emit()
 
 	if has_node("/root/GameManager"):
 		get_node("/root/GameManager").register_enemy_defeat(self, score_value)

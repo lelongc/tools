@@ -68,6 +68,11 @@ func _apply_cartoon_ui_theme() -> void:
 			world_title.add_theme_color_override("font_outline_color", Color(0.18, 0.08, 0.02))
 			world_title.add_theme_constant_override("outline_size", 6)
 
+	var world_frame = get_node_or_null("WorldFrame")
+	if world_frame:
+		var sbt_frame = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_top_bar_hud.svg", 20, 8, 20, 16)
+		if sbt_frame: world_frame.add_theme_stylebox_override("panel", sbt_frame)
+
 func _build_world_ribbon() -> void:
 	if not world_ribbon_box: return
 	for child in world_ribbon_box.get_children():
@@ -130,29 +135,16 @@ func _render_world_levels() -> void:
 	for i in range(ribbon_buttons.size()):
 		var r_btn = ribbon_buttons[i]
 		var is_active = (i + 1 == current_world)
-		var style = StyleBoxFlat.new()
-		style.corner_radius_top_left = 10
-		style.corner_radius_top_right = 10
-		style.corner_radius_bottom_right = 10
-		style.corner_radius_bottom_left = 10
 		if is_active:
-			style.bg_color = Color(0.85, 0.62, 0.12, 0.95)
-			style.border_width_bottom = 3
-			style.border_width_top = 1
-			style.border_width_left = 1
-			style.border_width_right = 1
-			style.border_color = Color(1.0, 0.95, 0.6, 1.0)
-			r_btn.add_theme_color_override("font_color", Color(0.12, 0.05, 0.02, 1.0))
+			var sbt = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_badge_capsule.svg", 16, 16, 16, 16)
+			r_btn.add_theme_stylebox_override("normal", sbt)
+			r_btn.add_theme_stylebox_override("hover", sbt)
+			r_btn.add_theme_color_override("font_color", Color(1.0, 0.95, 0.6, 1.0))
 		else:
-			style.bg_color = Color(0.18, 0.10, 0.28, 0.9)
-			style.border_width_bottom = 2
-			style.border_width_top = 1
-			style.border_width_left = 1
-			style.border_width_right = 1
-			style.border_color = Color(0.4, 0.3, 0.55, 0.6)
+			var sbt = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/btn_wood_brown_normal.svg", 12, 12, 12, 16)
+			r_btn.add_theme_stylebox_override("normal", sbt)
+			r_btn.add_theme_stylebox_override("hover", sbt)
 			r_btn.add_theme_color_override("font_color", Color(0.85, 0.8, 0.9, 0.9))
-		r_btn.add_theme_stylebox_override("normal", style)
-		r_btn.add_theme_stylebox_override("hover", style)
 
 	# Đồng bộ bối cảnh bầu trời & hang ngầm chân thực theo từng Thế Giới
 	var world_names = ["farm", "quarry", "industrial", "lava", "crystal", "cyber", "toxic", "glacier", "dragon", "celestial"]

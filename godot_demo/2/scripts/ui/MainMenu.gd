@@ -58,25 +58,6 @@ func _ready() -> void:
 		tween.tween_property(title_label, "scale", Vector2.ONE, 0.6).set_trans(Tween.TRANS_SINE)
 
 	_apply_cartoon_ui_theme()
-	_update_star_count()
-	_update_coin_count()
-	_update_sound_button()
-	_update_language_ui()
-	_setup_wheel_badge()
-
-func _apply_cartoon_ui_theme() -> void:
-	var top_bar = get_node_or_null("TopBar")
-	if top_bar:
-		var sbt = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_top_bar_hud.svg", 20, 8, 20, 16)
-		if sbt: top_bar.add_theme_stylebox_override("panel", sbt)
-
-	var sbt_badge = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_badge_capsule.svg", 16, 12, 16, 16)
-	if sbt_badge:
-		var star_badge = get_node_or_null("TopBar/Margin/HBox/StarBadge")
-		if star_badge: star_badge.add_theme_stylebox_override("panel", sbt_badge)
-		var coin_badge = get_node_or_null("TopBar/Margin/HBox/CoinBadge")
-		if coin_badge: coin_badge.add_theme_stylebox_override("panel", sbt_badge)
-
 	_apply_safe_area()
 	get_viewport().size_changed.connect(_apply_safe_area)
 
@@ -98,6 +79,25 @@ func _apply_cartoon_ui_theme() -> void:
 	if btn_shop:
 		btn_shop.pressed.connect(_on_btn_shop_pressed)
 
+	_update_star_count()
+	_update_coin_count()
+	_update_sound_button()
+	_update_language_ui()
+	_setup_wheel_badge()
+
+func _apply_cartoon_ui_theme() -> void:
+	var top_bar = get_node_or_null("TopBar")
+	if top_bar:
+		var sbt = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_top_bar_hud.svg", 20, 8, 20, 16)
+		if sbt: top_bar.add_theme_stylebox_override("panel", sbt)
+
+	var sbt_badge = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_badge_capsule.svg", 16, 12, 16, 16)
+	if sbt_badge:
+		var star_badge = get_node_or_null("TopBar/Margin/HBox/StarBadge")
+		if star_badge: star_badge.add_theme_stylebox_override("panel", sbt_badge)
+		var coin_badge = get_node_or_null("TopBar/Margin/HBox/CoinBadge")
+		if coin_badge: coin_badge.add_theme_stylebox_override("panel", sbt_badge)
+
 func _process(_delta: float) -> void:
 	if mascot_root:
 		var t = Time.get_ticks_msec() * 0.001
@@ -116,7 +116,7 @@ func _update_language_ui() -> void:
 	if btn_play: btn_play.text = "  " + lm.t("KEY_PLAY")
 	if btn_levels: btn_levels.text = " " + lm.t("KEY_SELECT_LEVEL")
 	if btn_wheel: btn_wheel.text = lm.t("KEY_LUCKY_WHEEL")
-	if btn_shop: btn_shop.text = "🛍️ " + lm.t("KEY_SHOP")
+	if btn_shop: btn_shop.text = "  " + lm.t("KEY_SHOP")
 	if footer_label: footer_label.text = lm.t("KEY_FOOTER")
 	if btn_lang: btn_lang.text = lm.get_current_language_display()
 	_update_sound_button()

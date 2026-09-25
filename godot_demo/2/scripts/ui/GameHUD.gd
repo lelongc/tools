@@ -118,6 +118,7 @@ func _ready() -> void:
 	_update_ui()
 	_setup_booster_tray()
 	_setup_level_1_tutorial()
+	_setup_boss_bar()
 
 func _apply_cartoon_ui_theme() -> void:
 	# 1. TopBar với 9-Patch Header
@@ -699,3 +700,149 @@ func _exit_tree() -> void:
 		get_viewport().size_changed.disconnect(_apply_safe_area)
 	if get_tree().paused:
 		get_tree().paused = false
+
+# ==========================================
+# BOSS HEALTH BAR (Thanh máu Trùm Thế Giới)
+# ==========================================
+var boss_bar_container: PanelContainer = null
+var boss_hp_bar: ProgressBar = null
+var boss_hp_label: Label = null
+var boss_title_label: Label = null
+
+func _setup_boss_bar() -> void:
+	# Trì hoãn 1 frame để đảm bảo monster nodes trong màn chơi đã vào cây node
+	await get_tree().process_frame
+	if not is_inside_tree(): return
+
+	var bosses = get_tree().get_nodes_in_group("Bosses")
+	if bosses.is_empty():
+		return
+
+	# Lấy boss đầu tiên
+	var boss = bosses[0]
+	if not is_instance_valid(boss): return
+
+	var boss_max_hp = boss.get("max_health") if "max_health" in boss else 1800
+	var boss_cur_hp = boss.get("health") if "health" in boss else boss_max_hp
+
+	# Tạo container Boss Bar
+	boss_bar_container = PanelContainer.new()
+	boss_bar_container.name = "BossHealthBar"
+	boss_bar_container.custom_minimum_size = Vector2(360, 48)
+	boss_bar_container.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	boss_bar_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	# Style panel khung kim loại viền đỏ
+	var style_bg = StyleBoxFlat.new()
+	style_bg.bg_color = Color(0.12, 0.05, 0.08, 0.92)
+	style_bg.border_width_left = 2
+	style_bg.border_width_top = 2
+	style_bg.border_width_right = 2
+	style_bg.border_width_bottom = 3
+	style_bg.border_color = Color(0.85, 0.2, 0.2, 0.85)
+	style_bg.corner_radius_top_left = 12
+	style_bg.corner_radius_top_right = 12
+	style_bg.corner_radius_bottom_right = 12
+	style_bg.corner_radius_bottom_left = 12
+	boss_bar_container.add_theme_stylebox_override("panel", style_bg)
+
+	var margin = MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 12)
+	margin.add_theme_constant_override("margin_right", 12)
+	margin.add_theme_constant_override("margin_top", 6)
+	margin.add_theme_constant_override("margin_bottom", 6)
+	boss_bar_container.add_child(margin)
+
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 3)
+	margin.add_child(vbox)
+
+	# HBox Tiêu đề Boss
+	var hbox_header = HBoxContainer.new()
+	vbox.add_child(hbox_header)
+
+	boss_title_label = Label.new()
+	var b_type = boss.get("monster_type") if "monster_type" in boss else "BOSS"
+	boss_title_label.text = "👑 WORLD BOSS: " + str(b_type).to_upper()
+	boss_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	boss_title_label.add_theme_font_size_override("font_size", 13)
+	boss_title_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.3))
+	boss_title_label.add_theme_constant_override("shadow_offset_y", 1)
+	boss_title_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
+	hbox_header.add_child(boss_title_label)
+
+	boss_hp_label = Label.new()
+	boss_hp_label.text = "%d / %d" % [boss_cur_hp, boss_max_hp]
+	boss_hp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	boss_hp_label.add_theme_font_size_override("font_size", 12)
+	boss_hp_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.9))
+	boss_hp_label.add_theme_constant_override("shadow_offset_y", 1)
+	boss_hp_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
+	hbox_header.add_child(boss_hp_label)
+
+	# Thanh HP ProgressBar
+	boss_hp_bar = ProgressBar.new()
+	boss_hp_bar.min_value = 0.0
+	boss_hp_bar.max_value = float(boss_max_hp)
+	boss_hp_bar.value = float(boss_cur_hp)
+	boss_hp_bar.show_percentage = false
+	boss_hp_bar.custom_minimum_size = Vector2(0, 14)
+
+	var bar_bg = StyleBoxFlat.new()
+	bar_bg.bg_color = Color(0.18, 0.08, 0.12, 0.95)
+	bar_bg.corner_radius_top_left = 6
+	bar_bg.corner_radius_top_right = 6
+	bar_bg.corner_radius_bottom_right = 6
+	bar_bg.corner_radius_bottom_left = 6
+	boss_hp_bar.add_theme_stylebox_override("background", bar_bg)
+
+	var bar_fill = StyleBoxFlat.new()
+	bar_fill.bg_color = Color(0.95, 0.22, 0.22, 1.0)
+	bar_fill.border_width_bottom = 2
+	bar_fill.border_color = Color(1.0, 0.5, 0.3, 0.8)
+	bar_fill.corner_radius_top_left = 6
+	bar_fill.corner_radius_top_right = 6
+	bar_fill.corner_radius_bottom_right = 6
+	bar_fill.corner_radius_bottom_left = 6
+	boss_hp_bar.add_theme_stylebox_override("fill", bar_fill)
+
+	vbox.add_child(boss_hp_bar)
+
+	# Đặt vị trí dưới TopBar
+	var top_bar = get_node_or_null("TopBar")
+	add_child(boss_bar_container)
+	boss_bar_container.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	var tb_bottom = (top_bar.position.y + top_bar.size.y + 10) if top_bar else 85.0
+	boss_bar_container.position = Vector2((get_viewport().size.x - boss_bar_container.custom_minimum_size.x) * 0.5, tb_bottom)
+
+	# Hoạt ảnh xuất hiện uy lực
+	boss_bar_container.scale = Vector2(0.8, 0.8)
+	boss_bar_container.modulate.a = 0.0
+	var appear_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	appear_tween.tween_property(boss_bar_container, "scale", Vector2.ONE, 0.4)
+	appear_tween.tween_property(boss_bar_container, "modulate:a", 1.0, 0.3)
+
+	# Kết nối tín hiệu máu và hạ gục
+	if boss.has_signal("health_changed"):
+		boss.health_changed.connect(_on_boss_health_changed)
+	if boss.has_signal("monster_defeated"):
+		boss.monster_defeated.connect(_on_boss_defeated)
+
+func _on_boss_health_changed(cur_hp: int, max_hp: int) -> void:
+	if not is_instance_valid(boss_hp_bar): return
+	var target_val = clampf(float(cur_hp), 0.0, float(max_hp))
+	var tween = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_property(boss_hp_bar, "value", target_val, 0.25)
+	if is_instance_valid(boss_hp_label):
+		boss_hp_label.text = "%d / %d" % [max(0, cur_hp), max_hp]
+
+func _on_boss_defeated() -> void:
+	if not is_instance_valid(boss_bar_container): return
+	var tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	tween.tween_property(boss_bar_container, "modulate:a", 0.0, 0.6)
+	tween.tween_property(boss_bar_container, "position:y", boss_bar_container.position.y - 25.0, 0.6)
+	tween.chain().tween_callback(func():
+		if is_instance_valid(boss_bar_container):
+			boss_bar_container.queue_free()
+	)
+

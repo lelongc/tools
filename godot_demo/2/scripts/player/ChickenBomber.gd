@@ -494,7 +494,7 @@ func _on_aim_end(dropped: bool) -> void:
 			vt.tween_property(visual_root, "scale", Vector2.ONE, 0.28)
 			vt.parallel().tween_property(visual_root, "rotation", 0.0, 0.18)
 			if has_node("/root/SoundManager"):
-				get_node("/root/SoundManager").play_sfx("res://assets/audio/sfx/whoosh.wav", 0.6, 1.3)
+				get_node("/root/SoundManager").play_whoosh()
 
 	if sweat_sprite:
 		sweat_sprite.visible = false

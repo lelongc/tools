@@ -3,7 +3,7 @@ class_name DestructibleBlock
 
 const CameraShake = preload("res://scripts/core/CameraShake2D.gd")
 
-@export_enum("wood", "stone", "glass", "steel", "obsidian", "crystal") var material_type: String = "wood"
+@export_enum("wood", "stone", "glass", "steel", "obsidian", "crystal", "cyber_alloy", "swamp_wood", "permafrost", "magma_brick", "celestial_stone") var material_type: String = "wood"
 @export var max_health: float = 130.0
 @export var block_size: Vector2 = Vector2(120, 24)
 

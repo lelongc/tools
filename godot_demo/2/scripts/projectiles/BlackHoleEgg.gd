@@ -31,6 +31,7 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_broken and not is_singularity and not has_boosted and BaseEgg.is_valid_airborne_tap(event):
+		get_viewport().set_input_as_handled()
 		_trigger_vortex()
 
 func _on_body_entered(_body: Node) -> void:

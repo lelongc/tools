@@ -401,6 +401,78 @@ var translations: Dictionary = {
 		"en": "Egg Bonus: +%d", "vi": "Thưởng Trứng Thừa: +%d", "ja": "タマゴボーナス: +%d", "ko": "남은 알 보너스: +%d",
 		"zh_CN": "剩余鸡蛋奖励: +%d", "es": "Bonus de Huevos: +%d", "pt_BR": "Bônus de Ovos: +%d", "de": "Eier-Bonus: +%d",
 		"fr": "Bonus d'oeufs : +%d", "ru": "Бонус за яйца: +%d"
+	},
+	"KEY_SETTINGS": {
+		"en": "SETTINGS", "vi": "CÀI ĐẶT", "ja": "設定", "ko": "설정",
+		"zh_CN": "设置", "es": "AJUSTES", "pt_BR": "CONFIGURAÇÕES", "de": "EINSTELLUNGEN",
+		"fr": "PARAMÈTRES", "ru": "НАСТРОЙКИ"
+	},
+	"KEY_BGM_VOLUME": {
+		"en": "Music Volume", "vi": "Nhạc nền", "ja": "BGM音量", "ko": "배경음악",
+		"zh_CN": "背景音乐", "es": "Música", "pt_BR": "Música", "de": "Musik",
+		"fr": "Musique", "ru": "Музыка"
+	},
+	"KEY_SFX_VOLUME": {
+		"en": "Sound FX", "vi": "Hiệu ứng", "ja": "効果音", "ko": "효과음",
+		"zh_CN": "音效", "es": "Efectos", "pt_BR": "Efeitos", "de": "Effekte",
+		"fr": "Effets", "ru": "Звуки"
+	},
+	"KEY_VIBRATION": {
+		"en": "Vibration", "vi": "Rung xúc giác", "ja": "振動", "ko": "진동",
+		"zh_CN": "震动", "es": "Vibración", "pt_BR": "Vibração", "de": "Vibration",
+		"fr": "Vibration", "ru": "Вибрация"
+	},
+	"KEY_RESET_PROGRESS": {
+		"en": "Reset All Progress", "vi": "Xóa toàn bộ tiến trình", "ja": "進行状況をリセット", "ko": "진행 상황 초기화",
+		"zh_CN": "重置所有进度", "es": "Restablecer Progreso", "pt_BR": "Redefinir Progresso", "de": "Fortschritt zurücksetzen",
+		"fr": "Réinitialiser", "ru": "Сбросить прогресс"
+	},
+	"KEY_RESET_CONFIRM_DESC": {
+		"en": "All 200 levels and coins will be permanently reset!", "vi": "Toàn bộ 200 màn chơi và vàng sẽ bị xóa vĩnh viễn!",
+		"ja": "200ステージとコインがすべて初期化されます！", "ko": "200개의 레벨과 코인이 영구 삭제됩니다!",
+		"zh_CN": "所有200关及金币将被永久重置！", "es": "¡Se restablecerán permanentemente los 200 niveles y monedas!",
+		"pt_BR": "Todas as 200 fases e moedas serão redefinidas permanentemente!", "de": "Alle 200 Level und Münzen werden dauerhaft zurückgesetzt!",
+		"fr": "Tous les 200 niveaux et pièces seront réinitialisés définitivement !", "ru": "Все 200 уровней и монеты будут сброшены безвозвратно!"
+	},
+	"KEY_CONFIRM": {
+		"en": "CONFIRM", "vi": "XÁC NHẬN", "ja": "確認", "ko": "확인",
+		"zh_CN": "确认", "es": "CONFIRMAR", "pt_BR": "CONFIRMAR", "de": "BESTÄTIGEN",
+		"fr": "CONFIRMER", "ru": "ПОДТВЕРДИТЬ"
+	},
+	"KEY_CANCEL": {
+		"en": "CANCEL", "vi": "HỦY", "ja": "キャンセル", "ko": "취소",
+		"zh_CN": "取消", "es": "CANCELAR", "pt_BR": "CANCELAR", "de": "ABBRECHEN",
+		"fr": "ANNULER", "ru": "ОТМЕНА"
+	},
+	"KEY_CLOSE": {
+		"en": "CLOSE", "vi": "ĐÓNG", "ja": "閉じる", "ko": "닫기",
+		"zh_CN": "关闭", "es": "CERRAR", "pt_BR": "FECHAR", "de": "SCHLIESSEN",
+		"fr": "FERMER", "ru": "ЗАКРЫТЬ"
+	},
+	"KEY_BOMB_BOOSTER": {
+		"en": "Bomb Egg", "vi": "Trứng Bom", "ja": "爆弾タマゴ", "ko": "폭탄 달걀",
+		"zh_CN": "炸弹蛋", "es": "Huevo Bomba", "pt_BR": "Ovo Bomba", "de": "Bomben-Ei",
+		"fr": "Œuf Bombe", "ru": "Яйцо-Бомба"
+	},
+	"KEY_DRILL_BOOSTER": {
+		"en": "Drill Egg", "vi": "Trứng Khoan", "ja": "ドリルタマゴ", "ko": "드릴 달걀",
+		"zh_CN": "钻头蛋", "es": "Huevo Taladro", "pt_BR": "Ovo Broca", "de": "Bohrer-Ei",
+		"fr": "Œuf Foreuse", "ru": "Яйцо-Бур"
+	},
+	"KEY_ACID_BOOSTER": {
+		"en": "Acid Egg", "vi": "Trứng Axit", "ja": "酸性タマゴ", "ko": "산성 달걀",
+		"zh_CN": "酸性蛋", "es": "Huevo Ácido", "pt_BR": "Ovo Ácido", "de": "Säure-Ei",
+		"fr": "Œuf Acide", "ru": "Яйцо-Кислота"
+	},
+	"KEY_COMBO_BOOSTER": {
+		"en": "Tactical Trio Pack", "vi": "Gói Bộ Ba Tác Chiến", "ja": "戦術トリオパック", "ko": "전술 트리오 팩",
+		"zh_CN": "战术三合一包", "es": "Paquete Trío Táctico", "pt_BR": "Pacote Trio Tático", "de": "Taktisches Dreierpack",
+		"fr": "Pack Trio Tactique", "ru": "Тактический набор Трио"
+	},
+	"KEY_PURCHASED": {
+		"en": "PURCHASED SUCCESSFULLY!", "vi": "ĐÃ MUA THÀNH CÔNG!", "ja": "購入が完了しました！", "ko": "구매 완료!",
+		"zh_CN": "购买成功！", "es": "¡COMPRA EXITOSA!", "pt_BR": "COMPRA CONCLUÍDA!", "de": "ERFOLGREICH GEKAUFT!",
+		"fr": "ACHAT RÉUSSI !", "ru": "УСПЕШНО КУПЛЕНО!"
 	}
 }
 
