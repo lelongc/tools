@@ -322,15 +322,15 @@ func _physics_process(delta: float) -> void:
 		var ang_speed = abs(angular_velocity)
 		var has_contacts = get_contact_count() > 0
 
-		# Khi thanh công trình/mảnh vụn nằm nghỉ và CÓ TIẾP XÚC, vận tốc dao động nhỏ (< 32.0 px/s, xoay < 1.4 rad/s)
-		# Tuyệt đối không dập lực nếu khối đang rơi tự do trong không khí (linear_velocity.y > 35.0 hoặc không có tiếp xúc)
-		if has_contacts and speed < 32.0 and ang_speed < 1.4 and linear_velocity.y <= 35.0:
+		# Khi thanh công trình/mảnh vụn có dao động vi chấn rất nhỏ (< 32.0 px/s, xoay < 1.4 rad/s)
+		# Tuyệt đối không dập lực nếu khối đang rơi tự do tốc độ cao (linear_velocity.y > 35.0)
+		if speed < 32.0 and ang_speed < 1.4 and linear_velocity.y <= 35.0:
 			linear_velocity *= 0.88
 			angular_velocity *= 0.82
 			micro_jitter_timer += delta
 
-			# Cho ngủ dứt khoát nếu khối đã ổn định và có bệ đỡ vững chắc hoặc chạm đất
-			if micro_jitter_timer > 0.18 and speed < 6.0 and ang_speed < 0.3:
+			# Cho ngủ dứt khoát nếu khối đã ổn định và CÓ TIẾP XÚC bệ đỡ vững chắc hoặc chạm đất
+			if has_contacts and micro_jitter_timer > 0.18 and speed < 6.0 and ang_speed < 0.3:
 				if (global_position.y >= floor_y - 20.0) or _has_rigid_support():
 					linear_velocity = Vector2.ZERO
 					angular_velocity = 0.0
