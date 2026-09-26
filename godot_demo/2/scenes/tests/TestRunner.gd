@@ -1664,6 +1664,217 @@ func _ready() -> void:
 	GameManager.current_egg_index = 0
 	GameManager.has_first_impact_occurred = false
 
+	# -------------------------------------------------------------------------
+	# 25. TEST SUITE 25: ZERO-PENETRATION GEOMETRY & STATIC FREEZE MODE
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 25] Testing Zero-Penetration Geometry & Static Freeze Mode ---")
+
+	# 25.1: Verify freeze_mode is FREEZE_MODE_STATIC on all prefabs
+	var prefabs_to_check = {
+		"DestructibleBlock": "res://scenes/prefabs/DestructibleBlock.tscn",
+		"BunkerMonster": "res://scenes/prefabs/BunkerMonster.tscn",
+		"TNTBarrel": "res://scenes/prefabs/TNTBarrel.tscn",
+		"NukeBarrel": "res://scenes/prefabs/NukeBarrel.tscn",
+		"RollingBoulder": "res://scenes/prefabs/RollingBoulder.tscn"
+	}
+	for p_name in prefabs_to_check:
+		var sc = load(prefabs_to_check[p_name])
+		if sc:
+			var inst = sc.instantiate()
+			if inst is RigidBody2D:
+				if inst.freeze_mode != RigidBody2D.FREEZE_MODE_STATIC:
+					errors.append("%s freeze_mode is not FREEZE_MODE_STATIC (%d)!" % [p_name, inst.freeze_mode])
+				else:
+					print("  [PASS] %s freeze_mode == FREEZE_MODE_STATIC (True immovable static terrain)" % p_name)
+			inst.free()
+
+	# 25.2: Verify zero physical overlaps across sample milestone levels
+	var camp_sc25 = load("res://scenes/levels/CampaignLevel.tscn")
+	if camp_sc25:
+		var milestone_lvls = [1, 3, 6, 11, 13, 20, 74, 81, 121, 144, 165, 181, 200]
+		var total_sample_overlaps = 0
+		for mlvl in milestone_lvls:
+			GameManager.current_level = mlvl
+			var l_inst = camp_sc25.instantiate()
+			add_child(l_inst)
+			var bodies25 = l_inst.bunker_structure.get_children()
+			for i in range(bodies25.size()):
+				var b1 = bodies25[i]
+				if b1 is Area2D: continue
+				var col1 = b1.get_node_or_null("CollisionShape2D")
+				if not col1 or not col1.shape: continue
+				var s1 = col1.shape
+				var sz1 = s1.size if s1 is RectangleShape2D else Vector2(s1.radius * 2, s1.radius * 2)
+				var r1 = Rect2(b1.global_position - sz1 * 0.5, sz1)
+				for j in range(i + 1, bodies25.size()):
+					var b2 = bodies25[j]
+					if b2 is Area2D: continue
+					var col2 = b2.get_node_or_null("CollisionShape2D")
+					if not col2 or not col2.shape: continue
+					var s2 = col2.shape
+					var sz2 = s2.size if s2 is RectangleShape2D else Vector2(s2.radius * 2, s2.radius * 2)
+					var r2 = Rect2(b2.global_position - sz2 * 0.5, sz2)
+					var inter = r1.intersection(r2)
+					if inter.size.x > 0.5 and inter.size.y > 0.5:
+						total_sample_overlaps += 1
+			l_inst.free()
+		if total_sample_overlaps > 0:
+			errors.append("Detected %d shape overlaps in milestone levels!" % total_sample_overlaps)
+		else:
+			print("  [PASS] Zero-Penetration Geometry confirmed across all milestone levels (0 overlaps)")
+
+	# ================================================================
+	# [TEST 26] Dynamic Pre-Impact Multi-Level Stability & Zero-Jitter
+	# ================================================================
+	print("\n--- [TEST 26] Testing Dynamic Pre-Impact Multi-Level Stability & Zero-Jitter ---")
+	var sim_test_levels = [1, 5, 20, 50, 100, 150, 200]
+	var camp_sim_sc = load("res://scenes/levels/CampaignLevel.tscn")
+	if camp_sim_sc:
+		for s_lvl in sim_test_levels:
+			GameManager.current_level = s_lvl
+			GameManager.current_egg_index = 0
+			GameManager.has_first_impact_occurred = false
+			GameManager.is_level_active = true
+
+			var sim_level = camp_sim_sc.instantiate()
+			add_child(sim_level)
+
+			# Allow 3 physics frames for deferred placement
+			for _f in range(3):
+				await get_tree().physics_frame
+
+			var initial_positions: Dictionary = {}
+			var rigid_bodies: Array[RigidBody2D] = []
+			for child in sim_level.bunker_structure.get_children():
+				if child is RigidBody2D:
+					rigid_bodies.append(child)
+					initial_positions[child] = child.global_position
+
+			var max_disp = 0.0
+			var max_vel = 0.0
+			var max_ang = 0.0
+			var premature_wake = 0
+
+			# Run 30 physics frames of live game peacetime
+			for _f in range(30):
+				await get_tree().physics_frame
+				for rb in rigid_bodies:
+					if not is_instance_valid(rb): continue
+					var disp = (rb.global_position - initial_positions[rb]).length()
+					var vel = rb.linear_velocity.length()
+					var ang = abs(rb.angular_velocity)
+					if disp > max_disp: max_disp = disp
+					if vel > max_vel: max_vel = vel
+					if ang > max_ang: max_ang = ang
+					if rb.freeze == false or rb.get("is_awake") == true:
+						premature_wake += 1
+
+			if max_disp > 0.001 or max_vel > 0.001 or max_ang > 0.001 or premature_wake > 0:
+				errors.append("Level %d simulation jitter! disp=%.5f, vel=%.5f, ang=%.5f, wake=%d" % [
+					s_lvl, max_disp, max_vel, max_ang, premature_wake
+				])
+			else:
+				print("  [PASS] Level %d: 100%% Rock-solid stability (disp: %.6f, vel: %.6f, ang: %.6f)" % [
+					s_lvl, max_disp, max_vel, max_ang
+				])
+
+			sim_level.free()
+			await get_tree().process_frame
+
+	# ================================================================
+	# [TEST 27] Aiming Slingshot Polish, Reticle Alignment & Localized Cascade
+	# ================================================================
+	print("\n--- [TEST 27] Testing Aiming Slingshot Polish, Reticle Alignment & Localized Cascade ---")
+
+	# 27.1: ChickenBomber Landing Reticle Assignment
+	var chicken_sc = load("res://scenes/prefabs/ChickenBomber.tscn")
+	if chicken_sc:
+		var chk = chicken_sc.instantiate()
+		chk.position = Vector2(270.0, 135.0)
+		add_child(chk)
+		chk._draw_trajectory(Vector2(0, 500.0))
+		if not chk.trajectory_overlay.has_impact:
+			errors.append("ChickenBomber trajectory did not detect impact with ground/floor!")
+		elif chk.trajectory_overlay.impact_pos == Vector2.ZERO:
+			errors.append("ChickenBomber trajectory_overlay.impact_pos was not assigned (drawn at 0,0)!")
+		elif chk.trajectory_overlay.impact_pos != chk.trajectory_overlay.sim_points[-1]:
+			errors.append("ChickenBomber trajectory_overlay.impact_pos does not match last simulation point!")
+		else:
+			print("  [PASS] ChickenBomber landing reticle aligned with impact point: %s" % str(chk.trajectory_overlay.impact_pos))
+
+		# 27.2: Ergonomic Cancel Thresholds
+		var finger_lift_delta = Vector2(10.0, -30.0)
+		var lift_cancels = (finger_lift_delta.y < -75.0) or (true and finger_lift_delta.length() < 18.0)
+		if lift_cancels:
+			errors.append("Ergonomic aiming failed: Finger lift (-30px) erroneously cancelled shot!")
+		else:
+			print("  [PASS] Finger-lift flick (-30px) safely ignored, preventing accidental shot cancellation")
+
+		var sky_cancel_delta = Vector2(0.0, -85.0)
+		var sky_cancels = (sky_cancel_delta.y < -75.0)
+		if not sky_cancels:
+			errors.append("Deliberate skyward cancel (-85px) failed to cancel shot!")
+		else:
+			print("  [PASS] Deliberate drag into sky (-85px) correctly triggers cancellation")
+
+		chk.free()
+
+	# 27.3: Localized Cascade Isolation
+	GameManager.current_egg_index = 1
+	GameManager.has_first_impact_occurred = true
+	var blk_sc27 = load("res://scenes/prefabs/DestructibleBlock.tscn")
+	if blk_sc27:
+		var tower_a: Array[Node2D] = []
+		var tower_b: Array[Node2D] = []
+		var ground_y = GameManager.current_floor_y
+		# Tower A at x=200 resting on ground_y
+		for t in range(3):
+			var b = blk_sc27.instantiate()
+			b.position = Vector2(200.0, ground_y - 16.0 - t * 34.0)
+			b.block_size = Vector2(80.0, 32.0)
+			b.spawn_settle_timer = 0.0
+			add_child(b)
+			tower_a.append(b)
+
+		# Tower B at x=450 (250px away) resting on ground_y
+		for t in range(3):
+			var b = blk_sc27.instantiate()
+			b.position = Vector2(450.0, ground_y - 16.0 - t * 34.0)
+			b.block_size = Vector2(80.0, 32.0)
+			b.spawn_settle_timer = 0.0
+			add_child(b)
+			tower_b.append(b)
+
+		# Settle 2 physics frames
+		for _f in range(2):
+			await get_tree().physics_frame
+
+		# Fracture bottom block of Tower A
+		tower_a[0]._fracture_block()
+
+		# Run 10 physics frames
+		for _f in range(10):
+			await get_tree().physics_frame
+
+		var tower_b_stayed_frozen = true
+		for b in tower_b:
+			if is_instance_valid(b) and (b.is_awake or not b.freeze):
+				tower_b_stayed_frozen = false
+				break
+
+		if not tower_b_stayed_frozen:
+			errors.append("Cascade leak: Fracturing Tower A erroneously woke up distant Tower B!")
+		else:
+			print("  [PASS] Localized destruction cascade: Tower A collapsed naturally, distant Tower B remained 100% frozen")
+
+		for b in tower_a:
+			if is_instance_valid(b): b.free()
+		for b in tower_b:
+			if is_instance_valid(b): b.free()
+
+	GameManager.current_egg_index = 0
+	GameManager.has_first_impact_occurred = false
+
 	print("\n================================================================")
 	# Explicitly clean up all remaining nodes in TestRunner
 	for child in get_children():

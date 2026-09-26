@@ -45,7 +45,7 @@ func _ready() -> void:
 	add_to_group("Destructibles")
 	continuous_cd = RigidBody2D.CCD_MODE_CAST_SHAPE
 	set_deferred("freeze", true)
-	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
+	freeze_mode = RigidBody2D.FREEZE_MODE_STATIC
 	mass = 8.0
 	contact_monitor = true
 	max_contacts_reported = 4
@@ -76,23 +76,12 @@ func _physics_process(delta: float) -> void:
 		dust_fx.emitting = (is_awake and linear_velocity.length() > 65.0)
 
 	if not is_awake:
-		if spawn_settle_timer > 0.0:
-			spawn_settle_timer -= delta
-			return
-		# KHÓA CỐ ĐỊNH 100%: Tuyệt đối không tự rã đông khi người chơi chưa bắn quả trứng nào
-		if has_node("/root/GameManager"):
-			var gm = get_node("/root/GameManager")
-			if gm.current_egg_index == 0 or not gm.has_first_impact_occurred:
-				return
-		support_check_timer -= delta
-		if support_check_timer <= 0.0:
-			support_check_timer = 0.12
-			_check_underlying_support()
+		return
 	else:
 		if sleeping:
 			support_check_timer -= delta
 			if support_check_timer <= 0.0:
-				support_check_timer = 0.12
+				support_check_timer = 0.20
 				_check_underlying_support()
 
 func _check_underlying_support() -> void:
@@ -151,11 +140,11 @@ func _check_underlying_support() -> void:
 func _load_svg(path: String) -> Texture2D:
 	return ParticleHelper._safe_load(path)
 
-func wake_up() -> void:
+func wake_up(force: bool = false) -> void:
 	if is_awake: return
-	if has_node("/root/GameManager"):
+	if not force and has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
-		if gm.current_egg_index == 0:
+		if gm.is_level_active and gm.current_egg_index == 0:
 			return # Peacetime lock
 	is_awake = true
 	sleeping = false

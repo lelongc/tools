@@ -31,6 +31,8 @@ const TrajectoryOverlayClass = preload("res://scripts/player/TrajectoryOverlay.g
 var aim_anchor_x: float = 270.0
 var has_aim_dragged: bool = false
 var trajectory_overlay: Node2D = null
+var aim_start_screen_pos: Vector2 = Vector2.ZERO
+var aim_touch_time: float = 0.0
 
 const THEME_COLORS: Dictionary = {
 	"normal": Color(1.0, 0.85, 0.20, 0.95),   # Vàng kim
@@ -381,17 +383,13 @@ func _handle_aim_input() -> void:
 		return
 
 	var screen_mouse_pos = get_viewport().get_mouse_position()
-	var mouse_pos = get_global_mouse_position()
 
 	# Bắt đầu chạm / click chuột để ngắm
 	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 		if not is_aiming:
 			if drop_cooldown > 0.0:
 				return
-			# Ưu tiên kích hoạt kỹ năng trên không cho quả trứng đang bay (Tap-in-Flight)
-			if has_airborne_unboosted_egg():
-				drop_cooldown = 0.25
-				return
+
 			# Không nhận click nếu bấm đè thanh menu TopBar ở trên đỉnh hoặc kệ trứng phía dưới
 			var vp_height = get_viewport_rect().size.y
 			var top_limit = 75.0
@@ -401,30 +399,34 @@ func _handle_aim_input() -> void:
 
 			is_aiming = true
 			has_aim_dragged = false
-			aim_anchor_x = position.x # KHÓA CHẶT TỌA ĐỘ GÀ - KHÔNG DỊCH CHUYỂN
-			aim_start_pos = mouse_pos
+			aim_anchor_x = position.x # KHÓA CHẶT TỌA ĐỘ GÀ TẠI VỊ TRÍ BẮT ĐẦU NGẮM
+			aim_start_screen_pos = screen_mouse_pos
+			aim_touch_time = Time.get_ticks_msec() / 1000.0
 			aim_vector = Vector2(0, 480.0)
 			_on_aim_start()
 
 		if is_aiming:
-			var drag_delta = mouse_pos - aim_start_pos
-			if drag_delta.length() > 20.0:
+			# Sử dụng Viewport Screen Coordinates: Triệt tiêu 100% hiện tượng trôi lệch quỹ đạo khi camera lerp/zoom
+			var drag_delta = screen_mouse_pos - aim_start_screen_pos
+			if drag_delta.length() > 18.0:
 				has_aim_dragged = true
 
-			var is_cancelling = (drag_delta.y < -28.0) or (has_aim_dragged and drag_delta.length() < 16.0)
+			# Vùng hủy an toàn: Chỉ hủy khi cố ý kéo ngược hẳn lên trên đỉnh (>75px) hoặc kéo trả về điểm gốc (<18px)
+			var is_cancelling = (drag_delta.y < -75.0) or (has_aim_dragged and drag_delta.length() < 18.0)
 
 			# GIỮ VỮNG GÀ TẠI VỊ TRÍ THẢ NEO - KHÔNG TRƯỢT NGANG THEO TAY KÉO
 			position.x = aim_anchor_x
 
-			# Tính toán lực và góc bắn từ khoảng cách kéo ngón tay
-			var pull_y = clamp(max(drag_delta.y, 30.0), 30.0, 320.0)
-			var pull_x = clamp(drag_delta.x * 1.8, -260.0, 260.0)
-			var launch_spd_y = clamp(pull_y * 2.0 + 350.0, 350.0, 850.0)
+			# Tính toán lực và góc bắn từ khoảng cách kéo ngón tay mượt mà
+			var pull_y = clamp(drag_delta.y, 0.0, 320.0)
+			var pull_x = clamp(drag_delta.x * 1.5, -280.0, 280.0)
+			var tension_ratio = clamp(pull_y / 240.0, 0.0, 1.0)
+			var launch_spd_y = lerp(420.0, 860.0, tension_ratio)
 			aim_vector = Vector2(pull_x, launch_spd_y)
 
-			# Co giãn người gà theo lực kéo (Nén dây ná)
+			# Co giãn người gà theo lực kéo (Đàn hồi dây ná chuẩn hoạt hình)
 			var tension = clamp(pull_y / 280.0, 0.0, 0.35)
-			visual_root.scale = Vector2(1.0 + tension * 0.35, 1.0 - tension * 0.35)
+			visual_root.scale = Vector2(1.0 - tension * 0.25, 1.0 + tension * 0.35)
 
 			# Mắt liếc nhìn xuống hầm theo góc nhắm
 			_update_eye_direction(aim_vector.normalized())
@@ -449,9 +451,15 @@ func _handle_aim_input() -> void:
 			if trajectory_line: trajectory_line.visible = false
 			_reset_eye_direction()
 
-			var drag_delta = mouse_pos - aim_start_pos
-			var is_cancelled = (drag_delta.y < -28.0) or (has_aim_dragged and drag_delta.length() < 16.0)
-			if not is_cancelled:
+			var drag_delta = screen_mouse_pos - aim_start_screen_pos
+			var elapsed = (Time.get_ticks_msec() / 1000.0) - aim_touch_time
+			var is_cancelled = (drag_delta.y < -75.0) or (has_aim_dragged and drag_delta.length() < 18.0)
+
+			# Nếu đang có trứng trên không chưa kích hoạt kỹ năng và người chơi chỉ chạm nhanh (Tap < 0.22s)
+			if has_airborne_unboosted_egg() and not has_aim_dragged and elapsed < 0.22:
+				_on_aim_end(false)
+				drop_cooldown = 0.20
+			elif not is_cancelled:
 				if not has_aim_dragged:
 					# Thao tác chạm nhanh (Tap-to-Drop): Thả rơi trứng thẳng đứng tức thì
 					aim_vector = Vector2(0, 480.0)
@@ -527,7 +535,7 @@ func _draw_trajectory(initial_vel: Vector2) -> void:
 
 	var floor_y = GameManager.current_floor_y if has_node("/root/GameManager") else 840.0
 
-	for _i in range(38):
+	for _i in range(48):
 		var next_p = cur_p + vel * dt
 		vel += gravity * dt
 

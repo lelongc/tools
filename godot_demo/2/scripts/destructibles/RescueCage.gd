@@ -14,7 +14,7 @@ var is_awake: bool = false
 func _ready() -> void:
 	add_to_group("Destructibles")
 	set_deferred("freeze", true)
-	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
+	freeze_mode = RigidBody2D.FREEZE_MODE_STATIC
 	contact_monitor = true
 	max_contacts_reported = 4
 	body_entered.connect(_on_impact)
@@ -41,19 +41,12 @@ func _process(delta: float) -> void:
 		chick.scale = Vector2(0.65 * (1.0 + breath), 0.65 * (1.0 - breath))
 
 	if not is_awake:
-		if has_node("/root/GameManager"):
-			var gm = get_node("/root/GameManager")
-			if gm.current_egg_index == 0 or not gm.has_first_impact_occurred:
-				return
-		support_check_timer -= delta
-		if support_check_timer <= 0.0:
-			support_check_timer = 0.12
-			_check_underlying_support()
+		return
 	else:
 		if sleeping:
 			support_check_timer -= delta
 			if support_check_timer <= 0.0:
-				support_check_timer = 0.12
+				support_check_timer = 0.20
 				_check_underlying_support()
 
 func _check_underlying_support() -> void:
@@ -97,11 +90,11 @@ func _check_underlying_support() -> void:
 		elif sleeping:
 			sleeping = false
 
-func wake_up() -> void:
+func wake_up(force: bool = false) -> void:
 	if is_broken or is_awake: return
-	if has_node("/root/GameManager"):
+	if not force and has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
-		if gm.current_egg_index == 0:
+		if gm.is_level_active and gm.current_egg_index == 0:
 			return # Peacetime lock
 	is_awake = true
 	sleeping = false

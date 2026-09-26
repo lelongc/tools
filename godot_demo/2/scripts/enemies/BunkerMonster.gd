@@ -132,7 +132,7 @@ func _ready() -> void:
 	_load_character_expression_palette()
 
 	set_deferred("freeze", true)
-	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
+	freeze_mode = RigidBody2D.FREEZE_MODE_STATIC
 
 	contact_monitor = true
 	max_contacts_reported = 8
@@ -890,11 +890,11 @@ func _play_spawn_bounce() -> void:
 	var tween = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	tween.tween_property(visual_root, "scale", target_s, 0.3)
 
-func wake_up() -> void:
+func wake_up(force: bool = false) -> void:
 	if is_defeated or is_awake: return
-	if has_node("/root/GameManager"):
+	if not force and has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
-		if gm.current_egg_index == 0:
+		if gm.is_level_active and gm.current_egg_index == 0:
 			return # Khóa tĩnh tuyệt đối lúc chưa bắn trứng
 	is_awake = true
 	sleeping = false
@@ -918,10 +918,6 @@ func _physics_process(delta: float) -> void:
 		if gm.current_egg_index == 0 or not gm.has_first_impact_occurred:
 			return
 	if not is_awake:
-		support_check_timer -= delta
-		if support_check_timer <= 0.0:
-			support_check_timer = 0.12
-			_check_underlying_support()
 		for b in get_colliding_bodies():
 			if is_instance_valid(b) and b is RigidBody2D and b.linear_velocity.length() > 40.0:
 				wake_up()
@@ -931,7 +927,7 @@ func _physics_process(delta: float) -> void:
 		if sleeping:
 			support_check_timer -= delta
 			if support_check_timer <= 0.0:
-				support_check_timer = 0.12
+				support_check_timer = 0.20
 				_check_underlying_support()
 
 	if spawn_settle_timer > 0.0: return

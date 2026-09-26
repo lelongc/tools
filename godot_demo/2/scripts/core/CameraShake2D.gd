@@ -27,7 +27,12 @@ func _exit_tree() -> void:
 func _process(delta: float) -> void:
 	if trauma > 0.0:
 		trauma = max(trauma - decay * delta, 0.0)
-		_apply_shake()
+		if trauma < 0.005:
+			trauma = 0.0
+			offset = Vector2.ZERO
+			rotation = 0.0
+		else:
+			_apply_shake()
 	else:
 		offset = Vector2.ZERO
 		rotation = 0.0

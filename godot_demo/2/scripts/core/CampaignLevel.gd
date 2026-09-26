@@ -344,94 +344,111 @@ func _setup_level() -> void:
 
 func _spawn_bastion_tier(center_x: float, base_y: float, span: float, pillar_h: float, mat: String, enemy_type: String = "", tnt_mode: int = 0) -> float:
 	# tnt_mode: 0 = none, 1 = TNT, 2 = Nuke
-	# Trụ chịu lực 28px tạo kết cấu vững chãi, triệt tiêu rung lắc
 	var pillar_w = 28.0
 	var p_y = base_y - pillar_h * 0.5
 	_spawn_block(Vector2(center_x - span * 0.5, p_y), Vector2(pillar_w, pillar_h), mat)
 	_spawn_block(Vector2(center_x + span * 0.5, p_y), Vector2(pillar_w, pillar_h), mat)
 
-	# Dầm ngang kết cấu nhô đều 2 bên 24px tạo gờ chịu lực
 	var beam_h = 24.0
 	var beam_w = span + 48.0
 	var beam_y = base_y - pillar_h - beam_h * 0.5
 	_spawn_block(Vector2(center_x, beam_y), Vector2(beam_w, beam_h), mat)
 
-	# Bố trí an toàn bên trong tầng: không chạm trụ, không đè nhau
-	if enemy_type != "":
-		var e_y_offset = 20.0
-		if enemy_type.begins_with("boss_"):
-			e_y_offset = 27.0
-		elif enemy_type in ["imperial_boar", "mine_wolf", "spike_hound", "crystal_badger", "cyber_hound", "cyborg_fox", "swamp_mutant", "spore_badger", "frost_yeti", "blizzard_wolf", "magma_drake", "lava_golem", "void_wraith", "celestial_sentinel"]:
-			e_y_offset = 23.0
+	# Bố trí an toàn bên trong tầng: triệt tiêu 100% va chạm, đè nén giữa trụ và vật thể
+	var room_left = center_x - span * 0.5 + 14.0
+	var room_right = center_x + span * 0.5 - 14.0
 
-		if tnt_mode > 0:
-			var is_nuke = (tnt_mode == 2)
-			var t_y_offset = 26.0 if is_nuke else 23.0
-			var half_clearance = (span * 0.5 - 16.0)
-			var offset_x = clamp(half_clearance * 0.45, 20.0, 36.0)
-			_spawn_enemy(Vector2(center_x - offset_x, base_y - e_y_offset), enemy_type)
-			_spawn_tnt(Vector2(center_x + offset_x, base_y - t_y_offset), is_nuke)
-		else:
-			_spawn_enemy(Vector2(center_x, base_y - e_y_offset), enemy_type)
+	var e_radius = 18.0
+	if enemy_type.begins_with("boss_"):
+		e_radius = 26.0
+	elif enemy_type in ["imperial_boar", "mine_wolf", "spike_hound", "crystal_badger", "cyber_hound", "cyborg_fox", "swamp_mutant", "spore_badger", "frost_yeti", "blizzard_wolf", "magma_drake", "lava_golem", "void_wraith", "celestial_sentinel"]:
+		e_radius = 22.0
+
+	var is_nuke = (tnt_mode == 2)
+	var t_half_w = 19.0 if is_nuke else 18.0
+	var t_half_h = 26.0 if is_nuke else 23.0
+
+	if enemy_type != "" and tnt_mode > 0:
+		var total_needed = (e_radius + t_half_w) * 2.0
+		var room_w = room_right - room_left
+		var margin = max(1.5, (room_w - total_needed) / 3.0)
+		var e_x = room_left + margin + e_radius
+		var t_x = room_right - margin - t_half_w
+		_spawn_enemy(Vector2(e_x, base_y - e_radius - 1.0), enemy_type)
+		_spawn_tnt(Vector2(t_x, base_y - t_half_h - 1.0), is_nuke)
+	elif enemy_type != "":
+		_spawn_enemy(Vector2(center_x, base_y - e_radius - 1.0), enemy_type)
 	elif tnt_mode > 0:
-		var is_nuke = (tnt_mode == 2)
-		_spawn_tnt(Vector2(center_x, base_y - (26.0 if is_nuke else 23.0)), is_nuke)
+		_spawn_tnt(Vector2(center_x, base_y - t_half_h - 1.0), is_nuke)
 
 	return base_y - pillar_h - beam_h
 
-func _spawn_connecting_bridge(x_from: float, x_to: float, y_level: float, span_from: float, span_to: float, mat: String, floor_y_ref: float, _has_t2_from: bool = false, _has_t2_to: bool = false, _t2_span_from: float = 0.0, _t2_span_to: float = 0.0) -> void:
+func _spawn_connecting_bridge(x_from: float, x_to: float, y_level: float, span_from: float, span_to: float, mat: String, floor_y_ref: float, has_t2_from: bool = false, has_t2_to: bool = false, t2_span_from: float = 0.0, t2_span_to: float = 0.0) -> void:
 	if x_from > x_to:
 		var tx = x_from; x_from = x_to; x_to = tx
 		var ts = span_from; span_from = span_to; span_to = ts
+		var ht = has_t2_from; has_t2_from = has_t2_to; has_t2_to = ht
+		var t2s = t2_span_from; t2_span_from = t2_span_to; t2_span_to = t2s
 
-	# Mép trong của 2 tháp
-	var inner_from = x_from + span_from * 0.5
-	var inner_to = x_to - span_to * 0.5
+	var beam_right_from = x_from + (span_from + 48.0) * 0.5
+	var beam_left_to = x_to - (span_to + 48.0) * 0.5
 
-	# Cầu bắc ngang gối trực tiếp lên dầm của 2 tháp mỗi bên 16px (triệt tiêu hoàn toàn khe hở lơ lửng)
-	var start_x = inner_from - 16.0
-	var end_x = inner_to + 16.0
-	var bridge_w = end_x - start_x
-	if bridge_w < 20.0: return
+	# Vùng gối nhịp cầu an toàn, tuyệt đối không chèn lấn vào trụ tầng 2 của tháp
+	var min_start_x = (x_from + t2_span_from * 0.5 + 16.0) if has_t2_from else (beam_right_from - 14.0)
+	var bridge_start_x = max(min_start_x, beam_right_from - 14.0)
 
-	var bridge_cx = (start_x + end_x) * 0.5
-	var bridge_h = 20.0
-	var bridge_y = y_level - bridge_h * 0.5
+	var max_end_x = (x_to - t2_span_to * 0.5 - 16.0) if has_t2_to else (beam_left_to + 14.0)
+	var bridge_end_x = min(max_end_x, beam_left_to + 14.0)
 
-	# Dầm cầu chính kiên cố
-	_spawn_block(Vector2(bridge_cx, bridge_y), Vector2(bridge_w, bridge_h), mat)
+	var bridge_w = bridge_end_x - bridge_start_x
+	if bridge_w >= 16.0:
+		var bridge_cx = (bridge_start_x + bridge_end_x) * 0.5
+		var bridge_h = 20.0
+		var bridge_y = y_level - bridge_h * 0.5
+		_spawn_block(Vector2(bridge_cx, bridge_y), Vector2(bridge_w, bridge_h), mat)
 
-	# Trụ đá chống võng ở giữa cầu nối chạm nền đất
-	if bridge_w > 60.0:
+	# Trụ đá chống võng: CHỈ sinh khi khoảng cách giữa 2 dầm tháp đủ rộng (>= 34px) tránh chèn ép trụ vào tường
+	var gap_between_beams = beam_left_to - beam_right_from
+	if gap_between_beams >= 34.0:
+		var pier_w = 28.0
+		var pier_cx = (beam_right_from + beam_left_to) * 0.5
 		var pier_h = floor_y_ref - y_level
 		if pier_h > 24.0:
-			_spawn_block(Vector2(bridge_cx, floor_y_ref - pier_h * 0.5), Vector2(28.0, pier_h), mat)
+			_spawn_block(Vector2(pier_cx, floor_y_ref - pier_h * 0.5), Vector2(pier_w, pier_h), mat)
 
 func _spawn_watchtower(pos_x: float, floor_y: float, tower_h: float, mat: String, enemy_type: String = "") -> void:
 	var col_w = 24.0
 	var col_dist = 22.0
 	var p_y = floor_y - tower_h * 0.5
 
-	# Móng đế vọng lâu tiếp đất vững vàng
+	# 1. Móng đế vọng lâu tiếp đất vững vàng
 	_spawn_block(Vector2(pos_x, floor_y - 12.0), Vector2(76.0, 24.0), mat)
-	# 2 cột trụ chịu lực song song kiên cố
+	# 2. Cột trụ chịu lực song song
 	_spawn_block(Vector2(pos_x - col_dist, p_y - 12.0), Vector2(col_w, tower_h - 24.0), mat)
 	_spawn_block(Vector2(pos_x + col_dist, p_y - 12.0), Vector2(col_w, tower_h - 24.0), mat)
-	# Sàn quan sát trên đỉnh
-	var roof_y = floor_y - tower_h
-	_spawn_block(Vector2(pos_x, roof_y - 10.0), Vector2(88.0, 20.0), mat)
-	# Hai gờ tường chắn đạn bảo vệ xạ thủ 2 bên
-	_spawn_block(Vector2(pos_x - 34.0, roof_y - 24.0), Vector2(16.0, 16.0), mat)
-	_spawn_block(Vector2(pos_x + 34.0, roof_y - 24.0), Vector2(16.0, 16.0), mat)
+	# 3. Sàn quan sát trên đỉnh trụ
+	var roof_h = 20.0
+	var roof_y = floor_y - tower_h - roof_h * 0.5
+	_spawn_block(Vector2(pos_x, roof_y), Vector2(88.0, roof_h), mat)
+	# 4. Hai gờ tường chắn đạn đặt khít trên đỉnh sàn
+	var curb_h = 16.0
+	var curb_y = roof_y - roof_h * 0.5 - curb_h * 0.5
+	_spawn_block(Vector2(pos_x - 34.0, curb_y), Vector2(16.0, curb_h), mat)
+	_spawn_block(Vector2(pos_x + 34.0, curb_y), Vector2(16.0, curb_h), mat)
 
 	if enemy_type != "":
-		_spawn_enemy(Vector2(pos_x, roof_y - 36.0), enemy_type)
+		var e_radius = 18.0
+		if enemy_type.begins_with("boss_"): e_radius = 26.0
+		elif enemy_type in ["imperial_boar", "mine_wolf", "spike_hound", "crystal_badger", "cyber_hound", "cyborg_fox", "swamp_mutant", "spore_badger", "frost_yeti", "blizzard_wolf", "magma_drake", "lava_golem", "void_wraith", "celestial_sentinel"]:
+			e_radius = 22.0
+		var e_y = roof_y - roof_h * 0.5 - e_radius - 1.0
+		_spawn_enemy(Vector2(pos_x, e_y), enemy_type)
 
 func _spawn_boulder(pos: Vector2, _span: float = 80.0, mat: String = "stone") -> void:
-	# Bệ nôi đá 24x24 hai bên giữ tảng đá nằm yên 100% trong nôi
+	# Bệ nôi đá 24x24 hai bên giữ tảng đá bán kính 28px nằm êm ái, khoảng cách gờ 42px (đệm an toàn 2px)
 	var curb_w = 24.0
 	var curb_h = 24.0
-	var curb_dist = 38.0
+	var curb_dist = 42.0
 	var curb_y = pos.y + 16.0
 	_spawn_block(Vector2(pos.x - curb_dist, curb_y), Vector2(curb_w, curb_h), mat)
 	_spawn_block(Vector2(pos.x + curb_dist, curb_y), Vector2(curb_w, curb_h), mat)
@@ -452,8 +469,8 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 			# =========================================================================
 			var tw_cx = cx - 180.0
 			var te_cx = cx + 180.0
-			var tx_sniper_w = cx - 290.0
-			var tx_sniper_e = cx + 290.0
+			var tx_sniper_w = min(cx - 290.0, tw_cx - 82.0 - 52.0)
+			var tx_sniper_e = max(cx + 290.0, te_cx + 82.0 + 52.0)
 
 			# 1. Pháo Đài Trung Tâm (Center Citadel)
 			var c_tnt = 0 if world_stage == 1 else 1
@@ -492,7 +509,7 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 					var ee2 = e_grunt if world_stage >= 8 else ""
 					re2 = _spawn_bastion_tier(te_cx, re1, 84.0, 88.0, mat2, ee2, 0)
 					if world_stage % 4 == 1:
-						_spawn_rescue_cage(Vector2(te_cx, re2 - 20.0))
+						_spawn_rescue_cage(Vector2(te_cx, re2 - 22.0))
 				_spawn_connecting_bridge(cx, te_cx, r1, 144.0, 116.0, mat1, floor_y, world_stage >= 2, world_stage >= 8, 116.0, 84.0)
 
 			# 4. Vọng Lâu Bắn Tỉa Tây (Stage 11+)
@@ -508,7 +525,7 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 				_spawn_boulder(Vector2(cx, r3 - 28.0), 84.0, mat_heavy)
 			if world_stage >= 9 and rw1 < floor_y:
 				_spawn_boulder(Vector2(tw_cx, rw2 - 28.0), 84.0, mat1)
-			if world_stage >= 13 and re1 < floor_y:
+			if world_stage >= 13 and re1 < floor_y and (world_stage % 4 != 1):
 				_spawn_boulder(Vector2(te_cx, re2 - 28.0), 84.0, mat1)
 
 			# Loadout World 1
@@ -533,8 +550,8 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 			# =========================================================================
 			var tw_cx = cx - 210.0
 			var te_cx = cx + 210.0
-			var tx_sniper = cx - 315.0
-			var tx_sniper_e = cx + 315.0
+			var tx_sniper = min(cx - 315.0, tw_cx - 82.0 - 52.0)
+			var tx_sniper_e = max(cx + 315.0, te_cx + 82.0 + 52.0)
 
 			# 1. Đại Pháo Đài Trung Tâm (3 tầng đá & thép kiên cố)
 			var r1 = _spawn_bastion_tier(cx, floor_y, 144.0, 120.0, mat1, "boss_iron_crusher" if is_boss_level else e_elite, 1)
@@ -589,8 +606,8 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 			# =========================================================================
 			var s1_cx = cx - 280.0
 			var s3_cx = cx + 240.0
-			var s4_cx = cx + 360.0
-			var s_far_w = cx - 390.0
+			var s4_cx = max(cx + 360.0, s3_cx + 84.0 + 52.0)
+			var s_far_w = min(cx - 390.0, s1_cx - 84.0 - 52.0)
 
 			# 1. Bể Axit Hóa Chất Tây (West Chemical Vat & Vent)
 			_spawn_updraft(Vector2(s1_cx - 50.0, floor_y))
@@ -685,7 +702,8 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 
 			# Bastion 6: Vọng Lâu Hoàng Gia Bầu Trời (Imperial Sky Perch, Stage 14+)
 			if world_stage >= 14:
-				_spawn_watchtower(cx - 285.0, floor_y, 190.0, mat_heavy, e_elite)
+				var perch_x = b1_cx - 82.0 - 52.0
+				_spawn_watchtower(perch_x, floor_y, 190.0, mat_heavy, e_elite)
 
 			# Loadout World 4
 			if world_stage <= 4:
@@ -719,7 +737,7 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 				_spawn_boulder(Vector2(c5_w2, rw_2 - 28.0), 88.0, mat_heavy)
 
 			# 3. Pháo Đài Cánh Trái
-			var r_wl1 = _spawn_bastion_tier(c5_w1, floor_y, 120.0, 110.0, mat1, e_grunt, 0)
+			var r_wl1 = _spawn_bastion_tier(c5_w1, floor_y, 120.0, 120.0, mat1, e_grunt, 0)
 			_spawn_connecting_bridge(c5_w2, c5_w1, rw_1, 116.0, 120.0, mat1, floor_y, world_stage >= 4, false, 88.0, 0.0)
 
 			# 4. ĐẠI ĐIỆN VỰC THẲM TRUNG TÂM (Grand Void Sanctum - 3 Tầng Kiên Cố)
@@ -732,7 +750,7 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 			_spawn_connecting_bridge(c5_w1, cx, r_wl1, 120.0, 160.0, mat1, floor_y, false, true, 0.0, 126.0)
 
 			# 5. Pháo Đài Cánh Phải
-			var r_el1 = _spawn_bastion_tier(c5_e1, floor_y, 120.0, 110.0, mat1, e_grunt, 0)
+			var r_el1 = _spawn_bastion_tier(c5_e1, floor_y, 120.0, 120.0, mat1, e_grunt, 0)
 			_spawn_connecting_bridge(cx, c5_e1, rc_1, 160.0, 120.0, mat1, floor_y, true, false, 126.0, 0.0)
 
 			# 6. Tháp Vũ Khí Pha Lê Đông
@@ -763,7 +781,7 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 			# =========================================================================
 			var c6_w = cx - 280.0
 			var c6_e = cx + 280.0
-			var c6_catwalk = cx + 380.0
+			var c6_catwalk = max(cx + 380.0, c6_e + 84.0 + 52.0)
 
 			# 1. Tháp Máy Chủ Trung Tâm (Central Server Vault)
 			var r_boss6 = "boss_cyber_mech" if is_boss_level else e_elite
@@ -794,7 +812,7 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 				_spawn_watchtower(c6_catwalk, floor_y, 200.0, mat1, e_grunt)
 
 			if world_stage % 4 == 2:
-				_spawn_rescue_cage(Vector2(c6_w, rw6_2 - 20.0))
+				_spawn_rescue_cage(Vector2(c6_w, rw6_2 - 22.0))
 
 			# Loadout World 6
 			if world_stage <= 5:
@@ -810,10 +828,10 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 			# =========================================================================
 			# WORLD 7: TOXIC JUNGLE CAVERN (Rừng Độc Hầm Ngầm) - Màn 121 đến 140
 			# =========================================================================
-			var c7_w2 = cx - 360.0
-			var c7_w1 = cx - 180.0
-			var c7_e1 = cx + 180.0
-			var c7_e2 = cx + 360.0
+			var c7_w2 = cx - 400.0
+			var c7_w1 = cx - 200.0
+			var c7_e1 = cx + 200.0
+			var c7_e2 = cx + 400.0
 
 			# 1. Hầm Khí Thở Rừng Độc
 			_spawn_updraft(Vector2(c7_w1 - 40.0, floor_y))
@@ -825,7 +843,8 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 			var rw7_2 = rw7_1
 			if world_stage >= 4:
 				rw7_2 = _spawn_bastion_tier(c7_w1, rw7_1, 92.0, 92.0, mat2, e_elite, 0)
-				_spawn_boulder(Vector2(c7_w1, rw7_2 - 28.0), 92.0, mat_heavy)
+				if world_stage % 4 != 3:
+					_spawn_boulder(Vector2(c7_w1, rw7_2 - 28.0), 92.0, mat_heavy)
 
 			# 3. ĐẠI ĐIỆN ĐẦM LẦY TRUNG TÂM (Central Toxic Sanctuary)
 			var r_boss7 = "boss_swamp_hydra" if is_boss_level else e_elite
@@ -853,7 +872,7 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 				_spawn_connecting_bridge(c7_e1, c7_e2, re7_1, 126.0, 110.0, mat1, floor_y, world_stage >= 5, false, 92.0, 0.0)
 
 			if world_stage % 4 == 3 and rw7_2 < floor_y:
-				_spawn_rescue_cage(Vector2(c7_w1, rw7_2 - 20.0))
+				_spawn_rescue_cage(Vector2(c7_w1, rw7_2 - 22.0))
 
 			# Loadout World 7
 			if world_stage <= 5:
@@ -884,7 +903,8 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 			var rw8_2 = rw8_1
 			if world_stage >= 4:
 				rw8_2 = _spawn_bastion_tier(c8_w1, rw8_1, 90.0, 90.0, mat2, e_elite, 0)
-				_spawn_boulder(Vector2(c8_w1, rw8_2 - 28.0), 90.0, mat_heavy)
+				if world_stage % 4 != 0:
+					_spawn_boulder(Vector2(c8_w1, rw8_2 - 28.0), 90.0, mat_heavy)
 
 			# 3. ĐẠI ĐIỆN BĂNG CỰC TRUNG TÂM (Glacier High Sanctum - 3 Tầng Pha Lê)
 			var r_boss8 = "boss_frost_colossus" if is_boss_level else e_elite
@@ -910,7 +930,7 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 				_spawn_connecting_bridge(c8_e1, c8_e2, re8_1, 120.0, 110.0, mat1, floor_y, world_stage >= 5, false, 90.0, 0.0)
 
 			if world_stage % 4 == 0:
-				_spawn_rescue_cage(Vector2(c8_w1, rw8_2 - 20.0))
+				_spawn_rescue_cage(Vector2(c8_w1, rw8_2 - 22.0))
 
 			# Loadout World 8
 			if world_stage <= 5:
@@ -939,7 +959,8 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 			var rw9_2_2 = rw9_2_1
 			if world_stage >= 3:
 				rw9_2_2 = _spawn_bastion_tier(c9_w1, rw9_2_1, 96.0, 92.0, mat1, e_grunt, 0)
-				_spawn_boulder(Vector2(c9_w1, rw9_2_2 - 28.0), 96.0, mat_heavy)
+				if world_stage % 4 != 1:
+					_spawn_boulder(Vector2(c9_w1, rw9_2_2 - 28.0), 96.0, mat_heavy)
 			_spawn_connecting_bridge(c9_w2, c9_w1, rw9_1, 120.0, 130.0, mat1, floor_y, false, world_stage >= 3, 0.0, 96.0)
 
 			# 3. ĐẠI ĐIỆN NGAI VÀNG RỒNG TRUNG TÂM (Dragon Core Throne - 3 Tầng Obsidian)
@@ -963,7 +984,8 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 			_spawn_connecting_bridge(c9_e1, c9_e2, re9_1, 130.0, 120.0, mat1, floor_y, world_stage >= 4, false, 96.0, 0.0)
 
 			if world_stage % 4 == 1 and rw9_2_1 < floor_y:
-				_spawn_rescue_cage(Vector2(c9_w1, rw9_2_1 - 20.0))
+				var top_roof = rw9_2_2 if world_stage >= 3 else rw9_2_1
+				_spawn_rescue_cage(Vector2(c9_w1, top_roof - 22.0))
 
 			# Loadout World 9
 			if world_stage <= 5:
@@ -996,7 +1018,7 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 				_spawn_boulder(Vector2(c10_w2, rw10_2 - 28.0), 92.0, mat_heavy)
 
 			# 3. Pháo Đài Cánh Trái (West Celestial Bastion)
-			var r_wl10 = _spawn_bastion_tier(c10_w1, floor_y, 130.0, 115.0, mat_heavy, e_elite, 0)
+			var r_wl10 = _spawn_bastion_tier(c10_w1, floor_y, 130.0, 120.0, mat_heavy, e_elite, 0)
 			_spawn_connecting_bridge(c10_w2, c10_w1, rw10_1, 120.0, 130.0, mat1, floor_y, world_stage >= 3, false, 92.0, 0.0)
 
 			# 4. ĐẠI THẦN ĐIỆN VŨ TRỤ TỐI THƯỢNG (Celestial Supreme Citadel - 4 Tầng Siêu Cường)
@@ -1012,7 +1034,7 @@ func _generate_grand_bunker(lvl: int, world: int, cx: float, floor_y: float, mat
 			_spawn_connecting_bridge(c10_w1, cx, r_wl10, 130.0, 168.0, mat1, floor_y, false, true, 0.0, 132.0)
 
 			# 5. Pháo Đài Cánh Phải (East Celestial Bastion)
-			var r_el10 = _spawn_bastion_tier(c10_e1, floor_y, 130.0, 115.0, mat_heavy, e_grunt, 0)
+			var r_el10 = _spawn_bastion_tier(c10_e1, floor_y, 130.0, 120.0, mat_heavy, e_grunt, 0)
 			_spawn_connecting_bridge(cx, c10_e1, rc10_1, 168.0, 130.0, mat1, floor_y, true, false, 132.0, 0.0)
 
 			# 6. Tháp Hư Không Viễn Đông (East Singularity Spire)
@@ -1278,8 +1300,14 @@ func _update_dynamic_camera(delta: float) -> void:
 		cam.global_position = cam.global_position.lerp(target_pos, clamp(4.0 * delta, 0.0, 1.0))
 		cam.zoom = cam.zoom.lerp(target_zoom, clamp(4.0 * delta, 0.0, 1.0))
 	else:
-		cam.global_position = cam.global_position.lerp(default_cam_pos, clamp(3.5 * delta, 0.0, 1.0))
-		cam.zoom = cam.zoom.lerp(default_cam_zoom, clamp(3.5 * delta, 0.0, 1.0))
+		if cam.global_position.distance_squared_to(default_cam_pos) < 0.04:
+			cam.global_position = default_cam_pos
+		else:
+			cam.global_position = cam.global_position.lerp(default_cam_pos, clamp(3.5 * delta, 0.0, 1.0))
+		if abs(cam.zoom.x - default_cam_zoom.x) < 0.001:
+			cam.zoom = default_cam_zoom
+		else:
+			cam.zoom = cam.zoom.lerp(default_cam_zoom, clamp(3.5 * delta, 0.0, 1.0))
 
 func _setup_ambient_atmosphere(world_id: int, total_w: float, cavern_top_y: float, floor_y: float) -> void:
 	var bg = get_node_or_null("Background")

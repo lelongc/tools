@@ -83,7 +83,7 @@ func _ready() -> void:
 	_apply_block_dimensions()
 
 	set_deferred("freeze", true)
-	freeze_mode = RigidBody2D.FREEZE_MODE_KINEMATIC
+	freeze_mode = RigidBody2D.FREEZE_MODE_STATIC
 
 	contact_monitor = true
 	max_contacts_reported = 4
@@ -312,50 +312,33 @@ func _physics_process(delta: float) -> void:
 		_fracture_block()
 		return
 
-	# Anti-Jitter & Micro-Velocity Snubber (Triệt tiêu rung giật khi thanh công trình bị kẹt / chèn ép)
+	# Anti-Jitter & Settling Snubber (Triệt tiêu rung giật khi mảnh vụn/khối đã rơi và ổn định vị trí)
 	if is_awake and not is_destroyed:
 		var speed = linear_velocity.length()
 		var ang_speed = abs(angular_velocity)
 
-		# I11: Micro-debris early sleep throttling (khối nhỏ / mảnh vụn <= 1200px2 được cho ngủ sớm)
-		var is_micro_debris = (block_size.x * block_size.y) <= 1200.0
-		var jitter_threshold = 0.09 if is_micro_debris else 0.18
-
-		# Khi thanh công trình nằm kẹt/chèn ép, vận tốc dao động rất nhỏ (< 32.0 px/s, xoay < 1.4 rad/s)
-		# Tuyệt đối không dập lực nếu khối đang gia tốc rơi tự do xuống dưới (linear_velocity.y > 35.0)
+		# Khi thanh công trình/mảnh vụn nằm nghỉ, vận tốc dao động nhỏ (< 32.0 px/s, xoay < 1.4 rad/s)
+		# Tuyệt đối không dập lực nếu khối đang rơi tự do trong không khí (linear_velocity.y > 35.0)
 		if speed < 32.0 and ang_speed < 1.4 and linear_velocity.y <= 35.0:
-			# Dập tắt xung lực vi mô lũy tiến theo từng tick vật lý
 			linear_velocity *= 0.88
 			angular_velocity *= 0.82
 			micro_jitter_timer += delta
 
-			# TUYỆT ĐỐI CHỈ CHO NGỦ VÀ TRIỆT TIÊU VẬN TỐC KHI KHỐI CÓ BỆ ĐỠ VỮNG CHẮC!
-			if (micro_jitter_timer > jitter_threshold or (speed < 3.0 and ang_speed < 0.2)) and _has_rigid_support():
+			# Cho ngủ dứt khoát nếu khối đã ổn định và đang tiếp xúc với vật thể khác hoặc nền đất
+			if (micro_jitter_timer > 0.12 or (speed < 3.5 and ang_speed < 0.15)) and (get_contact_count() > 0 or global_position.y >= floor_y - 20.0):
 				linear_velocity = Vector2.ZERO
 				angular_velocity = 0.0
 				sleeping = true
 				micro_jitter_timer = 0.0
 				anti_wedge_timer = 0.0
 		else:
-			# Thanh đang bay tự do, rơi dốc hoặc bị bom hất tung -> reset bộ đếm ngay
-			micro_jitter_timer = max(0.0, micro_jitter_timer - delta * 3.0)
-
-		# I01: Virtual Apex Anti-Wedging Perturbation
-		# Nếu khối nghiêng tựa góc chéo (> 15 độ), đứng im nhưng không có bệ đỡ mặt đất và bị kẹt nêm vòm > 2.0s
-		if abs(rotation) > 0.26 and speed < 15.0 and not sleeping:
-			anti_wedge_timer += delta
-			if anti_wedge_timer > 2.0:
-				anti_wedge_timer = 0.0
-				if not _has_rigid_support():
-					sleeping = false
-		else:
-			anti_wedge_timer = max(0.0, anti_wedge_timer - delta * 2.0)
+			micro_jitter_timer = max(0.0, micro_jitter_timer - delta * 2.0)
 
 		# Chống lơ lửng: Nếu khối đã ngủ (sleeping) nhưng mất bệ đỡ bên dưới -> đánh thức rơi tự nhiên theo trọng lực
 		if sleeping:
 			support_check_timer -= delta
 			if support_check_timer <= 0.0:
-				support_check_timer = 0.35
+				support_check_timer = 0.25
 				if not _has_rigid_support():
 					sleeping = false
 
@@ -453,83 +436,64 @@ func _has_rigid_support() -> bool:
 		return true
 
 	# Đối với khối rộng (thanh dầm ngang, cầu nối, mái vòm):
-	# Nếu chỉ có điểm tựa ở một bên mép duy nhất mà không có điểm tựa ở giữa hoặc mép đối diện -> Cantilever mất cân bằng
-	if (has_left and not has_right and not has_center) or (has_right and not has_left and not has_center):
-		return false
+	# Nếu có ít nhất 1 điểm tựa chắc chắn (bên trái, bên phải, hoặc ở giữa) -> Vẫn có bệ đỡ vững chắc
+	if has_left or has_right or has_center:
+		return true
 
-	return true
+	return any_hit
 
 func _check_underlying_support() -> void:
 	if not _has_rigid_support():
 		wake_up()
 
-func wake_up() -> void:
+func wake_up(force: bool = false) -> void:
 	if is_destroyed or is_awake: return
 	# KHÓA CỐ ĐỊNH 100%: Tuyệt đối không bao giờ rã đông trong thời gian yên tĩnh (chưa bắn trứng)
-	if has_node("/root/GameManager"):
+	if not force and has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
-		if gm.current_egg_index == 0:
+		if gm.is_level_active and gm.current_egg_index == 0:
 			return
 	is_awake = true
 	sleeping = false
 	freeze = false
 	set_deferred("freeze", false)
 	micro_jitter_timer = 0.0
-	_wake_up_neighbors()
 
 func _wake_up_neighbors() -> void:
-	# Lan tỏa thức giấc lên trên cột để toàn bộ tháp sụp đổ đồng bộ, không bao giờ để khối trên lơ lửng.
-	# Sử dụng hàng đợi BFS lặp (Iterative Queue) để triệt tiêu 100% rủi ro đệ quy sâu / Stack Overflow.
+	# Lan tỏa thức giấc lên các khối tiếp xúc trực tiếp trên đỉnh khi khối này bị phá hủy
 	var space_state = get_world_2d().direct_space_state
 	if not space_state: return
 
-	var queue: Array[Node2D] = [self]
-	var visited: Dictionary = {self: true}
-	var max_iterations = 64
+	var c_size = block_size if "block_size" in self else Vector2(64.0, 32.0)
+	var hh = c_size.y * 0.5
+	var box_height = max(hh + 18.0, 36.0)
+	var box_width = max(c_size.x + 8.0, 36.0)
+	var box = RectangleShape2D.new()
+	box.size = Vector2(box_width, box_height)
 
-	while not queue.is_empty() and visited.size() <= max_iterations:
-		var current = queue.pop_front()
-		if not is_instance_valid(current) or current.is_queued_for_deletion():
-			continue
+	var up_query = PhysicsShapeQueryParameters2D.new()
+	up_query.shape = box
+	up_query.transform = Transform2D(0, global_position + Vector2(0, -hh - box_height * 0.5))
+	up_query.collide_with_bodies = true
+	up_query.exclude = [get_rid()]
 
-		var c_size = current.block_size if "block_size" in current else Vector2(64.0, 32.0)
-		var hh = c_size.y * 0.5
-		var box_height = max(hh * 1.5, 120.0)
-		var box_width = max(c_size.x + 20.0, 50.0)
-		var box = RectangleShape2D.new()
-		box.size = Vector2(box_width, box_height)
-
-		var up_query = PhysicsShapeQueryParameters2D.new()
-		up_query.shape = box
-		# Đặt hộp truy vấn hoàn toàn nằm TRÊN đỉnh khối (từ mép trên trở lên, không chèn vào bệ đỡ bên dưới)
-		up_query.transform = Transform2D(0, current.global_position + Vector2(0, -hh - box_height * 0.5))
-		up_query.collide_with_bodies = true
-		up_query.exclude = [current.get_rid()]
-
-		var up_hits = space_state.intersect_shape(up_query, 24)
-		for uh in up_hits:
-			var ub = uh.collider
-			if is_instance_valid(ub) and ub != self and not ub.is_queued_for_deletion() and not visited.has(ub):
-				visited[ub] = true
-				if ub is RigidBody2D:
-					ub.sleeping = false
-					# Chỉ lan tỏa thức giấc cho các vật thể nằm ở trên đỉnh hoặc ngang tầm đỉnh (Y <= current.global_position.y - hh + 4.0)
-					if ub.global_position.y <= (current.global_position.y - hh + 4.0):
-						if "is_awake" in ub:
-							if not ub.is_awake:
-								ub.is_awake = true
-								ub.sleeping = false
-								ub.freeze = false
-								ub.set_deferred("freeze", false)
-								if "micro_jitter_timer" in ub:
-									ub.micro_jitter_timer = 0.0
-								queue.append(ub)
-						else:
-							ub.freeze = false
-							ub.set_deferred("freeze", false)
-					else:
-						# Đã rã đông nhưng có thể đang đứng yên, đánh thức ngủ để rơi tự nhiên
+	var up_hits = space_state.intersect_shape(up_query, 16)
+	for uh in up_hits:
+		var ub = uh.collider
+		if is_instance_valid(ub) and ub != self and not ub.is_queued_for_deletion():
+			if ub is RigidBody2D:
+				ub.sleeping = false
+				if "is_awake" in ub:
+					if not ub.is_awake:
+						ub.is_awake = true
 						ub.sleeping = false
+						ub.freeze = false
+						ub.set_deferred("freeze", false)
+						if "micro_jitter_timer" in ub:
+							ub.micro_jitter_timer = 0.0
+				else:
+					ub.freeze = false
+					ub.set_deferred("freeze", false)
 
 
 func _on_impact(body: Node) -> void:
