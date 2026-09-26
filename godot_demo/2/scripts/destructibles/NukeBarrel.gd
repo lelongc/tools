@@ -64,7 +64,7 @@ func _check_underlying_support() -> void:
 	var space_state = get_world_2d().direct_space_state
 	if not space_state: return
 
-	var ray_query = PhysicsRayQueryParameters2D.create(global_position, global_position + Vector2(0, 28.0))
+	var ray_query = PhysicsRayQueryParameters2D.create(global_position + Vector2(0, 24.0), global_position + Vector2(0, 32.0))
 	ray_query.exclude = [get_rid()]
 	ray_query.collide_with_bodies = true
 	ray_query.collide_with_areas = false
@@ -87,6 +87,8 @@ func _check_underlying_support() -> void:
 					is_failing = true
 				elif "is_awake" in col and col.is_awake and (not col.sleeping or col.linear_velocity.y > 10.0 or col.linear_velocity.length() > 30.0):
 					is_failing = true
+				elif col.has_method("_quick_check_grounded") and not col._quick_check_grounded():
+					is_failing = true
 				if not is_failing:
 					has_support = true
 
@@ -95,6 +97,8 @@ func _check_underlying_support() -> void:
 			wake_up(true)
 		elif sleeping:
 			sleeping = false
+			freeze = false
+			set_deferred("freeze", false)
 
 func wake_up(force: bool = false) -> void:
 	if is_ignited or is_awake: return

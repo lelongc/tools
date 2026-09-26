@@ -23,11 +23,12 @@ func _draw() -> void:
 		var origin_p = local_points[0]
 		var gauge_r = 26.0
 		var gauge_span = clamp(pull_tension, 0.05, 1.0) * (PI * 0.75)
-		var start_a = PI * 0.5 - gauge_span
-		var end_a = PI * 0.5 + gauge_span
+		var center_a = (local_points[1] - local_points[0]).angle() if local_points.size() >= 2 else (PI * 0.5)
+		var start_a = center_a - gauge_span
+		var end_a = center_a + gauge_span
 
 		# Vòng cung nền mờ 180 độ
-		draw_arc(origin_p, gauge_r, PI * 0.5 - PI * 0.75, PI * 0.5 + PI * 0.75, 24, Color(1, 1, 1, 0.15), 2.5, true)
+		draw_arc(origin_p, gauge_r, center_a - PI * 0.75, center_a + PI * 0.75, 24, Color(1, 1, 1, 0.15), 2.5, true)
 
 		# Vòng cung năng lượng đổi màu theo lực
 		var gauge_col = Color(0.25, 0.92, 0.65, 0.95)

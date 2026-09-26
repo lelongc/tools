@@ -95,14 +95,15 @@ func _check_underlying_support() -> void:
 	if not space_state: return
 
 	# Kiểm tra 3 tia phía dưới bệ đỡ tảng đá (trái, giữa, phải)
-	# Tia bắt đầu từ bên trong tảng đá (y = 16.0), bắn xuống 26px (xuyên qua đáy y=28)
+	# Bán kính tảng đá là 28px. Tia xuất phát từ y = 24.0 (cách đáy 4px bên trong) và quét xuống 8.0px (xuống tới y = 32.0, vượt qua đáy 4px)
+	# TUYỆT ĐỐI không quét 26px làm nhảy cóc qua khe hở khi dầm bên dưới bị vỡ!
 	var test_pts = [
-		global_position + Vector2(-14.0, 16.0),
-		global_position + Vector2(0.0, 16.0),
-		global_position + Vector2(14.0, 16.0)
+		global_position + Vector2(-14.0, 24.0),
+		global_position + Vector2(0.0, 24.0),
+		global_position + Vector2(14.0, 24.0)
 	]
 	var has_valid_support = false
-	var ray_length = 26.0
+	var ray_length = 8.0
 
 	for pt in test_pts:
 		var ray_query = PhysicsRayQueryParameters2D.create(pt, pt + Vector2(0, ray_length))
@@ -128,6 +129,8 @@ func _check_underlying_support() -> void:
 						is_failing = true
 					elif "is_awake" in col and col.is_awake and (not col.sleeping or col.linear_velocity.y > 10.0 or col.linear_velocity.length() > 30.0):
 						is_failing = true
+					elif col.has_method("_quick_check_grounded") and not col._quick_check_grounded():
+						is_failing = true
 					if not is_failing:
 						has_valid_support = true
 						break
@@ -137,6 +140,8 @@ func _check_underlying_support() -> void:
 			wake_up(true)
 		elif sleeping:
 			sleeping = false
+			freeze = false
+			set_deferred("freeze", false)
 
 func _load_svg(path: String) -> Texture2D:
 	return ParticleHelper._safe_load(path)

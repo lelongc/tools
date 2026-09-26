@@ -2049,9 +2049,81 @@ func _ready() -> void:
 				errors.append("TEST 29: Level %d has 0 monsters!" % lvl_id)
 			if b_count == 0:
 				errors.append("TEST 29: Level %d has 0 destructible blocks!" % lvl_id)
-			cl_mw.free()
-			await get_tree().process_frame
 		print("  [PASS] Multi-World level generation verified across all 10 worlds (monsters > 0, blocks > 0).")
+
+	# 29.6 Level 6 Intermediate Beam Collapse Test (Anti-Floating Verification)
+	print("\n--- [TEST 29.6] Testing Level 6 Intermediate Beam Collapse & Upper Arch Gravity Drop ---")
+	var test29_camp_sc = load("res://scenes/levels/CampaignLevel.tscn")
+	if test29_camp_sc:
+		GameManager.current_level = 6
+		GameManager.current_egg_index = 0
+		GameManager.has_first_impact_occurred = false
+		GameManager.is_level_active = true
+
+		var cl_inst = test29_camp_sc.instantiate()
+		add_child(cl_inst)
+		await get_tree().physics_frame
+		await get_tree().physics_frame
+
+		# Simulate egg fired & first impact
+		GameManager.current_egg_index = 1
+		GameManager.has_first_impact_occurred = true
+
+		var bunker = cl_inst.get_node_or_null("BunkerStructure")
+		if bunker:
+			# Find the Tier 2 wood beam (pos.y ≈ 588.0, mat="wood")
+			var target_beam = null
+			for c in bunker.get_children():
+				if c is DestructibleBlock and c.material_type == "wood" and abs(c.global_position.y - 588.0) < 10.0:
+					target_beam = c
+					break
+			# Record initial positions of upper Center Citadel blocks
+			var initial_positions = {}
+			for c in bunker.get_children():
+				if not is_instance_valid(c): continue
+				if (c is DestructibleBlock or c is RollingBoulder) and abs(c.global_position.x - 305.0) < 110.0 and c.global_position.y < 580.0:
+					initial_positions[c] = c.global_position.y
+
+			if target_beam:
+				# Destroy the intermediate beam
+				target_beam.take_damage(9999.0)
+
+			# Run 80 physics frames
+			for _f in range(80):
+				await get_tree().physics_frame
+
+			# Verify that ALL upper blocks and boulder fell across the gap and are not frozen in air
+			var any_still_floating = false
+			for c in initial_positions.keys():
+				if not is_instance_valid(c) or c.is_queued_for_deletion(): continue
+				var init_y = initial_positions[c]
+				var delta_y = c.global_position.y - init_y
+				if delta_y < 8.0:
+					var colliders = []
+					if "get_colliding_bodies" in c:
+						for b in c.get_colliding_bodies():
+							colliders.append("%s(y=%.1f)" % [b.name, b.global_position.y])
+					print("DEBUG block %s: init=%.1f curr=%.1f delta=%.1f sleep=%s freeze=%s colliders=%s" % [
+						c.name, init_y, c.global_position.y, delta_y, c.sleeping, c.freeze, str(colliders)
+					])
+					errors.append("TEST 29.6: Object %s stayed frozen in air (init=%.1f, curr=%.1f, delta=%.1f)!" % [c.name, init_y, c.global_position.y, delta_y])
+					any_still_floating = true
+				if "freeze" in c and c.freeze:
+					errors.append("TEST 29.6: Object %s still has freeze=true in air!" % c.name)
+					any_still_floating = true
+				if "get_contact_count" in c:
+					var contacts = c.get_contact_count()
+					var is_moving = c.linear_velocity.length() > 5.0
+					if contacts == 0 and not is_moving:
+						errors.append("TEST 29.6: Object %s is hovering in air with 0 contacts and 0 velocity!" % c.name)
+						any_still_floating = true
+
+			if not any_still_floating:
+				print("  [PASS] Level 6 intermediate beam destruction caused 100% of upper stone arch and boulder to fall naturally (0 frozen, 0 floating)!")
+
+		cl_inst.free()
+		await get_tree().process_frame
+
 
 	GameManager.current_egg_index = 0
 	GameManager.has_first_impact_occurred = false

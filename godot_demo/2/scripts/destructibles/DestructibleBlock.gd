@@ -324,13 +324,18 @@ func _physics_process(delta: float) -> void:
 			angular_velocity *= 0.82
 			micro_jitter_timer += delta
 
-			# Cho ngủ dứt khoát nếu khối đã ổn định và đang tiếp xúc với vật thể khác hoặc nền đất
-			if (micro_jitter_timer > 0.12 or (speed < 3.5 and ang_speed < 0.15)) and (get_contact_count() > 0 or global_position.y >= floor_y - 20.0):
-				linear_velocity = Vector2.ZERO
-				angular_velocity = 0.0
-				sleeping = true
-				micro_jitter_timer = 0.0
-				anti_wedge_timer = 0.0
+			# Cho ngủ dứt khoát nếu khối đã ổn định và có bệ đỡ vững chắc hoặc chạm đất
+			if micro_jitter_timer > 0.18 and speed < 6.0 and ang_speed < 0.3:
+				if (global_position.y >= floor_y - 20.0) or _has_rigid_support():
+					linear_velocity = Vector2.ZERO
+					angular_velocity = 0.0
+					sleeping = true
+					micro_jitter_timer = 0.0
+					anti_wedge_timer = 0.0
+				else:
+					sleeping = false
+					freeze = false
+					set_deferred("freeze", false)
 		else:
 			micro_jitter_timer = max(0.0, micro_jitter_timer - delta * 2.0)
 
@@ -338,9 +343,11 @@ func _physics_process(delta: float) -> void:
 		if sleeping:
 			support_check_timer -= delta
 			if support_check_timer <= 0.0:
-				support_check_timer = 0.25
+				support_check_timer = 0.12
 				if not _has_rigid_support():
 					sleeping = false
+					freeze = false
+					set_deferred("freeze", false)
 
 	if not is_awake:
 		if spawn_settle_timer > 0.0:
@@ -356,6 +363,48 @@ func _physics_process(delta: float) -> void:
 			if not _has_rigid_support():
 				wake_up(true)
 
+func _quick_check_grounded(visited: Array = [], depth: int = 0) -> bool:
+	if is_destroyed: return false
+	var floor_y = GameManager.current_floor_y if has_node("/root/GameManager") else 840.0
+	var hh = block_size.y * 0.5
+	if (global_position.y + hh) >= (floor_y - 6.0):
+		return true
+	if depth >= 5 or self in visited:
+		return false
+	visited.append(self)
+
+	var space_state = get_world_2d().direct_space_state
+	if not space_state: return true
+
+	var hw = block_size.x * 0.5
+	var test_pts: Array[Vector2] = []
+	if block_size.x <= 48.0:
+		test_pts.append(to_global(Vector2(0.0, hh - 2.0)))
+	else:
+		test_pts.append(to_global(Vector2(-hw + 8.0, hh - 2.0)))
+		test_pts.append(to_global(Vector2(0.0, hh - 2.0)))
+		test_pts.append(to_global(Vector2(hw - 8.0, hh - 2.0)))
+
+	var ray_query = PhysicsRayQueryParameters2D.new()
+	ray_query.exclude = [get_rid()]
+	ray_query.collide_with_bodies = true
+	ray_query.collide_with_areas = false
+	ray_query.hit_from_inside = true
+
+	for pt in test_pts:
+		ray_query.from = pt
+		ray_query.to = pt + Vector2(0, 8.0)
+		var hit = space_state.intersect_ray(ray_query)
+		if hit and hit.collider:
+			var col = hit.collider
+			if is_instance_valid(col) and col != self and not col.is_queued_for_deletion():
+				if col is StaticBody2D:
+					return true
+				elif col is DestructibleBlock and not (col in visited):
+					if not col.is_destroyed and col._quick_check_grounded(visited, depth + 1):
+						return true
+	return false
+
 func _has_rigid_support() -> bool:
 	var hh = block_size.y * 0.5
 	# 1. Nền móng bedrock: Khối tiếp xúc mặt đất thực tế của màn chơi (floor_y) vĩnh viễn vững chắc
@@ -367,21 +416,23 @@ func _has_rigid_support() -> bool:
 	if not space_state: return true
 
 	var hw = block_size.x * 0.5
-	# 2. Phân bổ điểm quét đáy khối: Tối đa 3 điểm (trái, giữa, phải) tránh raycast bão hòa
+	# 2. Phân bổ điểm quét đáy khối: Tối đa 3 điểm (trái, giữa, phải)
+	# Tia quét bắt đầu từ bên trong khối (hh - 2.0) và chỉ quét xuống 8.0px (vượt qua đáy 6.0px)
+	# TUYỆT ĐỐI không quét 26px làm nhảy cóc qua khoảng trống rỗng 24px khi tầng dầm dưới bị vỡ!
 	var test_points: Array[Vector2] = []
 	var test_local_x: Array[float] = []
 	if block_size.x <= 48.0:
-		test_points.append(to_global(Vector2(0.0, hh - 4.0)))
+		test_points.append(to_global(Vector2(0.0, hh - 2.0)))
 		test_local_x.append(0.0)
 	else:
-		test_points.append(to_global(Vector2(-hw + 8.0, hh - 4.0)))
+		test_points.append(to_global(Vector2(-hw + 8.0, hh - 2.0)))
 		test_local_x.append(-hw + 8.0)
-		test_points.append(to_global(Vector2(0.0, hh - 4.0)))
+		test_points.append(to_global(Vector2(0.0, hh - 2.0)))
 		test_local_x.append(0.0)
-		test_points.append(to_global(Vector2(hw - 8.0, hh - 4.0)))
+		test_points.append(to_global(Vector2(hw - 8.0, hh - 2.0)))
 		test_local_x.append(hw - 8.0)
 
-	var ray_length = 26.0
+	var ray_length = 8.0
 	var has_left = false
 	var has_right = false
 	var has_center = false
@@ -416,6 +467,9 @@ func _has_rigid_support() -> bool:
 						is_failing = true
 					elif "is_awake" in col and col.is_awake and (not col.sleeping or col.linear_velocity.y > 10.0 or col.linear_velocity.length() > 30.0):
 						# Khối đỡ bên dưới đã thức giấc đang rơi hoặc trượt -> không còn là bệ đỡ vững chắc
+						is_failing = true
+					elif col.has_method("_quick_check_grounded") and not col._quick_check_grounded():
+						# Khối đỡ bên dưới đang lơ lửng mất gốc -> không thể làm trụ đỡ vững chắc!
 						is_failing = true
 				else:
 					is_failing = true
@@ -461,14 +515,14 @@ func wake_up(force: bool = false) -> void:
 	micro_jitter_timer = 0.0
 
 func _wake_up_neighbors() -> void:
-	# Lan tỏa thức giấc lên các khối tiếp xúc trực tiếp trên đỉnh khi khối này bị phá hủy
+	# Lan tỏa thức giấc lên toàn bộ các khối trong cột kết cấu bên trên (chiều cao 550px) khi khối này bị phá hủy
 	var space_state = get_world_2d().direct_space_state
 	if not space_state: return
 
 	var c_size = block_size if "block_size" in self else Vector2(64.0, 32.0)
 	var hh = c_size.y * 0.5
-	var box_height = max(hh + 18.0, 36.0)
-	var box_width = max(c_size.x + 8.0, 36.0)
+	var box_height = 550.0
+	var box_width = max(c_size.x + 24.0, 56.0)
 	var box = RectangleShape2D.new()
 	box.size = Vector2(box_width, box_height)
 
@@ -478,23 +532,19 @@ func _wake_up_neighbors() -> void:
 	up_query.collide_with_bodies = true
 	up_query.exclude = [get_rid()]
 
-	var up_hits = space_state.intersect_shape(up_query, 16)
+	var up_hits = space_state.intersect_shape(up_query, 32)
 	for uh in up_hits:
 		var ub = uh.collider
 		if is_instance_valid(ub) and ub != self and not ub.is_queued_for_deletion():
 			if ub is RigidBody2D:
 				ub.sleeping = false
-				if "is_awake" in ub:
-					if not ub.is_awake:
-						ub.is_awake = true
-						ub.sleeping = false
-						ub.freeze = false
-						ub.set_deferred("freeze", false)
-						if "micro_jitter_timer" in ub:
-							ub.micro_jitter_timer = 0.0
+				if ub.has_method("wake_up"):
+					ub.wake_up(true)
 				else:
 					ub.freeze = false
 					ub.set_deferred("freeze", false)
+				if "micro_jitter_timer" in ub:
+					ub.micro_jitter_timer = 0.0
 
 
 func _on_impact(body: Node) -> void:

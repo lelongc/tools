@@ -943,12 +943,13 @@ func _check_underlying_support() -> void:
 	var space_state = get_world_2d().direct_space_state
 	if not space_state: return
 
+	var test_r = 24.0 if is_boss else 16.0
 	var test_pts = [
-		global_position + Vector2(-10.0, 10.0),
-		global_position + Vector2(10.0, 10.0)
+		global_position + Vector2(-10.0, test_r - 2.0),
+		global_position + Vector2(10.0, test_r - 2.0)
 	]
 	var has_support = false
-	var ray_length = 26.0
+	var ray_length = 8.0
 
 	for pt in test_pts:
 		var ray_query = PhysicsRayQueryParameters2D.create(pt, pt + Vector2(0, ray_length))
@@ -974,6 +975,8 @@ func _check_underlying_support() -> void:
 						is_failing = true
 					elif "is_awake" in col and col.is_awake and (not col.sleeping or col.linear_velocity.y > 10.0 or col.linear_velocity.length() > 30.0):
 						is_failing = true
+					elif col.has_method("_quick_check_grounded") and not col._quick_check_grounded():
+						is_failing = true
 					if not is_failing:
 						has_support = true
 						break
@@ -983,6 +986,8 @@ func _check_underlying_support() -> void:
 			wake_up(true)
 		elif sleeping:
 			sleeping = false
+			freeze = false
+			set_deferred("freeze", false)
 
 func _handle_continuous_crushing(delta: float) -> void:
 	if crush_audio_cooldown > 0.0:

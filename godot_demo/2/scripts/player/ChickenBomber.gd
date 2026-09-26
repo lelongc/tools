@@ -330,18 +330,20 @@ func _process_aiming_hover(delta: float) -> void:
 	if left_wing: left_wing.rotation = flap_angle
 	if right_wing: right_wing.rotation = flap_angle
 
+	# KHÓA CỨNG VỊ TRÍ GÀ: Giữ nguyên vị trí x và y cố định khi ngắm bắn
+	position.x = aim_anchor_x
 	position.y = lerp(position.y, default_y, 9.0 * delta)
 
 	# Toàn thân nghiêng nhẹ theo góc kéo dây ná ngắm đạn
 	if visual_root:
-		var aim_tilt = clamp(aim_vector.x * 0.0006, -0.25, 0.25)
+		var aim_tilt = clamp(aim_vector.x * 0.0004, -0.22, 0.22)
 		visual_root.rotation = lerp_angle(visual_root.rotation, aim_tilt, 10.0 * delta)
 
 	if basket_sprite and visual_root:
 		basket_sprite.rotation = lerp_angle(basket_sprite.rotation, -visual_root.rotation * 0.75, 8.0 * delta)
 
-	# Trứng trong giỏ rung lắc theo lực căng
-	var tension_ratio = clamp(aim_vector.y / 850.0, 0.0, 1.0)
+	# Trứng trong giỏ rung lắc theo lực căng trong mọi hướng
+	var tension_ratio = clamp((aim_vector.length() - 420.0) / (960.0 - 420.0), 0.0, 1.0)
 	if loaded_egg and loaded_egg.visible:
 		loaded_egg.position = Vector2(randf_range(-1.5, 1.5), -6.0 + randf_range(-1.5, 1.5)) * tension_ratio
 
@@ -406,40 +408,59 @@ func _handle_aim_input(delta: float = 0.016) -> void:
 			_on_aim_start()
 
 		if is_aiming:
-			# Sử dụng Viewport Screen Coordinates: Triệt tiêu 100% hiện tượng trôi lệch quỹ đạo khi camera lerp/zoom
+			# Khóa cứng vị trí x của gà tại điểm neo, tuyệt đối không dịch chuyển khi ngón tay kéo ngắm
+			position.x = aim_anchor_x
+
 			var drag_delta = screen_mouse_pos - aim_start_screen_pos
-			if drag_delta.length() > 18.0:
+			var drag_dist = drag_delta.length()
+
+			if drag_dist > 14.0:
 				has_aim_dragged = true
 
-			# Vùng hủy an toàn: Chỉ hủy khi cố ý kéo ngược hẳn lên trên đỉnh (>75px) hoặc kéo trả về điểm gốc (<18px)
-			var is_cancelling = (drag_delta.y < -75.0) or (has_aim_dragged and drag_delta.length() < 18.0)
+			# Vùng hủy an toàn: Kéo trả về điểm gốc (<18px), kéo vào thanh TopBar (y < 80px), hoặc kéo ngược lên trời (y < -45px hoặc kéo thẳng đứng lên y < -25px)
+			var is_cancelling = (has_aim_dragged and drag_dist < 18.0) \
+				or (screen_mouse_pos.y < 80.0) \
+				or (drag_delta.y < -45.0) \
+				or (drag_delta.y < -25.0 and abs(drag_delta.x) < 35.0)
 
-			# Di chuyển gà lượn ngang bầu trời theo thao tác ngón tay kéo (Steerable Chicken)
-			var target_chicken_x = clamp(aim_anchor_x + drag_delta.x * 0.75, min_x, max_x)
-			position.x = lerp(position.x, target_chicken_x, 10.0 * delta)
+			# Tính toán lực và hướng bắn trong bán nguyệt 180 độ hướng xuống dưới (không ném lên trời)
+			if has_aim_dragged and not is_cancelling:
+				var raw_angle = drag_delta.angle()
+				# Khóa góc trong vòng bán nguyệt 180 độ hướng xuống [0.04, PI - 0.04] rad
+				# Tuyệt đối không cho phép ném ngược lên trời
+				var clamped_angle: float
+				if raw_angle < 0.0:
+					# Ngón tay nằm ở nửa trên: kẹp sát trục ngang tương ứng trái / phải
+					if raw_angle > -PI * 0.5:
+						clamped_angle = 0.04 # Kẹp sát mép ngang sang phải
+					else:
+						clamped_angle = PI - 0.04 # Kẹp sát mép ngang sang trái
+				else:
+					clamped_angle = clamp(raw_angle, 0.04, PI - 0.04)
 
-			# Tính toán lực và góc bắn từ khoảng cách kéo ngón tay mượt mà: Góc rộng phủ khắp hang
-			var pull_y = clamp(drag_delta.y + 40.0, 0.0, 360.0)
-			var pull_x = clamp(drag_delta.x * 2.2, -620.0, 620.0)
-			var tension_ratio = clamp(pull_y / 240.0, 0.0, 1.0)
-			var launch_spd_y = lerp(420.0, 920.0, tension_ratio)
-			aim_vector = Vector2(pull_x, launch_spd_y)
+				var aim_dir = Vector2(cos(clamped_angle), sin(clamped_angle))
+				var tension_ratio = clamp((drag_dist - 14.0) / 160.0, 0.0, 1.0)
+				var launch_speed = lerp(450.0, 960.0, tension_ratio)
+				aim_vector = aim_dir * launch_speed
 
-			# Co giãn người gà theo lực kéo (Đàn hồi dây ná chuẩn hoạt hình)
-			var tension = clamp(pull_y / 280.0, 0.0, 0.35)
-			visual_root.scale = Vector2(1.0 - tension * 0.25, 1.0 + tension * 0.35)
+				# Co giãn người gà theo lực kéo
+				var tension = tension_ratio * 0.28
+				visual_root.scale = Vector2(1.0 - tension * 0.20, 1.0 + tension * 0.28)
 
-			# Mắt liếc nhìn xuống hầm theo góc nhắm
-			_update_eye_direction(aim_vector.normalized())
+				# Mắt liếc theo hướng ngắm bắn
+				_update_eye_direction(aim_dir)
 
-			# Vẽ đường dự đoán quỹ đạo nếu không đang trong vùng hủy
-			if is_cancelling:
-				if trajectory_overlay:
-					trajectory_overlay.visible = false
-					trajectory_overlay.pull_tension = 0.0
-				if trajectory_line: trajectory_line.visible = false
-			else:
 				_draw_trajectory(aim_vector)
+			else:
+				if is_cancelling:
+					if trajectory_overlay:
+						trajectory_overlay.visible = false
+						trajectory_overlay.pull_tension = 0.0
+					if trajectory_line: trajectory_line.visible = false
+				else:
+					# Khi mới chạm giữ chưa kéo: mặc định hướng rơi thẳng đứng
+					aim_vector = Vector2(0, 480.0)
+					_draw_trajectory(aim_vector)
 	else:
 		# Nhả chuột / ngón tay -> Thả trứng ngay hoặc Hủy nếu trong deadzone!
 		if is_aiming:
@@ -453,8 +474,12 @@ func _handle_aim_input(delta: float = 0.016) -> void:
 			_reset_eye_direction()
 
 			var drag_delta = screen_mouse_pos - aim_start_screen_pos
+			var drag_dist = drag_delta.length()
 			var elapsed = (Time.get_ticks_msec() / 1000.0) - aim_touch_time
-			var is_cancelled = (drag_delta.y < -75.0) or (has_aim_dragged and drag_delta.length() < 18.0)
+			var is_cancelled = (has_aim_dragged and drag_dist < 18.0) \
+				or (screen_mouse_pos.y < 80.0) \
+				or (drag_delta.y < -45.0) \
+				or (drag_delta.y < -25.0 and abs(drag_delta.x) < 35.0)
 
 			# Nếu đang có trứng trên không chưa kích hoạt kỹ năng và người chơi chỉ chạm nhanh (Tap < 0.22s)
 			if has_airborne_unboosted_egg() and not has_aim_dragged and elapsed < 0.22:
@@ -587,7 +612,7 @@ func _draw_trajectory(initial_vel: Vector2) -> void:
 
 func _update_eye_direction(dir: Vector2) -> void:
 	if eyes_sprite:
-		eyes_sprite.position = Vector2(dir.x * 3.5, clamp(dir.y * 3.0, 0.0, 4.0))
+		eyes_sprite.position = Vector2(clamp(dir.x * 3.5, -4.0, 4.0), clamp(dir.y * 3.0, -3.0, 4.0))
 
 func _reset_eye_direction() -> void:
 	if eyes_sprite:

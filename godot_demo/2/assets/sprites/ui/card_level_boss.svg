@@ -1,40 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
-  <defs>
-    <!-- Thân đỏ hoàng gia Boss -->
-    <linearGradient id="cardBoss" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#4d081e"/>
-      <stop offset="45%" stop-color="#330412"/>
-      <stop offset="100%" stop-color="#1c0108"/>
-    </linearGradient>
-    <linearGradient id="cardBossRim" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#ff4d6d"/>
-      <stop offset="50%" stop-color="#c9184a"/>
-      <stop offset="100%" stop-color="#590d22"/>
-    </linearGradient>
-    <linearGradient id="bossBevelBottom" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#38040e"/>
-      <stop offset="100%" stop-color="#140105"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Bóng đổ -->
-  <rect x="5" y="8" width="118" height="114" rx="20" fill="#000000" opacity="0.45"/>
-
-  <!-- Khối đế 3D -->
-  <rect x="3" y="5" width="122" height="118" rx="20" fill="url(#bossBevelBottom)" stroke="#1a0206" stroke-width="2"/>
-
-  <!-- Viền đỏ rực lửa nguy hiểm -->
-  <rect x="3" y="3" width="122" height="112" rx="18" fill="url(#cardBossRim)" stroke="#ffb3c1" stroke-width="1.8"/>
-
-  <!-- Thân thẻ bài Boss -->
-  <rect x="7" y="7" width="114" height="102" rx="15" fill="url(#cardBoss)" stroke="#0f0104" stroke-width="1.5"/>
-
-  <!-- Vệt bóng sáng mặt trên -->
-  <path d="M 16 10 Q 64 14 112 10 C 117 10 118 13 115 17 Q 64 24 13 17 C 10 13 11 10 16 10 Z" fill="#ffffff" opacity="0.4"/>
-
-  <!-- Đinh tán đầu lâu / sừng vàng nhỏ góc thẻ -->
-  <circle cx="15" cy="15" r="2.5" fill="#fde047" stroke="#800f2f" stroke-width="0.8"/>
-  <circle cx="113" cy="15" r="2.5" fill="#fde047" stroke="#800f2f" stroke-width="0.8"/>
-  <circle cx="15" cy="100" r="2.5" fill="#fde047" stroke="#800f2f" stroke-width="0.8"/>
-  <circle cx="113" cy="100" r="2.5" fill="#fde047" stroke="#800f2f" stroke-width="0.8"/>
+  <rect x="4" y="4" width="120" height="120" rx="18" fill="#2a0815" stroke="#e74c3c" stroke-width="4"/>
+  <rect x="14" y="14" width="100" height="100" rx="12" fill="none" stroke="#922b21" stroke-width="2"/>
 </svg>
