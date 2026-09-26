@@ -75,14 +75,15 @@ func _physics_process(delta: float) -> void:
 			dust_fx.direction = Vector2(-sign(linear_velocity.x), -0.4).normalized()
 		dust_fx.emitting = (is_awake and linear_velocity.length() > 65.0)
 
-	if not is_awake:
-		return
-	else:
-		if sleeping:
-			support_check_timer -= delta
-			if support_check_timer <= 0.0:
-				support_check_timer = 0.20
-				_check_underlying_support()
+	if has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		if gm.current_egg_index == 0 or not gm.has_first_impact_occurred:
+			return
+
+	support_check_timer -= delta
+	if support_check_timer <= 0.0:
+		support_check_timer = 0.15
+		_check_underlying_support()
 
 func _check_underlying_support() -> void:
 	# 1. Nền móng bedrock: Nếu tảng đá tiếp xúc sàn đất thực tế của màn chơi (floor_y) thì không bao giờ mất bệ đỡ
@@ -119,9 +120,9 @@ func _check_underlying_support() -> void:
 					break
 				elif col is RigidBody2D:
 					var is_failing = false
-					if ("is_destroyed" in col and col.is_destroyed) \
-						or ("is_defeated" in col and col.is_defeated) \
-						or ("is_ignited" in col and col.is_ignited) \
+					if not (col is DestructibleBlock):
+						is_failing = true
+					elif ("is_destroyed" in col and col.is_destroyed) \
 						or ("is_broken" in col and col.is_broken) \
 						or ("is_breaking" in col and col.is_breaking):
 						is_failing = true
@@ -133,7 +134,7 @@ func _check_underlying_support() -> void:
 
 	if not has_valid_support:
 		if not is_awake:
-			wake_up()
+			wake_up(true)
 		elif sleeping:
 			sleeping = false
 

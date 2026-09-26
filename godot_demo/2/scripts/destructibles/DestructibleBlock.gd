@@ -354,7 +354,7 @@ func _physics_process(delta: float) -> void:
 		if support_check_timer <= 0.0:
 			support_check_timer = 0.12
 			if not _has_rigid_support():
-				wake_up()
+				wake_up(true)
 
 func _has_rigid_support() -> bool:
 	var hh = block_size.y * 0.5
@@ -407,9 +407,10 @@ func _has_rigid_support() -> bool:
 				if col is StaticBody2D:
 					pass # Nền đá tĩnh hoặc tường biên vững chắc
 				elif col is RigidBody2D:
-					if ("is_destroyed" in col and col.is_destroyed) \
-						or ("is_defeated" in col and col.is_defeated) \
-						or ("is_ignited" in col and col.is_ignited) \
+					if not (col is DestructibleBlock):
+						# Quái vật, thùng thuốc nổ, tảng đá KHÔNG BAO GIỜ là trụ đỡ kết cấu cho khối công trình!
+						is_failing = true
+					elif ("is_destroyed" in col and col.is_destroyed) \
 						or ("is_broken" in col and col.is_broken) \
 						or ("is_breaking" in col and col.is_breaking):
 						is_failing = true

@@ -225,7 +225,7 @@ func _process(delta: float) -> void:
 		_process_aiming_hover(delta)
 
 	# 2. Xử lý Input ngắm bắn
-	_handle_aim_input()
+	_handle_aim_input(delta)
 
 func _process_flying_movement(delta: float) -> void:
 	# Di chuyển theo hướng bay
@@ -373,7 +373,7 @@ func has_airborne_unboosted_egg() -> bool:
 				return true
 	return false
 
-func _handle_aim_input() -> void:
+func _handle_aim_input(delta: float = 0.016) -> void:
 	if not GameManager.is_level_active or get_tree().paused:
 		if is_aiming:
 			is_aiming = false
@@ -399,7 +399,7 @@ func _handle_aim_input() -> void:
 
 			is_aiming = true
 			has_aim_dragged = false
-			aim_anchor_x = position.x # KHÓA CHẶT TỌA ĐỘ GÀ TẠI VỊ TRÍ BẮT ĐẦU NGẮM
+			aim_anchor_x = position.x
 			aim_start_screen_pos = screen_mouse_pos
 			aim_touch_time = Time.get_ticks_msec() / 1000.0
 			aim_vector = Vector2(0, 480.0)
@@ -414,14 +414,15 @@ func _handle_aim_input() -> void:
 			# Vùng hủy an toàn: Chỉ hủy khi cố ý kéo ngược hẳn lên trên đỉnh (>75px) hoặc kéo trả về điểm gốc (<18px)
 			var is_cancelling = (drag_delta.y < -75.0) or (has_aim_dragged and drag_delta.length() < 18.0)
 
-			# GIỮ VỮNG GÀ TẠI VỊ TRÍ THẢ NEO - KHÔNG TRƯỢT NGANG THEO TAY KÉO
-			position.x = aim_anchor_x
+			# Di chuyển gà lượn ngang bầu trời theo thao tác ngón tay kéo (Steerable Chicken)
+			var target_chicken_x = clamp(aim_anchor_x + drag_delta.x * 0.75, min_x, max_x)
+			position.x = lerp(position.x, target_chicken_x, 10.0 * delta)
 
-			# Tính toán lực và góc bắn từ khoảng cách kéo ngón tay mượt mà
-			var pull_y = clamp(drag_delta.y, 0.0, 320.0)
-			var pull_x = clamp(drag_delta.x * 1.5, -280.0, 280.0)
+			# Tính toán lực và góc bắn từ khoảng cách kéo ngón tay mượt mà: Góc rộng phủ khắp hang
+			var pull_y = clamp(drag_delta.y + 40.0, 0.0, 360.0)
+			var pull_x = clamp(drag_delta.x * 2.2, -620.0, 620.0)
 			var tension_ratio = clamp(pull_y / 240.0, 0.0, 1.0)
-			var launch_spd_y = lerp(420.0, 860.0, tension_ratio)
+			var launch_spd_y = lerp(420.0, 920.0, tension_ratio)
 			aim_vector = Vector2(pull_x, launch_spd_y)
 
 			# Co giãn người gà theo lực kéo (Đàn hồi dây ná chuẩn hoạt hình)
@@ -535,7 +536,7 @@ func _draw_trajectory(initial_vel: Vector2) -> void:
 
 	var floor_y = GameManager.current_floor_y if has_node("/root/GameManager") else 840.0
 
-	for _i in range(48):
+	for _i in range(76):
 		var next_p = cur_p + vel * dt
 		vel += gravity * dt
 

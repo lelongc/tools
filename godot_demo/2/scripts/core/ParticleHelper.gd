@@ -549,29 +549,47 @@ static func spawn_monster_defeat_fx(parent: Node, pos: Vector2, monster_type: St
 			tween.parallel().tween_property(drop, "modulate:a", 0.0, 0.32).set_delay(0.08)
 			tween.tween_callback(drop.queue_free)
 
+## Bộ nhớ đệm tái sử dụng (Object Pool) cho nhãn chữ hành động truyện tranh
+static var _popup_pool: Array[Label] = []
+const MAX_POPUP_POOL = 10
+
 ## Hiển thị chữ hành động truyện tranh (Comic Action Text Popup: "BOOM!", "DRILL!", "SUPERNOVA!")
 static func spawn_comic_popup(parent: Node, pos: Vector2, text: String, color: Color = Color(1.0, 0.9, 0.2)) -> void:
 	if not parent or not is_instance_valid(parent): return
 
-	var label = Label.new()
-	label.text = text
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	label.add_theme_font_size_override("font_size", 22)
-	label.add_theme_color_override("font_color", color)
-	label.add_theme_color_override("font_outline_color", Color(0.06, 0.04, 0.1, 1.0))
-	label.add_theme_constant_override("outline_size", 7)
-	label.add_theme_constant_override("shadow_offset_y", 3)
-	label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	var label: Label = null
+	while not _popup_pool.is_empty():
+		var candidate = _popup_pool.pop_back()
+		if is_instance_valid(candidate):
+			label = candidate
+			break
 
-	label.custom_minimum_size = Vector2(160, 40)
-	label.pivot_offset = Vector2(80, 20)
-	label.position = pos - Vector2(80, 20)
+	if not label:
+		label = Label.new()
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.add_theme_font_size_override("font_size", 22)
+		label.add_theme_color_override("font_outline_color", Color(0.06, 0.04, 0.1, 1.0))
+		label.add_theme_constant_override("outline_size", 7)
+		label.add_theme_constant_override("shadow_offset_y", 3)
+		label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+		label.custom_minimum_size = Vector2(160, 40)
+		label.pivot_offset = Vector2(80, 20)
+		label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		label.z_index = 60
+
+	label.text = text
+	label.add_theme_color_override("font_color", color)
+	label.modulate = Color(1.0, 1.0, 1.0, 1.0)
 	label.scale = Vector2(0.3, 0.3)
+	label.position = pos - Vector2(80, 20)
 	label.rotation = randf_range(-0.15, 0.15)
-	label.z_index = 60
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	parent.add_child(label)
+	label.visible = true
+
+	if label.get_parent() != parent:
+		if label.get_parent():
+			label.get_parent().remove_child(label)
+		parent.add_child(label)
 
 	var tw = label.create_tween()
 	tw.set_parallel(true)
@@ -582,7 +600,14 @@ static func spawn_comic_popup(parent: Node, pos: Vector2, text: String, color: C
 	tw.parallel().tween_property(label, "position:y", label.position.y - 48.0, 0.55).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	# Fade out
 	tw.parallel().tween_property(label, "modulate:a", 0.0, 0.25).set_delay(0.32)
-	tw.chain().tween_callback(label.queue_free)
+	tw.chain().tween_callback(func():
+		if is_instance_valid(label):
+			label.visible = false
+			if _popup_pool.size() < MAX_POPUP_POOL:
+				_popup_pool.append(label)
+			else:
+				label.queue_free()
+	)
 
 ## Bắn pháo hoa giấy rực rỡ ăn mừng chiến thắng 3 sao (Confetti Cannon Burst)
 static func spawn_confetti_burst(parent: Node, pos: Vector2, count: int = 24) -> void:

@@ -54,6 +54,8 @@ var current_base_coins: int = 50
 var last_stand_tween: Tween = null
 var tutorial_prompt_node: Control = null
 var tutorial_dismissed: bool = false
+var is_awaiting_restart_confirm: bool = false
+var restart_confirm_tween: Tween = null
 
 func _ready() -> void:
 	if modal_dimmer:
@@ -87,7 +89,7 @@ func _ready() -> void:
 		sm.coins_updated.connect(_update_coin_display)
 		_update_coin_display(sm.get_coins())
 
-	if btn_restart: btn_restart.pressed.connect(func(): GameManager.restart_current_level())
+	if btn_restart: btn_restart.pressed.connect(_on_topbar_restart_pressed)
 	if btn_pause: btn_pause.pressed.connect(_toggle_pause)
 
 	# Nút VIP Trial trên TopBar
@@ -322,6 +324,37 @@ func _render_booster_buttons() -> void:
 		)
 		booster_tray.add_child(btn)
 
+func _on_topbar_restart_pressed() -> void:
+	# Nếu màn chơi chưa bắn quả trứng nào hoặc điểm = 0: cho chơi lại ngay tức thì
+	if GameManager.current_egg_index == 0 or GameManager.current_score == 0:
+		GameManager.restart_current_level()
+		return
+
+	# Nếu đang trong ván đấu dở dang và vừa bấm lần 1 trong vòng 2.0s:
+	if is_awaiting_restart_confirm:
+		is_awaiting_restart_confirm = false
+		if restart_confirm_tween: restart_confirm_tween.kill()
+		if btn_restart: btn_restart.modulate = Color.WHITE
+		GameManager.restart_current_level()
+		return
+
+	# Chống chạm quẹt nhầm lần đầu: Rung nảy nút và hiển thị viền vàng xác nhận trong 2.0s
+	is_awaiting_restart_confirm = true
+	if has_node("/root/SoundManager"):
+		get_node("/root/SoundManager").play_button_click()
+
+	if btn_restart:
+		btn_restart.modulate = Color(1.6, 1.25, 0.4, 1.0)
+		if restart_confirm_tween: restart_confirm_tween.kill()
+		restart_confirm_tween = create_tween()
+		restart_confirm_tween.tween_property(btn_restart, "scale", Vector2(1.15, 1.15), 0.12).set_trans(Tween.TRANS_BACK)
+		restart_confirm_tween.tween_property(btn_restart, "scale", Vector2.ONE, 0.12)
+		restart_confirm_tween.parallel().tween_property(btn_restart, "modulate", Color.WHITE, 2.0)
+		restart_confirm_tween.chain().tween_callback(func():
+			is_awaiting_restart_confirm = false
+			if btn_restart: btn_restart.modulate = Color.WHITE
+		)
+
 func _apply_safe_area() -> void:
 	if not is_inside_tree(): return
 	var safe_rect = DisplayServer.get_display_safe_area()
@@ -336,8 +369,8 @@ func _apply_safe_area() -> void:
 	# Đệm thanh TopBar né camera nốt ruồi / tai thỏ
 	var top_bar = get_node_or_null("TopBar") as Control
 	if top_bar:
-		var target_top = max(8.0, top_inset + 4.0)
-		var bar_h = 56.0
+		var target_top = max(10.0, top_inset + 4.0)
+		var bar_h = 58.0
 		top_bar.offset_top = target_top
 		top_bar.offset_bottom = target_top + bar_h
 

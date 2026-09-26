@@ -1,31 +1,3 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 64" width="192" height="64">
-  <defs>
-    <linearGradient id="woodPressed" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#9a5a20"/>
-      <stop offset="50%" stop-color="#783d16"/>
-      <stop offset="100%" stop-color="#592b0c"/>
-    </linearGradient>
-    <linearGradient id="woodBevelBottom" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#3d1c04"/>
-      <stop offset="100%" stop-color="#1f0c01"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Khối đế gỗ khi bị nhấn -->
-  <rect x="4" y="10" width="184" height="50" rx="14" fill="url(#woodBevelBottom)" stroke="#1a0800" stroke-width="2"/>
-
-  <!-- Mặt gỗ lún xuống y=9 -->
-  <rect x="4" y="9" width="184" height="47" rx="14" fill="url(#woodPressed)" stroke="#d97706" stroke-width="1.8"/>
-
-  <!-- Vân gỗ uốn lượn chìm -->
-  <path d="M 18 24 Q 70 20 125 26 T 174 23" fill="none" stroke="#4a2208" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
-
-  <!-- Vệt bóng mờ -->
-  <path d="M 20 13 Q 96 16 172 13 C 176 13 177 16 175 20 Q 96 26 17 20 C 15 16 17 13 20 13 Z" fill="#ffffff" opacity="0.2"/>
-
-  <!-- Đinh ốc -->
-  <circle cx="16" cy="19" r="3.2" fill="#cbd5e1" stroke="#334155" stroke-width="1.2"/>
-  <circle cx="176" cy="19" r="3.2" fill="#cbd5e1" stroke="#334155" stroke-width="1.2"/>
-  <circle cx="16" cy="46" r="3.2" fill="#94a3b8" stroke="#1e293b" stroke-width="1.2"/>
-  <circle cx="176" cy="46" r="3.2" fill="#94a3b8" stroke="#1e293b" stroke-width="1.2"/>
+  <rect x="3" y="3" width="186" height="58" rx="16" fill="#35261b" stroke="#4a3728" stroke-width="3"/>
 </svg>

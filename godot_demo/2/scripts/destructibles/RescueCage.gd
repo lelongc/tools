@@ -40,14 +40,15 @@ func _process(delta: float) -> void:
 		var breath = sin(t) * 0.05
 		chick.scale = Vector2(0.65 * (1.0 + breath), 0.65 * (1.0 - breath))
 
-	if not is_awake:
-		return
-	else:
-		if sleeping:
-			support_check_timer -= delta
-			if support_check_timer <= 0.0:
-				support_check_timer = 0.20
-				_check_underlying_support()
+	if has_node("/root/GameManager"):
+		var gm = get_node("/root/GameManager")
+		if gm.current_egg_index == 0 or not gm.has_first_impact_occurred:
+			return
+
+	support_check_timer -= delta
+	if support_check_timer <= 0.0:
+		support_check_timer = 0.15
+		_check_underlying_support()
 
 func _check_underlying_support() -> void:
 	if is_broken: return
@@ -73,9 +74,9 @@ func _check_underlying_support() -> void:
 				has_support = true
 			elif col is RigidBody2D:
 				var is_failing = false
-				if ("is_destroyed" in col and col.is_destroyed) \
-					or ("is_defeated" in col and col.is_defeated) \
-					or ("is_ignited" in col and col.is_ignited) \
+				if not (col is DestructibleBlock):
+					is_failing = true
+				elif ("is_destroyed" in col and col.is_destroyed) \
 					or ("is_broken" in col and col.is_broken) \
 					or ("is_breaking" in col and col.is_breaking):
 					is_failing = true
@@ -86,7 +87,7 @@ func _check_underlying_support() -> void:
 
 	if not has_support:
 		if not is_awake:
-			wake_up()
+			wake_up(true)
 		elif sleeping:
 			sleeping = false
 

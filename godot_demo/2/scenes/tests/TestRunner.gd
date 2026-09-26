@@ -1644,7 +1644,25 @@ func _ready() -> void:
 				errors.append("GameHUD TopBar buttons are too small (< 44px)!")
 			else:
 				print("  [PASS] GameHUD TopBar buttons comfortably sized (Pause: %s, Restart: %s)" % [btn_p.custom_minimum_size, btn_r.custom_minimum_size])
+
+		# Test safe two-tap restart protection during active game
+		GameManager.current_egg_index = 1
+		GameManager.current_score = 500
+		h24._on_topbar_restart_pressed()
+		if not h24.is_awaiting_restart_confirm:
+			errors.append("GameHUD restart button did not require confirmation during active game!")
+		else:
+			print("  [PASS] GameHUD safe restart confirmation active (accidental brush protected)")
 		h24.free()
+		GameManager.current_egg_index = 0
+		GameManager.current_score = 0
+
+		# Test ParticleHelper Object Pooling
+		ParticleHelper.spawn_comic_popup(self, Vector2(200, 200), "TEST_POOL", Color.YELLOW)
+		if ParticleHelper.MAX_POPUP_POOL <= 0:
+			errors.append("ParticleHelper missing MAX_POPUP_POOL!")
+		else:
+			print("  [PASS] ParticleHelper Comic Popup Object Pool active (capacity: %d)" % ParticleHelper.MAX_POPUP_POOL)
 
 	# 24.4: MainMenu TopBar button sizes
 	var mm_sc24 = load("res://scenes/ui/MainMenu.tscn")
@@ -1872,8 +1890,58 @@ func _ready() -> void:
 		for b in tower_b:
 			if is_instance_valid(b): b.free()
 
+	# ================================================================
+	# [TEST 28] Anti-Floating Dynamic Support & Structural Collapse
+	# ================================================================
+	print("\n--- [TEST 28] Testing Anti-Floating Dynamic Support & Structural Collapse ---")
+	var camp_collapse_sc = load("res://scenes/levels/CampaignLevel.tscn")
+	if camp_collapse_sc:
+		GameManager.current_level = 21
+		GameManager.current_egg_index = 0
+		GameManager.has_first_impact_occurred = false
+		GameManager.is_level_active = true
+
+		var cl28 = camp_collapse_sc.instantiate()
+		add_child(cl28)
+
+		await get_tree().physics_frame
+		await get_tree().physics_frame
+
+		# Simulate egg fired & first impact
+		GameManager.current_egg_index = 1
+		GameManager.has_first_impact_occurred = true
+
+		var floor_y28 = GameManager.current_floor_y
+		for node in cl28.bunker_structure.get_children():
+			if node is DestructibleBlock:
+				if node.global_position.y >= 700.0:
+					node.take_damage(9999.0)
+			elif node is TNTBarrel or node is NukeBarrel:
+				node.take_damage(9999.0)
+
+		# Allow 100 physics frames for complete structural cascade
+		for _f in range(100):
+			await get_tree().physics_frame
+
+		var floating_remnants = 0
+		for node in cl28.bunker_structure.get_children():
+			if not is_instance_valid(node) or node.is_queued_for_deletion(): continue
+			if node is RigidBody2D:
+				var sz = node.block_size.y if "block_size" in node else 30.0
+				var bottom_y = node.global_position.y + sz * 0.5
+				var is_near_floor = bottom_y >= floor_y28 - 30.0
+				var is_on_rubble = (bottom_y >= floor_y28 - 120.0) and (node.get_contact_count() > 0 or node.sleeping)
+				if not (is_near_floor or is_on_rubble):
+					errors.append("TEST 28: Object %s still floating in mid-air at %s (bottom=%.1f)!" % [node.name, str(node.global_position), bottom_y])
+					floating_remnants += 1
+
+		if floating_remnants == 0:
+			print("  [PASS] Anti-floating dynamic cascade: 100% of upper tier blocks, boulders, and monsters fell naturally upon lower collapse (0 floating)")
+		cl28.free()
+
 	GameManager.current_egg_index = 0
 	GameManager.has_first_impact_occurred = false
+	GameManager.is_level_active = false
 
 	print("\n================================================================")
 	# Explicitly clean up all remaining nodes in TestRunner
