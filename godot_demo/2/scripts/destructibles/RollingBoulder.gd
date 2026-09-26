@@ -75,6 +75,10 @@ func _physics_process(delta: float) -> void:
 			dust_fx.direction = Vector2(-sign(linear_velocity.x), -0.4).normalized()
 		dust_fx.emitting = (is_awake and linear_velocity.length() > 65.0)
 
+	# Đảm bảo dứt khoát: Khi tảng đá đã thức giấc thì freeze phải bằng false để rơi tự nhiên
+	if is_awake and freeze:
+		freeze = false
+
 	if has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
 		if gm.current_egg_index == 0 or not gm.has_first_impact_occurred:
@@ -138,7 +142,7 @@ func _check_underlying_support() -> void:
 	if not has_valid_support:
 		if not is_awake:
 			wake_up(true)
-		elif sleeping:
+		elif sleeping or freeze:
 			sleeping = false
 			freeze = false
 			set_deferred("freeze", false)
@@ -154,7 +158,6 @@ func wake_up(force: bool = false) -> void:
 			return # Peacetime lock
 	is_awake = true
 	sleeping = false
-	freeze = false
 	set_deferred("freeze", false)
 
 func _on_impact(body: Node) -> void:

@@ -40,6 +40,10 @@ func _process(delta: float) -> void:
 		var breath = sin(t) * 0.05
 		chick.scale = Vector2(0.65 * (1.0 + breath), 0.65 * (1.0 - breath))
 
+	# Đảm bảo dứt khoát: Khi lồng đã thức giấc thì freeze phải bằng false để rơi tự nhiên
+	if is_awake and freeze:
+		freeze = false
+
 	if has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
 		if gm.current_egg_index == 0 or not gm.has_first_impact_occurred:
@@ -90,7 +94,7 @@ func _check_underlying_support() -> void:
 	if not has_support:
 		if not is_awake:
 			wake_up(true)
-		elif sleeping:
+		elif sleeping or freeze:
 			sleeping = false
 			freeze = false
 			set_deferred("freeze", false)
@@ -103,7 +107,6 @@ func wake_up(force: bool = false) -> void:
 			return # Peacetime lock
 	is_awake = true
 	sleeping = false
-	freeze = false
 	set_deferred("freeze", false)
 
 func _on_impact(body: Node) -> void:

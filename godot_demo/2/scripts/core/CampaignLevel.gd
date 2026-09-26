@@ -80,6 +80,10 @@ const WORLD_ENV_ASSETS: Dictionary = {
 var default_cam_pos: Vector2 = Vector2.ZERO
 var default_cam_zoom: Vector2 = Vector2.ONE
 var active_tracking_egg: Node2D = null
+var left_edge_x: float = 30.0
+var right_edge_x: float = 650.0
+var cx: float = 340.0
+var cavern_half_width: float = 310.0
 
 func _safe_load(path: String) -> Texture2D:
 	return ParticleHelper._safe_load(path)
@@ -148,22 +152,48 @@ func _setup_level() -> void:
 
 	# 2. Quy mô công trình CỰC ĐẠI THEO THẾ GIỚI & GIAI ĐOẠN
 	var world_stage = (level_id - 1) % 20 + 1
-	var cavern_half_width = 260.0
+	cavern_half_width = 320.0
 	match world_id:
-		1: cavern_half_width = 260.0 + (world_stage - 1) * 3.0 # 260 -> 317
-		2: cavern_half_width = 330.0 + (world_stage - 1) * 4.0 # 330 -> 406
-		3: cavern_half_width = 400.0 + (world_stage - 1) * 4.0 # 400 -> 476
-		4: cavern_half_width = 470.0 + (world_stage - 1) * 4.0 # 470 -> 546
-		5: cavern_half_width = 520.0 + (world_stage - 1) * 5.0 # 520 -> 615
-		6: cavern_half_width = 540.0 + (world_stage - 1) * 4.0 # 540 -> 616
-		7: cavern_half_width = 560.0 + (world_stage - 1) * 4.0 # 560 -> 636
-		8: cavern_half_width = 580.0 + (world_stage - 1) * 4.0 # 580 -> 656
-		9: cavern_half_width = 600.0 + (world_stage - 1) * 4.0 # 600 -> 676
-		10: cavern_half_width = 620.0 + (world_stage - 1) * 5.0 # 620 -> 715
+		1:
+			if world_stage >= 15:
+				cavern_half_width = 460.0
+			elif world_stage >= 11:
+				cavern_half_width = 410.0
+			elif world_stage >= 3:
+				cavern_half_width = 340.0
+			else:
+				cavern_half_width = 280.0
+		2:
+			if world_stage >= 11:
+				cavern_half_width = 480.0
+			elif world_stage >= 6:
+				cavern_half_width = 430.0
+			else:
+				cavern_half_width = 360.0
+		3:
+			if world_stage >= 13:
+				cavern_half_width = 540.0
+			elif world_stage >= 7:
+				cavern_half_width = 480.0
+			else:
+				cavern_half_width = 420.0
+		4:
+			if world_stage >= 14:
+				cavern_half_width = 620.0
+			elif world_stage >= 6:
+				cavern_half_width = 540.0
+			else:
+				cavern_half_width = 480.0
+		5: cavern_half_width = 540.0 + (world_stage - 1) * 5.0
+		6: cavern_half_width = 570.0 + (world_stage - 1) * 4.0
+		7: cavern_half_width = 590.0 + (world_stage - 1) * 4.0
+		8: cavern_half_width = 610.0 + (world_stage - 1) * 4.0
+		9: cavern_half_width = 630.0 + (world_stage - 1) * 4.0
+		10: cavern_half_width = 650.0 + (world_stage - 1) * 5.0
 
-	var left_edge_x = 30.0
-	var cx = left_edge_x + cavern_half_width
-	var right_edge_x = left_edge_x + cavern_half_width * 2.0
+	left_edge_x = 30.0
+	cx = left_edge_x + cavern_half_width
+	right_edge_x = left_edge_x + cavern_half_width * 2.0
 	var total_w = right_edge_x + 30.0
 
 	var floor_y = 840.0 + min((world_id - 1) * 12.0, 92.0)
@@ -344,13 +374,20 @@ func _setup_level() -> void:
 
 func _spawn_bastion_tier(center_x: float, base_y: float, span: float, pillar_h: float, mat: String, enemy_type: String = "", tnt_mode: int = 0) -> float:
 	# tnt_mode: 0 = none, 1 = TNT, 2 = Nuke
+	var beam_h = 24.0
+	var beam_w = span + 48.0
+
+	# Ràng buộc an toàn: Không bao giờ để dầm và trụ vượt khỏi vách hang
+	var min_cx = left_edge_x + 16.0 + beam_w * 0.5
+	var max_cx = right_edge_x - 16.0 - beam_w * 0.5
+	if max_cx >= min_cx:
+		center_x = clamp(center_x, min_cx, max_cx)
+
 	var pillar_w = 28.0
 	var p_y = base_y - pillar_h * 0.5
 	_spawn_block(Vector2(center_x - span * 0.5, p_y), Vector2(pillar_w, pillar_h), mat)
 	_spawn_block(Vector2(center_x + span * 0.5, p_y), Vector2(pillar_w, pillar_h), mat)
 
-	var beam_h = 24.0
-	var beam_w = span + 48.0
 	var beam_y = base_y - pillar_h - beam_h * 0.5
 	_spawn_block(Vector2(center_x, beam_y), Vector2(beam_w, beam_h), mat)
 
@@ -417,6 +454,13 @@ func _spawn_connecting_bridge(x_from: float, x_to: float, y_level: float, span_f
 			_spawn_block(Vector2(pier_cx, floor_y_ref - pier_h * 0.5), Vector2(pier_w, pier_h), mat)
 
 func _spawn_watchtower(pos_x: float, floor_y: float, tower_h: float, mat: String, enemy_type: String = "") -> void:
+	# Ràng buộc an toàn: Sàn mái rộng 88px, chân đế rộng 76px không bao giờ chạm vách hang
+	var half_w = 44.0
+	var min_x = left_edge_x + 16.0 + half_w
+	var max_x = right_edge_x - 16.0 - half_w
+	if max_x >= min_x:
+		pos_x = clamp(pos_x, min_x, max_x)
+
 	var col_w = 24.0
 	var col_dist = 22.0
 	var p_y = floor_y - tower_h * 0.5
@@ -445,6 +489,13 @@ func _spawn_watchtower(pos_x: float, floor_y: float, tower_h: float, mat: String
 		_spawn_enemy(Vector2(pos_x, e_y), enemy_type)
 
 func _spawn_boulder(pos: Vector2, _span: float = 80.0, mat: String = "stone") -> void:
+	# Ràng buộc an toàn: Bệ nôi và đá không bao giờ va chạm vách hang
+	var half_w = 54.0
+	var min_x = left_edge_x + 16.0 + half_w
+	var max_x = right_edge_x - 16.0 - half_w
+	if max_x >= min_x:
+		pos.x = clamp(pos.x, min_x, max_x)
+
 	# Bệ nôi đá 24x24 hai bên giữ tảng đá bán kính 28px nằm êm ái, khoảng cách gờ 42px (đệm an toàn 2px)
 	var curb_w = 24.0
 	var curb_h = 24.0
@@ -1083,11 +1134,19 @@ func _spawn_enemy(pos: Vector2, type: String) -> void:
 	bunker_structure.add_child(e)
 
 func _spawn_rescue_cage(pos: Vector2) -> void:
+	var min_x = left_edge_x + 30.0
+	var max_x = right_edge_x - 30.0
+	if max_x >= min_x:
+		pos.x = clamp(pos.x, min_x, max_x)
 	var c = RescueCageScene.instantiate()
 	c.position = pos
 	bunker_structure.add_child(c)
 
 func _spawn_updraft(pos: Vector2) -> void:
+	var min_x = left_edge_x + 30.0
+	var max_x = right_edge_x - 30.0
+	if max_x >= min_x:
+		pos.x = clamp(pos.x, min_x, max_x)
 	var u = UpdraftVentScene.instantiate()
 	u.position = pos
 	bunker_structure.add_child(u)

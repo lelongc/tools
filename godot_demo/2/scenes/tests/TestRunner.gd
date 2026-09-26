@@ -2049,6 +2049,8 @@ func _ready() -> void:
 				errors.append("TEST 29: Level %d has 0 monsters!" % lvl_id)
 			if b_count == 0:
 				errors.append("TEST 29: Level %d has 0 destructible blocks!" % lvl_id)
+			remove_child(cl_mw)
+			cl_mw.free()
 		print("  [PASS] Multi-World level generation verified across all 10 worlds (monsters > 0, blocks > 0).")
 
 	# 29.6 Level 6 Intermediate Beam Collapse Test (Anti-Floating Verification)
@@ -2081,7 +2083,7 @@ func _ready() -> void:
 			var initial_positions = {}
 			for c in bunker.get_children():
 				if not is_instance_valid(c): continue
-				if (c is DestructibleBlock or c is RollingBoulder) and abs(c.global_position.x - 305.0) < 110.0 and c.global_position.y < 580.0:
+				if (c is DestructibleBlock or c is RollingBoulder) and abs(c.global_position.x - cl_inst.cx) < 110.0 and c.global_position.y < 580.0:
 					initial_positions[c] = c.global_position.y
 
 			if target_beam:
@@ -2122,6 +2124,40 @@ func _ready() -> void:
 				print("  [PASS] Level 6 intermediate beam destruction caused 100% of upper stone arch and boulder to fall naturally (0 frozen, 0 floating)!")
 
 		cl_inst.free()
+		await get_tree().process_frame
+
+	# 29.7 Level 20 Geometry Inspection
+	print("\n--- Diagnostic: Inspecting Level 20 Geometry & Blocks ---")
+	if test29_camp_sc:
+		GameManager.current_level = 20
+		var cl20 = test29_camp_sc.instantiate()
+		add_child(cl20)
+		await get_tree().physics_frame
+
+		var col_l = cl20.get_node_or_null("BunkerBoundaries/ColWallL")
+		var col_r = cl20.get_node_or_null("BunkerBoundaries/ColWallR")
+		var col_fl = cl20.get_node_or_null("BunkerBoundaries/ColFloor")
+		var floor_y20 = GameManager.current_floor_y
+		print("  Level 20: floor_y = ", floor_y20)
+		if col_l: print("  ColWallL: pos=", col_l.position, " size=", col_l.shape.size, " right_boundary=", col_l.position.x + col_l.shape.size.x * 0.5)
+		if col_r: print("  ColWallR: pos=", col_r.position, " size=", col_r.shape.size, " left_boundary=", col_r.position.x - col_r.shape.size.x * 0.5)
+		if col_fl: print("  ColFloor: pos=", col_fl.position, " size=", col_fl.shape.size)
+
+		var bunker20 = cl20.get_node_or_null("BunkerStructure")
+		if bunker20:
+			for i in range(bunker20.get_child_count()):
+				var c = bunker20.get_child(i)
+				if "block_size" in c:
+					var b_top = c.position.y - c.block_size.y * 0.5
+					var b_bot = c.position.y + c.block_size.y * 0.5
+					var b_l = c.position.x - c.block_size.x * 0.5
+					var b_r = c.position.x + c.block_size.x * 0.5
+					print("  [%2d] BLOCK %s pos=(%.1f, %.1f) sz=(%.1f, %.1f) [L=%.1f, R=%.1f, T=%.1f, B=%.1f]" % [
+						i, c.material_type, c.position.x, c.position.y, c.block_size.x, c.block_size.y, b_l, b_r, b_top, b_bot
+					])
+				else:
+					print("  [%2d] OTHER %s pos=(%.1f, %.1f)" % [i, c.name, c.position.x, c.position.y])
+		cl20.free()
 		await get_tree().process_frame
 
 

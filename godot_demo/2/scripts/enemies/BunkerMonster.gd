@@ -898,7 +898,6 @@ func wake_up(force: bool = false) -> void:
 			return # Khóa tĩnh tuyệt đối lúc chưa bắn trứng
 	is_awake = true
 	sleeping = false
-	freeze = false
 	set_deferred("freeze", false)
 
 var crush_audio_cooldown: float = 0.0
@@ -912,6 +911,10 @@ func _physics_process(delta: float) -> void:
 	if pos.y > 1400.0 or pos.y < -700.0 or abs(pos.x) > 1800.0:
 		take_damage(9999.0, global_position)
 		return
+
+	# Đảm bảo dứt khoát: Khi quái vật đã thức giấc thì freeze phải bằng false để rơi tự nhiên
+	if is_awake and freeze:
+		freeze = false
 
 	if has_node("/root/GameManager"):
 		var gm = get_node("/root/GameManager")
@@ -984,7 +987,7 @@ func _check_underlying_support() -> void:
 	if not has_support:
 		if not is_awake:
 			wake_up(true)
-		elif sleeping:
+		elif sleeping or freeze:
 			sleeping = false
 			freeze = false
 			set_deferred("freeze", false)

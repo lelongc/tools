@@ -303,6 +303,10 @@ func _process(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	if is_destroyed: return
 
+	# Đảm bảo dứt khoát: Khi khối đã thức giấc thì freeze phải bằng false để rơi tự nhiên theo trọng lực
+	if is_awake and freeze:
+		freeze = false
+
 	if damage_flash_cooldown > 0.0:
 		damage_flash_cooldown -= delta
 
@@ -381,9 +385,9 @@ func _quick_check_grounded(visited: Array = [], depth: int = 0) -> bool:
 	if block_size.x <= 48.0:
 		test_pts.append(to_global(Vector2(0.0, hh - 2.0)))
 	else:
-		test_pts.append(to_global(Vector2(-hw + 8.0, hh - 2.0)))
-		test_pts.append(to_global(Vector2(0.0, hh - 2.0)))
-		test_pts.append(to_global(Vector2(hw - 8.0, hh - 2.0)))
+		var ratios = [-0.85, -0.70, -0.35, 0.0, 0.35, 0.70, 0.85]
+		for r in ratios:
+			test_pts.append(to_global(Vector2(hw * r, hh - 2.0)))
 
 	var ray_query = PhysicsRayQueryParameters2D.new()
 	ray_query.exclude = [get_rid()]
@@ -416,21 +420,18 @@ func _has_rigid_support() -> bool:
 	if not space_state: return true
 
 	var hw = block_size.x * 0.5
-	# 2. Phân bổ điểm quét đáy khối: Tối đa 3 điểm (trái, giữa, phải)
-	# Tia quét bắt đầu từ bên trong khối (hh - 2.0) và chỉ quét xuống 8.0px (vượt qua đáy 6.0px)
-	# TUYỆT ĐỐI không quét 26px làm nhảy cóc qua khoảng trống rỗng 24px khi tầng dầm dưới bị vỡ!
+	# 2. Phân bổ điểm quét đáy khối: bao quát 2 mép, 2 trụ nâng đỡ bastion (0.70*hw), và tâm dầm
 	var test_points: Array[Vector2] = []
 	var test_local_x: Array[float] = []
 	if block_size.x <= 48.0:
 		test_points.append(to_global(Vector2(0.0, hh - 2.0)))
 		test_local_x.append(0.0)
 	else:
-		test_points.append(to_global(Vector2(-hw + 8.0, hh - 2.0)))
-		test_local_x.append(-hw + 8.0)
-		test_points.append(to_global(Vector2(0.0, hh - 2.0)))
-		test_local_x.append(0.0)
-		test_points.append(to_global(Vector2(hw - 8.0, hh - 2.0)))
-		test_local_x.append(hw - 8.0)
+		var ratios = [-0.85, -0.70, -0.35, 0.0, 0.35, 0.70, 0.85]
+		for r in ratios:
+			var lx = hw * r
+			test_points.append(to_global(Vector2(lx, hh - 2.0)))
+			test_local_x.append(lx)
 
 	var ray_length = 8.0
 	var has_left = false
@@ -510,7 +511,6 @@ func wake_up(force: bool = false) -> void:
 			return
 	is_awake = true
 	sleeping = false
-	freeze = false
 	set_deferred("freeze", false)
 	micro_jitter_timer = 0.0
 
