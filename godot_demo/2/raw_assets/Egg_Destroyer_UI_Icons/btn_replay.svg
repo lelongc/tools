@@ -11,7 +11,7 @@
   <circle cx="64" cy="64" r="54" fill="url(#bg_blue)" stroke="#0d5494" stroke-width="6" filter="url(#shadow)"/>
   <ellipse cx="64" cy="30" rx="36" ry="14" fill="#ffffff" fill-opacity="0.25"/>
   <!-- Curved reload arrow -->
-  <path d="M68 28 A36 36 0 1 0 92 80" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round"/>
-  <polygon points="68,18 68,54 100,36" fill="#ffffff"/>
-  <path d="M68 28 A36 36 0 1 0 92 80" fill="none" stroke="#0d5494" stroke-width="3" stroke-linecap="round"/>
+  <path d="M64 29 A35 35 0 1 0 92 42" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round"/>
+  <polygon points="104,33 80,51 79,26" fill="#ffffff"/>
+  <path d="M64 29 A35 35 0 1 0 92 42" fill="none" stroke="#0d5494" stroke-width="3" stroke-linecap="round"/>
 </svg>

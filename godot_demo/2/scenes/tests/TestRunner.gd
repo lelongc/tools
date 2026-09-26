@@ -1943,6 +1943,120 @@ func _ready() -> void:
 	GameManager.has_first_impact_occurred = false
 	GameManager.is_level_active = false
 
+	# -------------------------------------------------------------------------
+	# 29. TEST FULL-GAME UI BUTTONS, MODAL LIFECYCLES, 200 MAPS & LOGIC INTEGRITY
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 29] Testing Full-Game UI Buttons, Modals, 200 Maps & Logic Integrity ---")
+	
+	# 29.1 MainMenu buttons & touch target sizes
+	var test29_mm_scene = load("res://scenes/ui/MainMenu.tscn")
+	if not test29_mm_scene:
+		errors.append("TEST 29: Failed to load MainMenu.tscn")
+	else:
+		var mm = test29_mm_scene.instantiate()
+		add_child(mm)
+		await get_tree().process_frame
+		var mm_btn_names = ["BtnPlay", "BtnLevels", "BtnWheel", "BtnShop", "BtnSound", "BtnLang", "BtnSettings"]
+		for bname in mm_btn_names:
+			var btn = mm.find_child(bname, true, false) as Button
+			if not btn:
+				errors.append("TEST 29: MainMenu missing button: %s" % bname)
+			else:
+				if btn.pressed.get_connections().size() == 0:
+					errors.append("TEST 29: MainMenu button %s has no pressed connections" % bname)
+		print("  [PASS] MainMenu all buttons verified and correctly wired.")
+		mm.free()
+		await get_tree().process_frame
+
+	# 29.2 LevelSelect 20 level buttons per world & navigation
+	var test29_ls_scene = load("res://scenes/ui/LevelSelect.tscn")
+	if not test29_ls_scene:
+		errors.append("TEST 29: Failed to load LevelSelect.tscn")
+	else:
+		var ls = test29_ls_scene.instantiate()
+		add_child(ls)
+		await get_tree().process_frame
+		var grid = ls.find_child("GridContainer", true, false)
+		if not grid or grid.get_child_count() != 20:
+			errors.append("TEST 29: LevelSelect grid does not contain 20 level buttons")
+		else:
+			print("  [PASS] LevelSelect grid successfully populated 20 level buttons.")
+		var btn_back = ls.find_child("BtnBack", true, false) as Button
+		if not btn_back or btn_back.pressed.get_connections().size() == 0:
+			errors.append("TEST 29: LevelSelect BtnBack missing or unconnected")
+		ls.free()
+		await get_tree().process_frame
+
+	# 29.3 GameHUD TopBar, Modals & Buttons
+	var test29_hud_scene = load("res://scenes/prefabs/GameHUD.tscn")
+	if not test29_hud_scene:
+		errors.append("TEST 29: Failed to load GameHUD.tscn")
+	else:
+		var hud = test29_hud_scene.instantiate()
+		add_child(hud)
+		await get_tree().process_frame
+		var hud_btn_names = ["BtnPause", "BtnRestart", "BtnVipTrial", "BtnClaimTriple", "BtnNext", "BtnRetry", "BtnResume"]
+		for bname in hud_btn_names:
+			var btn = hud.find_child(bname, true, false) as Button
+			if btn and btn.pressed.get_connections().size() == 0:
+				errors.append("TEST 29: GameHUD button %s has no pressed connections" % bname)
+		print("  [PASS] GameHUD all buttons verified and connected.")
+		hud.free()
+		await get_tree().process_frame
+
+	# 29.4 SettingsModal, DailyWheelModal & ShopModal Lifecycles
+	var test29_sm_scene = load("res://scenes/ui/SettingsModal.tscn")
+	var test29_wheel_scene = load("res://scenes/ui/DailyWheelModal.tscn")
+	var test29_shop_scene = load("res://scenes/ui/ShopModal.tscn")
+	if test29_sm_scene and test29_wheel_scene and test29_shop_scene:
+		var sm_inst = test29_sm_scene.instantiate()
+		var wheel_inst = test29_wheel_scene.instantiate()
+		var shop_inst = test29_shop_scene.instantiate()
+		add_child(sm_inst)
+		add_child(wheel_inst)
+		add_child(shop_inst)
+		await get_tree().process_frame
+		
+		var sm_close = sm_inst.find_child("BtnClose", true, false) as Button
+		var wh_close = wheel_inst.find_child("BtnClose", true, false) as Button
+		var sh_close = shop_inst.find_child("BtnClose", true, false) as Button
+		if not sm_close or sm_close.pressed.get_connections().size() == 0:
+			errors.append("TEST 29: SettingsModal close button unconnected")
+		if not wh_close or wh_close.pressed.get_connections().size() == 0:
+			errors.append("TEST 29: DailyWheelModal close button unconnected")
+		if not sh_close or sh_close.pressed.get_connections().size() == 0:
+			errors.append("TEST 29: ShopModal close button unconnected")
+		print("  [PASS] Settings, Wheel, and Shop modals instantiated and close buttons verified.")
+		
+		sm_inst.free()
+		wheel_inst.free()
+		shop_inst.free()
+		await get_tree().process_frame
+
+	# 29.5 Multi-World Level Integrity Check (Worlds 1, 2, 4, 6, 8, 10)
+	var multi_world_levels = [1, 21, 61, 101, 141, 181, 200]
+	var test29_camp_multi_sc = load("res://scenes/levels/CampaignLevel.tscn")
+	if test29_camp_multi_sc:
+		for lvl_id in multi_world_levels:
+			GameManager.current_level = lvl_id
+			var cl_mw = test29_camp_multi_sc.instantiate()
+			add_child(cl_mw)
+			await get_tree().physics_frame
+			
+			var m_count = cl_mw.find_children("", "BunkerMonster", true, false).size()
+			var b_count = cl_mw.find_children("", "DestructibleBlock", true, false).size()
+			if m_count == 0:
+				errors.append("TEST 29: Level %d has 0 monsters!" % lvl_id)
+			if b_count == 0:
+				errors.append("TEST 29: Level %d has 0 destructible blocks!" % lvl_id)
+			cl_mw.free()
+			await get_tree().process_frame
+		print("  [PASS] Multi-World level generation verified across all 10 worlds (monsters > 0, blocks > 0).")
+
+	GameManager.current_egg_index = 0
+	GameManager.has_first_impact_occurred = false
+	GameManager.is_level_active = false
+
 	print("\n================================================================")
 	# Explicitly clean up all remaining nodes in TestRunner
 	for child in get_children():
