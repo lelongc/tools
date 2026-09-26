@@ -133,13 +133,15 @@ func _supernova_blast() -> void:
 		var col = res.collider
 		if is_instance_valid(col) and col != self:
 			var diff = col.global_position - global_position
+			var dist = max(10.0, diff.length())
 			var dir = diff.normalized()
+			var falloff = 1.0 - clamp(dist / vortex_radius, 0.0, 0.85)
 
 			if col is RigidBody2D:
-				col.apply_central_impulse(dir * 1400.0)
+				col.apply_central_impulse(dir * (1400.0 * falloff))
 
 			if col.has_method("take_damage"):
-				col.take_damage(blast_damage, global_position)
+				col.take_damage(blast_damage * falloff, global_position)
 
 	if not is_inside_tree() or not get_tree():
 		queue_free()

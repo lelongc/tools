@@ -33,4 +33,8 @@ func _physics_process(_delta: float) -> void:
 		if not is_instance_valid(body) or body.is_queued_for_deletion():
 			overlapping_bodies.remove_at(i)
 		elif not body.freeze:
-			body.apply_central_force(Vector2(0, -wind_force))
+			var lift = wind_force
+			if body.linear_velocity.y < -380.0:
+				lift *= 0.15 # Hãm lực khi vận tốc bốc lên đã đạt ngưỡng trần
+			var turb_x = randf_range(-140.0, 140.0)
+			body.apply_central_force(Vector2(turb_x, -lift))

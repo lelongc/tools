@@ -210,20 +210,20 @@ func _setup_level() -> void:
 	# Cập nhật hình ảnh bối cảnh phong phú theo từng Thế Giới
 	_apply_world_environment(world_id, left_edge_x, right_edge_x, cx, total_w, cavern_top_y, floor_y, cav_mid_y, cav_width, cav_height)
 
-	# Cập nhật hình ảnh nền mở rộng toàn cảnh
-	var bg_margin_x = 1200.0
+	# Cập nhật hình ảnh nền mở rộng toàn cảnh (Biên độ rộng ±2400px chống lộ mép khi camera zoom xa)
+	var bg_margin_x = 2400.0
 	var bg_min_x = -bg_margin_x
 	var bg_max_x = total_w + bg_margin_x
 
 	if bg_sky:
 		bg_sky.polygon = PackedVector2Array([
-			Vector2(bg_min_x, -800.0), Vector2(bg_max_x, -800.0),
+			Vector2(bg_min_x, -2200.0), Vector2(bg_max_x, -2200.0),
 			Vector2(bg_max_x, cavern_top_y), Vector2(bg_min_x, cavern_top_y)
 		])
 	if bg_dirt:
 		bg_dirt.polygon = PackedVector2Array([
 			Vector2(bg_min_x, cavern_top_y), Vector2(bg_max_x, cavern_top_y),
-			Vector2(bg_max_x, floor_y + 800.0), Vector2(bg_min_x, floor_y + 800.0)
+			Vector2(bg_max_x, floor_y + 2200.0), Vector2(bg_min_x, floor_y + 2200.0)
 		])
 	if bg_cavern:
 		bg_cavern.polygon = PackedVector2Array([
@@ -287,11 +287,14 @@ func _setup_level() -> void:
 
 	# Gà oanh tạc lượn theo sải cánh bầu trời tương ứng
 	var chicken = get_node_or_null("ChickenBomber")
-	if chicken and "min_x" in chicken:
-		chicken.min_x = left_edge_x + 35.0
-		chicken.max_x = right_edge_x - 35.0
-		chicken.default_y = cavern_top_y - 120.0
-		chicken.position = Vector2(cx, chicken.default_y)
+	if chicken:
+		if chicken.has_method("set_flight_bounds"):
+			chicken.set_flight_bounds(left_edge_x + 35.0, right_edge_x - 35.0, cavern_top_y - 120.0)
+		else:
+			chicken.min_x = left_edge_x + 35.0
+			chicken.max_x = right_edge_x - 35.0
+			chicken.default_y = cavern_top_y - 120.0
+		chicken.position = Vector2(cx, cavern_top_y - 120.0)
 		if "aim_anchor_x" in chicken:
 			chicken.aim_anchor_x = cx
 		chicken.move_speed = 160.0 + min((world_id - 1) * 16.0, 120.0)

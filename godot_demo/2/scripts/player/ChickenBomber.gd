@@ -97,6 +97,13 @@ var egg_scenes: Dictionary = {
 func _safe_load(path: String) -> Texture2D:
 	return ParticleHelper._safe_load(path)
 
+func set_flight_bounds(p_min_x: float, p_max_x: float, p_default_y: float = -1.0) -> void:
+	min_x = p_min_x
+	max_x = p_max_x
+	if p_default_y > 0.0:
+		default_y = p_default_y
+		position.y = default_y
+
 func _ready() -> void:
 	add_to_group("Player")
 	position = Vector2(270.0, default_y)
@@ -394,7 +401,11 @@ func _handle_aim_input(delta: float = 0.016) -> void:
 
 			# Không nhận click nếu bấm đè thanh menu TopBar ở trên đỉnh hoặc kệ trứng phía dưới
 			var vp_height = get_viewport_rect().size.y
-			var top_limit = 75.0
+			var safe_rect = DisplayServer.get_display_safe_area()
+			var win_size = DisplayServer.window_get_size()
+			var scale_y = vp_height / float(max(1, win_size.y)) if win_size.y > 0 else 1.0
+			var top_safe = float(safe_rect.position.y) * scale_y
+			var top_limit = max(80.0, top_safe + 45.0)
 			var bottom_limit = max(800.0, vp_height - 75.0)
 			if screen_mouse_pos.y < top_limit or screen_mouse_pos.y > bottom_limit:
 				return
@@ -417,21 +428,27 @@ func _handle_aim_input(delta: float = 0.016) -> void:
 			if drag_dist > 14.0:
 				has_aim_dragged = true
 
-			# Vùng hủy an toàn: Kéo trả về điểm gốc (<18px), kéo vào thanh TopBar (y < 80px), hoặc kéo ngược lên trời (y < -45px hoặc kéo thẳng đứng lên y < -25px)
+			var vp_h = get_viewport_rect().size.y
+			var s_rect = DisplayServer.get_display_safe_area()
+			var w_sz = DisplayServer.window_get_size()
+			var sc_y = vp_h / float(max(1, w_sz.y)) if w_sz.y > 0 else 1.0
+			var t_safe = float(s_rect.position.y) * sc_y
+			var cur_top_limit = max(80.0, t_safe + 45.0)
+
+			# Vùng hủy an toàn: Kéo trả về điểm gốc (<18px), chạm vào thanh TopBar, hoặc kéo ngược ngón tay lên bầu trời (drag_delta.y < -15px)
 			var is_cancelling = (has_aim_dragged and drag_dist < 18.0) \
-				or (screen_mouse_pos.y < 80.0) \
-				or (drag_delta.y < -45.0) \
-				or (drag_delta.y < -25.0 and abs(drag_delta.x) < 35.0)
+				or (screen_mouse_pos.y < cur_top_limit) \
+				or (drag_delta.y < -15.0) \
+				or (drag_delta.y < -10.0 and abs(drag_delta.x) < 40.0)
 
 			# Tính toán lực và hướng bắn trong bán nguyệt 180 độ hướng xuống dưới (không ném lên trời)
 			if has_aim_dragged and not is_cancelling:
 				var raw_angle = drag_delta.angle()
 				# Khóa góc trong vòng bán nguyệt 180 độ hướng xuống [0.04, PI - 0.04] rad
-				# Tuyệt đối không cho phép ném ngược lên trời
+				# Dựa vào drag_delta.x để kẹp mượt mà không đảo cực 180 độ
 				var clamped_angle: float
 				if raw_angle < 0.0:
-					# Ngón tay nằm ở nửa trên: kẹp sát trục ngang tương ứng trái / phải
-					if raw_angle > -PI * 0.5:
+					if drag_delta.x >= 0.0:
 						clamped_angle = 0.04 # Kẹp sát mép ngang sang phải
 					else:
 						clamped_angle = PI - 0.04 # Kẹp sát mép ngang sang trái
@@ -476,10 +493,18 @@ func _handle_aim_input(delta: float = 0.016) -> void:
 			var drag_delta = screen_mouse_pos - aim_start_screen_pos
 			var drag_dist = drag_delta.length()
 			var elapsed = (Time.get_ticks_msec() / 1000.0) - aim_touch_time
+
+			var vp_h = get_viewport_rect().size.y
+			var s_rect = DisplayServer.get_display_safe_area()
+			var w_sz = DisplayServer.window_get_size()
+			var sc_y = vp_h / float(max(1, w_sz.y)) if w_sz.y > 0 else 1.0
+			var t_safe = float(s_rect.position.y) * sc_y
+			var cur_top_limit = max(80.0, t_safe + 45.0)
+
 			var is_cancelled = (has_aim_dragged and drag_dist < 18.0) \
-				or (screen_mouse_pos.y < 80.0) \
-				or (drag_delta.y < -45.0) \
-				or (drag_delta.y < -25.0 and abs(drag_delta.x) < 35.0)
+				or (screen_mouse_pos.y < cur_top_limit) \
+				or (drag_delta.y < -15.0) \
+				or (drag_delta.y < -10.0 and abs(drag_delta.x) < 40.0)
 
 			# Nếu đang có trứng trên không chưa kích hoạt kỹ năng và người chơi chỉ chạm nhanh (Tap < 0.22s)
 			if has_airborne_unboosted_egg() and not has_aim_dragged and elapsed < 0.22:
@@ -550,7 +575,7 @@ func _draw_trajectory(initial_vel: Vector2) -> void:
 	var start_p = global_position + Vector2(0, 26.0)
 	var vel = initial_vel
 	var gravity = Vector2(0, 980.0)
-	var dt = 0.022
+	var dt = 0.015
 
 	var cur_p = start_p
 	var sim: Array[Vector2] = [start_p]
@@ -561,7 +586,7 @@ func _draw_trajectory(initial_vel: Vector2) -> void:
 
 	var floor_y = GameManager.current_floor_y if has_node("/root/GameManager") else 840.0
 
-	for _i in range(76):
+	for _i in range(96):
 		var next_p = cur_p + vel * dt
 		vel += gravity * dt
 

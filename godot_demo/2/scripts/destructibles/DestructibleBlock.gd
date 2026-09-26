@@ -320,10 +320,11 @@ func _physics_process(delta: float) -> void:
 	if is_awake and not is_destroyed:
 		var speed = linear_velocity.length()
 		var ang_speed = abs(angular_velocity)
+		var has_contacts = get_contact_count() > 0
 
-		# Khi thanh công trình/mảnh vụn nằm nghỉ, vận tốc dao động nhỏ (< 32.0 px/s, xoay < 1.4 rad/s)
-		# Tuyệt đối không dập lực nếu khối đang rơi tự do trong không khí (linear_velocity.y > 35.0)
-		if speed < 32.0 and ang_speed < 1.4 and linear_velocity.y <= 35.0:
+		# Khi thanh công trình/mảnh vụn nằm nghỉ và CÓ TIẾP XÚC, vận tốc dao động nhỏ (< 32.0 px/s, xoay < 1.4 rad/s)
+		# Tuyệt đối không dập lực nếu khối đang rơi tự do trong không khí (linear_velocity.y > 35.0 hoặc không có tiếp xúc)
+		if has_contacts and speed < 32.0 and ang_speed < 1.4 and linear_velocity.y <= 35.0:
 			linear_velocity *= 0.88
 			angular_velocity *= 0.82
 			micro_jitter_timer += delta
@@ -367,11 +368,20 @@ func _physics_process(delta: float) -> void:
 			if not _has_rigid_support():
 				wake_up(true)
 
+var _last_grounded_frame: int = -1
+var _last_grounded_result: bool = false
+
 func _quick_check_grounded(visited: Array = [], depth: int = 0) -> bool:
 	if is_destroyed: return false
+	var cur_frame = Engine.get_physics_frames()
+	if visited.is_empty() and cur_frame == _last_grounded_frame:
+		return _last_grounded_result
+
 	var floor_y = GameManager.current_floor_y if has_node("/root/GameManager") else 840.0
 	var hh = block_size.y * 0.5
 	if (global_position.y + hh) >= (floor_y - 6.0):
+		_last_grounded_frame = cur_frame
+		_last_grounded_result = true
 		return true
 	if depth >= 5 or self in visited:
 		return false
@@ -403,10 +413,16 @@ func _quick_check_grounded(visited: Array = [], depth: int = 0) -> bool:
 			var col = hit.collider
 			if is_instance_valid(col) and col != self and not col.is_queued_for_deletion():
 				if col is StaticBody2D:
+					_last_grounded_frame = cur_frame
+					_last_grounded_result = true
 					return true
 				elif col is DestructibleBlock and not (col in visited):
 					if not col.is_destroyed and col._quick_check_grounded(visited, depth + 1):
+						_last_grounded_frame = cur_frame
+						_last_grounded_result = true
 						return true
+	_last_grounded_frame = cur_frame
+	_last_grounded_result = false
 	return false
 
 func _has_rigid_support() -> bool:

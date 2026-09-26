@@ -1036,8 +1036,12 @@ func _handle_continuous_crushing(delta: float) -> void:
 	if is_crushed_this_frame:
 		is_currently_pinned = true
 		pinned_cooldown = 0.6
+		can_sleep = false
+		sleeping = false
 		if current_state != State.PINNED_UNDER_DEBRIS:
 			_set_state(State.PINNED_UNDER_DEBRIS)
+	elif not is_currently_pinned:
+		can_sleep = true
 
 func _process(delta: float) -> void:
 	if spawn_settle_timer > 0.0:

@@ -278,7 +278,10 @@ func _notification(what: int) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		if not _handle_back_button():
-			get_tree().quit(0)
+			if has_node("/root/GameManager"):
+				get_node("/root/GameManager")._handle_mobile_back()
+			else:
+				get_tree().quit(0)
 
 func _apply_safe_area() -> void:
 	if not is_inside_tree(): return
