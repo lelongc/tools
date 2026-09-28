@@ -18,23 +18,26 @@ var save_data: Dictionary = {
 	"consumables": {
 		"bomb": 1,
 		"drill": 0,
-		"acid": 0
+		"acid": 0,
+		"frost": 0,
+		"cluster": 0,
+		"blackhole": 0
 	},
 	"daily_spins_date": "",
 	"daily_spins_count": 0,
-	"version": 7
+	"version": 8
 }
 
 func _ready() -> void:
 	load_game()
-	if save_data.get("version", 1) < 7:
+	if save_data.get("version", 1) < 8:
 		_migrate_save_version()
 
 func _migrate_save_version() -> void:
 	# SAVE-01: Bảo toàn toàn bộ tiến trình người chơi thay vì reset_save
 	var cur_ver = int(save_data.get("version", 1))
-	if cur_ver < 7:
-		save_data["version"] = 7
+	if cur_ver < 8:
+		save_data["version"] = 8
 		if not save_data.has("highest_unlocked_level"):
 			save_data["highest_unlocked_level"] = 1
 		if not (save_data.get("level_stars") is Dictionary):
@@ -42,7 +45,11 @@ func _migrate_save_version() -> void:
 		if not (save_data.get("level_scores") is Dictionary):
 			save_data["level_scores"] = {}
 		if not (save_data.get("consumables") is Dictionary):
-			save_data["consumables"] = {"bomb": 1, "drill": 0, "acid": 0}
+			save_data["consumables"] = {"bomb": 1, "drill": 0, "acid": 0, "frost": 0, "cluster": 0, "blackhole": 0}
+		else:
+			for c_type in ["bomb", "drill", "acid", "frost", "cluster", "blackhole"]:
+				if not save_data["consumables"].has(c_type):
+					save_data["consumables"][c_type] = 0
 		save_game()
 
 func _notification(what: int) -> void:
@@ -62,11 +69,14 @@ func reset_save() -> void:
 		"consumables": {
 			"bomb": 1,
 			"drill": 0,
-			"acid": 0
+			"acid": 0,
+			"frost": 0,
+			"cluster": 0,
+			"blackhole": 0
 		},
 		"daily_spins_date": "",
 		"daily_spins_count": 0,
-		"version": 7
+		"version": 8
 	}
 	save_game()
 	coins_updated.emit(save_data["coins"])
