@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Ổ sao khoét rãnh chìm trong gỗ (Empty Star Socket Recess) -->
+  <polygon points="32,4 41,21 60,24 46,38 49,57 32,48 15,57 18,38 4,24 23,21" fill="#180c06"/>
+  <polygon points="32,6 40,22 58,25 44,38 47,55 32,46 17,55 20,38 6,25 24,22" fill="#24140b"/>
+  <!-- Viền rãnh khoét âm bóng tối -->
+  <polygon points="32,6 32,46 47,55 44,38" fill="#150a04" opacity="0.6"/>
+  <polygon points="32,25 58,25 44,38" fill="#150a04" opacity="0.4"/>
+  <!-- Gờ viền sáng nhẹ phản chiếu mép gỗ đáy -->
+  <path d="M 17 55 L 32 46 L 47 55" stroke="#482714" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+</svg>

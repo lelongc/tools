@@ -151,6 +151,19 @@ func _apply_cartoon_ui_theme() -> void:
 		var coin_box = get_node_or_null("TopBar/Margin/HBox/CoinBox")
 		if coin_box: coin_box.add_theme_stylebox_override("panel", sbt_badge)
 
+	if level_label:
+		level_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.88))
+		level_label.add_theme_color_override("font_outline_color", Color(0.18, 0.08, 0.02))
+		level_label.add_theme_constant_override("outline_size", 4)
+	if score_label:
+		score_label.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
+		score_label.add_theme_color_override("font_outline_color", Color(0.18, 0.08, 0.02))
+		score_label.add_theme_constant_override("outline_size", 4)
+	if coin_label:
+		coin_label.add_theme_color_override("font_color", Color(1.0, 0.92, 0.50))
+		coin_label.add_theme_color_override("font_outline_color", Color(0.18, 0.08, 0.02))
+		coin_label.add_theme_constant_override("outline_size", 4)
+
 	# 4. Modals (Victory, Fail, Pause, LastStand) với khung gỗ hoạt hình nẹp góc đồng vàng
 	var sbt_modal = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_modal_wood_frame.svg", 36, 36, 36, 44)
 	if sbt_modal:
@@ -202,12 +215,12 @@ func _setup_level_1_tutorial() -> void:
 	panel.name = "Bubble"
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var sb = StyleBoxFlat.new()
-	sb.bg_color = Color(0.1, 0.08, 0.18, 0.90)
+	sb.bg_color = Color(0.20, 0.12, 0.06, 0.94)
 	sb.border_width_left = 2
 	sb.border_width_right = 2
 	sb.border_width_top = 2
-	sb.border_width_bottom = 2
-	sb.border_color = Color(1.0, 0.85, 0.25, 0.95)
+	sb.border_width_bottom = 3
+	sb.border_color = Color(0.58, 0.38, 0.20, 0.95)
 	sb.corner_radius_top_left = 12
 	sb.corner_radius_top_right = 12
 	sb.corner_radius_bottom_right = 12
@@ -225,8 +238,8 @@ func _setup_level_1_tutorial() -> void:
 	lbl.name = "TutorialLabel"
 	lbl.text = prompt_txt
 	lbl.add_theme_font_size_override("font_size", 12)
-	lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.4))
-	lbl.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.85))
+	lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.85))
+	lbl.add_theme_color_override("font_outline_color", Color(0.18, 0.08, 0.02, 0.9))
 	lbl.add_theme_constant_override("outline_size", 4)
 	panel.add_child(lbl)
 
@@ -301,19 +314,19 @@ func _render_booster_buttons() -> void:
 			btn.expand_icon = true
 
 		var st_norm = StyleBoxFlat.new()
-		st_norm.bg_color = Color(0.18, 0.12, 0.28, 0.9)
-		st_norm.border_width_bottom = 4
+		st_norm.bg_color = Color(0.24, 0.14, 0.08, 0.94)
+		st_norm.border_width_bottom = 3
 		st_norm.border_width_left = 2
 		st_norm.border_width_right = 2
 		st_norm.border_width_top = 2
-		st_norm.border_color = Color(1.0, 0.8, 0.2)
+		st_norm.border_color = Color(0.55, 0.35, 0.18, 0.95)
 		st_norm.corner_radius_top_left = 10
 		st_norm.corner_radius_top_right = 10
 		st_norm.corner_radius_bottom_right = 10
 		st_norm.corner_radius_bottom_left = 10
 		btn.add_theme_stylebox_override("normal", st_norm)
 		btn.add_theme_font_size_override("font_size", 11)
-		btn.add_theme_color_override("font_color", Color(1, 0.9, 0.4))
+		btn.add_theme_color_override("font_color", Color(1.0, 0.95, 0.85))
 
 		btn.pressed.connect(func():
 			if GameManager.add_active_booster_egg(b_type):
@@ -637,21 +650,28 @@ func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> 
 
 		# Chuỗi hoạt ảnh 3 Ngôi Sao nảy tung nhịp nhàng và điểm chuông sao trong trẻo
 		var tex_star_full = preload("res://assets/ui/icons/icon_star.svg")
+		var tex_star_empty = preload("res://assets/ui/icons/icon_star_empty.svg")
 		var star_nodes = [star1, star2, star3]
 		for i in range(3):
 			var s_node = star_nodes[i]
 			if s_node:
-				s_node.scale = Vector2.ZERO
 				s_node.pivot_offset = s_node.size * 0.5
-				s_node.texture = tex_star_full
+				s_node.modulate = Color.WHITE
+				s_node.texture = tex_star_empty
+				s_node.scale = Vector2.ONE
+
+				var star_idx = i
 				if i < stars:
-					s_node.modulate = Color.WHITE
 					var st = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
-					st.tween_interval(0.25 + i * 0.32)
-					var star_idx = i
+					st.tween_interval(0.35 + i * 0.36)
 					st.tween_callback(func():
+						s_node.texture = tex_star_full
+						s_node.scale = Vector2(0.25, 0.25)
 						if has_node("/root/SoundManager"):
 							get_node("/root/SoundManager").play_star_chime(star_idx + 1)
+						if has_node("/root/SaveManager"):
+							get_node("/root/SaveManager").vibrate(35 + star_idx * 15)
+						ParticleHelper.spawn_star_pop(self, s_node.global_position + s_node.size * 0.5)
 						if star_idx == 2 and stars == 3:
 							var vp_size = get_viewport().get_visible_rect().size
 							var center_y = vp_size.y * 0.45
@@ -660,10 +680,8 @@ func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> 
 					)
 					st.tween_property(s_node, "scale", Vector2.ONE, 0.28)
 				else:
-					s_node.modulate = Color(0.25, 0.18, 0.35, 0.65)
-					var st = create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-					st.tween_interval(0.25 + i * 0.32)
-					st.tween_property(s_node, "scale", Vector2(0.85, 0.85), 0.20)
+					s_node.texture = tex_star_empty
+					s_node.modulate = Color(0.85, 0.85, 0.85, 0.75)
 
 		if coin_reward_label:
 			if lm: coin_reward_label.text = lm.t("KEY_GOLD_REWARD") % base_coins

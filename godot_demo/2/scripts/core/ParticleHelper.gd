@@ -651,4 +651,30 @@ static func spawn_confetti_burst(parent: Node, pos: Vector2, count: int = 24) ->
 		tw.parallel().tween_property(ribbon, "modulate:a", 0.0, 0.35).set_delay(0.75)
 		tw.chain().tween_callback(ribbon.queue_free)
 
+## Hiệu ứng hạt sao lấp lánh bung nở khi nhận sao chiến thắng (Star Pop Sparkles)
+static func spawn_star_pop(parent: Node, pos: Vector2) -> void:
+	if not parent or not is_instance_valid(parent): return
+	_init_textures()
+
+	var spark_tex = tex_spark if tex_spark else tex_circle
+	for i in range(10):
+		var spark = Sprite2D.new()
+		spark.texture = spark_tex
+		spark.global_position = pos
+		spark.scale = Vector2(0.4, 0.4)
+		spark.modulate = Color(1.0, randf_range(0.82, 0.98), randf_range(0.2, 0.4), 1.0)
+		spark.z_index = 85
+		parent.add_child(spark)
+
+		var angle = (float(i) / 10.0) * TAU + randf_range(-0.15, 0.15)
+		var dist = randf_range(28.0, 52.0)
+		var target_p = pos + Vector2(cos(angle), sin(angle)) * dist
+
+		var tw = spark.create_tween().set_parallel(true)
+		tw.tween_property(spark, "global_position", target_p, 0.38).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.tween_property(spark, "scale", Vector2(0.1, 0.1), 0.38).set_delay(0.08)
+		tw.tween_property(spark, "modulate:a", 0.0, 0.28).set_delay(0.18)
+		tw.chain().tween_callback(spark.queue_free)
+
+
 

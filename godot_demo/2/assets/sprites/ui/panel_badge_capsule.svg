@@ -1,3 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 48" width="128" height="48">
-  <rect x="3" y="3" width="122" height="42" rx="16" fill="#251540" stroke="#f1c40f" stroke-width="2.5"/>
+  <!-- Viền rãnh khoét gỗ sâu (Carved Wood Inset Capsule) -->
+  <rect x="2" y="2" width="124" height="44" rx="15" fill="#24140a" stroke="#482b19" stroke-width="2.5"/>
+  <!-- Lòng rãnh khoét âm bóng đổ phía trên tạo chiều sâu 3D -->
+  <rect x="5" y="5" width="118" height="38" rx="12" fill="#1e1008"/>
+  <!-- Gờ viền đáy nhẹ tạo độ nảy ánh sáng gỗ -->
+  <path d="M 18 42 L 110 42" stroke="#5a3720" stroke-width="1.5" stroke-linecap="round"/>
 </svg>

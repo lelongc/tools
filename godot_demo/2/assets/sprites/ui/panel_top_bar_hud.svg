@@ -1,6 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 64" width="256" height="64">
-  <rect x="3" y="3" width="250" height="58" rx="14" fill="#1b0e33" stroke="#f1c40f" stroke-width="3"/>
-  <!-- Điểm nhấn góc phẳng -->
-  <circle cx="12" cy="32" r="2.5" fill="#f1c40f"/>
-  <circle cx="244" cy="32" r="2.5" fill="#f1c40f"/>
+  <!-- Thân thanh xà gỗ TopBar hầm ngục mộc mạc bo cong góc đáy -->
+  <rect x="2" y="1" width="252" height="60" rx="16" fill="#382214" stroke="#221208" stroke-width="3"/>
+  <!-- Nẹp vân gỗ sáng ấm phía trên -->
+  <rect x="6" y="4" width="244" height="52" rx="12" fill="#482b19"/>
+  <!-- Dải nhấn viền đáy gỗ sồi chạm khắc -->
+  <path d="M 6 42 Q 128 46 250 42 L 250 50 A 12 12 0 0 1 238 58 L 18 58 A 12 12 0 0 1 6 50 Z" fill="#2d1a0e"/>
+  <!-- Hai đinh tán tròn đồng thau phong cách hoạt hình ở hai góc đáy -->
+  <circle cx="16" cy="48" r="3.5" fill="#c49652" stroke="#5a3d1b" stroke-width="1.2"/>
+  <circle cx="15" cy="47" r="1.2" fill="#fdf2d0"/>
+  <circle cx="240" cy="48" r="3.5" fill="#c49652" stroke="#5a3d1b" stroke-width="1.2"/>
+  <circle cx="239" cy="47" r="1.2" fill="#fdf2d0"/>
 </svg>

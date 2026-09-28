@@ -54,7 +54,7 @@ func _ready() -> void:
 		var gm = get_node("/root/GameManager")
 		gm.egg_dropped.connect(func(_type): play_egg_drop())
 		gm.enemy_defeated.connect(func(_enemy, _pts): play_enemy_squash())
-		# Khử âm thanh fanfare trước tiếng chuông sao theo yêu cầu người dùng
+		gm.level_completed.connect(func(_stars, _score, _coins): play_victory())
 		gm.level_failed.connect(func(): play_level_fail())
 
 	# 5. Khởi động nhạc nền hoạt hình
@@ -281,10 +281,10 @@ func play_star_chime(star_index: int = 1) -> void:
 	if not is_inside_tree(): return
 	if not is_sound_enabled(): return
 	if not wav_cache.has("star_chime"): return
-	var p = ui_player if is_instance_valid(ui_player) else _get_available_player()
+	var p = _get_available_player()
 	p.stream = wav_cache["star_chime"]
-	p.volume_db = 1.8
-	p.pitch_scale = 1.0 + float(star_index - 1) * 0.22 # C6 -> E6 -> G6
+	p.volume_db = 2.4
+	p.pitch_scale = 1.0 + float(star_index - 1) * 0.25 # C6 -> E6 -> G6
 	p.play()
 
 func play_victory() -> void:
@@ -296,11 +296,11 @@ func play_victory() -> void:
 			p.stop()
 	if is_instance_valid(fanfare_player) and wav_cache.has("victory_fanfare"):
 		fanfare_player.stream = wav_cache["victory_fanfare"]
-		fanfare_player.volume_db = 3.0
+		fanfare_player.volume_db = 2.0
 		fanfare_player.pitch_scale = 1.0
 		fanfare_player.play()
 	else:
-		play_sfx("victory_fanfare", 3.0, 1.0, 1.0)
+		play_sfx("victory_fanfare", 2.0, 1.0, 1.0)
 
 func play_level_fail() -> void:
 	if not can_play_sfx("level_fail", 1.5): return

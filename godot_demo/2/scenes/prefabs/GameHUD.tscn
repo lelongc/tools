@@ -11,43 +11,43 @@
 [ext_resource type="Texture2D" path="res://assets/ui/icons/icon_star.svg" id="9_star_ico"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_TopBar"]
-bg_color = Color(0.12, 0.04, 0.22, 0.92)
+bg_color = Color(0.22, 0.13, 0.08, 0.95)
 border_width_bottom = 3
-border_color = Color(1, 0.84, 0, 0.6)
+border_color = Color(0.42, 0.26, 0.15, 0.9)
 corner_radius_bottom_right = 18
 corner_radius_bottom_left = 18
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_Badge"]
-bg_color = Color(0.18, 0.08, 0.32, 0.92)
+bg_color = Color(0.14, 0.08, 0.04, 0.95)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(1, 0.84, 0, 0.5)
+border_color = Color(0.36, 0.22, 0.12, 0.85)
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_Shelf"]
-bg_color = Color(0.12, 0.05, 0.2, 0.92)
+bg_color = Color(0.24, 0.15, 0.09, 0.95)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(1, 0.84, 0, 0.85)
+border_color = Color(0.45, 0.28, 0.16, 0.9)
 corner_radius_top_left = 18
 corner_radius_top_right = 18
 corner_radius_bottom_right = 18
 corner_radius_bottom_left = 18
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_VictoryModal"]
-bg_color = Color(0.14, 0.04, 0.25, 0.98)
+bg_color = Color(0.22, 0.13, 0.08, 0.98)
 border_width_left = 3
 border_width_top = 3
 border_width_right = 3
 border_width_bottom = 3
-border_color = Color(1, 0.84, 0, 1)
+border_color = Color(0.52, 0.34, 0.18, 1)
 corner_radius_top_left = 20
 corner_radius_top_right = 20
 corner_radius_bottom_right = 20

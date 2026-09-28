@@ -1,3 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <polygon points="32,5 40,22 59,24 45,37 49,56 32,46 15,56 19,37 5,24 24,22" fill="#f1c40f" stroke="#d4ac0d" stroke-width="2.5" stroke-linejoin="round"/>
+  <defs>
+    <filter id="starGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <!-- Viền đậm hoạt hình phía sau -->
+  <polygon points="32,4 41,21 60,24 46,38 49,57 32,48 15,57 18,38 4,24 23,21" fill="#7a4400" filter="url(#starGlow)"/>
+  <!-- Thân sao vàng kim chính -->
+  <polygon points="32,6 40,22 58,25 44,38 47,55 32,46 17,55 20,38 6,25 24,22" fill="#ffc700"/>
+  <!-- Các vát cạnh 3D (Beveled Facets) tạo chiều sâu khối -->
+  <!-- Nửa tối bên phải và dưới -->
+  <polygon points="32,6 32,46 47,55 44,38" fill="#e67e22" opacity="0.45"/>
+  <polygon points="32,46 17,55 20,38" fill="#d35400" opacity="0.35"/>
+  <polygon points="32,25 58,25 44,38" fill="#f39c12" opacity="0.5"/>
+  <!-- Nửa sáng bên trái và trên -->
+  <polygon points="32,6 24,22 32,25" fill="#fff3a8" opacity="0.85"/>
+  <polygon points="24,22 6,25 20,38 32,25" fill="#ffe066" opacity="0.5"/>
+  <!-- Điểm sáng ngọc (Glint/Sparkle) ở đỉnh cánh trên -->
+  <circle cx="28" cy="14" r="3.2" fill="#ffffff" opacity="0.9"/>
+  <ellipse cx="32" cy="18" rx="6" ry="2.5" fill="#ffffff" opacity="0.6"/>
 </svg>
