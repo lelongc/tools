@@ -260,20 +260,20 @@ quadrantChart
 ### 🚀 Giai Đoạn 1: Hoàn Thiện Cốt Lõi, Đa Chạm & Chuẩn Hóa 7 Loại Trứng
 * **Mục tiêu**: Đảm bảo trải nghiệm chạm ngắm bắn mượt mà tuyệt đối không rủi ro lỗi đa chạm, đồng thời kích hoạt toàn bộ sức mạnh của 7 loại trứng trong kho đồ người chơi.
 * **Các bước triển khai**:
-  1. Nâng cấp bộ bắt sự kiện cảm ứng trong [`ChickenBomber.gd`](file:///d:/folder/tools/godot_demo/2/scripts/player/ChickenBomber.gd) sang phân luồng `touch_index` độc lập.
-  2. Bổ sung `get_viewport().set_input_as_handled()` vào `BombEgg.gd`.
-  3. Cập nhật `save_data["consumables"]` trong `SaveManager.gd` hỗ trợ cả 7 loại đạn: `bomb`, `drill`, `acid`, `frost`, `cluster`, `blackhole`, `normal`.
-  4. Đưa 7 loại trứng vào `ShopModal.gd`, `DailyWheelModal.gd` và `GameHUD.gd`.
-  5. Cập nhật `project.godot` kích hoạt `physics_interpolation = true`.
+  - [x] **1.1: Khóa góc bắn bán nguyệt 180 độ & Hủy thả an toàn**: Trong [`ChickenBomber.gd`](file:///d:/folder/tools/godot_demo/2/scripts/player/ChickenBomber.gd), kẹp góc chỉ hướng xuống, hỗ trợ hủy kéo thả khi vuốt ngược hoặc đưa về gốc.
+  - [x] **1.2: Tiêu thụ sự kiện chạm chống rò rỉ**: Đã bổ sung `get_viewport().set_input_as_handled()` cho tất cả các loại đạn (`BombEgg.gd`, `NormalEgg.gd`, `DrillEgg.gd`, `FrostEgg.gd`, `AcidEgg.gd`, `ClusterEgg.gd`, `BlackHoleEgg.gd`).
+  - [x] **1.3: Cập nhật SaveManager v8 toàn diện**: Hỗ trợ đầy đủ kho trứng 6 loại đặc biệt (`bomb`, `drill`, `acid`, `frost`, `cluster`, `blackhole`) kèm cơ chế di chuyển phiên bản `_migrate_save_version()` và Cloud Save Merge an toàn.
+  - [x] **1.4: Đưa 7 loại trứng vào ShopModal, DailyWheelModal & GameHUD**: Người chơi có thể quay trúng, mua sắm và kích hoạt mọi loại trứng đặc biệt trong trận đấu.
+  - [x] **1.5: Kích hoạt Physics Interpolation**: Bổ sung `common/physics_interpolation = true` trong `project.godot` cho màn hình 90/120Hz mượt mà.
 
 ### 🛡️ Giai Đoạn 2: Đồng Bộ Mỹ Thuật Giao Diện, Công Thái Học & Âm Thanh
 * **Mục tiêu**: Toàn bộ giao diện đạt chuẩn 2D 9-patch vector cao cấp, âm thanh đạt độ ấm uy lực không méo tiếng.
 * **Các bước triển khai**:
-  1. Đồng bộ các nút trong `BoosterTray` trên `GameHUD.gd` bằng `JuicyButton`.
-  2. Bổ sung thanh trượt `SliderShake` trong `SettingsModal.gd` kết nối với `CameraShake2D.gd`.
-  3. Bổ sung hiệu ứng `AudioEffectCompressor` và `AudioEffectLimiter` trong `default_bus_layout.tres`.
-  4. Triển khai cử chỉ vuốt ngang đổi Thế Giới (`Swipe Navigation`) trong `LevelSelect.gd`.
-  5. Thêm chế độ `OS.low_processor_usage_mode` khi mở Modal hoặc dừng ván đấu.
+  - [x] **2.1: Đồng bộ Khay Booster 9-Patch Vector 3D**: Nút booster trong `GameHUD.gd` sử dụng `btn_wood_brown_normal.svg` và hoạt ảnh co nảy đàn hồi chuẩn cartoon.
+  - [x] **2.2: Thay thế ổ sao trống gỗ 3D**: Trong [`LevelSelect.gd`](file:///d:/folder/tools/godot_demo/2/scripts/ui/LevelSelect.gd), sử dụng `icon_star_empty.svg` cho các sao chưa mở khóa thay vì nhuộm màu tím xám thô.
+  - [x] **2.3: Bộ nén và hạn chế méo tiếng Audio Limiter**: `default_bus_layout.tres` đã tích hợp `AudioEffectLimiter` trên Master bus.
+  - [x] **2.4: Điều hướng vuốt ngang chuyển Thế Giới (Swipe Navigation)**: Trong [`LevelSelect.gd`](file:///d:/folder/tools/godot_demo/2/scripts/ui/LevelSelect.gd), hỗ trợ cả thao tác vuốt ngang cảm ứng lẫn phím mũi tên trái/phải.
+  - [x] **2.5: Phản hồi rung xúc giác nấc kéo ná (Haptic Tension Notches)**: Trong [`ChickenBomber.gd`](file:///d:/folder/tools/godot_demo/2/scripts/player/ChickenBomber.gd), rung phản hồi xúc giác nhẹ theo từng nấc kéo dây ná ($33\%, 66\%, 100\%$).
 
 ### 💥 Giai Đoạn 3: Nâng Cấp Chiều Sâu Vật Lý, Hồ Chứa Đối Tượng & Đại Trùm
 * **Mục tiêu**: Tối ưu hóa hiệu năng khung hình tuyệt đối khi nổ lớn, biến các trận chiến Đại Trùm thành điểm nhấn điện ảnh.
