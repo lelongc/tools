@@ -462,6 +462,26 @@ var translations: Dictionary = {
 		"zh_CN": "音效", "es": "Efectos", "pt_BR": "Efeitos", "de": "Effekte",
 		"fr": "Effets", "ru": "Звуки"
 	},
+	"KEY_SCREEN_SHAKE": {
+		"en": "Screen Shake", "vi": "Rung màn hình", "ja": "画面の揺れ", "ko": "화면 흔들림",
+		"zh_CN": "屏幕震动", "es": "Sacudida de pantalla", "pt_BR": "Tremor de tela", "de": "Bildschirmrütteln",
+		"fr": "Secousse d'écran", "ru": "Тряска экрана"
+	},
+	"KEY_DAILY_LOGIN": {
+		"en": "DAILY REWARD", "vi": "ĐIỂM DANH 7 NGÀY", "ja": "デイリー報酬", "ko": "일일 보상",
+		"zh_CN": "每日签到", "es": "RECOMPENSA DIARIA", "pt_BR": "RECOMPENSA DIÁRIA", "de": "TÄGLICHE BELOHNUNG",
+		"fr": "RÉCOMPENSE DU JOUR", "ru": "ЕЖЕДНЕВНАЯ НАГРАДА"
+	},
+	"KEY_CLAIM": {
+		"en": "CLAIM", "vi": "NHẬN", "ja": "受け取る", "ko": "받기",
+		"zh_CN": "领取", "es": "RECLAMAR", "pt_BR": "RESGATAR", "de": "EINSAMMELN",
+		"fr": "RÉCLAMER", "ru": "ЗАБРАТЬ"
+	},
+	"KEY_DAY_N": {
+		"en": "Day %d", "vi": "Ngày %d", "ja": "%d日目", "ko": "%d일차",
+		"zh_CN": "第%d天", "es": "Día %d", "pt_BR": "Dia %d", "de": "Tag %d",
+		"fr": "Jour %d", "ru": "День %d"
+	},
 	"KEY_VIBRATION": {
 		"en": "Vibration", "vi": "Rung xúc giác", "ja": "振動", "ko": "진동",
 		"zh_CN": "震动", "es": "Vibración", "pt_BR": "Vibração", "de": "Vibration",

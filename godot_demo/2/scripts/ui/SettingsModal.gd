@@ -14,6 +14,10 @@ signal settings_closed()
 @onready var slider_sfx: HSlider = $CenterContainer/Panel/Margin/VBox/AudioGrid/SliderSFX
 @onready var lbl_sfx_val: Label = $CenterContainer/Panel/Margin/VBox/AudioGrid/LblSFXVal
 
+@onready var lbl_shake: Label = get_node_or_null("CenterContainer/Panel/Margin/VBox/AudioGrid/LblShake")
+@onready var slider_shake: HSlider = get_node_or_null("CenterContainer/Panel/Margin/VBox/AudioGrid/SliderShake")
+@onready var lbl_shake_val: Label = get_node_or_null("CenterContainer/Panel/Margin/VBox/AudioGrid/LblShakeVal")
+
 @onready var lbl_vib: Label = $CenterContainer/Panel/Margin/VBox/HapticsBox/LblVib
 @onready var btn_vib: Button = $CenterContainer/Panel/Margin/VBox/HapticsBox/BtnVib
 
@@ -49,6 +53,11 @@ func _ready() -> void:
 	if slider_sfx:
 		slider_sfx.value = sfx_vol * 100.0
 		slider_sfx.value_changed.connect(_on_sfx_slider_changed)
+
+	if slider_shake and has_node("/root/SaveManager"):
+		var sm = get_node("/root/SaveManager")
+		slider_shake.value = sm.get_screen_shake_intensity() * 100.0
+		slider_shake.value_changed.connect(_on_shake_slider_changed)
 
 	_update_slider_labels()
 
@@ -125,6 +134,13 @@ func _update_slider_labels() -> void:
 		lbl_bgm_val.text = "%d%%" % int(slider_bgm.value)
 	if lbl_sfx_val and slider_sfx:
 		lbl_sfx_val.text = "%d%%" % int(slider_sfx.value)
+	if lbl_shake_val and slider_shake:
+		lbl_shake_val.text = "%d%%" % int(slider_shake.value)
+
+func _on_shake_slider_changed(val: float) -> void:
+	if has_node("/root/SaveManager"):
+		get_node("/root/SaveManager").set_screen_shake_intensity(val / 100.0)
+	_update_slider_labels()
 
 func _on_bgm_slider_changed(val: float) -> void:
 	if val <= 0.5:
@@ -197,6 +213,7 @@ func _update_text_localization() -> void:
 	if title_label: title_label.text = lm.t("KEY_SETTINGS")
 	if lbl_bgm: lbl_bgm.text = "🎵 " + lm.t("KEY_BGM_VOLUME")
 	if lbl_sfx: lbl_sfx.text = "🔊 " + lm.t("KEY_SFX_VOLUME")
+	if lbl_shake: lbl_shake.text = "💥 " + (lm.t("KEY_SCREEN_SHAKE") if lm.t("KEY_SCREEN_SHAKE") != "KEY_SCREEN_SHAKE" else "Rung màn")
 	if lbl_vib: lbl_vib.text = "📳 " + lm.t("KEY_VIBRATION")
 	if lbl_lang: lbl_lang.text = "🌐 " + lm.t("KEY_LANGUAGE")
 	if btn_lang: btn_lang.text = lm.get_current_language_display()

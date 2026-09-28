@@ -15,6 +15,7 @@ extends Control
 @onready var btn_levels: Button = $CenterContainer/VBoxContainer/BtnLevels
 @onready var btn_wheel: Button = $CenterContainer/VBoxContainer/BtnWheel
 @onready var btn_shop: Button = get_node_or_null("CenterContainer/VBoxContainer/BtnShop")
+@onready var btn_daily_login: Button = get_node_or_null("CenterContainer/VBoxContainer/BtnDailyLogin")
 @onready var btn_sound: Button = $TopBar/Margin/HBox/BtnSound
 @onready var btn_settings: Button = get_node_or_null("TopBar/Margin/HBox/BtnSettings") if get_node_or_null("TopBar/Margin/HBox/BtnSettings") else get_node_or_null("TopBar/Margin/HBox/BtnReset")
 @onready var btn_lang: Button = $TopBar/Margin/HBox/BtnLang
@@ -23,6 +24,8 @@ extends Control
 var wheel_modal_instance: Node = null
 var shop_modal_instance: Node = null
 var settings_modal_instance: Node = null
+var daily_login_modal_instance: Node = null
+var login_badge: Control = null
 
 func _ready() -> void:
 	var bg_sky = get_node_or_null("Background/SkyPanorama") as TextureRect
@@ -78,12 +81,15 @@ func _ready() -> void:
 		btn_wheel.pressed.connect(_on_btn_wheel_pressed)
 	if btn_shop:
 		btn_shop.pressed.connect(_on_btn_shop_pressed)
+	if btn_daily_login:
+		btn_daily_login.pressed.connect(_on_btn_daily_login_pressed)
 
 	_update_star_count()
 	_update_coin_count()
 	_update_sound_button()
 	_update_language_ui()
 	_setup_wheel_badge()
+	_setup_login_badge()
 
 func _apply_cartoon_ui_theme() -> void:
 	var top_bar = get_node_or_null("TopBar")
@@ -117,6 +123,7 @@ func _update_language_ui() -> void:
 	if btn_levels: btn_levels.text = " " + lm.t("KEY_SELECT_LEVEL")
 	if btn_wheel: btn_wheel.text = lm.t("KEY_LUCKY_WHEEL")
 	if btn_shop: btn_shop.text = "  " + lm.t("KEY_SHOP")
+	if btn_daily_login: btn_daily_login.text = "📅 " + lm.t("KEY_DAILY_LOGIN")
 	if footer_label: footer_label.text = lm.t("KEY_FOOTER")
 	if btn_lang:
 		if lm.has_method("get_short_language_display"):
@@ -197,6 +204,56 @@ func _on_btn_wheel_pressed() -> void:
 			_update_wheel_badge()
 		)
 	wheel_modal_instance.open_wheel()
+
+func _setup_login_badge() -> void:
+	if not btn_daily_login: return
+	login_badge = PanelContainer.new()
+	login_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	login_badge.name = "LoginBadge"
+	var sb = StyleBoxFlat.new()
+	sb.bg_color = Color(1.0, 0.25, 0.25, 0.95)
+	sb.border_color = Color(1.0, 0.9, 0.3, 1.0)
+	sb.border_width_left = 1
+	sb.border_width_top = 1
+	sb.border_width_right = 1
+	sb.border_width_bottom = 1
+	sb.corner_radius_top_left = 8
+	sb.corner_radius_top_right = 8
+	sb.corner_radius_bottom_right = 8
+	sb.corner_radius_bottom_left = 8
+	login_badge.add_theme_stylebox_override("panel", sb)
+
+	var lbl = Label.new()
+	lbl.text = "!"
+	lbl.add_theme_font_size_override("font_size", 10)
+	lbl.add_theme_color_override("font_color", Color.WHITE)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	login_badge.add_child(lbl)
+
+	btn_daily_login.add_child(login_badge)
+	login_badge.custom_minimum_size = Vector2(16, 16)
+	login_badge.position = Vector2(btn_daily_login.custom_minimum_size.x - 24.0, -4.0)
+	_update_login_badge()
+
+func _update_login_badge() -> void:
+	if not login_badge: return
+	var can_claim = false
+	if has_node("/root/SaveManager"):
+		can_claim = get_node("/root/SaveManager").can_claim_daily_login()
+	login_badge.visible = can_claim
+
+func _on_btn_daily_login_pressed() -> void:
+	if daily_login_modal_instance and is_instance_valid(daily_login_modal_instance):
+		return
+	var scene = load("res://scenes/ui/DailyLoginModal.tscn")
+	if scene:
+		daily_login_modal_instance = scene.instantiate()
+		add_child(daily_login_modal_instance)
+		daily_login_modal_instance.login_modal_closed.connect(func():
+			_update_coin_count()
+			_update_login_badge()
+		)
 
 const ICON_SOUND_ON = preload("res://assets/ui/icons/btn_sound_on.svg")
 const ICON_SOUND_OFF = preload("res://assets/ui/icons/btn_sound_off.svg")

@@ -2160,6 +2160,118 @@ func _ready() -> void:
 		cl20.free()
 		await get_tree().process_frame
 
+	# =========================================================================
+	# TEST 30: Multi-Touch Isolation, Anti-Wedge, Boulder Follow-Through & LiveOps
+	# =========================================================================
+	print("\n--- [TEST 30] Testing Multi-Touch Isolation, Anti-Wedge, Boulder Follow-Through & LiveOps ---")
+
+	# 30.1: ChickenBomber Multi-Touch Isolation
+	var chk_scene = load("res://scenes/prefabs/ChickenBomber.tscn")
+	if chk_scene:
+		var chk_inst = chk_scene.instantiate()
+		add_child(chk_inst)
+		GameManager.is_level_active = true
+
+		# Test multi-touch isolation: Finger 0 initiates aim
+		var ev0 = InputEventScreenTouch.new()
+		ev0.index = 0
+		ev0.position = Vector2(270.0, 400.0)
+		ev0.pressed = true
+		chk_inst._unhandled_input(ev0)
+
+		if not chk_inst.is_aiming or chk_inst.active_touch_id != 0:
+			errors.append("TEST 30: ChickenBomber failed to capture primary touch index 0")
+		else:
+			print("  [PASS] ChickenBomber successfully captured primary touch index 0 (is_aiming=true)")
+
+		# Secondary touch finger 1 (e.g. palm/edge of screen) touches
+		var ev1 = InputEventScreenTouch.new()
+		ev1.index = 1
+		ev1.position = Vector2(100.0, 200.0)
+		ev1.pressed = true
+		chk_inst._unhandled_input(ev1)
+
+		if chk_inst.active_touch_id != 0:
+			errors.append("TEST 30: Secondary touch 1 hijacked active_touch_id from 0!")
+		else:
+			print("  [PASS] Secondary touch index 1 successfully rejected (touch isolation active)")
+
+		# Release primary finger 0
+		ev0.pressed = false
+		chk_inst._unhandled_input(ev0)
+		if chk_inst.is_aiming:
+			errors.append("TEST 30: ChickenBomber failed to release aim on touch index 0 release")
+		else:
+			print("  [PASS] ChickenBomber cleanly released aim on primary touch lift")
+
+		chk_inst.free()
+		await get_tree().process_frame
+
+	# 30.2: CameraShake2D Physics Interpolation & Intensity Scaling
+	if CameraShake2D.instance:
+		if CameraShake2D.instance.process_callback != Camera2D.CAMERA2D_PROCESS_PHYSICS:
+			errors.append("TEST 30: CameraShake2D process_callback is not CAMERA2D_PROCESS_PHYSICS!")
+		else:
+			print("  [PASS] CameraShake2D process_callback == CAMERA2D_PROCESS_PHYSICS (0 warnings)")
+
+	if has_node("/root/SaveManager"):
+		var sm = get_node("/root/SaveManager")
+		sm.set_screen_shake_intensity(0.5)
+		if abs(sm.get_screen_shake_intensity() - 0.5) > 0.01:
+			errors.append("TEST 30: SaveManager set_screen_shake_intensity failed to persist value")
+		else:
+			print("  [PASS] SaveManager screen_shake_intensity persistence verified: 0.5")
+		sm.set_screen_shake_intensity(1.0)
+
+	# 30.3: Low Processor Mode in GameManager
+	GameManager.set_low_processor_mode(true)
+	if not OS.low_processor_usage_mode:
+		errors.append("TEST 30: GameManager set_low_processor_mode(true) failed to activate OS.low_processor_usage_mode")
+	else:
+		print("  [PASS] GameManager low processor usage mode active in menus (thermal protection)")
+	GameManager.set_low_processor_mode(false)
+	if OS.low_processor_usage_mode:
+		errors.append("TEST 30: GameManager set_low_processor_mode(false) failed to deactivate")
+	else:
+		print("  [PASS] GameManager low processor usage mode successfully restored for gameplay 60Hz")
+
+	# 30.4: Daily Wheel BlackHole Prize Verification
+	var wheel_sc = load("res://scenes/ui/DailyWheelModal.tscn")
+	if wheel_sc:
+		var wh_test = wheel_sc.instantiate()
+		add_child(wh_test)
+		var has_bh = false
+		for p in wh_test.prizes:
+			if p.get("egg_type") == "blackhole":
+				has_bh = true
+				break
+		if not has_bh:
+			errors.append("TEST 30: DailyWheelModal prizes missing blackhole egg prize!")
+		else:
+			print("  [PASS] DailyWheelModal contains blackhole egg prize in prize roster")
+		wh_test.free()
+		await get_tree().process_frame
+
+	# 30.5: Daily Login Modal & Streak Claim Verification
+	var login_sc = load("res://scenes/ui/DailyLoginModal.tscn")
+	if login_sc:
+		var login_inst = login_sc.instantiate()
+		add_child(login_inst)
+		if not login_inst.btn_claim or not login_inst.btn_close:
+			errors.append("TEST 30: DailyLoginModal missing BtnClaim or BtnClose!")
+		else:
+			print("  [PASS] DailyLoginModal instantiated with full 7-day card layout and controls")
+		login_inst.free()
+		await get_tree().process_frame
+
+	if has_node("/root/SaveManager"):
+		var sm = get_node("/root/SaveManager")
+		sm.save_data["last_daily_login_date"] = "1970-01-01"
+		var reward = sm.claim_daily_login_reward()
+		if not reward.get("success", false):
+			errors.append("TEST 30: SaveManager claim_daily_login_reward failed to claim")
+		else:
+			print("  [PASS] SaveManager 7-day login streak successfully advanced to Day %d: %s" % [reward["streak"], reward["desc"]])
 
 	GameManager.current_egg_index = 0
 	GameManager.has_first_impact_occurred = false

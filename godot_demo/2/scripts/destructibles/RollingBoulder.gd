@@ -184,6 +184,10 @@ func _on_impact(body: Node) -> void:
 		CameraShake.add_trauma(0.2)
 		if body.is_in_group("Enemies") and my_speed > 160.0:
 			ParticleHelper.spawn_comic_popup(get_parent(), global_position, "CRUNCH!", Color(1.0, 0.6, 0.1))
+		# Kinetic Follow-Through: Giữ vững xung lượng càn quét khi đè vỡ kết cấu gỗ/kính nhẹ
+		if body is DestructibleBlock:
+			var roll_dir = linear_velocity.normalized() if linear_velocity.length() > 20.0 else Vector2.RIGHT
+			apply_central_impulse(roll_dir * (mass * 35.0))
 
 func take_damage(_amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:
 	if has_node("/root/GameManager"):

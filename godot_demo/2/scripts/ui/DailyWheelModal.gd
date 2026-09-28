@@ -22,7 +22,7 @@ var prizes = [
 	{"type": "coins", "amount": 500, "label_key": "500"},
 	{"type": "egg", "egg_type": "cluster", "label_key": "CLUSTER"},
 	{"type": "egg", "egg_type": "drill", "label_key": "DRILL"},
-	{"type": "coins", "amount": 1000, "label_key": "1000"}
+	{"type": "egg", "egg_type": "blackhole", "label_key": "VORTEX"}
 ]
 
 func _ready() -> void:

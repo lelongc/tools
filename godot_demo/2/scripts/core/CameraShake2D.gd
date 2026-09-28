@@ -15,6 +15,7 @@ static var _hit_stop_count: int = 0
 
 func _ready() -> void:
 	instance = self
+	process_callback = Camera2D.CAMERA2D_PROCESS_PHYSICS
 	global_position = Vector2(270.0, 480.0)
 	zoom = Vector2.ONE
 	reset_hit_stop()
@@ -38,7 +39,17 @@ func _process(delta: float) -> void:
 		rotation = 0.0
 
 func _apply_shake() -> void:
-	var amount = pow(trauma, trauma_power)
+	var intensity_mult: float = 1.0
+	if is_inside_tree() and has_node("/root/SaveManager"):
+		var sm = get_node("/root/SaveManager")
+		if sm.has_method("get_screen_shake_intensity"):
+			intensity_mult = float(sm.get_screen_shake_intensity())
+	if intensity_mult <= 0.0:
+		offset = Vector2.ZERO
+		rotation = 0.0
+		return
+
+	var amount = pow(trauma, trauma_power) * intensity_mult
 	noise_y += 1.0
 	rotation = max_roll * amount * sin(noise_y * 0.8)
 	offset.x = max_offset.x * amount * cos(noise_y * 0.9)

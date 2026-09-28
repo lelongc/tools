@@ -34,6 +34,8 @@ var trajectory_overlay: Node2D = null
 var aim_start_screen_pos: Vector2 = Vector2.ZERO
 var aim_touch_time: float = 0.0
 var prev_tension_notch: int = 0
+var active_touch_id: int = -1
+var current_touch_pos: Vector2 = Vector2.ZERO
 
 const THEME_COLORS: Dictionary = {
 	"normal": Color(1.0, 0.85, 0.20, 0.95),   # Vàng kim
@@ -383,155 +385,189 @@ func has_airborne_unboosted_egg() -> bool:
 				return true
 	return false
 
-func _handle_aim_input(delta: float = 0.016) -> void:
-	if not GameManager.is_level_active or get_tree().paused:
-		if is_aiming:
-			is_aiming = false
-			_on_aim_end(false)
-			if trajectory_overlay: trajectory_overlay.visible = false
-			if trajectory_line: trajectory_line.visible = false
-		return
+func _is_pos_in_valid_aim_zone(screen_pos: Vector2) -> bool:
+	if drop_cooldown > 0.0:
+		return false
+	var vp_height = get_viewport_rect().size.y
+	var safe_rect = DisplayServer.get_display_safe_area()
+	var win_size = DisplayServer.window_get_size()
+	var scale_y = vp_height / float(max(1, win_size.y)) if win_size.y > 0 else 1.0
+	var top_safe = float(safe_rect.position.y) * scale_y
+	var top_limit = max(80.0, top_safe + 45.0)
+	var bottom_limit = max(800.0, vp_height - 75.0)
+	if screen_pos.y < top_limit or screen_pos.y > bottom_limit:
+		return false
+	return true
 
-	var screen_mouse_pos = get_viewport().get_mouse_position()
+func _start_aim(screen_pos: Vector2) -> void:
+	if is_aiming: return
+	if not _is_pos_in_valid_aim_zone(screen_pos): return
+	is_aiming = true
+	has_aim_dragged = false
+	aim_anchor_x = position.x
+	aim_start_screen_pos = screen_pos
+	aim_touch_time = Time.get_ticks_msec() / 1000.0
+	aim_vector = Vector2(0, 480.0)
+	_on_aim_start()
 
-	# Bắt đầu chạm / click chuột để ngắm
-	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
-		if not is_aiming:
-			if drop_cooldown > 0.0:
-				return
+func _update_aim(screen_pos: Vector2) -> void:
+	if not is_aiming: return
+	position.x = aim_anchor_x
 
-			# Không nhận click nếu bấm đè thanh menu TopBar ở trên đỉnh hoặc kệ trứng phía dưới
-			var vp_height = get_viewport_rect().size.y
-			var safe_rect = DisplayServer.get_display_safe_area()
-			var win_size = DisplayServer.window_get_size()
-			var scale_y = vp_height / float(max(1, win_size.y)) if win_size.y > 0 else 1.0
-			var top_safe = float(safe_rect.position.y) * scale_y
-			var top_limit = max(80.0, top_safe + 45.0)
-			var bottom_limit = max(800.0, vp_height - 75.0)
-			if screen_mouse_pos.y < top_limit or screen_mouse_pos.y > bottom_limit:
-				return
+	var drag_delta = screen_pos - aim_start_screen_pos
+	var drag_dist = drag_delta.length()
 
-			is_aiming = true
-			has_aim_dragged = false
-			aim_anchor_x = position.x
-			aim_start_screen_pos = screen_mouse_pos
-			aim_touch_time = Time.get_ticks_msec() / 1000.0
-			aim_vector = Vector2(0, 480.0)
-			_on_aim_start()
+	if drag_dist > 14.0:
+		has_aim_dragged = true
 
-		if is_aiming:
-			# Khóa cứng vị trí x của gà tại điểm neo, tuyệt đối không dịch chuyển khi ngón tay kéo ngắm
-			position.x = aim_anchor_x
+	var vp_h = get_viewport_rect().size.y
+	var s_rect = DisplayServer.get_display_safe_area()
+	var w_sz = DisplayServer.window_get_size()
+	var sc_y = vp_h / float(max(1, w_sz.y)) if w_sz.y > 0 else 1.0
+	var t_safe = float(s_rect.position.y) * sc_y
+	var cur_top_limit = max(80.0, t_safe + 45.0)
 
-			var drag_delta = screen_mouse_pos - aim_start_screen_pos
-			var drag_dist = drag_delta.length()
+	# Vùng hủy an toàn: Kéo trả về điểm gốc (<18px), chạm vào thanh TopBar, hoặc kéo ngược ngón tay lên bầu trời (drag_delta.y < -15px)
+	var is_cancelling = (has_aim_dragged and drag_dist < 18.0) \
+		or (screen_pos.y < cur_top_limit) \
+		or (drag_delta.y < -15.0) \
+		or (drag_delta.y < -10.0 and abs(drag_delta.x) < 40.0)
 
-			if drag_dist > 14.0:
-				has_aim_dragged = true
-
-			var vp_h = get_viewport_rect().size.y
-			var s_rect = DisplayServer.get_display_safe_area()
-			var w_sz = DisplayServer.window_get_size()
-			var sc_y = vp_h / float(max(1, w_sz.y)) if w_sz.y > 0 else 1.0
-			var t_safe = float(s_rect.position.y) * sc_y
-			var cur_top_limit = max(80.0, t_safe + 45.0)
-
-			# Vùng hủy an toàn: Kéo trả về điểm gốc (<18px), chạm vào thanh TopBar, hoặc kéo ngược ngón tay lên bầu trời (drag_delta.y < -15px)
-			var is_cancelling = (has_aim_dragged and drag_dist < 18.0) \
-				or (screen_mouse_pos.y < cur_top_limit) \
-				or (drag_delta.y < -15.0) \
-				or (drag_delta.y < -10.0 and abs(drag_delta.x) < 40.0)
-
-			# Tính toán lực và hướng bắn trong bán nguyệt 180 độ hướng xuống dưới (không ném lên trời)
-			if has_aim_dragged and not is_cancelling:
-				var raw_angle = drag_delta.angle()
-				# Khóa góc trong vòng bán nguyệt 180 độ hướng xuống [0.04, PI - 0.04] rad
-				# Dựa vào drag_delta.x để kẹp mượt mà không đảo cực 180 độ
-				var clamped_angle: float
-				if raw_angle < 0.0:
-					if drag_delta.x >= 0.0:
-						clamped_angle = 0.04 # Kẹp sát mép ngang sang phải
-					else:
-						clamped_angle = PI - 0.04 # Kẹp sát mép ngang sang trái
-				else:
-					clamped_angle = clamp(raw_angle, 0.04, PI - 0.04)
-
-				var aim_dir = Vector2(cos(clamped_angle), sin(clamped_angle))
-				var tension_ratio = clamp((drag_dist - 14.0) / 160.0, 0.0, 1.0)
-				var launch_speed = lerp(450.0, 960.0, tension_ratio)
-				aim_vector = aim_dir * launch_speed
-
-				# Rung phản hồi xúc giác từng nấc kéo dây ná (33%, 66%, 100%)
-				var notch = int(tension_ratio * 3.0)
-				if notch != prev_tension_notch:
-					prev_tension_notch = notch
-					if has_node("/root/SaveManager"):
-						get_node("/root/SaveManager").vibrate(16 + notch * 8)
-
-				# Co giãn người gà theo lực kéo
-				var tension = tension_ratio * 0.28
-				visual_root.scale = Vector2(1.0 - tension * 0.20, 1.0 + tension * 0.28)
-
-				# Mắt liếc theo hướng ngắm bắn
-				_update_eye_direction(aim_dir)
-
-				_draw_trajectory(aim_vector)
+	if has_aim_dragged and not is_cancelling:
+		var raw_angle = drag_delta.angle()
+		var clamped_angle: float
+		if raw_angle < 0.0:
+			if drag_delta.x >= 0.0:
+				clamped_angle = 0.04
 			else:
-				if is_cancelling:
-					prev_tension_notch = 0
-					if trajectory_overlay:
-						trajectory_overlay.visible = false
-						trajectory_overlay.pull_tension = 0.0
-					if trajectory_line: trajectory_line.visible = false
-				else:
-					# Khi mới chạm giữ chưa kéo: mặc định hướng rơi thẳng đứng
-					aim_vector = Vector2(0, 480.0)
-					_draw_trajectory(aim_vector)
+				clamped_angle = PI - 0.04
+		else:
+			clamped_angle = clamp(raw_angle, 0.04, PI - 0.04)
+
+		var aim_dir = Vector2(cos(clamped_angle), sin(clamped_angle))
+		var tension_ratio = clamp((drag_dist - 14.0) / 160.0, 0.0, 1.0)
+		var launch_speed = lerp(450.0, 960.0, tension_ratio)
+		aim_vector = aim_dir * launch_speed
+
+		# Rung phản hồi xúc giác từng nấc kéo dây ná
+		var notch = int(tension_ratio * 3.0)
+		if notch != prev_tension_notch:
+			prev_tension_notch = notch
+			if has_node("/root/SaveManager"):
+				get_node("/root/SaveManager").vibrate(16 + notch * 8)
+
+		var tension = tension_ratio * 0.28
+		visual_root.scale = Vector2(1.0 - tension * 0.20, 1.0 + tension * 0.28)
+		_update_eye_direction(aim_dir)
+		_draw_trajectory(aim_vector)
 	else:
-		# Nhả chuột / ngón tay -> Thả trứng ngay hoặc Hủy nếu trong deadzone!
-		if is_aiming:
-			is_aiming = false
+		if is_cancelling:
 			prev_tension_notch = 0
 			if trajectory_overlay:
 				trajectory_overlay.visible = false
 				trajectory_overlay.pull_tension = 0.0
-				trajectory_overlay.sim_points.clear()
-				trajectory_overlay.queue_redraw()
 			if trajectory_line: trajectory_line.visible = false
-			_reset_eye_direction()
-
-			var drag_delta = screen_mouse_pos - aim_start_screen_pos
-			var drag_dist = drag_delta.length()
-			var elapsed = (Time.get_ticks_msec() / 1000.0) - aim_touch_time
-
-			var vp_h = get_viewport_rect().size.y
-			var s_rect = DisplayServer.get_display_safe_area()
-			var w_sz = DisplayServer.window_get_size()
-			var sc_y = vp_h / float(max(1, w_sz.y)) if w_sz.y > 0 else 1.0
-			var t_safe = float(s_rect.position.y) * sc_y
-			var cur_top_limit = max(80.0, t_safe + 45.0)
-
-			var is_cancelled = (has_aim_dragged and drag_dist < 18.0) \
-				or (screen_mouse_pos.y < cur_top_limit) \
-				or (drag_delta.y < -15.0) \
-				or (drag_delta.y < -10.0 and abs(drag_delta.x) < 40.0)
-
-			# Nếu đang có trứng trên không chưa kích hoạt kỹ năng và người chơi chỉ chạm nhanh (Tap < 0.22s)
-			if has_airborne_unboosted_egg() and not has_aim_dragged and elapsed < 0.22:
-				_on_aim_end(false)
-				drop_cooldown = 0.20
-			elif not is_cancelled:
-				if not has_aim_dragged:
-					# Thao tác chạm nhanh (Tap-to-Drop): Thả rơi trứng thẳng đứng tức thì
-					aim_vector = Vector2(0, 480.0)
-				elif aim_vector == Vector2.ZERO:
-					aim_vector = Vector2(0, 480.0)
-				_drop_egg(aim_vector)
-			else:
-				_on_aim_end(false)
-
+		else:
 			aim_vector = Vector2(0, 480.0)
-			has_aim_dragged = false
+			_draw_trajectory(aim_vector)
+
+func _end_aim(screen_pos: Vector2) -> void:
+	if not is_aiming: return
+	is_aiming = false
+	prev_tension_notch = 0
+	if trajectory_overlay:
+		trajectory_overlay.visible = false
+		trajectory_overlay.pull_tension = 0.0
+		trajectory_overlay.sim_points.clear()
+		trajectory_overlay.queue_redraw()
+	if trajectory_line: trajectory_line.visible = false
+	_reset_eye_direction()
+
+	var drag_delta = screen_pos - aim_start_screen_pos
+	var drag_dist = drag_delta.length()
+	var elapsed = (Time.get_ticks_msec() / 1000.0) - aim_touch_time
+
+	var vp_h = get_viewport_rect().size.y
+	var s_rect = DisplayServer.get_display_safe_area()
+	var w_sz = DisplayServer.window_get_size()
+	var sc_y = vp_h / float(max(1, w_sz.y)) if w_sz.y > 0 else 1.0
+	var t_safe = float(s_rect.position.y) * sc_y
+	var cur_top_limit = max(80.0, t_safe + 45.0)
+
+	var is_cancelled = (has_aim_dragged and drag_dist < 18.0) \
+		or (screen_pos.y < cur_top_limit) \
+		or (drag_delta.y < -15.0) \
+		or (drag_delta.y < -10.0 and abs(drag_delta.x) < 40.0)
+
+	if has_airborne_unboosted_egg() and not has_aim_dragged and elapsed < 0.22:
+		_on_aim_end(false)
+		drop_cooldown = 0.20
+	elif not is_cancelled:
+		if not has_aim_dragged:
+			aim_vector = Vector2(0, 480.0)
+		elif aim_vector == Vector2.ZERO:
+			aim_vector = Vector2(0, 480.0)
+		_drop_egg(aim_vector)
+	else:
+		_on_aim_end(false)
+
+	aim_vector = Vector2(0, 480.0)
+	has_aim_dragged = false
+
+func _unhandled_input(event: InputEvent) -> void:
+	if not GameManager.is_level_active or get_tree().paused:
+		if is_aiming:
+			active_touch_id = -1
+			_end_aim(current_touch_pos)
+		return
+
+	if event is InputEventScreenTouch:
+		if event.pressed:
+			# Chỉ chấp nhận ngón tay đầu tiên chạm vào màn hình
+			if active_touch_id == -1 and _is_pos_in_valid_aim_zone(event.position):
+				active_touch_id = event.index
+				current_touch_pos = event.position
+				_start_aim(event.position)
+				get_viewport().set_input_as_handled()
+		else:
+			# Chỉ giải phóng khi ngón tay đang ngắm nhấc lên
+			if active_touch_id == event.index:
+				active_touch_id = -1
+				current_touch_pos = event.position
+				_end_aim(event.position)
+				get_viewport().set_input_as_handled()
+
+	elif event is InputEventScreenDrag:
+		if active_touch_id == event.index:
+			current_touch_pos = event.position
+			_update_aim(event.position)
+			get_viewport().set_input_as_handled()
+
+	elif event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				if active_touch_id == -1 and _is_pos_in_valid_aim_zone(event.position):
+					active_touch_id = 999
+					current_touch_pos = event.position
+					_start_aim(event.position)
+					get_viewport().set_input_as_handled()
+			else:
+				if active_touch_id == 999:
+					active_touch_id = -1
+					current_touch_pos = event.position
+					_end_aim(event.position)
+					get_viewport().set_input_as_handled()
+
+	elif event is InputEventMouseMotion:
+		if active_touch_id == 999:
+			current_touch_pos = event.position
+			_update_aim(event.position)
+			get_viewport().set_input_as_handled()
+
+func _handle_aim_input(_delta: float = 0.016) -> void:
+	# Khóa vị trí khi đang ngắm bắn
+	if is_aiming:
+		position.x = aim_anchor_x
 
 func _on_aim_start() -> void:
 	prev_tension_notch = 0

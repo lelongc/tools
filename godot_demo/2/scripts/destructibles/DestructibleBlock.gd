@@ -344,6 +344,19 @@ func _physics_process(delta: float) -> void:
 		else:
 			micro_jitter_timer = max(0.0, micro_jitter_timer - delta * 2.0)
 
+		# Anti-Wedge & Arch Stalemate: Phát hiện kẹt vòm chữ A lơ lửng trong không trung
+		if is_awake and not sleeping and global_position.y < (floor_y - 25.0):
+			if speed < 8.0 and ang_speed < 0.4:
+				anti_wedge_timer += delta
+				if anti_wedge_timer >= 2.2:
+					anti_wedge_timer = 0.0
+					# Kích hoạt vi xung lực rung lắc ngang và ngẫu lực xoay để làm trượt điểm tựa bế tắc
+					var nudge_dir = 1.0 if (int(global_position.x) % 2 == 0) else -1.0
+					apply_impulse(Vector2(nudge_dir * 18.0, 10.0), Vector2(0, -block_size.y * 0.25))
+					apply_torque_impulse(nudge_dir * 25.0)
+			else:
+				anti_wedge_timer = max(0.0, anti_wedge_timer - delta * 0.5)
+
 		# Chống lơ lửng: Nếu khối đã ngủ (sleeping) nhưng mất bệ đỡ bên dưới -> đánh thức rơi tự nhiên theo trọng lực
 		if sleeping:
 			support_check_timer -= delta

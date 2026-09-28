@@ -25,25 +25,34 @@ var save_data: Dictionary = {
 	},
 	"daily_spins_date": "",
 	"daily_spins_count": 0,
-	"version": 8
+	"screen_shake_intensity": 1.0,
+	"daily_login_streak": 0,
+	"last_daily_login_date": "",
+	"version": 9
 }
 
 func _ready() -> void:
 	load_game()
-	if save_data.get("version", 1) < 8:
+	if save_data.get("version", 1) < 9:
 		_migrate_save_version()
 
 func _migrate_save_version() -> void:
 	# SAVE-01: Bảo toàn toàn bộ tiến trình người chơi thay vì reset_save
 	var cur_ver = int(save_data.get("version", 1))
-	if cur_ver < 8:
-		save_data["version"] = 8
+	if cur_ver < 9:
+		save_data["version"] = 9
 		if not save_data.has("highest_unlocked_level"):
 			save_data["highest_unlocked_level"] = 1
 		if not (save_data.get("level_stars") is Dictionary):
 			save_data["level_stars"] = {}
 		if not (save_data.get("level_scores") is Dictionary):
 			save_data["level_scores"] = {}
+		if not save_data.has("screen_shake_intensity"):
+			save_data["screen_shake_intensity"] = 1.0
+		if not save_data.has("daily_login_streak"):
+			save_data["daily_login_streak"] = 0
+		if not save_data.has("last_daily_login_date"):
+			save_data["last_daily_login_date"] = ""
 		if not (save_data.get("consumables") is Dictionary):
 			save_data["consumables"] = {"bomb": 1, "drill": 0, "acid": 0, "frost": 0, "cluster": 0, "blackhole": 0}
 		else:
@@ -307,6 +316,72 @@ func record_daily_spin() -> void:
 	_check_and_reset_daily_spins()
 	save_data["daily_spins_count"] = save_data.get("daily_spins_count", 0) + 1
 	save_game()
+
+# ==========================================
+# CƯỜNG ĐỘ RUNG MÀN HÌNH (SCREEN SHAKE ACCESSIBILITY)
+# ==========================================
+func get_screen_shake_intensity() -> float:
+	return float(save_data.get("screen_shake_intensity", 1.0))
+
+func set_screen_shake_intensity(val: float) -> void:
+	save_data["screen_shake_intensity"] = clamp(val, 0.0, 1.0)
+	save_game()
+
+# ==========================================
+# ĐIỂM DANH NHẬN THƯỞNG 7 NGÀY (7-DAY DAILY LOGIN STREAK)
+# ==========================================
+signal daily_login_claimed(reward_data: Dictionary)
+
+func get_daily_login_streak() -> int:
+	return int(save_data.get("daily_login_streak", 0))
+
+func can_claim_daily_login() -> bool:
+	var today_str = _get_today_string()
+	var last_date = str(save_data.get("last_daily_login_date", ""))
+	return today_str != last_date
+
+func claim_daily_login_reward() -> Dictionary:
+	var today_str = _get_today_string()
+	var last_date = str(save_data.get("last_daily_login_date", ""))
+	if today_str == last_date:
+		return {"success": false, "reason": "already_claimed"}
+
+	var current_streak = int(save_data.get("daily_login_streak", 0))
+	var new_streak = (current_streak % 7) + 1
+	save_data["daily_login_streak"] = new_streak
+	save_data["last_daily_login_date"] = today_str
+
+	var reward_info: Dictionary = {}
+	match new_streak:
+		1:
+			add_coins(150)
+			reward_info = {"day": 1, "type": "coins", "amount": 150, "desc": "150 Coins"}
+		2:
+			add_consumable("bomb", 1)
+			reward_info = {"day": 2, "type": "egg", "egg_type": "bomb", "amount": 1, "desc": "1x Bomb Egg"}
+		3:
+			add_consumable("drill", 1)
+			reward_info = {"day": 3, "type": "egg", "egg_type": "drill", "amount": 1, "desc": "1x Drill Egg"}
+		4:
+			add_coins(350)
+			reward_info = {"day": 4, "type": "coins", "amount": 350, "desc": "350 Coins"}
+		5:
+			add_consumable("frost", 1)
+			add_consumable("acid", 1)
+			reward_info = {"day": 5, "type": "egg_combo", "amount": 2, "desc": "1x Frost + 1x Acid Egg"}
+		6:
+			add_consumable("cluster", 1)
+			reward_info = {"day": 6, "type": "egg", "egg_type": "cluster", "amount": 1, "desc": "1x Cluster Chick Egg"}
+		7:
+			add_consumable("blackhole", 1)
+			add_coins(1000)
+			reward_info = {"day": 7, "type": "jackpot", "amount": 1, "desc": "1x Black Hole Egg + 1000 Coins!"}
+
+	save_game()
+	reward_info["success"] = true
+	reward_info["streak"] = new_streak
+	daily_login_claimed.emit(reward_info)
+	return reward_info
 
 # ==========================================
 # ĐỒNG BỘ LƯU TRỮ ĐÁM MÂY (CLOUD SAVE - GOOGLE PLAY SNAPSHOTS READY)

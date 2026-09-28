@@ -1,0 +1,102 @@
+[gd_scene load_steps=4 format=3 uid="uid://dailyloginmodal01"]
+
+[ext_resource type="Script" path="res://scripts/ui/DailyLoginModal.gd" id="1_login_script"]
+[ext_resource type="Script" path="res://scripts/ui/JuicyButton.gd" id="2_juicy_btn"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_LoginPanel"]
+bg_color = Color(0.14, 0.06, 0.24, 0.98)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 8
+border_color = Color(1, 0.84, 0, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 14
+shadow_offset = Vector2(0, 8)
+
+[node name="DailyLoginModal" type="CanvasLayer"]
+layer = 100
+script = ExtResource("1_login_script")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.04, 0.08, 0.88)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(460, 640)
+layout_mode = 2
+pivot_offset = Vector2(230, 320)
+theme_override_styles/panel = SubResource("StyleBoxFlat_LoginPanel")
+
+[node name="Margin" type="MarginContainer" parent="CenterContainer/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+alignment = 1
+
+[node name="Title" type="Label" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.2, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_constants/shadow_offset_y = 3
+theme_override_font_sizes/font_size = 24
+text = "📅 ĐIỂM DANH 7 NGÀY"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.82, 0.95, 1)
+theme_override_font_sizes/font_size = 13
+text = "Đăng nhập mỗi ngày để mở khóa Trứng Hố Đen huyền thoại!"
+horizontal_alignment = 1
+
+[node name="CardsContainer" type="HFlowContainer" parent="CenterContainer/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(420, 290)
+layout_mode = 2
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+alignment = 1
+
+[node name="StatusLabel" type="Label" parent="CenterContainer/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.95, 0.4, 1)
+theme_override_font_sizes/font_size = 13
+text = "✓ Bạn đã nhận quà hôm nay!"
+horizontal_alignment = 1
+
+[node name="BtnClaim" type="Button" parent="CenterContainer/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(260, 52)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 17
+text = "🎁 NHẬN QUÀ"
+script = ExtResource("2_juicy_btn")
+
+[node name="BtnClose" type="Button" parent="CenterContainer/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(220, 44)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 15
+text = "ĐÓNG"
+script = ExtResource("2_juicy_btn")

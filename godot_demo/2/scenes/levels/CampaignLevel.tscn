@@ -25,6 +25,7 @@ script = ExtResource("1_campaign")
 
 [node name="CameraShake2D" type="Camera2D" parent="."]
 position = Vector2(270, 480)
+process_callback = 0
 script = ExtResource("2_camera")
 
 [node name="Background" type="Node2D" parent="."]

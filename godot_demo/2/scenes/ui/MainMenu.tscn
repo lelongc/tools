@@ -177,6 +177,15 @@ text = "🛍️ CỬA HÀNG ĐẠO CỤ"
 script = ExtResource("2_btn")
 is_wood_brown = true
 
+[node name="BtnDailyLogin" type="Button" parent="CenterContainer/VBoxContainer"]
+custom_minimum_size = Vector2(290, 52)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 18
+text = "📅 ĐIỂM DANH 7 NGÀY"
+script = ExtResource("2_btn")
+is_wood_brown = true
+
 [node name="Footer" type="Label" parent="."]
 layout_mode = 1
 anchors_preset = 12

@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cx4adpromo15s01"]
+
+[ext_resource type="Script" path="res://scenes/promo/PromoAd15s.gd" id="1_script"]
+
+[node name="PromoAd15s" type="Node2D"]
+script = ExtResource("1_script")

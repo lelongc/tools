@@ -328,7 +328,13 @@ func send_youtube_score(score: int) -> void:
 		if js_bridge:
 			js_bridge.eval("if (window.YT && window.YT.playables) { window.YT.playables.sendScore({value: %d}); }" % score)
 
+func set_low_processor_mode(enabled: bool) -> void:
+	OS.low_processor_usage_mode = enabled
+	if enabled:
+		OS.low_processor_usage_mode_sleep_usec = 6900
+
 func load_level(level_id: int) -> void:
+	set_low_processor_mode(false)
 	Engine.time_scale = 1.0
 	get_tree().paused = false
 	current_session_id += 1
@@ -342,18 +348,21 @@ func next_level() -> void:
 		go_to_level_select()
 
 func restart_current_level() -> void:
+	set_low_processor_mode(false)
 	Engine.time_scale = 1.0
 	get_tree().paused = false
 	current_session_id += 1
 	get_tree().reload_current_scene()
 
 func go_to_level_select() -> void:
+	set_low_processor_mode(true)
 	Engine.time_scale = 1.0
 	get_tree().paused = false
 	current_session_id += 1
 	get_tree().change_scene_to_file("res://scenes/ui/LevelSelect.tscn")
 
 func go_to_main_menu() -> void:
+	set_low_processor_mode(true)
 	Engine.time_scale = 1.0
 	get_tree().paused = false
 	current_session_id += 1
