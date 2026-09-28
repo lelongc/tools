@@ -103,6 +103,10 @@
    - Chặn hoàn toàn sự kiện rò rỉ chạm màn hình (`set_input_as_handled()`) khi kích hoạt kỹ năng giữa không trung trên cả 5 loại trứng kỹ năng (`BlackHoleEgg`, `DrillEgg`, `AcidEgg`, `FrostEgg`, `ClusterEgg`).
    - Đồng bộ hóa vật liệu khối boong-ke `@export_enum` đầy đủ 11 loại trong `DestructibleBlock`.
    - Xóa emoji hardcoded `🛍️ ` trên `MainMenu` và chuẩn hóa dải ruy băng thế giới với 9-patch trong `LevelSelect`.
+18. [31 — Kế Hoạch Cải Thiện Toàn Diện & Lộ Trình Hoàn Thiện Dự Án (2026)](31-ke-hoach-cai-thien-toan-dien-va-lo-trinh-hoan-thien-du-an.md): **Chiến Lược Hoàn Thiện & Lộ Trình 20 Đột Phá (I21 - I40)**:
+   - Đại kiểm toán chuyên sâu 7 trục: Đa chạm cảm ứng, vật lý chống kẹt vòm, bẫy trùm thế giới, hệ sinh thái 7 loại trứng, âm thanh master limiter, nội suy vật lý 120Hz và LiveOps điểm danh 7 ngày.
+   - Bảng phân rã 20 điểm cải tiến cụ thể (I21 đến I40) và ma trận ưu tiên Eisenhower 4 góc phần tư.
+   - Lộ trình thực thi 4 giai đoạn cụ thể và bộ 6 tiêu chí nghiệm thu chất lượng chuẩn CH Play 2026 & YouTube Playables.
 
 ---
 
@@ -110,8 +114,8 @@
 
 ```
 ================================================================
->>> ALL 21 TEST SUITES PASSED SUCCESSFULLY! (0 ERRORS) <<<
+>>> ALL 29 TEST SUITES PASSED SUCCESSFULLY! (0 ERRORS) <<<
 ================================================================
 ```
-- **0 Lỗi logic, 21/21 Bộ Test Tự Động Vượt Qua Tuyệt Đối, Return Code 0**.
-- Hệ sinh thái dự án đã hoàn thiện trọn vẹn **17 bộ tài liệu kỹ thuật đỉnh cao** (từ Tài liệu 10 đến Tài liệu 26), phủ kín $100\%$ các khía cạnh: engine, mỹ thuật, cân bằng, hiệu năng, lỗi tiềm ẩn, bảo mật, YouTube Playables, CH Play Store 2026, hệ thống giao diện 2D 9-patch vector và kiểm định toàn diện chất lượng game.
+- **0 Lỗi logic, 29/29 Bộ Test Tự Động Vượt Qua Tuyệt Đối, Return Code 0**.
+- Hệ sinh thái dự án đã hoàn thiện trọn vẹn **18 bộ tài liệu kỹ thuật đỉnh cao** (từ Tài liệu 10 đến Tài liệu 31), phủ kín $100\%$ các khía cạnh: engine, mỹ thuật, cân bằng, hiệu năng, lỗi tiềm ẩn, bảo mật, YouTube Playables, CH Play Store 2026, hệ thống giao diện 2D 9-patch vector và kiểm định toàn diện chất lượng game.
