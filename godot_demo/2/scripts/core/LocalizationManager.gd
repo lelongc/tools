@@ -386,8 +386,53 @@ var translations: Dictionary = {
 	"KEY_SHOP_ACID_DESC": {
 		"en": "Dissolves and melts barriers continuously", "vi": "Vũng axit ăn mòn tan chảy chướng ngại vật"
 	},
+	"KEY_SHOP_FROST_DESC": {
+		"en": "Freezes blocks and monsters into brittle glass",
+		"vi": "Đóng băng cấu trúc và quái thành thủy tinh giòn",
+		"ja": "ブロックと敵を凍らせて脆いガラスに変える",
+		"ko": "블록과 몬스터를 얼려 깨지기 쉬운 유리로 변환",
+		"zh_CN": "冰冻障碍与怪物，将其化为易碎玻璃",
+		"es": "Congela bloques y monstruos en vidrio frágil",
+		"pt_BR": "Congela blocos e monstros em vidro quebradiço",
+		"de": "Friert Blöcke und Monster zu sprödem Glas ein",
+		"fr": "Gèle blocs et monstres en verre fragile",
+		"ru": "Замораживает блоки и монстров в хрупкое стекло"
+	},
+	"KEY_SHOP_CLUSTER_DESC": {
+		"en": "Hatches 4 explosive kamikaze chicks on tap",
+		"vi": "Nở ra 4 chú gà con cảm tử phát nổ diện rộng",
+		"ja": "タップで4羽の爆発特攻ヒヨコが分裂拡散",
+		"ko": "터치 시 4마리의 폭발 자폭 병아리 부화",
+		"zh_CN": "点击分裂孵化4只自爆特攻小鸡",
+		"es": "Eclosiona 4 pollitos explosivos al pulsar",
+		"pt_BR": "Choca 4 pintinhos explosivos ao tocar",
+		"de": "Schlüpft 4 explosive Kamikaze-Küken bei Tippen",
+		"fr": "Fait éclore 4 poussins explosifs au toucher",
+		"ru": "Выпускает 4 взрывных цыплёнка при нажатии"
+	},
+	"KEY_SHOP_BLACKHOLE_DESC": {
+		"en": "Cosmic singularity sucks and crushes everything",
+		"vi": "Hố đen vũ trụ hút sạch và nghiền nát mọi thứ",
+		"ja": "宇宙特異点が全てを吸い込み粉砕する",
+		"ko": "우주 특이점이 모든 것을 빨아들여 분쇄",
+		"zh_CN": "宇宙奇点引力黑洞，吞噬粉碎一切",
+		"es": "Singularidad cósmica que succiona y aplasta todo",
+		"pt_BR": "Singularidade cósmica que suga e esmaga tudo",
+		"de": "Kosmische Singularität saugt und zermalmt alles",
+		"fr": "Singularité cosmique qui aspire et broie tout",
+		"ru": "Космическая сингулярность засасывает и дробит всё"
+	},
 	"KEY_SHOP_COMBO_DESC": {
-		"en": "Super Pack: 1 Bomb + 1 Drill + 1 Acid", "vi": "Gói Siêu Cấp: 1 Bom + 1 Khoan + 1 Axit"
+		"en": "Mega Arsenal Pack: 1 of every special egg!",
+		"vi": "Gói Kho Vũ Khí: Sở hữu 1 quả mỗi loại trứng đặc biệt!",
+		"ja": "メガ兵器パック：全特殊タマゴ各1個！",
+		"ko": "메가 아스널 팩: 모든 특수 알 각 1개씩!",
+		"zh_CN": "超级军火包：包含全部特殊变异蛋各1枚！",
+		"es": "¡Megapack Arsenal: 1 de cada huevo especial!",
+		"pt_BR": "Megapacote Arsenal: 1 de cada ovo especial!",
+		"de": "Mega-Arsenal-Pack: 1 von jedem Spezial-Ei!",
+		"fr": "Pack Méga Arsenal : 1 de chaque œuf spécial !",
+		"ru": "Мега Арсенал: по 1 яйцу каждого спец-типа!"
 	},
 	"KEY_SHOP_NOT_ENOUGH": {
 		"en": "Not enough coins!", "vi": "Không đủ vàng!"
@@ -464,10 +509,25 @@ var translations: Dictionary = {
 		"zh_CN": "酸性蛋", "es": "Huevo Ácido", "pt_BR": "Ovo Ácido", "de": "Säure-Ei",
 		"fr": "Œuf Acide", "ru": "Яйцо-Кислота"
 	},
+	"KEY_FROST_BOOSTER": {
+		"en": "Frost Egg", "vi": "Trứng Băng", "ja": "フロストタマゴ", "ko": "냉기 달걀",
+		"zh_CN": "冰霜蛋", "es": "Huevo Helado", "pt_BR": "Ovo Gélido", "de": "Frost-Ei",
+		"fr": "Œuf de Givre", "ru": "Ледяное Яйцо"
+	},
+	"KEY_CLUSTER_BOOSTER": {
+		"en": "Cluster Egg", "vi": "Trứng Chùm", "ja": "クラスタータマゴ", "ko": "클러스터 달걀",
+		"zh_CN": "群鸟分裂蛋", "es": "Huevo Racimo", "pt_BR": "Ovo Cluster", "de": "Cluster-Ei",
+		"fr": "Œuf à Fragmentation", "ru": "Кассетное Яйцо"
+	},
+	"KEY_BLACKHOLE_BOOSTER": {
+		"en": "Black Hole Egg", "vi": "Trứng Lỗ Đen", "ja": "ブラックホールタマゴ", "ko": "블랙홀 달걀",
+		"zh_CN": "黑洞引力蛋", "es": "Huevo Agujero Negro", "pt_BR": "Ovo Buraco Negro", "de": "Schwarzes-Loch-Ei",
+		"fr": "Œuf Trou Noir", "ru": "Яйцо Чёрная Дыра"
+	},
 	"KEY_COMBO_BOOSTER": {
-		"en": "Tactical Trio Pack", "vi": "Gói Bộ Ba Tác Chiến", "ja": "戦術トリオパック", "ko": "전술 트리오 팩",
-		"zh_CN": "战术三合一包", "es": "Paquete Trío Táctico", "pt_BR": "Pacote Trio Tático", "de": "Taktisches Dreierpack",
-		"fr": "Pack Trio Tactique", "ru": "Тактический набор Трио"
+		"en": "Mega Arsenal Pack", "vi": "Gói Kho Vũ Khí", "ja": "メガ兵器パック", "ko": "메가 아스널 팩",
+		"zh_CN": "超级军火包", "es": "Paquete Mega Arsenal", "pt_BR": "Pacote Mega Arsenal", "de": "Mega-Arsenal-Pack",
+		"fr": "Pack Méga Arsenal", "ru": "Набор Мега Арсенал"
 	},
 	"KEY_PURCHASED": {
 		"en": "PURCHASED SUCCESSFULLY!", "vi": "ĐÃ MUA THÀNH CÔNG!", "ja": "購入が完了しました！", "ko": "구매 완료!",

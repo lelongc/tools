@@ -42,12 +42,42 @@ var shop_items = [
 		"icon_path": "res://assets/sprites/projectiles/egg_acid.svg"
 	},
 	{
+		"id": "frost",
+		"type": "single",
+		"egg_type": "frost",
+		"amount": 1,
+		"price": 300,
+		"title_key": "KEY_FROST_BOOSTER",
+		"desc_key": "KEY_SHOP_FROST_DESC",
+		"icon_path": "res://assets/sprites/projectiles/egg_frost.svg"
+	},
+	{
+		"id": "cluster",
+		"type": "single",
+		"egg_type": "cluster",
+		"amount": 1,
+		"price": 350,
+		"title_key": "KEY_CLUSTER_BOOSTER",
+		"desc_key": "KEY_SHOP_CLUSTER_DESC",
+		"icon_path": "res://assets/sprites/projectiles/egg_cluster.svg"
+	},
+	{
+		"id": "blackhole",
+		"type": "single",
+		"egg_type": "blackhole",
+		"amount": 1,
+		"price": 500,
+		"title_key": "KEY_BLACKHOLE_BOOSTER",
+		"desc_key": "KEY_SHOP_BLACKHOLE_DESC",
+		"icon_path": "res://assets/sprites/projectiles/egg_blackhole.svg"
+	},
+	{
 		"id": "combo",
 		"type": "combo",
-		"price": 650,
+		"price": 850,
 		"title_key": "KEY_COMBO_BOOSTER",
 		"desc_key": "KEY_SHOP_COMBO_DESC",
-		"icon_path": "res://assets/sprites/projectiles/egg_bomb.svg"
+		"icon_path": "res://assets/ui/icons/icon_egg_golden.svg"
 	}
 ]
 
@@ -199,7 +229,7 @@ func _build_shop_items() -> void:
 		if item["type"] == "single" and sm:
 			count_lbl.text = (lm.t("KEY_INVENTORY") % sm.get_consumable(item["egg_type"])) if lm else "x%d" % sm.get_consumable(item["egg_type"])
 		else:
-			count_lbl.text = "COMBO 3-IN-1"
+			count_lbl.text = "MEGA PACK (6-IN-1)"
 		vbox.add_child(count_lbl)
 
 		# Buy button
@@ -259,9 +289,8 @@ func _on_buy_item_pressed(item: Dictionary, card_node: PanelContainer) -> void:
 		if item["type"] == "single":
 			sm.add_consumable(item["egg_type"], item["amount"])
 		elif item["type"] == "combo":
-			sm.add_consumable("bomb", 1)
-			sm.add_consumable("drill", 1)
-			sm.add_consumable("acid", 1)
+			for c_type in ["bomb", "drill", "acid", "frost", "cluster", "blackhole"]:
+				sm.add_consumable(c_type, 1)
 
 		if has_node("/root/SoundManager"):
 			get_node("/root/SoundManager").play_coin_pickup()

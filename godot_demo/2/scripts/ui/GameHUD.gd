@@ -273,7 +273,7 @@ func _setup_booster_tray() -> void:
 	booster_tray.anchor_top = 1.0
 	booster_tray.anchor_right = 1.0
 	booster_tray.anchor_bottom = 1.0
-	booster_tray.offset_left = -175.0
+	booster_tray.offset_left = -320.0
 	booster_tray.offset_top = -54.0
 	booster_tray.offset_right = -12.0
 	booster_tray.offset_bottom = -10.0
@@ -295,7 +295,10 @@ func _render_booster_buttons() -> void:
 	var booster_types = [
 		{"type": "bomb", "icon": "res://assets/ui/icons/icon_egg_bomb.svg"},
 		{"type": "drill", "icon": "res://assets/ui/icons/icon_egg_drill.svg"},
-		{"type": "acid", "icon": "res://assets/ui/icons/icon_egg_acid.svg"}
+		{"type": "acid", "icon": "res://assets/ui/icons/icon_egg_acid.svg"},
+		{"type": "frost", "icon": "res://assets/ui/icons/icon_egg_frost.svg"},
+		{"type": "cluster", "icon": "res://assets/ui/icons/icon_egg_cluster.svg"},
+		{"type": "blackhole", "icon": "res://assets/ui/icons/icon_egg_blackhole.svg"}
 	]
 
 	for b_info in booster_types:
@@ -313,20 +316,39 @@ func _render_booster_buttons() -> void:
 			btn.icon = ico_tex
 			btn.expand_icon = true
 
-		var st_norm = StyleBoxFlat.new()
-		st_norm.bg_color = Color(0.24, 0.14, 0.08, 0.94)
-		st_norm.border_width_bottom = 3
-		st_norm.border_width_left = 2
-		st_norm.border_width_right = 2
-		st_norm.border_width_top = 2
-		st_norm.border_color = Color(0.55, 0.35, 0.18, 0.95)
-		st_norm.corner_radius_top_left = 10
-		st_norm.corner_radius_top_right = 10
-		st_norm.corner_radius_bottom_right = 10
-		st_norm.corner_radius_bottom_left = 10
-		btn.add_theme_stylebox_override("normal", st_norm)
+		var sbt_wood = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/btn_wood_brown_normal.svg", 12, 12, 12, 16)
+		if sbt_wood:
+			btn.add_theme_stylebox_override("normal", sbt_wood)
+			btn.add_theme_stylebox_override("hover", sbt_wood)
+			var sbt_pressed = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/btn_wood_brown_pressed.svg", 12, 12, 12, 16)
+			if sbt_pressed: btn.add_theme_stylebox_override("pressed", sbt_pressed)
+		else:
+			var st_norm = StyleBoxFlat.new()
+			st_norm.bg_color = Color(0.24, 0.14, 0.08, 0.94)
+			st_norm.border_width_bottom = 3
+			st_norm.border_width_left = 2
+			st_norm.border_width_right = 2
+			st_norm.border_width_top = 2
+			st_norm.border_color = Color(0.55, 0.35, 0.18, 0.95)
+			st_norm.corner_radius_top_left = 10
+			st_norm.corner_radius_top_right = 10
+			st_norm.corner_radius_bottom_right = 10
+			st_norm.corner_radius_bottom_left = 10
+			btn.add_theme_stylebox_override("normal", st_norm)
+
 		btn.add_theme_font_size_override("font_size", 11)
 		btn.add_theme_color_override("font_color", Color(1.0, 0.95, 0.85))
+		btn.add_theme_color_override("font_outline_color", Color(0.18, 0.08, 0.02))
+		btn.add_theme_constant_override("outline_size", 3)
+
+		btn.pivot_offset = Vector2(23, 21)
+		btn.button_down.connect(func():
+			btn.scale = Vector2(0.92, 0.92)
+		)
+		btn.button_up.connect(func():
+			var tw = btn.create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			tw.tween_property(btn, "scale", Vector2.ONE, 0.15)
+		)
 
 		btn.pressed.connect(func():
 			if GameManager.add_active_booster_egg(b_type):

@@ -167,7 +167,11 @@ func _apply_loaded_dict(dict: Dictionary) -> void:
 	if not (dict.get("level_scores") is Dictionary):
 		dict["level_scores"] = {}
 	if not (dict.get("consumables") is Dictionary):
-		dict["consumables"] = {"bomb": 1, "drill": 0, "acid": 0}
+		dict["consumables"] = {"bomb": 1, "drill": 0, "acid": 0, "frost": 0, "cluster": 0, "blackhole": 0}
+	else:
+		for c_type in ["bomb", "drill", "acid", "frost", "cluster", "blackhole"]:
+			if not dict["consumables"].has(c_type):
+				dict["consumables"][c_type] = 0
 
 	var coins_val = dict.get("coins", 150)
 	dict["coins"] = max(0, int(coins_val))
@@ -342,7 +346,7 @@ func import_save_json(json_str: String) -> bool:
 		save_data["coins"] = max(int(save_data.get("coins", 0)), int(parsed.get("coins", 0)))
 		var local_cons = save_data.get("consumables", {})
 		var remote_cons = parsed.get("consumables", {})
-		for c_key in ["bomb", "drill", "acid"]:
+		for c_key in ["bomb", "drill", "acid", "frost", "cluster", "blackhole"]:
 			var c_local = int(local_cons.get(c_key, 0))
 			var c_remote = int(remote_cons.get(c_key, 0))
 			local_cons[c_key] = max(c_local, c_remote)

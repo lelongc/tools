@@ -17,12 +17,12 @@ var is_spinning: bool = false
 var prizes = [
 	{"type": "coins", "amount": 100, "label_key": "100"},
 	{"type": "egg", "egg_type": "bomb", "label_key": "BOMB"},
-	{"type": "coins", "amount": 250, "label_key": "250"},
+	{"type": "egg", "egg_type": "frost", "label_key": "FROST"},
 	{"type": "egg", "egg_type": "acid", "label_key": "ACID"},
 	{"type": "coins", "amount": 500, "label_key": "500"},
+	{"type": "egg", "egg_type": "cluster", "label_key": "CLUSTER"},
 	{"type": "egg", "egg_type": "drill", "label_key": "DRILL"},
-	{"type": "coins", "amount": 1000, "label_key": "1000"},
-	{"type": "coins", "amount": 50, "label_key": "50"}
+	{"type": "coins", "amount": 1000, "label_key": "1000"}
 ]
 
 func _ready() -> void:

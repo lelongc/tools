@@ -54,6 +54,7 @@ static func _load_fx_textures() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	# Tap-in-Flight: Chạm màn hình khi đang bay để hóa Trứng Kim Cương Siêu Nặng
 	if not is_breaking and not has_boosted and not has_first_impact and BaseEgg.is_valid_airborne_tap(event):
+		get_viewport().set_input_as_handled()
 		_activate_special_ability()
 
 func _activate_special_ability() -> void:

@@ -14,6 +14,8 @@ const WORLD_ICONS: Array[String] = ["🌾", "⛏", "⚙", "🌋", "💎", "⚡",
 @onready var world_ribbon_box: HBoxContainer = get_node_or_null("WorldRibbonScroll/WorldRibbonHBox")
 
 var ribbon_buttons: Array[Button] = []
+var swipe_start_pos: Vector2 = Vector2.ZERO
+var is_swiping: bool = false
 
 func _ready() -> void:
 	btn_back.pressed.connect(func(): GameManager.go_to_main_menu())
@@ -186,6 +188,7 @@ func _render_world_levels() -> void:
 	var end_lvl = start_lvl + 19
 
 	var tex_star_full = preload("res://assets/ui/icons/icon_star.svg")
+	var tex_star_empty = preload("res://assets/ui/icons/icon_star_empty.svg")
 
 	for lvl in range(start_lvl, end_lvl + 1):
 		var btn = Button.new()
@@ -277,8 +280,12 @@ func _render_world_levels() -> void:
 				s_rect.custom_minimum_size = Vector2(20, 20)
 				s_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 				s_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-				s_rect.texture = tex_star_full
-				s_rect.modulate = Color.WHITE if (s_idx < stars) else Color(0.25, 0.18, 0.35, 0.65)
+				if s_idx < stars:
+					s_rect.texture = tex_star_full
+					s_rect.modulate = Color.WHITE
+				else:
+					s_rect.texture = tex_star_empty
+					s_rect.modulate = Color(1.0, 1.0, 1.0, 0.85)
 				stars_hbox.add_child(s_rect)
 
 			btn.pivot_offset = Vector2(53, 44)
@@ -312,6 +319,40 @@ func _notification(what: int) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		GameManager.go_to_main_menu()
+		get_viewport().set_input_as_handled()
+		return
+	elif event.is_action_pressed("ui_left"):
+		_prev_world()
+		get_viewport().set_input_as_handled()
+		return
+	elif event.is_action_pressed("ui_right"):
+		_next_world()
+		get_viewport().set_input_as_handled()
+		return
+
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				swipe_start_pos = event.position
+				is_swiping = true
+			elif is_swiping:
+				is_swiping = false
+				_check_swipe_gesture(event.position)
+	elif event is InputEventScreenTouch:
+		if event.pressed:
+			swipe_start_pos = event.position
+			is_swiping = true
+		elif is_swiping:
+			is_swiping = false
+			_check_swipe_gesture(event.position)
+
+func _check_swipe_gesture(end_pos: Vector2) -> void:
+	var delta = end_pos - swipe_start_pos
+	if abs(delta.x) > 65.0 and abs(delta.x) > abs(delta.y) * 1.3:
+		if delta.x > 0:
+			_prev_world()
+		else:
+			_next_world()
 
 func _apply_safe_area() -> void:
 	if not is_inside_tree(): return

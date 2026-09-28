@@ -33,6 +33,7 @@ var has_aim_dragged: bool = false
 var trajectory_overlay: Node2D = null
 var aim_start_screen_pos: Vector2 = Vector2.ZERO
 var aim_touch_time: float = 0.0
+var prev_tension_notch: int = 0
 
 const THEME_COLORS: Dictionary = {
 	"normal": Color(1.0, 0.85, 0.20, 0.95),   # Vàng kim
@@ -460,6 +461,13 @@ func _handle_aim_input(delta: float = 0.016) -> void:
 				var launch_speed = lerp(450.0, 960.0, tension_ratio)
 				aim_vector = aim_dir * launch_speed
 
+				# Rung phản hồi xúc giác từng nấc kéo dây ná (33%, 66%, 100%)
+				var notch = int(tension_ratio * 3.0)
+				if notch != prev_tension_notch:
+					prev_tension_notch = notch
+					if has_node("/root/SaveManager"):
+						get_node("/root/SaveManager").vibrate(16 + notch * 8)
+
 				# Co giãn người gà theo lực kéo
 				var tension = tension_ratio * 0.28
 				visual_root.scale = Vector2(1.0 - tension * 0.20, 1.0 + tension * 0.28)
@@ -470,6 +478,7 @@ func _handle_aim_input(delta: float = 0.016) -> void:
 				_draw_trajectory(aim_vector)
 			else:
 				if is_cancelling:
+					prev_tension_notch = 0
 					if trajectory_overlay:
 						trajectory_overlay.visible = false
 						trajectory_overlay.pull_tension = 0.0
@@ -482,6 +491,7 @@ func _handle_aim_input(delta: float = 0.016) -> void:
 		# Nhả chuột / ngón tay -> Thả trứng ngay hoặc Hủy nếu trong deadzone!
 		if is_aiming:
 			is_aiming = false
+			prev_tension_notch = 0
 			if trajectory_overlay:
 				trajectory_overlay.visible = false
 				trajectory_overlay.pull_tension = 0.0
@@ -524,6 +534,7 @@ func _handle_aim_input(delta: float = 0.016) -> void:
 			has_aim_dragged = false
 
 func _on_aim_start() -> void:
+	prev_tension_notch = 0
 	# 1. Kính phi công trượt xuống che mắt ("CLACK!")
 	if goggles_sprite:
 		var gt = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
