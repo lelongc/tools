@@ -598,8 +598,12 @@ func _on_impact(body: Node) -> void:
 			micro_jitter_timer = 0.0
 
 		if rel_vel > 140.0:
-			var impact_dmg = (rel_vel - 140.0) * min(body.mass * 0.28, 2.5)
-			impact_dmg = min(impact_dmg, 220.0)
+			var mass_factor = clamp(body.mass * 0.35, 0.4, 4.0)
+			var impact_dmg = (rel_vel - 140.0) * mass_factor
+			# Cho phép các khối cực nặng (tảng đá, dầm thép) tạo sát thương nghiền nát tới 440 HP
+			# giúp các vụ sập trần nhà lớn đè sập xuyên tầng sàn đá (340 HP) một cách tự nhiên
+			var max_cap = 250.0 + min(body.mass * 12.0, 190.0)
+			impact_dmg = min(impact_dmg, max_cap)
 			take_damage(impact_dmg, global_position)
 
 func take_damage(amount: float, _from_pos: Vector2 = Vector2.ZERO) -> void:

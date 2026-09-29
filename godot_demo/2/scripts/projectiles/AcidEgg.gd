@@ -134,7 +134,11 @@ func _physics_process(delta: float) -> void:
 				if col.has_method("wake_up"):
 					col.wake_up()
 				if col.has_method("take_damage"):
-					col.take_damage(damage_per_sec * delta, global_position)
+					var dmg = damage_per_sec * delta
+					# Tác nhân ăn mòn hóa học chuyên dụng: Tăng 1.65x sát thương đối với dầm sắt và kim loại kiên cố
+					if "material_type" in col and col.material_type in ["steel", "cyber_alloy", "magma_brick", "obsidian"]:
+						dmg *= 1.65
+					col.take_damage(dmg, global_position)
 
 		if melt_timer <= 0.0:
 			is_melting = false

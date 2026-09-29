@@ -176,13 +176,13 @@ func _on_impact(body: Node) -> void:
 	if (my_speed > 60.0 or body_speed > 60.0) and not is_awake:
 		wake_up()
 
-	if my_speed > 80.0 and body.has_method("wake_up"):
+	if my_speed > 75.0 and body.has_method("wake_up"):
 		body.wake_up()
 
-	if my_speed > 100.0 and body.has_method("take_damage"):
+	if my_speed > 75.0 and body.has_method("take_damage"):
 		body.take_damage(crush_damage * (my_speed / 200.0), global_position)
 		CameraShake.add_trauma(0.2)
-		if body.is_in_group("Enemies") and my_speed > 160.0:
+		if body.is_in_group("Enemies") and my_speed > 140.0:
 			ParticleHelper.spawn_comic_popup(get_parent(), global_position, "CRUNCH!", Color(1.0, 0.6, 0.1))
 		# Kinetic Follow-Through: Giữ vững xung lượng càn quét khi đè vỡ kết cấu gỗ/kính nhẹ
 		if body is DestructibleBlock:

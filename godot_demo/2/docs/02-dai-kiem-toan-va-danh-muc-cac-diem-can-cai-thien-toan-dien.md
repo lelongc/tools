@@ -48,8 +48,14 @@ graph LR
    - *Hiện trạng*: Đã tích hợp `anti_wedge_timer` sau 2.2 giây phát vi xung lực ngang $\pm 18\text{px/s}$.
    - *Điểm cần cải thiện*: Bổ sung hiệu ứng rung lắc nứt vỡ hình ảnh (Visual Stress Jitter) trước khi bung xung lực, cho người chơi thấy khối đá đang nứt rạn vì quá tải trước khi sụp đổ hoàn toàn.
 3. **Bảo toàn Động năng Tảng Đá Lăn (Rolling Boulder Kinetic Transfer)**:
-   - *Hiện trạng*: Đã thêm xung lực bù đắp khi đè nát khối vật liệu.
+   - *Hiện trạng*: Đã nâng cấp ngưỡng vận tốc gây sát thương từ $100\text{px/s} \to 75\text{px/s}$ và xung lực càn quét $roll\_dir \times (mass \times 35.0)$, giúp tảng đá $8.0\text{kg}$ lăn mượt mà nghiền nát kính, gỗ và cáo unarmored ngay cả trên các con dốc thoai thoải.
    - *Điểm cần cải thiện*: Tăng nhẹ mô-men quán tính trục quay (`angular_velocity`) dựa trên độ dốc mặt bằng lăn, biến tảng đá thành cỗ máy nghiền nát boong-ke tự nhiên khi người chơi kích hoạt đúng điểm tựa.
+4. **Hiệu Chuẩn Giới Hạn Sát Thương Nghiền Nát Rơi Tự Do (Dynamic Collapse Crushing Damage)**:
+   - *Vấn đề đã khắc phục*: Trước đây sát thương va chạm bị ghim cứng ở mốc $\le 220\text{HP}$. Khi một dầm đá hoặc phiến trần $13.8\text{kg}$ rơi từ đỉnh hang với vận tốc $>800\text{px/s}$, nó chỉ gây $220$ sát thương khiến sàn đá ($340\text{HP}$) luôn sống sót với $120\text{HP}$, làm đứng khựng vụ sập nhà giữa chừng.
+   - *Giải pháp vật lý đã áp dụng*: Nâng trần sát thương động theo khối lượng $250.0 + \min(mass \times 12.0, 190.0)$ (cho phép đạt tối đa tới $440\text{HP}$). Các vụ sập trần nhà lớn giờ đây sẽ nghiền nát dầm sàn đá bên dưới, tạo ra chuỗi phản ứng dây chuyền sụp đổ (Domino Cascade) cực kỳ mãn nhãn và chân thực.
+5. **Cơ Chế Ăn Mòn Hóa Học Chuyên Dụng Của Trứng Axit (`Acid Anti-Armor Factor`)**:
+   - *Vấn đề đã khắc phục*: Trứng Axit gây đồng đều $220\text{ DPS}$ trong $1.8\text{s}$ ($396\text{ tổng ST}$). Khi gặp dầm thép ($650\text{HP}$) hay hợp kim cyber ($750\text{HP}$), thanh thép vẫn còn $>250\text{HP}$ sau cả bãi axit.
+   - *Giải pháp đã áp dụng*: Tích hợp hệ số ăn mòn $1.65\times$ ($363\text{ DPS}$, tổng $653\text{ ST}$) khi tiếp xúc `steel`, `cyber_alloy`, `magma_brick`, `obsidian`. Trứng Axit giờ đây phát huy trọn vẹn vai trò khắc chế cứng boong-ke kim loại kiên cố.
 
 ---
 

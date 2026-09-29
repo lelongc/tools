@@ -1,4 +1,3 @@
-
 Dưới đây là trọn bộ **4 lệnh** chuẩn theo thứ tự để bạn chạy trong Console (F12):
 
 ### Lệnh 1: Tự động cuộn và bấm mở rộng bình luận
