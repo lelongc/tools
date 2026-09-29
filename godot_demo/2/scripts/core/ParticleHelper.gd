@@ -23,6 +23,9 @@ static var tex_toxic_fume: Texture2D = null
 static var tex_gravity_ring: Texture2D = null
 static var tex_cosmic_star: Texture2D = null
 static var tex_eggshell_chip: Texture2D = null
+static var tex_victory_burst: Texture2D = null
+static var tex_victory_sunburst: Texture2D = null
+static var tex_coin_icon: Texture2D = null
 
 static func _init_textures() -> void:
 	if tex_spark == null:
@@ -48,6 +51,10 @@ static func _init_textures() -> void:
 		tex_gravity_ring = _safe_load("res://assets/sprites/vfx/vfx_gravity_distortion_ring.svg")
 		tex_cosmic_star = _safe_load("res://assets/sprites/vfx/vfx_cosmic_star_dust.svg")
 		tex_eggshell_chip = _safe_load("res://assets/sprites/vfx/vfx_eggshell_shard_chip.svg")
+
+		tex_victory_burst = _safe_load("res://assets/sprites/vfx/vfx_celebration_starburst.svg")
+		tex_victory_sunburst = _safe_load("res://assets/sprites/vfx/vfx_victory_sunburst.svg")
+		tex_coin_icon = _safe_load("res://assets/ui/icons/icon_coin.svg")
 
 static var _tex_cache: Dictionary = {}
 
@@ -609,8 +616,8 @@ static func spawn_comic_popup(parent: Node, pos: Vector2, text: String, color: C
 				label.queue_free()
 	)
 
-## Bắn pháo hoa giấy rực rỡ ăn mừng chiến thắng 3 sao (Confetti Cannon Burst)
-static func spawn_confetti_burst(parent: Node, pos: Vector2, count: int = 24) -> void:
+## Bắn pháo hoa giấy & đồng vàng rực rỡ ăn mừng chiến thắng 3 sao (Textured Confetti & Coin Burst)
+static func spawn_confetti_burst(parent: Node, pos: Vector2, count: int = 28) -> void:
 	if not parent or not is_instance_valid(parent): return
 	_init_textures()
 
@@ -624,50 +631,82 @@ static func spawn_confetti_burst(parent: Node, pos: Vector2, count: int = 24) ->
 	]
 
 	for i in range(count):
-		var ribbon = Sprite2D.new()
-		ribbon.texture = tex_confetti if tex_confetti else tex_shard
-		ribbon.global_position = pos + Vector2(randf_range(-12, 12), randf_range(-8, 8))
-		ribbon.scale = Vector2(randf_range(0.35, 0.65), randf_range(0.35, 0.65))
-		ribbon.modulate = colors[randi() % colors.size()]
-		ribbon.z_index = 80
-		parent.add_child(ribbon)
+		var is_coin = (i % 5 == 0) and (tex_coin_icon != null)
+		var is_star = (i % 4 == 1) and (tex_cosmic_star != null)
+
+		var item = Sprite2D.new()
+		if is_coin:
+			item.texture = tex_coin_icon
+			item.scale = Vector2(0.55, 0.55)
+			item.modulate = Color.WHITE
+		elif is_star:
+			item.texture = tex_cosmic_star
+			item.scale = Vector2(0.45, 0.45)
+			item.modulate = Color(1.0, 0.95, 0.4, 1.0)
+		else:
+			item.texture = tex_confetti if tex_confetti else tex_shard
+			item.scale = Vector2(randf_range(0.35, 0.65), randf_range(0.35, 0.65))
+			item.modulate = colors[randi() % colors.size()]
+
+		item.global_position = pos + Vector2(randf_range(-14, 14), randf_range(-10, 10))
+		item.z_index = 80
+		parent.add_child(item)
 
 		# Quỹ đạo bung nở pháo hoa hình quạt hướng lên
 		var angle = randf_range(-PI * 0.85, -PI * 0.15)
-		var speed = randf_range(160.0, 340.0)
+		var speed = randf_range(180.0, 360.0)
 		var vel = Vector2(cos(angle), sin(angle)) * speed
-		var end_pos = ribbon.global_position + vel * 0.45 + Vector2(randf_range(-30, 30), randf_range(80, 160))
+		var end_pos = item.global_position + vel * 0.45 + Vector2(randf_range(-35, 35), randf_range(90, 180))
 
-		var tw = ribbon.create_tween()
+		var tw = item.create_tween()
 		tw.set_parallel(true)
-		tw.tween_property(ribbon, "global_position:x", end_pos.x, randf_range(0.8, 1.2)).set_trans(Tween.TRANS_SINE)
+		tw.tween_property(item, "global_position:x", end_pos.x, randf_range(0.85, 1.25)).set_trans(Tween.TRANS_SINE)
 		# Lượn parabol lên đỉnh rồi rơi chậm
-		var apex_y = ribbon.global_position.y + vel.y * 0.25
-		tw.chain().tween_property(ribbon, "global_position:y", apex_y, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-		tw.chain().tween_property(ribbon, "global_position:y", end_pos.y, 0.75).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
-		# Xoay ruy băng liên tục
-		tw.parallel().tween_property(ribbon, "rotation", randf_range(-8.0, 8.0), 1.1)
+		var apex_y = item.global_position.y + vel.y * 0.26
+		tw.chain().tween_property(item, "global_position:y", apex_y, 0.35).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tw.chain().tween_property(item, "global_position:y", end_pos.y, 0.80).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		# Xoay ruy băng / đồng tiền liên tục
+		tw.parallel().tween_property(item, "rotation", randf_range(-8.0, 8.0), 1.15)
 		# Mờ dần
-		tw.parallel().tween_property(ribbon, "modulate:a", 0.0, 0.35).set_delay(0.75)
-		tw.chain().tween_callback(ribbon.queue_free)
+		tw.parallel().tween_property(item, "modulate:a", 0.0, 0.35).set_delay(0.80)
+		tw.chain().tween_callback(item.queue_free)
 
-## Hiệu ứng hạt sao lấp lánh bung nở khi nhận sao chiến thắng (Star Pop Sparkles)
+## Hiệu ứng texture nổ sao rực rỡ và tia sáng bung nở khi nhận sao chiến thắng (Texture Star Pop Burst)
 static func spawn_star_pop(parent: Node, pos: Vector2) -> void:
 	if not parent or not is_instance_valid(parent): return
 	_init_textures()
 
+	# 1. Texture Flash nổ sao truyện tranh rực rỡ ở tâm
+	var burst_tex = tex_victory_burst if tex_victory_burst else tex_spark
+	if burst_tex:
+		var flash = Sprite2D.new()
+		flash.texture = burst_tex
+		flash.global_position = pos
+		flash.scale = Vector2(0.2, 0.2)
+		flash.z_index = 84
+		flash.rotation = randf_range(-0.4, 0.4)
+		parent.add_child(flash)
+
+		var tw_flash = flash.create_tween().set_parallel(true)
+		tw_flash.tween_property(flash, "scale", Vector2(0.85, 0.85), 0.18).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw_flash.tween_property(flash, "rotation", flash.rotation + 0.5, 0.35)
+		tw_flash.chain().tween_property(flash, "scale", Vector2(1.0, 1.0), 0.16)
+		tw_flash.parallel().tween_property(flash, "modulate:a", 0.0, 0.16).set_delay(0.12)
+		tw_flash.chain().tween_callback(flash.queue_free)
+
+	# 2. Vành tia sáng sao bung tỏa
 	var spark_tex = tex_spark if tex_spark else tex_circle
-	for i in range(10):
+	for i in range(12):
 		var spark = Sprite2D.new()
 		spark.texture = spark_tex
 		spark.global_position = pos
-		spark.scale = Vector2(0.4, 0.4)
-		spark.modulate = Color(1.0, randf_range(0.82, 0.98), randf_range(0.2, 0.4), 1.0)
+		spark.scale = Vector2(0.42, 0.42)
+		spark.modulate = Color(1.0, randf_range(0.84, 1.0), randf_range(0.2, 0.4), 1.0)
 		spark.z_index = 85
 		parent.add_child(spark)
 
-		var angle = (float(i) / 10.0) * TAU + randf_range(-0.15, 0.15)
-		var dist = randf_range(28.0, 52.0)
+		var angle = (float(i) / 12.0) * TAU + randf_range(-0.15, 0.15)
+		var dist = randf_range(30.0, 60.0)
 		var target_p = pos + Vector2(cos(angle), sin(angle)) * dist
 
 		var tw = spark.create_tween().set_parallel(true)
@@ -675,6 +714,54 @@ static func spawn_star_pop(parent: Node, pos: Vector2) -> void:
 		tw.tween_property(spark, "scale", Vector2(0.1, 0.1), 0.38).set_delay(0.08)
 		tw.tween_property(spark, "modulate:a", 0.0, 0.28).set_delay(0.18)
 		tw.chain().tween_callback(spark.queue_free)
+
+## Vụ nổ chúc mừng chiến thắng quy mô lớn bằng Texture hoạt hình (Grand Victory Texture Burst)
+static func spawn_victory_burst(parent: Node, pos: Vector2, scale_mult: float = 1.0) -> void:
+	if not parent or not is_instance_valid(parent): return
+	_init_textures()
+
+	# 1. Texture sao nổ truyện tranh hoành tráng (Hero Comic Starburst Texture)
+	var burst_tex = tex_victory_burst if tex_victory_burst else tex_spark
+	if burst_tex:
+		var burst = Sprite2D.new()
+		burst.texture = burst_tex
+		burst.global_position = pos
+		burst.scale = Vector2(0.25, 0.25) * scale_mult
+		burst.z_index = 86
+		burst.rotation = randf_range(-0.3, 0.3)
+		parent.add_child(burst)
+
+		var tw = burst.create_tween()
+		tw.set_parallel(true)
+		tw.tween_property(burst, "scale", Vector2(1.35, 1.35) * scale_mult, 0.24).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw.tween_property(burst, "rotation", burst.rotation + randf_range(-0.6, 0.6), 0.45)
+		tw.chain().tween_property(burst, "scale", Vector2(1.5, 1.5) * scale_mult, 0.25).set_trans(Tween.TRANS_QUAD)
+		tw.parallel().tween_property(burst, "modulate:a", 0.0, 0.25).set_delay(0.22)
+		tw.chain().tween_callback(burst.queue_free)
+
+	# 2. Vòng tròn các ngôi sao vàng kim & đồng xu nảy tung tóe
+	var star_tex = tex_cosmic_star if tex_cosmic_star else tex_spark
+	if star_tex:
+		var star_count = 14
+		for i in range(star_count):
+			var star = Sprite2D.new()
+			star.texture = star_tex
+			star.global_position = pos
+			star.scale = Vector2(0.38, 0.38) * scale_mult
+			star.modulate = Color(1.0, randf_range(0.85, 1.0), randf_range(0.2, 0.4), 1.0)
+			star.z_index = 87
+			parent.add_child(star)
+
+			var angle = (float(i) / float(star_count)) * TAU + randf_range(-0.15, 0.15)
+			var dist = randf_range(50.0, 95.0) * scale_mult
+			var target_p = pos + Vector2(cos(angle), sin(angle)) * dist
+
+			var tw2 = star.create_tween().set_parallel(true)
+			tw2.tween_property(star, "global_position", target_p, 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+			tw2.tween_property(star, "rotation", randf_range(-3.5, 3.5), 0.45)
+			tw2.tween_property(star, "scale", Vector2(0.12, 0.12) * scale_mult, 0.45).set_delay(0.12)
+			tw2.tween_property(star, "modulate:a", 0.0, 0.30).set_delay(0.20)
+			tw2.chain().tween_callback(star.queue_free)
 
 
 

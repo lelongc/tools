@@ -104,26 +104,26 @@ func _render_cards() -> void:
 				is_past = true
 
 		if is_current:
-			sbox.bg_color = Color(0.35, 0.20, 0.05, 0.95)
+			sbox.bg_color = Color(0.32, 0.18, 0.08, 0.98)
 			sbox.border_width_left = 3
 			sbox.border_width_top = 3
 			sbox.border_width_right = 3
 			sbox.border_width_bottom = 5
-			sbox.border_color = Color(1.0, 0.88, 0.2)
+			sbox.border_color = Color(0.85, 0.65, 0.25)
 		elif is_past:
-			sbox.bg_color = Color(0.12, 0.22, 0.12, 0.9)
+			sbox.bg_color = Color(0.14, 0.20, 0.12, 0.92)
 			sbox.border_width_left = 2
 			sbox.border_width_top = 2
 			sbox.border_width_right = 2
 			sbox.border_width_bottom = 2
-			sbox.border_color = Color(0.3, 0.85, 0.3)
+			sbox.border_color = Color(0.28, 0.70, 0.32)
 		else:
-			sbox.bg_color = Color(0.14, 0.08, 0.20, 0.85)
+			sbox.bg_color = Color(0.16, 0.10, 0.06, 0.88)
 			sbox.border_width_left = 2
 			sbox.border_width_top = 2
 			sbox.border_width_right = 2
 			sbox.border_width_bottom = 2
-			sbox.border_color = Color(0.4, 0.3, 0.5)
+			sbox.border_color = Color(0.38, 0.24, 0.14)
 
 		card.add_theme_stylebox_override("panel", sbox)
 

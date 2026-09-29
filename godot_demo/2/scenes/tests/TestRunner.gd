@@ -2273,6 +2273,43 @@ func _ready() -> void:
 		else:
 			print("  [PASS] SaveManager 7-day login streak successfully advanced to Day %d: %s" % [reward["streak"], reward["desc"]])
 
+	# -------------------------------------------------------------------------
+	# 31. TEST VICTORY CELEBRATION TEXTURES & 2D FRAME COHESION
+	# -------------------------------------------------------------------------
+	print("\n--- [TEST 31] Testing Victory Celebration Textures & 2D Frame Cohesion ---")
+	ParticleHelper._init_textures()
+	if ParticleHelper.tex_victory_burst == null:
+		errors.append("TEST 31: ParticleHelper.tex_victory_burst is NULL!")
+	else:
+		print("  [PASS] ParticleHelper.tex_victory_burst loaded successfully")
+
+	if ParticleHelper.tex_victory_sunburst == null:
+		errors.append("TEST 31: ParticleHelper.tex_victory_sunburst is NULL!")
+	else:
+		print("  [PASS] ParticleHelper.tex_victory_sunburst loaded successfully")
+
+	var hud_scene = load("res://scenes/prefabs/GameHUD.tscn")
+	var hud_t = hud_scene.instantiate()
+	add_child(hud_t)
+	if not hud_t.victory_sunburst:
+		errors.append("TEST 31: GameHUD missing VictorySunburst TextureRect!")
+	else:
+		print("  [PASS] GameHUD contains rotating VictorySunburst backdrop")
+
+	if not hud_t.victory_crest:
+		errors.append("TEST 31: GameHUD missing VictoryCrest TextureRect!")
+	else:
+		print("  [PASS] GameHUD contains VictoryCrest celebratory laurel badge")
+
+	# Smoke test celebration textured bursts without crash
+	ParticleHelper.spawn_victory_burst(hud_t, Vector2(270, 480), 1.0)
+	ParticleHelper.spawn_star_pop(hud_t, Vector2(270, 480))
+	ParticleHelper.spawn_confetti_burst(hud_t, Vector2(270, 480), 12)
+	print("  [PASS] ParticleHelper textured celebration VFX spawned cleanly without errors")
+
+	hud_t.free()
+	await get_tree().process_frame
+
 	GameManager.current_egg_index = 0
 	GameManager.has_first_impact_occurred = false
 	GameManager.is_level_active = false

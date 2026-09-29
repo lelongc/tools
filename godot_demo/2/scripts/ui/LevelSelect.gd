@@ -94,12 +94,12 @@ func _build_world_ribbon() -> void:
 		norm.corner_radius_top_right = 10
 		norm.corner_radius_bottom_right = 10
 		norm.corner_radius_bottom_left = 10
-		norm.bg_color = Color(0.18, 0.10, 0.28, 0.9)
+		norm.bg_color = Color(0.22, 0.13, 0.08, 0.92)
 		norm.border_width_bottom = 2
 		norm.border_width_top = 1
 		norm.border_width_left = 1
 		norm.border_width_right = 1
-		norm.border_color = Color(0.4, 0.3, 0.55, 0.6)
+		norm.border_color = Color(0.44, 0.28, 0.16, 0.85)
 		btn.add_theme_stylebox_override("normal", norm)
 
 		btn.pressed.connect(func():

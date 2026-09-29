@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Vòng hào quang tỏa sáng tâm (Core Glow) -->
+    <radialGradient id="sunGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fffbeb" stop-opacity="1"/>
+      <stop offset="25%" stop-color="#fde047" stop-opacity="0.85"/>
+      <stop offset="55%" stop-color="#f59e0b" stop-opacity="0.45"/>
+      <stop offset="85%" stop-color="#d97706" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#b45309" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Gradient dải tia nắng vàng kim (Ray Gradient) -->
+    <radialGradient id="rayGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fef08a" stop-opacity="0.95"/>
+      <stop offset="40%" stop-color="#fbbf24" stop-opacity="0.80"/>
+      <stop offset="75%" stop-color="#f59e0b" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#d97706" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="rayGradAlt" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.85"/>
+      <stop offset="35%" stop-color="#fde047" stop-opacity="0.65"/>
+      <stop offset="70%" stop-color="#eab308" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#ca8a04" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Lớp hào quang nền mềm mại -->
+  <circle cx="256" cy="256" r="250" fill="url(#sunGlow)"/>
+
+  <!-- 16 Dải tia nắng vinh quang rực rỡ (16 Celebratory Sunburst Beams) -->
+  <g fill="url(#rayGrad)">
+    <!-- Ray 0 (0 deg) -->
+    <polygon points="256,256 510,215 510,297"/>
+    <!-- Ray 2 (45 deg) -->
+    <polygon points="256,256 436,436 378,494"/>
+    <!-- Ray 4 (90 deg) -->
+    <polygon points="256,256 215,510 297,510"/>
+    <!-- Ray 6 (135 deg) -->
+    <polygon points="256,256 76,436 18,378"/>
+    <!-- Ray 8 (180 deg) -->
+    <polygon points="256,256 2,297 2,215"/>
+    <!-- Ray 10 (225 deg) -->
+    <polygon points="256,256 76,76 134,18"/>
+    <!-- Ray 12 (270 deg) -->
+    <polygon points="256,256 297,2 215,2"/>
+    <!-- Ray 14 (315 deg) -->
+    <polygon points="256,256 436,76 494,134"/>
+  </g>
+
+  <!-- 8 Dải tia phụ xen kẽ góc 22.5 deg -->
+  <g fill="url(#rayGradAlt)">
+    <!-- 22.5 deg -->
+    <polygon points="256,256 491,158 506,200"/>
+    <!-- 67.5 deg -->
+    <polygon points="256,256 354,491 312,506"/>
+    <!-- 112.5 deg -->
+    <polygon points="256,256 158,491 200,506"/>
+    <!-- 157.5 deg -->
+    <polygon points="256,256 21,354 6,312"/>
+    <!-- 202.5 deg -->
+    <polygon points="256,256 21,158 6,200"/>
+    <!-- 247.5 deg -->
+    <polygon points="256,256 158,21 200,6"/>
+    <!-- 292.5 deg -->
+    <polygon points="256,256 354,21 312,6"/>
+    <!-- 337.5 deg -->
+    <polygon points="256,256 491,354 506,312"/>
+  </g>
+
+  <!-- Đĩa sáng mặt trời rực rỡ ở tâm -->
+  <circle cx="256" cy="256" r="64" fill="#fef08a" opacity="0.9"/>
+  <circle cx="256" cy="256" r="42" fill="#ffffff" opacity="0.95"/>
+</svg>

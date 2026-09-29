@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 128" width="256" height="128">
+  <defs>
+    <linearGradient id="goldLeaf" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="crownGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="40%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Vòng nguyệt quế trái (Left Laurel Branch) -->
+  <g fill="url(#goldLeaf)" stroke="#451a03" stroke-width="2.5" stroke-linejoin="round">
+    <!-- Cành cong -->
+    <path d="M 112 110 Q 50 100 42 45" fill="none" stroke="#78350f" stroke-width="4" stroke-linecap="round"/>
+    <!-- Lá 1 -->
+    <path d="M 42 45 Q 32 30 48 24 Q 56 38 42 45 Z"/>
+    <!-- Lá 2 -->
+    <path d="M 46 60 Q 24 54 30 40 Q 48 48 46 60 Z"/>
+    <!-- Lá 3 -->
+    <path d="M 58 78 Q 36 80 42 64 Q 60 68 58 78 Z"/>
+    <!-- Lá 4 -->
+    <path d="M 78 95 Q 56 104 62 88 Q 80 88 78 95 Z"/>
+    <!-- Lá 5 -->
+    <path d="M 104 108 Q 86 120 90 104 Q 106 100 104 108 Z"/>
+  </g>
+
+  <!-- Vòng nguyệt quế phải (Right Laurel Branch - Mirrored) -->
+  <g fill="url(#goldLeaf)" stroke="#451a03" stroke-width="2.5" stroke-linejoin="round">
+    <!-- Cành cong -->
+    <path d="M 144 110 Q 206 100 214 45" fill="none" stroke="#78350f" stroke-width="4" stroke-linecap="round"/>
+    <!-- Lá 1 -->
+    <path d="M 214 45 Q 224 30 208 24 Q 200 38 214 45 Z"/>
+    <!-- Lá 2 -->
+    <path d="M 210 60 Q 232 54 226 40 Q 208 48 210 60 Z"/>
+    <!-- Lá 3 -->
+    <path d="M 198 78 Q 220 80 214 64 Q 196 68 198 78 Z"/>
+    <!-- Lá 4 -->
+    <path d="M 178 95 Q 200 104 194 88 Q 176 88 178 95 Z"/>
+    <!-- Lá 5 -->
+    <path d="M 152 108 Q 170 120 166 104 Q 150 100 152 108 Z"/>
+  </g>
+
+  <!-- Vương miện gà chiến thắng ở trung tâm (Cartoon Victory Crown) -->
+  <!-- Viền dày -->
+  <path d="M 96 90 L 92 46 L 112 62 L 128 32 L 144 62 L 164 46 L 160 90 Z"
+        fill="#78350f" stroke="#451a03" stroke-width="5" stroke-linejoin="round"/>
+  <!-- Thân vương miện vàng rực rỡ -->
+  <path d="M 98 88 L 95 50 L 114 64 L 128 38 L 142 64 L 161 50 L 158 88 Z"
+        fill="url(#crownGrad)" stroke="#b45309" stroke-width="2" stroke-linejoin="round"/>
+
+  <!-- Đai chân vương miện đính đá quý -->
+  <rect x="96" y="80" width="64" height="12" rx="3" fill="#b45309" stroke="#451a03" stroke-width="2"/>
+  <circle cx="106" cy="86" r="3" fill="#ef4444" stroke="#7f1d1d" stroke-width="1"/>
+  <circle cx="128" cy="86" r="3.5" fill="#38bdf8" stroke="#0369a1" stroke-width="1"/>
+  <circle cx="150" cy="86" r="3" fill="#22c55e" stroke="#14532d" stroke-width="1"/>
+
+  <!-- Ngôi sao vàng đỉnh vương miện -->
+  <polygon points="128,14 132,24 142,25 134,32 137,42 128,36 119,42 122,32 114,25 124,24"
+           fill="#ffffff" stroke="#f59e0b" stroke-width="1.5"/>
+</svg>

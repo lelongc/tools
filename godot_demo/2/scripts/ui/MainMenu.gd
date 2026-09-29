@@ -211,8 +211,8 @@ func _setup_login_badge() -> void:
 	login_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	login_badge.name = "LoginBadge"
 	var sb = StyleBoxFlat.new()
-	sb.bg_color = Color(1.0, 0.25, 0.25, 0.95)
-	sb.border_color = Color(1.0, 0.9, 0.3, 1.0)
+	sb.bg_color = Color(1.0, 0.22, 0.28, 1.0)
+	sb.border_color = Color.WHITE
 	sb.border_width_left = 1
 	sb.border_width_top = 1
 	sb.border_width_right = 1

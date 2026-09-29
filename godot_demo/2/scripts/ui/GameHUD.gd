@@ -21,7 +21,9 @@ const EGG_TEXTURES: Dictionary = {
 
 # Modals
 @onready var modal_dimmer: ColorRect = get_node_or_null("ModalDimmer")
+@onready var victory_sunburst: TextureRect = get_node_or_null("VictorySunburst")
 @onready var victory_modal: PanelContainer = $VictoryModal
+@onready var victory_crest: TextureRect = get_node_or_null("VictoryModal/VBox/VictoryCrest")
 @onready var victory_title: Label = $VictoryModal/VBox/Title
 @onready var victory_score: Label = $VictoryModal/VBox/ScoreLabel
 @onready var star1: TextureRect = $VictoryModal/VBox/StarsContainer/Star1
@@ -197,7 +199,9 @@ func _apply_cartoon_ui_theme() -> void:
 		if last_stand_title:
 			last_stand_title.add_theme_stylebox_override("normal", sbt_ribbon_gold if sbt_ribbon_gold else sbt_ribbon_wood)
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if victory_sunburst and victory_sunburst.visible:
+		victory_sunburst.rotation += delta * 0.45
 	if tutorial_prompt_node and not tutorial_dismissed:
 		if GameManager.current_egg_index > 0 or Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 			_dismiss_tutorial()
@@ -214,22 +218,26 @@ func _setup_level_1_tutorial() -> void:
 	var panel = PanelContainer.new()
 	panel.name = "Bubble"
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var sb = StyleBoxFlat.new()
-	sb.bg_color = Color(0.20, 0.12, 0.06, 0.94)
-	sb.border_width_left = 2
-	sb.border_width_right = 2
-	sb.border_width_top = 2
-	sb.border_width_bottom = 3
-	sb.border_color = Color(0.58, 0.38, 0.20, 0.95)
-	sb.corner_radius_top_left = 12
-	sb.corner_radius_top_right = 12
-	sb.corner_radius_bottom_right = 12
-	sb.corner_radius_bottom_left = 12
-	sb.content_margin_left = 14
-	sb.content_margin_right = 14
-	sb.content_margin_top = 8
-	sb.content_margin_bottom = 8
-	panel.add_theme_stylebox_override("panel", sb)
+	var sbt_bubble = JuicyButton._get_or_create_sbt("res://assets/sprites/ui/panel_bubble_tutorial.svg", 20, 16, 20, 24, 16, 8, 16, 14)
+	if sbt_bubble:
+		panel.add_theme_stylebox_override("panel", sbt_bubble)
+	else:
+		var sb = StyleBoxFlat.new()
+		sb.bg_color = Color(0.20, 0.12, 0.06, 0.94)
+		sb.border_width_left = 2
+		sb.border_width_right = 2
+		sb.border_width_top = 2
+		sb.border_width_bottom = 3
+		sb.border_color = Color(0.58, 0.38, 0.20, 0.95)
+		sb.corner_radius_top_left = 12
+		sb.corner_radius_top_right = 12
+		sb.corner_radius_bottom_right = 12
+		sb.corner_radius_bottom_left = 12
+		sb.content_margin_left = 14
+		sb.content_margin_right = 14
+		sb.content_margin_top = 8
+		sb.content_margin_bottom = 8
+		panel.add_theme_stylebox_override("panel", sb)
 
 	var lm = get_node_or_null("/root/LocalizationManager")
 	var prompt_txt = lm.t("KEY_TUTORIAL_AIM") if lm else "👇 KÉO XUỐNG ĐỂ NGẮM & THẢ RA ĐỂ BẮN! 👇"
@@ -644,16 +652,38 @@ func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> 
 	if fail_modal: fail_modal.visible = false
 	if modal_dimmer: modal_dimmer.visible = true
 
+	# 1. Hào quang mặt trời vàng rực xoay tít đằng sau Victory Modal
+	if victory_sunburst:
+		victory_sunburst.visible = true
+		victory_sunburst.scale = Vector2(0.1, 0.1)
+		victory_sunburst.modulate.a = 0.0
+		var tw_sun = create_tween().set_parallel(true)
+		tw_sun.tween_property(victory_sunburst, "scale", Vector2.ONE, 0.45).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw_sun.tween_property(victory_sunburst, "modulate:a", 0.92, 0.35)
+
 	if victory_modal:
 		victory_modal.visible = true
 		victory_modal.pivot_offset = victory_modal.size * 0.5
 		var lm = get_node_or_null("/root/LocalizationManager")
+
+		# Vương miện nguyệt quế vàng nảy lên trên đầu tiêu đề
+		if victory_crest:
+			victory_crest.pivot_offset = victory_crest.size * 0.5
+			victory_crest.scale = Vector2(0.2, 0.2)
+			var ct = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+			ct.tween_property(victory_crest, "scale", Vector2.ONE, 0.35).set_delay(0.08)
+
 		if victory_title:
 			victory_title.text = lm.t("KEY_VICTORY") if lm else "CHIẾN THẮNG!"
 			victory_title.pivot_offset = victory_title.size * 0.5
 			victory_title.scale = Vector2(0.4, 0.4)
 			var tt = create_tween().set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 			tt.tween_property(victory_title, "scale", Vector2.ONE, 0.35)
+
+		# Nổ chúc mừng bằng Texture truyện tranh hoành tráng ngay khi bảng vinh danh xuất hiện
+		ParticleHelper.spawn_victory_burst(self, victory_modal.global_position + victory_modal.size * 0.5, 1.25)
+		if has_node("/root/SoundManager"):
+			get_node("/root/SoundManager").play_victory()
 
 		if victory_score:
 			var prev_best = 0
@@ -693,12 +723,16 @@ func _on_level_completed(stars: int, final_score: int, base_coins: int = 50) -> 
 							get_node("/root/SoundManager").play_star_chime(star_idx + 1)
 						if has_node("/root/SaveManager"):
 							get_node("/root/SaveManager").vibrate(35 + star_idx * 15)
+						# Nổ Texture và tia sao rực rỡ tại vị trí từng ngôi sao
 						ParticleHelper.spawn_star_pop(self, s_node.global_position + s_node.size * 0.5)
 						if star_idx == 2 and stars == 3:
 							var vp_size = get_viewport().get_visible_rect().size
 							var center_y = vp_size.y * 0.45
+							# Pháo hoa ruy băng texture và đồng xu vàng rực rỡ 2 bên màn hình
 							ParticleHelper.spawn_confetti_burst(self, Vector2(60, center_y), 32)
 							ParticleHelper.spawn_confetti_burst(self, Vector2(vp_size.x - 60, center_y), 32)
+							var pop_txt = lm.t("KEY_PERFECT") if lm and lm.has_method("t") else "XUẤT SẮC!"
+							ParticleHelper.spawn_comic_popup(self, Vector2(vp_size.x * 0.5, vp_size.y * 0.22), pop_txt, Color(1.0, 0.9, 0.2))
 					)
 					st.tween_property(s_node, "scale", Vector2.ONE, 0.28)
 				else:
@@ -744,6 +778,8 @@ func _on_claim_triple_pressed() -> void:
 		func():
 			victory_claimed = true
 			if modal_dimmer: modal_dimmer.visible = false
+			if victory_sunburst: victory_sunburst.visible = false
+			if victory_modal: victory_modal.visible = false
 			GameManager.next_level()
 	)
 
@@ -751,6 +787,8 @@ func _on_victory_next_pressed() -> void:
 	if victory_claimed: return
 	victory_claimed = true
 	if modal_dimmer: modal_dimmer.visible = false
+	if victory_sunburst: victory_sunburst.visible = false
+	if victory_modal: victory_modal.visible = false
 	if has_node("/root/SaveManager"):
 		get_node("/root/SaveManager").add_coins(current_base_coins)
 	GameManager.next_level()
@@ -759,6 +797,8 @@ func _on_victory_levels_pressed() -> void:
 	if victory_claimed: return
 	victory_claimed = true
 	if modal_dimmer: modal_dimmer.visible = false
+	if victory_sunburst: victory_sunburst.visible = false
+	if victory_modal: victory_modal.visible = false
 	if has_node("/root/SaveManager"):
 		get_node("/root/SaveManager").add_coins(current_base_coins)
 	GameManager.go_to_level_select()

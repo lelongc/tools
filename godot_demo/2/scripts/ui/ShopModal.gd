@@ -179,9 +179,9 @@ func _build_shop_items() -> void:
 			panel_card.add_theme_stylebox_override("panel", sbt_card)
 		else:
 			var sb = StyleBoxFlat.new()
-			sb.bg_color = Color(0.18, 0.10, 0.28, 0.95)
+			sb.bg_color = Color(0.24, 0.14, 0.08, 0.95)
 			sb.set_border_width_all(2)
-			sb.border_color = Color(1.0, 0.85, 0.3, 0.6)
+			sb.border_color = Color(0.48, 0.30, 0.16, 0.9)
 			sb.set_corner_radius_all(14)
 			panel_card.add_theme_stylebox_override("panel", sb)
 
