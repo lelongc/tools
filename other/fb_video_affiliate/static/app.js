@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const nicheSelect = document.getElementById("nicheSelect");
   const modelSelect = document.getElementById("modelSelect");
   const scriptText = document.getElementById("scriptText");
-  const btnLoadSampleScript = document.getElementById("btnLoadSampleScript");
+  const btnGenRandomScript = document.getElementById("btnGenRandomScript");
   const btnAnalyze = document.getElementById("btnAnalyze");
   const videoDropZone = document.getElementById("videoDropZone");
   const videoFileInput = document.getElementById("videoFileInput");
@@ -27,11 +27,34 @@ document.addEventListener("DOMContentLoaded", () => {
   const videoFileName = document.getElementById("videoFileName");
   const btnRemoveVideo = document.getElementById("btnRemoveVideo");
 
+  // DOM Elements - Thumbnail Studio (Chuẩn Văn Cao)
+  const thumbStudioCard = document.getElementById("thumbStudioCard");
+  const thumbCanvas = document.getElementById("thumbCanvas");
+  const thumbCurrentTimeText = document.getElementById("thumbCurrentTimeText");
+  const thumbTotalTimeText = document.getElementById("thumbTotalTimeText");
+  const thumbFrameScrubber = document.getElementById("thumbFrameScrubber");
+  const btnSnapCurrentFrame = document.getElementById("btnSnapCurrentFrame");
+  const thumbTextLine1 = document.getElementById("thumbTextLine1");
+  const thumbTextLine2 = document.getElementById("thumbTextLine2");
+  const thumbPosY = document.getElementById("thumbPosY");
+  const valPosY = document.getElementById("valPosY");
+  const thumbFontSize = document.getElementById("thumbFontSize");
+  const valFontSize = document.getElementById("valFontSize");
+  const thumbBoxColor = document.getElementById("thumbBoxColor");
+  const btnDownloadThumb = document.getElementById("btnDownloadThumb");
+  const btnApplyThumbAsCover = document.getElementById("btnApplyThumbAsCover");
+  let currentThumbnailPath = "";
+
   // DOM Elements - Studio Output
   const emptyOutputState = document.getElementById("emptyOutputState");
   const resultContent = document.getElementById("resultContent");
   const aiStatusTag = document.getElementById("aiStatusTag");
   const outTitle = document.getElementById("outTitle");
+  const viralTitlesBox = document.getElementById("viralTitlesBox");
+  const viralTitlesList = document.getElementById("viralTitlesList");
+  const seoFilenameBox = document.getElementById("seoFilenameBox");
+  const seoFilenameText = document.getElementById("seoFilenameText");
+  const btnCopyFilename = document.getElementById("btnCopyFilename");
   const outCaption = document.getElementById("outCaption");
   const hashtagsCloud = document.getElementById("hashtagsCloud");
   const matchedCount = document.getElementById("matchedCount");
@@ -41,6 +64,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const outComment = document.getElementById("outComment");
   const btnPublish = document.getElementById("btnPublish");
   const publishResultBox = document.getElementById("publishResultBox");
+  const btnToggleAddMore = document.getElementById("btnToggleAddMore");
+  const selectAddMoreProd = document.getElementById("selectAddMoreProd");
+  const btnConfirmAddMore = document.getElementById("btnConfirmAddMore");
 
   // DOM Elements - Products Tab
   const productsGrid = document.getElementById("productsGrid");
@@ -223,19 +249,52 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ================= SAMPLE SCRIPT LOADER =================
-  const SAMPLE_SCRIPT = `Nhiều người hay có thói quen tắm muộn, rước bệnh vào người lúc nào không hay. Thứ nhất là rất dễ bị cảm lạnh, trúng gió sưng vù cả mặt.
-Thứ hai là máu huyết khó lưu thông, cực kỳ nguy hiểm cho tim mạch và huyết áp. Thứ ba là đêm lạnh làm co thắt mạch máu dễ gây đột quỵ.
-Tắm sau mười giờ đêm là cấm kỵ nha bà con. Đừng ỷ mình khỏe mà chủ quan. Thấy đúng thì thả tim và theo dõi kênh để xem mẹo hay nhé.`;
-
-  btnLoadSampleScript.addEventListener("click", () => {
-    scriptText.value = SAMPLE_SCRIPT;
-    nicheSelect.value = "Sức khỏe & Đời sống (Bán hàng Affiliate)";
-    showToast("Đã nạp kịch bản mẫu Tắm Đêm (30 giây)!");
-  });
+  // ================= AI SCRIPT GENERATOR (VĂN CAO STYLE) =================
+  if (btnGenRandomScript) {
+    btnGenRandomScript.addEventListener("click", async () => {
+      btnGenRandomScript.disabled = true;
+      btnGenRandomScript.textContent = "⏳ Đang sáng tạo kịch bản 30s mới...";
+      try {
+        const res = await fetch("/api/generate-script", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model_name: modelSelect?.value || "gemini-3.5-flash-lite"
+          })
+        });
+        const data = await res.json();
+        if (data.status === "success" && data.script) {
+          scriptText.value = data.script;
+          nicheSelect.value = "Sức khỏe & Đời sống (Bán hàng Affiliate)";
+          if (data.thumbnail_banner) {
+            if (thumbTextLine1 && data.thumbnail_banner.line1) thumbTextLine1.value = data.thumbnail_banner.line1;
+            if (thumbTextLine2 && data.thumbnail_banner.line2) thumbTextLine2.value = data.thumbnail_banner.line2;
+            renderThumbnailCanvas();
+          }
+          showToast("Gemini đã tạo xong 1 kịch bản sức khỏe 30s mới!");
+        } else {
+          throw new Error(data.detail || "Không tạo được kịch bản");
+        }
+      } catch (e) {
+        console.error("Lỗi sinh kịch bản:", e);
+        showToast("Lỗi khi sinh kịch bản: " + e.message, "error");
+      } finally {
+        btnGenRandomScript.disabled = false;
+        btnGenRandomScript.textContent = "🎲 AI Sinh Kịch Bản Sức Khỏe Mới (30s)";
+      }
+    });
+  }
 
   // ================= VIDEO UPLOAD & DRAG DROP =================
-  videoDropZone.addEventListener("click", () => videoFileInput.click());
+  if (dropPrompt) {
+    dropPrompt.addEventListener("click", () => videoFileInput.click());
+  }
+  if (videoPreviewBox) {
+    videoPreviewBox.addEventListener("click", (e) => e.stopPropagation());
+  }
+  if (thumbStudioCard) {
+    thumbStudioCard.addEventListener("click", (e) => e.stopPropagation());
+  }
 
   videoDropZone.addEventListener("dragover", (e) => {
     e.preventDefault();
@@ -268,6 +327,7 @@ Tắm sau mười giờ đêm là cấm kỵ nha bà con. Đừng ỷ mình kh�
 
     dropPrompt.style.display = "none";
     videoPreviewBox.style.display = "block";
+    if (thumbStudioCard) thumbStudioCard.style.display = "block";
     videoPreview.src = URL.createObjectURL(file);
     videoFileName.textContent = `${file.name} (${(file.size / (1024 * 1024)).toFixed(1)} MB)`;
 
@@ -292,11 +352,218 @@ Tắm sau mười giờ đêm là cấm kỵ nha bà con. Đừng ỷ mình kh�
   btnRemoveVideo.addEventListener("click", (e) => {
     e.stopPropagation();
     currentVideoPath = "";
+    currentThumbnailPath = "";
     videoPreview.src = "";
     videoFileInput.value = "";
     videoPreviewBox.style.display = "none";
+    if (thumbStudioCard) thumbStudioCard.style.display = "none";
     dropPrompt.style.display = "block";
   });
+
+  // ================= THUMBNAIL STUDIO & BANNER GENERATOR =================
+  function formatTime(seconds) {
+    if (isNaN(seconds) || seconds < 0) return "00:00.0";
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    const ms = Math.floor((seconds % 1) * 10);
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}.${ms}`;
+  }
+
+  function renderThumbnailCanvas() {
+    if (!thumbCanvas) return;
+    const ctx = thumbCanvas.getContext("2d");
+    const cw = thumbCanvas.width;
+    const ch = thumbCanvas.height;
+
+    ctx.clearRect(0, 0, cw, ch);
+
+    // 1. Draw video frame or stylish fallback
+    if (videoPreview && videoPreview.readyState >= 2 && videoPreview.videoWidth > 0) {
+      const vw = videoPreview.videoWidth;
+      const vh = videoPreview.videoHeight;
+      const vAspect = vw / vh;
+      const cAspect = cw / ch;
+      let sx = 0, sy = 0, sw = vw, sh = vh;
+      if (vAspect > cAspect) {
+        sw = vh * cAspect;
+        sx = (vw - sw) / 2;
+      } else {
+        sh = vw / cAspect;
+        sy = (vh - sh) / 2;
+      }
+      ctx.drawImage(videoPreview, sx, sy, sw, sh, 0, 0, cw, ch);
+    } else {
+      // Dark emerald gradient background
+      const grad = ctx.createLinearGradient(0, 0, 0, ch);
+      grad.addColorStop(0, "#064e3b");
+      grad.addColorStop(0.5, "#047857");
+      grad.addColorStop(1, "#022c22");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, cw, ch);
+    }
+
+    // 2. Options
+    const line1 = (thumbTextLine1?.value || "TÁC DỤNG CỦA CÂY BẦU").trim().toUpperCase();
+    const line2 = (thumbTextLine2?.value || "ĐỐI VỚI BỆNH TIỂU ĐƯỜNG").trim().toUpperCase();
+    const posYRatio = parseInt(thumbPosY?.value || 18) / 100;
+    const fontSize = parseInt(thumbFontSize?.value || 46);
+    const boxColor = thumbBoxColor?.value || "#dc2626";
+
+    if (valPosY) valPosY.textContent = `${thumbPosY.value}%`;
+    if (valFontSize) valFontSize.textContent = `${fontSize}px`;
+
+    // 3. Draw Red Box Banner
+    ctx.save();
+    ctx.font = `900 ${fontSize}px 'Montserrat', 'Oswald', 'Impact', Arial, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    const m1 = ctx.measureText(line1);
+    const m2 = ctx.measureText(line2);
+    const maxTextW = Math.max(m1.width, m2.width);
+    const boxW = Math.min(cw - 40, maxTextW + 70);
+    const lineGap = fontSize * 1.25;
+    const boxH = lineGap + fontSize + 36;
+    const boxX = (cw - boxW) / 2;
+    const boxY = ch * posYRatio;
+
+    // Soft drop shadow under the red box
+    ctx.shadowColor = "rgba(0, 0, 0, 0.65)";
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 6;
+
+    ctx.fillStyle = boxColor;
+    ctx.beginPath();
+    if (ctx.roundRect) {
+      ctx.roundRect(boxX, boxY, boxW, boxH, 14);
+    } else {
+      ctx.rect(boxX, boxY, boxW, boxH);
+    }
+    ctx.fill();
+    ctx.restore();
+
+    // 4. Draw Stroked Text
+    ctx.save();
+    ctx.font = `900 ${fontSize}px 'Montserrat', 'Oswald', 'Impact', Arial, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    const cX = cw / 2;
+    const textY1 = boxY + 22 + fontSize / 2;
+    const textY2 = textY1 + lineGap;
+    const strokeW = Math.max(4, Math.round(fontSize * 0.1));
+
+    // Line 1: Yellow
+    ctx.shadowColor = "rgba(0, 0, 0, 0.9)";
+    ctx.shadowBlur = 6;
+    ctx.shadowOffsetY = 3;
+    ctx.lineWidth = strokeW;
+    ctx.strokeStyle = "#000000";
+    ctx.strokeText(line1, cX, textY1);
+
+    ctx.fillStyle = "#fde047";
+    ctx.fillText(line1, cX, textY1);
+
+    // Line 2: White
+    ctx.lineWidth = strokeW;
+    ctx.strokeStyle = "#000000";
+    ctx.strokeText(line2, cX, textY2);
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillText(line2, cX, textY2);
+    ctx.restore();
+  }
+
+  // Hook Video Events to Thumbnail Canvas
+  videoPreview.addEventListener("loadedmetadata", () => {
+    if (thumbFrameScrubber) {
+      thumbFrameScrubber.max = videoPreview.duration || 30;
+      thumbFrameScrubber.value = Math.min(1.5, (videoPreview.duration || 30) / 2);
+    }
+    if (thumbTotalTimeText) {
+      thumbTotalTimeText.textContent = formatTime(videoPreview.duration || 30);
+    }
+    videoPreview.currentTime = Math.min(1.5, (videoPreview.duration || 30) / 2);
+  });
+
+  videoPreview.addEventListener("seeked", () => {
+    if (thumbCurrentTimeText) {
+      thumbCurrentTimeText.textContent = formatTime(videoPreview.currentTime);
+    }
+    renderThumbnailCanvas();
+  });
+
+  if (thumbFrameScrubber) {
+    thumbFrameScrubber.addEventListener("input", (e) => {
+      videoPreview.currentTime = parseFloat(e.target.value);
+    });
+  }
+
+  if (btnSnapCurrentFrame) {
+    btnSnapCurrentFrame.addEventListener("click", () => {
+      if (thumbFrameScrubber) thumbFrameScrubber.value = videoPreview.currentTime;
+      if (thumbCurrentTimeText) thumbCurrentTimeText.textContent = formatTime(videoPreview.currentTime);
+      renderThumbnailCanvas();
+      showToast("Đã chụp frame tại " + formatTime(videoPreview.currentTime));
+    });
+  }
+
+  // Reactive inputs for instant redraw
+  [thumbTextLine1, thumbTextLine2, thumbPosY, thumbFontSize, thumbBoxColor].forEach(el => {
+    if (el) {
+      el.addEventListener("input", renderThumbnailCanvas);
+      el.addEventListener("change", renderThumbnailCanvas);
+    }
+  });
+
+  // Action: Tải ảnh bìa PNG
+  if (btnDownloadThumb) {
+    btnDownloadThumb.addEventListener("click", () => {
+      if (!thumbCanvas) return;
+      thumbCanvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        const line1 = (thumbTextLine1?.value || "thumbnail").replace(/[^a-zA-Z0-9\s]/g, "").trim().replace(/\s+/g, "_").toLowerCase();
+        a.download = `bia_reels_${line1 || "meosongkhoe"}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast("Đã tải ảnh bìa PNG chuẩn nét, khử AI thành công!");
+      }, "image/png");
+    });
+  }
+
+  // Action: Gắn làm bìa cho video
+  if (btnApplyThumbAsCover) {
+    btnApplyThumbAsCover.addEventListener("click", async () => {
+      if (!thumbCanvas) return;
+      btnApplyThumbAsCover.disabled = true;
+      btnApplyThumbAsCover.innerHTML = "<span>⏳ Đang lưu bìa...</span>";
+      try {
+        const dataUrl = thumbCanvas.toDataURL("image/png");
+        const res = await fetch("/api/save-thumbnail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image_base64: dataUrl })
+        });
+        const d = await res.json();
+        if (d.status === "success") {
+          currentThumbnailPath = d.saved_path;
+          btnApplyThumbAsCover.classList.add("btn-success");
+          btnApplyThumbAsCover.innerHTML = "<span>✅ Đã Gắn Bìa Cho Video</span>";
+          showToast("Đã gắn ảnh bìa này vào tiến trình đăng Facebook Reels!");
+        } else {
+          throw new Error(d.detail || "Không thể lưu");
+        }
+      } catch (err) {
+        showToast("Lỗi lưu ảnh bìa: " + err.message, "error");
+        btnApplyThumbAsCover.disabled = false;
+        btnApplyThumbAsCover.innerHTML = "<span>✨ Gắn Bìa Này Cho Video</span>";
+      }
+    });
+  }
 
   // ================= GEMINI AI ANALYSIS =================
   btnAnalyze.addEventListener("click", async () => {
@@ -340,6 +607,63 @@ Tắm sau mười giờ đêm là cấm kỵ nha bà con. Đừng ỷ mình kh�
       outCaption.value = aiData.reels_caption || "";
       outComment.value = aiData.pinned_comment || "";
 
+      // Render 4 Tiêu Đề Kích View (Click để đổi ngay)
+      if (viralTitlesBox && viralTitlesList) {
+        viralTitlesList.innerHTML = "";
+        const titles = aiData.viral_video_titles || [];
+        if (titles.length > 0) {
+          viralTitlesBox.style.display = "block";
+          titles.forEach((t, idx) => {
+            const div = document.createElement("div");
+            div.className = `viral-title-item ${idx === 0 ? "active" : ""}`;
+            div.innerHTML = `
+              <span class="viral-tag-badge">${t.tag || "🔥 Gợi ý"}</span>
+              <span class="viral-title-text">${t.title}</span>
+            `;
+            div.addEventListener("click", () => {
+              document.querySelectorAll(".viral-title-item").forEach(el => el.classList.remove("active"));
+              div.classList.add("active");
+              outTitle.value = t.title;
+              showToast(`Đã đổi sang: ${t.tag}`);
+            });
+            viralTitlesList.appendChild(div);
+          });
+        } else {
+          viralTitlesBox.style.display = "none";
+        }
+      }
+
+      // Render Tên File Video Chuẩn SEO Meta
+      if (seoFilenameBox && seoFilenameText) {
+        if (aiData.seo_video_filename) {
+          seoFilenameBox.style.display = "flex";
+          seoFilenameText.textContent = aiData.seo_video_filename;
+        } else {
+          seoFilenameBox.style.display = "none";
+        }
+      }
+
+      // Populate Thumbnail Banner from AI Hook/Script
+      if (aiData.thumbnail_banner) {
+        if (thumbTextLine1 && aiData.thumbnail_banner.line1) thumbTextLine1.value = aiData.thumbnail_banner.line1;
+        if (thumbTextLine2 && aiData.thumbnail_banner.line2) thumbTextLine2.value = aiData.thumbnail_banner.line2;
+        renderThumbnailCanvas();
+      } else if (aiData.hook_title) {
+        // Fallback: smart split hook_title into 2 lines
+        const clean = aiData.hook_title.replace(/[🚨⚠️💡📌]/g, "").trim();
+        const parts = clean.split(/[:\-\–]/);
+        if (parts.length >= 2) {
+          if (thumbTextLine1) thumbTextLine1.value = parts[0].trim().toUpperCase();
+          if (thumbTextLine2) thumbTextLine2.value = parts[1].trim().toUpperCase();
+        } else {
+          const words = clean.split(/\s+/);
+          const mid = Math.ceil(words.length / 2);
+          if (thumbTextLine1) thumbTextLine1.value = words.slice(0, mid).join(" ").toUpperCase();
+          if (thumbTextLine2) thumbTextLine2.value = words.slice(mid).join(" ").toUpperCase();
+        }
+        renderThumbnailCanvas();
+      }
+
       // Render Hashtags
       hashtagsCloud.innerHTML = "";
       (aiData.hashtags || []).forEach(tag => {
@@ -349,44 +673,10 @@ Tắm sau mười giờ đêm là cấm kỵ nha bà con. Đừng ỷ mình kh�
         hashtagsCloud.appendChild(span);
       });
 
-      // Render Matched Products
-      matchedProductsList.innerHTML = "";
-      const selectedIds = aiData.selected_product_ids || [];
-      matchedCount.textContent = `${selectedIds.length} món phù hợp`;
+      // Render Matched Products & AI 5 Recommendations
+      renderStudioProducts();
 
-      const matchedProds = currentProducts.filter(p => selectedIds.includes(p.id));
-      if (matchedProds.length > 0) {
-        matchedProds.forEach(p => {
-          const item = document.createElement("div");
-          item.className = "matched-item";
-          item.innerHTML = `
-            <div>
-              <div class="matched-item-title">🛒 ${p.name}</div>
-              <a href="${p.affiliate_url}" target="_blank" class="matched-item-link">${p.affiliate_url}</a>
-            </div>
-            <span class="badge" style="color:var(--accent-emerald); font-size:0.75rem;">${p.category}</span>
-          `;
-          matchedProductsList.appendChild(item);
-        });
-      } else {
-        matchedProductsList.innerHTML = `<p style="font-size:0.85rem; color:var(--text-muted)">Không có sản phẩm nào trong kho khớp 100%.</p>`;
-      }
-
-      // Render Missing Recommendations
-      const missing = aiData.missing_recommendations || [];
-      if (missing.length > 0) {
-        missingBox.style.display = "block";
-        missingList.innerHTML = missing.map(m => `
-          <div style="margin-bottom:6px;">
-            <b>• ${m.product_name}</b>: ${m.reason} 
-            <i>(Từ khóa tìm trên Shopee: "<u>${m.search_keyword}</u>")</i>
-          </div>
-        `).join("");
-      } else {
-        missingBox.style.display = "none";
-      }
-
-      showToast("Gemini Flash đã hoàn tất phân tích và ghép 5 link Shopee!");
+      showToast("Gemini Flash đã hoàn tất phân tích và chuẩn bị link Shopee!");
       publishResultBox.style.display = "none";
 
     } catch (e) {
@@ -398,6 +688,305 @@ Tắm sau mười giờ đêm là cấm kỵ nha bà con. Đừng ỷ mình kh�
       btnAnalyze.innerHTML = `<span class="btn-icon">⚡</span><span>Gemini Flash: Phân Tích & Khớp 5 Link Shopee</span>`;
     }
   });
+
+  // ================= STUDIO PRODUCTS MANAGEMENT (INLINE EDIT & AI RECOMMENDATIONS) =================
+  function renderStudioProducts() {
+    if (!lastAnalysisResult) return;
+    const selectedIds = lastAnalysisResult.selected_product_ids || [];
+    const matchedProds = currentProducts.filter(p => selectedIds.includes(p.id));
+    matchedCount.textContent = `${matchedProds.length} món đã chọn`;
+
+    // 1. Render Matched Products
+    matchedProductsList.innerHTML = "";
+    if (matchedProds.length > 0) {
+      matchedProds.forEach(p => {
+        const item = document.createElement("div");
+        item.className = "matched-item";
+        item.innerHTML = `
+          <div class="matched-item-header">
+            <div class="matched-item-title-wrap">
+              <span class="matched-item-title">🛒 ${p.name}</span>
+              <span class="matched-item-badge">${p.category || 'Sức khỏe'}</span>
+            </div>
+            <button type="button" class="btn-remove-matched" data-id="${p.id}" title="Bỏ sản phẩm này khỏi video hiện tại">✖ Bỏ khỏi video</button>
+          </div>
+          <div class="matched-item-hint">🔗 Link Affiliate Shopee (Sửa trực tiếp bên dưới để lưu vào kho & bình luận):</div>
+          <div class="matched-item-edit-row">
+            <input type="text" class="form-control form-control-sm matched-aff-input" id="aff_input_${p.id}" value="${p.affiliate_url || ''}" placeholder="https://s.shopee.vn/...">
+            <button type="button" class="btn-xs btn-success btn-save-matched-aff" data-id="${p.id}">💾 Lưu Kho & Comment</button>
+            <a href="${p.affiliate_url || '#'}" target="_blank" class="btn-xs btn-secondary matched-test-link" id="test_link_${p.id}">↗ Mở Thử</a>
+          </div>
+          <div class="matched-item-status" id="status_${p.id}" style="display:none; font-size:0.75rem; color:#34d399; margin-top:2px;"></div>
+        `;
+        matchedProductsList.appendChild(item);
+      });
+
+      // Event listener: Lưu link đã sửa trực tiếp vào kho & bình luận
+      matchedProductsList.querySelectorAll(".btn-save-matched-aff").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const prodId = btn.getAttribute("data-id");
+          const prod = currentProducts.find(p => p.id === prodId);
+          if (!prod) return;
+          const inputEl = document.getElementById(`aff_input_${prodId}`);
+          const statusEl = document.getElementById(`status_${prodId}`);
+          const testLinkEl = document.getElementById(`test_link_${prodId}`);
+          const newUrl = inputEl ? inputEl.value.trim() : "";
+          if (!newUrl) {
+            showToast("Vui lòng nhập link Shopee Affiliate hợp lệ!", "error");
+            return;
+          }
+
+          const oldUrl = prod.affiliate_url;
+          btn.disabled = true;
+          btn.textContent = "⏳ Đang lưu...";
+
+          try {
+            const payload = {
+              name: prod.name,
+              affiliate_url: newUrl,
+              category: prod.category,
+              keywords: prod.keywords || [],
+              notes: prod.notes || ""
+            };
+            const res = await fetch(`/api/products/${prodId}`, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data.status === "success") {
+              prod.affiliate_url = newUrl;
+              if (testLinkEl) testLinkEl.href = newUrl;
+              
+              // Đồng bộ cập nhật link trong ô Bình Luận Ghim (outComment)
+              if (outComment && outComment.value) {
+                if (oldUrl && outComment.value.includes(oldUrl)) {
+                  outComment.value = outComment.value.replaceAll(oldUrl, newUrl);
+                } else if (outComment.value.includes(prod.name)) {
+                  const lines = outComment.value.split("\n");
+                  const updatedLines = lines.map(line => {
+                    if (line.includes(prod.name)) {
+                      return `👉 ${prod.name}: ${newUrl}`;
+                    }
+                    return line;
+                  });
+                  outComment.value = updatedLines.join("\n");
+                } else {
+                  outComment.value = outComment.value.trim() + `\n👉 ${prod.name}: ${newUrl}\n`;
+                }
+              }
+
+              if (statusEl) {
+                statusEl.style.display = "block";
+                statusEl.textContent = `✅ Đã lưu vào kho và đồng bộ vào bình luận ghim!`;
+              }
+              showToast(`Đã cập nhật link Affiliate cho "${prod.name}" vào kho!`);
+              renderProductsGrid(); // Cập nhật Tab 2
+            } else {
+              throw new Error(data.detail || "Không thể cập nhật");
+            }
+          } catch (err) {
+            showToast("Lỗi lưu link: " + err.message, "error");
+          } finally {
+            btn.disabled = false;
+            btn.textContent = "💾 Lưu Kho & Comment";
+          }
+        });
+      });
+
+      // Event listener: Bỏ chọn sản phẩm khỏi video
+      matchedProductsList.querySelectorAll(".btn-remove-matched").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const prodId = btn.getAttribute("data-id");
+          const prod = currentProducts.find(p => p.id === prodId);
+          lastAnalysisResult.selected_product_ids = lastAnalysisResult.selected_product_ids.filter(id => id !== prodId);
+          
+          // Xóa dòng liên quan khỏi comment nếu có
+          if (prod && outComment && outComment.value) {
+            const lines = outComment.value.split("\n");
+            const filteredLines = lines.filter(l => !(l.includes(prod.name) || (prod.affiliate_url && l.includes(prod.affiliate_url))));
+            outComment.value = filteredLines.join("\n");
+          }
+          renderStudioProducts();
+          showToast(`Đã bỏ "${prod ? prod.name : 'sản phẩm'}" khỏi video này (vẫn giữ nguyên trong kho).`);
+        });
+      });
+
+    } else {
+      matchedProductsList.innerHTML = `<p style="font-size:0.85rem; color:var(--text-muted); padding: 8px 0;">Chưa có sản phẩm nào trong kho được chọn cho video này.</p>`;
+    }
+
+    // 2. Render Missing Recommendations (AI Gợi Ý 3-5 Sản Phẩm Bán Chạy)
+    const missing = lastAnalysisResult.missing_recommendations || [];
+    if (missing.length > 0) {
+      missingBox.style.display = "block";
+      missingList.innerHTML = "";
+      missing.forEach((m, idx) => {
+        const item = document.createElement("div");
+        item.className = "suggested-item";
+        item.innerHTML = `
+          <div class="suggested-item-header">
+            <span class="suggested-name">📦 ${m.product_name}</span>
+            <span class="suggested-cat-badge">${m.category || 'Gợi ý bán chạy'}</span>
+          </div>
+          <div class="suggested-reason">🎯 <b>Nhu cầu khán giả:</b> ${m.reason}</div>
+          <div class="suggested-meta-row">
+            <span class="suggested-keyword">🔍 Từ khóa Shopee: <b>"${m.search_keyword}"</b></span>
+            <a href="https://shopee.vn/search?keyword=${encodeURIComponent(m.search_keyword)}" target="_blank" class="btn-xs btn-secondary">
+              <span>🔍 Mở Shopee Tìm Sản Phẩm Này ↗</span>
+            </a>
+          </div>
+          <div class="suggested-action-row">
+            <input type="text" class="suggested-url-input" id="sug_url_${idx}" placeholder="Dán link Shopee Affiliate của bạn vào đây (https://s.shopee.vn/... hoặc https://shope.ee/...)">
+            <button type="button" class="btn-save-suggested" data-idx="${idx}">
+              <span>💾 Lưu Vào Kho & Ghép Link</span>
+            </button>
+          </div>
+        `;
+        missingList.appendChild(item);
+      });
+
+      // Handlers cho nút Lưu sản phẩm gợi ý vào kho
+      missingList.querySelectorAll(".btn-save-suggested").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const idx = parseInt(btn.getAttribute("data-idx"));
+          const m = missing[idx];
+          if (!m) return;
+
+          const inputEl = document.getElementById(`sug_url_${idx}`);
+          const affUrl = inputEl ? inputEl.value.trim() : "";
+          if (!affUrl) {
+            showToast("Vui lòng dán link Shopee Affiliate của bạn trước khi bấm lưu!", "error");
+            if (inputEl) inputEl.focus();
+            return;
+          }
+
+          btn.disabled = true;
+          btn.innerHTML = "<span>⏳ Đang lưu kho...</span>";
+
+          try {
+            const payload = {
+              name: m.product_name,
+              affiliate_url: affUrl,
+              category: m.category || "Gợi ý kịch bản",
+              keywords: [m.search_keyword].filter(Boolean),
+              notes: `Gợi ý theo kịch bản: ${m.reason}`
+            };
+
+            const res = await fetch("/api/products", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (data.status === "success" && data.product) {
+              const newProd = data.product;
+              // Thêm vào currentProducts
+              currentProducts.unshift(newProd);
+              prodCountBadge.textContent = currentProducts.length;
+
+              // Thêm vào selected_product_ids
+              if (!lastAnalysisResult.selected_product_ids) lastAnalysisResult.selected_product_ids = [];
+              lastAnalysisResult.selected_product_ids.push(newProd.id);
+
+              // Xóa mục này khỏi danh sách gợi ý
+              lastAnalysisResult.missing_recommendations.splice(idx, 1);
+
+              // Bổ sung vào Bình luận ghim (outComment)
+              if (outComment) {
+                const newLine = `👉 ${newProd.name}: ${affUrl}`;
+                const commentVal = outComment.value.trim();
+                if (commentVal.includes("Chúc bà con") || commentVal.includes("Bà con cần") || commentVal.includes("Lưu lại")) {
+                  const parts = commentVal.split("\n\n");
+                  if (parts.length >= 2) {
+                    parts.splice(parts.length - 1, 0, newLine);
+                    outComment.value = parts.join("\n\n");
+                  } else {
+                    outComment.value = commentVal + "\n" + newLine;
+                  }
+                } else {
+                  outComment.value = commentVal ? commentVal + "\n" + newLine : newLine;
+                }
+              }
+
+              // Render lại Studio & Kho Tab 2
+              renderStudioProducts();
+              renderProductsGrid();
+
+              showToast(`Đã lưu "${newProd.name}" vào kho vĩnh viễn và chèn vào bình luận ghim!`);
+            } else {
+              throw new Error(data.detail || "Không thể lưu sản phẩm");
+            }
+          } catch (err) {
+            console.error("Lỗi lưu gợi ý:", err);
+            showToast("Lỗi lưu sản phẩm: " + err.message, "error");
+            btn.disabled = false;
+            btn.innerHTML = "<span>💾 Lưu Vào Kho & Ghép Link</span>";
+          }
+        });
+      });
+
+    } else {
+      missingBox.style.display = "none";
+    }
+
+    // Cập nhật dropdown chọn thêm sản phẩm khác trong kho
+    updateAddMoreDropdown();
+  }
+
+  function updateAddMoreDropdown() {
+    if (!selectAddMoreProd) return;
+    const selectedIds = lastAnalysisResult?.selected_product_ids || [];
+    const available = currentProducts.filter(p => !selectedIds.includes(p.id));
+    
+    selectAddMoreProd.innerHTML = `<option value="">-- Chọn sản phẩm khác từ kho (${available.length} món) --</option>`;
+    available.forEach(p => {
+      const opt = document.createElement("option");
+      opt.value = p.id;
+      opt.textContent = `[${p.category || 'Khác'}] ${p.name}`;
+      selectAddMoreProd.appendChild(opt);
+    });
+  }
+
+  // Toggle & Confirm Thêm sản phẩm từ kho vào video
+  if (btnToggleAddMore) {
+    btnToggleAddMore.addEventListener("click", () => {
+      const isHidden = selectAddMoreProd.style.display === "none";
+      selectAddMoreProd.style.display = isHidden ? "inline-block" : "none";
+      btnConfirmAddMore.style.display = isHidden ? "inline-block" : "none";
+      btnToggleAddMore.textContent = isHidden ? "✖ Đóng Lại" : "➕ Chọn Thêm Sản Phẩm Khác Trong Kho";
+      if (isHidden) updateAddMoreDropdown();
+    });
+  }
+
+  if (btnConfirmAddMore) {
+    btnConfirmAddMore.addEventListener("click", () => {
+      const prodId = selectAddMoreProd.value;
+      if (!prodId) {
+        showToast("Vui lòng chọn 1 sản phẩm từ danh sách!", "error");
+        return;
+      }
+      const prod = currentProducts.find(p => p.id === prodId);
+      if (!prod) return;
+
+      if (!lastAnalysisResult) lastAnalysisResult = { selected_product_ids: [] };
+      if (!lastAnalysisResult.selected_product_ids) lastAnalysisResult.selected_product_ids = [];
+      
+      if (!lastAnalysisResult.selected_product_ids.includes(prodId)) {
+        lastAnalysisResult.selected_product_ids.push(prodId);
+        
+        // Bổ sung vào comment
+        if (outComment) {
+          const newLine = `👉 ${prod.name}: ${prod.affiliate_url}`;
+          outComment.value = outComment.value.trim() ? outComment.value.trim() + "\n" + newLine : newLine;
+        }
+
+        renderStudioProducts();
+        showToast(`Đã ghép "${prod.name}" vào video!`);
+      }
+    });
+  }
 
   // ================= COPY BUTTONS =================
   document.querySelectorAll(".btn-copy").forEach(btn => {
@@ -433,6 +1022,7 @@ Tắm sau mười giờ đêm là cấm kỵ nha bà con. Đừng ỷ mình kh�
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           video_path: currentVideoPath || "",
+          thumbnail_path: currentThumbnailPath || "",
           title: title,
           caption: caption,
           hashtags: hashtags,
@@ -578,6 +1168,16 @@ Tắm sau mười giờ đêm là cấm kỵ nha bà con. Đừng ỷ mình kh�
       showToast("Lỗi lưu cấu hình", "error");
     }
   });
+
+  // Copy SEO Filename
+  if (btnCopyFilename) {
+    btnCopyFilename.addEventListener("click", () => {
+      if (seoFilenameText) {
+        navigator.clipboard.writeText(seoFilenameText.textContent.trim());
+        showToast("Đã sao chép tên file chuẩn SEO!");
+      }
+    });
+  }
 
   // Khởi động
   loadConfig();

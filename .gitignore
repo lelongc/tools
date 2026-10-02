@@ -6,7 +6,7 @@ sub-video/config.js
 short/.env
 other/fb_video_affiliate/config.json
 other/fb_video_affiliate/.env
-other/fb_video_affiliate/data/
+other/fb_video_affiliate/data/history.json
 other/fb_video_affiliate/uploads/
 
 # Python Virtual Environments & Packages

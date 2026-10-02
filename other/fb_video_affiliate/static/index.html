@@ -6,7 +6,7 @@
   <title>FB Reels & Shopee Affiliate Automation Hub | Gemini 3.5 Flash-Lite</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@800;900&family=Oswald:wght@700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -105,11 +105,94 @@
               </div>
             </div>
 
+            <!-- TRÌNH TẠO ẢNH BÌA THUMBNAIL REELS CHUẨN VĂN CAO -->
+            <div class="thumb-studio-card" id="thumbStudioCard" style="display: none;">
+              <div class="thumb-header">
+                <div class="thumb-title">
+                  <span class="thumb-badge-icon">🖼️</span>
+                  <div>
+                    <h3>Tạo Bìa Video (Thumbnail) Kích View</h3>
+                    <small>Chọn frame bất kỳ trong video + ghép hộp đỏ chữ vàng/trắng triệu view</small>
+                  </div>
+                </div>
+                <span class="tag-hint">Auto Khử AI</span>
+              </div>
+
+              <div class="thumb-editor-grid">
+                <!-- Cột Canvas Preview (Tỉ lệ đứng 9:16) -->
+                <div class="thumb-canvas-wrapper">
+                  <div class="canvas-aspect-box">
+                    <canvas id="thumbCanvas" width="720" height="1280"></canvas>
+                  </div>
+                  <div class="thumb-time-display">
+                    <span>⏱️ Frame: <b id="thumbCurrentTimeText">00:00.0</b> / <span id="thumbTotalTimeText">--:--</span></span>
+                  </div>
+                </div>
+
+                <!-- Cột Tùy Chỉnh -->
+                <div class="thumb-controls">
+                  <!-- Tua chọn frame trong video -->
+                  <div class="form-group-sm">
+                    <label for="thumbFrameScrubber">🎞️ Kéo tua chọn frame đẹp nhất:</label>
+                    <div class="scrubber-row">
+                      <input type="range" id="thumbFrameScrubber" min="0" max="100" step="0.05" value="0" class="custom-slider">
+                      <button type="button" class="btn-xs btn-secondary" id="btnSnapCurrentFrame" title="Lấy frame video tại điểm đang tạm dừng">📸 Bắt Điểm</button>
+                    </div>
+                  </div>
+
+                  <!-- Dòng 1: Chữ Vàng -->
+                  <div class="form-group-sm">
+                    <label for="thumbTextLine1">🟡 Dòng 1 (Chữ Vàng - Tên cây / Thói quen):</label>
+                    <input type="text" id="thumbTextLine1" class="form-control form-control-sm font-bold text-yellow" placeholder="TÁC DỤNG CỦA CÂY BẦU">
+                  </div>
+
+                  <!-- Dòng 2: Chữ Trắng -->
+                  <div class="form-group-sm">
+                    <label for="thumbTextLine2">⚪ Dòng 2 (Chữ Trắng - Căn bệnh / Nguy cơ):</label>
+                    <input type="text" id="thumbTextLine2" class="form-control form-control-sm font-bold text-white" placeholder="ĐỐI VỚI BỆNH TIỂU ĐƯỜNG">
+                  </div>
+
+                  <!-- Vị trí & Cỡ chữ -->
+                  <div class="control-row-duo">
+                    <div class="form-group-sm">
+                      <label for="thumbPosY">↕️ Vị trí hộp chữ: <span id="valPosY">18%</span></label>
+                      <input type="range" id="thumbPosY" min="10" max="75" value="18" class="custom-slider">
+                    </div>
+                    <div class="form-group-sm">
+                      <label for="thumbFontSize">🔤 Cỡ chữ: <span id="valFontSize">46px</span></label>
+                      <input type="range" id="thumbFontSize" min="28" max="64" value="46" class="custom-slider">
+                    </div>
+                  </div>
+
+                  <!-- Màu Hộp -->
+                  <div class="form-group-sm">
+                    <label for="thumbBoxColor">🎨 Màu hộp chữ:</label>
+                    <select id="thumbBoxColor" class="form-control form-control-sm">
+                      <option value="#dc2626" selected>🔴 Đỏ Rực Nổi Bật</option>
+                      <option value="#991b1b">🔴 Đỏ Đô Thảo Dược</option>
+                      <option value="#15803d">🟢 Xanh Lá Sống Khỏe</option>
+                      <option value="#18181b">⚫ Đen Sang Trọng</option>
+                    </select>
+                  </div>
+
+                  <!-- Nút Tải & Gắn Bìa -->
+                  <div class="thumb-action-buttons">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btnDownloadThumb">
+                      <span>📥 Tải Ảnh Bìa PNG (Khử Sạch AI)</span>
+                    </button>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnApplyThumbAsCover">
+                      <span>✨ Đã Lưu Làm Bìa Video</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Nhập Kịch Bản -->
             <div class="form-group">
               <div class="label-with-action">
                 <label for="scriptText">Kịch Bản Thoại Video (Script):</label>
-                <button type="button" class="btn-link" id="btnLoadSampleScript">⚡ Nạp Kịch Bản Mẫu Tắm Đêm (30s)</button>
+                <button type="button" class="btn-link" id="btnGenRandomScript">🎲 AI Sinh Kịch Bản Sức Khỏe Mới (30s)</button>
               </div>
               <textarea id="scriptText" class="form-control" rows="6" placeholder="Dán kịch bản thoại video vào đây...
 Ví dụ:
@@ -140,12 +223,28 @@ Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
 
             <div class="result-content" id="resultContent" style="display: none;">
               
-              <!-- Tiêu đề giật tít -->
+              <!-- Tiêu đề & Tên Video Kích View (SEO & Hook Triệu View) -->
               <div class="form-group">
-                <label for="outTitle">🚨 Tiêu Đề Facebook Reels (Hook Giữ Chân 3s Đầu):</label>
+                <div class="label-with-action">
+                  <label for="outTitle">🔥 Tên Video / Tiêu Đề Reels Kích View (Chọn 1 trong các mẫu gợi ý):</label>
+                  <button type="button" class="btn-copy" data-target="outTitle">📋 Sao chép</button>
+                </div>
                 <div class="input-with-copy">
-                  <input type="text" id="outTitle" class="form-control">
+                  <input type="text" id="outTitle" class="form-control font-bold" placeholder="Tiêu đề kích view...">
                   <button type="button" class="btn-copy" data-target="outTitle">📋</button>
+                </div>
+                
+                <!-- Các phương án Tiêu Đề Kích View (Click để đổi ngay) -->
+                <div class="viral-titles-box" id="viralTitlesBox" style="display: none;">
+                  <div class="viral-titles-label">💡 Gợi ý tiêu đề giật tít ăn đề xuất (Bấm để đổi ngay):</div>
+                  <div class="viral-titles-list" id="viralTitlesList"></div>
+                </div>
+
+                <!-- Tên File Video Chuẩn SEO Meta -->
+                <div class="seo-filename-row" id="seoFilenameBox" style="display: none;">
+                  <span class="seo-badge">📁 Tên file MP4 chuẩn SEO:</span>
+                  <code id="seoFilenameText">meo-song-khoe-video.mp4</code>
+                  <button type="button" class="btn-xs btn-secondary" id="btnCopyFilename">📋 Copy Tên File</button>
                 </div>
               </div>
 
@@ -167,12 +266,28 @@ Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
                   <span class="badge count-badge" id="matchedCount">0 món</span>
                 </div>
                 <div class="matched-products-list" id="matchedProductsList"></div>
+                <!-- Thanh công cụ ghép thêm sản phẩm trong kho -->
+                <div class="matched-toolbar" style="margin-top: 8px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                  <button type="button" class="btn-xs btn-secondary" id="btnToggleAddMore">➕ Chọn Thêm Sản Phẩm Khác Trong Kho</button>
+                  <select id="selectAddMoreProd" class="form-control form-control-sm" style="flex: 1; min-width: 200px; display: none;">
+                    <option value="">-- Chọn sản phẩm từ kho --</option>
+                  </select>
+                  <button type="button" class="btn-xs btn-primary" id="btnConfirmAddMore" style="display: none;">Ghép Vào Video</button>
+                </div>
               </div>
 
-              <!-- Đề xuất bổ sung nếu kho chưa có -->
-              <div class="alert-box warning" id="missingBox" style="display: none;">
-                <h4>💡 Gợi ý bổ sung sản phẩm mới vào kho:</h4>
-                <div id="missingList"></div>
+              <!-- AI Gợi ý sản phẩm chưa có trong kho -->
+              <div class="suggested-products-box" id="missingBox" style="display: none;">
+                <div class="suggested-header">
+                  <div class="suggested-title">
+                    <span class="suggested-icon">💡</span>
+                    <div>
+                      <h4>AI Gợi Ý 3-5 Sản Phẩm Bán Chạy Khớp Kịch Bản:</h4>
+                      <small>Dán link Shopee Affiliate của bạn vào ➔ Bấm <b>"Lưu Vào Kho & Ghép Link"</b> để lưu vĩnh viễn và tự động chèn vào comment!</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="suggested-products-list" id="missingList"></div>
               </div>
 
               <!-- Bình luận ghim Shopee -->

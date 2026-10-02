@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from gemini_service import analyze_and_match
+from gemini_service import analyze_and_match, generate_new_script
 from fb_service import FacebookReelsPublisher
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -62,6 +62,10 @@ class AnalyzeRequest(BaseModel):
     model_name: Optional[str] = None
     video_filename: Optional[str] = ""
 
+class GenerateScriptRequest(BaseModel):
+    topic: Optional[str] = ""
+    model_name: Optional[str] = None
+
 class ProductItem(BaseModel):
     id: Optional[str] = None
     name: str
@@ -72,6 +76,7 @@ class ProductItem(BaseModel):
 
 class PublishRequest(BaseModel):
     video_path: Optional[str] = ""
+    thumbnail_path: Optional[str] = ""
     title: str
     caption: str
     hashtags: List[str]
@@ -182,6 +187,27 @@ async def upload_video(file: UploadFile = File(...)):
         "size_bytes": len(content)
     }
 
+@app.post("/api/generate-script")
+def api_generate_script(req: GenerateScriptRequest):
+    cfg = load_json(CONFIG_FILE, {})
+    api_key = cfg.get("gemini_api_key", "").strip()
+    if not api_key:
+        raise HTTPException(status_code=400, detail="Chưa cấu hình Gemini API Key!")
+    model_name = req.model_name or cfg.get("default_model", "gemini-3.5-flash-lite")
+    try:
+        res = generate_new_script(api_key=api_key, model_name=model_name, topic=req.topic or "")
+        if isinstance(res, dict):
+            return {
+                "status": "success",
+                "script": res.get("script", ""),
+                "topic": res.get("topic", ""),
+                "thumbnail_banner": res.get("thumbnail_banner", {})
+            }
+        return {"status": "success", "script": res}
+    except Exception as e:
+        logger.error(f"Generate script error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/analyze")
 def analyze_script(req: AnalyzeRequest):
     cfg = load_json(CONFIG_FILE, {})
@@ -262,9 +288,42 @@ def publish_post(req: PublishRequest):
 def get_history():
     return load_json(HISTORY_FILE, [])
 
-# Static files for Frontend
+SAMPLE_SCRIPTS_FILE = DATA_DIR / "sample_scripts.json"
+
+@app.get("/api/sample-scripts")
+def get_sample_scripts():
+    return load_json(SAMPLE_SCRIPTS_FILE, [])
+
+class SaveThumbnailRequest(BaseModel):
+    image_base64: str
+    video_filename: Optional[str] = "thumbnail"
+
+@app.post("/api/save-thumbnail")
+def save_thumbnail(req: SaveThumbnailRequest):
+    import base64
+    data = req.image_base64
+    if "," in data:
+        data = data.split(",", 1)[1]
+    raw = base64.b64decode(data)
+    filename = f"thumb_{int(time.time())}.png"
+    target = UPLOAD_DIR / filename
+    with open(target, "wb") as f:
+        f.write(raw)
+    return {
+        "status": "success",
+        "filename": filename,
+        "saved_path": str(target),
+        "url": f"/uploads/{filename}"
+    }
+
+# Static & Asset files for Frontend
 STATIC_DIR = BASE_DIR / "static"
+ASSETS_DIR = BASE_DIR / "assets"
 STATIC_DIR.mkdir(parents=True, exist_ok=True)
+ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+
+app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
+app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 app.mount("/", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
 
 if __name__ == "__main__":

@@ -4,8 +4,10 @@ config.json
 *.env
 
 # Local database & uploaded videos
-data/
 uploads/
+data/history.json
+# Giữ lại kho sản phẩm để lưu trữ trong Git Repo:
+# data/
 
 # Python cache & logs
 __pycache__/
