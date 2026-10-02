@@ -282,7 +282,7 @@ def publish_post(req: PublishRequest):
 
     except Exception as e:
         logger.error(f"Publish error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/api/history")
 def get_history():

@@ -1054,6 +1054,13 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) {
       console.error("Lỗi đăng bài:", e);
       showToast(`Lỗi: ${e.message}`, "error");
+      publishResultBox.style.display = "block";
+      publishResultBox.innerHTML = `
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); padding: 14px 16px; border-radius: 8px; color: #fca5a5;">
+          <h4 style="color: #f87171; margin-bottom: 6px;">❌ Đăng Lên Facebook Thất Bại</h4>
+          <p style="font-size: 0.88rem; line-height: 1.5; margin: 0;">${e.message}</p>
+        </div>
+      `;
     } finally {
       btnPublish.disabled = false;
       btnPublish.innerHTML = `<span>🚀 ĐĂNG LÊN FACEBOOK REELS & GHIM LINK SHOPEE</span>`;
