@@ -1,0 +1,15 @@
+# Local sensitive configs - TUYỆT ĐỐI KHÔNG ĐƯA LÊN GITHUB
+config.json
+.env
+*.env
+
+# Local database & uploaded videos
+data/
+uploads/
+
+# Python cache & logs
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log

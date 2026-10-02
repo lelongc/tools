@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FB Reels & Shopee Affiliate Automation Hub | Gemini 3.5 Flash-Lite</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar / Top Navigation -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">⚡</div>
+        <div class="brand-text">
+          <h1>ReelsAffiliate <span>AI Hub</span></h1>
+          <p class="subtitle">Đăng Reels Facebook Tự Động & Bán Hàng Shopee Affiliate</p>
+        </div>
+      </div>
+      <div class="header-status">
+        <div class="badge model-badge">
+          <span class="status-dot green"></span>
+          <span id="currentModelBadge">Gemini 3.5 Flash-Lite</span>
+        </div>
+        <div class="badge mode-badge" id="fbStatusBadge">
+          <span class="status-dot yellow"></span>
+          <span id="fbModeText">Mô Phỏng (Test)</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="studio">
+        <span class="tab-icon">🎬</span>
+        <span>Studio Tạo Bài Đăng</span>
+      </button>
+      <button class="tab-btn" data-tab="products">
+        <span class="tab-icon">🛒</span>
+        <span>Kho Link Shopee (<span id="prodCountBadge">0</span>)</span>
+      </button>
+      <button class="tab-btn" data-tab="history">
+        <span class="tab-icon">📜</span>
+        <span>Kho Kịch Bản & Lịch Sử</span>
+      </button>
+      <button class="tab-btn" data-tab="settings">
+        <span class="tab-icon">⚙️</span>
+        <span>Cài Đặt API & Page</span>
+      </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="tab-content-wrapper">
+      
+      <!-- ================= TAB 1: STUDIO ================= -->
+      <section id="tab-studio" class="tab-pane active">
+        <div class="studio-grid">
+          
+          <!-- Cột Trái: Nhập Liệu -->
+          <div class="panel input-panel">
+            <div class="panel-header">
+              <h2>1. Đầu Vào Video & Kịch Bản</h2>
+              <span class="tag-hint">Nộp kịch bản -> AI tự xử lý</span>
+            </div>
+
+            <!-- Chọn Ngách Kênh -->
+            <div class="form-group">
+              <label for="nicheSelect">Kênh & Ngách Nội Dung:</label>
+              <select id="nicheSelect" class="form-control">
+                <option value="Sức khỏe & Đời sống (Bán hàng Affiliate)">🌿 Kênh Sức Khỏe & Chăm Sóc Đời Sống (Bán Hàng Shopee)</option>
+                <option value="Meme nhân vật hài hước">🎭 Kênh Meme 1 Nhân Vật Nhất Quán</option>
+                <option value="Hài hước vô tri cuộc sống">🤪 Kênh Hài Hước Vô Tri Đời Sống</option>
+              </select>
+            </div>
+
+            <!-- Chọn Model AI -->
+            <div class="form-group">
+              <label for="modelSelect">Mô hình AI xử lý:</label>
+              <select id="modelSelect" class="form-control">
+                <option value="gemini-3.5-flash-lite" selected>Gemini 3.5 Flash-Lite (Khuyên dùng - Siêu tốc độ, 1 tỷ tokens)</option>
+                <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite (Ổn định cao)</option>
+              </select>
+            </div>
+
+            <!-- Upload / Chọn Video -->
+            <div class="form-group">
+              <label>File Video Reels (MP4):</label>
+              <div class="drop-zone" id="videoDropZone">
+                <input type="file" id="videoFileInput" accept="video/mp4,video/*" hidden>
+                <div class="drop-zone-prompt" id="dropPrompt">
+                  <span class="upload-icon">📹</span>
+                  <p>Kéo thả video vào đây hoặc <span class="highlight">Bấm để chọn file</span></p>
+                  <small>Khuyên dùng tỉ lệ 9:16 (Facebook Reels), độ dài 15s - 60s</small>
+                </div>
+                <div class="video-preview-box" id="videoPreviewBox" style="display: none;">
+                  <video id="videoPreview" controls></video>
+                  <div class="video-meta">
+                    <span id="videoFileName">video.mp4</span>
+                    <button type="button" class="btn-xs btn-danger" id="btnRemoveVideo">Xóa</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Nhập Kịch Bản -->
+            <div class="form-group">
+              <div class="label-with-action">
+                <label for="scriptText">Kịch Bản Thoại Video (Script):</label>
+                <button type="button" class="btn-link" id="btnLoadSampleScript">⚡ Nạp Kịch Bản Mẫu Tắm Đêm (30s)</button>
+              </div>
+              <textarea id="scriptText" class="form-control" rows="6" placeholder="Dán kịch bản thoại video vào đây...
+Ví dụ:
+Nhiều người hay có thói quen tắm muộn, rước bệnh vào người lúc nào không hay...
+Thứ nhất là dễ bị cảm lạnh, thứ hai là huyết áp tăng cao dễ đột quỵ...
+Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
+            </div>
+
+            <!-- Nút Phân Tích AI -->
+            <button type="button" class="btn btn-primary btn-block btn-pulse" id="btnAnalyze">
+              <span class="btn-icon">⚡</span>
+              <span>Gemini Flash: Phân Tích & Khớp 5 Link Shopee</span>
+            </button>
+          </div>
+
+          <!-- Cột Phải: Kết Quả & Đăng Bài -->
+          <div class="panel output-panel">
+            <div class="panel-header">
+              <h2>2. Xem Trước & Tự Động Hóa Facebook</h2>
+              <span class="tag-hint" id="aiStatusTag">Chưa chạy phân tích</span>
+            </div>
+
+            <div class="empty-state" id="emptyOutputState">
+              <div class="empty-icon">🤖</div>
+              <h3>Sẵn Sàng Xử Lý!</h3>
+              <p>Nhập kịch bản ở bên trái rồi bấm <b>"Gemini Flash: Phân Tích"</b> để AI tự động giật tít, viết caption và tìm 5 link Shopee phù hợp nhất trong kho.</p>
+            </div>
+
+            <div class="result-content" id="resultContent" style="display: none;">
+              
+              <!-- Tiêu đề giật tít -->
+              <div class="form-group">
+                <label for="outTitle">🚨 Tiêu Đề Facebook Reels (Hook Giữ Chân 3s Đầu):</label>
+                <div class="input-with-copy">
+                  <input type="text" id="outTitle" class="form-control">
+                  <button type="button" class="btn-copy" data-target="outTitle">📋</button>
+                </div>
+              </div>
+
+              <!-- Caption & Hashtags -->
+              <div class="form-group">
+                <label for="outCaption">📝 Mô Tả Bài Đăng (Reels Caption):</label>
+                <textarea id="outCaption" class="form-control" rows="3"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>🏷️ Thẻ Hashtags Thuật Toán:</label>
+                <div class="hashtags-cloud" id="hashtagsCloud"></div>
+              </div>
+
+              <!-- 5 Sản Phẩm Shopee Khớp Nối -->
+              <div class="form-group">
+                <div class="label-with-action">
+                  <label>🛒 Sản Phẩm Shopee Tự Động Khớp Nối Từ Kho:</label>
+                  <span class="badge count-badge" id="matchedCount">0 món</span>
+                </div>
+                <div class="matched-products-list" id="matchedProductsList"></div>
+              </div>
+
+              <!-- Đề xuất bổ sung nếu kho chưa có -->
+              <div class="alert-box warning" id="missingBox" style="display: none;">
+                <h4>💡 Gợi ý bổ sung sản phẩm mới vào kho:</h4>
+                <div id="missingList"></div>
+              </div>
+
+              <!-- Bình luận ghim Shopee -->
+              <div class="form-group">
+                <div class="label-with-action">
+                  <label for="outComment">📌 Bình Luận Ghim Tự Động (First Comment Chứa Link Shopee):</label>
+                  <button type="button" class="btn-copy" data-target="outComment">Sao chép comment</button>
+                </div>
+                <textarea id="outComment" class="form-control font-mono" rows="6"></textarea>
+              </div>
+
+              <!-- Nút Đăng Bài -->
+              <div class="action-buttons">
+                <button type="button" class="btn btn-success btn-lg btn-block" id="btnPublish">
+                  <span>🚀 ĐĂNG LÊN FACEBOOK REELS & GHIM LINK SHOPEE</span>
+                </button>
+              </div>
+
+              <div class="publish-status-box" id="publishResultBox" style="display: none;"></div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 2: KHO SẢN PHẨM SHOPEE ================= -->
+      <section id="tab-products" class="tab-pane">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Kho Link Sản Phẩm Shopee Affiliate (Product Brain)</h2>
+              <p class="subtitle">Lưu link một lần, dùng vĩnh viễn. Gemini sẽ tự động đọc kịch bản và bốc đúng link phù hợp!</p>
+            </div>
+            <div class="panel-actions">
+              <button type="button" class="btn btn-secondary" id="btnResetSampleProds">Khôi Phục 7 Món Mẫu</button>
+              <button type="button" class="btn btn-primary" id="btnOpenAddProduct">➕ Thêm Sản Phẩm Mới</button>
+            </div>
+          </div>
+
+          <div class="products-grid" id="productsGrid">
+            <!-- Render cards via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 3: KHO KỊCH BẢN & LỊCH SỬ ================= -->
+      <section id="tab-history" class="tab-pane">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Kho Kịch Bản & Lịch Sử Đăng Video</h2>
+              <p class="subtitle">Lưu trữ tất cả kịch bản, tiêu đề và link bài viết để tái sử dụng sang TikTok, YouTube Shorts.</p>
+            </div>
+          </div>
+
+          <div class="history-list" id="historyList">
+            <!-- Render history via JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 4: CÀI ĐẶT ================= -->
+      <section id="tab-settings" class="tab-pane">
+        <div class="panel max-w-700">
+          <div class="panel-header">
+            <h2>Cấu Hình Hệ Thống</h2>
+            <p class="subtitle">Quản lý Gemini API Key và kết nối Fanpage Facebook</p>
+          </div>
+
+          <form id="settingsForm">
+            <div class="setting-section">
+              <h3>1. Google Gemini API</h3>
+              <div class="form-group">
+                <label for="cfgGeminiKey">Gemini API Key:</label>
+                <input type="password" id="cfgGeminiKey" class="form-control" placeholder="Nhập API Key...">
+                <small class="hint">Đã tích hợp sẵn API Key của bạn. Hỗ trợ Gemini 3.5 Flash-Lite & 3.1 Flash-Lite.</small>
+              </div>
+              <div class="form-group">
+                <label for="cfgDefaultModel">Model AI Mặc Định:</label>
+                <select id="cfgDefaultModel" class="form-control">
+                  <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (Tốc độ cao nhất)</option>
+                  <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="setting-section">
+              <h3>2. Kết Nối Fanpage Facebook (Reels Publishing API)</h3>
+              
+              <div class="form-group switch-group">
+                <label class="switch">
+                  <input type="checkbox" id="cfgSimulationMode" checked>
+                  <span class="slider round"></span>
+                </label>
+                <div>
+                  <strong>Chế Độ Mô Phỏng (Test Mode)</strong>
+                  <p class="hint">Bật chế độ này để thử nghiệm toàn bộ luồng đăng video và comment mà không cần nạp Page Token thật.</p>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="cfgPageId">Facebook Page ID:</label>
+                <input type="text" id="cfgPageId" class="form-control" placeholder="Ví dụ: 102938475610293">
+              </div>
+
+              <div class="form-group">
+                <label for="cfgPageToken">Facebook Page Access Token (Vĩnh viễn):</label>
+                <input type="password" id="cfgPageToken" class="form-control" placeholder="EAAxxxxxxxxx...">
+                <small class="hint">Token có quyền <code>publish_video</code>, <code>pages_manage_posts</code>, <code>pages_read_engagement</code>.</small>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">💾 Lưu Cấu Hình</button>
+          </form>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Modal Thêm/Sửa Sản Phẩm Shopee -->
+  <div class="modal-overlay" id="productModal" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle">Thêm Sản Phẩm Shopee Mới</h3>
+        <button type="button" class="btn-close" id="btnCloseModal">✕</button>
+      </div>
+      <form id="productForm">
+        <input type="hidden" id="prodId">
+        <div class="form-group">
+          <label for="prodName">Tên Sản Phẩm:</label>
+          <input type="text" id="prodName" class="form-control" placeholder="Ví dụ: Đèn sưởi nhà tắm 2 bóng" required>
+        </div>
+        <div class="form-group">
+          <label for="prodUrl">Link Shopee Affiliate Rút Gọn:</label>
+          <input type="url" id="prodUrl" class="form-control" placeholder="https://s.shopee.vn/xxx" required>
+        </div>
+        <div class="form-group">
+          <label for="prodCategory">Danh Mục / Ngành Hàng:</label>
+          <input type="text" id="prodCategory" class="form-control" placeholder="Ví dụ: Sức khỏe & Thiết bị gia đình" required>
+        </div>
+        <div class="form-group">
+          <label for="prodKeywords">Từ Khóa Liên Quan (Cách nhau dấu phẩy):</label>
+          <input type="text" id="prodKeywords" class="form-control" placeholder="tắm đêm, cảm lạnh, đột quỵ, huyết áp, mùa đông...">
+        </div>
+        <div class="form-group">
+          <label for="prodNotes">Công Dụng & Ghi Chú:</label>
+          <input type="text" id="prodNotes" class="form-control" placeholder="Chống sốc nhiệt, ngừa tai biến...">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelModal">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu Sản Phẩm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
