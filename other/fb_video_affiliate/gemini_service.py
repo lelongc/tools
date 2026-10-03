@@ -28,6 +28,17 @@ EMOJI_PATTERN = re.compile(
     flags=re.UNICODE
 )
 
+VIETNAMESE_ACCENT_PATTERN = re.compile(
+    r'[àáảãạăắằẳẵặâấầẩẫậđèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵ]',
+    re.IGNORECASE
+)
+
+def has_vietnamese_accents(text: str) -> bool:
+    """Kiểm tra chuỗi có chứa ký tự tiếng Việt có dấu hay không."""
+    if not text or not isinstance(text, str):
+        return False
+    return bool(VIETNAMESE_ACCENT_PATTERN.search(text))
+
 def clean_no_emojis(text: str) -> str:
     """Loại bỏ hoàn toàn mọi icon, emoji, ký hiệu đồ họa để bài đăng mộc mạc chuẩn người thật."""
     if not text or not isinstance(text, str):
@@ -129,7 +140,10 @@ YÊU CẦU BẮT BUỘC:
    - Đoạn 1 (0-10s): Bắt đầu bằng "Nhiều người hay có thói quen..." hoặc "Bà con mình hay..." + Nêu thói quen sai lầm + Cảnh báo "rước bệnh vào người lúc nào không hay" hoặc "sai lầm rước bệnh vào thân nha bà con".
    - Đoạn 2 (10-20s): Bắt buộc dùng cấu trúc: "Thứ nhất là... Thứ hai là... Thứ ba là..." chỉ rõ 3 tác hại cụ thể đến cơ quan cơ thể (dạ dày, tim mạch, huyết áp, cột sống, vi khuẩn...).
    - Đoạn 3 (20-30s): Lời khuyên làm đúng + Kết thúc bằng câu: "Bà con thấy đúng thì thả tim và theo dõi kênh để xem mẹo hay nhé." (hoặc tương tự).
-3. ĐỊNH DẠNG ĐẦU RA JSON:
+3. QUY TẮC DẤU TIẾNG VIỆT (BẮT BUỘC):
+   - 100% kịch bản (script), chủ đề (topic), và 2 dòng chữ ảnh bìa (thumbnail_banner) PHẢI VIẾT BẰNG TIẾNG VIỆT CÓ ĐẦY ĐỦ DẤU THANH (Ví dụ: "TÁC DỤNG CỦA CÂY BẦU", "ĐỐI VỚI BỆNH TIỂU ĐƯỜNG").
+   - TUYỆT ĐỐI KHÔNG VIẾT TIẾNG VIỆT KHÔNG DẤU!
+4. ĐỊNH DẠNG ĐẦU RA JSON:
 {{
   "topic": "Tên chủ đề",
   "script": "Đoạn 1\\nĐoạn 2\\nĐoạn 3",
@@ -145,6 +159,16 @@ YÊU CẦU BẮT BUỘC:
     except Exception as e:
         logger.warning(f"Thử model {model_name} thất bại ({e}), chuyển sang dự phòng {fallback_model}...")
         res = call_gemini_api(api_key, fallback_model, prompt)
+
+    if isinstance(res, dict) and not has_vietnamese_accents(res.get("script", "")):
+        logger.warning("Kịch bản mới sinh ra bị thiếu dấu tiếng Việt, đang yêu cầu thử lại...")
+        strict_prompt = prompt + "\n\nBẮT BUỘC 100% KỊCH BẢN VÀ ẢNH BÌA PHẢI VIẾT BẰNG TIẾNG VIỆT CÓ DẤU ĐẦY ĐỦ!"
+        try:
+            retry_res = call_gemini_api(api_key, fallback_model, strict_prompt)
+            if has_vietnamese_accents(retry_res.get("script", "")):
+                res = retry_res
+        except Exception:
+            pass
 
     if isinstance(res, dict):
         if "topic" in res:
@@ -191,7 +215,11 @@ KHO SẢN PHẨM SHOPEE HIỆN CÓ:
 {json.dumps(catalog_summary, ensure_ascii=False, indent=2)}
 
 CÔNG THỨC VIRAL VIDEO SỨC KHỎE TRIỆU VIEW:
-1. TONE GIỌNG: Dân dã, mộc mạc, gần gũi như một người em/người cháu trong làng chia sẻ chân thành với bà con ("Bà con ơi", "Nhà em chia sẻ", "Nhiều bác hay chủ quan..."). Tuyệt đối không dùng văn mẫu sách vở hoặc từ ngữ y tế đao to búa lớn.
+1. QUY TẮC DẤU TIẾNG VIỆT BẮT BUỘC (QUAN TRỌNG NHẤT):
+   - TẤT CẢ các trường: Tiêu đề (hook_title), 4 tiêu đề kích view (viral_video_titles), 2 dòng chữ ảnh bìa (thumbnail_banner), Mô tả (reels_caption), Bình luận ghim (pinned_comment), và gợi ý sản phẩm BẮT BUỘC 100% PHẢI VIẾT BẰNG TIẾNG VIỆT CÓ ĐẦY ĐỦ DẤU THANH (Ví dụ: "Ăn cơm chan canh: Thói quen rước bệnh dạ dày vào thân, xem ngay kẻo hối!", "ĂN CƠM CHAN CANH", "HẠI DẠ DÀY NGUY HIỂM").
+   - TUYỆT ĐỐI CẤM VIẾT TIẾNG VIỆT KHÔNG DẤU (viết "Chan com vao canh", "hai da day", "khong dau" là lỗi nghiêm trọng!).
+   - NGOẠI TRỪ DUY NHẤT: Chỉ riêng trường "seo_video_filename" là tên file kỹ thuật tiếng Việt viết thường không dấu nối bằng dấu gạch ngang (ví dụ: 'an-com-chan-canh-hai-da-day.mp4').
+2. TONE GIỌNG: Dân dã, mộc mạc, gần gũi như một người em/người cháu trong làng chia sẻ chân thành với bà con ("Bà con ơi", "Nhà em chia sẻ", "Nhiều bác hay chủ quan..."). Tuyệt đối không dùng văn mẫu sách vở hoặc từ ngữ y tế đao to búa lớn.
 2. TUÂN THỦ CHÍNH SÁCH META: Tuyệt đối KHÔNG dùng từ cấm (như 'chữa dứt điểm', 'cam kết 100%', 'trị tận gốc', 'chữa khỏi hoàn toàn'). Hãy dùng ngôn ngữ cảnh báo thói quen, mẹo dân gian, bảo vệ sức khỏe chủ động.
 3. TIÊU ĐỀ (HOOK): Giật tít đánh thẳng vào thói quen sai lầm + nguy cơ bệnh tật (dưới 80 ký tự). TUYỆT ĐỐI KHÔNG DÙNG BẤT KỲ ICON / EMOJI NÀO (không dùng 🚨, ⚠️, 💡, 🔥...). Phải là chữ viết tự nhiên mộc mạc của người thật.
    Mẫu chuẩn:
@@ -222,7 +250,7 @@ CÔNG THỨC VIRAL VIDEO SỨC KHỎE TRIỆU VIEW:
 
 Định dạng JSON trả về bắt buộc (TUYỆT ĐỐI KHÔNG CHỨA BẤT KỲ ICON / EMOJI NÀO TRONG GIÁ TRỊ):
 {{
-  "hook_title": "string (tiêu đề số 1 hay nhất, không icon)",
+  "hook_title": "string (BẮT BUỘC TIẾNG VIỆT CÓ ĐẦY ĐỦ DẤU, không icon)",
   "viral_video_titles": [
     {{
       "tag": "Cảnh Báo",
@@ -267,5 +295,16 @@ CÔNG THỨC VIRAL VIDEO SỨC KHỎE TRIỆU VIEW:
     except Exception as e:
         logger.warning(f"Thử model {model_name} thất bại ({e}), chuyển sang dự phòng {fallback_model}...")
         raw_result = call_gemini_api(api_key, fallback_model, prompt)
+
+    # Tự động kiểm tra: Nếu kịch bản có dấu mà kết quả trả về không có dấu -> Tự động yêu cầu viết lại có dấu
+    if has_vietnamese_accents(script) and isinstance(raw_result, dict) and not has_vietnamese_accents(raw_result.get("hook_title", "")):
+        logger.warning("Phát hiện Gemini sinh ra Tiêu đề/Nội dung không dấu! Đang tự động yêu cầu viết lại có đầy đủ dấu...")
+        strict_accent_prompt = prompt + "\n\nCẢNH BÁO KHẨN CẤP: Kết quả vừa rồi của bạn bị lỗi KHÔNG CÓ DẤU TIẾNG VIỆT. BẮT BUỘC 100% TIÊU ĐỀ, MÔ TẢ, COMMENT, ẢNH BÌA PHẢI VIẾT BẰNG TIẾNG VIỆT CÓ ĐẦY ĐỦ DẤU THANH (Ăn cơm chan canh, hại dạ dày...). Tuyệt đối không được bỏ dấu!"
+        try:
+            retry_result = call_gemini_api(api_key, fallback_model, strict_accent_prompt)
+            if isinstance(retry_result, dict) and has_vietnamese_accents(retry_result.get("hook_title", "")):
+                raw_result = retry_result
+        except Exception as retry_err:
+            logger.warning(f"Lỗi khi retry yêu cầu có dấu: {retry_err}")
 
     return sanitize_analysis_output(raw_result)

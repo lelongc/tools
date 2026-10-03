@@ -414,7 +414,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 3. Draw Red Box Banner
     ctx.save();
-    ctx.font = `900 ${fontSize}px 'Montserrat', 'Oswald', 'Impact', Arial, sans-serif`;
+    ctx.font = `900 ${fontSize}px 'Montserrat', Arial, sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
@@ -444,7 +444,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 4. Draw Stroked Text
     ctx.save();
-    ctx.font = `900 ${fontSize}px 'Montserrat', 'Oswald', 'Impact', Arial, sans-serif`;
+    ctx.font = `900 ${fontSize}px 'Montserrat', Arial, sans-serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
