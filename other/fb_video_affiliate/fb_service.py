@@ -20,36 +20,6 @@ class FacebookReelsPublisher:
         self.token = page_access_token.strip()
         self.simulation_mode = simulation_mode or not bool(self.token and self.page_id)
 
-    def publish_reel_with_comment(
-        self,
-        video_path: Optional[str],
-        title: str,
-        caption: str,
-        hashtags: list,
-        pinned_comment: str,
-        scheduled_publish_time: Optional[int] = None
-    ) -> Dict[str, Any]:
-        """
-        Đăng video Reels lên Facebook Page và tự động thả comment ghim link Shopee.
-        """
-        full_description = f"{title}\n\n{caption}\n\n{' '.join(hashtags)}"
-
-        # Chế độ mô phỏng kiểm thử
-        if self.simulation_mode:
-            time.sleep(1.2)  # Giả lập độ trễ mạng
-            mock_video_id = f"reel_{int(time.time())}_{uuid.uuid4().hex[:6]}"
-            mock_comment_id = f"cmt_{int(time.time())}_{uuid.uuid4().hex[:6]}"
-            
-            return {
-                "success": True,
-                "mode": "simulation",
-                "message": "Đã chạy kiểm thử thành công! (Nhập Page ID & Token trong Cài Đặt để đăng lên Facebook thật)",
-                "video_id": mock_video_id,
-                "comment_id": mock_comment_id,
-                "facebook_url": f"https://www.facebook.com/reel/{mock_video_id}",
-                "published_at": time.strftime("%Y-%m-%d %H:%M:%S")
-            }
-
     def _request_with_retry(self, method: str, url: str, **kwargs) -> requests.Response:
         """Thực hiện HTTP request kèm retry tự động khi gặp sự cố mạng hoặc DNS."""
         max_retries = 3
@@ -90,10 +60,12 @@ class FacebookReelsPublisher:
         caption: str,
         hashtags: list,
         pinned_comment: str,
-        scheduled_publish_time: Optional[int] = None
+        scheduled_publish_time: Optional[int] = None,
+        thumbnail_path: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Đăng video Reels lên Facebook Page và tự động thả comment ghim link Shopee.
+        Hỗ trợ gán ảnh bìa / thumbnail tùy chỉnh từ Thumbnail Studio lên Facebook Reels.
         """
         full_description = f"{title}\n\n{caption}\n\n{' '.join(hashtags)}"
 
@@ -106,9 +78,10 @@ class FacebookReelsPublisher:
             return {
                 "success": True,
                 "mode": "simulation",
-                "message": "Đã chạy kiểm thử thành công! (Bật đăng thật và cập nhật Page ID & Token trong Cài Đặt)",
+                "message": "Đã chạy kiểm thử thành công! (Nhập Page ID & Token trong Cài Đặt để đăng lên Facebook thật)",
                 "video_id": mock_video_id,
                 "comment_id": mock_comment_id,
+                "thumbnail_applied": bool(thumbnail_path),
                 "facebook_url": f"https://www.facebook.com/reel/{mock_video_id}",
                 "published_at": time.strftime("%Y-%m-%d %H:%M:%S")
             }
@@ -161,10 +134,42 @@ class FacebookReelsPublisher:
             if "error" in finish_data:
                 raise RuntimeError(self._parse_meta_error(finish_data["error"]))
 
+            # Bước 3.5: Gán ảnh Thumbnail/Bìa tùy chỉnh lên Facebook Reels (is_preferred=true)
+            thumbnail_applied = False
+            if thumbnail_path:
+                from pathlib import Path
+                t_path = Path(thumbnail_path)
+                if not t_path.is_absolute():
+                    t_path = Path.cwd() / t_path
+                if t_path.exists():
+                    logger.info(f"Đang đồng bộ ảnh bìa tùy chỉnh ({t_path}) lên Facebook Reels {video_id}...")
+                    thumb_url = f"{GRAPH_API_BASE}/{video_id}/thumbnails"
+                    for attempt in range(1, 3):
+                        try:
+                            time.sleep(1.8)  # Đợi Meta đồng bộ video_id
+                            with open(t_path, "rb") as tf:
+                                thumb_resp = self._request_with_retry(
+                                    "POST",
+                                    thumb_url,
+                                    data={"access_token": self.token, "is_preferred": "true"},
+                                    files={"source": tf}
+                                )
+                            thumb_data = thumb_resp.json() if thumb_resp.text else {}
+                            if thumb_resp.status_code in (200, 201) and thumb_data.get("success"):
+                                logger.info(f"Đã gán Thumbnail tùy chỉnh thành công cho Reel {video_id}!")
+                                thumbnail_applied = True
+                                break
+                            else:
+                                logger.warning(f"Lần thử {attempt} gán thumbnail: {thumb_resp.text}")
+                        except Exception as te:
+                            logger.warning(f"Lỗi gán thumbnail lần {attempt}: {te}")
+                else:
+                    logger.warning(f"File thumbnail_path không tồn tại: {thumbnail_path}")
+
             # Bước 4: Tự động bình luận link Shopee vào bài viết vừa đăng
             comment_id = None
             if pinned_comment:
-                time.sleep(2.5)  # Đợi 2.5s để server Meta index xong video ID
+                time.sleep(2.0)  # Đợi server Meta index xong video ID
                 comment_url = f"{GRAPH_API_BASE}/{video_id}/comments"
                 comment_resp = self._request_with_retry("POST", comment_url, data={"access_token": self.token, "message": pinned_comment})
                 comment_data = comment_resp.json()
@@ -177,6 +182,7 @@ class FacebookReelsPublisher:
                 "message": "Đã đăng video lên Facebook Reels và ghim bình luận Shopee thành công!",
                 "video_id": video_id,
                 "comment_id": comment_id,
+                "thumbnail_applied": thumbnail_applied,
                 "facebook_url": f"https://www.facebook.com/reel/{video_id}",
                 "published_at": time.strftime("%Y-%m-%d %H:%M:%S")
             }

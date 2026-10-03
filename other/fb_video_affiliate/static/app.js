@@ -617,7 +617,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const div = document.createElement("div");
             div.className = `viral-title-item ${idx === 0 ? "active" : ""}`;
             div.innerHTML = `
-              <span class="viral-tag-badge">${t.tag || "🔥 Gợi ý"}</span>
+              <span class="viral-tag-badge">${t.tag || "Gợi ý"}</span>
               <span class="viral-title-text">${t.title}</span>
             `;
             div.addEventListener("click", () => {
@@ -766,13 +766,13 @@ document.addEventListener("DOMContentLoaded", () => {
                   const lines = outComment.value.split("\n");
                   const updatedLines = lines.map(line => {
                     if (line.includes(prod.name)) {
-                      return `👉 ${prod.name}: ${newUrl}`;
+                      return `- ${prod.name}: ${newUrl}`;
                     }
                     return line;
                   });
                   outComment.value = updatedLines.join("\n");
                 } else {
-                  outComment.value = outComment.value.trim() + `\n👉 ${prod.name}: ${newUrl}\n`;
+                  outComment.value = outComment.value.trim() + `\n- ${prod.name}: ${newUrl}\n`;
                 }
               }
 
@@ -895,7 +895,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
               // Bổ sung vào Bình luận ghim (outComment)
               if (outComment) {
-                const newLine = `👉 ${newProd.name}: ${affUrl}`;
+                const newLine = `- ${newProd.name}: ${affUrl}`;
                 const commentVal = outComment.value.trim();
                 if (commentVal.includes("Chúc bà con") || commentVal.includes("Bà con cần") || commentVal.includes("Lưu lại")) {
                   const parts = commentVal.split("\n\n");
@@ -978,7 +978,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // Bổ sung vào comment
         if (outComment) {
-          const newLine = `👉 ${prod.name}: ${prod.affiliate_url}`;
+          const newLine = `- ${prod.name}: ${prod.affiliate_url}`;
           outComment.value = outComment.value.trim() ? outComment.value.trim() + "\n" + newLine : newLine;
         }
 
@@ -1012,7 +1012,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     btnPublish.disabled = true;
-    btnPublish.innerHTML = `<span>⏳ Đang đăng video & ghim comment Shopee...</span>`;
+    btnPublish.innerHTML = `<span>⏳ Đang chuẩn bị đăng video & bình luận...</span>`;
+
+    // Tự động xuất và lưu ảnh bìa từ Thumbnail Canvas nếu đang mở Thumbnail Studio
+    let thumbPathToSend = currentThumbnailPath || "";
+    if (thumbCanvas && thumbStudioCard && thumbStudioCard.style.display !== "none") {
+      try {
+        btnPublish.innerHTML = `<span>⏳ Đang xuất ảnh bìa tùy chỉnh từ Thumbnail Studio...</span>`;
+        const dataUrl = thumbCanvas.toDataURL("image/png");
+        const resThumb = await fetch("/api/save-thumbnail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image_base64: dataUrl })
+        });
+        const dThumb = await resThumb.json();
+        if (dThumb.status === "success" && dThumb.saved_path) {
+          thumbPathToSend = dThumb.saved_path;
+          currentThumbnailPath = dThumb.saved_path;
+        }
+      } catch (errThumb) {
+        console.warn("Không thể tự động xuất ảnh bìa canvas:", errThumb);
+      }
+    }
+
+    btnPublish.innerHTML = `<span>⏳ Đang đăng video & ghim bình luận lên Facebook...</span>`;
 
     const hashtags = Array.from(hashtagsCloud.querySelectorAll(".hashtag-tag")).map(el => el.textContent);
 
@@ -1022,7 +1045,7 @@ document.addEventListener("DOMContentLoaded", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           video_path: currentVideoPath || "",
-          thumbnail_path: currentThumbnailPath || "",
+          thumbnail_path: thumbPathToSend,
           title: title,
           caption: caption,
           hashtags: hashtags,
@@ -1044,6 +1067,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <h4>🎉 ${fbResult.message}</h4>
         <p>• Mã Video Reels: <code>${fbResult.video_id}</code></p>
         <p>• Mã Bình Luận Shopee: <code>${fbResult.comment_id || 'N/A'}</code></p>
+        ${fbResult.thumbnail_applied ? `<p>• Ảnh bìa tùy chỉnh: <span style="color:var(--accent-primary); font-weight:600;">✅ Đã gán ảnh bìa thiết lập từ tool lên Facebook Reels</span></p>` : ''}
         <p>• Link bài đăng: <a href="${fbResult.facebook_url}" target="_blank">${fbResult.facebook_url} ↗</a></p>
         <p style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">Bài viết đã được tự động lưu vào Kho Kịch Bản & Lịch Sử.</p>
       `;

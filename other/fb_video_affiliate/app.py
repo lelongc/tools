@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from gemini_service import analyze_and_match, generate_new_script
+from gemini_service import analyze_and_match, generate_new_script, clean_no_emojis
 from fb_service import FacebookReelsPublisher
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -243,13 +243,18 @@ def publish_post(req: PublishRequest):
         simulation_mode=fb_cfg.get("simulation_mode", True)
     )
 
+    clean_title = clean_no_emojis(req.title)
+    clean_caption = clean_no_emojis(req.caption)
+    clean_comment = clean_no_emojis(req.pinned_comment)
+
     try:
         fb_res = publisher.publish_reel_with_comment(
             video_path=req.video_path,
-            title=req.title,
-            caption=req.caption,
+            title=clean_title,
+            caption=clean_caption,
             hashtags=req.hashtags,
-            pinned_comment=req.pinned_comment
+            pinned_comment=clean_comment,
+            thumbnail_path=req.thumbnail_path
         )
 
         # Cập nhật số lần dùng sản phẩm
@@ -268,10 +273,11 @@ def publish_post(req: PublishRequest):
             "niche": req.niche,
             "script": req.script,
             "video_path": req.video_path,
-            "title": req.title,
-            "caption": req.caption,
+            "thumbnail_path": req.thumbnail_path,
+            "title": clean_title,
+            "caption": clean_caption,
             "hashtags": req.hashtags,
-            "pinned_comment": req.pinned_comment,
+            "pinned_comment": clean_comment,
             "selected_product_ids": req.selected_product_ids,
             "facebook_result": fb_res
         }
