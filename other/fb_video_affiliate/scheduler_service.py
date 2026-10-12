@@ -71,6 +71,8 @@ def add_scheduled_task(task_data: Dict[str, Any]) -> Dict[str, Any]:
         "target_timestamp": int(task_data.get("target_timestamp", time.time() + 900)),
         "target_time_str": task_data.get("target_time_str", ""),
         "golden_slot_label": task_data.get("golden_slot_label", ""),
+        "meta_cloud_schedule": bool(task_data.get("meta_cloud_schedule", False)),
+        "comment_posted": bool(task_data.get("comment_posted", False)),
         "post_type": task_data.get("post_type", "reel"),  # 'reel' hoặc 'photo'
         "photo_path": task_data.get("photo_path", ""),
         "target_page_id": task_data.get("target_page_id", ""),
@@ -133,8 +135,19 @@ def _worker_loop():
             tasks_modified = False
 
             for t in tasks:
+                # BẢO VỆ CHỐNG ĐĂNG TRÙNG LẶP:
+                # Nếu tác vụ đã có video_id/post_id trên Facebook hoặc đã hoàn thành -> Không bao giờ đăng lại!
+                fb_res = t.get("facebook_result") or {}
+                has_fb_id = bool(fb_res.get("video_id") or fb_res.get("post_id"))
+
                 # 1. Với bài lên lịch Cục bộ (Local Scheduler)
                 if t.get("status") == "pending" and not t.get("meta_cloud_schedule"):
+                    if has_fb_id:
+                        logger.warning(f"Tác vụ {t.get('id')} đã có ID Facebook ({fb_res.get('video_id') or fb_res.get('post_id')}). Chuyển sang completed để chặn đăng trùng lặp!")
+                        t["status"] = "completed"
+                        tasks_modified = True
+                        continue
+
                     target = t.get("target_timestamp", 0)
                     if target <= now:
                         task_id = t["id"]

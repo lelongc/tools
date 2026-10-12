@@ -391,11 +391,13 @@ Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
 
               <div class="publish-status-box" id="publishResultBox" style="display: none;"></div>
 
-          </div>
-        </div>
+            </div> <!-- Closes resultContent -->
+          </div> <!-- Closes panel output-panel -->
+        </div> <!-- Closes studio-grid -->
+      </div> <!-- Closes reelsStudioView -->
 
-        <!-- VIEW 2: ĐĂNG BÀI VIẾT ẢNH -->
-        <div id="photoStudioView" class="studio-content-view" style="display: none;">
+      <!-- VIEW 2: ĐĂNG BÀI VIẾT ẢNH -->
+      <div id="photoStudioView" class="studio-content-view" style="display: none;">
           <div class="studio-grid">
             <!-- Cột Trái: Chọn ảnh & Nhập ý tưởng -->
             <div class="panel input-panel">
@@ -560,6 +562,7 @@ Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
               <p class="subtitle">Lưu link một lần, dùng vĩnh viễn. Gemini sẽ tự động đọc kịch bản và bốc đúng link phù hợp!</p>
             </div>
             <div class="panel-actions">
+              <button type="button" class="btn btn-warning" id="btnOpenBatchReplace">🔄 Đổi Link Hàng Loạt (Hết Hàng / Thay Link)</button>
               <button type="button" class="btn btn-secondary" id="btnResetSampleProds">Khôi Phục 7 Món Mẫu</button>
               <button type="button" class="btn btn-primary" id="btnOpenAddProduct">➕ Thêm Sản Phẩm Mới</button>
             </div>
@@ -795,6 +798,81 @@ Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
           <button type="submit" class="btn btn-primary">Lưu Sản Phẩm</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Modal Thay Thế Hàng Loạt Link Affiliate -->
+  <div class="modal-overlay" id="batchReplaceModal" style="display: none;">
+    <div class="modal-card max-w-700">
+      <div class="modal-header">
+        <div>
+          <h3>🔄 Đổi Hàng Loạt Link Affiliate (Hết Hàng / Thay Link)</h3>
+          <p class="subtitle" style="margin-top: 4px;">Cập nhật lại link Shopee bị hết hàng hoặc đổi link mới trên Kho Sản Phẩm, Hàng Đợi và Bình Luận Facebook đã đăng.</p>
+        </div>
+        <button type="button" class="btn-close" id="btnCloseBatchModal">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 20px;">
+        <div class="form-group">
+          <label for="batchSelectProduct">1. Chọn Sản Phẩm Từ Kho (Hoặc gõ link bên dưới):</label>
+          <select id="batchSelectProduct" class="form-control">
+            <option value="">-- Chọn sản phẩm trong kho để tự điền link cũ --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="batchOldUrl">Link Shopee Cũ Cần Thay Thế (*):</label>
+          <input type="url" id="batchOldUrl" class="form-control font-mono" placeholder="https://s.shopee.vn/old123" required>
+          <small class="hint">Đường link cũ đang bị hết hàng, shop đóng cửa hoặc muốn đổi.</small>
+        </div>
+
+        <div class="form-row-duo">
+          <div class="form-group">
+            <label for="batchNewUrl">Link Shopee Mới Thay Thế (*):</label>
+            <input type="url" id="batchNewUrl" class="form-control font-mono" placeholder="https://s.shopee.vn/new_xyz" required>
+            <small class="hint">Link affiliate mới của bạn.</small>
+          </div>
+          <div class="form-group">
+            <label for="batchNewName">Tên Món Mới (Tùy chọn):</label>
+            <input type="text" id="batchNewName" class="form-control" placeholder="Để trống nếu giữ nguyên tên cũ">
+            <small class="hint">Nếu đổi sang sản phẩm tương đương khác tên.</small>
+          </div>
+        </div>
+
+        <div class="form-group" style="background: rgba(15,23,42,0.6); padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border-color); margin-top: 10px;">
+          <label style="margin-bottom: 8px; font-weight: 700; color: #a7f3d0;">2. Phạm Vi Áp Dụng Thay Thế:</label>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label class="checkbox-container">
+              <input type="checkbox" id="chkBatchProducts" checked>
+              <span class="checkmark"></span>
+              <span class="chk-label"><b>Kho Sản Phẩm Shopee (Product Brain):</b> Tự động đổi link để các video/ảnh tương lai dùng link mới.</span>
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" id="chkBatchScheduled" checked>
+              <span class="checkmark"></span>
+              <span class="chk-label"><b>Hàng Đợi Hẹn Giờ (Scheduled Tasks):</b> Đổi link trong bình luận của các video/ảnh đang xếp hàng chờ phát sóng.</span>
+            </label>
+            <label class="checkbox-container">
+              <input type="checkbox" id="chkBatchFacebookLive" checked>
+              <span class="checkmark"></span>
+              <span class="chk-label"><b>Bình Luận Ghim Trên Facebook Đã Đăng (Facebook Live API):</b> Tự động gọi Meta API sửa lại bình luận ghim của các bài cũ sang link mới!</span>
+            </label>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 16px;">
+          <button type="button" class="btn btn-secondary" id="btnBatchPreview">
+            <span>🔍 Quét Kiểm Tra Trước (Preview)</span>
+          </button>
+          <button type="button" class="btn btn-success" id="btnBatchExecute" style="flex: 1;">
+            <span>🚀 Tiến Hành Thay Thế Hàng Loạt</span>
+          </button>
+        </div>
+
+        <!-- Khung kết quả Preview & Tiến trình -->
+        <div id="batchPreviewBox" style="display: none; margin-top: 16px; background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 14px;"></div>
+        <div id="batchResultBox" style="display: none; margin-top: 16px;"></div>
+      </div>
     </div>
   </div>
 

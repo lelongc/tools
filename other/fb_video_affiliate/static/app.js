@@ -492,7 +492,7 @@ document.addEventListener("DOMContentLoaded", () => {
     btnTypeReels.addEventListener("click", () => {
       btnTypeReels.classList.add("active");
       btnTypePhoto.classList.remove("active");
-      if (reelsStudioView) reelsStudioView.style.display = "grid";
+      if (reelsStudioView) reelsStudioView.style.display = "block";
       if (photoStudioView) photoStudioView.style.display = "none";
     });
 
@@ -500,7 +500,7 @@ document.addEventListener("DOMContentLoaded", () => {
       btnTypePhoto.classList.add("active");
       btnTypeReels.classList.remove("active");
       if (reelsStudioView) reelsStudioView.style.display = "none";
-      if (photoStudioView) photoStudioView.style.display = "grid";
+      if (photoStudioView) photoStudioView.style.display = "block";
     });
   }
 
@@ -563,6 +563,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (d.status === "success") {
         currentPhotoPath = d.saved_path;
         showToast(`Đã nhận ảnh: ${file.name}`);
+        // Hiển thị ngay khung nhập bài viết & đăng bài
+        if (photoEmptyState) photoEmptyState.style.display = "none";
+        if (photoResultContent) photoResultContent.style.display = "block";
       } else {
         throw new Error(d.detail || "Không thể tải ảnh");
       }
@@ -699,6 +702,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const caption = outPhotoCaption ? outPhotoCaption.value.trim() : "";
       const title = outPhotoTitle ? outPhotoTitle.value.trim() : "";
       const comment = outPhotoComment ? outPhotoComment.value.trim() : "";
+
+      if (!currentPhotoPath) {
+        showToast("Vui lòng tải lên hoặc chọn 1 file ảnh trước!", "error");
+        if (photoDropZone) photoDropZone.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
 
       if (!caption) {
         showToast("Vui lòng nhập nội dung bài viết ảnh (Caption) trước!", "error");
@@ -856,6 +865,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="product-footer">
           <span>Ngày tạo: ${p.created_at || "2026-10-02"}</span>
           <div class="product-actions">
+            <button class="btn-xs btn-quick-replace" data-id="${p.id}" data-url="${p.affiliate_url}" title="Đổi link hàng loạt khi sản phẩm hết hàng">🔄 Đổi Link</button>
             <button class="btn-xs btn-secondary btn-edit-prod" data-id="${p.id}">Sửa</button>
             <button class="btn-xs btn-danger btn-del-prod" data-id="${p.id}">Xóa</button>
           </div>
@@ -864,7 +874,14 @@ document.addEventListener("DOMContentLoaded", () => {
       productsGrid.appendChild(card);
     });
 
-    // Attach event listeners for Edit & Delete
+    // Attach event listeners for Quick Replace, Edit & Delete
+    document.querySelectorAll(".btn-quick-replace").forEach(b => {
+      b.addEventListener("click", () => {
+        const pId = b.getAttribute("data-id");
+        const pUrl = b.getAttribute("data-url");
+        openBatchReplaceModal(pId, pUrl);
+      });
+    });
     document.querySelectorAll(".btn-edit-prod").forEach(b => {
       b.addEventListener("click", () => openEditProduct(b.getAttribute("data-id")));
     });
@@ -1993,6 +2010,8 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="task-actions-wrap">
             ${isPending ? `
               <button type="button" class="btn-xs btn-primary btn-publish-now-sched" data-id="${task.id}" data-is-photo="${isPhoto}" title="Đăng ngay lập tức">⚡ Đăng Ngay</button>
+            ` : ''}
+            ${isPending ? `
               <button type="button" class="btn-xs btn-secondary btn-cancel-sched" data-id="${task.id}" title="Hủy tác vụ hẹn giờ này" style="color:#f87171;">🗑️ Hủy</button>
             ` : ''}
             ${task.facebook_result?.facebook_url ? `
@@ -2146,6 +2165,234 @@ document.addEventListener("DOMContentLoaded", () => {
     showToast("Đã làm mới danh mục sản phẩm!");
     loadProducts();
   });
+
+  // ================= BATCH REPLACE AFFILIATE LINKS (HẾT HÀNG / ĐỔI LINK) =================
+  const btnOpenBatchReplace = document.getElementById("btnOpenBatchReplace");
+  const batchReplaceModal = document.getElementById("batchReplaceModal");
+  const btnCloseBatchModal = document.getElementById("btnCloseBatchModal");
+  const batchSelectProduct = document.getElementById("batchSelectProduct");
+  const batchOldUrl = document.getElementById("batchOldUrl");
+  const batchNewUrl = document.getElementById("batchNewUrl");
+  const batchNewName = document.getElementById("batchNewName");
+  const chkBatchProducts = document.getElementById("chkBatchProducts");
+  const chkBatchScheduled = document.getElementById("chkBatchScheduled");
+  const chkBatchFacebookLive = document.getElementById("chkBatchFacebookLive");
+  const btnBatchPreview = document.getElementById("btnBatchPreview");
+  const btnBatchExecute = document.getElementById("btnBatchExecute");
+  const batchPreviewBox = document.getElementById("batchPreviewBox");
+  const batchResultBox = document.getElementById("batchResultBox");
+
+  function openBatchReplaceModal(productId = null, oldUrl = null) {
+    if (!batchReplaceModal) return;
+    
+    // Nạp danh sách sản phẩm vào dropdown
+    if (batchSelectProduct) {
+      batchSelectProduct.innerHTML = `<option value="">-- Chọn sản phẩm trong kho để tự điền link cũ --</option>`;
+      currentProducts.forEach(p => {
+        const opt = document.createElement("option");
+        opt.value = p.id;
+        opt.textContent = `${p.name} (Đã dùng ${p.use_count || 0} lần)`;
+        opt.setAttribute("data-url", p.affiliate_url);
+        opt.setAttribute("data-name", p.name);
+        if (productId && p.id === productId) {
+          opt.selected = true;
+        }
+        batchSelectProduct.appendChild(opt);
+      });
+    }
+
+    if (batchOldUrl) {
+      batchOldUrl.value = oldUrl || "";
+    }
+    if (productId && !oldUrl) {
+      const prod = currentProducts.find(p => p.id === productId);
+      if (prod && batchOldUrl) batchOldUrl.value = prod.affiliate_url;
+    }
+
+    if (batchNewUrl) batchNewUrl.value = "";
+    if (batchNewName) batchNewName.value = "";
+    if (batchPreviewBox) {
+      batchPreviewBox.style.display = "none";
+      batchPreviewBox.innerHTML = "";
+    }
+    if (batchResultBox) {
+      batchResultBox.style.display = "none";
+      batchResultBox.innerHTML = "";
+    }
+
+    batchReplaceModal.style.display = "flex";
+  }
+
+  function closeBatchReplaceModal() {
+    if (batchReplaceModal) batchReplaceModal.style.display = "none";
+  }
+
+  if (btnOpenBatchReplace) {
+    btnOpenBatchReplace.addEventListener("click", () => openBatchReplaceModal());
+  }
+
+  if (btnCloseBatchModal) {
+    btnCloseBatchModal.addEventListener("click", closeBatchReplaceModal);
+  }
+
+  if (batchSelectProduct) {
+    batchSelectProduct.addEventListener("change", () => {
+      const selectedOpt = batchSelectProduct.options[batchSelectProduct.selectedIndex];
+      if (selectedOpt && selectedOpt.value) {
+        const url = selectedOpt.getAttribute("data-url");
+        const name = selectedOpt.getAttribute("data-name");
+        if (batchOldUrl) batchOldUrl.value = url || "";
+        if (batchNewName) batchNewName.placeholder = `Để trống nếu giữ tên: "${name}"`;
+      }
+    });
+  }
+
+  // Quét kiểm tra trước (Preview)
+  if (btnBatchPreview) {
+    btnBatchPreview.addEventListener("click", async () => {
+      const oldUrl = batchOldUrl ? batchOldUrl.value.trim() : "";
+      const prodId = batchSelectProduct ? batchSelectProduct.value : "";
+
+      if (!oldUrl && !prodId) {
+        showToast("Vui lòng chọn sản phẩm hoặc dán link Shopee cũ cần quét!", "error");
+        if (batchOldUrl) batchOldUrl.focus();
+        return;
+      }
+
+      btnBatchPreview.disabled = true;
+      btnBatchPreview.innerHTML = `<span>⏳ Đang quét toàn bộ hệ thống...</span>`;
+
+      try {
+        const res = await fetch("/api/products/batch-preview-link", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ old_url: oldUrl, product_id: prodId })
+        });
+        const data = await res.json();
+        if (data.status !== "success") throw new Error(data.detail || "Lỗi quét dữ liệu");
+
+        if (batchPreviewBox) {
+          batchPreviewBox.style.display = "block";
+          const counts = data.counts || {};
+          batchPreviewBox.innerHTML = `
+            <div class="batch-stat-grid">
+              <div class="batch-stat-card">
+                <div class="batch-stat-num">${counts.products || 0}</div>
+                <div class="batch-stat-label">Sản phẩm trong Kho</div>
+              </div>
+              <div class="batch-stat-card">
+                <div class="batch-stat-num">${counts.scheduled || 0}</div>
+                <div class="batch-stat-label">Bài trong Hàng Đợi</div>
+              </div>
+              <div class="batch-stat-card">
+                <div class="batch-stat-num">${counts.history || 0}</div>
+                <div class="batch-stat-label">Bài đã đăng Facebook</div>
+              </div>
+              <div class="batch-stat-card" style="border-color: rgba(16,185,129,0.4);">
+                <div class="batch-stat-num" style="color: #34d399;">${counts.total || 0}</div>
+                <div class="batch-stat-label">Tổng vị trí khớp</div>
+              </div>
+            </div>
+            <p style="font-size: 0.84rem; color: #cbd5e1; margin-top: 6px;">
+              🔍 Đã tìm thấy <b>${counts.total || 0}</b> vị trí đang gắn link này. Khi bấm <b>"Tiến Hành Thay Thế Hàng Loạt"</b>, hệ thống sẽ tự động cập nhật tất cả sang link mới!
+            </p>
+          `;
+        }
+        showToast(`Quét xong! Tìm thấy ${data.counts?.total || 0} vị trí chứa link này.`);
+      } catch (err) {
+        showToast("Lỗi quét: " + err.message, "error");
+      } finally {
+        btnBatchPreview.disabled = false;
+        btnBatchPreview.innerHTML = `<span>🔍 Quét Kiểm Tra Trước (Preview)</span>`;
+      }
+    });
+  }
+
+  // Thực hiện thay thế hàng loạt
+  if (btnBatchExecute) {
+    btnBatchExecute.addEventListener("click", async () => {
+      const oldUrl = batchOldUrl ? batchOldUrl.value.trim() : "";
+      const newUrl = batchNewUrl ? batchNewUrl.value.trim() : "";
+      const prodId = batchSelectProduct ? batchSelectProduct.value : "";
+      const newName = batchNewName ? batchNewName.value.trim() : "";
+
+      if (!oldUrl && !prodId) {
+        showToast("Vui lòng nhập Link Shopee cũ cần thay thế!", "error");
+        if (batchOldUrl) batchOldUrl.focus();
+        return;
+      }
+      if (!newUrl) {
+        showToast("Vui lòng nhập Link Shopee mới thay thế!", "error");
+        if (batchNewUrl) batchNewUrl.focus();
+        return;
+      }
+
+      if (!confirm(`Bạn có chắc chắn muốn thay thế hàng loạt link Shopee cũ thành link mới này không?\n\nLink mới: ${newUrl}`)) return;
+
+      btnBatchExecute.disabled = true;
+      btnBatchExecute.innerHTML = `<span>⏳ Đang thay thế hàng loạt trên Kho, Hàng Đợi & Facebook...</span>`;
+
+      try {
+        const payload = {
+          old_url: oldUrl,
+          new_url: newUrl,
+          product_id: prodId,
+          new_name: newName,
+          update_products: chkBatchProducts ? chkBatchProducts.checked : true,
+          update_scheduled: chkBatchScheduled ? chkBatchScheduled.checked : true,
+          update_facebook_comments: chkBatchFacebookLive ? chkBatchFacebookLive.checked : true,
+          target_page_id: headerActivePageSelect ? headerActivePageSelect.value : ""
+        };
+
+        const res = await fetch("/api/products/batch-replace-link", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok || data.status !== "success") {
+          throw new Error(data.detail || "Lỗi thay thế hàng loạt");
+        }
+
+        const stats = data.stats || {};
+        if (batchResultBox) {
+          batchResultBox.style.display = "block";
+          const logsHtml = (data.logs || []).map(l => `<li>${l}</li>`).join("");
+          batchResultBox.innerHTML = `
+            <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); padding: 14px; border-radius: 8px;">
+              <h4 style="color:#6ee7b7; margin-bottom: 6px;">🎉 Cập Nhật Hàng Loạt Thành Công!</h4>
+              <p style="font-size:0.86rem; line-height:1.5;">
+                • Đã cập nhật trong Kho Sản Phẩm: <b>${stats.products_updated || 0}</b> món<br>
+                • Đã cập nhật trong Hàng Đợi Hẹn Giờ: <b>${stats.scheduled_updated || 0}</b> bài<br>
+                • Đã cập nhật trong Lịch Sử Bài Đăng: <b>${stats.history_updated || 0}</b> bài<br>
+                • Bình luận trực tiếp trên Facebook Fanpage: <b>${stats.facebook_comments_updated || 0}</b> bình luận đã sửa thành công (Thất bại: ${stats.facebook_comments_failed || 0})
+              </p>
+              ${logsHtml ? `<ul style="font-size:0.78rem; color:var(--text-muted); margin-top:8px; padding-left:16px;">${logsHtml}</ul>` : ''}
+            </div>
+          `;
+        }
+
+        showToast("Đã thay thế hàng loạt link Shopee thành công!");
+        loadProducts();
+        loadScheduledTasks();
+        loadHistory();
+      } catch (err) {
+        showToast("Lỗi thay thế: " + err.message, "error");
+        if (batchResultBox) {
+          batchResultBox.style.display = "block";
+          batchResultBox.innerHTML = `
+            <div class="alert-box alert-error">
+              <h4>❌ Thất bại: ${err.message}</h4>
+            </div>
+          `;
+        }
+      } finally {
+        btnBatchExecute.disabled = false;
+        btnBatchExecute.innerHTML = `<span>🚀 Tiến Hành Thay Thế Hàng Loạt</span>`;
+      }
+    });
+  }
 
   // ================= SETTINGS FORM =================
   settingsForm.addEventListener("submit", async (e) => {

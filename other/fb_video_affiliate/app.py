@@ -36,6 +36,7 @@ UPLOAD_DIR = BASE_DIR / "uploads"
 CONFIG_FILE = BASE_DIR / "config.json"
 PRODUCTS_FILE = DATA_DIR / "products.json"
 HISTORY_FILE = DATA_DIR / "history.json"
+SCHEDULED_TASKS_FILE = DATA_DIR / "scheduled_tasks.json"
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
@@ -99,6 +100,7 @@ class PublishRequest(BaseModel):
     scheduled_time: Optional[str] = ""
     meta_cloud_schedule: Optional[bool] = False
     golden_slot_label: Optional[str] = ""
+    allow_duplicate: Optional[bool] = False
 
 class PublishPhotoRequest(BaseModel):
     photo_path: str
@@ -128,6 +130,20 @@ class VerifyPageRequest(BaseModel):
     page_id: Optional[str] = None
     id: Optional[str] = None
     access_token: str
+
+class BatchPreviewRequest(BaseModel):
+    old_url: str
+    product_id: Optional[str] = None
+
+class BatchReplaceRequest(BaseModel):
+    old_url: str
+    new_url: str
+    product_id: Optional[str] = None
+    new_name: Optional[str] = None
+    update_products: bool = True
+    update_scheduled: bool = True
+    update_facebook_comments: bool = True
+    target_page_id: Optional[str] = None
 
 class ConfigUpdate(BaseModel):
     gemini_api_key: Optional[str] = None
@@ -397,6 +413,173 @@ def delete_product(prod_id: str):
     save_json(PRODUCTS_FILE, filtered)
     return {"status": "success", "message": "Đã xóa sản phẩm khỏi kho"}
 
+@app.post("/api/products/batch-preview-link")
+def api_batch_preview_link(req: BatchPreviewRequest):
+    old_url = req.old_url.strip()
+    prod_id = (req.product_id or "").strip()
+
+    if not old_url and not prod_id:
+        raise HTTPException(status_code=400, detail="Vui lòng cung cấp link cũ hoặc chọn sản phẩm cần tìm!")
+
+    products = load_json(PRODUCTS_FILE, [])
+    scheduled_tasks = load_json(SCHEDULED_TASKS_FILE, [])
+    history = load_json(HISTORY_FILE, [])
+
+    # Nếu chỉ có prod_id, tìm URL tương ứng
+    target_url = old_url
+    target_prod_name = ""
+    if not target_url and prod_id:
+        for p in products:
+            if p.get("id") == prod_id:
+                target_url = p.get("affiliate_url", "")
+                target_prod_name = p.get("name", "")
+                break
+
+    matched_products = []
+    for p in products:
+        if (target_url and target_url in p.get("affiliate_url", "")) or (prod_id and p.get("id") == prod_id):
+            matched_products.append({
+                "id": p.get("id"),
+                "name": p.get("name"),
+                "affiliate_url": p.get("affiliate_url"),
+                "use_count": p.get("use_count", 0)
+            })
+
+    matched_scheduled = []
+    for t in scheduled_tasks:
+        c = t.get("pinned_comment", "")
+        p_ids = t.get("selected_product_ids", [])
+        if (target_url and target_url in c) or (prod_id and prod_id in p_ids):
+            matched_scheduled.append({
+                "id": t.get("id"),
+                "title": t.get("title", ""),
+                "target_time_str": t.get("target_time_str", ""),
+                "status": t.get("status", ""),
+                "has_comment_id": bool(t.get("facebook_result", {}).get("comment_id"))
+            })
+
+    matched_history = []
+    for h in history:
+        c = h.get("pinned_comment", "")
+        p_ids = h.get("selected_product_ids", [])
+        if (target_url and target_url in c) or (prod_id and prod_id in p_ids):
+            matched_history.append({
+                "id": h.get("id"),
+                "title": h.get("title", ""),
+                "timestamp": h.get("timestamp", ""),
+                "comment_id": h.get("facebook_result", {}).get("comment_id"),
+                "facebook_url": h.get("facebook_result", {}).get("facebook_url")
+            })
+
+    return {
+        "status": "success",
+        "target_url": target_url,
+        "product_name": target_prod_name,
+        "counts": {
+            "products": len(matched_products),
+            "scheduled": len(matched_scheduled),
+            "history": len(matched_history),
+            "total": len(matched_products) + len(matched_scheduled) + len(matched_history)
+        },
+        "matched_products": matched_products,
+        "matched_scheduled": matched_scheduled,
+        "matched_history": matched_history
+    }
+
+@app.post("/api/products/batch-replace-link")
+def api_batch_replace_link(req: BatchReplaceRequest):
+    old_url = req.old_url.strip()
+    new_url = req.new_url.strip()
+    prod_id = (req.product_id or "").strip()
+    new_name = (req.new_name or "").strip()
+
+    products = load_json(PRODUCTS_FILE, [])
+    scheduled_tasks = load_json(SCHEDULED_TASKS_FILE, [])
+    history = load_json(HISTORY_FILE, [])
+
+    # Nếu chưa có old_url mà có prod_id, lấy link từ product
+    if not old_url and prod_id:
+        for p in products:
+            if p.get("id") == prod_id:
+                old_url = p.get("affiliate_url", "")
+                break
+
+    if not old_url or not new_url:
+        raise HTTPException(status_code=400, detail="Vui lòng cung cấp cả link Shopee cũ và link Shopee mới!")
+
+    old_product_names = []
+    updated_products_count = 0
+    if req.update_products:
+        for p in products:
+            if (old_url and old_url in p.get("affiliate_url", "")) or (prod_id and p.get("id") == prod_id):
+                old_product_names.append(p.get("name", ""))
+                p["affiliate_url"] = new_url
+                if new_name:
+                    p["name"] = new_name
+                updated_products_count += 1
+        save_json(PRODUCTS_FILE, products)
+
+    # 1. Cập nhật các bài trong hàng đợi hẹn giờ
+    updated_scheduled_count = 0
+    if req.update_scheduled:
+        for t in scheduled_tasks:
+            c = t.get("pinned_comment", "")
+            if old_url in c:
+                c = c.replace(old_url, new_url)
+                if new_name:
+                    for old_pname in old_product_names:
+                        if old_pname:
+                            c = c.replace(old_pname, new_name)
+                t["pinned_comment"] = c
+                updated_scheduled_count += 1
+        save_json(SCHEDULED_TASKS_FILE, scheduled_tasks)
+
+    # 2. Cập nhật Lịch sử và đồng bộ trực tiếp lên Facebook Live Comments
+    updated_history_count = 0
+    fb_comments_updated = 0
+    fb_comments_failed = 0
+    fb_logs = []
+
+    for h in history:
+        c = h.get("pinned_comment", "")
+        if old_url in c:
+            new_comment = c.replace(old_url, new_url)
+            if new_name:
+                for old_pname in old_product_names:
+                    if old_pname:
+                        new_comment = new_comment.replace(old_pname, new_name)
+            h["pinned_comment"] = new_comment
+            updated_history_count += 1
+
+            if req.update_facebook_comments:
+                fb_res = h.get("facebook_result", {})
+                comment_id = fb_res.get("comment_id")
+                if comment_id:
+                    page_id = h.get("target_page_id") or req.target_page_id
+                    pub = get_facebook_publisher(page_id)
+                    success = pub.update_comment(comment_id, new_comment)
+                    if success:
+                        fb_comments_updated += 1
+                        fb_logs.append(f"Đã sửa bình luận Facebook ID {comment_id} cho bài: '{h.get('title', '')[:35]}...'")
+                    else:
+                        fb_comments_failed += 1
+                        fb_logs.append(f"Không thể sửa bình luận Facebook ID {comment_id}")
+
+    save_json(HISTORY_FILE, history)
+
+    return {
+        "status": "success",
+        "message": f"Đã thay thế hàng loạt link '{old_url}' thành '{new_url}' thành công!",
+        "stats": {
+            "products_updated": updated_products_count,
+            "scheduled_updated": updated_scheduled_count,
+            "history_updated": updated_history_count,
+            "facebook_comments_updated": fb_comments_updated,
+            "facebook_comments_failed": fb_comments_failed
+        },
+        "logs": fb_logs
+    }
+
 @app.post("/api/upload-video")
 async def upload_video(file: UploadFile = File(...)):
     filename = f"{int(time.time())}_{file.filename}"
@@ -458,6 +641,12 @@ def analyze_script(req: AnalyzeRequest):
 
 def execute_publish_task(task_data: dict) -> dict:
     """Hàm ủy quyền được Scheduler Worker gọi khi đến giờ hẹn đăng bài."""
+    # BẢO VỆ CHỐNG ĐĂNG TRÙNG LẶP:
+    fb_res_existing = task_data.get("facebook_result") or {}
+    if task_data.get("status") == "completed" or fb_res_existing.get("video_id") or fb_res_existing.get("post_id"):
+        logger.warning(f"Tác vụ {task_data.get('id')} đã đăng thành công trước đó ({fb_res_existing}). Bỏ qua đăng trùng lặp!")
+        return fb_res_existing
+
     publisher = get_facebook_publisher(task_data.get("target_page_id"))
     post_type = task_data.get("post_type", "reel")
 
@@ -545,6 +734,21 @@ def execute_comment_task(task_data: dict) -> Optional[dict]:
 @app.post("/api/publish")
 def publish_post(req: PublishRequest):
     publisher = get_facebook_publisher(req.target_page_id)
+
+    # BẢO VỆ CHỐNG ĐĂNG TRÙNG LẶP:
+    if not req.allow_duplicate and req.video_path:
+        history = load_json(HISTORY_FILE, [])
+        target_vname = os.path.basename(req.video_path)
+        for h in history:
+            h_vpath = h.get("video_path", "")
+            h_vname = os.path.basename(h_vpath) if h_vpath else ""
+            if h_vname and h_vname == target_vname:
+                h_time = h.get("timestamp", "trước đó")
+                h_title = h.get("title", "")
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"Cảnh báo trùng lặp: Video '{target_vname}' ({h_title}) đã từng được đăng lên Facebook lúc {h_time}! Vui lòng chọn video khác để tránh đăng trùng bài."
+                )
 
     clean_title = clean_no_emojis(req.title)
     clean_caption = clean_no_emojis(req.caption)
@@ -854,6 +1058,28 @@ def api_publish_now_scheduled_task(task_id: str):
     task = get_scheduled_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Không tìm thấy tác vụ hẹn giờ này")
+    if task.get("status") == "completed":
+        raise HTTPException(status_code=400, detail="Bài viết này đã được đăng thành công trước đó trên Facebook!")
+
+    publisher = get_facebook_publisher(task.get("target_page_id"))
+
+    # TRƯỜNG HỢP 1: Video ĐÃ được tải lên Meta Cloud và đang chờ giờ phát sóng
+    cloud_video_id = (task.get("facebook_result") or {}).get("video_id")
+    if task.get("meta_cloud_schedule") and cloud_video_id:
+        try:
+            update_task_status(task_id, "publishing")
+            clean_comment = clean_no_emojis(task.get("pinned_comment", ""))
+            res = publisher.publish_scheduled_reel_now(
+                video_id=cloud_video_id,
+                pinned_comment=clean_comment
+            )
+            update_task_status(task_id, "completed", result=res)
+            return {"status": "success", "result": res}
+        except Exception as e:
+            update_task_status(task_id, "failed", error=str(e))
+            raise HTTPException(status_code=500, detail=f"Không thể kích hoạt phát sóng video trên Meta Cloud: {e}")
+
+    # TRƯỜNG HỢP 2: Bài lên lịch Local (chưa tải lên Meta)
     try:
         update_task_status(task_id, "publishing")
         res = execute_publish_task(task)

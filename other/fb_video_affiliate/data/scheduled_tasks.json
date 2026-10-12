@@ -76,10 +76,10 @@
       "success": true,
       "mode": "live",
       "message": "Đã đăng video lên Facebook Reels và ghim bình luận Shopee thành công!",
-      "video_id": "2853979514995274",
+      "video_id": "4225771897553369",
       "comment_id": "4225771897553369_1115017927747211",
       "thumbnail_applied": true,
-      "facebook_url": "https://www.facebook.com/reel/2853979514995274/",
+      "facebook_url": "https://www.facebook.com/reel/4225771897553369/",
       "published_at": "2026-10-12 13:21:42",
       "scheduled_publish_time": null
     },
@@ -119,15 +119,17 @@
       "success": true,
       "mode": "live",
       "message": "Đã đăng video lên Facebook Reels và ghim bình luận Shopee thành công!",
-      "video_id": "958430256703471",
+      "video_id": "2853979514995274",
       "comment_id": "2853979514995274_1746009513288983",
       "thumbnail_applied": true,
-      "facebook_url": "https://www.facebook.com/reel/958430256703471/",
+      "facebook_url": "https://www.facebook.com/reel/2853979514995274/",
       "published_at": "2026-10-12 13:16:32",
       "scheduled_publish_time": null
     },
     "error_message": null,
-    "completed_at": "2026-10-12 13:16:32"
+    "completed_at": "2026-10-12 13:16:32",
+    "comment_posted": true,
+    "comment_id": "958430256703471_1098804936087603"
   },
   {
     "id": "sched_1791043112_dd013d",

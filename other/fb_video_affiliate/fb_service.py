@@ -179,7 +179,7 @@ class FacebookReelsPublisher:
                 except Exception as ce:
                     logger.warning(f"Lỗi khi bình luận tự động: {ce}")
 
-            # Lấy link thật và ID thật của Reels trên Facebook
+            # Lấy link thật và ID thật của Reels trên Facebook (luôn giữ đúng video_id vừa tạo)
             facebook_url = f"https://www.facebook.com/reel/{video_id}"
             actual_video_id = video_id
             if not scheduled_publish_time:
@@ -187,17 +187,13 @@ class FacebookReelsPublisher:
                     time.sleep(1.0)
                     r_check = self._request_with_retry(
                         "GET",
-                        f"{GRAPH_API_BASE}/{self.page_id}/video_reels",
-                        params={"fields": "id,permalink_url", "limit": 1, "access_token": self.token}
+                        f"{GRAPH_API_BASE}/{video_id}",
+                        params={"fields": "permalink_url", "access_token": self.token}
                     )
-                    r_items = r_check.json().get("data", [])
-                    if r_items:
-                        actual_video_id = r_items[0].get("id", video_id)
-                        p_url = r_items[0].get("permalink_url")
-                        if p_url:
-                            facebook_url = p_url if p_url.startswith("http") else f"https://www.facebook.com{p_url}"
-                        else:
-                            facebook_url = f"https://www.facebook.com/reel/{actual_video_id}"
+                    r_data = r_check.json() if r_check.text else {}
+                    p_url = r_data.get("permalink_url")
+                    if p_url:
+                        facebook_url = p_url if p_url.startswith("http") else f"https://www.facebook.com{p_url}"
                 except Exception as pe:
                     logger.warning(f"Không thể truy vấn permalink Reels: {pe}")
 
@@ -299,6 +295,109 @@ class FacebookReelsPublisher:
         except Exception as e:
             logger.error(f"Facebook Photo publish failed: {e}")
             raise RuntimeError(f"{str(e)}")
+
+    def update_comment(self, comment_id: str, new_message: str) -> bool:
+        """Cập nhật nội dung bình luận đã đăng trên Facebook Fanpage."""
+        if self.simulation_mode:
+            logger.info(f"[MÔ PHỎNG] Đã cập nhật comment {comment_id} sang nội dung mới.")
+            return True
+
+        if not comment_id:
+            return False
+
+        try:
+            url = f"{GRAPH_API_BASE}/{comment_id.strip()}"
+            resp = self._request_with_retry(
+                "POST",
+                url,
+                data={"access_token": self.token, "message": new_message}
+            )
+            data = resp.json() if resp.text else {}
+            if resp.status_code in (200, 201) and data.get("success"):
+                logger.info(f"Đã cập nhật bình luận Facebook {comment_id} thành công!")
+                return True
+            logger.warning(f"Không thể cập nhật bình luận {comment_id}: {resp.text}")
+            return False
+        except Exception as e:
+            logger.error(f"Lỗi khi cập nhật bình luận {comment_id}: {e}")
+            return False
+
+    def update_post(self, post_id: str, new_message: str) -> bool:
+        """Cập nhật nội dung bài viết/caption đã đăng trên Facebook Fanpage."""
+        if self.simulation_mode:
+            logger.info(f"[MÔ PHỎNG] Đã cập nhật bài viết {post_id} sang nội dung mới.")
+            return True
+
+        if not post_id:
+            return False
+
+        try:
+            url = f"{GRAPH_API_BASE}/{post_id.strip()}"
+            resp = self._request_with_retry(
+                "POST",
+                url,
+                data={"access_token": self.token, "message": new_message}
+            )
+            data = resp.json() if resp.text else {}
+            if resp.status_code in (200, 201) and data.get("success"):
+                logger.info(f"Đã cập nhật bài viết Facebook {post_id} thành công!")
+                return True
+            logger.warning(f"Không thể cập nhật bài viết {post_id}: {resp.text}")
+            return False
+        except Exception as e:
+            logger.error(f"Lỗi khi cập nhật bài viết {post_id}: {e}")
+            return False
+
+    def publish_scheduled_reel_now(self, video_id: str, pinned_comment: str = "") -> Dict[str, Any]:
+        """Kích hoạt phát sóng ngay lập tức một video Reels đang ở trạng thái hẹn giờ trên Meta Cloud."""
+        if self.simulation_mode:
+            logger.info(f"[MÔ PHỎNG] Đã kích hoạt phát sóng ngay Reel {video_id}")
+            return {
+                "success": True,
+                "mode": "simulation",
+                "message": "Đã phát sóng video hẹn giờ thành công! (Mô phỏng)",
+                "video_id": video_id,
+                "facebook_url": f"https://www.facebook.com/reel/{video_id}",
+                "published_at": time.strftime("%Y-%m-%d %H:%M:%S")
+            }
+
+        try:
+            # Gửi lệnh phát sóng ngay tới Meta Graph API
+            url = f"{GRAPH_API_BASE}/{video_id}"
+            resp = self._request_with_retry(
+                "POST",
+                url,
+                data={"access_token": self.token, "is_published": "true"}
+            )
+            data = resp.json() if resp.text else {}
+            if "error" in data:
+                raise RuntimeError(self._parse_meta_error(data["error"]))
+
+            # Tự động ghim bình luận Shopee nếu có
+            comment_id = None
+            if pinned_comment:
+                time.sleep(1.5)
+                try:
+                    c_url = f"{GRAPH_API_BASE}/{video_id}/comments"
+                    c_resp = self._request_with_retry("POST", c_url, data={"access_token": self.token, "message": pinned_comment})
+                    c_data = c_resp.json()
+                    if "id" in c_data:
+                        comment_id = c_data["id"]
+                except Exception as ce:
+                    logger.warning(f"Lỗi khi bình luận tự động: {ce}")
+
+            return {
+                "success": True,
+                "mode": "live",
+                "message": "Đã phát sóng video hẹn giờ trên Facebook thành công!",
+                "video_id": video_id,
+                "comment_id": comment_id,
+                "facebook_url": f"https://www.facebook.com/reel/{video_id}",
+                "published_at": time.strftime("%Y-%m-%d %H:%M:%S")
+            }
+        except Exception as e:
+            logger.error(f"Lỗi khi phát sóng video hẹn giờ {video_id}: {e}")
+            raise RuntimeError(str(e))
 
     @staticmethod
     def verify_page(page_id: str, token: str) -> Dict[str, Any]:
