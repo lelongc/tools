@@ -1,5 +1,41 @@
 [
   {
+    "id": "prod_1791787533_c6cf",
+    "name": "Bộ Ly Thủy Trinh Có Nắp Đậy Chống Bụi Bẩn",
+    "affiliate_url": "https://s.shopee.vn/113d3tytNj",
+    "category": "Đồ dùng nhà bếp",
+    "keywords": [
+      "ly thuy tinh co nap"
+    ],
+    "notes": "Gợi ý theo kịch bản: Giúp che đậy nước uống cẩn thận không bị bụi bặm hay côn trùng rơi vào",
+    "use_count": 0,
+    "created_at": "2026-10-12"
+  },
+  {
+    "id": "prod_1791787522_5c71",
+    "name": "Ấm Siêu Tốc Đun Nước Tự Ngắt Tiện Lợi",
+    "affiliate_url": "https://s.shopee.vn/3qNoR07yzV",
+    "category": "Gia dụng nhà bếp",
+    "keywords": [
+      "am sieu toc"
+    ],
+    "notes": "Gợi ý theo kịch bản: Hỗ trợ đun nước mới mỗi ngày nhanh chóng để cả nhà luôn có nước sạch sử dụng",
+    "use_count": 0,
+    "created_at": "2026-10-12"
+  },
+  {
+    "id": "prod_1791787495_8682",
+    "name": "Bình Giữ Nhiệt Inox 316 Giữ Nóng Lạnh An Toàn",
+    "affiliate_url": "https://s.shopee.vn/30ohROyx8e",
+    "category": "Gia dụng gia đình",
+    "keywords": [
+      "binh giu nhiet inox"
+    ],
+    "notes": "Gợi ý theo kịch bản: Giúp bà con luôn có nước ấm sạch sẽ uống trong ngày mà không sợ bụi bẩn rơi vào",
+    "use_count": 0,
+    "created_at": "2026-10-12"
+  },
+  {
     "id": "prod_1790954091_5954",
     "name": "Nồi chiên không dầu giảm mỡ thừa",
     "affiliate_url": "https://s.shopee.vn/4VdFqPHJOd",
@@ -8,7 +44,7 @@
       "nồi chiên không dầu"
     ],
     "notes": "Gợi ý theo kịch bản: Giúp chế biến món ăn nhanh chóng, hạn chế dầu mỡ chiên đi chiên lại nhiều lần sinh chất độc hại",
-    "use_count": 2,
+    "use_count": 3,
     "created_at": "2026-10-02"
   },
   {
@@ -26,7 +62,7 @@
       "tiêu hóa"
     ],
     "notes": "Thay thế hộp nhựa độc hại, giữ thức ăn tươi ngon không sinh độc chất",
-    "use_count": 3,
+    "use_count": 4,
     "created_at": "2026-10-02"
   },
   {
@@ -44,7 +80,7 @@
       "vi khuẩn"
     ],
     "notes": "Cân bằng hệ vi sinh đường ruột, chống rối loạn tiêu hóa và đau bụng",
-    "use_count": 3,
+    "use_count": 4,
     "created_at": "2026-10-02"
   }
 ]

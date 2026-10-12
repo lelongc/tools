@@ -21,6 +21,12 @@
         </div>
       </div>
       <div class="header-status">
+        <div class="header-page-selector-wrap" id="headerPageSelectorWrap">
+          <span class="header-page-icon">📘</span>
+          <select id="headerActivePageSelect" class="header-page-select" title="Chọn Fanpage đang hoạt động">
+            <option value="">Đang tải Fanpage...</option>
+          </select>
+        </div>
         <div class="badge model-badge">
           <span class="status-dot green"></span>
           <span id="currentModelBadge">Gemini 3.5 Flash-Lite</span>
@@ -61,7 +67,23 @@
       
       <!-- ================= TAB 1: STUDIO ================= -->
       <section id="tab-studio" class="tab-pane active">
-        <div class="studio-grid">
+        <!-- Bộ chuyển đổi Định dạng bài đăng: Video Reels vs Bài Viết Ảnh -->
+        <div class="content-type-nav">
+          <button type="button" class="type-nav-btn active" id="btnTypeReels">
+            <span class="type-icon">🎬</span>
+            <span>Đăng Video Reels</span>
+            <span class="type-badge">Shorts / Reels</span>
+          </button>
+          <button type="button" class="type-nav-btn" id="btnTypePhoto">
+            <span class="type-icon">🖼️</span>
+            <span>Đăng Bài Viết Ảnh</span>
+            <span class="type-badge green">Mới - Đơn Giản</span>
+          </button>
+        </div>
+
+        <!-- VIEW 1: ĐĂNG VIDEO REELS -->
+        <div id="reelsStudioView" class="studio-content-view">
+          <div class="studio-grid">
           
           <!-- Cột Trái: Nhập Liệu -->
           <div class="panel input-panel">
@@ -369,9 +391,163 @@ Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
 
               <div class="publish-status-box" id="publishResultBox" style="display: none;"></div>
 
+          </div>
+        </div>
+
+        <!-- VIEW 2: ĐĂNG BÀI VIẾT ẢNH -->
+        <div id="photoStudioView" class="studio-content-view" style="display: none;">
+          <div class="studio-grid">
+            <!-- Cột Trái: Chọn ảnh & Nhập ý tưởng -->
+            <div class="panel input-panel">
+              <div class="panel-header">
+                <h2>1. Chọn Ảnh & Nhập Ý Tưởng</h2>
+                <span class="tag-hint">Nhanh gọn - Tự động</span>
+              </div>
+
+              <!-- Upload / Chọn Ảnh -->
+              <div class="form-group">
+                <label>File Ảnh Bài Đăng (JPG, PNG, WEBP):</label>
+                <div class="drop-zone" id="photoDropZone">
+                  <input type="file" id="photoFileInput" accept="image/png,image/jpeg,image/webp,image/*" hidden>
+                  <div class="drop-zone-prompt" id="photoDropPrompt">
+                    <span class="upload-icon">🖼️</span>
+                    <p>Kéo thả ảnh vào đây hoặc <span class="highlight">Bấm để chọn file ảnh</span></p>
+                    <small>Khuyên dùng ảnh dọc 4:5 hoặc vuông 1:1, rõ nét, mẹo dễ đọc</small>
+                  </div>
+                  <div class="photo-preview-box" id="photoPreviewBox" style="display: none;">
+                    <img id="photoPreviewImg" src="" alt="Xem trước ảnh">
+                    <div class="video-meta">
+                      <span id="photoFileName">photo.png</span>
+                      <button type="button" class="btn-xs btn-danger" id="btnRemovePhoto">Chọn ảnh khác</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ô Nhập Ý Tưởng / Chủ Đề -->
+              <div class="form-group">
+                <label for="photoPromptInput">Chủ Đề Hoặc Mẹo Bạn Muốn Chia Sẻ (Tùy chọn):</label>
+                <textarea id="photoPromptInput" class="form-control" rows="4" placeholder="Ví dụ: 3 thời điểm vàng uống nước ấm tốt cho thận và thải độc cơ thể buổi sáng... (Hoặc để trống để AI tự tạo mẹo hay dựa theo chủ đề Sức khỏe)"></textarea>
+                <small class="hint">Bạn chỉ cần gõ vài dòng ngắn gọn, AI Gemini sẽ tự động viết caption chuẩn văn phong mộc mạc, ngắt dòng thông thoáng và 100% không dùng icon.</small>
+              </div>
+
+              <button type="button" class="btn btn-primary btn-block btn-lg" id="btnAnalyzePhoto">
+                <span class="btn-icon">✨</span>
+                <span>AI Tạo Caption & Khớp Link Shopee</span>
+              </button>
+            </div>
+
+            <!-- Cột Phải: Kết Quả & Đăng Bài -->
+            <div class="panel output-panel">
+              <div class="panel-header">
+                <h2>2. Nội Dung & Đăng Bài</h2>
+                <span class="tag-hint" id="photoStatusTag">Sẵn sàng</span>
+              </div>
+
+              <!-- Trạng thái trống -->
+              <div class="empty-state" id="photoEmptyState">
+                <div class="empty-icon">🖼️</div>
+                <h3>Chưa Có Nội Dung Bài Viết Ảnh</h3>
+                <p>Hãy tải lên 1 bức ảnh và bấm <b>"AI Tạo Caption & Khớp Link Shopee"</b> để AI chuẩn bị nội dung hoàn chỉnh cho bạn.</p>
+              </div>
+
+              <!-- Nội dung kết quả -->
+              <div class="result-content" id="photoResultContent" style="display: none;">
+                <!-- Tiêu đề bài viết -->
+                <div class="result-card">
+                  <div class="card-header">
+                    <h4>📌 Tiêu Đề Bài Viết Ảnh:</h4>
+                  </div>
+                  <input type="text" id="outPhotoTitle" class="form-control bold-input font-title" placeholder="Tiêu đề bài viết ảnh...">
+                </div>
+
+                <!-- Caption bài viết -->
+                <div class="result-card">
+                  <div class="card-header">
+                    <h4>📝 Nội Dung Bài Viết (Caption):</h4>
+                  </div>
+                  <textarea id="outPhotoCaption" class="form-control font-mono" rows="6" placeholder="Nội dung bài viết..."></textarea>
+                </div>
+
+                <!-- Hashtags -->
+                <div class="result-card">
+                  <div class="card-header">
+                    <h4>🏷️ Bộ Hashtags:</h4>
+                  </div>
+                  <div class="hashtags-cloud" id="photoHashtagsCloud"></div>
+                </div>
+
+                <!-- Bình luận ghim Shopee -->
+                <div class="result-card">
+                  <div class="card-header">
+                    <h4>💬 Bình Luận Ghim Shopee Affiliate:</h4>
+                  </div>
+                  <textarea id="outPhotoComment" class="form-control" rows="4" placeholder="Bình luận ghim link Shopee..."></textarea>
+                </div>
+
+                <!-- Bộ Hẹn Giờ Cho Ảnh -->
+                <div class="schedule-control-card">
+                  <div class="schedule-mode-toggle">
+                    <span class="sched-label">Chế Độ Đăng:</span>
+                    <div class="btn-group-toggle">
+                      <button type="button" class="btn-toggle active" id="btnPhotoModeImmediate">⚡ Đăng Ngay</button>
+                      <button type="button" class="btn-toggle" id="btnPhotoModeSchedule">⏰ Hẹn Giờ</button>
+                    </div>
+                  </div>
+
+                  <div class="schedule-settings-box" id="photoScheduleSettingsBox" style="display: none;">
+                    <div class="golden-slots-group">
+                      <label>Khung Giờ Vàng Sức Khỏe:</label>
+                      <div class="preset-slots-grid">
+                        <button type="button" class="btn-preset-slot btn-photo-slot" data-slot="06:30">
+                          <span class="slot-time">06:30</span>
+                          <span class="slot-desc">🌅 Sáng (Thức giấc, giải độc)</span>
+                        </button>
+                        <button type="button" class="btn-preset-slot btn-photo-slot" data-slot="11:45">
+                          <span class="slot-time">11:45</span>
+                          <span class="slot-desc">🍱 Trưa (Dinh dưỡng, tiêu hóa)</span>
+                        </button>
+                        <button type="button" class="btn-preset-slot btn-photo-slot" data-slot="19:00">
+                          <span class="slot-time">19:00</span>
+                          <span class="slot-desc">🌙 Tối (Bữa tối gia đình)</span>
+                        </button>
+                        <button type="button" class="btn-preset-slot btn-photo-slot" data-slot="21:15">
+                          <span class="slot-time">21:15</span>
+                          <span class="slot-desc">🛏️ Đêm (Giấc ngủ ngon)</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div class="form-group custom-time-group">
+                      <label for="inputPhotoScheduleTime">Thời Gian Phát Sóng Cụ Thể:</label>
+                      <input type="datetime-local" id="inputPhotoScheduleTime" class="form-control font-mono">
+                    </div>
+
+                    <div class="cloud-schedule-option">
+                      <label class="checkbox-container">
+                        <input type="checkbox" id="chkPhotoMetaCloudSchedule" checked>
+                        <span class="checkmark"></span>
+                        <span class="chk-label">
+                          <strong>☁️ Hẹn giờ trực tiếp qua Meta Cloud (Khuyên dùng)</strong>
+                          <small>Tải ảnh thẳng lên máy chủ Facebook, tắt máy tính thì Facebook vẫn tự phát sóng đúng giờ!</small>
+                        </span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Nút Hành Động Đăng Ảnh -->
+                <div class="action-buttons">
+                  <button type="button" class="btn btn-success btn-lg btn-block" id="btnPublishPhoto">
+                    <span id="btnPublishPhotoIcon">🚀</span>
+                    <span id="btnPublishPhotoText">ĐĂNG BÀI VIẾT ẢNH & GHIM LINK SHOPEE</span>
+                  </button>
+                </div>
+
+                <div class="publish-status-box" id="photoPublishResultBox" style="display: none;"></div>
+              </div>
             </div>
           </div>
-
         </div>
       </section>
 
@@ -508,32 +684,76 @@ Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
             </div>
 
             <div class="setting-section">
-              <h3>2. Kết Nối Fanpage Facebook (Reels Publishing API)</h3>
-              
-              <div class="form-group switch-group">
+              <div class="label-with-action">
+                <h3>2. Quản Lý Danh Sách Fanpage Facebook (Multi-Pages)</h3>
+                <span class="tag-hint" id="cfgActivePageBadge">Trang Đang Chọn: --</span>
+              </div>
+              <p class="subtitle" style="margin-bottom: 14px;">Quản lý nhiều Fanpage cùng lúc. Thêm, sửa, xóa hoặc chuyển đổi trang đăng bài chỉ với 1 click.</p>
+
+              <!-- Bảng Danh Sách Fanpage -->
+              <div class="pages-table-wrapper">
+                <table class="pages-table" id="pagesTable">
+                  <thead>
+                    <tr>
+                      <th style="width: 140px;">Trạng Thái</th>
+                      <th>Tên Fanpage</th>
+                      <th>Facebook Page ID</th>
+                      <th style="width: 190px; text-align: center;">Hành Động</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pagesTableBody">
+                    <!-- Rendered by JS -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Form Thêm / Cập Nhật Trang Mới -->
+              <div class="add-page-box">
+                <h4 id="pageFormTitle" style="margin-bottom: 12px; color: var(--accent-emerald);">➕ Thêm / Sửa Trang Facebook</h4>
+                <div class="form-row-duo">
+                  <div class="form-group">
+                    <label for="newCfgPageId">Facebook Page ID (*):</label>
+                    <input type="text" id="newCfgPageId" class="form-control" placeholder="Ví dụ: 924512634089549">
+                  </div>
+                  <div class="form-group">
+                    <label for="newCfgPageName">Tên Gợi Nhớ (Tùy chọn):</label>
+                    <input type="text" id="newCfgPageName" class="form-control" placeholder="Ví dụ: Mẹo Sống Khỏe">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="newCfgPageToken">Page Access Token Vĩnh Viễn (*):</label>
+                  <input type="password" id="newCfgPageToken" class="form-control" placeholder="EAAxxxxxxxxx...">
+                  <small class="hint">Mã truy cập trang vĩnh viễn (Page Token) từ Meta App <code>page-gk</code>.</small>
+                </div>
+
+                <div class="page-form-actions" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                  <button type="button" class="btn btn-secondary btn-sm" id="btnVerifyPageToken">
+                    <span>🔍 Kiểm Tra Token & Lấy Tên Tự Động</span>
+                  </button>
+                  <button type="button" class="btn btn-primary btn-sm" id="btnSavePage">
+                    <span>💾 Lưu Fanpage Này</span>
+                  </button>
+                  <button type="button" class="btn btn-secondary btn-sm" id="btnCancelEditPage" style="display: none;">
+                    <span>✕ Hủy Sửa</span>
+                  </button>
+                </div>
+                <div id="pageVerifyAlert" style="display: none; margin-top: 10px;"></div>
+              </div>
+
+              <div class="form-group switch-group" style="margin-top: 20px;">
                 <label class="switch">
-                  <input type="checkbox" id="cfgSimulationMode" checked>
+                  <input type="checkbox" id="cfgSimulationMode">
                   <span class="slider round"></span>
                 </label>
                 <div>
                   <strong>Chế Độ Mô Phỏng (Test Mode)</strong>
-                  <p class="hint">Bật chế độ này để thử nghiệm toàn bộ luồng đăng video và comment mà không cần nạp Page Token thật.</p>
+                  <p class="hint">Bật chế độ này để thử nghiệm mà không đăng thật lên Facebook.</p>
                 </div>
-              </div>
-
-              <div class="form-group">
-                <label for="cfgPageId">Facebook Page ID:</label>
-                <input type="text" id="cfgPageId" class="form-control" placeholder="Ví dụ: 102938475610293">
-              </div>
-
-              <div class="form-group">
-                <label for="cfgPageToken">Facebook Page Access Token (Vĩnh viễn):</label>
-                <input type="password" id="cfgPageToken" class="form-control" placeholder="EAAxxxxxxxxx...">
-                <small class="hint">Token có quyền <code>publish_video</code>, <code>pages_manage_posts</code>, <code>pages_read_engagement</code>.</small>
               </div>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-block">💾 Lưu Cấu Hình</button>
+            <button type="submit" class="btn btn-primary btn-block">💾 Lưu Cấu Hình Chung (Gemini & Mode)</button>
           </form>
         </div>
       </section>

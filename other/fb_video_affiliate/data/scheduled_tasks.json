@@ -1,8 +1,52 @@
 [
   {
+    "id": "sched_1791787652_678149",
+    "created_at": "2026-10-12 13:47:32",
+    "status": "completed",
+    "target_timestamp": 1791866700,
+    "target_time_str": "2026-10-13 11:45:00",
+    "golden_slot_label": "🍱 Trưa 11:45 (Tiêu hóa, giãn cơ, tim mạch)",
+    "meta_cloud_schedule": true,
+    "video_path": "D:\\folder\\tools\\other\\fb_video_affiliate\\uploads\\1791786624_4.mp4",
+    "thumbnail_path": "D:\\folder\\tools\\other\\fb_video_affiliate\\uploads\\thumb_1791787602.png",
+    "title": "Uống nước đun sôi để nguội qua ngày: Thói quen rước bệnh vào thân, xem ngay kẻo hối!",
+    "caption": "Nước đun sôi để qua hai mươi bốn tiếng là vi khuẩn sinh sôi và dễ gây đau bụng, viêm ruột cho cả nhà. Nấu nước ngày nào thì bà con nên uống hết trong ngày đó để đảm bảo sức khỏe. Lưu lại ngay mẹo hay này và chia sẻ cho người thân cùng biết nhé!",
+    "hashtags": [
+      "#suckhoe",
+      "#meosuckhoe",
+      "#canhbao",
+      "#meohay",
+      "#songkhoe",
+      "#chamsocsuckhoe",
+      "#suckhoegiadinh"
+    ],
+    "pinned_comment": "Cảm ơn bà con đã xem video của nhà em nha. Nhớ là nước đun sôi chỉ nên uống trong ngày thôi để bảo vệ cái bụng của mình không bị đau thắt hay viêm ruột. Nhà em có chuẩn bị sẵn mấy món đồ dùng an toàn cho sức khỏe, bà con tham khảo nha:\n- Bình Giữ Nhiệt Inox 316 Giữ Nóng Lạnh An Toàn: https://s.shopee.vn/8KpyPKwP49\n- Men vi sinh bào tử lợi khuẩn đa chủng đường ruột: https://s.shopee.vn/6fhkQL8lMc\n- Ấm Siêu Tốc Đun Nước Tự Ngắt Tiện Lợi: https://s.shopee.vn/3qNoR07yzV\n- Bộ Ly Thủy Trinh Có Nắp Đậy Chống Bụi Bẩn: https://s.shopee.vn/113d3tytNj",
+    "selected_product_ids": [
+      "prod_8",
+      "prod_11",
+      "prod_1791787495_8682",
+      "prod_1791787522_5c71",
+      "prod_1791787533_c6cf"
+    ],
+    "script": "Nhà ai hay uống nước đun sôi để nguội qua mấy ngày thì bỏ ngay đi nha. Thứ nhất là nước để quá hai tư tiếng vi khuẩn đã sinh sôi rồi.\nThứ hai là uống vào chẳng giải khát đâu mà chỉ dễ làm đau bụng, viêm ruột. Thứ ba là nước để hở cặn bã bụi bặm rơi vào rất bẩn.\nNấu nước ngày nào thì uống hết trong ngày đó thôi nha bà con. Nhớ thả tim và theo dõi tui để biết thêm nhiều điều hay bảo vệ sức khỏe nhé.",
+    "niche": "Sức khỏe & Đời sống (Bán hàng Affiliate)",
+    "facebook_result": {
+      "success": true,
+      "mode": "scheduled",
+      "message": "Đã lên lịch đăng video trên Facebook Meta Cloud thành công!",
+      "video_id": "1964842588219453",
+      "comment_id": null,
+      "thumbnail_applied": true,
+      "facebook_url": "https://www.facebook.com/reel/1964842588219453",
+      "published_at": "2026-10-12 13:47:32",
+      "scheduled_publish_time": 1791866700
+    },
+    "error_message": null
+  },
+  {
     "id": "sched_1791785580_79ed26",
     "created_at": "2026-10-12 13:13:00",
-    "status": "pending",
+    "status": "completed",
     "target_timestamp": 1791866700,
     "target_time_str": "2026-10-13 11:45:00",
     "golden_slot_label": "🍱 Trưa 11:45 (Bữa trưa dinh dưỡng & Tiêu hóa khỏe)",
@@ -30,16 +74,17 @@
     "niche": "Sức khỏe",
     "facebook_result": {
       "success": true,
-      "mode": "scheduled",
-      "message": "Đã lên lịch đăng video trên Facebook Meta Cloud thành công!",
-      "video_id": "1079019081570814",
-      "comment_id": null,
+      "mode": "live",
+      "message": "Đã đăng video lên Facebook Reels và ghim bình luận Shopee thành công!",
+      "video_id": "2853979514995274",
+      "comment_id": "4225771897553369_1115017927747211",
       "thumbnail_applied": true,
-      "facebook_url": "https://www.facebook.com/reel/1079019081570814",
-      "published_at": "2026-10-12 13:13:00",
-      "scheduled_publish_time": 1791866700
+      "facebook_url": "https://www.facebook.com/reel/2853979514995274/",
+      "published_at": "2026-10-12 13:21:42",
+      "scheduled_publish_time": null
     },
-    "error_message": null
+    "error_message": null,
+    "completed_at": "2026-10-12 13:21:42"
   },
   {
     "id": "sched_1791785537_b15762",

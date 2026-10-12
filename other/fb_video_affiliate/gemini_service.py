@@ -308,3 +308,68 @@ CÔNG THỨC VIRAL VIDEO SỨC KHỎE TRIỆU VIEW:
             logger.warning(f"Lỗi khi retry yêu cầu có dấu: {retry_err}")
 
     return sanitize_analysis_output(raw_result)
+
+def analyze_photo_post(
+    prompt_text: str = "",
+    niche: str = "Sức khỏe",
+    catalog: List[Dict[str, Any]] = None,
+    api_key: str = "",
+    model_name: str = "gemini-3.5-flash-lite"
+) -> Dict[str, Any]:
+    """Phân tích và tạo nội dung bài viết ảnh (Facebook Photo Post) kèm caption, hashtag và link Shopee."""
+    catalog = catalog or []
+    catalog_summary = []
+    for item in catalog:
+        catalog_summary.append({
+            "id": item.get("id"),
+            "name": item.get("name"),
+            "affiliate_url": item.get("affiliate_url"),
+            "category": item.get("category"),
+            "keywords": item.get("keywords", [])
+        })
+
+    user_input = prompt_text.strip() if prompt_text else "Chia sẻ mẹo sức khỏe bổ ích, dễ áp dụng hàng ngày cho cả gia đình"
+
+    prompt = f"""
+Bạn là chuyên gia Sáng tạo Nội Dung Bài Viết Ảnh Fanpage Facebook ({niche}) tại Việt Nam chuyên về mẹo sức khỏe, thảo dược và đời sống gia đình.
+TUYỆT ĐỐI KHÔNG đưa tên riêng của người khác hay tên kênh khác vào bài viết! Dùng danh xưng chung ("Kênh em", "Nhà em", "Bà con ơi").
+
+CHỦ ĐỀ / NỘI DUNG MONG MUỐN:
+\"\"\"{user_input}\"\"\"
+
+KHO SẢN PHẨM SHOPEE HIỆN CÓ:
+{json.dumps(catalog_summary, ensure_ascii=False, indent=2)}
+
+CÔNG THỨC BÀI VIẾT ẢNH VIRAL CHUẨN MỘC MẠC:
+1. BẮT BUỘC TIẾNG VIỆT CÓ ĐẦY ĐỦ DẤU THANH 100%. Tuyệt đối không viết không dấu.
+2. TUYỆT ĐỐI KHÔNG DÙNG BẤT KỲ ICON / EMOJI NÀO (không dùng 🌿, 💡, 👉, ⚠️...). Phải là chữ viết tự nhiên mộc mạc như người thật.
+3. TIÊU ĐỀ (title): Dưới 80 ký tự, nêu bật thói quen hoặc giải pháp sức khỏe hữu ích.
+4. NỘI DUNG (caption): Ngắn gọn 3-5 câu mạch lạc, giải thích rõ nguyên nhân và mẹo khắc phục đơn giản, ngắt dòng thông thoáng dễ đọc. Kèm lời kêu gọi: "Lưu lại ngay mẹo hay này và chia sẻ cho người thân cùng biết nhé!".
+5. HASHTAGS: Bộ 5 - 8 thẻ hashtag liên quan (ví dụ: #suckhoe #meosuckhoe #meohay #songkhoe #chamsocsuckhoe).
+6. KHỚP NỐI SHOPEE: Chọn 1 - 2 sản phẩm liên quan nhất trong kho vào "selected_product_ids" và viết "pinned_comment" chân thành, mộc mạc. Mỗi sản phẩm trên 1 dòng định dạng: "- Tên sản phẩm: Link Shopee".
+
+Định dạng JSON trả về bắt buộc:
+{{
+  "title": "string (Tiêu đề có dấu, không icon)",
+  "caption": "string (Nội dung bài viết ảnh, không icon)",
+  "hashtags": ["string"],
+  "selected_product_ids": ["string"],
+  "pinned_comment": "string (bình luận ghim mộc mạc, không icon, định dạng: - Tên SP: Link)"
+}}
+"""
+    fallback_model = "gemini-3.1-flash-lite" if model_name == "gemini-3.5-flash-lite" else "gemini-3.5-flash-lite"
+    try:
+        raw_result = call_gemini_api(api_key, model_name, prompt)
+    except Exception as e:
+        logger.warning(f"Thử model {model_name} thất bại ({e}), chuyển sang dự phòng {fallback_model}...")
+        raw_result = call_gemini_api(api_key, fallback_model, prompt)
+
+    if isinstance(raw_result, dict):
+        if "title" in raw_result:
+            raw_result["title"] = clean_no_emojis(raw_result["title"])
+        if "caption" in raw_result:
+            raw_result["caption"] = clean_no_emojis(raw_result["caption"])
+        if "pinned_comment" in raw_result:
+            raw_result["pinned_comment"] = clean_no_emojis(raw_result["pinned_comment"])
+
+    return raw_result

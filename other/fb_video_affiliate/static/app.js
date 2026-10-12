@@ -6,8 +6,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // Global States
   let currentConfig = {};
   let currentProducts = [];
+  let currentPages = [];
+  let activePageId = "";
   let currentVideoPath = "";
   let lastAnalysisResult = null;
+  let currentPhotoPath = "";
+  let lastPhotoAnalysisResult = null;
+  let isPhotoScheduleMode = false;
+  let selectedPhotoGoldenSlot = "";
+  let editingPageId = null;
 
   // DOM Elements - Tabs
   const tabButtons = document.querySelectorAll(".tab-btn");
@@ -110,10 +117,55 @@ document.addEventListener("DOMContentLoaded", () => {
   const cfgGeminiKey = document.getElementById("cfgGeminiKey");
   const cfgDefaultModel = document.getElementById("cfgDefaultModel");
   const cfgSimulationMode = document.getElementById("cfgSimulationMode");
-  const cfgPageId = document.getElementById("cfgPageId");
-  const cfgPageToken = document.getElementById("cfgPageToken");
   const currentModelBadge = document.getElementById("currentModelBadge");
   const fbModeText = document.getElementById("fbModeText");
+
+  // DOM Elements - Multi-Fanpage Management
+  const headerActivePageSelect = document.getElementById("headerActivePageSelect");
+  const pagesTableBody = document.getElementById("pagesTableBody");
+  const cfgActivePageBadge = document.getElementById("cfgActivePageBadge");
+  const newCfgPageId = document.getElementById("newCfgPageId");
+  const newCfgPageName = document.getElementById("newCfgPageName");
+  const newCfgPageToken = document.getElementById("newCfgPageToken");
+  const btnVerifyPageToken = document.getElementById("btnVerifyPageToken");
+  const btnSavePage = document.getElementById("btnSavePage");
+  const btnCancelEditPage = document.getElementById("btnCancelEditPage");
+  const pageVerifyAlert = document.getElementById("pageVerifyAlert");
+  const pageFormTitle = document.getElementById("pageFormTitle");
+
+  // DOM Elements - Studio Switcher (Reels vs Photo)
+  const btnTypeReels = document.getElementById("btnTypeReels");
+  const btnTypePhoto = document.getElementById("btnTypePhoto");
+  const reelsStudioView = document.getElementById("reelsStudioView");
+  const photoStudioView = document.getElementById("photoStudioView");
+
+  // DOM Elements - Photo Studio
+  const photoDropZone = document.getElementById("photoDropZone");
+  const photoFileInput = document.getElementById("photoFileInput");
+  const photoDropPrompt = document.getElementById("photoDropPrompt");
+  const photoPreviewBox = document.getElementById("photoPreviewBox");
+  const photoPreviewImg = document.getElementById("photoPreviewImg");
+  const photoFileName = document.getElementById("photoFileName");
+  const btnRemovePhoto = document.getElementById("btnRemovePhoto");
+  const photoPromptInput = document.getElementById("photoPromptInput");
+  const btnAnalyzePhoto = document.getElementById("btnAnalyzePhoto");
+  const photoStatusTag = document.getElementById("photoStatusTag");
+  const photoEmptyState = document.getElementById("photoEmptyState");
+  const photoResultContent = document.getElementById("photoResultContent");
+  const outPhotoTitle = document.getElementById("outPhotoTitle");
+  const outPhotoCaption = document.getElementById("outPhotoCaption");
+  const photoHashtagsCloud = document.getElementById("photoHashtagsCloud");
+  const outPhotoComment = document.getElementById("outPhotoComment");
+  const btnPhotoModeImmediate = document.getElementById("btnPhotoModeImmediate");
+  const btnPhotoModeSchedule = document.getElementById("btnPhotoModeSchedule");
+  const photoScheduleSettingsBox = document.getElementById("photoScheduleSettingsBox");
+  const photoPresetSlotButtons = document.querySelectorAll(".btn-photo-slot");
+  const inputPhotoScheduleTime = document.getElementById("inputPhotoScheduleTime");
+  const chkPhotoMetaCloudSchedule = document.getElementById("chkPhotoMetaCloudSchedule");
+  const btnPublishPhoto = document.getElementById("btnPublishPhoto");
+  const btnPublishPhotoIcon = document.getElementById("btnPublishPhotoIcon");
+  const btnPublishPhotoText = document.getElementById("btnPublishPhotoText");
+  const photoPublishResultBox = document.getElementById("photoPublishResultBox");
 
   // ================= TABS SWITCHING =================
   tabButtons.forEach(btn => {
@@ -167,11 +219,593 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function loadConfigToSettings() {
     if (!currentConfig) return;
-    cfgGeminiKey.value = currentConfig.gemini_api_key || "";
-    cfgDefaultModel.value = currentConfig.default_model || "gemini-3.5-flash-lite";
-    cfgSimulationMode.checked = !!currentConfig.facebook?.simulation_mode;
-    cfgPageId.value = currentConfig.facebook?.page_id || "";
-    cfgPageToken.value = currentConfig.facebook?.page_access_token || "";
+    if (cfgGeminiKey) cfgGeminiKey.value = currentConfig.gemini_api_key || "";
+    if (cfgDefaultModel) cfgDefaultModel.value = currentConfig.default_model || "gemini-3.5-flash-lite";
+    if (cfgSimulationMode) cfgSimulationMode.checked = !!currentConfig.facebook?.simulation_mode;
+    loadPages();
+  }
+
+  // ================= MULTI-FANPAGE MANAGEMENT =================
+  async function loadPages() {
+    try {
+      const res = await fetch("/api/facebook/pages");
+      const data = await res.json();
+      currentPages = data.pages || [];
+      activePageId = data.active_page_id || "";
+
+      // 1. Render Header Selector
+      if (headerActivePageSelect) {
+        headerActivePageSelect.innerHTML = "";
+        if (currentPages.length === 0) {
+          headerActivePageSelect.innerHTML = `<option value="">(Chưa có Fanpage)</option>`;
+        } else {
+          currentPages.forEach(p => {
+            const opt = document.createElement("option");
+            opt.value = p.id;
+            opt.textContent = `${p.name || 'Fanpage'} (${p.id.slice(-6)})`;
+            if (p.is_active || p.id === activePageId) {
+              opt.selected = true;
+            }
+            headerActivePageSelect.appendChild(opt);
+          });
+        }
+      }
+
+      // 2. Render Settings Active Badge
+      if (cfgActivePageBadge) {
+        const activePage = currentPages.find(p => p.is_active || p.id === activePageId);
+        if (activePage) {
+          cfgActivePageBadge.textContent = `Trang Đang Chọn: ${activePage.name} (${activePage.id})`;
+          cfgActivePageBadge.style.color = "var(--accent-emerald)";
+        } else {
+          cfgActivePageBadge.textContent = "Chưa chọn trang";
+          cfgActivePageBadge.style.color = "var(--text-muted)";
+        }
+      }
+
+      // 3. Render Settings Table
+      renderPagesTable();
+    } catch (err) {
+      console.error("Lỗi tải danh sách Fanpage:", err);
+    }
+  }
+
+  function renderPagesTable() {
+    if (!pagesTableBody) return;
+    pagesTableBody.innerHTML = "";
+
+    if (currentPages.length === 0) {
+      pagesTableBody.innerHTML = `
+        <tr>
+          <td colspan="4" style="text-align:center; color:var(--text-muted); padding: 18px;">
+            Chưa có Fanpage nào được kết nối. Hãy thêm Page ID và Token ở bên dưới!
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    currentPages.forEach(p => {
+      const tr = document.createElement("tr");
+      const isActive = p.is_active || p.id === activePageId;
+      tr.innerHTML = `
+        <td>
+          <span class="page-status-badge ${isActive ? 'active' : 'inactive'}">
+            ${isActive ? '● Đang Dùng' : '○ Phụ'}
+          </span>
+        </td>
+        <td><b>${p.name || 'Fanpage'}</b></td>
+        <td><code>${p.id}</code></td>
+        <td style="text-align: center;">
+          ${!isActive ? `<button type="button" class="btn-table-action btn-select" data-id="${p.id}">Kích Hoạt</button>` : ''}
+          <button type="button" class="btn-table-action btn-edit-page" data-id="${p.id}">Sửa</button>
+          <button type="button" class="btn-table-action btn-del" data-id="${p.id}">Xóa</button>
+        </td>
+      `;
+      pagesTableBody.appendChild(tr);
+    });
+
+    // Attach row events
+    pagesTableBody.querySelectorAll(".btn-select").forEach(b => {
+      b.addEventListener("click", () => switchActivePage(b.getAttribute("data-id")));
+    });
+    pagesTableBody.querySelectorAll(".btn-edit-page").forEach(b => {
+      b.addEventListener("click", () => editPage(b.getAttribute("data-id")));
+    });
+    pagesTableBody.querySelectorAll(".btn-del").forEach(b => {
+      b.addEventListener("click", () => deletePage(b.getAttribute("data-id")));
+    });
+  }
+
+  // Chuyển trang hoạt động
+  async function switchActivePage(pageId) {
+    try {
+      const res = await fetch(`/api/facebook/pages/${pageId}/activate`, { method: "POST" });
+      const d = await res.json();
+      if (d.status === "success") {
+        showToast(`Đã chuyển sang trang: ${d.active_page_name || pageId}`);
+        loadPages();
+      } else {
+        throw new Error(d.detail || "Không thể kích hoạt trang");
+      }
+    } catch (e) {
+      showToast("Lỗi chuyển trang: " + e.message, "error");
+    }
+  }
+
+  // Header select event
+  if (headerActivePageSelect) {
+    headerActivePageSelect.addEventListener("change", () => {
+      const selectedId = headerActivePageSelect.value;
+      if (selectedId && selectedId !== activePageId) {
+        switchActivePage(selectedId);
+      }
+    });
+  }
+
+  // Kiểm tra token qua Graph API
+  if (btnVerifyPageToken) {
+    btnVerifyPageToken.addEventListener("click", async () => {
+      const pId = newCfgPageId.value.trim();
+      const pTok = newCfgPageToken.value.trim();
+      if (!pId || !pTok) {
+        showToast("Vui lòng nhập Page ID và Page Access Token trước!", "error");
+        return;
+      }
+      btnVerifyPageToken.disabled = true;
+      btnVerifyPageToken.innerHTML = `<span>⏳ Đang kiểm tra với Meta Graph API...</span>`;
+      pageVerifyAlert.style.display = "none";
+
+      try {
+        const res = await fetch("/api/facebook/pages/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ page_id: pId, access_token: pTok })
+        });
+        const d = await res.json();
+        pageVerifyAlert.style.display = "block";
+        if (d.valid) {
+          const pgName = d.name || d.page_name || "Fanpage";
+          const pgId = d.id || d.page_id || pId;
+          pageVerifyAlert.className = "alert-box alert-success";
+          pageVerifyAlert.innerHTML = `✅ Kết nối thành công! Tên Trang: <b>${pgName}</b> (ID: ${pgId})`;
+          if (!newCfgPageName.value.trim()) {
+            newCfgPageName.value = pgName;
+          }
+          showToast(`Xác thực thành công Fanpage: ${pgName}!`);
+        } else {
+          pageVerifyAlert.className = "alert-box alert-error";
+          pageVerifyAlert.innerHTML = `❌ Token không hợp lệ hoặc thiếu quyền: ${d.message || d.error}`;
+          showToast("Xác thực thất bại", "error");
+        }
+      } catch (err) {
+        pageVerifyAlert.style.display = "block";
+        pageVerifyAlert.className = "alert-box alert-error";
+        pageVerifyAlert.innerHTML = `❌ Lỗi kết nối: ${err.message}`;
+      } finally {
+        btnVerifyPageToken.disabled = false;
+        btnVerifyPageToken.innerHTML = `<span>🔍 Kiểm Tra Token & Lấy Tên Tự Động</span>`;
+      }
+    });
+  }
+
+  // Lưu Fanpage
+  if (btnSavePage) {
+    btnSavePage.addEventListener("click", async () => {
+      const pId = newCfgPageId.value.trim();
+      const pName = newCfgPageName.value.trim();
+      const pTok = newCfgPageToken.value.trim();
+
+      if (!pId) {
+        showToast("Vui lòng nhập Facebook Page ID!", "error");
+        newCfgPageId.focus();
+        return;
+      }
+      if (!pTok) {
+        showToast("Vui lòng nhập Page Access Token!", "error");
+        newCfgPageToken.focus();
+        return;
+      }
+
+      btnSavePage.disabled = true;
+      btnSavePage.innerHTML = `<span>⏳ Đang lưu Fanpage...</span>`;
+
+      try {
+        const res = await fetch("/api/facebook/pages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: pId,
+            name: pName,
+            access_token: pTok,
+            is_active: currentPages.length === 0
+          })
+        });
+        const d = await res.json();
+        if (d.status === "success") {
+          showToast(`Đã lưu Fanpage "${pName || pId}" thành công!`);
+          cancelEditPage();
+          loadPages();
+        } else {
+          throw new Error(d.detail || "Lỗi lưu Fanpage");
+        }
+      } catch (err) {
+        showToast("Lỗi lưu Fanpage: " + err.message, "error");
+      } finally {
+        btnSavePage.disabled = false;
+        btnSavePage.innerHTML = `<span>💾 Lưu Fanpage Này</span>`;
+      }
+    });
+  }
+
+  function editPage(pageId) {
+    const p = currentPages.find(item => item.id === pageId);
+    if (!p) return;
+    editingPageId = pageId;
+    newCfgPageId.value = p.id;
+    newCfgPageName.value = p.name || "";
+    newCfgPageToken.value = "";
+    newCfgPageToken.placeholder = "Nhập token mới hoặc để trống nếu không đổi";
+    if (pageFormTitle) pageFormTitle.textContent = `✏️ Chỉnh Sửa Fanpage: ${p.name || p.id}`;
+    if (btnCancelEditPage) btnCancelEditPage.style.display = "inline-flex";
+    if (pageVerifyAlert) pageVerifyAlert.style.display = "none";
+    newCfgPageId.focus();
+  }
+
+  function cancelEditPage() {
+    editingPageId = null;
+    newCfgPageId.value = "";
+    newCfgPageName.value = "";
+    newCfgPageToken.value = "";
+    newCfgPageToken.placeholder = "EAAxxxxxxxxx...";
+    if (pageFormTitle) pageFormTitle.textContent = "➕ Thêm / Sửa Trang Facebook";
+    if (btnCancelEditPage) btnCancelEditPage.style.display = "none";
+    if (pageVerifyAlert) pageVerifyAlert.style.display = "none";
+  }
+
+  if (btnCancelEditPage) {
+    btnCancelEditPage.addEventListener("click", cancelEditPage);
+  }
+
+  async function deletePage(pageId) {
+    const p = currentPages.find(item => item.id === pageId);
+    const pName = p ? p.name : pageId;
+    if (!confirm(`Bạn có chắc chắn muốn xóa Fanpage "${pName}" khỏi danh sách quản lý?`)) return;
+
+    try {
+      const res = await fetch(`/api/facebook/pages/${pageId}`, { method: "DELETE" });
+      const d = await res.json();
+      if (d.status === "success") {
+        showToast(`Đã xóa Fanpage "${pName}" khỏi danh sách!`);
+        if (editingPageId === pageId) cancelEditPage();
+        loadPages();
+      } else {
+        throw new Error(d.detail || "Lỗi xóa");
+      }
+    } catch (err) {
+      showToast("Lỗi xóa Fanpage: " + err.message, "error");
+    }
+  }
+
+  // ================= STUDIO SWITCHER (REELS vs PHOTO) =================
+  if (btnTypeReels && btnTypePhoto) {
+    btnTypeReels.addEventListener("click", () => {
+      btnTypeReels.classList.add("active");
+      btnTypePhoto.classList.remove("active");
+      if (reelsStudioView) reelsStudioView.style.display = "grid";
+      if (photoStudioView) photoStudioView.style.display = "none";
+    });
+
+    btnTypePhoto.addEventListener("click", () => {
+      btnTypePhoto.classList.add("active");
+      btnTypeReels.classList.remove("active");
+      if (reelsStudioView) reelsStudioView.style.display = "none";
+      if (photoStudioView) photoStudioView.style.display = "grid";
+    });
+  }
+
+  // ================= PHOTO STUDIO IMPLEMENTATION =================
+  // 1. Drag & Drop Upload Photo
+  if (photoDropZone && photoFileInput) {
+    photoDropZone.addEventListener("click", (e) => {
+      if (e.target.id !== "btnRemovePhoto") {
+        photoFileInput.click();
+      }
+    });
+
+    photoFileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) handlePhotoUpload(file);
+    });
+
+    photoDropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      photoDropZone.classList.add("drag-over");
+    });
+
+    photoDropZone.addEventListener("dragleave", () => {
+      photoDropZone.classList.remove("drag-over");
+    });
+
+    photoDropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      photoDropZone.classList.remove("drag-over");
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith("image/")) {
+        handlePhotoUpload(file);
+      } else {
+        showToast("Vui lòng tải lên file hình ảnh (JPG, PNG, WEBP)!", "error");
+      }
+    });
+  }
+
+  async function handlePhotoUpload(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    if (photoFileName) photoFileName.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    if (photoDropPrompt) photoDropPrompt.style.display = "none";
+    if (photoPreviewBox) photoPreviewBox.style.display = "block";
+
+    // Client-side instant preview
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (photoPreviewImg) photoPreviewImg.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      const res = await fetch("/api/upload-photo", {
+        method: "POST",
+        body: formData
+      });
+      const d = await res.json();
+      if (d.status === "success") {
+        currentPhotoPath = d.saved_path;
+        showToast(`Đã nhận ảnh: ${file.name}`);
+      } else {
+        throw new Error(d.detail || "Không thể tải ảnh");
+      }
+    } catch (err) {
+      console.error("Lỗi tải ảnh:", err);
+      showToast("Lỗi tải ảnh: " + err.message, "error");
+    }
+  }
+
+  if (btnRemovePhoto) {
+    btnRemovePhoto.addEventListener("click", (e) => {
+      e.stopPropagation();
+      currentPhotoPath = "";
+      if (photoFileInput) photoFileInput.value = "";
+      if (photoPreviewImg) photoPreviewImg.src = "";
+      if (photoPreviewBox) photoPreviewBox.style.display = "none";
+      if (photoDropPrompt) photoDropPrompt.style.display = "block";
+    });
+  }
+
+  // 2. AI Analyze Photo Prompt
+  if (btnAnalyzePhoto) {
+    btnAnalyzePhoto.addEventListener("click", async () => {
+      const promptVal = photoPromptInput ? photoPromptInput.value.trim() : "";
+      
+      btnAnalyzePhoto.disabled = true;
+      btnAnalyzePhoto.innerHTML = `<span>⏳ Gemini Flash đang viết bài & khớp link Shopee...</span>`;
+      if (photoStatusTag) photoStatusTag.textContent = "AI đang xử lý...";
+
+      try {
+        const res = await fetch("/api/analyze-photo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            photo_path: currentPhotoPath || "",
+            prompt: promptVal,
+            niche: "Sức khỏe"
+          })
+        });
+
+        const d = await res.json();
+        if (d.status !== "success") {
+          throw new Error(d.detail || "Lỗi AI phân tích");
+        }
+
+        const data = d.data;
+        lastPhotoAnalysisResult = data;
+
+        if (photoEmptyState) photoEmptyState.style.display = "none";
+        if (photoResultContent) photoResultContent.style.display = "block";
+        if (photoStatusTag) photoStatusTag.textContent = "Đã tạo nội dung";
+
+        if (outPhotoTitle) outPhotoTitle.value = data.title || "";
+        if (outPhotoCaption) outPhotoCaption.value = data.caption || "";
+        if (outPhotoComment) outPhotoComment.value = data.pinned_comment || "";
+
+        if (photoHashtagsCloud) {
+          photoHashtagsCloud.innerHTML = "";
+          (data.hashtags || []).forEach(tag => {
+            const span = document.createElement("span");
+            span.className = "hashtag-tag";
+            span.textContent = tag.startsWith("#") ? tag : `#${tag}`;
+            photoHashtagsCloud.appendChild(span);
+          });
+        }
+
+        showToast("Gemini đã viết xong bài viết ảnh và khớp link Shopee!");
+      } catch (err) {
+        console.error("Lỗi phân tích bài viết ảnh:", err);
+        showToast("Lỗi AI: " + err.message, "error");
+      } finally {
+        btnAnalyzePhoto.disabled = false;
+        btnAnalyzePhoto.innerHTML = `<span>✨ AI Tạo Caption & Khớp Link Shopee</span>`;
+      }
+    });
+  }
+
+  // 3. Photo Schedule Mode Controls
+  if (btnPhotoModeImmediate && btnPhotoModeSchedule) {
+    btnPhotoModeImmediate.addEventListener("click", () => {
+      isPhotoScheduleMode = false;
+      btnPhotoModeImmediate.classList.add("active");
+      btnPhotoModeSchedule.classList.remove("active");
+      if (photoScheduleSettingsBox) photoScheduleSettingsBox.style.display = "none";
+      if (btnPublishPhotoText) btnPublishPhotoText.textContent = "ĐĂNG BÀI VIẾT ẢNH & GHIM LINK SHOPEE";
+      if (btnPublishPhotoIcon) btnPublishPhotoIcon.textContent = "🚀";
+    });
+
+    btnPhotoModeSchedule.addEventListener("click", () => {
+      isPhotoScheduleMode = true;
+      btnPhotoModeSchedule.classList.add("active");
+      btnPhotoModeImmediate.classList.remove("active");
+      if (photoScheduleSettingsBox) photoScheduleSettingsBox.style.display = "block";
+      if (btnPublishPhotoText) btnPublishPhotoText.textContent = "LÊN LỊCH ĐĂNG BÀI VIẾT ẢNH";
+      if (btnPublishPhotoIcon) btnPublishPhotoIcon.textContent = "⏰";
+
+      // Mặc định chọn slot đầu tiên nếu chưa chọn
+      if (inputPhotoScheduleTime && !inputPhotoScheduleTime.value) {
+        const firstSlot = document.querySelector(".btn-photo-slot");
+        if (firstSlot) firstSlot.click();
+      }
+    });
+  }
+
+  photoPresetSlotButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      photoPresetSlotButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const slot = btn.getAttribute("data-slot"); // ví dụ "19:00"
+      if (!slot) return;
+      const [h, m] = slot.split(":").map(Number);
+
+      const now = new Date();
+      let target = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
+      if (target.getTime() <= now.getTime() + 600000) { // Nếu đã qua hoặc còn dưới 10 phút, sang ngày mai
+        target.setDate(target.getDate() + 1);
+      }
+
+      const pad = (n) => String(n).padStart(2, "0");
+      const isoStr = `${target.getFullYear()}-${pad(target.getMonth() + 1)}-${pad(target.getDate())}T${pad(target.getHours())}:${pad(target.getMinutes())}`;
+      if (inputPhotoScheduleTime) inputPhotoScheduleTime.value = isoStr;
+      selectedPhotoGoldenSlot = btn.querySelector(".slot-desc")?.textContent || slot;
+
+      if (btnPublishPhotoText) {
+        btnPublishPhotoText.textContent = `LÊN LỊCH ĐĂNG ẢNH VÀO ${slot} (${pad(target.getDate())}/${pad(target.getMonth() + 1)})`;
+      }
+      showToast(`Đã chọn khung giờ: ${slot}`);
+    });
+  });
+
+  // 4. Publish Photo Action
+  if (btnPublishPhoto) {
+    btnPublishPhoto.addEventListener("click", async () => {
+      const caption = outPhotoCaption ? outPhotoCaption.value.trim() : "";
+      const title = outPhotoTitle ? outPhotoTitle.value.trim() : "";
+      const comment = outPhotoComment ? outPhotoComment.value.trim() : "";
+
+      if (!caption) {
+        showToast("Vui lòng nhập nội dung bài viết ảnh (Caption) trước!", "error");
+        if (outPhotoCaption) outPhotoCaption.focus();
+        return;
+      }
+
+      if (isPhotoScheduleMode) {
+        if (!inputPhotoScheduleTime || !inputPhotoScheduleTime.value) {
+          showToast("Vui lòng chọn thời gian hẹn giờ phát sóng bài viết ảnh!", "error");
+          return;
+        }
+        const schedTime = new Date(inputPhotoScheduleTime.value).getTime();
+        if (schedTime <= Date.now() + 45000) {
+          showToast("Thời gian hẹn giờ phải lớn hơn thời điểm hiện tại ít nhất 1 phút!", "error");
+          return;
+        }
+      }
+
+      btnPublishPhoto.disabled = true;
+      btnPublishPhoto.innerHTML = isPhotoScheduleMode ? 
+        `<span>⏳ Đang ghi nhận lịch hẹn đăng ảnh...</span>` : 
+        `<span>⏳ Đang đăng bài viết ảnh & ghim bình luận lên Facebook...</span>`;
+
+      const hashtags = photoHashtagsCloud ? 
+        Array.from(photoHashtagsCloud.querySelectorAll(".hashtag-tag")).map(el => el.textContent) : [];
+
+      const targetPageId = headerActivePageSelect ? headerActivePageSelect.value : "";
+
+      try {
+        const payload = {
+          photo_path: currentPhotoPath || "",
+          title: title,
+          caption: caption,
+          hashtags: hashtags,
+          pinned_comment: comment,
+          selected_product_ids: lastPhotoAnalysisResult?.selected_product_ids || [],
+          target_page_id: targetPageId,
+          is_scheduled: isPhotoScheduleMode,
+          scheduled_time: isPhotoScheduleMode ? inputPhotoScheduleTime.value : "",
+          meta_cloud_schedule: isPhotoScheduleMode && chkPhotoMetaCloudSchedule ? chkPhotoMetaCloudSchedule.checked : false,
+          golden_slot_label: isPhotoScheduleMode ? selectedPhotoGoldenSlot : ""
+        };
+
+        const res = await fetch("/api/publish-photo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok || data.status === "error") {
+          throw new Error(data.detail || "Lỗi đăng bài viết ảnh");
+        }
+
+        if (photoPublishResultBox) {
+          photoPublishResultBox.style.display = "block";
+          if (data.status === "scheduled") {
+            const task = data.task || {};
+            photoPublishResultBox.innerHTML = `
+              <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); padding: 16px; border-radius: 8px;">
+                <h4 style="color:#6ee7b7; margin-bottom: 8px;">⏰ Đã Lên Lịch Đăng Bài Viết Ảnh Thành Công!</h4>
+                <p>• Thời gian phát sóng: <b style="color:#38bdf8;">${task.target_time_str || inputPhotoScheduleTime.value}</b></p>
+                <p>• Chế độ: <b>${data.mode === 'cloud' ? '☁️ Meta Cloud Server (Tự phát sóng)' : '💻 Local Scheduler (Tự động)'}</b></p>
+                <p>• Tiêu đề: <code>${title || 'Bài Viết Ảnh'}</code></p>
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-top:8px;">
+                  Hệ thống đã lưu vào hàng đợi. Theo dõi tại tab <b>"Hàng Đợi Hẹn Giờ"</b>.
+                </p>
+              </div>
+            `;
+            showToast("Đã lên lịch đăng bài viết ảnh thành công!");
+            loadScheduledTasks();
+          } else {
+            const fbResult = data.result || {};
+            photoPublishResultBox.innerHTML = `
+              <div style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); padding: 16px; border-radius: 8px;">
+                <h4 style="color:#6ee7b7; margin-bottom: 8px;">🎉 ${fbResult.message || 'Đăng ảnh thành công!'}</h4>
+                <p>• Mã Bài Viết: <code>${fbResult.post_id || fbResult.photo_id}</code></p>
+                <p>• Mã Bình Luận Shopee: <code>${fbResult.comment_id || 'N/A'}</code></p>
+                <p>• Link bài đăng: <a href="${fbResult.facebook_url}" target="_blank" style="color:#38bdf8;">${fbResult.facebook_url} ↗</a></p>
+              </div>
+            `;
+            showToast("Đã đăng bài viết ảnh & ghim link Shopee thành công!");
+            loadProducts();
+          }
+        }
+      } catch (err) {
+        console.error("Lỗi đăng ảnh:", err);
+        showToast("Lỗi: " + err.message, "error");
+        if (photoPublishResultBox) {
+          photoPublishResultBox.style.display = "block";
+          photoPublishResultBox.innerHTML = `
+            <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); padding: 14px 16px; border-radius: 8px; color: #fca5a5;">
+              <h4>❌ Không Thể Đăng Bài Viết Ảnh</h4>
+              <p>${err.message}</p>
+            </div>
+          `;
+        }
+      } finally {
+        btnPublishPhoto.disabled = false;
+        if (isPhotoScheduleMode) {
+          btnPublishPhoto.innerHTML = `<span>⏰ LÊN LỊCH ĐĂNG BÀI VIẾT ẢNH</span>`;
+        } else {
+          btnPublishPhoto.innerHTML = `<span>🚀 ĐĂNG BÀI VIẾT ẢNH & GHIM LINK SHOPEE</span>`;
+        }
+      }
+    });
   }
 
   async function loadProducts() {
@@ -251,13 +885,21 @@ document.addEventListener("DOMContentLoaded", () => {
     history.forEach(item => {
       const card = document.createElement("div");
       card.className = "history-card";
+      const isPhoto = item.post_type === "photo";
+      const typeBadge = isPhoto ? 
+        `<span class="badge" style="background:rgba(56,189,248,0.15); color:#38bdf8;">🖼️ Bài Viết Ảnh</span>` : 
+        `<span class="badge" style="background:rgba(168,85,247,0.15); color:#c084fc;">🎬 Video Reels</span>`;
+
       card.innerHTML = `
         <div class="history-card-header">
-          <span>${item.niche || "Sức khỏe"} • ${item.timestamp}</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            ${typeBadge}
+            <span>${item.niche || "Sức khỏe"} • ${item.timestamp}</span>
+          </div>
           <span class="badge" style="color:var(--accent-emerald)">${item.facebook_result?.mode === "simulation" ? "Mô Phỏng" : "Đã Đăng FB"}</span>
         </div>
-        <h3>${item.title}</h3>
-        <div class="history-script"><b>Kịch bản gốc:</b> ${item.script ? item.script.slice(0, 180) + '...' : 'Không có'}</div>
+        <h3>${item.title || (isPhoto ? 'Bài Viết Ảnh Sức Khỏe' : 'Video Reels Sức Khỏe')}</h3>
+        <div class="history-script"><b>${isPhoto ? 'Nội dung caption:' : 'Kịch bản gốc:'}</b> ${isPhoto ? (item.caption ? item.caption.slice(0, 180) + '...' : '') : (item.script ? item.script.slice(0, 180) + '...' : 'Không có')}</div>
         <div class="history-card-footer">
           <span style="font-size:0.82rem; color:var(--text-muted)">Đã gắn ${item.selected_product_ids?.length || 0} link Shopee</span>
           <a href="${item.facebook_result?.facebook_url || '#'}" target="_blank" class="btn-xs btn-secondary">Xem Bài Viết ↗</a>
@@ -1199,6 +1841,7 @@ document.addEventListener("DOMContentLoaded", () => {
           selected_product_ids: lastAnalysisResult?.selected_product_ids || [],
           script: scriptText.value.trim(),
           niche: nicheSelect.value,
+          target_page_id: headerActivePageSelect ? headerActivePageSelect.value : "",
           is_scheduled: isScheduleMode,
           scheduled_time: isScheduleMode ? inputScheduleTime.value : "",
           meta_cloud_schedule: isScheduleMode ? chkMetaCloudSchedule.checked : false,
@@ -1311,22 +1954,32 @@ document.addEventListener("DOMContentLoaded", () => {
           statusBadge = `<span class="task-countdown-badge" style="background:rgba(239,68,68,0.2); color:#f87171;">❌ Thất bại: ${task.error_message || 'Lỗi'}</span>`;
         }
 
+        const isPhoto = task.post_type === "photo";
         let thumbSrc = "";
         if (task.thumbnail_path) {
           const norm = task.thumbnail_path.replace(/\\/g, "/");
           const idx = norm.indexOf("uploads/");
           thumbSrc = idx !== -1 ? `/${norm.substring(idx)}` : `/${norm}`;
+        } else if (task.photo_path) {
+          const norm = task.photo_path.replace(/\\/g, "/");
+          const idx = norm.indexOf("uploads/");
+          thumbSrc = idx !== -1 ? `/${norm.substring(idx)}` : `/${norm}`;
         }
         const thumbHtml = thumbSrc ? 
           `<img src="${thumbSrc}" class="task-thumb-img" alt="Thumbnail" onerror="this.style.display='none'">` : 
-          `<span class="task-thumb-placeholder">🎬</span>`;
+          `<span class="task-thumb-placeholder">${isPhoto ? '🖼️' : '🎬'}</span>`;
 
         card.innerHTML = `
           <div class="task-thumb-wrap">
             ${thumbHtml}
           </div>
           <div class="task-info-wrap">
-            <div class="task-title" title="${task.title || 'Video Reels'}">${task.title || 'Video Reels Sức Khỏe'}</div>
+            <div class="task-title" title="${task.title || (isPhoto ? 'Bài Viết Ảnh' : 'Video Reels')}">
+              <span class="badge" style="font-size:0.75rem; background:${isPhoto ? 'rgba(56,189,248,0.2)' : 'rgba(168,85,247,0.2)'}; color:${isPhoto ? '#38bdf8' : '#c084fc'}; margin-right: 6px;">
+                ${isPhoto ? '🖼️ Ảnh' : '🎬 Reels'}
+              </span>
+              ${task.title || (isPhoto ? 'Bài Viết Ảnh Sức Khỏe' : 'Video Reels Sức Khỏe')}
+            </div>
             <div class="task-meta-row">
               <span class="task-time-badge">🎯 Giờ hẹn: ${task.target_time_str}</span>
               ${task.golden_slot_label ? `<span class="badge" style="background:rgba(245,158,11,0.15); color:#fbbf24;">${task.golden_slot_label}</span>` : ''}
@@ -1339,11 +1992,11 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
           <div class="task-actions-wrap">
             ${isPending ? `
-              <button type="button" class="btn-xs btn-primary btn-publish-now-sched" data-id="${task.id}" title="Đăng ngay lập tức">⚡ Đăng Ngay</button>
+              <button type="button" class="btn-xs btn-primary btn-publish-now-sched" data-id="${task.id}" data-is-photo="${isPhoto}" title="Đăng ngay lập tức">⚡ Đăng Ngay</button>
               <button type="button" class="btn-xs btn-secondary btn-cancel-sched" data-id="${task.id}" title="Hủy tác vụ hẹn giờ này" style="color:#f87171;">🗑️ Hủy</button>
             ` : ''}
             ${task.facebook_result?.facebook_url ? `
-              <a href="${task.facebook_result.facebook_url}" target="_blank" class="btn-xs btn-secondary">↗ Xem Reels</a>
+              <a href="${task.facebook_result.facebook_url}" target="_blank" class="btn-xs btn-secondary">↗ Xem Bài Viết</a>
             ` : ''}
           </div>
         `;
@@ -1355,7 +2008,8 @@ document.addEventListener("DOMContentLoaded", () => {
       scheduledQueueList.querySelectorAll(".btn-publish-now-sched").forEach(btn => {
         btn.addEventListener("click", async () => {
           const id = btn.getAttribute("data-id");
-          if (!confirm("Bạn có muốn đăng ngay lập tức video này lên Facebook Reels không?")) return;
+          const isPhoto = btn.getAttribute("data-is-photo") === "true";
+          if (!confirm(`Bạn có muốn đăng ngay lập tức ${isPhoto ? 'bài viết ảnh' : 'video Reels'} này lên Facebook không?`)) return;
           btn.disabled = true;
           btn.textContent = "⏳ Đang đăng...";
           try {
@@ -1499,9 +2153,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const payload = {
       gemini_api_key: cfgGeminiKey.value.trim(),
       default_model: cfgDefaultModel.value,
-      simulation_mode: cfgSimulationMode.checked,
-      page_id: cfgPageId.value.trim(),
-      page_access_token: cfgPageToken.value.trim()
+      simulation_mode: cfgSimulationMode.checked
     };
 
     try {
@@ -1512,7 +2164,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       const data = await res.json();
       if (data.status === "success") {
-        showToast("Đã lưu cấu hình thành công!");
+        showToast("Đã lưu cấu hình chung (Gemini & Mode) thành công!");
         loadConfig();
       }
     } catch (e) {
@@ -1535,4 +2187,5 @@ document.addEventListener("DOMContentLoaded", () => {
   loadConfig();
   loadProducts();
   loadScheduledTasks();
+  loadPages();
 });

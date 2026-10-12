@@ -71,7 +71,9 @@ def add_scheduled_task(task_data: Dict[str, Any]) -> Dict[str, Any]:
         "target_timestamp": int(task_data.get("target_timestamp", time.time() + 900)),
         "target_time_str": task_data.get("target_time_str", ""),
         "golden_slot_label": task_data.get("golden_slot_label", ""),
-        "meta_cloud_schedule": bool(task_data.get("meta_cloud_schedule", False)),
+        "post_type": task_data.get("post_type", "reel"),  # 'reel' hoặc 'photo'
+        "photo_path": task_data.get("photo_path", ""),
+        "target_page_id": task_data.get("target_page_id", ""),
         "video_path": task_data.get("video_path", ""),
         "thumbnail_path": task_data.get("thumbnail_path", ""),
         "title": task_data.get("title", ""),

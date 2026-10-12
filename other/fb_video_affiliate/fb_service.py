@@ -217,3 +217,104 @@ class FacebookReelsPublisher:
         except Exception as e:
             logger.error(f"Facebook Reels publish failed: {e}")
             raise RuntimeError(f"{str(e)}")
+
+    def publish_photo_with_comment(
+        self,
+        photo_path: str,
+        caption: str,
+        hashtags: list,
+        pinned_comment: str = "",
+        scheduled_publish_time: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """Đăng ảnh lên Facebook Fanpage kèm tự động bình luận link Shopee Affiliate."""
+        full_message = caption.strip()
+        if hashtags:
+            clean_tags = " ".join([h if h.startswith("#") else f"#{h}" for h in hashtags])
+            full_message = f"{full_message}\n\n{clean_tags}"
+
+        if self.simulation_mode:
+            time.sleep(1.0)
+            mock_id = f"photo_{int(time.time())}_{uuid.uuid4().hex[:6]}"
+            return {
+                "success": True,
+                "mode": "simulation",
+                "message": "Đã chạy kiểm thử đăng ảnh thành công! (Chế độ mô phỏng)",
+                "post_id": mock_id,
+                "photo_id": mock_id,
+                "comment_id": f"cmt_{mock_id}",
+                "facebook_url": f"https://www.facebook.com/{mock_id}",
+                "published_at": time.strftime("%Y-%m-%d %H:%M:%S")
+            }
+
+        if not photo_path or not os.path.exists(photo_path):
+            raise FileNotFoundError(f"Không tìm thấy file ảnh: {photo_path}")
+
+        try:
+            url = f"{GRAPH_API_BASE}/{self.page_id}/photos"
+            is_scheduled = bool(scheduled_publish_time)
+            payload = {
+                "access_token": self.token,
+                "message": full_message,
+                "published": "false" if is_scheduled else "true"
+            }
+            if is_scheduled:
+                payload["scheduled_publish_time"] = scheduled_publish_time
+
+            with open(photo_path, "rb") as f:
+                resp = self._request_with_retry("POST", url, data=payload, files={"source": f}, timeout=60)
+            
+            data = resp.json()
+            if "error" in data:
+                raise RuntimeError(self._parse_meta_error(data["error"]))
+
+            photo_id = data.get("id")
+            post_id = data.get("post_id") or photo_id
+
+            # Bình luận tự động nếu đăng ngay
+            comment_id = None
+            if pinned_comment and not is_scheduled:
+                time.sleep(1.5)
+                try:
+                    c_url = f"{GRAPH_API_BASE}/{post_id}/comments"
+                    c_resp = self._request_with_retry("POST", c_url, data={"access_token": self.token, "message": pinned_comment})
+                    c_data = c_resp.json()
+                    if "id" in c_data:
+                        comment_id = c_data["id"]
+                except Exception as ce:
+                    logger.warning(f"Lỗi khi bình luận tự động vào ảnh: {ce}")
+
+            facebook_url = f"https://www.facebook.com/{post_id}"
+
+            return {
+                "success": True,
+                "mode": "scheduled" if is_scheduled else "live",
+                "message": "Đã lên lịch đăng ảnh lên Meta Cloud thành công!" if is_scheduled else "Đã đăng bài viết ảnh lên Facebook và ghim bình luận Shopee thành công!",
+                "post_id": post_id,
+                "photo_id": photo_id,
+                "comment_id": comment_id,
+                "facebook_url": facebook_url,
+                "published_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "scheduled_publish_time": scheduled_publish_time
+            }
+        except Exception as e:
+            logger.error(f"Facebook Photo publish failed: {e}")
+            raise RuntimeError(f"{str(e)}")
+
+    @staticmethod
+    def verify_page(page_id: str, token: str) -> Dict[str, Any]:
+        """Kiểm tra token và lấy thông tin Page từ Meta Graph API."""
+        try:
+            url = f"{GRAPH_API_BASE}/{page_id.strip()}?fields=id,name,link,fan_count,is_published&access_token={token.strip()}"
+            resp = requests.get(url, timeout=15)
+            data = resp.json()
+            if "error" in data:
+                return {"valid": False, "error": data["error"].get("message", "Lỗi xác thực")}
+            return {
+                "valid": True,
+                "id": data.get("id"),
+                "name": data.get("name"),
+                "fan_count": data.get("fan_count", 0),
+                "is_published": data.get("is_published", True)
+            }
+        except Exception as e:
+            return {"valid": False, "error": str(e)}
