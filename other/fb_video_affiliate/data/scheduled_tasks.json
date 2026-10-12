@@ -1,0 +1,131 @@
+[
+  {
+    "id": "sched_1791785580_79ed26",
+    "created_at": "2026-10-12 13:13:00",
+    "status": "pending",
+    "target_timestamp": 1791866700,
+    "target_time_str": "2026-10-13 11:45:00",
+    "golden_slot_label": "🍱 Trưa 11:45 (Bữa trưa dinh dưỡng & Tiêu hóa khỏe)",
+    "meta_cloud_schedule": true,
+    "video_path": "D:\\folder\\tools\\other\\fb_video_affiliate\\uploads\\1790953561_2.mp4",
+    "thumbnail_path": "D:\\folder\\tools\\other\\fb_video_affiliate\\uploads\\thumb_1790953598.png",
+    "title": "3 sai lầm kinh điển khi ăn đồ cũ hại đường ruột không ngờ!",
+    "caption": "Bà con mình hay tiếc của để đồ ăn qua đêm hâm đi hâm lại rất nguy hiểm nha! Thứ nhất là rau củ sinh độc tố. Thứ hai là hải sản gây tiêu chảy. Thứ ba là đồ chiên rán sinh chất gây ung thư, chia sẻ cho người thân cùng biết nhé!",
+    "hashtags": [
+      "#suckhoe",
+      "#meosuckhoe",
+      "#canhbao",
+      "#meohay",
+      "#songkhoe",
+      "#chamsocsuckhoe",
+      "#suckhoegiadinh"
+    ],
+    "pinned_comment": "Bà con ơi, ăn uống quan trọng lắm, đừng vì tiếc của mà hại thân nha! Nhà em có gom sẵn mấy mẫu hộp thủy tinh an toàn và men vi sinh bảo vệ đường ruột cực tốt ở đây, bà con tham khảo nhé:\n- Bộ hộp thủy tinh chịu nhiệt: https://s.shopee.vn/8KpyPKwP49\n- Men vi sinh bào tử lợi khuẩn đa chủng đường ruột: https://s.shopee.vn/6fhkQL8lMc\n- Nồi chiên không dầu giảm mỡ thừa: https://s.shopee.vn/4VdFqPHJOd",
+    "selected_product_ids": [
+      "prod_8",
+      "prod_11",
+      "prod_1790954091_5954"
+    ],
+    "script": "",
+    "niche": "Sức khỏe",
+    "facebook_result": {
+      "success": true,
+      "mode": "scheduled",
+      "message": "Đã lên lịch đăng video trên Facebook Meta Cloud thành công!",
+      "video_id": "1079019081570814",
+      "comment_id": null,
+      "thumbnail_applied": true,
+      "facebook_url": "https://www.facebook.com/reel/1079019081570814",
+      "published_at": "2026-10-12 13:13:00",
+      "scheduled_publish_time": 1791866700
+    },
+    "error_message": null
+  },
+  {
+    "id": "sched_1791785537_b15762",
+    "created_at": "2026-10-12 13:12:17",
+    "status": "completed",
+    "target_timestamp": 1791806400,
+    "target_time_str": "2026-10-12 19:00:00",
+    "golden_slot_label": "🌙 Tối 19:00 (Bữa tối gia đình & Chăm sóc tiêu hóa)",
+    "meta_cloud_schedule": true,
+    "video_path": "D:\\folder\\tools\\other\\fb_video_affiliate\\uploads\\1791042936_3.mp4",
+    "thumbnail_path": "D:\\folder\\tools\\other\\fb_video_affiliate\\uploads\\thumb_1791043050.png",
+    "title": "Ăn cơm chan canh: Thói quen rước bệnh dạ dày vào thân, xem ngay kẻo hối!",
+    "caption": "Nhiều người bận rộn hay ăn cơm chan canh cho nhanh nhưng thói quen này làm loãng dịch vị và hại dạ dày lâu ngày gây trào ngược. Cơm ra cơm canh ra canh và nhớ tập nhai kỹ để bảo vệ sức khỏe hệ tiêu hóa bà con nhé. Lưu lại ngay mẹo hay này và chia sẻ cho người thân cùng biết nhé.",
+    "hashtags": [
+      "#suckhoe",
+      "#meosuckhoe",
+      "#canhbao",
+      "#meohay",
+      "#songkhoe",
+      "#chamsocsuckhoe",
+      "#suckhoegiadinh"
+    ],
+    "pinned_comment": "Bà con mình nhớ chú ý ăn uống khoa học để bảo vệ dạ dày nhé. Nhà em có chuẩn bị sẵn mấy món hữu ích hỗ trợ tiêu hóa và bảo vệ sức khỏe, bà con tham khảo nha:\n- Men vi sinh bào tử lợi khuẩn đa chủng đường ruột: https://s.shopee.vn/6fhkQL8lMc\n- Bộ hộp thủy tinh chịu nhiệt chia ngăn bảo quản thức ăn an toàn: https://s.shopee.vn/8KpyPKwP49\n- Nồi chiên không dầu giảm mỡ thừa: https://s.shopee.vn/4VdFqPHJOd",
+    "selected_product_ids": [
+      "prod_11",
+      "prod_8",
+      "prod_1790954091_5954"
+    ],
+    "script": "",
+    "niche": "Sức khỏe",
+    "facebook_result": {
+      "success": true,
+      "mode": "live",
+      "message": "Đã đăng video lên Facebook Reels và ghim bình luận Shopee thành công!",
+      "video_id": "958430256703471",
+      "comment_id": "2853979514995274_1746009513288983",
+      "thumbnail_applied": true,
+      "facebook_url": "https://www.facebook.com/reel/958430256703471/",
+      "published_at": "2026-10-12 13:16:32",
+      "scheduled_publish_time": null
+    },
+    "error_message": null,
+    "completed_at": "2026-10-12 13:16:32"
+  },
+  {
+    "id": "sched_1791043112_dd013d",
+    "created_at": "2026-10-03 22:58:32",
+    "status": "completed",
+    "target_timestamp": 1791089100,
+    "target_time_str": "2026-10-04 11:45:00",
+    "golden_slot_label": "🍱 Trưa 11:45 (Tiêu hóa, giãn cơ, tim mạch)",
+    "meta_cloud_schedule": true,
+    "video_path": "D:\\folder\\tools\\other\\fb_video_affiliate\\uploads\\1791042936_3.mp4",
+    "thumbnail_path": "D:\\folder\\tools\\other\\fb_video_affiliate\\uploads\\thumb_1791043050.png",
+    "title": "Ăn cơm chan canh: Thói quen rước bệnh dạ dày vào thân, xem ngay kẻo hối!",
+    "caption": "Nhiều người bận rộn hay ăn cơm chan canh cho nhanh nhưng thói quen này làm loãng dịch vị và hại dạ dày lâu ngày gây trào ngược. Cơm ra cơm canh ra canh và nhớ tập nhai kỹ để bảo vệ sức khỏe hệ tiêu hóa bà con nhé. Lưu lại ngay mẹo hay này và chia sẻ cho người thân cùng biết nhé.",
+    "hashtags": [
+      "#suckhoe",
+      "#meosuckhoe",
+      "#canhbao",
+      "#meohay",
+      "#songkhoe",
+      "#chamsocsuckhoe",
+      "#suckhoegiadinh"
+    ],
+    "pinned_comment": "Bà con mình nhớ chú ý ăn uống khoa học để bảo vệ dạ dày nhé. Nhà em có chuẩn bị sẵn mấy món hữu ích hỗ trợ tiêu hóa và bảo vệ sức khỏe, bà con tham khảo nha:\n- Men vi sinh bào tử lợi khuẩn đa chủng đường ruột: https://s.shopee.vn/6fhkQL8lMc\n- Bộ hộp thủy tinh chịu nhiệt chia ngăn bảo quản thức ăn an toàn: https://s.shopee.vn/8KpyPKwP49\n- Nồi chiên không dầu giảm mỡ thừa: https://s.shopee.vn/4VdFqPHJOd",
+    "selected_product_ids": [
+      "prod_11",
+      "prod_8",
+      "prod_1790954091_5954"
+    ],
+    "script": "Nhiều người bận rộn toàn ăn cơm chan canh cho nhanh trôi, nhưng cực kỳ hại dạ dày. Thứ nhất là nước canh làm loãng dịch vị tiêu hóa.\nThứ hai là cơm chưa được nhai kỹ đã tọt thẳng xuống bao tử làm nó làm việc mệt mỏi. Thứ ba là lâu ngày dễ gây trào ngược, đầy hơi.\nCơm ra cơm canh ra canh, tập nhai kỹ no lâu bà con ơi. Đừng quên ấn thả tim và theo dõi kênh để sống khỏe mỗi ngày cùng tui nha.",
+    "niche": "Sức khỏe & Đời sống (Bán hàng Affiliate)",
+    "facebook_result": {
+      "success": true,
+      "mode": "scheduled",
+      "message": "Đã lên lịch đăng video trên Facebook Meta Cloud thành công!",
+      "video_id": "958430256703471",
+      "comment_id": null,
+      "thumbnail_applied": true,
+      "facebook_url": "https://www.facebook.com/reel/958430256703471",
+      "published_at": "2026-10-03 22:58:32",
+      "scheduled_publish_time": 1791089100
+    },
+    "error_message": null,
+    "comment_posted": true,
+    "comment_id": "958430256703471_1096844496391601"
+  }
+]

@@ -1,0 +1,98 @@
+{
+  "settings": {
+    "data": [
+      {
+        "setting": "USERS_CAN_POST",
+        "value": false
+      },
+      {
+        "setting": "USERS_CAN_MESSAGE",
+        "value": true
+      },
+      {
+        "setting": "USERS_CAN_POST_PHOTOS",
+        "value": false
+      },
+      {
+        "setting": "USERS_CAN_TAG_PHOTOS",
+        "value": false
+      },
+      {
+        "setting": "WALL_COMBINED_POSTS",
+        "value": false
+      },
+      {
+        "setting": "PLATFORM_OPTOUTS_CAN_POST",
+        "value": true
+      },
+      {
+        "setting": "SHOW_RECENT_POSTS_BY_OTHERS",
+        "value": true
+      },
+      {
+        "setting": "IS_PUBLISHED",
+        "value": true
+      },
+      {
+        "setting": "APPEARS_IN_RELATED_PAGES",
+        "value": true
+      },
+      {
+        "setting": "AGE_RESTRICTIONS",
+        "value": "Mọi người"
+      },
+      {
+        "setting": "PROFANITY_FILTER",
+        "value": "none"
+      },
+      {
+        "setting": "REVIEW_POSTS_BY_OTHER",
+        "value": false
+      }
+    ]
+  },
+  "reel": {
+    "id": "958430256703471",
+    "permalink_url": "/reel/958430256703471/",
+    "privacy": {
+      "allow": "",
+      "deny": "",
+      "description": "Công khai",
+      "friends": "",
+      "networks": "",
+      "value": "EVERYONE"
+    },
+    "published": true
+  },
+  "post": {
+    "id": "924512634089549_122124369651032599",
+    "permalink_url": "https://www.facebook.com/reel/958430256703471/",
+    "privacy": {
+      "allow": "",
+      "deny": "",
+      "description": "Công khai",
+      "friends": "",
+      "value": "EVERYONE"
+    },
+    "is_published": true
+  },
+  "reel_comments": {
+    "data": [
+      {
+        "created_time": "2026-10-04T04:45:06+0000",
+        "from": {
+          "name": "Mẹo Sống Khỏe",
+          "id": "924512634089549"
+        },
+        "message": "Bà con mình nhớ chú ý ăn uống khoa học để bảo vệ dạ dày nhé. Nhà em có chuẩn bị sẵn mấy món hữu ích hỗ trợ tiêu hóa và bảo vệ sức khỏe, bà con tham khảo nha:\n- Men vi sinh bào tử lợi khuẩn đa chủng đường ruột: https://s.shopee.vn/6fhkQL8lMc\n- Bộ hộp thủy tinh chịu nhiệt chia ngăn bảo quản thức ăn an toàn: https://s.shopee.vn/8KpyPKwP49\n- Nồi chiên không dầu giảm mỡ thừa: https://s.shopee.vn/4VdFqPHJOd",
+        "id": "122124369651032599_1096844496391601"
+      }
+    ],
+    "paging": {
+      "cursors": {
+        "before": "QVFIVEEwakJyWHJKSERWaDg3NFhuY1FWN2hYSHV1NlUtYnhKMVh1LWZAzQnFhYXMtSk9hME5uX1pwZA05keGNiLVB3cTVPbWdQcWdiaHNzZA0RYSkZA3T2dhc2ln",
+        "after": "QVFIVEEwakJyWHJKSERWaDg3NFhuY1FWN2hYSHV1NlUtYnhKMVh1LWZAzQnFhYXMtSk9hME5uX1pwZA05keGNiLVB3cTVPbWdQcWdiaHNzZA0RYSkZA3T2dhc2ln"
+      }
+    }
+  }
+}

@@ -61,12 +61,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const matchedProductsList = document.getElementById("matchedProductsList");
   const missingBox = document.getElementById("missingBox");
   const missingList = document.getElementById("missingList");
-  const outComment = document.getElementById("outComment");
   const btnPublish = document.getElementById("btnPublish");
+  const btnPublishIcon = document.getElementById("btnPublishIcon");
+  const btnPublishText = document.getElementById("btnPublishText");
   const publishResultBox = document.getElementById("publishResultBox");
   const btnToggleAddMore = document.getElementById("btnToggleAddMore");
   const selectAddMoreProd = document.getElementById("selectAddMoreProd");
   const btnConfirmAddMore = document.getElementById("btnConfirmAddMore");
+
+  // DOM Elements - Scheduler
+  const btnModeImmediate = document.getElementById("btnModeImmediate");
+  const btnModeSchedule = document.getElementById("btnModeSchedule");
+  const scheduleSettingsBox = document.getElementById("scheduleSettingsBox");
+  const presetSlotButtons = document.querySelectorAll(".btn-preset-slot");
+  const inputScheduleTime = document.getElementById("inputScheduleTime");
+  const scheduleSummaryAlert = document.getElementById("scheduleSummaryAlert");
+  const scheduleTargetText = document.getElementById("scheduleTargetText");
+  const chkMetaCloudSchedule = document.getElementById("chkMetaCloudSchedule");
+  const scheduledCountBadge = document.getElementById("scheduledCountBadge");
+  const scheduledQueueList = document.getElementById("scheduledQueueList");
+  const btnRefreshSchedule = document.getElementById("btnRefreshSchedule");
+
+  let isScheduleMode = false;
+  let selectedGoldenLabel = "";
 
   // DOM Elements - Products Tab
   const productsGrid = document.getElementById("productsGrid");
@@ -109,6 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (targetPane) targetPane.classList.add("active");
 
       if (targetTab === "products") loadProducts();
+      if (targetTab === "schedule") loadScheduledTasks();
       if (targetTab === "history") loadHistory();
       if (targetTab === "settings") loadConfigToSettings();
     });
@@ -1000,6 +1018,119 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // ================= SCHEDULER & GOLDEN HOURS LOGIC =================
+  function formatRemainingTime(seconds) {
+    if (seconds <= 0) return "Đến giờ đăng";
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    if (hours > 0) return `Còn ${hours}h ${mins}m`;
+    if (mins > 0) return `Còn ${mins} phút ${secs}s`;
+    return `Còn ${secs} giây`;
+  }
+
+  function setPresetTime(hour, minute, label) {
+    const now = new Date();
+    const target = new Date();
+    target.setHours(parseInt(hour, 10), parseInt(minute, 10), 0, 0);
+
+    // Meta Graph API yêu cầu tối thiểu 15 phút, nếu giờ hôm nay còn dưới 15 phút hoặc đã qua thì hẹn sang ngày mai
+    if (target.getTime() <= now.getTime() + 15 * 60 * 1000) {
+      target.setDate(target.getDate() + 1);
+    }
+
+    const yyyy = target.getFullYear();
+    const mm = String(target.getMonth() + 1).padStart(2, "0");
+    const dd = String(target.getDate()).padStart(2, "0");
+    const hh = String(target.getHours()).padStart(2, "0");
+    const min = String(target.getMinutes()).padStart(2, "0");
+
+    const isoStr = `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+    if (inputScheduleTime) {
+      inputScheduleTime.value = isoStr;
+    }
+
+    selectedGoldenLabel = label || "";
+    updateScheduleAlertAndButton(target, label);
+  }
+
+  function updateScheduleAlertAndButton(dateObj, label = "") {
+    if (!dateObj || isNaN(dateObj.getTime())) {
+      if (scheduleSummaryAlert) scheduleSummaryAlert.style.display = "none";
+      if (btnPublishText) btnPublishText.textContent = "LÊN LỊCH ĐĂNG VIDEO REELS";
+      return;
+    }
+
+    const days = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+    const dayName = days[dateObj.getDay()];
+    const dateStr = `${dayName}, ${String(dateObj.getDate()).padStart(2, "0")}/${String(dateObj.getMonth() + 1).padStart(2, "0")}/${dateObj.getFullYear()}`;
+    const timeStr = `${String(dateObj.getHours()).padStart(2, "0")}:${String(dateObj.getMinutes()).padStart(2, "0")}`;
+
+    if (scheduleSummaryAlert && scheduleTargetText) {
+      scheduleSummaryAlert.style.display = "block";
+      scheduleTargetText.textContent = `${timeStr} - ${dateStr} ${label ? `(${label})` : ""}`;
+    }
+
+    if (btnPublishText) {
+      btnPublishText.textContent = `LÊN LỊCH ĐĂNG VÀO ${timeStr} (${dateStr})`;
+    }
+    if (btnPublishIcon) {
+      btnPublishIcon.textContent = "⏰";
+    }
+  }
+
+  if (btnModeImmediate) {
+    btnModeImmediate.addEventListener("click", () => {
+      isScheduleMode = false;
+      btnModeImmediate.classList.add("active");
+      if (btnModeSchedule) btnModeSchedule.classList.remove("active");
+      if (scheduleSettingsBox) scheduleSettingsBox.style.display = "none";
+      if (btnPublishText) btnPublishText.textContent = "ĐĂNG LÊN FACEBOOK REELS & GHIM LINK SHOPEE";
+      if (btnPublishIcon) btnPublishIcon.textContent = "🚀";
+    });
+  }
+
+  if (btnModeSchedule) {
+    btnModeSchedule.addEventListener("click", () => {
+      isScheduleMode = true;
+      btnModeSchedule.classList.add("active");
+      if (btnModeImmediate) btnModeImmediate.classList.remove("active");
+      if (scheduleSettingsBox) scheduleSettingsBox.style.display = "flex";
+      
+      // Nếu chưa chọn giờ thì tự động chọn khung giờ mặc định
+      if (inputScheduleTime && !inputScheduleTime.value) {
+        const firstPreset = document.querySelector(".btn-preset-slot");
+        if (firstPreset) firstPreset.click();
+      } else if (inputScheduleTime && inputScheduleTime.value) {
+        const d = new Date(inputScheduleTime.value);
+        updateScheduleAlertAndButton(d, selectedGoldenLabel);
+      }
+    });
+  }
+
+  presetSlotButtons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      presetSlotButtons.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const h = btn.getAttribute("data-hour");
+      const m = btn.getAttribute("data-minute");
+      const label = btn.getAttribute("data-label");
+      setPresetTime(h, m, label);
+      showToast(`Đã chọn khung giờ: ${label}`);
+    });
+  });
+
+  if (inputScheduleTime) {
+    inputScheduleTime.addEventListener("change", () => {
+      presetSlotButtons.forEach(b => b.classList.remove("active"));
+      selectedGoldenLabel = "Giờ tự chọn";
+      if (inputScheduleTime.value) {
+        const d = new Date(inputScheduleTime.value);
+        updateScheduleAlertAndButton(d, selectedGoldenLabel);
+      }
+    });
+  }
+
   // ================= PUBLISH TO FACEBOOK =================
   btnPublish.addEventListener("click", async () => {
     const title = outTitle.value.trim();
@@ -1011,8 +1142,21 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    if (isScheduleMode) {
+      if (!inputScheduleTime || !inputScheduleTime.value) {
+        showToast("Vui lòng chọn thời gian hẹn giờ đăng bài!", "error");
+        if (inputScheduleTime) inputScheduleTime.focus();
+        return;
+      }
+      const schedDate = new Date(inputScheduleTime.value);
+      if (schedDate.getTime() <= Date.now() + 45000) {
+        showToast("Thời gian hẹn giờ phải lớn hơn thời điểm hiện tại ít nhất 1 phút!", "error");
+        return;
+      }
+    }
+
     btnPublish.disabled = true;
-    btnPublish.innerHTML = `<span>⏳ Đang chuẩn bị đăng video & bình luận...</span>`;
+    btnPublish.innerHTML = `<span>⏳ Đang chuẩn bị dữ liệu video & bìa...</span>`;
 
     // Tự động xuất và lưu ảnh bìa từ Thumbnail Canvas nếu đang mở Thumbnail Studio
     let thumbPathToSend = currentThumbnailPath || "";
@@ -1035,7 +1179,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    btnPublish.innerHTML = `<span>⏳ Đang đăng video & ghim bình luận lên Facebook...</span>`;
+    btnPublish.innerHTML = isScheduleMode ? 
+      `<span>⏳ Đang ghi nhận lịch hẹn đăng...</span>` : 
+      `<span>⏳ Đang đăng video & ghim bình luận lên Facebook...</span>`;
 
     const hashtags = Array.from(hashtagsCloud.querySelectorAll(".hashtag-tag")).map(el => el.textContent);
 
@@ -1052,28 +1198,49 @@ document.addEventListener("DOMContentLoaded", () => {
           pinned_comment: comment,
           selected_product_ids: lastAnalysisResult?.selected_product_ids || [],
           script: scriptText.value.trim(),
-          niche: nicheSelect.value
+          niche: nicheSelect.value,
+          is_scheduled: isScheduleMode,
+          scheduled_time: isScheduleMode ? inputScheduleTime.value : "",
+          meta_cloud_schedule: isScheduleMode ? chkMetaCloudSchedule.checked : false,
+          golden_slot_label: isScheduleMode ? selectedGoldenLabel : ""
         })
       });
 
       const data = await res.json();
-      if (data.status !== "success") {
+      if (!res.ok || data.status === "error") {
         throw new Error(data.detail || "Lỗi đăng bài");
       }
 
-      const fbResult = data.result;
-      publishResultBox.style.display = "block";
-      publishResultBox.innerHTML = `
-        <h4>🎉 ${fbResult.message}</h4>
-        <p>• Mã Video Reels: <code>${fbResult.video_id}</code></p>
-        <p>• Mã Bình Luận Shopee: <code>${fbResult.comment_id || 'N/A'}</code></p>
-        ${fbResult.thumbnail_applied ? `<p>• Ảnh bìa tùy chỉnh: <span style="color:var(--accent-primary); font-weight:600;">✅ Đã gán ảnh bìa thiết lập từ tool lên Facebook Reels</span></p>` : ''}
-        <p>• Link bài đăng: <a href="${fbResult.facebook_url}" target="_blank">${fbResult.facebook_url} ↗</a></p>
-        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">Bài viết đã được tự động lưu vào Kho Kịch Bản & Lịch Sử.</p>
-      `;
+      if (data.status === "scheduled") {
+        publishResultBox.style.display = "block";
+        const task = data.task || {};
+        publishResultBox.innerHTML = `
+          <h4>⏰ Đã Lên Lịch Đăng Video Thành Công!</h4>
+          <p>• Thời gian phát sóng: <b style="color:#38bdf8;">${task.target_time_str || inputScheduleTime.value}</b></p>
+          ${task.golden_slot_label ? `<p>• Khung giờ vàng: <span class="badge" style="background:rgba(245,158,11,0.2); color:#fbbf24;">${task.golden_slot_label}</span></p>` : ''}
+          <p>• Chế độ: <b>${data.mode === 'cloud' ? '☁️ Meta Cloud Server' : '💻 Local Scheduler (Tự động ghim bình luận Shopee)'}</b></p>
+          <p>• Tiêu đề: <code>${title}</code></p>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-top:8px;">
+            Hệ thống đã lưu vào hàng đợi. Bạn có thể theo dõi đếm ngược hoặc hủy lịch tại tab <b>"Hàng Đợi Hẹn Giờ"</b>.
+          </p>
+        `;
+        showToast(`Đã lên lịch đăng video vào lúc ${task.target_time_str || inputScheduleTime.value}!`);
+        loadScheduledTasks();
+      } else {
+        const fbResult = data.result;
+        publishResultBox.style.display = "block";
+        publishResultBox.innerHTML = `
+          <h4>🎉 ${fbResult.message}</h4>
+          <p>• Mã Video Reels: <code>${fbResult.video_id}</code></p>
+          <p>• Mã Bình Luận Shopee: <code>${fbResult.comment_id || 'N/A'}</code></p>
+          ${fbResult.thumbnail_applied ? `<p>• Ảnh bìa tùy chỉnh: <span style="color:var(--accent-primary); font-weight:600;">✅ Đã gán ảnh bìa thiết lập từ tool lên Facebook Reels</span></p>` : ''}
+          <p>• Link bài đăng: <a href="${fbResult.facebook_url}" target="_blank">${fbResult.facebook_url} ↗</a></p>
+          <p style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">Bài viết đã được tự động lưu vào Kho Kịch Bản & Lịch Sử.</p>
+        `;
 
-      showToast("Đăng video & ghim link Shopee thành công!");
-      loadProducts(); // Update use counts
+        showToast("Đăng video & ghim link Shopee thành công!");
+        loadProducts(); // Update use counts
+      }
 
     } catch (e) {
       console.error("Lỗi đăng bài:", e);
@@ -1081,15 +1248,169 @@ document.addEventListener("DOMContentLoaded", () => {
       publishResultBox.style.display = "block";
       publishResultBox.innerHTML = `
         <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); padding: 14px 16px; border-radius: 8px; color: #fca5a5;">
-          <h4 style="color: #f87171; margin-bottom: 6px;">❌ Đăng Lên Facebook Thất Bại</h4>
+          <h4 style="color: #f87171; margin-bottom: 6px;">❌ Đăng / Hẹn Giờ Thất Bại</h4>
           <p style="font-size: 0.88rem; line-height: 1.5; margin: 0;">${e.message}</p>
         </div>
       `;
     } finally {
       btnPublish.disabled = false;
-      btnPublish.innerHTML = `<span>🚀 ĐĂNG LÊN FACEBOOK REELS & GHIM LINK SHOPEE</span>`;
+      if (isScheduleMode) {
+        if (inputScheduleTime && inputScheduleTime.value) {
+          const d = new Date(inputScheduleTime.value);
+          updateScheduleAlertAndButton(d, selectedGoldenLabel);
+        } else {
+          btnPublish.innerHTML = `<span>⏰ LÊN LỊCH ĐĂNG VIDEO REELS</span>`;
+        }
+      } else {
+        btnPublish.innerHTML = `<span>🚀 ĐĂNG LÊN FACEBOOK REELS & GHIM LINK SHOPEE</span>`;
+      }
     }
   });
+
+  // ================= SCHEDULED TASKS QUEUE RENDERER =================
+  async function loadScheduledTasks() {
+    try {
+      const res = await fetch("/api/schedule/tasks");
+      const tasks = await res.json();
+
+      const pendingTasks = tasks.filter(t => t.status === "pending");
+      if (scheduledCountBadge) {
+        scheduledCountBadge.textContent = pendingTasks.length;
+      }
+
+      if (!scheduledQueueList) return;
+      scheduledQueueList.innerHTML = "";
+
+      if (tasks.length === 0) {
+        scheduledQueueList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">⏰</div>
+            <h3>Chưa Có Bài Viết Nào Được Hẹn Giờ</h3>
+            <p>Chọn tab <b>"Studio Tạo Bài Đăng"</b> ➔ Chọn <b>"Hẹn Giờ Đăng"</b> và chọn khung giờ vàng sức khỏe để tự động hóa hoàn toàn.</p>
+          </div>
+        `;
+        return;
+      }
+
+      tasks.forEach(task => {
+        const card = document.createElement("div");
+        card.className = "scheduled-task-card";
+
+        const isPending = task.status === "pending";
+        const isCloud = Boolean(task.meta_cloud_schedule);
+        const remaining = task.remaining_seconds || 0;
+
+        let statusBadge = "";
+        if (task.status === "pending") {
+          statusBadge = `<span class="task-countdown-badge">⏳ ${formatRemainingTime(remaining)}</span>`;
+        } else if (task.status === "publishing") {
+          statusBadge = `<span class="task-countdown-badge" style="background:rgba(59,130,246,0.2); color:#60a5fa;">🚀 Đang tiến hành đăng...</span>`;
+        } else if (task.status === "completed") {
+          statusBadge = `<span class="task-countdown-badge" style="background:rgba(16,185,129,0.2); color:#34d399;">✅ Đã hoàn thành</span>`;
+        } else if (task.status === "failed") {
+          statusBadge = `<span class="task-countdown-badge" style="background:rgba(239,68,68,0.2); color:#f87171;">❌ Thất bại: ${task.error_message || 'Lỗi'}</span>`;
+        }
+
+        let thumbSrc = "";
+        if (task.thumbnail_path) {
+          const norm = task.thumbnail_path.replace(/\\/g, "/");
+          const idx = norm.indexOf("uploads/");
+          thumbSrc = idx !== -1 ? `/${norm.substring(idx)}` : `/${norm}`;
+        }
+        const thumbHtml = thumbSrc ? 
+          `<img src="${thumbSrc}" class="task-thumb-img" alt="Thumbnail" onerror="this.style.display='none'">` : 
+          `<span class="task-thumb-placeholder">🎬</span>`;
+
+        card.innerHTML = `
+          <div class="task-thumb-wrap">
+            ${thumbHtml}
+          </div>
+          <div class="task-info-wrap">
+            <div class="task-title" title="${task.title || 'Video Reels'}">${task.title || 'Video Reels Sức Khỏe'}</div>
+            <div class="task-meta-row">
+              <span class="task-time-badge">🎯 Giờ hẹn: ${task.target_time_str}</span>
+              ${task.golden_slot_label ? `<span class="badge" style="background:rgba(245,158,11,0.15); color:#fbbf24;">${task.golden_slot_label}</span>` : ''}
+              ${statusBadge}
+              <span class="task-mode-badge">${isCloud ? '☁️ Meta Cloud' : '💻 Local (Auto Pinned Comment)'}</span>
+            </div>
+            <div style="font-size:0.78rem; color:var(--text-muted); margin-top:3px;">
+              🔗 Đã ghép ${task.selected_product_ids ? task.selected_product_ids.length : 0} link Shopee Affiliate trong bình luận ghim
+            </div>
+          </div>
+          <div class="task-actions-wrap">
+            ${isPending ? `
+              <button type="button" class="btn-xs btn-primary btn-publish-now-sched" data-id="${task.id}" title="Đăng ngay lập tức">⚡ Đăng Ngay</button>
+              <button type="button" class="btn-xs btn-secondary btn-cancel-sched" data-id="${task.id}" title="Hủy tác vụ hẹn giờ này" style="color:#f87171;">🗑️ Hủy</button>
+            ` : ''}
+            ${task.facebook_result?.facebook_url ? `
+              <a href="${task.facebook_result.facebook_url}" target="_blank" class="btn-xs btn-secondary">↗ Xem Reels</a>
+            ` : ''}
+          </div>
+        `;
+
+        scheduledQueueList.appendChild(card);
+      });
+
+      // Actions event listeners
+      scheduledQueueList.querySelectorAll(".btn-publish-now-sched").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-id");
+          if (!confirm("Bạn có muốn đăng ngay lập tức video này lên Facebook Reels không?")) return;
+          btn.disabled = true;
+          btn.textContent = "⏳ Đang đăng...";
+          try {
+            const res = await fetch(`/api/schedule/tasks/${id}/publish-now`, { method: "POST" });
+            const d = await res.json();
+            if (d.status === "success") {
+              showToast("Đã tự động đăng video lên Facebook Reels thành công!");
+              loadScheduledTasks();
+            } else {
+              throw new Error(d.detail || "Không thể đăng");
+            }
+          } catch (err) {
+            showToast("Lỗi đăng ngay: " + err.message, "error");
+            btn.disabled = false;
+            btn.textContent = "⚡ Đăng Ngay";
+          }
+        });
+      });
+
+      scheduledQueueList.querySelectorAll(".btn-cancel-sched").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.getAttribute("data-id");
+          if (!confirm("Bạn có chắc chắn muốn hủy lịch đăng video này?")) return;
+          try {
+            const res = await fetch(`/api/schedule/tasks/${id}`, { method: "DELETE" });
+            const d = await res.json();
+            if (d.status === "success") {
+              showToast("Đã hủy lịch đăng thành công!");
+              loadScheduledTasks();
+            }
+          } catch (err) {
+            showToast("Lỗi hủy lịch: " + err.message, "error");
+          }
+        });
+      });
+
+    } catch (err) {
+      console.error("Lỗi tải danh sách hẹn giờ:", err);
+    }
+  }
+
+  if (btnRefreshSchedule) {
+    btnRefreshSchedule.addEventListener("click", () => {
+      loadScheduledTasks();
+      showToast("Đã làm mới danh sách hẹn giờ!");
+    });
+  }
+
+  // Tự động quét cập nhật countdown mỗi 20 giây khi tab Hàng Đợi đang mở
+  setInterval(() => {
+    const schedulePane = document.getElementById("tab-schedule");
+    if (schedulePane && schedulePane.classList.contains("active")) {
+      loadScheduledTasks();
+    }
+  }, 20000);
 
   // ================= MODAL PRODUCT CRUD =================
   btnOpenAddProduct.addEventListener("click", () => {
@@ -1213,4 +1534,5 @@ document.addEventListener("DOMContentLoaded", () => {
   // Khởi động
   loadConfig();
   loadProducts();
+  loadScheduledTasks();
 });

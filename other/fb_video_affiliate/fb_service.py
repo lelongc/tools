@@ -166,25 +166,52 @@ class FacebookReelsPublisher:
                 else:
                     logger.warning(f"File thumbnail_path không tồn tại: {thumbnail_path}")
 
-            # Bước 4: Tự động bình luận link Shopee vào bài viết vừa đăng
+            # Bước 4: Tự động bình luận link Shopee vào bài viết vừa đăng (chỉ với video đăng ngay)
             comment_id = None
-            if pinned_comment:
+            if pinned_comment and not scheduled_publish_time:
                 time.sleep(2.0)  # Đợi server Meta index xong video ID
-                comment_url = f"{GRAPH_API_BASE}/{video_id}/comments"
-                comment_resp = self._request_with_retry("POST", comment_url, data={"access_token": self.token, "message": pinned_comment})
-                comment_data = comment_resp.json()
-                if "id" in comment_data:
-                    comment_id = comment_data["id"]
+                try:
+                    comment_url = f"{GRAPH_API_BASE}/{video_id}/comments"
+                    comment_resp = self._request_with_retry("POST", comment_url, data={"access_token": self.token, "message": pinned_comment})
+                    comment_data = comment_resp.json()
+                    if "id" in comment_data:
+                        comment_id = comment_data["id"]
+                except Exception as ce:
+                    logger.warning(f"Lỗi khi bình luận tự động: {ce}")
 
+            # Lấy link thật và ID thật của Reels trên Facebook
+            facebook_url = f"https://www.facebook.com/reel/{video_id}"
+            actual_video_id = video_id
+            if not scheduled_publish_time:
+                try:
+                    time.sleep(1.0)
+                    r_check = self._request_with_retry(
+                        "GET",
+                        f"{GRAPH_API_BASE}/{self.page_id}/video_reels",
+                        params={"fields": "id,permalink_url", "limit": 1, "access_token": self.token}
+                    )
+                    r_items = r_check.json().get("data", [])
+                    if r_items:
+                        actual_video_id = r_items[0].get("id", video_id)
+                        p_url = r_items[0].get("permalink_url")
+                        if p_url:
+                            facebook_url = p_url if p_url.startswith("http") else f"https://www.facebook.com{p_url}"
+                        else:
+                            facebook_url = f"https://www.facebook.com/reel/{actual_video_id}"
+                except Exception as pe:
+                    logger.warning(f"Không thể truy vấn permalink Reels: {pe}")
+
+            is_cloud_scheduled = bool(scheduled_publish_time)
             return {
                 "success": True,
-                "mode": "live",
-                "message": "Đã đăng video lên Facebook Reels và ghim bình luận Shopee thành công!",
-                "video_id": video_id,
+                "mode": "scheduled" if is_cloud_scheduled else "live",
+                "message": "Đã lên lịch đăng video trên Facebook Meta Cloud thành công!" if is_cloud_scheduled else "Đã đăng video lên Facebook Reels và ghim bình luận Shopee thành công!",
+                "video_id": actual_video_id,
                 "comment_id": comment_id,
                 "thumbnail_applied": thumbnail_applied,
-                "facebook_url": f"https://www.facebook.com/reel/{video_id}",
-                "published_at": time.strftime("%Y-%m-%d %H:%M:%S")
+                "facebook_url": facebook_url,
+                "published_at": time.strftime("%Y-%m-%d %H:%M:%S"),
+                "scheduled_publish_time": scheduled_publish_time
             }
 
         except Exception as e:

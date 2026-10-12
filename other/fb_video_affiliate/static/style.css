@@ -1333,3 +1333,354 @@ input:checked + .slider:before {
   word-break: break-all;
   flex: 1;
 }
+
+/* ==========================================================================
+   Scheduler & Golden Hours Styles
+   ========================================================================== */
+.schedule-control-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+.schedule-mode-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.btn-mode-pill {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(30, 41, 59, 0.6);
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.btn-mode-pill:hover {
+  background: rgba(51, 65, 85, 0.8);
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.btn-mode-pill.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(168, 85, 247, 0.25));
+  border-color: #818cf8;
+  color: #c7d2fe;
+  font-weight: 700;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.25);
+}
+
+.schedule-settings-box {
+  background: rgba(2, 6, 23, 0.55);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.golden-hours-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #fbbf24;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.golden-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+@media (min-width: 900px) {
+  .golden-presets-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.btn-preset-slot {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.btn-preset-slot:hover {
+  background: rgba(51, 65, 85, 0.9);
+  border-color: #38bdf8;
+  transform: translateY(-2px);
+}
+
+.btn-preset-slot.active {
+  background: rgba(14, 165, 233, 0.2);
+  border-color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+
+.preset-slot-time {
+  font-size: 0.96rem;
+  font-weight: 800;
+  color: #38bdf8;
+}
+
+.preset-slot-desc {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  line-height: 1.3;
+}
+
+.schedule-custom-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.schedule-custom-row label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.schedule-custom-row input[type="datetime-local"] {
+  flex: 1;
+  min-width: 220px;
+  background: rgba(15, 23, 42, 0.8) !important;
+  color: #38bdf8 !important;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  border: 1px solid rgba(56, 189, 248, 0.3) !important;
+}
+
+.schedule-summary-alert {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.84rem;
+}
+
+.schedule-options-row {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+}
+
+.schedule-options-row label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.schedule-options-row input[type="checkbox"] {
+  margin-top: 3px;
+}
+
+/* Scheduled Queue List */
+.scheduled-queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.scheduled-task-card {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.scheduled-task-card:hover {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(30, 41, 59, 0.6);
+}
+
+.task-thumb-wrap {
+  width: 60px;
+  height: 90px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #000;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.task-thumb-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.task-thumb-placeholder {
+  font-size: 1.5rem;
+}
+
+.task-info-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.task-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+}
+
+.task-time-badge {
+  background: rgba(14, 165, 233, 0.15);
+  color: #38bdf8;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.task-countdown-badge {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.task-mode-badge {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.task-actions-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Health Golden Guide Box */
+.health-golden-guide-box {
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 16px;
+}
+
+.guide-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.guide-icon {
+  font-size: 2rem;
+  background: rgba(16, 185, 129, 0.15);
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.guide-header h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #6ee7b7;
+  margin: 0;
+}
+
+.guide-header p {
+  font-size: 0.84rem;
+  color: #94a3b8;
+  margin: 4px 0 0 0;
+}
+
+.golden-slots-table-wrapper {
+  overflow-x: auto;
+}
+
+.golden-slots-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.golden-slots-table th {
+  background: rgba(30, 41, 59, 0.8);
+  padding: 10px 12px;
+  text-align: left;
+  font-weight: 700;
+  color: #e2e8f0;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.golden-slots-table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  vertical-align: top;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+
+.golden-slots-table tr:hover td {
+  background: rgba(30, 41, 59, 0.4);
+}
+
+.text-emerald { color: #34d399 !important; }
+.text-blue { color: #60a5fa !important; }
+.text-amber { color: #fbbf24 !important; }
+.text-purple { color: #c084fc !important; }
+.badge-gold {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #18181b;
+  font-size: 0.68rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 800;
+  display: inline-block;
+  margin-top: 3px;
+}
+

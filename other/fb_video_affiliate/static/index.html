@@ -42,6 +42,10 @@
         <span class="tab-icon">🛒</span>
         <span>Kho Link Shopee (<span id="prodCountBadge">0</span>)</span>
       </button>
+      <button class="tab-btn" data-tab="schedule">
+        <span class="tab-icon">⏰</span>
+        <span>Hàng Đợi Hẹn Giờ (<span id="scheduledCountBadge">0</span>)</span>
+      </button>
       <button class="tab-btn" data-tab="history">
         <span class="tab-icon">📜</span>
         <span>Kho Kịch Bản & Lịch Sử</span>
@@ -299,10 +303,67 @@ Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
                 <textarea id="outComment" class="form-control font-mono" rows="6"></textarea>
               </div>
 
-              <!-- Nút Đăng Bài -->
+              <!-- Bộ Điều Khiển Hẹn Giờ Đăng & Giờ Vàng Sức Khỏe -->
+              <div class="schedule-control-card">
+                <div class="schedule-mode-toggle">
+                  <button type="button" class="btn-mode-pill active" id="btnModeImmediate">
+                    <span>⚡ Đăng Ngay Lập Tức</span>
+                  </button>
+                  <button type="button" class="btn-mode-pill" id="btnModeSchedule">
+                    <span>⏰ Hẹn Giờ Đăng (Auto Scheduler)</span>
+                  </button>
+                </div>
+
+                <!-- Khu vực thiết lập Hẹn Giờ -->
+                <div class="schedule-settings-box" id="scheduleSettingsBox" style="display: none;">
+                  <div class="golden-hours-title">
+                    <span>⭐ 4 Khung Giờ Vàng Đăng Bài Sức Khỏe (Click chọn nhanh):</span>
+                  </div>
+                  
+                  <div class="golden-presets-grid">
+                    <button type="button" class="btn-preset-slot" data-hour="06" data-minute="30" data-label="🌅 Sáng 06:30 (Thanh lọc, uống nước ấm, bài tiết)">
+                      <div class="preset-slot-time">🌅 06:30</div>
+                      <div class="preset-slot-desc">Sáng sớm: Thanh lọc, bài tiết, nước ấm</div>
+                    </button>
+                    <button type="button" class="btn-preset-slot" data-hour="11" data-minute="45" data-label="🍱 Trưa 11:45 (Tiêu hóa, giãn cơ, tim mạch)">
+                      <div class="preset-slot-time">🍱 11:45</div>
+                      <div class="preset-slot-desc">Nghỉ trưa: Tiêu hóa, giãn cơ cổ gáy</div>
+                    </button>
+                    <button type="button" class="btn-preset-slot" data-hour="19" data-minute="00" data-label="🌇 Tối 19:00 (Dinh dưỡng, cảnh báo tắm muộn)">
+                      <div class="preset-slot-time">🌇 19:00</div>
+                      <div class="preset-slot-desc">Cơm tối: Cảnh báo tắm muộn, đồ thừa</div>
+                    </button>
+                    <button type="button" class="btn-preset-slot" data-hour="21" data-minute="15" data-label="🌙 Đêm 21:15 (ĐỈNH CAO: Ngâm chân, mất ngủ, Shopee)">
+                      <div class="preset-slot-time">🌙 21:15</div>
+                      <div class="preset-slot-desc">Đêm vàng: Giấc ngủ, xoa bóp, ngâm chân</div>
+                    </button>
+                  </div>
+
+                  <!-- Tự chọn ngày giờ cụ thể -->
+                  <div class="schedule-custom-row">
+                    <label for="inputScheduleTime">🎯 Chọn ngày giờ cụ thể:</label>
+                    <input type="datetime-local" id="inputScheduleTime" class="form-control form-control-sm">
+                  </div>
+
+                  <div class="schedule-summary-alert" id="scheduleSummaryAlert" style="display: none;">
+                    📌 Sẽ đăng vào lúc: <b id="scheduleTargetText">--:--</b>
+                  </div>
+
+                  <!-- Checkbox Meta Cloud vs Local -->
+                  <div class="schedule-options-row">
+                    <label class="checkbox-label" title="Đẩy lịch trực tiếp lên hệ thống máy chủ Facebook">
+                      <input type="checkbox" id="chkMetaCloudSchedule" checked>
+                      <span><b>Lên lịch trực tiếp trên máy chủ Facebook (Meta Cloud)</b> - Video sẽ xuất hiện ngay trong Meta Business Suite và tự phát sóng dù tắt máy tính!</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Nút Đăng Bài / Lên Lịch -->
               <div class="action-buttons">
                 <button type="button" class="btn btn-success btn-lg btn-block" id="btnPublish">
-                  <span>🚀 ĐĂNG LÊN FACEBOOK REELS & GHIM LINK SHOPEE</span>
+                  <span id="btnPublishIcon">🚀</span>
+                  <span id="btnPublishText">ĐĂNG LÊN FACEBOOK REELS & GHIM LINK SHOPEE</span>
                 </button>
               </div>
 
@@ -331,6 +392,77 @@ Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
           <div class="products-grid" id="productsGrid">
             <!-- Render cards via JS -->
           </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: HÀNG ĐỢI HẸN GIỜ ================= -->
+      <section id="tab-schedule" class="tab-pane">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Hàng Đợi Hẹn Giờ Đăng Video (Reels Scheduler)</h2>
+              <p class="subtitle">Hệ thống chạy ngầm tự động đăng video, gán ảnh bìa và ghim bình luận Shopee chuẩn từng giây.</p>
+            </div>
+            <div class="panel-actions">
+              <button type="button" class="btn btn-secondary" id="btnRefreshSchedule">🔄 Làm Mới Danh Sách</button>
+            </div>
+          </div>
+
+          <!-- Danh sách bài đang xếp hàng -->
+          <div class="scheduled-queue-list" id="scheduledQueueList">
+            <!-- Render qua JS -->
+          </div>
+
+          <!-- Bảng Kiến Thức Chiến Lược Giờ Vàng Đăng Bài Sức Khỏe -->
+          <div class="health-golden-guide-box">
+            <div class="guide-header">
+              <span class="guide-icon">🩺</span>
+              <div>
+                <h3>Cẩm Nang Giờ Vàng Đăng Reels Sức Khỏe & Chuyển Đổi Shopee Affiliate Cao Nhất</h3>
+                <p>Nghiên cứu thói quen sinh hoạt và tâm lý của khán giả Việt Nam (đặc biệt tệp 25 - 55 tuổi):</p>
+              </div>
+            </div>
+
+            <div class="golden-slots-table-wrapper">
+              <table class="golden-slots-table">
+                <thead>
+                  <tr>
+                    <th>Khung Giờ</th>
+                    <th>Tâm Lý Khán Giả</th>
+                    <th>Nội Dung Kịch Bản Đề Xuất</th>
+                    <th>Sản Phẩm Shopee Chốt Đơn Cao</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><b class="text-emerald">🌅 06:00 - 07:30</b><br><small>Sáng Sớm</small></td>
+                    <td>Thức dậy, lướt điện thoại trên giường hoặc uống cafe sáng. Tâm lý đón nhận năng lượng tích cực, thanh lọc cơ thể.</td>
+                    <td>Uống 1 cốc nước ấm khi thức dậy, bài tập vươn vai tại giường, cảnh báo bỏ bữa sáng, cách bài tiết thải độc buổi sáng.</td>
+                    <td>Bình giữ nhiệt, mật ong nguyên chất, trà thảo mộc detox, ngũ cốc dinh dưỡng, máy vắt cam.</td>
+                  </tr>
+                  <tr>
+                    <td><b class="text-blue">🍱 11:30 - 13:00</b><br><small>Nghỉ Trưa</small></td>
+                    <td>Ăn trưa xong ngồi nghỉ, dân văn phòng mỏi lưng, ê ẩm cổ vai gáy, bụng no căng buồn ngủ.</td>
+                    <td>Ăn xong đừng nằm ngay, sai lầm uống nước đá sau bữa ăn, 3 động tác giãn cơ cổ vai gáy cho dân văn phòng.</td>
+                    <td>Gối tựa lưng công thái học, máy massage cổ vai gáy, trà tiêu thực, đệm lót ghế chống trĩ.</td>
+                  </tr>
+                  <tr>
+                    <td><b class="text-amber">🌇 18:30 - 20:00</b><br><small>Chiều Tối</small></td>
+                    <td>Đi làm về, chuẩn bị nấu cơm hoặc vừa ăn tối cùng gia đình. Quan tâm đến dinh dưỡng và cảnh báo nguy hiểm tức thì.</td>
+                    <td>CẢNH BÁO TẮM ĐÊM ĐỘT QUỴ, thực phẩm không nên hâm lại qua đêm, thói quen ăn mặn hại thận của cả nhà.</td>
+                    <td>Đèn sưởi nhà tắm, nhiệt kế đo phòng, nồi chiên không dầu / nồi hấp dinh dưỡng, máy đo huyết áp tại nhà.</td>
+                  </tr>
+                  <tr>
+                    <td><b class="text-purple">🌙 20:30 - 22:30</b><br><span class="badge badge-gold">⭐ ĐỈNH CAO AFFILIATE</span></td>
+                    <td>Thời gian rảnh rỗi tuyệt đối, nằm trên giường thư giãn, xem video dài hơn, tâm lý mua sắm chi tiền mạnh nhất trong ngày!</td>
+                    <td>Mẹo trị mất ngủ không dùng thuốc, ngâm chân muối thảo dược, tư thế ngủ đúng cho người đau cột sống, xoa bóp huyệt vị dũng tuyền.</td>
+                    <td>Muối ngâm chân thảo dược, chậu ngâm chân massage, gối định hình cổ non cao su, tinh dầu ngủ ngon, viên uống bổ não thảo mộc.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       </section>
 

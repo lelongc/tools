@@ -1,0 +1,91 @@
+{
+  "page": {
+    "id": "924512634089549",
+    "name": "Mẹo Sống Khỏe",
+    "is_published": true,
+    "verification_status": "not_verified",
+    "link": "https://www.facebook.com/924512634089549"
+  },
+  "debug_token": {
+    "data": {
+      "app_id": "1484914013686021",
+      "type": "PAGE",
+      "application": "page-sk",
+      "data_access_expires_at": 1798731943,
+      "expires_at": 1796138995,
+      "is_valid": true,
+      "issued_at": 1790956170,
+      "profile_id": "924512634089549",
+      "scopes": [
+        "read_insights",
+        "publish_video",
+        "catalog_management",
+        "pages_show_list",
+        "business_management",
+        "pages_messaging",
+        "leads_retrieval",
+        "pages_read_engagement",
+        "pages_manage_metadata",
+        "pages_read_user_content",
+        "pages_manage_posts",
+        "pages_manage_engagement",
+        "public_profile"
+      ],
+      "granular_scopes": [
+        {
+          "scope": "pages_show_list"
+        },
+        {
+          "scope": "business_management"
+        },
+        {
+          "scope": "pages_messaging"
+        },
+        {
+          "scope": "leads_retrieval"
+        },
+        {
+          "scope": "pages_read_engagement"
+        },
+        {
+          "scope": "pages_manage_metadata"
+        },
+        {
+          "scope": "pages_read_user_content"
+        },
+        {
+          "scope": "pages_manage_posts"
+        },
+        {
+          "scope": "pages_manage_engagement"
+        }
+      ],
+      "user_id": "1104878378958759"
+    }
+  },
+  "video": {
+    "error": {
+      "message": "Unsupported get request. Object with ID '2249704268906564' does not exist, cannot be loaded due to missing permissions, or does not support this operation. Please read the Graph API documentation at https://developers.facebook.com/docs/graph-api",
+      "type": "GraphMethodException",
+      "code": 100,
+      "error_subcode": 33,
+      "fbtrace_id": "APAIwlg1q5xvHHTCnbL9odz"
+    }
+  },
+  "public_access_video": {
+    "error": {
+      "message": "An access token is required to request this resource.",
+      "type": "OAuthException",
+      "code": 104,
+      "fbtrace_id": "Av1CBJ59qWplvznWZvCwE7J"
+    }
+  },
+  "public_access_page": {
+    "error": {
+      "message": "(#200) Provide valid app ID",
+      "type": "OAuthException",
+      "code": 200,
+      "fbtrace_id": "AdO1S6-HZDPtd9bu-9NLvtF"
+    }
+  }
+}
