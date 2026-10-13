@@ -1980,5 +1980,50 @@ input:checked + .slider:before {
   color: var(--text-muted);
 }
 
+/* ==========================================================================
+   Anti-AI & Watermark Logo Overlay Component
+   ========================================================================== */
+.anti-ai-panel {
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+}
+
+.anti-ai-panel:hover {
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.15);
+}
+
+.btn-logo-opt, .btn-pos-opt {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+  user-select: none;
+}
+
+.btn-logo-opt:hover, .btn-pos-opt:hover {
+  border-color: rgba(56, 189, 248, 0.6) !important;
+  background: rgba(56, 189, 248, 0.12) !important;
+  color: #fff !important;
+  transform: translateY(-1px);
+}
+
+.btn-logo-opt.active, .btn-pos-opt.active {
+  border-color: #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.25) !important;
+  color: #fff !important;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.35);
+}
+
+#photoPreviewCanvas {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  display: block;
+  margin: 0 auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
 
 

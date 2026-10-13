@@ -704,7 +704,15 @@ def execute_publish_task(task_data: dict) -> dict:
 
 def execute_comment_task(task_data: dict) -> Optional[dict]:
     """Hàm tự động bình luận Shopee cho bài viết Meta Cloud khi đến giờ phát sóng."""
-    video_id = task_data.get("facebook_result", {}).get("video_id") or task_data.get("facebook_result", {}).get("post_id")
+    # BẢO VỆ CHỐNG BÌNH LUẬN TRÙNG LẶP:
+    fb_res = task_data.get("facebook_result") or {}
+    if task_data.get("comment_posted") or fb_res.get("comment_id") or task_data.get("comment_id"):
+        logger.warning(f"Tác vụ {task_data.get('id')} đã có comment_id ({task_data.get('comment_id') or fb_res.get('comment_id')}). Bỏ qua bình luận trùng lặp!")
+        return None
+    if task_data.get("status") in ["cancelled", "failed"]:
+        return None
+
+    video_id = fb_res.get("video_id") or fb_res.get("post_id")
     comment = task_data.get("pinned_comment", "")
     if not video_id or not comment:
         return None
@@ -1129,7 +1137,156 @@ def save_thumbnail(req: SaveThumbnailRequest):
         "url": f"/uploads/{filename}"
     }
 
-# Static & Asset files for Frontend
+class SaveCleanPhotoRequest(BaseModel):
+    image_base64: str
+    original_filename: Optional[str] = "photo.jpg"
+
+@app.post("/api/save-clean-photo")
+def api_save_clean_photo(req: SaveCleanPhotoRequest):
+    """
+    Nhận dữ liệu ảnh đã khử AI & dán logo từ trình duyệt,
+    chạy qua Pillow để xóa sạch 100% EXIF/C2PA metadata và lưu JPEG chất lượng cao.
+    """
+    import base64
+    import io
+    from PIL import Image
+
+    data = req.image_base64
+    if "," in data:
+        data = data.split(",", 1)[1]
+    raw = base64.b64decode(data)
+
+    filename = f"clean_photo_{int(time.time())}_{uuid.uuid4().hex[:4]}.jpg"
+    target = UPLOAD_DIR / filename
+
+    try:
+        with Image.open(io.BytesIO(raw)) as img:
+            rgb = img.convert("RGB")
+            # Lưu sạch 100% không mang theo thẻ metadata EXIF, IPTC hay C2PA
+            rgb.save(target, "JPEG", quality=95, optimize=True)
+    except Exception as e:
+        logger.warning(f"Lỗi khi chuyển đổi ảnh qua Pillow: {e}, lưu trực tiếp dữ liệu nhị phân.")
+        with open(target, "wb") as f:
+            f.write(raw)
+
+    return {
+        "status": "success",
+        "filename": filename,
+        "saved_path": str(target),
+        "url": f"/uploads/{filename}"
+    }
+
+@app.post("/api/upload-custom-logo")
+async def api_upload_custom_logo(file: UploadFile = File(...)):
+    """Tải lên logo riêng tùy chỉnh để dán đè lên ảnh bài viết."""
+    filename = f"logo_custom_{int(time.time())}_{file.filename}"
+    target_path = UPLOAD_DIR / filename
+    content = await file.read()
+    with open(target_path, "wb") as f:
+        f.write(content)
+    return {
+        "status": "success",
+        "filename": filename,
+        "saved_path": str(target_path),
+        "url": f"/uploads/{filename}"
+    }
+
+class ProcessPhotoAntiAIRequest(BaseModel):
+    photo_path: str
+    clean_anti_ai: Optional[bool] = True
+    apply_logo: Optional[bool] = False
+    logo_type: Optional[str] = "badge"  # 'badge', 'shadow', 'transparent', 'custom'
+    custom_logo_path: Optional[str] = ""
+    position: Optional[str] = "bottom-right"
+    scale_percent: Optional[float] = 18.0
+    opacity: Optional[float] = 0.9
+
+@app.post("/api/process-photo-anti-ai")
+def api_process_photo_anti_ai(req: ProcessPhotoAntiAIRequest):
+    """Xử lý ảnh bằng Pillow trên server: xóa sạch C2PA/EXIF và dán đè logo."""
+    from PIL import Image
+
+    in_path = Path(req.photo_path)
+    if not in_path.is_absolute():
+        in_path = BASE_DIR / in_path
+
+    if not in_path.exists():
+        raise HTTPException(status_code=404, detail="Không tìm thấy file ảnh gốc trên server!")
+
+    out_filename = f"anti_ai_{int(time.time())}_{uuid.uuid4().hex[:4]}.jpg"
+    out_path = UPLOAD_DIR / out_filename
+
+    logo_file = None
+    if req.apply_logo:
+        if req.logo_type == "badge":
+            logo_file = BASE_DIR / "assets" / "watermark_huy_hieu_tron.png"
+        elif req.logo_type == "shadow":
+            logo_file = BASE_DIR / "assets" / "watermark_icon_bong_mo.png"
+        elif req.logo_type == "transparent":
+            logo_file = BASE_DIR / "assets" / "watermark_icon_trongsuot.png"
+        elif req.logo_type == "custom" and req.custom_logo_path:
+            logo_file = Path(req.custom_logo_path)
+            if not logo_file.is_absolute():
+                logo_file = BASE_DIR / logo_file
+
+    try:
+        with Image.open(in_path) as orig:
+            # Tạo canvas ảnh mới hoàn toàn để hủy bỏ 100% siêu dữ liệu C2PA/EXIF gốc
+            img = Image.new("RGBA", orig.size)
+            img.paste(orig.convert("RGBA"), (0, 0))
+
+        if req.apply_logo and logo_file and logo_file.exists():
+            with Image.open(logo_file) as logo_orig:
+                logo = logo_orig.convert("RGBA")
+                w, h = img.size
+                scale = max(0.05, min(0.5, (req.scale_percent or 18.0) / 100.0))
+                target_w = max(40, int(w * scale))
+                target_h = int(logo.height * (target_w / logo.width))
+                logo = logo.resize((target_w, target_h), Image.Resampling.LANCZOS)
+
+                op = max(0.1, min(1.0, req.opacity or 0.9))
+                if op < 1.0:
+                    r, g, b, a = logo.split()
+                    a = a.point(lambda p: int(p * op))
+                    logo = Image.merge("RGBA", (r, g, b, a))
+
+                margin_x = int(w * 0.03)
+                margin_y = int(h * 0.03)
+                pos = req.position or "bottom-right"
+
+                if pos == "bottom-right":
+                    pos_x = w - target_w - margin_x
+                    pos_y = h - target_h - margin_y
+                elif pos == "bottom-left":
+                    pos_x = margin_x
+                    pos_y = h - target_h - margin_y
+                elif pos == "top-right":
+                    pos_x = w - target_w - margin_x
+                    pos_y = margin_y
+                elif pos == "top-left":
+                    pos_x = margin_x
+                    pos_y = margin_y
+                elif pos == "center":
+                    pos_x = (w - target_w) // 2
+                    pos_y = (h - target_h) // 2
+                else:
+                    pos_x = w - target_w - margin_x
+                    pos_y = h - target_h - margin_y
+
+                img.paste(logo, (pos_x, pos_y), mask=logo)
+
+        clean_rgb = img.convert("RGB")
+        clean_rgb.save(out_path, "JPEG", quality=95, optimize=True)
+
+        return {
+            "status": "success",
+            "filename": out_filename,
+            "saved_path": str(out_path),
+            "url": f"/uploads/{out_filename}"
+        }
+    except Exception as e:
+        logger.error(f"Lỗi xử lý ảnh Anti-AI: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 STATIC_DIR = BASE_DIR / "static"
 ASSETS_DIR = BASE_DIR / "assets"
 STATIC_DIR.mkdir(parents=True, exist_ok=True)

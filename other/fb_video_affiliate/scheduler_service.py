@@ -120,6 +120,10 @@ def update_task_status(task_id: str, status: str, result: Optional[dict] = None,
             if result:
                 t["facebook_result"] = result
                 t["completed_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
+                # Nếu kết quả đăng bài đã kèm bình luận ghim -> Đánh dấu ngay lập tức để worker không chạy lại
+                if result.get("comment_id"):
+                    t["comment_posted"] = True
+                    t["comment_id"] = result.get("comment_id")
             if error:
                 t["error_message"] = str(error)
             break
@@ -139,6 +143,8 @@ def _worker_loop():
                 # Nếu tác vụ đã có video_id/post_id trên Facebook hoặc đã hoàn thành -> Không bao giờ đăng lại!
                 fb_res = t.get("facebook_result") or {}
                 has_fb_id = bool(fb_res.get("video_id") or fb_res.get("post_id"))
+                has_comment = bool(t.get("comment_posted") or fb_res.get("comment_id") or t.get("comment_id"))
+                is_done = t.get("status") in ["completed", "cancelled", "failed"]
 
                 # 1. Với bài lên lịch Cục bộ (Local Scheduler)
                 if t.get("status") == "pending" and not t.get("meta_cloud_schedule"):
@@ -167,7 +173,12 @@ def _worker_loop():
                             update_task_status(task_id, "failed", error="Publisher callback is not configured")
 
                 # 2. Với bài đã lên lịch trực tiếp trên Meta Cloud (Facebook Scheduled)
-                elif t.get("meta_cloud_schedule") and not t.get("comment_posted") and t.get("pinned_comment"):
+                # CHỈ thực thi ghim bình luận khi:
+                # - Là bài meta_cloud_schedule
+                # - CHƯA từng được ghim bình luận (not has_comment)
+                # - CHƯA kết thúc (not is_done)
+                # - Có nội dung pinned_comment
+                elif t.get("meta_cloud_schedule") and not has_comment and not is_done and t.get("pinned_comment"):
                     target = t.get("target_timestamp", 0)
                     if target <= now:
                         if _commenter_callback:
@@ -176,6 +187,7 @@ def _worker_loop():
                                 if c_res and "id" in c_res:
                                     t["comment_posted"] = True
                                     t["comment_id"] = c_res.get("id")
+                                    t["status"] = "completed"
                                     tasks_modified = True
                                     logger.info(f"Đã tự động ghim bình luận Shopee cho video Meta Cloud {t.get('id')} thành công!")
                             except Exception as ce:

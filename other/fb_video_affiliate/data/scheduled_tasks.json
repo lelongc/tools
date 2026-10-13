@@ -41,7 +41,9 @@
       "published_at": "2026-10-12 13:47:32",
       "scheduled_publish_time": 1791866700
     },
-    "error_message": null
+    "error_message": null,
+    "comment_posted": true,
+    "comment_id": "1964842588219453_1135055799220121"
   },
   {
     "id": "sched_1791785580_79ed26",
@@ -84,7 +86,9 @@
       "scheduled_publish_time": null
     },
     "error_message": null,
-    "completed_at": "2026-10-12 13:21:42"
+    "completed_at": "2026-10-12 13:21:42",
+    "comment_posted": true,
+    "comment_id": "4225771897553369_1115017927747211"
   },
   {
     "id": "sched_1791785537_b15762",

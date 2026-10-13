@@ -417,10 +417,89 @@ Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
                     <small>Khuyên dùng ảnh dọc 4:5 hoặc vuông 1:1, rõ nét, mẹo dễ đọc</small>
                   </div>
                   <div class="photo-preview-box" id="photoPreviewBox" style="display: none;">
-                    <img id="photoPreviewImg" src="" alt="Xem trước ảnh">
+                    <canvas id="photoPreviewCanvas" style="max-width: 100%; height: auto; border-radius: 8px; display: block; margin: 0 auto; box-shadow: 0 4px 16px rgba(0,0,0,0.3);"></canvas>
+                    <img id="photoPreviewImg" src="" alt="Xem trước ảnh" style="display: none;">
                     <div class="video-meta">
                       <span id="photoFileName">photo.png</span>
                       <button type="button" class="btn-xs btn-danger" id="btnRemovePhoto">Chọn ảnh khác</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Khung Xử Lý Khử AI & Dán Logo -->
+                <div class="anti-ai-panel" id="photoAntiAIPanel" style="display: none; margin-top: 15px; padding: 14px 16px; background: rgba(17, 24, 39, 0.85); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; box-shadow: 0 8px 24px -6px rgba(0,0,0,0.4);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h3 style="font-size: 13.5px; font-weight: 700; color: #38bdf8; margin: 0; display: flex; align-items: center; gap: 6px;">
+                      <span>🛡️</span> Khử Nhận Diện AI & Đè Logo Thương Hiệu
+                    </h3>
+                    <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 11px; padding: 2px 8px; border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.3);">Chuẩn An Toàn</span>
+                  </div>
+
+                  <!-- Tùy chọn 1: Tẩy sạch mã nhận diện AI -->
+                  <div style="margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; background: rgba(30, 41, 59, 0.5); border-radius: 8px;">
+                    <input type="checkbox" id="chkPhotoCleanAntiAI" checked style="margin-top: 3px; accent-color: #38bdf8; width: 16px; height: 16px; cursor: pointer;">
+                    <label for="chkPhotoCleanAntiAI" style="margin: 0; font-size: 12.5px; color: #f1f5f9; cursor: pointer; flex: 1;">
+                      <b style="color: #38bdf8;">Tẩy sạch 100% siêu dữ liệu AI (C2PA, EXIF, IPTC):</b>
+                      <span style="display: block; font-size: 11px; color: #94a3b8; margin-top: 2px;">Tự động bóc tách sạch thẻ định danh của Midjourney, DALL-E, Gemini... để Meta không gắn nhãn "Thông tin AI".</span>
+                    </label>
+                  </div>
+
+                  <!-- Tùy chọn 2: Dán đè Logo bản quyền -->
+                  <div style="margin-bottom: 10px; display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; background: rgba(30, 41, 59, 0.5); border-radius: 8px;">
+                    <input type="checkbox" id="chkPhotoApplyLogo" checked style="margin-top: 3px; accent-color: #38bdf8; width: 16px; height: 16px; cursor: pointer;">
+                    <label for="chkPhotoApplyLogo" style="margin: 0; font-size: 12.5px; color: #f1f5f9; cursor: pointer; flex: 1;">
+                      <b style="color: #fbbf24;">Dán Logo đè lên ảnh (Che logo AI & Bản quyền):</b>
+                      <span style="display: block; font-size: 11px; color: #94a3b8; margin-top: 2px;">Đè huy hiệu Page hoặc icon vào góc để che logo mờ của AI và tạo dấu ấn độc quyền.</span>
+                    </label>
+                  </div>
+
+                  <!-- Cụm cấu hình Logo (hiện khi chkPhotoApplyLogo = true) -->
+                  <div id="photoLogoOptionsBox" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(148, 163, 184, 0.2);">
+                    <!-- 1. Chọn mẫu logo -->
+                    <label style="font-size: 12px; color: #cbd5e1; font-weight: 600; margin-bottom: 6px; display: block;">Mẫu Logo Muốn Đè:</label>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px;">
+                      <button type="button" class="btn-logo-opt active" data-logo="badge" id="btnLogoBadge" style="padding: 6px 10px; font-size: 12px; border-radius: 6px; border: 1px solid #38bdf8; background: rgba(56, 189, 248, 0.2); color: #fff; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 6px;">
+                        <span>🎖️</span> Huy hiệu tròn
+                      </button>
+                      <button type="button" class="btn-logo-opt" data-logo="shadow" id="btnLogoShadow" style="padding: 6px 10px; font-size: 12px; border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(30, 41, 59, 0.5); color: #cbd5e1; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 6px;">
+                        <span>✨</span> Icon bóng mờ
+                      </button>
+                      <button type="button" class="btn-logo-opt" data-logo="transparent" id="btnLogoTransparent" style="padding: 6px 10px; font-size: 12px; border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(30, 41, 59, 0.5); color: #cbd5e1; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 6px;">
+                        <span>💧</span> Icon trong suốt
+                      </button>
+                      <button type="button" class="btn-logo-opt" data-logo="custom" id="btnLogoCustom" style="padding: 6px 10px; font-size: 12px; border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(30, 41, 59, 0.5); color: #cbd5e1; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 6px;">
+                        <span>📁</span> Tải logo riêng...
+                      </button>
+                    </div>
+                    <input type="file" id="photoCustomLogoInput" accept="image/png,image/jpeg,image/webp" style="display: none;">
+                    <div id="customLogoStatus" style="display: none; font-size: 11px; color: #34d399; margin-bottom: 8px;">✓ Đã tải logo riêng</div>
+
+                    <!-- 2. Vị trí dán -->
+                    <label style="font-size: 12px; color: #cbd5e1; font-weight: 600; margin-bottom: 6px; display: block;">Vị Trí Đè Logo:</label>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px;">
+                      <button type="button" class="btn-pos-opt" data-pos="top-left" style="padding: 6px; font-size: 11px; border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(30, 41, 59, 0.5); color: #cbd5e1; cursor: pointer;">↖️ Trên Trái</button>
+                      <button type="button" class="btn-pos-opt" data-pos="center" style="padding: 6px; font-size: 11px; border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(30, 41, 59, 0.5); color: #cbd5e1; cursor: pointer;">🎯 Giữa</button>
+                      <button type="button" class="btn-pos-opt" data-pos="top-right" style="padding: 6px; font-size: 11px; border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(30, 41, 59, 0.5); color: #cbd5e1; cursor: pointer;">↗️ Trên Phải</button>
+                      <button type="button" class="btn-pos-opt" data-pos="bottom-left" style="padding: 6px; font-size: 11px; border-radius: 6px; border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(30, 41, 59, 0.5); color: #cbd5e1; cursor: pointer;">↙️ Dưới Trái</button>
+                      <button type="button" class="btn-pos-opt active" data-pos="bottom-right" style="padding: 6px; font-size: 11px; border-radius: 6px; border: 1px solid #38bdf8; background: rgba(56, 189, 248, 0.2); color: #fff; cursor: pointer; grid-column: span 2;">↘️ Dưới Phải (Che Logo AI)</button>
+                    </div>
+
+                    <!-- 3. Thanh trượt Kích thước & Độ mờ -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                      <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 4px;">
+                          <span>Kích thước logo:</span>
+                          <b id="valPhotoLogoScale" style="color: #38bdf8;">18%</b>
+                        </div>
+                        <input type="range" id="sliderPhotoLogoScale" min="6" max="40" value="18" style="width: 100%; accent-color: #38bdf8; cursor: pointer;">
+                      </div>
+                      <div>
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 4px;">
+                          <span>Độ mờ / Hiển thị:</span>
+                          <b id="valPhotoLogoOpacity" style="color: #38bdf8;">90%</b>
+                        </div>
+                        <input type="range" id="sliderPhotoLogoOpacity" min="20" max="100" value="90" style="width: 100%; accent-color: #38bdf8; cursor: pointer;">
+                      </div>
                     </div>
                   </div>
                 </div>

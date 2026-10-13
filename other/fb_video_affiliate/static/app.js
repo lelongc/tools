@@ -166,6 +166,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnPublishPhotoIcon = document.getElementById("btnPublishPhotoIcon");
   const btnPublishPhotoText = document.getElementById("btnPublishPhotoText");
   const photoPublishResultBox = document.getElementById("photoPublishResultBox");
+  const photoPreviewCanvas = document.getElementById("photoPreviewCanvas");
+  const photoAntiAIPanel = document.getElementById("photoAntiAIPanel");
+  const chkPhotoCleanAntiAI = document.getElementById("chkPhotoCleanAntiAI");
+  const chkPhotoApplyLogo = document.getElementById("chkPhotoApplyLogo");
+  const photoLogoOptionsBox = document.getElementById("photoLogoOptionsBox");
+  const photoCustomLogoInput = document.getElementById("photoCustomLogoInput");
+  const customLogoStatus = document.getElementById("customLogoStatus");
+  const sliderPhotoLogoScale = document.getElementById("sliderPhotoLogoScale");
+  const sliderPhotoLogoOpacity = document.getElementById("sliderPhotoLogoOpacity");
+  const valPhotoLogoScale = document.getElementById("valPhotoLogoScale");
+  const valPhotoLogoOpacity = document.getElementById("valPhotoLogoOpacity");
+  const btnLogoOpts = document.querySelectorAll(".btn-logo-opt");
+  const btnPosOpts = document.querySelectorAll(".btn-pos-opt");
 
   // ================= TABS SWITCHING =================
   tabButtons.forEach(btn => {
@@ -539,6 +552,194 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // ================= BỘ XỬ LÝ ẢNH CHỐNG AI & DÁN ĐÈ LOGO =================
+  let sourcePhotoObj = null;
+  let activeLogoType = "badge"; // 'badge', 'shadow', 'transparent', 'custom'
+  let activeLogoPos = "bottom-right"; // 'bottom-right', 'bottom-left', 'top-right', 'top-left', 'center'
+  let customLogoObj = null;
+
+  const logoAssets = {
+    badge: new Image(),
+    shadow: new Image(),
+    transparent: new Image()
+  };
+  logoAssets.badge.src = "/assets/watermark_huy_hieu_tron.png";
+  logoAssets.shadow.src = "/assets/watermark_icon_bong_mo.png";
+  logoAssets.transparent.src = "/assets/watermark_icon_trongsuot.png";
+
+  function renderPhotoAntiAICanvas() {
+    if (!photoPreviewCanvas || !sourcePhotoObj) return;
+    const ctx = photoPreviewCanvas.getContext("2d");
+    const nw = sourcePhotoObj.naturalWidth || sourcePhotoObj.width || 800;
+    const nh = sourcePhotoObj.naturalHeight || sourcePhotoObj.height || 1000;
+
+    photoPreviewCanvas.width = nw;
+    photoPreviewCanvas.height = nh;
+
+    // 1. Vẽ ảnh gốc (HTML5 Canvas tự động loại bỏ sạch 100% EXIF, IPTC & C2PA metadata)
+    ctx.clearRect(0, 0, nw, nh);
+    ctx.drawImage(sourcePhotoObj, 0, 0, nw, nh);
+
+    // 2. Dán đè Logo nếu được chọn
+    const applyLogo = chkPhotoApplyLogo ? chkPhotoApplyLogo.checked : false;
+    if (applyLogo) {
+      let logoImg = (activeLogoType === "custom") ? customLogoObj : logoAssets[activeLogoType];
+
+      if (logoImg && (logoImg.complete || logoImg.naturalWidth > 0)) {
+        const scalePct = parseInt(sliderPhotoLogoScale ? sliderPhotoLogoScale.value : 18) / 100;
+        const opacity = parseInt(sliderPhotoLogoOpacity ? sliderPhotoLogoOpacity.value : 90) / 100;
+
+        const targetW = Math.max(40, Math.round(nw * scalePct));
+        const targetH = Math.round(logoImg.naturalHeight * (targetW / logoImg.naturalWidth));
+
+        const marginX = Math.round(nw * 0.035);
+        const marginY = Math.round(nh * 0.035);
+
+        let posX = 0, posY = 0;
+        if (activeLogoPos === "bottom-right") {
+          posX = nw - targetW - marginX;
+          posY = nh - targetH - marginY;
+        } else if (activeLogoPos === "bottom-left") {
+          posX = marginX;
+          posY = nh - targetH - marginY;
+        } else if (activeLogoPos === "top-right") {
+          posX = nw - targetW - marginX;
+          posY = marginY;
+        } else if (activeLogoPos === "top-left") {
+          posX = marginX;
+          posY = marginY;
+        } else if (activeLogoPos === "center") {
+          posX = Math.round((nw - targetW) / 2);
+          posY = Math.round((nh - targetH) / 2);
+        } else {
+          posX = nw - targetW - marginX;
+          posY = nh - targetH - marginY;
+        }
+
+        ctx.save();
+        ctx.globalAlpha = opacity;
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(logoImg, posX, posY, targetW, targetH);
+        ctx.restore();
+      }
+    }
+  }
+
+  // Gắn sự kiện chọn loại logo
+  if (btnLogoOpts) {
+    btnLogoOpts.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const type = btn.getAttribute("data-logo");
+        if (type === "custom") {
+          if (photoCustomLogoInput) photoCustomLogoInput.click();
+          return;
+        }
+        btnLogoOpts.forEach(b => {
+          b.classList.remove("active");
+          b.style.borderColor = "rgba(148, 163, 184, 0.3)";
+          b.style.background = "rgba(30, 41, 59, 0.5)";
+          b.style.color = "#cbd5e1";
+        });
+        btn.classList.add("active");
+        btn.style.borderColor = "#38bdf8";
+        btn.style.background = "rgba(56, 189, 248, 0.2)";
+        btn.style.color = "#fff";
+        activeLogoType = type;
+        renderPhotoAntiAICanvas();
+      });
+    });
+  }
+
+  // Tải logo riêng
+  if (photoCustomLogoInput) {
+    photoCustomLogoInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const res = await fetch("/api/upload-custom-logo", { method: "POST", body: formData });
+        const d = await res.json();
+        if (d.status === "success") {
+          customLogoObj = new Image();
+          customLogoObj.onload = () => {
+            btnLogoOpts.forEach(b => {
+              b.classList.remove("active");
+              b.style.borderColor = "rgba(148, 163, 184, 0.3)";
+              b.style.background = "rgba(30, 41, 59, 0.5)";
+              b.style.color = "#cbd5e1";
+            });
+            const customBtn = document.getElementById("btnLogoCustom");
+            if (customBtn) {
+              customBtn.classList.add("active");
+              customBtn.style.borderColor = "#38bdf8";
+              customBtn.style.background = "rgba(56, 189, 248, 0.2)";
+              customBtn.style.color = "#fff";
+            }
+            if (customLogoStatus) {
+              customLogoStatus.style.display = "block";
+              customLogoStatus.textContent = `✓ Đã tải logo: ${file.name}`;
+            }
+            activeLogoType = "custom";
+            renderPhotoAntiAICanvas();
+            showToast("Đã tải logo riêng lên thành công!");
+          };
+          customLogoObj.src = d.url;
+        }
+      } catch (err) {
+        showToast("Lỗi tải logo: " + err.message, "error");
+      }
+    });
+  }
+
+  // Gắn sự kiện chọn vị trí logo
+  if (btnPosOpts) {
+    btnPosOpts.forEach(btn => {
+      btn.addEventListener("click", () => {
+        btnPosOpts.forEach(b => {
+          b.classList.remove("active");
+          b.style.borderColor = "rgba(148, 163, 184, 0.3)";
+          b.style.background = "rgba(30, 41, 59, 0.5)";
+          b.style.color = "#cbd5e1";
+        });
+        btn.classList.add("active");
+        btn.style.borderColor = "#38bdf8";
+        btn.style.background = "rgba(56, 189, 248, 0.2)";
+        btn.style.color = "#fff";
+        activeLogoPos = btn.getAttribute("data-pos");
+        renderPhotoAntiAICanvas();
+      });
+    });
+  }
+
+  // Gắn sự kiện checkbox & slider
+  if (chkPhotoCleanAntiAI) {
+    chkPhotoCleanAntiAI.addEventListener("change", () => {
+      renderPhotoAntiAICanvas();
+    });
+  }
+  if (chkPhotoApplyLogo) {
+    chkPhotoApplyLogo.addEventListener("change", () => {
+      if (photoLogoOptionsBox) {
+        photoLogoOptionsBox.style.display = chkPhotoApplyLogo.checked ? "block" : "none";
+      }
+      renderPhotoAntiAICanvas();
+    });
+  }
+  if (sliderPhotoLogoScale) {
+    sliderPhotoLogoScale.addEventListener("input", (e) => {
+      if (valPhotoLogoScale) valPhotoLogoScale.textContent = `${e.target.value}%`;
+      renderPhotoAntiAICanvas();
+    });
+  }
+  if (sliderPhotoLogoOpacity) {
+    sliderPhotoLogoOpacity.addEventListener("input", (e) => {
+      if (valPhotoLogoOpacity) valPhotoLogoOpacity.textContent = `${e.target.value}%`;
+      renderPhotoAntiAICanvas();
+    });
+  }
+
   async function handlePhotoUpload(file) {
     const formData = new FormData();
     formData.append("file", file);
@@ -546,11 +747,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (photoFileName) photoFileName.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
     if (photoDropPrompt) photoDropPrompt.style.display = "none";
     if (photoPreviewBox) photoPreviewBox.style.display = "block";
+    if (photoAntiAIPanel) photoAntiAIPanel.style.display = "block";
 
-    // Client-side instant preview
+    // Client-side instant preview & setup Canvas
     const reader = new FileReader();
     reader.onload = (e) => {
       if (photoPreviewImg) photoPreviewImg.src = e.target.result;
+      sourcePhotoObj = new Image();
+      sourcePhotoObj.onload = () => {
+        renderPhotoAntiAICanvas();
+      };
+      sourcePhotoObj.src = e.target.result;
     };
     reader.readAsDataURL(file);
 
@@ -579,9 +786,15 @@ document.addEventListener("DOMContentLoaded", () => {
     btnRemovePhoto.addEventListener("click", (e) => {
       e.stopPropagation();
       currentPhotoPath = "";
+      sourcePhotoObj = null;
       if (photoFileInput) photoFileInput.value = "";
       if (photoPreviewImg) photoPreviewImg.src = "";
+      if (photoPreviewCanvas) {
+        const ctx = photoPreviewCanvas.getContext("2d");
+        ctx.clearRect(0, 0, photoPreviewCanvas.width, photoPreviewCanvas.height);
+      }
       if (photoPreviewBox) photoPreviewBox.style.display = "none";
+      if (photoAntiAIPanel) photoAntiAIPanel.style.display = "none";
       if (photoDropPrompt) photoDropPrompt.style.display = "block";
     });
   }
@@ -731,6 +944,29 @@ document.addEventListener("DOMContentLoaded", () => {
       btnPublishPhoto.innerHTML = isPhotoScheduleMode ? 
         `<span>⏳ Đang ghi nhận lịch hẹn đăng ảnh...</span>` : 
         `<span>⏳ Đang đăng bài viết ảnh & ghim bình luận lên Facebook...</span>`;
+
+      // Khử siêu dữ liệu AI & lưu ảnh có dán logo trước khi đăng
+      if (photoPreviewCanvas && photoPreviewCanvas.width > 0) {
+        try {
+          btnPublishPhoto.innerHTML = isPhotoScheduleMode ? 
+            `<span>🛡️ Đang khử sạch mã AI & chuẩn bị hẹn giờ...</span>` : 
+            `<span>🛡️ Đang khử sạch mã AI & dán logo lên bài viết...</span>`;
+
+          const cleanDataUrl = photoPreviewCanvas.toDataURL("image/jpeg", 0.95);
+          const saveRes = await fetch("/api/save-clean-photo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image_base64: cleanDataUrl })
+          });
+          const saveD = await saveRes.json();
+          if (saveD.status === "success" && saveD.saved_path) {
+            currentPhotoPath = saveD.saved_path;
+            console.log("Đã lưu ảnh sạch Anti-AI:", currentPhotoPath);
+          }
+        } catch (cleanErr) {
+          console.warn("Không thể lưu ảnh từ canvas, dùng ảnh gốc:", cleanErr);
+        }
+      }
 
       const hashtags = photoHashtagsCloud ? 
         Array.from(photoHashtagsCloud.querySelectorAll(".hashtag-tag")).map(el => el.textContent) : [];
