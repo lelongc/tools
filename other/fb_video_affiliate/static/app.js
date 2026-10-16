@@ -133,11 +133,13 @@ document.addEventListener("DOMContentLoaded", () => {
   const pageVerifyAlert = document.getElementById("pageVerifyAlert");
   const pageFormTitle = document.getElementById("pageFormTitle");
 
-  // DOM Elements - Studio Switcher (Reels vs Photo)
+  // DOM Elements - Studio Switcher (Reels vs Photo vs Remix)
   const btnTypeReels = document.getElementById("btnTypeReels");
   const btnTypePhoto = document.getElementById("btnTypePhoto");
+  const btnTypeRemix = document.getElementById("btnTypeRemix");
   const reelsStudioView = document.getElementById("reelsStudioView");
   const photoStudioView = document.getElementById("photoStudioView");
+  const remixStudioView = document.getElementById("remixStudioView");
 
   // DOM Elements - Photo Studio
   const photoDropZone = document.getElementById("photoDropZone");
@@ -180,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnLogoOpts = document.querySelectorAll(".btn-logo-opt");
   const btnPosOpts = document.querySelectorAll(".btn-pos-opt");
 
-  // ================= TABS SWITCHING =================
+  // ================= TABS SWITCHING (4 TAB CHÍNH) =================
   tabButtons.forEach(btn => {
     btn.addEventListener("click", () => {
       const targetTab = btn.getAttribute("data-tab");
@@ -191,9 +193,88 @@ document.addEventListener("DOMContentLoaded", () => {
       if (targetPane) targetPane.classList.add("active");
 
       if (targetTab === "products") loadProducts();
-      if (targetTab === "schedule") loadScheduledTasks();
-      if (targetTab === "history") loadHistory();
+      if (targetTab === "schedule") {
+        loadScheduledTasks();
+        loadHistory();
+      }
       if (targetTab === "settings") loadConfigToSettings();
+    });
+  });
+
+  // Dropdown Menu Tool ở Header
+  const btnHeaderMenuTool = document.getElementById("btnHeaderMenuTool");
+  const headerToolDropdown = document.getElementById("headerToolDropdown");
+  const headerToolDropdownWrap = document.getElementById("headerToolDropdownWrap");
+  if (btnHeaderMenuTool && headerToolDropdown) {
+    btnHeaderMenuTool.addEventListener("click", (e) => {
+      e.stopPropagation();
+      headerToolDropdown.classList.toggle("show");
+    });
+    document.addEventListener("click", (e) => {
+      if (headerToolDropdownWrap && !headerToolDropdownWrap.contains(e.target)) {
+        headerToolDropdown.classList.remove("show");
+      }
+    });
+  }
+
+  // Schedule & History Subviews
+  const btnSubScheduleQueue = document.getElementById("btnSubScheduleQueue");
+  const btnSubScheduleHistory = document.getElementById("btnSubScheduleHistory");
+  const scheduleQueueSubView = document.getElementById("scheduleQueueSubView");
+  const scheduleHistorySubView = document.getElementById("scheduleHistorySubView");
+  const toggleGoldenGuide = document.getElementById("toggleGoldenGuide");
+  const goldenGuideBody = document.getElementById("goldenGuideBody");
+
+  if (btnSubScheduleQueue && btnSubScheduleHistory) {
+    btnSubScheduleQueue.addEventListener("click", () => {
+      btnSubScheduleQueue.classList.add("active");
+      btnSubScheduleHistory.classList.remove("active");
+      if (scheduleQueueSubView) scheduleQueueSubView.style.display = "block";
+      if (scheduleHistorySubView) scheduleHistorySubView.style.display = "none";
+      loadScheduledTasks();
+    });
+
+    btnSubScheduleHistory.addEventListener("click", () => {
+      btnSubScheduleHistory.classList.add("active");
+      btnSubScheduleQueue.classList.remove("active");
+      if (scheduleQueueSubView) scheduleQueueSubView.style.display = "none";
+      if (scheduleHistorySubView) scheduleHistorySubView.style.display = "block";
+      loadHistory();
+    });
+  }
+
+  if (toggleGoldenGuide && goldenGuideBody) {
+    toggleGoldenGuide.addEventListener("click", () => {
+      const isHidden = goldenGuideBody.style.display === "none";
+      goldenGuideBody.style.display = isHidden ? "block" : "none";
+      toggleGoldenGuide.classList.toggle("open", isHidden);
+    });
+  }
+
+  // Các nút chuyển tab từ data-switch-tab
+  document.querySelectorAll("[data-switch-tab]").forEach(el => {
+    el.addEventListener("click", () => {
+      const tabName = el.getAttribute("data-switch-tab");
+      const subview = el.getAttribute("data-subview");
+      if (tabName === "remix") {
+        switchToHubTab("studio", "remix");
+        return;
+      }
+      if (tabName === "news") {
+        window.location.href = "/news";
+        return;
+      }
+      const targetBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+      if (targetBtn) {
+        targetBtn.click();
+        if (subview === "photo" && btnTypePhoto) {
+          showStudioView("photo");
+        } else if (subview === "reels" && btnTypeReels) {
+          showStudioView("reels");
+        } else if (subview === "remix" && btnTypeRemix) {
+          showStudioView("remix");
+        }
+      }
     });
   });
 
@@ -500,22 +581,20 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ================= STUDIO SWITCHER (REELS vs PHOTO) =================
-  if (btnTypeReels && btnTypePhoto) {
-    btnTypeReels.addEventListener("click", () => {
-      btnTypeReels.classList.add("active");
-      btnTypePhoto.classList.remove("active");
-      if (reelsStudioView) reelsStudioView.style.display = "block";
-      if (photoStudioView) photoStudioView.style.display = "none";
-    });
+  // ================= STUDIO SWITCHER (REELS vs PHOTO vs REMIX) =================
+  function showStudioView(viewType) {
+    if (btnTypeReels) btnTypeReels.classList.toggle("active", viewType === "reels");
+    if (btnTypePhoto) btnTypePhoto.classList.toggle("active", viewType === "photo");
+    if (btnTypeRemix) btnTypeRemix.classList.toggle("active", viewType === "remix");
 
-    btnTypePhoto.addEventListener("click", () => {
-      btnTypePhoto.classList.add("active");
-      btnTypeReels.classList.remove("active");
-      if (reelsStudioView) reelsStudioView.style.display = "none";
-      if (photoStudioView) photoStudioView.style.display = "block";
-    });
+    if (reelsStudioView) reelsStudioView.style.display = viewType === "reels" ? "block" : "none";
+    if (photoStudioView) photoStudioView.style.display = viewType === "photo" ? "block" : "none";
+    if (remixStudioView) remixStudioView.style.display = viewType === "remix" ? "block" : "none";
   }
+
+  if (btnTypeReels) btnTypeReels.addEventListener("click", () => showStudioView("reels"));
+  if (btnTypePhoto) btnTypePhoto.addEventListener("click", () => showStudioView("photo"));
+  if (btnTypeRemix) btnTypeRemix.addEventListener("click", () => showStudioView("remix"));
 
   // ================= PHOTO STUDIO IMPLEMENTATION =================
   // 1. Drag & Drop Upload Photo
@@ -2561,6 +2640,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (scheduledCountBadge) {
         scheduledCountBadge.textContent = pendingTasks.length;
       }
+      const scheduledSubBadge = document.getElementById("scheduledSubBadge");
+      if (scheduledSubBadge) scheduledSubBadge.textContent = pendingTasks.length;
 
       if (!scheduledQueueList) return;
       scheduledQueueList.innerHTML = "";
@@ -3054,9 +3135,735 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // ================= TAB: NEWS STUDIO (XAO NAU TIN TUC & GOOGLE FLOW) =================
+  function initNewsTab() {
+    let originalNewsImagePath = '';
+    let finalNewsImagePath = '';
+    let currentToneStyle = 'objective';
+
+    // 1. Source Pills
+    const pills = document.querySelectorAll('.source-pill');
+    const sourceInput = document.getElementById('newsInputSource');
+    pills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        pills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        if (sourceInput) sourceInput.value = pill.getAttribute('data-src') || '';
+      });
+    });
+
+    // 2. Style Selector
+    const styleBtns = document.querySelectorAll('#newsStyleGroup .btn-style-opt');
+    styleBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        styleBtns.forEach(b => {
+          b.classList.remove('active');
+          b.style.borderColor = 'rgba(148, 163, 184, 0.3)';
+          b.style.background = 'rgba(30, 41, 59, 0.5)';
+        });
+        btn.classList.add('active');
+        btn.style.borderColor = '#fbbf24';
+        btn.style.background = 'rgba(245, 158, 11, 0.2)';
+        currentToneStyle = btn.getAttribute('data-style') || 'objective';
+      });
+    });
+
+    // 3. Dropzone Ảnh Bản Tin Gốc
+    const dropZone = document.getElementById('newsDropZone');
+    const fileInput = document.getElementById('newsFileInput');
+    const promptBox = document.getElementById('newsDropPrompt');
+    const previewBox = document.getElementById('newsPreviewBox');
+    const previewImg = document.getElementById('newsPreviewImg');
+    const fileNameSpan = document.getElementById('newsFileName');
+    const btnRemove = document.getElementById('btnRemoveNewsPhoto');
+
+    if (dropZone && fileInput) {
+      dropZone.addEventListener('click', (e) => {
+        if (e.target !== btnRemove) fileInput.click();
+      });
+
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files && fileInput.files[0]) {
+          uploadOriginalPhoto(fileInput.files[0]);
+        }
+      });
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropZone.classList.add('drag-over');
+        }, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          dropZone.classList.remove('drag-over');
+        }, false);
+      });
+
+      dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        if (dt && dt.files && dt.files[0]) {
+          uploadOriginalPhoto(dt.files[0]);
+        }
+      });
+
+      if (btnRemove) {
+        btnRemove.addEventListener('click', (e) => {
+          e.stopPropagation();
+          originalNewsImagePath = '';
+          fileInput.value = '';
+          if (previewBox) previewBox.style.display = 'none';
+          if (promptBox) promptBox.style.display = 'block';
+        });
+      }
+    }
+
+    async function uploadOriginalPhoto(file) {
+      const formData = new FormData();
+      formData.append('photo', file);
+      if (fileNameSpan) fileNameSpan.textContent = 'Đang tải ' + file.name + '...';
+      if (promptBox) promptBox.style.display = 'none';
+      if (previewBox) previewBox.style.display = 'block';
+
+      try {
+        const res = await fetch('/api/upload-photo', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (res.ok && data.status === 'success') {
+          originalNewsImagePath = data.saved_path;
+          if (previewImg) previewImg.src = data.url;
+          if (fileNameSpan) fileNameSpan.textContent = file.name;
+          showToast('Đã tải ảnh gốc thành công!');
+        } else {
+          showToast('Tải ảnh thất bại: ' + (data.detail || 'Lỗi server'), 'error');
+          if (previewBox) previewBox.style.display = 'none';
+          if (promptBox) promptBox.style.display = 'block';
+        }
+      } catch (err) {
+        showToast('Lỗi kết nối khi tải ảnh: ' + err.message, 'error');
+        if (previewBox) previewBox.style.display = 'none';
+        if (promptBox) promptBox.style.display = 'block';
+      }
+    }
+
+    // 4. Dropzone Ảnh Thành Phẩm Từ Google Flow
+    const finalDropZone = document.getElementById('newsFinalDropZone');
+    const finalFileInput = document.getElementById('newsFinalFileInput');
+    const finalPrompt = document.getElementById('newsFinalPrompt');
+    const finalPreviewBox = document.getElementById('newsFinalPreviewBox');
+    const finalPreviewImg = document.getElementById('newsFinalPreviewImg');
+    const finalFileName = document.getElementById('newsFinalFileName');
+    const btnRemoveFinal = document.getElementById('btnRemoveFinalPhoto');
+
+    if (finalDropZone && finalFileInput) {
+      finalDropZone.addEventListener('click', (e) => {
+        if (e.target !== btnRemoveFinal) finalFileInput.click();
+      });
+
+      finalFileInput.addEventListener('change', () => {
+        if (finalFileInput.files && finalFileInput.files[0]) {
+          uploadFinalPhoto(finalFileInput.files[0]);
+        }
+      });
+
+      if (btnRemoveFinal) {
+        btnRemoveFinal.addEventListener('click', (e) => {
+          e.stopPropagation();
+          finalNewsImagePath = '';
+          finalFileInput.value = '';
+          if (finalPreviewBox) finalPreviewBox.style.display = 'none';
+          if (finalPrompt) finalPrompt.style.display = 'block';
+        });
+      }
+    }
+
+    async function uploadFinalPhoto(file) {
+      const formData = new FormData();
+      formData.append('photo', file);
+      if (finalFileName) finalFileName.textContent = 'Đang tải ' + file.name + '...';
+      if (finalPrompt) finalPrompt.style.display = 'none';
+      if (finalPreviewBox) finalPreviewBox.style.display = 'block';
+
+      try {
+        const res = await fetch('/api/upload-photo', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        if (res.ok && data.status === 'success') {
+          finalNewsImagePath = data.saved_path;
+          if (finalPreviewImg) finalPreviewImg.src = data.url;
+          if (finalFileName) finalFileName.textContent = file.name;
+          showToast('Đã nạp ảnh thành phẩm từ Google Flow!');
+        } else {
+          showToast('Tải ảnh thất bại: ' + (data.detail || 'Lỗi server'), 'error');
+          if (finalPreviewBox) finalPreviewBox.style.display = 'none';
+          if (finalPrompt) finalPrompt.style.display = 'block';
+        }
+      } catch (err) {
+        showToast('Lỗi tải ảnh: ' + err.message, 'error');
+        if (finalPreviewBox) finalPreviewBox.style.display = 'none';
+        if (finalPrompt) finalPrompt.style.display = 'block';
+      }
+    }
+
+    // 5. Setup Copy Buttons
+    function setupNewsCopy(btnId, targetId, msg) {
+      const b = document.getElementById(btnId);
+      if (!b) return;
+      b.addEventListener('click', async () => {
+        const t = document.getElementById(targetId);
+        if (!t || !t.value) return;
+        try {
+          await navigator.clipboard.writeText(t.value);
+          showToast(msg);
+          const oldTxt = b.textContent;
+          b.textContent = '✓ Đã Copy!';
+          setTimeout(() => { b.textContent = oldTxt; }, 2000);
+        } catch (e) {
+          t.select();
+          document.execCommand('copy');
+          showToast(msg);
+        }
+      });
+    }
+
+    setupNewsCopy('btnCopyNewsPrompt', 'outGoogleFlowPrompt', 'Đã copy Prompt Google Flow!');
+    setupNewsCopy('btnCopyNewsTitle', 'outNewsTitle', 'Đã copy tiêu đề tin tức!');
+    setupNewsCopy('btnCopyNewsCaption', 'outNewsCaption', 'Đã copy bài viết tin tức!');
+    setupNewsCopy('btnCopyVoiceover', 'outVoiceoverScript', 'Đã copy kịch bản đọc video!');
+
+    // 6. Nút chạy AI Xào Nấu Tin Tức
+    const btnRun = document.getElementById('btnRunNewsRemix');
+    const emptyState = document.getElementById('newsEmptyState');
+    const resultContent = document.getElementById('newsResultContent');
+    const statusTag = document.getElementById('newsStatusTag');
+
+    if (btnRun) {
+      btnRun.addEventListener('click', async () => {
+        const rawText = (document.getElementById('newsInputText')?.value || '').trim();
+        const source = (document.getElementById('newsInputSource')?.value || '').trim();
+        const editReq = (document.getElementById('newsImageEditReq')?.value || '').trim();
+
+        if (!rawText && !originalNewsImagePath) {
+          showToast('Vui lòng dán nội dung bài báo hoặc tải ảnh gốc lên!', 'error');
+          return;
+        }
+
+        btnRun.disabled = true;
+        btnRun.innerHTML = '<span>⏳</span><span>GEMINI ĐANG ĐỌC BÀI BÁO & SOẠN PROMPT GOOGLE FLOW...</span>';
+        if (statusTag) statusTag.textContent = 'Đang phân tích...';
+
+        try {
+          const res = await fetch('/api/remix-news', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              news_text: rawText,
+              news_source: source || 'Nguồn tổng hợp báo chí',
+              image_edit_request: editReq,
+              tone_style: currentToneStyle,
+              original_image_path: originalNewsImagePath
+            })
+          });
+
+          const resData = await res.json();
+          if (!res.ok || resData.status !== 'success') {
+            throw new Error(resData.detail || 'Lỗi xử lý tin tức từ server!');
+          }
+
+          const d = resData.data;
+
+          const outTitleEl = document.getElementById('outNewsTitle');
+          const outCaptionEl = document.getElementById('outNewsCaption');
+          const outVoiceEl = document.getElementById('outVoiceoverScript');
+          const outPromptEl = document.getElementById('outGoogleFlowPrompt');
+          const outImgAnalysisEl = document.getElementById('outImageAnalysis');
+
+          if (outTitleEl) outTitleEl.value = d.news_title || '';
+          if (outCaptionEl) outCaptionEl.value = d.news_caption || '';
+          if (outVoiceEl) outVoiceEl.value = d.voiceover_script || '';
+          if (outPromptEl) outPromptEl.value = d.google_flow_prompt || '';
+          if (outImgAnalysisEl) outImgAnalysisEl.textContent = d.image_analysis ? `🔍 Soi ảnh gốc: ${d.image_analysis}` : '';
+
+          const cloud = document.getElementById('newsHashtagsCloud');
+          if (cloud) {
+            cloud.innerHTML = '';
+            if (Array.isArray(d.news_hashtags)) {
+              d.news_hashtags.forEach(tag => {
+                const span = document.createElement('span');
+                span.className = 'hashtag-badge';
+                span.textContent = tag.startsWith('#') ? tag : '#' + tag;
+                cloud.appendChild(span);
+              });
+            }
+          }
+
+          if (emptyState) emptyState.style.display = 'none';
+          if (resultContent) resultContent.style.display = 'block';
+          if (statusTag) {
+            statusTag.textContent = 'Đã hoàn thành';
+            statusTag.style.color = '#34d399';
+          }
+
+          showToast('Xào nấu bài tin tức & tạo Prompt thành công!');
+        } catch (err) {
+          showToast('Có lỗi xảy ra: ' + err.message, 'error');
+        } finally {
+          btnRun.disabled = false;
+          btnRun.innerHTML = '<span class="btn-icon">⚡</span><span>AI PHÂN TÍCH & XÀO NẤU TIN TỨC + TẠO PROMPT GOOGLE FLOW</span>';
+        }
+      });
+    }
+
+    // 7. Nút Đăng Bài Lên Fanpage
+    const btnPublish = document.getElementById('btnPublishNewsNow');
+    const resultBox = document.getElementById('newsPublishResult');
+
+    if (btnPublish) {
+      btnPublish.addEventListener('click', async () => {
+        const caption = (document.getElementById('outNewsCaption')?.value || '').trim();
+        const title = (document.getElementById('outNewsTitle')?.value || '').trim();
+        const applyLogo = document.getElementById('chkNewsApplyLogo')?.checked;
+
+        let photoToPublish = finalNewsImagePath || originalNewsImagePath;
+
+        if (!photoToPublish) {
+          showToast('Vui lòng nạp ảnh thành phẩm từ Google Flow (hoặc ảnh gốc) vào!', 'error');
+          return;
+        }
+
+        if (!caption) {
+          showToast('Chưa có nội dung bài viết tin tức để đăng!', 'error');
+          return;
+        }
+
+        const tagElements = document.querySelectorAll('#newsHashtagsCloud .hashtag-badge');
+        const tags = Array.from(tagElements).map(el => el.textContent.trim()).join(' ');
+        const fullCaption = tags ? `${caption}\n\n${tags}` : caption;
+
+        btnPublish.disabled = true;
+        btnPublish.innerHTML = '<span>⏳</span><span>ĐANG TẨY RỬA METADATA & ĐĂNG BÀI LÊN FANPAGE...</span>';
+        if (resultBox) resultBox.style.display = 'none';
+
+        try {
+          let finalPath = photoToPublish;
+          try {
+            const transRes = await fetch('/api/transform-remix-image', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                image_path: photoToPublish,
+                flip_horizontal: false,
+                filter_type: 'none',
+                apply_logo: !!applyLogo,
+                logo_type: 'badge',
+                logo_position: 'bottom-right'
+              })
+            });
+            const transData = await transRes.json();
+            if (transRes.ok && transData.status === 'success') {
+              finalPath = transData.saved_path;
+            }
+          } catch (e) {
+            console.warn('Bỏ qua bước đóng logo:', e);
+          }
+
+          const pubRes = await fetch('/api/publish-photo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              photo_path: finalPath,
+              title: title,
+              caption: fullCaption,
+              pinned_comment: '',
+              is_scheduled: false
+            })
+          });
+
+          const pubData = await pubRes.json();
+          if (!pubRes.ok || pubData.status !== 'success') {
+            throw new Error(pubData.detail || 'Lỗi khi đăng bài lên Fanpage!');
+          }
+
+          if (resultBox) {
+            resultBox.style.display = 'block';
+            resultBox.style.background = 'rgba(16, 185, 129, 0.15)';
+            resultBox.style.border = '1px solid #10b981';
+            resultBox.style.color = '#34d399';
+            const postUrl = pubData.post_url ? `<br><a href="${pubData.post_url}" target="_blank" style="color: #38bdf8; font-weight: bold; text-decoration: underline;">👉 Bấm vào đây để xem bài viết trên Facebook</a>` : '';
+            resultBox.innerHTML = `<b>🎉 ĐĂNG BÀI BÁO THÀNH CÔNG!</b><br>${pubData.message || 'Bài viết đã phát sóng trên Fanpage.'}${postUrl}`;
+          }
+
+          showToast('Đã phát sóng bài báo lên Facebook thành công!');
+        } catch (err) {
+          if (resultBox) {
+            resultBox.style.display = 'block';
+            resultBox.style.background = 'rgba(239, 68, 68, 0.15)';
+            resultBox.style.border = '1px solid #ef4444';
+            resultBox.style.color = '#f87171';
+            resultBox.innerHTML = `<b>❌ ĐĂNG BÀI THẤT BẠI:</b> ${err.message}`;
+          }
+          showToast('Lỗi đăng bài: ' + err.message, 'error');
+        } finally {
+          btnPublish.disabled = false;
+          btnPublish.innerHTML = '<span>🚀</span><span>ĐĂNG BÀI BÁO NÀY LÊN FANPAGE NGAY LẬP TỨC</span>';
+        }
+      });
+    }
+  }
+
+  // ==========================================================================
+  // TOP MENU TOOL BAR & DYNAMIC TOOLS MANAGER (Dễ Dàng Sửa Đổi Trực Quan)
+  // ==========================================================================
+  let activeToolsList = [];
+
+  const topToolsList = document.getElementById("topToolsList");
+  const btnOpenToolsManager = document.getElementById("btnOpenToolsManager");
+  const toolsManageModal = document.getElementById("toolsManageModal");
+  const btnCloseToolsManageModal = document.getElementById("btnCloseToolsManageModal");
+  const toolsManageTableBody = document.getElementById("toolsManageTableBody");
+  const btnAddNewTool = document.getElementById("btnAddNewTool");
+  const btnResetDefaultTools = document.getElementById("btnResetDefaultTools");
+  const btnSaveToolsMenu = document.getElementById("btnSaveToolsMenu");
+
+  const newToolIcon = document.getElementById("newToolIcon");
+  const newToolTitle = document.getElementById("newToolTitle");
+  const newToolBadge = document.getElementById("newToolBadge");
+  const newToolActionType = document.getElementById("newToolActionType");
+  const newToolUrl = document.getElementById("newToolUrl");
+
+  function switchToHubTab(tabName, subview = null) {
+    if (tabName === "remix") {
+      tabName = "studio";
+      subview = "remix";
+    }
+    const targetTabBtn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+    if (targetTabBtn) {
+      targetTabBtn.click();
+      if (subview === "photo") {
+        showStudioView("photo");
+      } else if (subview === "reels") {
+        showStudioView("reels");
+      } else if (subview === "remix") {
+        showStudioView("remix");
+      }
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
+
+  function renderTopToolsBar(tools) {
+    if (!topToolsList) return;
+    topToolsList.innerHTML = "";
+
+    tools.forEach(tool => {
+      const isNews = tool.id === "news_flow" || (tool.url && tool.url.includes("/news"));
+      const itemClass = isNews ? "dropdown-tool-item highlight" : "dropdown-tool-item";
+      const badgeHtml = tool.badge ? `<span class="pill-badge" style="${isNews ? 'background: rgba(245, 158, 11, 0.4); color: #fbbf24;' : ''}">${tool.badge}</span>` : "";
+
+      if (tool.action_type === "link") {
+        const a = document.createElement("a");
+        a.href = tool.url;
+        a.className = itemClass;
+        a.title = tool.description || tool.title;
+        a.innerHTML = `<span>${tool.icon || '⚡'} ${tool.title}</span>${badgeHtml}`;
+        a.addEventListener("click", () => {
+          if (headerToolDropdown) headerToolDropdown.classList.remove("show");
+        });
+        topToolsList.appendChild(a);
+      } else if (tool.action_type === "external") {
+        const a = document.createElement("a");
+        a.href = tool.url;
+        a.target = "_blank";
+        a.rel = "noreferrer";
+        a.className = itemClass;
+        a.title = tool.description || tool.title;
+        a.innerHTML = `<span>${tool.icon || '⚡'} ${tool.title} ↗</span>${badgeHtml}`;
+        a.addEventListener("click", () => {
+          if (headerToolDropdown) headerToolDropdown.classList.remove("show");
+        });
+        topToolsList.appendChild(a);
+      } else {
+        // Tab action
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = itemClass;
+        btn.title = tool.description || tool.title;
+        btn.innerHTML = `<span>${tool.icon || '⚡'} ${tool.title}</span>${badgeHtml}`;
+        btn.addEventListener("click", () => {
+          if (headerToolDropdown) headerToolDropdown.classList.remove("show");
+          if (tool.url === "studio_photo") {
+            switchToHubTab("studio", "photo");
+          } else if (tool.url === "studio_reels") {
+            switchToHubTab("studio", "reels");
+          } else if (tool.url === "remix") {
+            switchToHubTab("studio", "remix");
+          } else {
+            switchToHubTab(tool.url);
+          }
+        });
+        topToolsList.appendChild(btn);
+      }
+    });
+  }
+
+  function renderToolsManageTable() {
+    if (!toolsManageTableBody) return;
+    toolsManageTableBody.innerHTML = "";
+
+    if (!activeToolsList || activeToolsList.length === 0) {
+      toolsManageTableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:20px;">Chưa có công cụ nào trong Menu Tool</td></tr>`;
+      return;
+    }
+
+    activeToolsList.forEach((tool, idx) => {
+      const tr = document.createElement("tr");
+
+      let actionLabel = "";
+      if (tool.action_type === "link") actionLabel = `<span style="color:#fbbf24; font-size:0.75rem; background:rgba(245,158,11,0.2); padding:2px 6px; border-radius:4px;">Link Nội Bộ</span>`;
+      else if (tool.action_type === "external") actionLabel = `<span style="color:#38bdf8; font-size:0.75rem; background:rgba(56,189,248,0.2); padding:2px 6px; border-radius:4px;">Web Ngoài</span>`;
+      else actionLabel = `<span style="color:#34d399; font-size:0.75rem; background:rgba(52,211,153,0.2); padding:2px 6px; border-radius:4px;">Tab Hub</span>`;
+
+      tr.innerHTML = `
+        <td style="font-size:1.2rem; text-align:center;">${tool.icon || '⚡'}</td>
+        <td>
+          <b style="color:#f1f5f9;">${tool.title}</b>
+          ${tool.badge ? `<span style="font-size:0.72rem; margin-left:6px; background:rgba(255,255,255,0.1); padding:1px 5px; border-radius:4px; color:#cbd5e1;">${tool.badge}</span>` : ''}
+          ${tool.description ? `<br><small style="color:#64748b;">${tool.description}</small>` : ''}
+        </td>
+        <td><code style="color:#93c5fd; font-size:0.8rem; background:rgba(0,0,0,0.3); padding:2px 6px; border-radius:4px;">${tool.url}</code></td>
+        <td>${actionLabel}</td>
+        <td style="text-align:center;">
+          <button type="button" class="btn btn-danger btn-xs btn-del-tool" data-index="${idx}" style="padding:3px 8px; font-size:0.75rem;" title="Xóa công cụ này">
+            🗑️
+          </button>
+        </td>
+      `;
+      toolsManageTableBody.appendChild(tr);
+    });
+
+    // Gán sự kiện xóa
+    toolsManageTableBody.querySelectorAll(".btn-del-tool").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.getAttribute("data-index"), 10);
+        if (!isNaN(idx) && activeToolsList[idx]) {
+          const removed = activeToolsList.splice(idx, 1);
+          renderToolsManageTable();
+          showToast(`Đã xóa "${removed[0]?.title || 'công cụ'}" khỏi danh sách tạm. Nhớ bấm "Lưu Cấu Hình Menu Tool"!`, "info");
+        }
+      });
+    });
+  }
+
+  async function loadToolsMenu() {
+    try {
+      const res = await fetch("/api/tools-menu");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          activeToolsList = data;
+          renderTopToolsBar(activeToolsList);
+          return;
+        }
+      }
+    } catch (e) {
+      console.warn("Không thể tải /api/tools-menu, dùng mặc định:", e);
+    }
+  }
+
+  function initToolsMenu() {
+    loadToolsMenu();
+
+    // Mở modal quản lý tool
+    if (btnOpenToolsManager && toolsManageModal) {
+      btnOpenToolsManager.addEventListener("click", () => {
+        renderToolsManageTable();
+        toolsManageModal.style.display = "flex";
+      });
+    }
+
+    if (btnCloseToolsManageModal && toolsManageModal) {
+      btnCloseToolsManageModal.addEventListener("click", () => {
+        toolsManageModal.style.display = "none";
+      });
+    }
+
+    // Đóng khi click ngoài overlay
+    if (toolsManageModal) {
+      toolsManageModal.addEventListener("click", (e) => {
+        if (e.target === toolsManageModal) {
+          toolsManageModal.style.display = "none";
+        }
+      });
+    }
+
+    // Thêm Tool Mới
+    if (btnAddNewTool) {
+      btnAddNewTool.addEventListener("click", () => {
+        const title = (newToolTitle ? newToolTitle.value : "").trim();
+        const url = (newToolUrl ? newToolUrl.value : "").trim();
+        const icon = (newToolIcon ? newToolIcon.value : "⚡").trim() || "⚡";
+        const badge = (newToolBadge ? newToolBadge.value : "").trim();
+        const actionType = newToolActionType ? newToolActionType.value : "link";
+
+        if (!title) {
+          showToast("Vui lòng nhập Tên Công Cụ!", "error");
+          if (newToolTitle) newToolTitle.focus();
+          return;
+        }
+
+        if (!url) {
+          showToast("Vui lòng nhập URL hoặc Mã Tab!", "error");
+          if (newToolUrl) newToolUrl.focus();
+          return;
+        }
+
+        const newTool = {
+          id: "tool_" + Date.now(),
+          title: title,
+          icon: icon,
+          badge: badge,
+          badge_color: "amber",
+          description: "Công cụ tùy chỉnh người dùng thêm.",
+          url: url,
+          action_type: actionType,
+          target: actionType === "external" ? "_blank" : "_self"
+        };
+
+        activeToolsList.push(newTool);
+        renderToolsManageTable();
+
+        // Clear input form
+        if (newToolTitle) newToolTitle.value = "";
+        if (newToolUrl) newToolUrl.value = "";
+        if (newToolBadge) newToolBadge.value = "";
+        showToast(`Đã thêm "${title}". Hãy bấm "Lưu Cấu Hình Menu Tool" để hoàn tất!`);
+      });
+    }
+
+    // Khôi phục mặc định
+    if (btnResetDefaultTools) {
+      btnResetDefaultTools.addEventListener("click", async () => {
+        if (!confirm("Bạn có chắc chắn muốn khôi phục danh sách Menu Tool về mặc định ban đầu?")) return;
+        try {
+          const defaultTools = [
+            {
+              "id": "news_flow",
+              "title": "Xào Nấu Tin Tức & Google Flow AI",
+              "icon": "📰",
+              "badge": "Mới Nhất",
+              "badge_color": "amber",
+              "description": "Xào nấu bài báo/tin tức, tự động trích nguồn chuẩn pháp lý, kịch bản đọc video 60s và sinh Prompt cho Google Flow.",
+              "url": "/news",
+              "action_type": "link",
+              "target": "_self"
+            },
+            {
+              "id": "remix_sales",
+              "title": "Xào Nấu Bán Hàng & Phá Trùng Lặp Ảnh",
+              "icon": "🍳",
+              "badge": "Affiliate",
+              "badge_color": "orange",
+              "description": "Viết lại bài đối thủ mộc mạc không icon, lật gương ảnh, chỉnh tone màu, đóng logo bản quyền và ghép Shopee.",
+              "url": "remix",
+              "action_type": "tab",
+              "target": ""
+            },
+            {
+              "id": "reels_studio",
+              "title": "Studio Video Reels Tự Động",
+              "icon": "🎬",
+              "badge": "Reels",
+              "badge_color": "blue",
+              "description": "Tải video ngắn lên: Gemini tự nghe kịch bản, giật tít Hook 3 giây, sinh tiêu đề SEO và ghim link Shopee.",
+              "url": "studio_reels",
+              "action_type": "tab",
+              "target": ""
+            },
+            {
+              "id": "photo_studio",
+              "title": "Studio Đăng Bài Viết Ảnh Facebook",
+              "icon": "🖼️",
+              "badge": "Photo",
+              "badge_color": "green",
+              "description": "Đăng ảnh bài viết, khử sạch 100% siêu dữ liệu AI (C2PA, EXIF), đóng watermark logo và hẹn giờ Meta Cloud.",
+              "url": "studio_photo",
+              "action_type": "tab",
+              "target": ""
+            },
+            {
+              "id": "products_shopee",
+              "title": "Kho Link Sản Phẩm Shopee (Product Brain)",
+              "icon": "🛒",
+              "badge": "Shopee",
+              "badge_color": "purple",
+              "description": "Quản trị danh mục sản phẩm affiliate Shopee, tự động đổi link hàng loạt khi hết hàng.",
+              "url": "products",
+              "action_type": "tab",
+              "target": ""
+            },
+            {
+              "id": "google_flow",
+              "title": "Google Flow Studio (labs.google/fx)",
+              "icon": "🌊",
+              "badge": "AI FX",
+              "badge_color": "blue",
+              "description": "Nền tảng sinh ảnh và biến đổi ảnh AI chính thức của Google (ImageFX, VideoFX, Flow).",
+              "url": "https://labs.google/fx/tools/image-fx",
+              "action_type": "external",
+              "target": "_blank"
+            }
+          ];
+          activeToolsList = defaultTools;
+          renderToolsManageTable();
+          showToast("Đã đưa về danh sách mặc định. Hãy bấm 'Lưu Cấu Hình Menu Tool' để áp dụng!");
+        } catch (e) {
+          showToast("Lỗi khôi phục: " + e.message, "error");
+        }
+      });
+    }
+
+    // Lưu Cấu Hình Menu Tool
+    if (btnSaveToolsMenu) {
+      btnSaveToolsMenu.addEventListener("click", async () => {
+        try {
+          btnSaveToolsMenu.disabled = true;
+          btnSaveToolsMenu.textContent = "⏳ Đang lưu...";
+
+          const res = await fetch("/api/tools-menu", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(activeToolsList)
+          });
+
+          const data = await res.json();
+          if (!res.ok || data.status !== "success") {
+            throw new Error(data.detail || "Không thể lưu cấu hình Menu Tool");
+          }
+
+          renderTopToolsBar(activeToolsList);
+          showToast("Đã lưu cấu hình Menu Tool thành công!");
+          if (toolsManageModal) toolsManageModal.style.display = "none";
+        } catch (err) {
+          showToast("Lỗi lưu Menu Tool: " + err.message, "error");
+        } finally {
+          btnSaveToolsMenu.disabled = false;
+          btnSaveToolsMenu.textContent = "💾 Lưu Cấu Hình Menu Tool";
+        }
+      });
+    }
+  }
+
   // Khởi động
   loadConfig();
   loadProducts();
   loadScheduledTasks();
   loadPages();
+  initNewsTab();
+  initToolsMenu();
 });
+

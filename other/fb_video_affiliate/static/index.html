@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Montserrat:wght@800;900&family=Oswald:wght@700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20261016_5">
 </head>
 <body>
   <div class="app-container">
@@ -32,63 +32,96 @@
           <span id="currentModelBadge">Gemini 3.5 Flash-Lite</span>
         </div>
         <div class="badge mode-badge" id="fbStatusBadge">
+        <!-- Nút nhanh mở trực tiếp Studio Tin Tức & Flow AI -->
+        <a href="/news" class="header-news-link" title="Mở Studio Xào Nấu Tin Tức & Google Flow AI chuyên dụng">
+          <span>📰</span>
+          <span>Xào Nấu Tin Tức & Flow AI</span>
+          <span class="header-mini-badge">Hot</span>
+        </a>
+
+        <!-- Fanpage Selector -->
+        <div class="header-page-selector-wrap" id="headerPageSelectorWrap">
+          <span class="header-page-icon">📘</span>
+          <select id="headerActivePageSelect" class="header-page-select" title="Chọn Fanpage đang hoạt động">
+            <option value="">Đang tải Fanpage...</option>
+          </select>
+        </div>
+
+        <div class="badge model-badge">
+          <span class="status-dot green"></span>
+          <span id="currentModelBadge">Gemini 3.5 Flash-Lite</span>
+        </div>
+
+        <div class="badge mode-badge" id="fbStatusBadge">
           <span class="status-dot yellow"></span>
           <span id="fbModeText">Mô Phỏng (Test)</span>
+        </div>
+
+        <!-- Dropdown Menu Tool Gọn Gàng -->
+        <div class="header-tool-dropdown-wrap" id="headerToolDropdownWrap">
+          <button type="button" class="header-tool-btn" id="btnHeaderMenuTool" title="Mở danh sách các công cụ & Menu Tool">
+            <span>🧰</span>
+            <span>Menu Tool ▼</span>
+          </button>
+          <div class="header-tool-dropdown" id="headerToolDropdown">
+            <div class="dropdown-header">
+              <b>🧰 KHO CÔNG CỤ TIỆN ÍCH</b>
+              <button type="button" class="btn-xs-tool-manage" id="btnOpenToolsManager">⚙️ Sửa Menu</button>
+            </div>
+            <div class="dropdown-list" id="topToolsList">
+              <!-- Rendered dynamically via JS from /api/tools-menu -->
+            </div>
+          </div>
         </div>
       </div>
     </header>
 
-    <!-- Navigation Tabs -->
+    <!-- Navigation Tabs (Tinh Gọn 4 Tab Trực Quan Không Lặp Lại) -->
     <nav class="nav-tabs">
-      <button class="tab-btn active" data-tab="studio">
+      <button class="tab-btn active" data-tab="studio" id="tabBtnStudio">
         <span class="tab-icon">🎬</span>
-        <span>Studio Tạo Bài Đăng</span>
+        <span>Studio Sáng Tạo</span>
       </button>
-      <a href="/news" target="_blank" class="tab-btn" style="text-decoration: none; border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.12); color: #fbbf24;">
-        <span class="tab-icon">📰</span>
-        <span>Studio Tin Tức & Google Flow AI</span>
-        <span class="badge-mini" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24; font-size: 10px; padding: 2px 7px; border-radius: 8px; margin-left: 6px; border: 1px solid rgba(245, 158, 11, 0.5); font-weight: 700;">Mới ↗</span>
-      </a>
-      <button class="tab-btn" data-tab="remix" id="tabBtnRemix">
-        <span class="tab-icon">🍳</span>
-        <span>Xào Nấu AI</span>
-        <span class="badge-mini" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; font-size: 10px; padding: 2px 7px; border-radius: 8px; margin-left: 6px; border: 1px solid rgba(245, 158, 11, 0.4); font-weight: 700;">Mới</span>
-      </button>
-      <button class="tab-btn" data-tab="products">
+      <button class="tab-btn" data-tab="products" id="tabBtnProducts">
         <span class="tab-icon">🛒</span>
-        <span>Kho Link Shopee (<span id="prodCountBadge">0</span>)</span>
+        <span>Kho Shopee (<span id="prodCountBadge">0</span>)</span>
       </button>
-      <button class="tab-btn" data-tab="schedule">
+      <button class="tab-btn" data-tab="schedule" id="tabBtnSchedule">
         <span class="tab-icon">⏰</span>
-        <span>Hàng Đợi Hẹn Giờ (<span id="scheduledCountBadge">0</span>)</span>
+        <span>Lịch Trình & Lịch Sử (<span id="scheduledCountBadge">0</span>)</span>
       </button>
-      <button class="tab-btn" data-tab="history">
-        <span class="tab-icon">📜</span>
-        <span>Kho Kịch Bản & Lịch Sử</span>
-      </button>
-      <button class="tab-btn" data-tab="settings">
+      <button class="tab-btn" data-tab="settings" id="tabBtnSettings">
         <span class="tab-icon">⚙️</span>
-        <span>Cài Đặt API & Page</span>
+        <span>Cài Đặt Hệ Thống</span>
       </button>
     </nav>
 
     <!-- Main Content Area -->
     <main class="tab-content-wrapper">
-      
-      <!-- ================= TAB 1: STUDIO ================= -->
+
+      <!-- ================= TAB 1: STUDIO SÁNG TẠO NỘI DUNG ================= -->
       <section id="tab-studio" class="tab-pane active">
-        <!-- Bộ chuyển đổi Định dạng bài đăng: Video Reels vs Bài Viết Ảnh -->
+        <!-- Bộ chuyển đổi Định dạng bài đăng: Video Reels vs Bài Viết Ảnh vs Xào Nấu Bán Hàng -->
         <div class="content-type-nav">
           <button type="button" class="type-nav-btn active" id="btnTypeReels">
             <span class="type-icon">🎬</span>
             <span>Đăng Video Reels</span>
-            <span class="type-badge">Shorts / Reels</span>
+            <span class="type-badge">Shorts/Reels</span>
           </button>
           <button type="button" class="type-nav-btn" id="btnTypePhoto">
             <span class="type-icon">🖼️</span>
             <span>Đăng Bài Viết Ảnh</span>
-            <span class="type-badge green">Mới - Đơn Giản</span>
+            <span class="type-badge green">Khử Anti-AI</span>
           </button>
+          <button type="button" class="type-nav-btn" id="btnTypeRemix">
+            <span class="type-icon">🍳</span>
+            <span>Xào Nấu Bán Hàng</span>
+            <span class="type-badge orange">Remix AI</span>
+          </button>
+          <a href="/news" target="_blank" class="type-nav-btn news-tab-link" title="Mở Studio Xào Nấu Tin Tức & Google Flow AI chuyên dụng">
+            <span class="type-icon">📰</span>
+            <span>Xào Nấu Tin Tức & Flow AI ↗</span>
+            <span class="type-badge amber">Trang Riêng</span>
         </div>
 
         <!-- VIEW 1: ĐĂNG VIDEO REELS -->
@@ -640,11 +673,10 @@ Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
             </div>
           </div>
         </div>
-      </section>
 
-      <!-- ================= TAB: XÀO NẤU BÀI VIẾT & BIẾN HÓA ẢNH AI ================= -->
-      <section id="tab-remix" class="tab-pane">
-        <div class="studio-grid">
+        <!-- VIEW 3: XÀO NẤU BÀI VIẾT & BIẾN HÓA ẢNH AI (REMIX) -->
+        <div id="remixStudioView" class="studio-content-view" style="display: none;">
+          <div class="studio-grid">
           <!-- Cột Trái: Bài Viết Gốc & Yêu Cầu Xào Nấu -->
           <div class="panel input-panel">
             <div class="panel-header">
@@ -810,6 +842,229 @@ Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
         </div>
       </section>
 
+      <!-- Hidden Fallback Panes for Legacy Compatibility -->
+      <section id="tab-remix" class="tab-pane" style="display: none;"></section>
+
+      <!-- ================= TAB: XÀO NẤU TIN TỨC & PROMPT GOOGLE FLOW ================= -->
+      <section id="tab-news" class="tab-pane">
+        <div class="studio-grid">
+          <!-- Cột Trái: Bản Tin Gốc & Yêu Cầu Sửa -->
+          <div class="panel input-panel">
+            <div class="panel-header">
+              <div>
+                <h2>1. Bản Tin Gốc & Yêu Cầu Sửa</h2>
+                <p class="subtitle" style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">Dán nội dung tin tức từ báo chí hoặc mạng xã hội để AI xử lý</p>
+              </div>
+              <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); font-size: 11px; padding: 2px 8px; border-radius: 8px;">News Vision AI</span>
+            </div>
+
+            <!-- 1. Nội dung bài báo / tin tức gốc -->
+            <div class="form-group">
+              <label for="newsInputText">Nội Dung Bản Tin / Bài Báo Gốc (Copy & Paste):</label>
+              <textarea id="newsInputText" class="form-control font-mono" rows="6" placeholder="Dán toàn bộ nội dung bài báo, bản tin thời sự hoặc bài đăng MXH vào đây..."></textarea>
+            </div>
+
+            <!-- 2. Nguồn tin gốc (Bảo vệ bản quyền & pháp lý) -->
+            <div class="form-group">
+              <label for="newsInputSource">Nguồn Tin Gốc (Tự động trích dẫn chuẩn pháp lý):</label>
+              <input type="text" id="newsInputSource" class="form-control" placeholder="Ví dụ: Báo Tuổi Trẻ, Báo Dân Trí, VnExpress, Mạng xã hội...">
+              <div class="source-pills" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
+                <span class="source-pill" data-src="Báo Tuổi Trẻ" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(148, 163, 184, 0.25); color: #cbd5e1; padding: 3px 10px; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">Tuổi Trẻ</span>
+                <span class="source-pill" data-src="VnExpress" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(148, 163, 184, 0.25); color: #cbd5e1; padding: 3px 10px; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">VnExpress</span>
+                <span class="source-pill" data-src="Báo Dân Trí" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(148, 163, 184, 0.25); color: #cbd5e1; padding: 3px 10px; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">Dân Trí</span>
+                <span class="source-pill" data-src="Báo Tiền Phong" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(148, 163, 184, 0.25); color: #cbd5e1; padding: 3px 10px; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">Tiền Phong</span>
+                <span class="source-pill" data-src="Báo Thanh Niên" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(148, 163, 184, 0.25); color: #cbd5e1; padding: 3px 10px; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">Thanh Niên</span>
+                <span class="source-pill" data-src="Mạng xã hội" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(148, 163, 184, 0.25); color: #cbd5e1; padding: 3px 10px; border-radius: 6px; font-size: 0.78rem; cursor: pointer;">Mạng xã hội</span>
+              </div>
+            </div>
+
+            <!-- 3. Tải ảnh gốc của bản tin -->
+            <div class="form-group">
+              <label>Ảnh Gốc Đi Kèm Bản Tin (Báo chí hoặc Hiện trường):</label>
+              <div class="drop-zone" id="newsDropZone">
+                <input type="file" id="newsFileInput" accept="image/png,image/jpeg,image/webp,image/*" hidden>
+                <div class="drop-zone-prompt" id="newsDropPrompt">
+                  <span class="upload-icon">📸</span>
+                  <p>Kéo thả ảnh gốc vào đây hoặc <span class="highlight">Bấm để chọn file ảnh</span></p>
+                  <small>Gemini Vision sẽ phân tích chi tiết ảnh gốc để viết prompt sửa ảnh cho Google Flow</small>
+                </div>
+                <div class="photo-preview-box" id="newsPreviewBox" style="display: none;">
+                  <img id="newsPreviewImg" src="" alt="Ảnh gốc bài báo" style="max-height: 220px; object-fit: contain; border-radius: 8px;">
+                  <div class="video-meta">
+                    <span id="newsFileName">photo.png</span>
+                    <button type="button" class="btn-xs btn-danger" id="btnRemoveNewsPhoto">Bỏ ảnh này</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Phong cách viết bài tin tức -->
+            <div class="form-group">
+              <label>Phong Cách Viết Bản Tin:</label>
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;" id="newsStyleGroup">
+                <button type="button" class="btn-style-opt active" data-style="objective" style="padding: 8px 10px; font-size: 12px; border-radius: 8px; border: 1px solid #fbbf24; background: rgba(245, 158, 11, 0.2); color: #fff; cursor: pointer; text-align: left;">
+                  <b>⚖️ Khách Quan Báo Chí</b>
+                  <span style="display:block; font-size: 10.5px; color: #cbd5e1; margin-top: 2px;">Chuẩn mực, trung lập, tin cậy</span>
+                </button>
+                <button type="button" class="btn-style-opt" data-style="commentary" style="padding: 8px 10px; font-size: 12px; border-radius: 8px; border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(30, 41, 59, 0.5); color: #cbd5e1; cursor: pointer; text-align: left;">
+                  <b>🎙️ Bình Luận Sâu Sắc</b>
+                  <span style="display:block; font-size: 10.5px; color: #94a3b8; margin-top: 2px;">Phân tích góc nhìn đa chiều</span>
+                </button>
+                <button type="button" class="btn-style-opt" data-style="storytelling" style="padding: 8px 10px; font-size: 12px; border-radius: 8px; border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(30, 41, 59, 0.5); color: #cbd5e1; cursor: pointer; text-align: left;">
+                  <b>📖 Kể Chuyện Phóng Sự</b>
+                  <span style="display:block; font-size: 10.5px; color: #94a3b8; margin-top: 2px;">Dẫn dắt lôi cuốn, chạm cảm xúc</span>
+                </button>
+                <button type="button" class="btn-style-opt" data-style="urgent" style="padding: 8px 10px; font-size: 12px; border-radius: 8px; border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(30, 41, 59, 0.5); color: #cbd5e1; cursor: pointer; text-align: left;">
+                  <b>🚨 Bản Tin Nóng Khẩn Cấp</b>
+                  <span style="display:block; font-size: 10.5px; color: #94a3b8; margin-top: 2px;">Tốc độ, báo động nghiêm túc</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 5. Yêu cầu chi tiết sửa ảnh -->
+            <div class="form-group">
+              <label for="newsImageEditReq">Muốn Sửa Đổi Chi Tiết Gì Trong Ảnh? (Tùy chọn):</label>
+              <input type="text" id="newsImageEditReq" class="form-control" placeholder="Ví dụ: Đổi góc chụp cận cảnh, làm mờ người xung quanh, đổi phong cách ảnh phóng sự tài liệu, xóa logo báo cũ...">
+              <small class="hint">Gemini sẽ biến yêu cầu này thành prompt tiếng Anh chuẩn nhiếp ảnh báo chí cho Google Flow.</small>
+            </div>
+
+            <!-- Nút hành động -->
+            <button type="button" class="btn btn-warning btn-block btn-lg" id="btnRunNewsRemix" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; font-weight: 800; box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4); padding: 14px;">
+              <span class="btn-icon">⚡</span>
+              <span>AI PHÂN TÍCH & XÀO NẤU TIN TỨC + TẠO PROMPT GOOGLE FLOW</span>
+            </button>
+          </div>
+
+          <!-- Cột Phải: Kết quả & Đăng bài -->
+          <div class="panel output-panel">
+            <div class="panel-header">
+              <div>
+                <h2>2. Kịch Bản Mới & Prompt Google Flow</h2>
+                <span class="tag-hint" id="newsStatusTag">Đang chờ bản tin</span>
+              </div>
+            </div>
+
+            <!-- Trạng thái trống -->
+            <div class="empty-state" id="newsEmptyState">
+              <div class="empty-icon">📰</div>
+              <h3>Chưa Có Bản Tin Nào Được Xử Lý</h3>
+              <p>Dán bài viết tin tức và tải ảnh ở cột bên trái, sau đó bấm <b>"AI PHÂN TÍCH & XÀO NẤU TIN TỨC"</b> để bắt đầu.</p>
+            </div>
+
+            <!-- Khung kết quả -->
+            <div class="result-content" id="newsResultContent" style="display: none;">
+
+              <!-- HỘP PROMPT GOOGLE FLOW (labs.google/fx) -->
+              <div class="flow-prompt-card" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 12px; padding: 16px; margin-bottom: 20px; box-shadow: 0 8px 24px rgba(245, 158, 11, 0.08);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <h3 style="font-size: 13.5px; font-weight: 700; color: #fbbf24; margin: 0; display: flex; align-items: center; gap: 6px;">
+                    <span>✨</span> PROMPT SỬA ẢNH CHO GOOGLE FLOW (labs.google/fx)
+                  </h3>
+                  <a href="https://labs.google/fx/" target="_blank" class="btn-xs btn-outline" style="border: 1px solid #38bdf8; color: #38bdf8; text-decoration: none; padding: 3px 8px; border-radius: 6px; font-size: 11px;">
+                    Mở Google Flow ↗
+                  </a>
+                </div>
+
+                <!-- Hướng dẫn 3 bước thao tác với Google Flow -->
+                <div style="background: rgba(30, 41, 59, 0.5); border-radius: 8px; padding: 10px; margin-bottom: 10px; font-size: 0.82rem; color: #cbd5e1;">
+                  <div style="margin-bottom: 4px;">1. Bấm nút <b>"Copy Prompt Google Flow"</b> màu vàng phía dưới.</div>
+                  <div style="margin-bottom: 4px;">2. Mở Google Flow (<a href="https://labs.google/fx/" target="_blank" style="color: #38bdf8;">labs.google/fx</a>), tải ảnh gốc lên làm Image Reference (hoặc Inpainting).</div>
+                  <div>3. Dán Prompt vào và bấm sinh ảnh. Khi xong, kéo ảnh mới vào ô <b>"Nạp Ảnh Thành Phẩm Từ Google Flow"</b> bên dưới để đăng!</div>
+                </div>
+
+                <div style="position: relative;">
+                  <textarea id="outGoogleFlowPrompt" class="form-control font-mono" rows="4" readonly style="font-size: 11.5px; background: rgba(2, 6, 23, 0.85); color: #67e8f9; border-color: rgba(245, 158, 11, 0.4); user-select: all;"></textarea>
+                  <button type="button" class="btn-xs btn-warning" id="btnCopyNewsPrompt" style="position: absolute; right: 8px; bottom: 8px; padding: 4px 10px; font-weight: 700;">
+                    📋 Copy Prompt Google Flow
+                  </button>
+                </div>
+                <small id="outImageAnalysis" style="display: block; color: #94a3b8; font-size: 11px; margin-top: 6px;"></small>
+              </div>
+
+              <!-- BÀI VIẾT TIN TỨC MỚI 100% -->
+              <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <label for="outNewsTitle" style="margin: 0; font-weight: 700; color: #f1f5f9;">Tiêu Đề Tin Tức Mới (Không trùng bài cũ, chuẩn báo chí):</label>
+                  <button type="button" class="btn-xs btn-secondary" id="btnCopyNewsTitle">Copy Tiêu Đề</button>
+                </div>
+                <input type="text" id="outNewsTitle" class="form-control bold-input font-title" style="color: #fbbf24; font-size: 1rem;">
+              </div>
+
+              <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <label for="outNewsCaption" style="margin: 0; font-weight: 700; color: #f1f5f9;">Bài Viết Tin Tức Hoàn Chỉnh (Đã trích nguồn minh bạch, không icon):</label>
+                  <button type="button" class="btn-xs btn-secondary" id="btnCopyNewsCaption">Copy Bài Viết</button>
+                </div>
+                <textarea id="outNewsCaption" class="form-control font-mono" rows="7" style="font-size: 0.88rem; line-height: 1.5;"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Hashtags Thời Sự:</label>
+                <div class="hashtags-cloud" id="newsHashtagsCloud"></div>
+              </div>
+
+              <!-- KỊCH BẢN ĐỌC VIDEO NGẮN 60S (VOICEOVER SCRIPT) -->
+              <div class="form-group" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.2); border-radius: 10px; padding: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <label style="margin: 0; font-size: 12.5px; font-weight: 700; color: #38bdf8; display: flex; align-items: center; gap: 6px;">
+                    <span>🎙️</span> Kịch Bản Đọc Video Ngắn 60s (Cho Giọng Thật Hoặc AI Lồng Tiếng):
+                  </label>
+                  <button type="button" class="btn-xs btn-secondary" id="btnCopyVoiceover">Copy Kịch Bản Đọc</button>
+                </div>
+                <textarea id="outVoiceoverScript" class="form-control font-mono" rows="5" readonly style="font-size: 12px; background: rgba(2, 6, 23, 0.6); color: #cbd5e1;"></textarea>
+              </div>
+
+              <!-- KHUNG NẠP ẢNH TỪ GOOGLE FLOW & ĐĂNG BÀI FACEBOOK -->
+              <div style="background: rgba(17, 24, 39, 0.85); border: 1px solid rgba(16, 185, 129, 0.35); border-radius: 12px; padding: 16px; margin-top: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <h3 style="font-size: 13.5px; font-weight: 700; color: #34d399; margin: 0; display: flex; align-items: center; gap: 6px;">
+                    <span>🚀</span> Nạp Ảnh Thành Phẩm Từ Google Flow & Đăng Fanpage Facebook
+                  </h3>
+                  <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 11px; padding: 2px 8px; border-radius: 8px;">Chuẩn Bị Phát Sóng</span>
+                </div>
+
+                <!-- Tải ảnh mới từ Google Flow -->
+                <div class="drop-zone" id="newsFinalDropZone" style="padding: 18px 12px; margin-bottom: 12px; border: 1px dashed rgba(16, 185, 129, 0.4);">
+                  <input type="file" id="newsFinalFileInput" accept="image/*" hidden>
+                  <div class="drop-zone-prompt" id="newsFinalPrompt">
+                    <span class="upload-icon">✨</span>
+                    <p>Kéo thả ảnh vừa sinh từ Google Flow vào đây hoặc <span class="highlight" style="color: #34d399;">Bấm chọn file</span></p>
+                    <small>Hệ thống sẽ tự động bóc tách sạch 100% metadata AI (C2PA) để Facebook không cộp mác AI</small>
+                  </div>
+                  <div class="photo-preview-box" id="newsFinalPreviewBox" style="display: none;">
+                    <img id="newsFinalPreviewImg" src="" alt="Ảnh thành phẩm Google Flow" style="max-height: 180px; object-fit: contain; border-radius: 8px;">
+                    <div class="video-meta">
+                      <span id="newsFinalFileName">flow_image.jpg</span>
+                      <button type="button" class="btn-xs btn-danger" id="btnRemoveFinalPhoto">Chọn ảnh khác</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Tùy chọn đóng dấu logo -->
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                  <input type="checkbox" id="chkNewsApplyLogo" checked style="accent-color: #34d399; width: 16px; height: 16px;">
+                  <label for="chkNewsApplyLogo" style="margin: 0; font-size: 12.5px; color: #cbd5e1; cursor: pointer;">
+                    Đóng dấu logo huy hiệu bản quyền Page vào góc ảnh để khẳng định thương hiệu
+                  </label>
+                </div>
+
+                <!-- Nút đăng ngay -->
+                <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                  <button type="button" class="btn btn-success btn-block btn-lg" id="btnPublishNewsNow" style="background: linear-gradient(135deg, #10b981, #059669); font-weight: 800; font-size: 1rem; padding: 14px; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);">
+                    <span>🚀</span>
+                    <span>ĐĂNG BÀI BÁO NÀY LÊN FANPAGE NGAY LẬP TỨC</span>
+                  </button>
+                </div>
+
+                <div id="newsPublishResult" style="display: none; margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 12.5px;"></div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+
       <!-- ================= TAB 2: KHO SẢN PHẨM SHOPEE ================= -->
       <section id="tab-products" class="tab-pane">
         <div class="panel">
@@ -831,92 +1086,114 @@ Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
         </div>
       </section>
 
-      <!-- ================= TAB: HÀNG ĐỢI HẸN GIỜ ================= -->
+      <!-- ================= TAB: LỊCH TRÌNH & LỊCH SỬ (GỘP GỌN 2 TRONG 1) ================= -->
       <section id="tab-schedule" class="tab-pane">
-        <div class="panel">
-          <div class="panel-header">
-            <div>
-              <h2>Hàng Đợi Hẹn Giờ Đăng Video (Reels Scheduler)</h2>
-              <p class="subtitle">Hệ thống chạy ngầm tự động đăng video, gán ảnh bìa và ghim bình luận Shopee chuẩn từng giây.</p>
-            </div>
-            <div class="panel-actions">
-              <button type="button" class="btn btn-secondary" id="btnRefreshSchedule">🔄 Làm Mới Danh Sách</button>
-            </div>
-          </div>
+        <!-- Bộ chuyển đổi phụ: Hàng Đợi Hẹn Giờ vs Lịch Sử Đã Đăng -->
+        <div class="content-type-nav" style="margin-bottom: 18px;">
+          <button type="button" class="type-nav-btn active" id="btnSubScheduleQueue">
+            <span class="type-icon">⏰</span>
+            <span>Hàng Đợi Hẹn Giờ</span>
+            <span class="type-badge" id="scheduledSubBadge">0</span>
+          </button>
+          <button type="button" class="type-nav-btn" id="btnSubScheduleHistory">
+            <span class="type-icon">📜</span>
+            <span>Kho Kịch Bản & Lịch Sử Đã Đăng</span>
+          </button>
+        </div>
 
-          <!-- Danh sách bài đang xếp hàng -->
-          <div class="scheduled-queue-list" id="scheduledQueueList">
-            <!-- Render qua JS -->
-          </div>
-
-          <!-- Bảng Kiến Thức Chiến Lược Giờ Vàng Đăng Bài Sức Khỏe -->
-          <div class="health-golden-guide-box">
-            <div class="guide-header">
-              <span class="guide-icon">🩺</span>
+        <!-- SUBVIEW 1: HÀNG ĐỢI HẸN GIỜ -->
+        <div id="scheduleQueueSubView">
+          <div class="panel">
+            <div class="panel-header">
               <div>
-                <h3>Cẩm Nang Giờ Vàng Đăng Reels Sức Khỏe & Chuyển Đổi Shopee Affiliate Cao Nhất</h3>
-                <p>Nghiên cứu thói quen sinh hoạt và tâm lý của khán giả Việt Nam (đặc biệt tệp 25 - 55 tuổi):</p>
+                <h2>Hàng Đợi Hẹn Giờ Đăng Video (Reels Scheduler)</h2>
+                <p class="subtitle">Hệ thống chạy ngầm tự động đăng video, gán ảnh bìa và ghim bình luận Shopee chuẩn từng giây.</p>
+              </div>
+              <div class="panel-actions">
+                <button type="button" class="btn btn-secondary btn-sm" id="btnRefreshSchedule">🔄 Làm Mới Danh Sách</button>
               </div>
             </div>
 
-            <div class="golden-slots-table-wrapper">
-              <table class="golden-slots-table">
-                <thead>
-                  <tr>
-                    <th>Khung Giờ</th>
-                    <th>Tâm Lý Khán Giả</th>
-                    <th>Nội Dung Kịch Bản Đề Xuất</th>
-                    <th>Sản Phẩm Shopee Chốt Đơn Cao</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><b class="text-emerald">🌅 06:00 - 07:30</b><br><small>Sáng Sớm</small></td>
-                    <td>Thức dậy, lướt điện thoại trên giường hoặc uống cafe sáng. Tâm lý đón nhận năng lượng tích cực, thanh lọc cơ thể.</td>
-                    <td>Uống 1 cốc nước ấm khi thức dậy, bài tập vươn vai tại giường, cảnh báo bỏ bữa sáng, cách bài tiết thải độc buổi sáng.</td>
-                    <td>Bình giữ nhiệt, mật ong nguyên chất, trà thảo mộc detox, ngũ cốc dinh dưỡng, máy vắt cam.</td>
-                  </tr>
-                  <tr>
-                    <td><b class="text-blue">🍱 11:30 - 13:00</b><br><small>Nghỉ Trưa</small></td>
-                    <td>Ăn trưa xong ngồi nghỉ, dân văn phòng mỏi lưng, ê ẩm cổ vai gáy, bụng no căng buồn ngủ.</td>
-                    <td>Ăn xong đừng nằm ngay, sai lầm uống nước đá sau bữa ăn, 3 động tác giãn cơ cổ vai gáy cho dân văn phòng.</td>
-                    <td>Gối tựa lưng công thái học, máy massage cổ vai gáy, trà tiêu thực, đệm lót ghế chống trĩ.</td>
-                  </tr>
-                  <tr>
-                    <td><b class="text-amber">🌇 18:30 - 20:00</b><br><small>Chiều Tối</small></td>
-                    <td>Đi làm về, chuẩn bị nấu cơm hoặc vừa ăn tối cùng gia đình. Quan tâm đến dinh dưỡng và cảnh báo nguy hiểm tức thì.</td>
-                    <td>CẢNH BÁO TẮM ĐÊM ĐỘT QUỴ, thực phẩm không nên hâm lại qua đêm, thói quen ăn mặn hại thận của cả nhà.</td>
-                    <td>Đèn sưởi nhà tắm, nhiệt kế đo phòng, nồi chiên không dầu / nồi hấp dinh dưỡng, máy đo huyết áp tại nhà.</td>
-                  </tr>
-                  <tr>
-                    <td><b class="text-purple">🌙 20:30 - 22:30</b><br><span class="badge badge-gold">⭐ ĐỈNH CAO AFFILIATE</span></td>
-                    <td>Thời gian rảnh rỗi tuyệt đối, nằm trên giường thư giãn, xem video dài hơn, tâm lý mua sắm chi tiền mạnh nhất trong ngày!</td>
-                    <td>Mẹo trị mất ngủ không dùng thuốc, ngâm chân muối thảo dược, tư thế ngủ đúng cho người đau cột sống, xoa bóp huyệt vị dũng tuyền.</td>
-                    <td>Muối ngâm chân thảo dược, chậu ngâm chân massage, gối định hình cổ non cao su, tinh dầu ngủ ngon, viên uống bổ não thảo mộc.</td>
-                  </tr>
-                </tbody>
-              </table>
+            <!-- Danh sách bài đang xếp hàng -->
+            <div class="scheduled-queue-list" id="scheduledQueueList">
+              <!-- Render qua JS -->
+            </div>
+
+            <!-- Bảng Kiến Thức Chiến Lược Giờ Vàng Đăng Bài (Dạng Thu Gọn Thông Minh) -->
+            <div class="accordion-card" style="margin-top: 20px;">
+              <button type="button" class="accordion-toggle-btn" id="toggleGoldenGuide">
+                <span style="display: flex; align-items: center; gap: 8px;">
+                  <span>🩺</span>
+                  <span>Cẩm Nang Giờ Vàng Đăng Reels Sức Khỏe & Chốt Đơn Shopee (Bấm Để Mở/Thu Gọn)</span>
+                </span>
+                <span class="accordion-icon" id="iconGoldenGuide">▼</span>
+              </button>
+              <div class="accordion-body" id="goldenGuideBody" style="display: none;">
+                <div class="health-golden-guide-box" style="margin: 0; border: none; padding: 0; background: transparent;">
+                  <div class="golden-slots-table-wrapper">
+                    <table class="golden-slots-table">
+                      <thead>
+                        <tr>
+                          <th>Khung Giờ</th>
+                          <th>Tâm Lý Khán Giả</th>
+                          <th>Nội Dung Kịch Bản Đề Xuất</th>
+                          <th>Sản Phẩm Shopee Chốt Đơn Cao</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td><b class="text-emerald">🌅 06:00 - 07:30</b><br><small>Sáng Sớm</small></td>
+                          <td>Thức dậy, lướt điện thoại trên giường hoặc uống cafe sáng. Tâm lý đón nhận năng lượng tích cực, thanh lọc cơ thể.</td>
+                          <td>Uống 1 cốc nước ấm khi thức dậy, bài tập vươn vai tại giường, cảnh báo bỏ bữa sáng, cách bài tiết thải độc buổi sáng.</td>
+                          <td>Bình giữ nhiệt, mật ong nguyên chất, trà thảo mộc detox, ngũ cốc dinh dưỡng, máy vắt cam.</td>
+                        </tr>
+                        <tr>
+                          <td><b class="text-blue">🍱 11:30 - 13:00</b><br><small>Nghỉ Trưa</small></td>
+                          <td>Ăn trưa xong ngồi nghỉ, dân văn phòng mỏi lưng, ê ẩm cổ vai gáy, bụng no căng buồn ngủ.</td>
+                          <td>Ăn xong đừng nằm ngay, sai lầm uống nước đá sau bữa ăn, 3 động tác giãn cơ cổ vai gáy cho dân văn phòng.</td>
+                          <td>Gối tựa lưng công thái học, máy massage cổ vai gáy, trà tiêu thực, đệm lót ghế chống trĩ.</td>
+                        </tr>
+                        <tr>
+                          <td><b class="text-amber">🌇 18:30 - 20:00</b><br><small>Chiều Tối</small></td>
+                          <td>Đi làm về, chuẩn bị nấu cơm hoặc vừa ăn tối cùng gia đình. Quan tâm đến dinh dưỡng và cảnh báo nguy hiểm tức thì.</td>
+                          <td>CẢNH BÁO TẮM ĐÊM ĐỘT QUỴ, thực phẩm không nên hâm lại qua đêm, thói quen ăn mặn hại thận của cả nhà.</td>
+                          <td>Đèn sưởi nhà tắm, nhiệt kế đo phòng, nồi chiên không dầu / nồi hấp dinh dưỡng, máy đo huyết áp tại nhà.</td>
+                        </tr>
+                        <tr>
+                          <td><b class="text-purple">🌙 20:30 - 22:30</b><br><span class="badge badge-gold">⭐ ĐỈNH CAO AFFILIATE</span></td>
+                          <td>Thời gian rảnh rỗi tuyệt đối, nằm trên giường thư giãn, xem video dài hơn, tâm lý mua sắm chi tiền mạnh nhất trong ngày!</td>
+                          <td>Mẹo trị mất ngủ không dùng thuốc, ngâm chân muối thảo dược, tư thế ngủ đúng cho người đau cột sống, xoa bóp huyệt vị dũng tuyền.</td>
+                          <td>Muối ngâm chân thảo dược, chậu ngâm chân massage, gối định hình cổ non cao su, tinh dầu ngủ ngon, viên uống bổ não thảo mộc.</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- SUBVIEW 2: LỊCH SỬ BÀI ĐĂNG -->
+        <div id="scheduleHistorySubView" style="display: none;">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Kho Kịch Bản & Lịch Sử Đăng Video</h2>
+                <p class="subtitle">Lưu trữ tất cả kịch bản, tiêu đề và link bài viết để tái sử dụng sang TikTok, YouTube Shorts.</p>
+              </div>
+            </div>
+
+            <div class="history-list" id="historyList">
+              <!-- Render history via JS -->
             </div>
           </div>
-
         </div>
       </section>
 
-      <!-- ================= TAB 3: KHO KỊCH BẢN & LỊCH SỬ ================= -->
-      <section id="tab-history" class="tab-pane">
-        <div class="panel">
-          <div class="panel-header">
-            <div>
-              <h2>Kho Kịch Bản & Lịch Sử Đăng Video</h2>
-              <p class="subtitle">Lưu trữ tất cả kịch bản, tiêu đề và link bài viết để tái sử dụng sang TikTok, YouTube Shorts.</p>
-            </div>
-          </div>
-
-          <div class="history-list" id="historyList">
-            <!-- Render history via JS -->
-          </div>
-        </div>
-      </section>
+      <!-- Hidden Fallback Panes for Legacy Compatibility -->
+      <section id="tab-history" class="tab-pane" style="display: none;"></section>
 
       <!-- ================= TAB 4: CÀI ĐẶT ================= -->
       <section id="tab-settings" class="tab-pane">
@@ -1133,9 +1410,94 @@ Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
     </div>
   </div>
 
+  <!-- Modal: Quản Lý & Chỉnh Sửa Menu Tool (Dễ Dàng Thêm/Sửa/Xóa Không Cần Code) -->
+  <div class="modal-overlay" id="toolsManageModal" style="display: none;">
+    <div class="modal-card max-w-700">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 1.4rem;">🧰</span>
+          <h3 style="margin: 0; font-size: 1.15rem; color: #fbbf24;">Quản Lý Menu Tool (Dễ Dàng Sửa Đổi)</h3>
+        </div>
+        <button type="button" class="btn-close" id="btnCloseToolsManageModal">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 18px 20px;">
+        <p style="font-size: 0.86rem; color: #94a3b8; margin-bottom: 14px; line-height: 1.5;">
+          Danh sách các công cụ hiển thị cố định trên thanh Menu Tool đỉnh trang. Bạn có thể thêm công cụ nội bộ, đường dẫn trang con hoặc link web ngoài (Google Flow, Canva, Midjourney...) cực kỳ linh hoạt! Lưu tại file <code style="color: #a7f3d0; background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px;">data/tools_menu.json</code>.
+        </p>
+
+        <!-- Bảng danh sách tool hiện tại -->
+        <div style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; margin-bottom: 16px;">
+          <table class="tools-manage-table" id="toolsManageTable">
+            <thead>
+              <tr>
+                <th style="width: 45px;">Icon</th>
+                <th>Tên Công Cụ</th>
+                <th>URL / Tab</th>
+                <th>Loại</th>
+                <th style="width: 70px; text-align: center;">Thao Tác</th>
+              </tr>
+            </thead>
+            <tbody id="toolsManageTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Form thêm tool mới -->
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 14px 16px; border-radius: 8px; border: 1px dashed rgba(245, 158, 11, 0.4);">
+          <h4 style="margin: 0 0 10px 0; font-size: 0.92rem; color: #fbbf24; display: flex; align-items: center; gap: 6px;">
+            <span>➕</span> Thêm Công Cụ Mới Vào Menu Tool:
+          </h4>
+          <div style="display: grid; grid-template-columns: 75px 1fr 130px; gap: 10px; margin-bottom: 10px;">
+            <div>
+              <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">Icon:</label>
+              <input type="text" id="newToolIcon" class="form-control" value="⚡" style="text-align: center; font-size: 1.1rem; padding: 6px;" placeholder="Icon">
+            </div>
+            <div>
+              <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">Tên Công Cụ (*):</label>
+              <input type="text" id="newToolTitle" class="form-control" placeholder="Ví dụ: Tool Viết Bài AI..." style="padding: 6px 10px; font-size: 0.88rem;">
+            </div>
+            <div>
+              <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">Huy hiệu:</label>
+              <input type="text" id="newToolBadge" class="form-control" placeholder="Hot / Mới" style="padding: 6px 10px; font-size: 0.88rem;">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 140px 1fr auto; gap: 10px; align-items: flex-end;">
+            <div>
+              <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">Loại hành động:</label>
+              <select id="newToolActionType" class="form-control" style="padding: 6px 10px; font-size: 0.88rem;">
+                <option value="link">Mở Link Trang (/news)</option>
+                <option value="external">Mở Web Ngoài (Tab mới)</option>
+                <option value="tab">Chuyển Tab Trong Hub</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 0.75rem; color: #94a3b8; display: block; margin-bottom: 4px;">URL hoặc Mã Tab (*):</label>
+              <input type="text" id="newToolUrl" class="form-control" placeholder="/news hoặc https://... hoặc mã tab" style="padding: 6px 10px; font-size: 0.88rem;">
+            </div>
+            <div>
+              <button type="button" class="btn btn-warning btn-sm" id="btnAddNewTool" style="padding: 7px 16px; font-weight: 700; white-space: nowrap;">
+                ➕ Thêm Tool
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.08);">
+        <button type="button" class="btn btn-secondary btn-sm" id="btnResetDefaultTools" style="color: #94a3b8;">
+          ↺ Khôi Phục Mặc Định
+        </button>
+        <button type="button" class="btn btn-primary btn-sm" id="btnSaveToolsMenu" style="font-weight: 700;">
+          💾 Lưu Cấu Hình Menu Tool
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=20261016_5"></script>
 </body>
 </html>

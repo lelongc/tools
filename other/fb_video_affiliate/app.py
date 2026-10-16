@@ -8,6 +8,7 @@ import uuid
 import logging
 from pathlib import Path
 from typing import List, Dict, Any, Optional
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, UploadFile, File, Form
 from fastapi.staticfiles import StaticFiles
@@ -44,11 +45,18 @@ CONFIG_FILE = BASE_DIR / "config.json"
 PRODUCTS_FILE = DATA_DIR / "products.json"
 HISTORY_FILE = DATA_DIR / "history.json"
 SCHEDULED_TASKS_FILE = DATA_DIR / "scheduled_tasks.json"
+TOOLS_MENU_FILE = DATA_DIR / "tools_menu.json"
 
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-app = FastAPI(title="FB Reels & Shopee Affiliate Automation Hub")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    start_scheduler(execute_publish_task, execute_comment_task)
+    yield
+    stop_scheduler()
+
+app = FastAPI(title="FB Reels & Shopee Affiliate Automation Hub", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -57,6 +65,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def add_no_cache_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
 
 def load_json(filepath: Path, default_val: Any) -> Any:
     if not filepath.exists():
@@ -219,6 +236,15 @@ def get_facebook_publisher(target_page_id: Optional[str] = None) -> FacebookReel
     )
 
 # Endpoints
+@app.get("/api/tools-menu")
+def api_get_tools_menu():
+    return load_json(TOOLS_MENU_FILE, [])
+
+@app.post("/api/tools-menu")
+def api_save_tools_menu(tools: List[Dict[str, Any]]):
+    save_json(TOOLS_MENU_FILE, tools)
+    return {"status": "success", "message": "Đã lưu Menu Tool thành công!", "tools": tools}
+
 @app.get("/api/config")
 def get_config():
     cfg = load_json(CONFIG_FILE, {})
@@ -1317,14 +1343,6 @@ def api_publish_now_scheduled_task(task_id: str):
     except Exception as e:
         update_task_status(task_id, "failed", error=str(e))
         raise HTTPException(status_code=500, detail=str(e))
-
-@app.on_event("startup")
-def startup_event():
-    start_scheduler(execute_publish_task, execute_comment_task)
-
-@app.on_event("shutdown")
-def shutdown_event():
-    stop_scheduler()
 
 @app.get("/api/history")
 def get_history():

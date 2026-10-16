@@ -1,0 +1,68 @@
+[
+  {
+    "id": "news_flow",
+    "title": "Xào Nấu Tin Tức & Google Flow AI",
+    "icon": "📰",
+    "badge": "Mới Nhất",
+    "badge_color": "amber",
+    "description": "Xào nấu bài báo/tin tức, tự động trích nguồn chuẩn pháp lý, kịch bản đọc video 60s và sinh Prompt cho Google Flow.",
+    "url": "/news",
+    "action_type": "link",
+    "target": "_self"
+  },
+  {
+    "id": "remix_sales",
+    "title": "Xào Nấu Bán Hàng & Phá Trùng Lặp Ảnh",
+    "icon": "🍳",
+    "badge": "Affiliate",
+    "badge_color": "orange",
+    "description": "Viết lại bài đối thủ mộc mạc không icon, lật gương ảnh, chỉnh tone màu, đóng logo bản quyền và ghép Shopee.",
+    "url": "remix",
+    "action_type": "tab",
+    "target": ""
+  },
+  {
+    "id": "reels_studio",
+    "title": "Studio Video Reels Tự Động",
+    "icon": "🎬",
+    "badge": "Reels",
+    "badge_color": "blue",
+    "description": "Tải video ngắn lên: Gemini tự nghe kịch bản, giật tít Hook 3 giây, sinh tiêu đề SEO và ghim link Shopee.",
+    "url": "studio_reels",
+    "action_type": "tab",
+    "target": ""
+  },
+  {
+    "id": "photo_studio",
+    "title": "Studio Đăng Bài Viết Ảnh Facebook",
+    "icon": "🖼️",
+    "badge": "Photo",
+    "badge_color": "green",
+    "description": "Đăng ảnh bài viết, khử sạch 100% siêu dữ liệu AI (C2PA, EXIF), đóng watermark logo và hẹn giờ Meta Cloud.",
+    "url": "studio_photo",
+    "action_type": "tab",
+    "target": ""
+  },
+  {
+    "id": "products_shopee",
+    "title": "Kho Link Sản Phẩm Shopee (Product Brain)",
+    "icon": "🛒",
+    "badge": "Shopee",
+    "badge_color": "purple",
+    "description": "Quản trị danh mục sản phẩm affiliate Shopee, tự động đổi link hàng loạt khi hết hàng.",
+    "url": "products",
+    "action_type": "tab",
+    "target": ""
+  },
+  {
+    "id": "google_flow",
+    "title": "Google Flow Studio (labs.google/fx)",
+    "icon": "🌊",
+    "badge": "Google Labs",
+    "badge_color": "cyan",
+    "description": "Phòng thí nghiệm tạo ảnh & video Veo 3.1 & Nano Banana Pro của Google.",
+    "url": "https://labs.google/fx/",
+    "action_type": "external",
+    "target": "_blank"
+  }
+]

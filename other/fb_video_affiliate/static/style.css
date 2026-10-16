@@ -2068,5 +2068,535 @@ input:checked + .slider:before {
   border-color: rgba(245, 158, 11, 0.4);
 }
 
+/* ==========================================================================
+   Menu Tool (Kho Cong Cu) Hub Component Styles
+   ========================================================================== */
+.tools-hub-header {
+  margin-bottom: 24px;
+}
+
+.tools-hub-header h2 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+
+.tools-hub-header p {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  margin-top: 4px;
+}
+
+.tools-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+.tool-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.tool-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.4), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tool-card:hover {
+  border-color: rgba(56, 189, 248, 0.5);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.15);
+}
+
+.tool-card:hover::before {
+  opacity: 1;
+}
+
+.tool-card.featured {
+  border-color: rgba(245, 158, 11, 0.4);
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.85));
+}
+
+.tool-card.featured::before {
+  background: linear-gradient(90deg, transparent, #fbbf24, transparent);
+  opacity: 1;
+}
+
+.tool-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.tool-card-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.tool-card.featured .tool-card-icon-wrap {
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.tool-card-meta {
+  flex: 1;
+}
+
+.tool-card-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.badge-amber {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.badge-blue {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.badge-green {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.badge-purple {
+  background: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.35);
+}
+
+.tool-card-title {
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.tool-card-desc {
+  font-size: 0.86rem;
+  color: #94a3b8;
+  line-height: 1.5;
+  margin: 10px 0 18px 0;
+  flex: 1;
+}
+
+.tool-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.header-tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.2));
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  color: #fbbf24;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.header-tool-btn:hover {
+  background: rgba(245, 158, 11, 0.35);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
+}
+
+/* ==========================================================================
+   Sticky Top Menu Tools Bar Component Styles
+   ========================================================================== */
+.top-menu-tools-bar {
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(15, 23, 42, 0.98));
+  border: 1.5px solid rgba(245, 158, 11, 0.5);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(245, 158, 11, 0.15);
+  position: sticky;
+  top: 10px;
+  z-index: 99;
+  backdrop-filter: blur(16px);
+}
+
+.top-tools-lead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.tools-pulse-icon {
+  font-size: 1.5rem;
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  padding: 4px 8px;
+  border-radius: 8px;
+  animation: pulseToolGlow 2.5s infinite;
+}
+
+@keyframes pulseToolGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+  50% { box-shadow: 0 0 14px 2px rgba(245, 158, 11, 0.6); }
+}
+
+.tools-lead-text b {
+  color: #fbbf24;
+  font-size: 0.92rem;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.tools-lead-text small {
+  color: #94a3b8;
+  font-size: 0.72rem;
+  display: block;
+  white-space: nowrap;
+}
+
+.top-tools-scroll {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px;
+  flex: 1;
+  scrollbar-width: thin;
+}
+
+.top-tools-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.top-tools-scroll::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 4px;
+}
+
+.top-tool-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #f1f5f9;
+  padding: 7px 13px;
+  border-radius: 20px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.top-tool-pill:hover {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: #fbbf24;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+}
+
+.top-tool-pill.highlight {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.25));
+  border-color: #fbbf24;
+  color: #fbbf24;
+}
+
+.top-tool-pill.highlight:hover {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #000;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+}
+
+.top-tool-pill .pill-badge {
+  font-size: 9.5px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  font-weight: 700;
+}
+
+.top-tools-actions {
+  flex-shrink: 0;
+}
+
+.btn-xs-tool-manage {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px dashed rgba(148, 163, 184, 0.4);
+  color: #cbd5e1;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-xs-tool-manage:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+/* Tools Manager Modal Table */
+.tools-manage-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.tools-manage-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tools-manage-table td {
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+}
+
+.tools-manage-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ==========================================================================
+   Streamlined UI: Header News Link, Dropdown Menu & Accordions
+   ========================================================================== */
+.header-news-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.22), rgba(217, 119, 6, 0.28));
+  border: 1px solid rgba(245, 158, 11, 0.55);
+  color: #fbbf24;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.15);
+  white-space: nowrap;
+}
+
+.header-news-link:hover {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #000;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+}
+
+.header-mini-badge {
+  font-size: 9.5px;
+  background: rgba(0, 0, 0, 0.4);
+  color: #fef08a;
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+/* Header Tool Dropdown */
+.header-tool-dropdown-wrap {
+  position: relative;
+}
+
+.header-tool-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  background: rgba(15, 23, 42, 0.98);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 24px rgba(245, 158, 11, 0.15);
+  padding: 12px;
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeInDropdown 0.2s ease;
+}
+
+@keyframes fadeInDropdown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header-tool-dropdown.show {
+  display: flex;
+}
+
+.dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.78rem;
+  color: #fbbf24;
+}
+
+.dropdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.dropdown-tool-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #f1f5f9;
+  text-decoration: none;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.dropdown-tool-item:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fff;
+  transform: translateX(3px);
+}
+
+.dropdown-tool-item.highlight {
+  border-color: #fbbf24;
+  background: rgba(245, 158, 11, 0.15);
+}
+
+/* Accordion Cards */
+.accordion-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 14px;
+  transition: all 0.2s;
+}
+
+.accordion-toggle-btn {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 11px 16px;
+  background: rgba(30, 41, 59, 0.4);
+  border: none;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  text-align: left;
+}
+
+.accordion-toggle-btn:hover {
+  background: rgba(30, 41, 59, 0.8);
+  color: #fbbf24;
+}
+
+.accordion-toggle-btn .accordion-icon {
+  font-size: 0.8rem;
+  transition: transform 0.25s ease;
+  color: #94a3b8;
+}
+
+.accordion-toggle-btn.open .accordion-icon {
+  transform: rotate(180deg);
+}
+
+.accordion-body {
+  padding: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Badge helpers */
+.type-badge.orange {
+  background: rgba(249, 115, 22, 0.2);
+  color: #fb923c;
+}
+
+.type-badge.amber {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+.news-tab-link:hover {
+  background: rgba(245, 158, 11, 0.2) !important;
+  color: #fbbf24 !important;
+}
+
+
+
 
 
