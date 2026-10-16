@@ -2,12 +2,15 @@
 Gemini Service - Tích hợp Gemini 3.5 Flash-Lite & Gemini 3.1 Flash Lite
 Tối ưu kịch bản video, sinh tiêu đề, caption, hashtags và tự động khớp nối kho sản phẩm Shopee Affiliate.
 """
+import os
 import json
+import base64
 import logging
 import re
 import urllib.request
 import urllib.error
-from typing import List, Dict, Any
+from pathlib import Path
+from typing import List, Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -80,19 +83,33 @@ def sanitize_analysis_output(data: Dict[str, Any]) -> Dict[str, Any]:
                 r["category"] = clean_no_emojis(r.get("category", ""))
     return data
 
-def call_gemini_api(api_key: str, model_name: str, prompt: str) -> Dict[str, Any]:
+def call_gemini_api(
+    api_key: str,
+    model_name: str,
+    prompt: str,
+    image_base64: Optional[str] = None,
+    image_mime_type: str = "image/jpeg"
+) -> Dict[str, Any]:
     """
     Gọi Gemini API với model chỉ định và xử lý retry tự động nếu gặp lỗi 429.
+    Hỗ trợ cả đầu vào văn bản và hình ảnh (Multimodal Vision).
     """
     clean_model = model_name.replace("models/", "")
     url = f"{GEMINI_API_BASE}/{clean_model}:generateContent?key={api_key}"
     
+    parts = [{"text": prompt}]
+    if image_base64:
+        parts.append({
+            "inlineData": {
+                "mimeType": image_mime_type,
+                "data": image_base64
+            }
+        })
+
     payload = {
         "contents": [
             {
-                "parts": [
-                    {"text": prompt}
-                ]
+                "parts": parts
             }
         ],
         "generationConfig": {
@@ -106,7 +123,7 @@ def call_gemini_api(api_key: str, model_name: str, prompt: str) -> Dict[str, Any
     req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers=headers)
     
     try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with urllib.request.urlopen(req, timeout=35) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
             return json.loads(raw_text)
@@ -373,3 +390,211 @@ CÔNG THỨC BÀI VIẾT ẢNH VIRAL CHUẨN MỘC MẠC:
             raw_result["pinned_comment"] = clean_no_emojis(raw_result["pinned_comment"])
 
     return raw_result
+
+def remix_post_content(
+    original_text: str = "",
+    original_image_path: Optional[str] = None,
+    writing_style: str = "rustic",
+    image_edit_request: str = "",
+    niche: str = "Sức khỏe",
+    catalog: List[Dict[str, Any]] = None,
+    api_key: str = "",
+    model_name: str = "gemini-3.5-flash-lite"
+) -> Dict[str, Any]:
+    """
+    Xào nấu toàn diện bài viết của người khác:
+    - Viết lại nội dung (caption) hoàn toàn mới 100% theo phong cách yêu cầu.
+    - Giật tít tiêu đề mới bắt mắt.
+    - Khớp nối sản phẩm Shopee Affiliate phù hợp từ kho.
+    - Soi bức ảnh gốc (qua Gemini Vision) và sinh Prompt tiếng Anh chi tiết để sửa/tạo ảnh mới độc quyền.
+    """
+    import base64
+    from pathlib import Path
+
+    catalog = catalog or []
+    catalog_summary = []
+    for item in catalog:
+        catalog_summary.append({
+            "id": item.get("id"),
+            "name": item.get("name"),
+            "affiliate_url": item.get("affiliate_url"),
+            "category": item.get("category"),
+            "keywords": item.get("keywords", [])
+        })
+
+    # Xử lý phong cách viết
+    style_guidelines = {
+        "rustic": "Phong cách dân dã, chân thành, mộc mạc ('Bà con ơi', 'Kênh em mách bà con'). Gần gũi như người trong gia đình.",
+        "humorous": "Phong cách hài hước, dí dỏm, châm biếm nhẹ nhàng, tươi vui kích thích thảo luận bình luận rôm rả.",
+        "expert": "Phong cách chuyên gia, bác sĩ gia đình, phân tích nguyên lý khoa học mạch lạc, đáng tin cậy và chỉn chu.",
+        "warning": "Phong cách giật tít cảnh báo mạnh mẽ ('Đừng bao giờ...', 'Sai lầm rước họa...'), đánh trúng tâm lý tò mò và thói quen xấu."
+    }.get(writing_style, "Phong cách mộc mạc, gần gũi, chân thành")
+
+    # Đọc ảnh gốc nếu có để đưa vào Gemini Multimodal
+    image_base64 = None
+    image_mime_type = "image/jpeg"
+    if original_image_path and os.path.exists(original_image_path):
+        p = Path(original_image_path)
+        ext = p.suffix.lower()
+        if ext in [".png"]:
+            image_mime_type = "image/png"
+        elif ext in [".webp"]:
+            image_mime_type = "image/webp"
+        try:
+            with open(original_image_path, "rb") as f:
+                image_base64 = base64.b64encode(f.read()).decode("utf-8")
+        except Exception as img_err:
+            logger.warning(f"Không thể đọc file ảnh gốc để phân tích: {img_err}")
+
+    img_prompt_req = f"YÊU CẦU BIẾN HÓA / SỬA ẢNH TỪ NGƯỜI DÙNG: \"{image_edit_request.strip()}\"" if image_edit_request.strip() else "YÊU CẦU SỬA ẢNH: Hãy tạo 1 phiên bản ảnh mới tương tự về ý nghĩa nhưng đổi góc nhìn, đổi bối cảnh hoặc nhân vật để hoàn toàn độc quyền, không dính bản quyền ảnh gốc."
+
+    prompt = f"""
+Bạn là chuyên gia Sáng Tạo & Xào Nấu Nội Dung Facebook (Remix & Content Repurposing) triệu view ({niche}).
+Nhiệm vụ của bạn là lấy bài viết gốc và hình ảnh gốc của người khác để "xào nấu" lại thành một tác phẩm mới 100% độc quyền, hay hơn bài cũ, cuốn hút hơn và không thể bị quét trùng lặp nội dung.
+
+THÔNG TIN BÀI VIẾT GỐC ĐƯỢC CUNG CẤP:
+\"\"\"{original_text.strip() or "Nội dung mẹo sức khỏe, dinh dưỡng hàng ngày"}\"\"\"
+
+PHONG CÁCH VIẾT YÊU CẦU:
+{style_guidelines}
+
+{img_prompt_req}
+
+KHO SẢN PHẨM SHOPEE ĐỂ GHÉP LINK AFFILIATE:
+{json.dumps(catalog_summary, ensure_ascii=False, indent=2)}
+
+NGUYÊN TẮC BẮT BUỘC:
+1. BẮT BUỘC TIẾNG VIỆT ĐẦY ĐỦ DẤU THANH 100%.
+2. TUYỆT ĐỐI KHÔNG DÙNG BẤT KỲ ICON / EMOJI NÀO (không dùng icon, không dùng emoji). Viết như lời văn người thật trò chuyện.
+3. TIÊU ĐỀ (new_title): Dưới 80 ký tự, giật tít hấp dẫn, khác biệt hoàn toàn với bài gốc.
+4. NỘI DUNG (new_caption): Viết lại mới 100% câu từ, 4-6 câu súc tích, ngắt dòng thoáng, dễ đọc trên di động.
+5. HASHTAGS: 5 - 8 thẻ hashtag thịnh hành.
+6. GHÉP SHOPEE (pinned_comment): Chọn 1 - 2 sản phẩm phù hợp nhất trong kho, viết bình luận ghim mộc mạc định dạng: "- Tên sản phẩm: Link Shopee".
+7. PHÂN TÍCH ẢNH (image_analysis): Tóm tắt nội dung/bố cục của bức ảnh gốc được gửi kèm (1-2 câu tiếng Việt).
+8. PROMPT TẠO ẢNH AI (ai_image_prompt): Viết một câu prompt tiếng Anh cực kỳ chi tiết, chất lượng cao (Masterpiece, photorealistic, 8k, detailed) để người dùng có thể dán vào Midjourney, FLUX, Imagen hoặc Leonardo sinh ra bức ảnh mới đã thay đổi chi tiết theo yêu cầu.
+9. TÓM TẮT THAY ĐỔI (remix_summary): Nêu ngắn gọn 2-3 điểm sáng tạo đã được làm mới so với bài gốc.
+
+Định dạng JSON trả về bắt buộc:
+{{
+  "new_title": "string (Tiêu đề mới, có dấu, không icon)",
+  "new_caption": "string (Nội dung bài viết mới, không icon)",
+  "hashtags": ["string"],
+  "selected_product_ids": ["string"],
+  "pinned_comment": "string (Bình luận ghim Shopee mộc mạc)",
+  "image_analysis": "string (Phân tích ảnh gốc)",
+  "ai_image_prompt": "string (English prompt for AI image generator)",
+  "remix_summary": "string (Tóm tắt đổi mới)"
+}}
+"""
+    fallback_model = "gemini-3.1-flash-lite" if model_name == "gemini-3.5-flash-lite" else "gemini-3.5-flash-lite"
+    try:
+        raw_result = call_gemini_api(api_key, model_name, prompt, image_base64=image_base64, image_mime_type=image_mime_type)
+    except Exception as e:
+        logger.warning(f"Thử remix model {model_name} thất bại ({e}), chuyển sang dự phòng {fallback_model}...")
+        raw_result = call_gemini_api(api_key, fallback_model, prompt, image_base64=image_base64, image_mime_type=image_mime_type)
+
+    if isinstance(raw_result, dict):
+        if "new_title" in raw_result:
+            raw_result["new_title"] = clean_no_emojis(raw_result["new_title"])
+        if "new_caption" in raw_result:
+            raw_result["new_caption"] = clean_no_emojis(raw_result["new_caption"])
+        if "pinned_comment" in raw_result:
+            raw_result["pinned_comment"] = clean_no_emojis(raw_result["pinned_comment"])
+
+    return raw_result
+
+
+def remix_news_content(
+    api_key: str,
+    model_name: str,
+    news_text: str,
+    news_source: Optional[str] = None,
+    image_edit_request: Optional[str] = None,
+    tone_style: str = "objective",
+    image_base64: Optional[str] = None,
+    image_mime_type: str = "image/jpeg"
+) -> Dict[str, Any]:
+    """
+    Xào nấu nội dung tin tức, tạo bài viết mới + kịch bản đọc video 60s
+    và tạo Prompt tiếng Anh tối ưu cho Google Flow (labs.google/fx) hoặc Midjourney/FLUX.
+    Đảm bảo 100% tiếng Việt chuẩn, không icon, trích dẫn nguồn báo minh bạch.
+    """
+    source_label = (news_source or "").strip() or "Nguồn tổng hợp báo chí"
+    
+    style_prompts = {
+        "objective": "Báo chí thời sự khách quan, chuẩn mực, từ ngữ đanh thép, tôn trọng sự thật và trung lập.",
+        "commentary": "Bình luận xã hội sắc bén, góc nhìn đa chiều, phân tích nguyên nhân và hệ lụy.",
+        "storytelling": "Kể chuyện phóng sự đời sống, dẫn dắt lôi cuốn, giàu cảm xúc, chạm đến trái tim người đọc.",
+        "urgent": "Bản tin nóng giật gân, tốc độ, giật tít báo động nhưng nghiêm túc, không câu view rẻ tiền."
+    }
+    selected_style = style_prompts.get(tone_style, style_prompts["objective"])
+
+    img_prompt_req = ""
+    if image_edit_request and image_edit_request.strip():
+        img_prompt_req = f"YÊU CẦU ĐẶC BIỆT CỦA NGƯỜI DÙNG KHI SỬA ẢNH BẰNG AI: '{image_edit_request.strip()}'."
+    else:
+        img_prompt_req = "YÊU CẦU SỬA ẢNH: Hãy biến đổi ảnh gốc thành một bức ảnh tin tức/phóng sự mới, thay đổi bối cảnh hoặc góc chụp để không trùng lặp bức ảnh cũ của báo chí."
+
+    prompt = f"""
+Bạn là một Biên tập viên Báo chí kỳ cựu và Chuyên gia Prompt AI Đồ họa cấp cao.
+Người dùng cung cấp một bản tin tức/bài viết thời sự và hình ảnh đi kèm lấy từ báo chí hoặc mạng xã hội.
+
+NHIỆM VỤ CỦA BẠN:
+1. XÀO NẤU LẠI BÀI VIẾT TIN TỨC: Viết lại 100% bằng câu từ mới độc quyền, sắc bén, cuốn hút, TUYỆT ĐỐI KHÔNG SAO CHÉP NGUYÊN VĂN để tránh bị phạt bản quyền.
+2. TRÍCH DẪN NGUỒN MINH BẠCH: Cuối bài viết bắt buộc phải có dòng ghi nhận nguồn tin: "(Theo {source_label})" để tuân thủ pháp luật và giữ uy tín cho Fanpage.
+3. SOẠN KỊCH BẢN ĐỌC VIDEO (VOICEOVER SCRIPT): Soạn kịch bản đọc ngắn 60 - 75 giây để người dùng tự thu âm giọng đọc hoặc dùng AI lồng tiếng.
+4. SOẠN PROMPT SỬA ẢNH CHO GOOGLE FLOW (labs.google/fx) / MIDJOURNEY / FLUX:
+   - Phân tích chi tiết bức ảnh gốc (chủ thể, sự kiện, góc máy).
+   - Soạn một Prompt tiếng Anh chuyên sâu cho Image-to-Image / Inpainting.
+   - Phong cách ảnh: Ảnh phóng sự đời thực (Photojournalism), chuẩn nhiếp ảnh báo chí quốc tế (Reuters, AP style), ánh sáng chân thực, 8k, không có watermark, không có logo cũ.
+
+BẢN TIN GỐC:
+\"\"\"{news_text.strip()}\"\"\"
+
+NGUỒN BÁO GỐC: {source_label}
+
+PHONG CÁCH VIẾT: {selected_style}
+
+{img_prompt_req}
+
+NGUYÊN TẮC BẮT BUỘC:
+1. Tiếng Việt 100% đầy đủ dấu thanh, từ ngữ báo chí chững chạc, mạch lạc.
+2. TUYỆT ĐỐI KHÔNG DÙNG BẤT KỲ EMOJI / ICON NÀO (không mặt cười, không ngón tay chỉ trỏ, không biểu tượng đồ họa).
+3. Tiêu đề (news_title): Dưới 85 ký tự, giật tít báo chí thời sự, kích thích người đọc nhưng đúng sự thật.
+4. Bài viết hoàn chỉnh (news_caption): 4 - 6 đoạn súc tích, ngắt dòng rõ ràng, kết thúc bằng dòng trích nguồn: "(Theo {source_label})".
+5. Kịch bản đọc video (voiceover_script): Có 3 phân đoạn thời gian rõ ràng:
+   [00:00 - 00:08] Hook mở đầu
+   [00:08 - 00:50] Diễn biến chính
+   [00:50 - 01:05] Bình luận & Lời kết
+6. Prompt tiếng Anh (google_flow_prompt): Viết chi tiết, chuyên nghiệp bằng tiếng Anh, mô tả chủ thể, bối cảnh mới, ánh sáng, góc máy, camera lens (e.g. 35mm photography, natural lighting, documentary editorial style, hyperrealistic, authentic texture, no text, no watermark, 8k).
+7. Hướng dẫn Google Flow (google_flow_guide): 2-3 gạch đầu dòng hướng dẫn người dùng cách copy ảnh và prompt này dán vào Google Flow (labs.google/fx).
+
+Định dạng JSON trả về bắt buộc:
+{{
+  "news_title": "string (Tiêu đề tin tức mới, có dấu, không icon)",
+  "news_caption": "string (Bài viết tin tức xào nấu hoàn chỉnh kèm trích nguồn cuối bài)",
+  "voiceover_script": "string (Kịch bản đọc video 60s có mốc thời gian, không icon)",
+  "news_hashtags": ["string"],
+  "image_analysis": "string (Phân tích ảnh gốc bằng tiếng Việt)",
+  "google_flow_prompt": "string (Prompt tiếng Anh chi tiết cho Google Flow / Midjourney / FLUX)",
+  "google_flow_guide": "string (Hướng dẫn thao tác nhanh)"
+}}
+"""
+    fallback_model = "gemini-3.1-flash-lite" if model_name == "gemini-3.5-flash-lite" else "gemini-3.5-flash-lite"
+    try:
+        raw_result = call_gemini_api(api_key, model_name, prompt, image_base64=image_base64, image_mime_type=image_mime_type)
+    except Exception as e:
+        logger.warning(f"Thử remix tin tức với model {model_name} thất bại ({e}), chuyển sang dự phòng {fallback_model}...")
+        raw_result = call_gemini_api(api_key, fallback_model, prompt, image_base64=image_base64, image_mime_type=image_mime_type)
+
+    if isinstance(raw_result, dict):
+        if "news_title" in raw_result:
+            raw_result["news_title"] = clean_no_emojis(raw_result["news_title"])
+        if "news_caption" in raw_result:
+            raw_result["news_caption"] = clean_no_emojis(raw_result["news_caption"])
+        if "voiceover_script" in raw_result:
+            raw_result["voiceover_script"] = clean_no_emojis(raw_result["voiceover_script"])
+
+    return raw_result
+
+

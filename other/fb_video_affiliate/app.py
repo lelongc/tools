@@ -15,7 +15,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
 
-from gemini_service import analyze_and_match, generate_new_script, clean_no_emojis, analyze_photo_post
+from gemini_service import (
+    analyze_and_match,
+    generate_new_script,
+    clean_no_emojis,
+    analyze_photo_post,
+    remix_post_content,
+    remix_news_content
+)
 from fb_service import FacebookReelsPublisher
 from scheduler_service import (
     start_scheduler,
@@ -119,6 +126,30 @@ class AnalyzePhotoRequest(BaseModel):
     photo_path: Optional[str] = ""
     prompt: Optional[str] = ""
     niche: Optional[str] = "Sức khỏe"
+
+class RemixPostRequest(BaseModel):
+    original_text: Optional[str] = ""
+    original_image_path: Optional[str] = ""
+    writing_style: Optional[str] = "rustic"
+    image_edit_request: Optional[str] = ""
+    niche: Optional[str] = "Sức khỏe"
+
+class RemixNewsRequest(BaseModel):
+    news_text: str
+    news_source: Optional[str] = "Nguồn tổng hợp báo chí"
+    image_edit_request: Optional[str] = ""
+    tone_style: Optional[str] = "objective"
+    original_image_path: Optional[str] = ""
+
+class TransformRemixImageRequest(BaseModel):
+    image_path: str
+    flip_horizontal: Optional[bool] = False
+    filter_type: Optional[str] = "none"  # 'none', 'vibrant', 'warm', 'cool', 'dramatic'
+    apply_logo: Optional[bool] = True
+    logo_type: Optional[str] = "badge"   # 'badge', 'shadow', 'transparent'
+    logo_position: Optional[str] = "bottom-right"
+    logo_scale: Optional[float] = 18.0
+    logo_opacity: Optional[float] = 0.9
 
 class PageItem(BaseModel):
     id: str
@@ -928,6 +959,196 @@ def api_analyze_photo(req: AnalyzePhotoRequest):
         logger.error(f"Analyze photo error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/remix-post")
+def api_remix_post(req: RemixPostRequest):
+    """
+    Xào nấu bài viết của người khác bằng AI:
+    - Đọc bài viết gốc + soi ảnh gốc (Gemini Vision)
+    - Viết lại bài mới 100% không trùng lặp, chuẩn mộc mạc, không icon
+    - Khớp sản phẩm Shopee Affiliate
+    - Sinh prompt tiếng Anh chất lượng cao để sửa/tạo ảnh AI
+    """
+    cfg = load_json(CONFIG_FILE, {})
+    api_key = cfg.get("gemini_api_key", "").strip()
+    if not api_key:
+        raise HTTPException(status_code=400, detail="Chưa cấu hình Gemini API Key!")
+    model_name = cfg.get("default_model", "gemini-3.5-flash-lite")
+    catalog = load_json(PRODUCTS_FILE, [])
+
+    try:
+        result = remix_post_content(
+            original_text=req.original_text or "",
+            original_image_path=req.original_image_path or "",
+            writing_style=req.writing_style or "rustic",
+            image_edit_request=req.image_edit_request or "",
+            niche=req.niche or "Sức khỏe",
+            catalog=catalog,
+            api_key=api_key,
+            model_name=model_name
+        )
+        return {"status": "success", "data": result}
+    except Exception as e:
+        logger.error(f"Remix post error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/remix-news")
+def api_remix_news(req: RemixNewsRequest):
+    """
+    Xào nấu bài đăng tin tức / thời sự / bình luận:
+    - Đọc text tin tức + soi ảnh gốc bằng Gemini Multimodal Vision
+    - Viết lại bài tin tức mới 100%, không bị bản quyền/công an sờ gáy, trích nguồn minh bạch
+    - Tạo kịch bản đọc video 60s (Voiceover Script)
+    - Tạo prompt tiếng Anh chuyên sâu cho Google Flow (labs.google/fx) hoặc Midjourney/FLUX
+    """
+    cfg = load_json(CONFIG_FILE, {})
+    api_key = cfg.get("gemini_api_key", "").strip()
+    if not api_key:
+        raise HTTPException(status_code=400, detail="Chưa cấu hình Gemini API Key!")
+    model_name = cfg.get("default_model", "gemini-3.5-flash-lite")
+
+    img_b64 = None
+    img_mime = "image/jpeg"
+    if req.original_image_path:
+        p = Path(req.original_image_path)
+        if not p.is_absolute():
+            p = BASE_DIR / p
+        if p.exists():
+            import base64
+            ext = p.suffix.lower()
+            if ext == ".png":
+                img_mime = "image/png"
+            elif ext == ".webp":
+                img_mime = "image/webp"
+            with open(p, "rb") as f:
+                img_b64 = base64.b64encode(f.read()).decode("utf-8")
+
+    try:
+        result = remix_news_content(
+            api_key=api_key,
+            model_name=model_name,
+            news_text=req.news_text,
+            news_source=req.news_source or "Nguồn tổng hợp báo chí",
+            image_edit_request=req.image_edit_request or "",
+            tone_style=req.tone_style or "objective",
+            image_base64=img_b64,
+            image_mime_type=img_mime
+        )
+        return {"status": "success", "data": result}
+    except Exception as e:
+        logger.error(f"Remix news error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/transform-remix-image")
+def api_transform_remix_image(req: TransformRemixImageRequest):
+    """
+    Biến đổi ảnh bài viết gốc để phá trùng lặp nhận diện của Facebook:
+    - Lật gương ảnh (Horizontal Flip)
+    - Bộ lọc màu / tương phản / độ sáng AI
+    - Đóng dấu logo Page và tẩy 100% metadata EXIF/C2PA
+    """
+    from PIL import Image, ImageEnhance
+
+    in_path = Path(req.image_path)
+    if not in_path.is_absolute():
+        in_path = BASE_DIR / in_path
+
+    if not in_path.exists():
+        raise HTTPException(status_code=404, detail="Không tìm thấy file ảnh gốc trên server!")
+
+    out_filename = f"remix_photo_{int(time.time())}_{uuid.uuid4().hex[:4]}.jpg"
+    out_path = UPLOAD_DIR / out_filename
+
+    try:
+        with Image.open(in_path) as orig:
+            img = orig.convert("RGBA")
+
+        # 1. Lật gương nếu được bật
+        if req.flip_horizontal:
+            img = img.transpose(Image.Transpose.FLIP_LEFT_RIGHT)
+
+        # 2. Áp dụng bộ lọc màu
+        f_type = req.filter_type or "none"
+        if f_type != "none":
+            rgb_temp = img.convert("RGB")
+            if f_type == "vibrant":
+                rgb_temp = ImageEnhance.Color(rgb_temp).enhance(1.25)
+                rgb_temp = ImageEnhance.Contrast(rgb_temp).enhance(1.1)
+            elif f_type == "warm":
+                rgb_temp = ImageEnhance.Color(rgb_temp).enhance(1.1)
+                rgb_temp = ImageEnhance.Brightness(rgb_temp).enhance(1.04)
+            elif f_type == "cool":
+                rgb_temp = ImageEnhance.Contrast(rgb_temp).enhance(1.08)
+                rgb_temp = ImageEnhance.Brightness(rgb_temp).enhance(0.98)
+            elif f_type == "dramatic":
+                rgb_temp = ImageEnhance.Contrast(rgb_temp).enhance(1.3)
+                rgb_temp = ImageEnhance.Sharpness(rgb_temp).enhance(1.25)
+            img = rgb_temp.convert("RGBA")
+
+        # 3. Dán đè Logo nếu được chọn
+        if req.apply_logo:
+            logo_file = None
+            if req.logo_type == "shadow":
+                logo_file = BASE_DIR / "assets" / "watermark_icon_bong_mo.png"
+            elif req.logo_type == "transparent":
+                logo_file = BASE_DIR / "assets" / "watermark_icon_trongsuot.png"
+            else:
+                logo_file = BASE_DIR / "assets" / "watermark_huy_hieu_tron.png"
+
+            if logo_file and logo_file.exists():
+                with Image.open(logo_file) as l_orig:
+                    logo = l_orig.convert("RGBA")
+                    w, h = img.size
+                    scale = max(0.06, min(0.4, (req.logo_scale or 18.0) / 100.0))
+                    target_w = max(40, int(w * scale))
+                    target_h = int(logo.height * (target_w / logo.width))
+                    logo = logo.resize((target_w, target_h), Image.Resampling.LANCZOS)
+
+                    op = max(0.2, min(1.0, req.logo_opacity or 0.9))
+                    if op < 1.0:
+                        r, g, b, a = logo.split()
+                        a = a.point(lambda p: int(p * op))
+                        logo = Image.merge("RGBA", (r, g, b, a))
+
+                    margin_x = int(w * 0.035)
+                    margin_y = int(h * 0.035)
+                    pos = req.logo_position or "bottom-right"
+
+                    if pos == "bottom-right":
+                        pos_x = w - target_w - margin_x
+                        pos_y = h - target_h - margin_y
+                    elif pos == "bottom-left":
+                        pos_x = margin_x
+                        pos_y = h - target_h - margin_y
+                    elif pos == "top-right":
+                        pos_x = w - target_w - margin_x
+                        pos_y = margin_y
+                    elif pos == "top-left":
+                        pos_x = margin_x
+                        pos_y = margin_y
+                    elif pos == "center":
+                        pos_x = (w - target_w) // 2
+                        pos_y = (h - target_h) // 2
+                    else:
+                        pos_x = w - target_w - margin_x
+                        pos_y = h - target_h - margin_y
+
+                    img.paste(logo, (pos_x, pos_y), mask=logo)
+
+        # 4. Lưu ảnh hoàn toàn sạch metadata
+        clean_rgb = img.convert("RGB")
+        clean_rgb.save(out_path, "JPEG", quality=95, optimize=True)
+
+        return {
+            "status": "success",
+            "filename": out_filename,
+            "saved_path": str(out_path),
+            "url": f"/uploads/{out_filename}"
+        }
+    except Exception as e:
+        logger.error(f"Lỗi biến đổi ảnh remix: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.post("/api/publish-photo")
 def api_publish_photo(req: PublishPhotoRequest):
     publisher = get_facebook_publisher(req.target_page_id)
@@ -1291,6 +1512,15 @@ STATIC_DIR = BASE_DIR / "static"
 ASSETS_DIR = BASE_DIR / "assets"
 STATIC_DIR.mkdir(parents=True, exist_ok=True)
 ASSETS_DIR.mkdir(parents=True, exist_ok=True)
+
+@app.get("/news")
+@app.get("/news-studio")
+def serve_news_studio():
+    from fastapi.responses import FileResponse
+    news_file = STATIC_DIR / "news_studio.html"
+    if news_file.exists():
+        return FileResponse(str(news_file))
+    return FileResponse(str(STATIC_DIR / "index.html"))
 
 app.mount("/assets", StaticFiles(directory=str(ASSETS_DIR)), name="assets")
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")

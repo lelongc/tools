@@ -1,5 +1,98 @@
 [
   {
+    "id": "sched_1792119968_55055b",
+    "created_at": "2026-10-16 10:06:08",
+    "status": "completed",
+    "target_timestamp": 1792125900,
+    "target_time_str": "2026-10-16 11:45:00",
+    "golden_slot_label": "🍱 Trưa 11:45 (Tiêu hóa, giãn cơ, tim mạch)",
+    "meta_cloud_schedule": true,
+    "comment_posted": true,
+    "post_type": "reel",
+    "photo_path": "",
+    "target_page_id": "924512634089549",
+    "video_path": "D:\\folder\\tools\\other\\fb_video_affiliate\\uploads\\1792119026_6.mp4",
+    "thumbnail_path": "D:\\folder\\tools\\other\\fb_video_affiliate\\uploads\\thumb_1792119864.png",
+    "title": "Cảnh báo thói quen đi chân đất sàn gạch lạnh dễ gây cúm và đau nhức xương khớp",
+    "caption": ".",
+    "hashtags": [
+      "#suckhoe",
+      "#meosuckhoe",
+      "#canhbao",
+      "#meohay",
+      "#songkhoe",
+      "#chamsocsuckhoe",
+      "#suckhoegiadinh"
+    ],
+    "pinned_comment": "Bà con ơi, nhà em thấy nhiều người hay chủ quan đi chân đất lắm, nhớ sắm ngay đôi dép mềm để giữ ấm chân nha. Nhà em có tổng hợp mấy món đồ bảo vệ sức khỏe tiện lợi ở đây, bà con tham khảo nhé.\n- Dép Đi Trong Nhà Mềm Êm Chống Trượt: https://s.shopee.vn/3g4UN0VOby\n- Bột Ngâm Chân Thảo Dược:\nhttps://s.shopee.vn/3LRdyWXyDr\n- Thảm Lót Sàn Chống Trượt Giữ Nhiệt: https://s.shopee.vn/9pf7iWgaoW",
+    "selected_product_ids": [
+      "prod_1792119628_9390",
+      "prod_1792119741_2735",
+      "prod_1792119793_2d6e"
+    ],
+    "script": "Sàn nhà gạch men mát thật đấy, nhưng cứ đi chân đất suốt là rước họa vào thân. Thứ nhất là lòng bàn chân bị lạnh dễ gây cảm cúm.\nThứ hai là hàn khí nhiễm vào người làm nhức mỏi xương khớp, nhất là người già. Thứ ba là chân giẫm phải bụi bẩn vi khuẩn dễ nhiễm trùng.\nKiếm đôi dép mềm đi trong nhà cho ấm chân, khỏe người nha. Bà con nhớ ấn thả tim và theo dõi kênh để tui có động lực làm video tiếp nha.",
+    "niche": "Sức khỏe & Đời sống (Bán hàng Affiliate)",
+    "facebook_result": {
+      "success": true,
+      "mode": "scheduled",
+      "message": "Đã lên lịch đăng video trên Facebook Meta Cloud thành công!",
+      "video_id": "1842153783476639",
+      "comment_id": null,
+      "thumbnail_applied": true,
+      "facebook_url": "https://www.facebook.com/reel/1842153783476639",
+      "published_at": "2026-10-16 10:06:08",
+      "scheduled_publish_time": 1792125900
+    },
+    "error_message": null,
+    "comment_id": "1842153783476639_2690204104760856"
+  },
+  {
+    "id": "sched_1791982987_83a4c5",
+    "created_at": "2026-10-14 20:03:07",
+    "status": "completed",
+    "target_timestamp": 1792039500,
+    "target_time_str": "2026-10-15 11:45:00",
+    "golden_slot_label": "🍱 Trưa 11:45 (Tiêu hóa, giãn cơ, tim mạch)",
+    "meta_cloud_schedule": true,
+    "comment_posted": true,
+    "post_type": "reel",
+    "photo_path": "",
+    "target_page_id": "924512634089549",
+    "video_path": "D:\\folder\\tools\\other\\fb_video_affiliate\\uploads\\1791982797_5.mp4",
+    "thumbnail_path": "D:\\folder\\tools\\other\\fb_video_affiliate\\uploads\\thumb_1791982925.png",
+    "title": "Ăn mặn quá: Thói quen rước bệnh cao huyết áp vào thân, xem ngay kẻo hối!",
+    "caption": "Ăn mặn quá khiến huyết áp tăng vọt và bắt quả thận làm việc cật lực dễ dẫn đến suy thận. Thêm nữa, thói quen này còn làm cơ thể tích nước khiến mặt mũi sưng phù rất khó chịu. Nấu nhạt đi một tí để tuổi thọ dài ra và cơ thể nhẹ nhõm hơn nha bà con. Lưu lại ngay mẹo hay này và chia sẻ cho người thân cùng biết nhé!",
+    "hashtags": [
+      "#suckhoe",
+      "#meosuckhoe",
+      "#canhbao",
+      "#meohay",
+      "#songkhoe",
+      "#chamsocsuckhoe",
+      "#suckhoegiadinh"
+    ],
+    "pinned_comment": "Bà con mình nhớ chú ý nêm nếm nhạt bớt để bảo vệ sức khỏe tim mạch và quả thận nhé. Nhà em có chuẩn bị sẵn mấy món đồ dùng nhà bếp tiện lợi giúp việc nấu ăn kiểm soát gia vị dễ dàng hơn, bà con tham khảo qua đây nha:\n- Ấm Siêu Tốc Đun Nước Tự Ngắt Tiện Lợi: https://s.shopee.vn/3qNoR07yzV\n- Bình Giữ Nhiệt Inox 316 Giữ Nóng Lạnh An Toàn: https://s.shopee.vn/30ohROyx8e",
+    "selected_product_ids": [
+      "prod_1791787522_5c71",
+      "prod_1791787495_8682"
+    ],
+    "script": "Bữa cơm mà thiếu bát nước mắm chanh ớt là ăn mất ngon đúng không bà con? Nhưng thứ nhất là ăn mặn quá thì huyết áp cứ thế mà tăng vọt.\nThứ hai là bắt quả thận phải làm việc cật lực để đào thải muối, dễ suy thận. Thứ ba là ăn mặn làm cơ thể tích nước, mặt mũi sưng phù.\nNấu nhạt đi một tí để tuổi thọ dài ra, người nhẹ nhõm nha. Thấy hữu ích thì bà con thả tim và theo dõi kênh để nhận video mới nhé.",
+    "niche": "Sức khỏe & Đời sống (Bán hàng Affiliate)",
+    "facebook_result": {
+      "success": true,
+      "mode": "scheduled",
+      "message": "Đã lên lịch đăng video trên Facebook Meta Cloud thành công!",
+      "video_id": "4342904819260087",
+      "comment_id": null,
+      "thumbnail_applied": true,
+      "facebook_url": "https://www.facebook.com/reel/4342904819260087",
+      "published_at": "2026-10-14 20:03:07",
+      "scheduled_publish_time": 1792039500
+    },
+    "error_message": null,
+    "comment_id": "4342904819260087_2175852783367334"
+  },
+  {
     "id": "sched_1791787652_678149",
     "created_at": "2026-10-12 13:47:32",
     "status": "completed",

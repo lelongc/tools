@@ -1053,6 +1053,394 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // ================= REMIX STUDIO IMPLEMENTATION =================
+  let currentRemixImagePath = "";
+  let currentRemixData = null;
+  let remixSelectedStyle = "rustic";
+  let remixIsFlipped = false;
+
+  // DOM Elements for Remix Studio
+  const remixDropZone = document.getElementById("remixDropZone");
+  const remixFileInput = document.getElementById("remixFileInput");
+  const remixDropPrompt = document.getElementById("remixDropPrompt");
+  const remixPreviewBox = document.getElementById("remixPreviewBox");
+  const remixPreviewImg = document.getElementById("remixPreviewImg");
+  const remixFileName = document.getElementById("remixFileName");
+  const btnRemoveRemixPhoto = document.getElementById("btnRemoveRemixPhoto");
+
+  const remixOriginalText = document.getElementById("remixOriginalText");
+  const remixImageEditPrompt = document.getElementById("remixImageEditPrompt");
+  const btnRunRemix = document.getElementById("btnRunRemix");
+  const remixStatusTag = document.getElementById("remixStatusTag");
+  const remixEmptyState = document.getElementById("remixEmptyState");
+  const remixResultContent = document.getElementById("remixResultContent");
+
+  const remixResultImg = document.getElementById("remixResultImg");
+  const remixImgTag = document.getElementById("remixImgTag");
+  const btnRemixFlip = document.getElementById("btnRemixFlip");
+  const btnRemixFilterVibrant = document.getElementById("btnRemixFilterVibrant");
+  const btnRemixFilterWarm = document.getElementById("btnRemixFilterWarm");
+  const btnRemixFilterDramatic = document.getElementById("btnRemixFilterDramatic");
+  const btnRemixApplyLogo = document.getElementById("btnRemixApplyLogo");
+  const remixNewPhotoInput = document.getElementById("remixNewPhotoInput");
+  const btnUploadNewRemixPhoto = document.getElementById("btnUploadNewRemixPhoto");
+
+  const outRemixAIPrompt = document.getElementById("outRemixAIPrompt");
+  const btnCopyAIPrompt = document.getElementById("btnCopyAIPrompt");
+
+  const outRemixTitle = document.getElementById("outRemixTitle");
+  const outRemixCaption = document.getElementById("outRemixCaption");
+  const remixHashtagsCloud = document.getElementById("remixHashtagsCloud");
+  const outRemixComment = document.getElementById("outRemixComment");
+  const btnTransferToPublish = document.getElementById("btnTransferToPublish");
+
+  // 1. Style Selection
+  const btnStyleOpts = document.querySelectorAll(".btn-style-opt");
+  if (btnStyleOpts) {
+    btnStyleOpts.forEach(btn => {
+      btn.addEventListener("click", () => {
+        btnStyleOpts.forEach(b => {
+          b.classList.remove("active");
+          b.style.borderColor = "rgba(148, 163, 184, 0.3)";
+          b.style.background = "rgba(30, 41, 59, 0.5)";
+          const titleEl = b.querySelector("b");
+          if (titleEl) titleEl.style.color = "#cbd5e1";
+        });
+        btn.classList.add("active");
+        btn.style.borderColor = "#fbbf24";
+        btn.style.background = "rgba(245, 158, 11, 0.2)";
+        const titleEl = btn.querySelector("b");
+        if (titleEl) titleEl.style.color = "#fff";
+        remixSelectedStyle = btn.getAttribute("data-style") || "rustic";
+      });
+    });
+  }
+
+  // 2. Drag & Drop Upload Original Photo in Remix Studio
+  if (remixDropZone && remixFileInput) {
+    remixDropZone.addEventListener("click", (e) => {
+      if (e.target.id !== "btnRemoveRemixPhoto") {
+        remixFileInput.click();
+      }
+    });
+
+    remixFileInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) handleRemixPhotoUpload(file);
+    });
+
+    remixDropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      remixDropZone.classList.add("drag-over");
+    });
+    remixDropZone.addEventListener("dragleave", () => {
+      remixDropZone.classList.remove("drag-over");
+    });
+    remixDropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      remixDropZone.classList.remove("drag-over");
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith("image/")) {
+        handleRemixPhotoUpload(file);
+      } else {
+        showToast("Vui lòng tải lên file hình ảnh (JPG, PNG, WEBP)!", "error");
+      }
+    });
+  }
+
+  async function handleRemixPhotoUpload(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    if (remixFileName) remixFileName.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+    if (remixDropPrompt) remixDropPrompt.style.display = "none";
+    if (remixPreviewBox) remixPreviewBox.style.display = "block";
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (remixPreviewImg) remixPreviewImg.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    try {
+      const res = await fetch("/api/upload-photo", {
+        method: "POST",
+        body: formData
+      });
+      const d = await res.json();
+      if (d.status === "success") {
+        currentRemixImagePath = d.saved_path;
+        if (remixResultImg) remixResultImg.src = d.url;
+        showToast(`Đã nhận ảnh gốc: ${file.name}`);
+      } else {
+        throw new Error(d.detail || "Không thể tải ảnh");
+      }
+    } catch (err) {
+      console.error("Lỗi tải ảnh remix:", err);
+      showToast("Lỗi tải ảnh: " + err.message, "error");
+    }
+  }
+
+  if (btnRemoveRemixPhoto) {
+    btnRemoveRemixPhoto.addEventListener("click", (e) => {
+      e.stopPropagation();
+      currentRemixImagePath = "";
+      if (remixFileInput) remixFileInput.value = "";
+      if (remixPreviewImg) remixPreviewImg.src = "";
+      if (remixPreviewBox) remixPreviewBox.style.display = "none";
+      if (remixDropPrompt) remixDropPrompt.style.display = "block";
+    });
+  }
+
+  // 3. AI Remix Execution
+  if (btnRunRemix) {
+    btnRunRemix.addEventListener("click", async () => {
+      const originalText = remixOriginalText ? remixOriginalText.value.trim() : "";
+      const editPrompt = remixImageEditPrompt ? remixImageEditPrompt.value.trim() : "";
+
+      if (!originalText && !currentRemixImagePath) {
+        showToast("Vui lòng nhập bài viết gốc hoặc tải lên 1 bức ảnh để AI xào nấu!", "error");
+        if (remixOriginalText) remixOriginalText.focus();
+        return;
+      }
+
+      btnRunRemix.disabled = true;
+      btnRunRemix.innerHTML = `<span>⏳ Gemini Flash đang xào nấu bài viết & soi ảnh...</span>`;
+      if (remixStatusTag) remixStatusTag.textContent = "AI đang xào nấu...";
+
+      try {
+        const payload = {
+          original_text: originalText,
+          original_image_path: currentRemixImagePath || "",
+          writing_style: remixSelectedStyle,
+          image_edit_request: editPrompt,
+          niche: "Sức khỏe"
+        };
+
+        const res = await fetch("/api/remix-post", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const d = await res.json();
+        if (!res.ok || d.status !== "success") {
+          throw new Error(d.detail || "Không thể xào nấu nội dung");
+        }
+
+        currentRemixData = d.data || {};
+
+        // Hiển thị kết quả
+        if (outRemixTitle) outRemixTitle.value = currentRemixData.new_title || "";
+        if (outRemixCaption) outRemixCaption.value = currentRemixData.new_caption || "";
+        if (outRemixComment) outRemixComment.value = currentRemixData.pinned_comment || "";
+        if (outRemixAIPrompt) outRemixAIPrompt.textContent = currentRemixData.ai_image_prompt || "Chưa có prompt ảnh.";
+
+        // Hashtags
+        if (remixHashtagsCloud) {
+          remixHashtagsCloud.innerHTML = "";
+          const tags = currentRemixData.hashtags || [];
+          tags.forEach(tag => {
+            const span = document.createElement("span");
+            span.className = "hashtag-tag";
+            span.textContent = tag.startsWith("#") ? tag : `#${tag}`;
+            remixHashtagsCloud.appendChild(span);
+          });
+        }
+
+        // Tự động lật ảnh và dán logo nhẹ nếu có ảnh gốc để phá trùng lặp
+        if (currentRemixImagePath) {
+          await transformRemixImage({ flip_horizontal: true, apply_logo: true });
+        }
+
+        if (remixEmptyState) remixEmptyState.style.display = "none";
+        if (remixResultContent) remixResultContent.style.display = "block";
+        if (remixStatusTag) remixStatusTag.textContent = "Đã xào nấu xong 100%";
+
+        showToast("Đã xào nấu thành công bài viết mới độc quyền!");
+      } catch (err) {
+        console.error("Lỗi xào nấu bài viết:", err);
+        showToast("Lỗi: " + err.message, "error");
+        if (remixStatusTag) remixStatusTag.textContent = "Lỗi xử lý";
+      } finally {
+        btnRunRemix.disabled = false;
+        btnRunRemix.innerHTML = `<span>✨ AI XÀO NẤU BÀI VIẾT & BIẾN HÓA ẢNH</span>`;
+      }
+    });
+  }
+
+  // 4. Image Transformations (Flip, Filters, Logo)
+  async function transformRemixImage(options = {}) {
+    if (!currentRemixImagePath) return;
+    try {
+      const res = await fetch("/api/transform-remix-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image_path: currentRemixImagePath,
+          flip_horizontal: options.flip_horizontal || false,
+          filter_type: options.filter_type || "none",
+          apply_logo: options.apply_logo !== undefined ? options.apply_logo : false,
+          logo_type: "badge",
+          logo_position: "bottom-right",
+          logo_scale: 18.0,
+          logo_opacity: 0.9
+        })
+      });
+      const d = await res.json();
+      if (d.status === "success") {
+        currentRemixImagePath = d.saved_path;
+        if (remixResultImg) remixResultImg.src = `${d.url}?t=${Date.now()}`;
+        if (remixImgTag) remixImgTag.textContent = "Đã biến hóa (Khử AI & Trùng Lặp)";
+      }
+    } catch (e) {
+      console.warn("Lỗi biến đổi ảnh remix:", e);
+    }
+  }
+
+  if (btnRemixFlip) {
+    btnRemixFlip.addEventListener("click", async () => {
+      remixIsFlipped = !remixIsFlipped;
+      await transformRemixImage({ flip_horizontal: true });
+      showToast("Đã lật gương ảnh để phá mã quét AI của Facebook!");
+    });
+  }
+  if (btnRemixFilterVibrant) {
+    btnRemixFilterVibrant.addEventListener("click", async () => {
+      await transformRemixImage({ filter_type: "vibrant" });
+      showToast("Đã áp dụng tông màu tươi tắn!");
+    });
+  }
+  if (btnRemixFilterWarm) {
+    btnRemixFilterWarm.addEventListener("click", async () => {
+      await transformRemixImage({ filter_type: "warm" });
+      showToast("Đã áp dụng tông màu ấm áp!");
+    });
+  }
+  if (btnRemixFilterDramatic) {
+    btnRemixFilterDramatic.addEventListener("click", async () => {
+      await transformRemixImage({ filter_type: "dramatic" });
+      showToast("Đã tăng độ tương phản và sắc nét!");
+    });
+  }
+  if (btnRemixApplyLogo) {
+    btnRemixApplyLogo.addEventListener("click", async () => {
+      await transformRemixImage({ apply_logo: true });
+      showToast("Đã dán logo thương hiệu lên ảnh!");
+    });
+  }
+
+  // Tải ảnh mới từ AI ngoài (Midjourney/Flux) nạp vào
+  if (btnUploadNewRemixPhoto && remixNewPhotoInput) {
+    btnUploadNewRemixPhoto.addEventListener("click", () => {
+      remixNewPhotoInput.click();
+    });
+    remixNewPhotoInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append("file", file);
+      try {
+        const res = await fetch("/api/upload-photo", { method: "POST", body: formData });
+        const d = await res.json();
+        if (d.status === "success") {
+          currentRemixImagePath = d.saved_path;
+          if (remixResultImg) remixResultImg.src = d.url;
+          if (remixImgTag) remixImgTag.textContent = "Ảnh mới sinh từ AI";
+          showToast("Đã nạp ảnh mới từ AI thành công!");
+        }
+      } catch (err) {
+        showToast("Lỗi nạp ảnh: " + err.message, "error");
+      }
+    });
+  }
+
+  // Copy AI Prompt
+  if (btnCopyAIPrompt) {
+    btnCopyAIPrompt.addEventListener("click", () => {
+      const promptText = outRemixAIPrompt ? outRemixAIPrompt.textContent.trim() : "";
+      if (!promptText) return;
+      navigator.clipboard.writeText(promptText).then(() => {
+        showToast("Đã sao chép Prompt tiếng Anh vào bộ nhớ đệm!");
+      }).catch(err => {
+        showToast("Không thể sao chép: " + err, "error");
+      });
+    });
+  }
+
+  // 5. VIP Action: Chuyển toàn bộ sang Tab Đăng Bài Viết Ảnh
+  if (btnTransferToPublish) {
+    btnTransferToPublish.addEventListener("click", () => {
+      const title = outRemixTitle ? outRemixTitle.value.trim() : "";
+      const caption = outRemixCaption ? outRemixCaption.value.trim() : "";
+      const comment = outRemixComment ? outRemixComment.value.trim() : "";
+
+      if (!caption) {
+        showToast("Chưa có nội dung xào nấu để chuyển sang đăng bài!", "error");
+        return;
+      }
+
+      // Đẩy dữ liệu sang Photo Studio
+      if (outPhotoTitle) outPhotoTitle.value = title;
+      if (outPhotoCaption) outPhotoCaption.value = caption;
+      if (outPhotoComment) outPhotoComment.value = comment;
+
+      // Hashtags
+      if (photoHashtagsCloud && remixHashtagsCloud) {
+        photoHashtagsCloud.innerHTML = "";
+        Array.from(remixHashtagsCloud.querySelectorAll(".hashtag-tag")).forEach(t => {
+          const clone = t.cloneNode(true);
+          photoHashtagsCloud.appendChild(clone);
+        });
+      }
+
+      // Ảnh
+      if (currentRemixImagePath) {
+        currentPhotoPath = currentRemixImagePath;
+        if (photoPreviewImg) photoPreviewImg.src = remixResultImg.src;
+        if (photoFileName) photoFileName.textContent = "remix_photo.jpg";
+        if (photoDropPrompt) photoDropPrompt.style.display = "none";
+        if (photoPreviewBox) photoPreviewBox.style.display = "block";
+        if (photoAntiAIPanel) photoAntiAIPanel.style.display = "block";
+
+        // Load vào canvas Photo Studio
+        sourcePhotoObj = new Image();
+        sourcePhotoObj.onload = () => {
+          renderPhotoAntiAICanvas();
+        };
+        sourcePhotoObj.src = remixResultImg.src;
+      }
+
+      // Hiện khung kết quả ở Photo Studio
+      if (photoEmptyState) photoEmptyState.style.display = "none";
+      if (photoResultContent) photoResultContent.style.display = "block";
+
+      // Chuyển Tab sang Studio -> Bật view Đăng Ảnh
+      tabButtons.forEach(b => {
+        if (b.getAttribute("data-tab") === "studio") {
+          b.classList.add("active");
+        } else {
+          b.classList.remove("active");
+        }
+      });
+      tabPanes.forEach(p => {
+        if (p.id === "tab-studio") {
+          p.classList.add("active");
+        } else {
+          p.classList.remove("active");
+        }
+      });
+
+      if (btnTypePhoto) btnTypePhoto.classList.add("active");
+      if (btnTypeReels) btnTypeReels.classList.remove("active");
+      if (reelsStudioView) reelsStudioView.style.display = "none";
+      if (photoStudioView) photoStudioView.style.display = "block";
+
+      showToast("Đã chuyển toàn bộ nội dung xào nấu sang Tab Đăng Ảnh!");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+
   async function loadProducts() {
     try {
       const res = await fetch("/api/products");

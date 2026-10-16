@@ -44,6 +44,16 @@
         <span class="tab-icon">🎬</span>
         <span>Studio Tạo Bài Đăng</span>
       </button>
+      <a href="/news" target="_blank" class="tab-btn" style="text-decoration: none; border-color: rgba(245, 158, 11, 0.4); background: rgba(245, 158, 11, 0.12); color: #fbbf24;">
+        <span class="tab-icon">📰</span>
+        <span>Studio Tin Tức & Google Flow AI</span>
+        <span class="badge-mini" style="background: rgba(245, 158, 11, 0.25); color: #fbbf24; font-size: 10px; padding: 2px 7px; border-radius: 8px; margin-left: 6px; border: 1px solid rgba(245, 158, 11, 0.5); font-weight: 700;">Mới ↗</span>
+      </a>
+      <button class="tab-btn" data-tab="remix" id="tabBtnRemix">
+        <span class="tab-icon">🍳</span>
+        <span>Xào Nấu AI</span>
+        <span class="badge-mini" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; font-size: 10px; padding: 2px 7px; border-radius: 8px; margin-left: 6px; border: 1px solid rgba(245, 158, 11, 0.4); font-weight: 700;">Mới</span>
+      </button>
       <button class="tab-btn" data-tab="products">
         <span class="tab-icon">🛒</span>
         <span>Kho Link Shopee (<span id="prodCountBadge">0</span>)</span>
@@ -626,6 +636,174 @@ Tắm sau 10h đêm là cấm kỵ nha bà con!"></textarea>
                 </div>
 
                 <div class="publish-status-box" id="photoPublishResultBox" style="display: none;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: XÀO NẤU BÀI VIẾT & BIẾN HÓA ẢNH AI ================= -->
+      <section id="tab-remix" class="tab-pane">
+        <div class="studio-grid">
+          <!-- Cột Trái: Bài Viết Gốc & Yêu Cầu Xào Nấu -->
+          <div class="panel input-panel">
+            <div class="panel-header">
+              <div>
+                <h2>1. Bài Viết Gốc & Yêu Cầu Sửa</h2>
+                <p class="subtitle" style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">Lấy bài viết và ảnh của đối thủ để AI "xào nấu" thành bài độc quyền mới 100%</p>
+              </div>
+              <span class="badge" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); font-size: 11px; padding: 2px 8px; border-radius: 8px;">Remix AI</span>
+            </div>
+
+            <!-- Tải ảnh bài gốc -->
+            <div class="form-group">
+              <label>Ảnh Gốc Của Bài Viết (Tùy chọn):</label>
+              <div class="drop-zone" id="remixDropZone">
+                <input type="file" id="remixFileInput" accept="image/png,image/jpeg,image/webp,image/*" hidden>
+                <div class="drop-zone-prompt" id="remixDropPrompt">
+                  <span class="upload-icon">🖼️</span>
+                  <p>Kéo thả ảnh của bài viết gốc vào đây hoặc <span class="highlight">Bấm để chọn file ảnh</span></p>
+                  <small>AI sẽ "soi" ảnh gốc để viết prompt sửa ảnh và biến đổi tránh trùng lặp</small>
+                </div>
+                <div class="photo-preview-box" id="remixPreviewBox" style="display: none;">
+                  <img id="remixPreviewImg" src="" alt="Xem trước ảnh gốc" style="max-height: 220px; object-fit: contain;">
+                  <div class="video-meta">
+                    <span id="remixFileName">photo.png</span>
+                    <button type="button" class="btn-xs btn-danger" id="btnRemoveRemixPhoto">Bỏ ảnh này</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Nội dung bài viết gốc -->
+            <div class="form-group">
+              <label for="remixOriginalText">Nội Dung / Caption Bài Viết Gốc (Copy & Paste):</label>
+              <textarea id="remixOriginalText" class="form-control" rows="5" placeholder="Dán nội dung bài viết gốc của đối thủ hoặc bài hot trend bạn copy từ Facebook, Threads, Báo chí vào đây..."></textarea>
+            </div>
+
+            <!-- Phong cách viết muốn xào nấu -->
+            <div class="form-group">
+              <label>Phong Cách Viết Mới:</label>
+              <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;" id="remixStyleGroup">
+                <button type="button" class="btn-style-opt active" data-style="rustic" style="padding: 8px 10px; font-size: 12px; border-radius: 8px; border: 1px solid #fbbf24; background: rgba(245, 158, 11, 0.2); color: #fff; cursor: pointer; text-align: left;">
+                  <b>🌾 Mộc Mạc, Gần Gũi</b>
+                  <span style="display:block; font-size: 10.5px; color: #cbd5e1; margin-top: 2px;">"Bà con ơi", chân thành như người nhà</span>
+                </button>
+                <button type="button" class="btn-style-opt" data-style="humorous" style="padding: 8px 10px; font-size: 12px; border-radius: 8px; border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(30, 41, 59, 0.5); color: #cbd5e1; cursor: pointer; text-align: left;">
+                  <b>😄 Hài Hước, Giải Trí</b>
+                  <span style="display:block; font-size: 10.5px; color: #94a3b8; margin-top: 2px;">Dí dỏm, châm biếm, hút bão comment</span>
+                </button>
+                <button type="button" class="btn-style-opt" data-style="expert" style="padding: 8px 10px; font-size: 12px; border-radius: 8px; border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(30, 41, 59, 0.5); color: #cbd5e1; cursor: pointer; text-align: left;">
+                  <b>🩺 Chuyên Gia Y Khoa</b>
+                  <span style="display:block; font-size: 10.5px; color: #94a3b8; margin-top: 2px;">Mạch lạc, dẫn chứng khoa học tin cậy</span>
+                </button>
+                <button type="button" class="btn-style-opt" data-style="warning" style="padding: 8px 10px; font-size: 12px; border-radius: 8px; border: 1px solid rgba(148, 163, 184, 0.3); background: rgba(30, 41, 59, 0.5); color: #cbd5e1; cursor: pointer; text-align: left;">
+                  <b>🚨 Giật Tít Cảnh Báo</b>
+                  <span style="display:block; font-size: 10.5px; color: #94a3b8; margin-top: 2px;">Đánh trúng nỗi sợ & thói quen sai lầm</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Yêu cầu sửa đổi chi tiết ảnh -->
+            <div class="form-group">
+              <label for="remixImageEditPrompt">Muốn Sửa Chi Tiết Gì Trong Ảnh? (Tùy chọn):</label>
+              <input type="text" id="remixImageEditPrompt" class="form-control" placeholder="Ví dụ: Đổi bối cảnh sang phòng khách, thay đổi màu sắc, bỏ logo cũ...">
+              <small class="hint">Gemini Vision sẽ phân tích ảnh và sinh câu lệnh Prompt tiếng Anh đỉnh cao để nạp vào các AI vẽ ảnh (Midjourney, Flux, Leonardo...).</small>
+            </div>
+
+            <!-- Nút chạy xào nấu -->
+            <button type="button" class="btn btn-warning btn-block btn-lg" id="btnRunRemix" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; font-weight: 800; box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);">
+              <span class="btn-icon">✨</span>
+              <span>AI XÀO NẤU BÀI VIẾT & BIẾN HÓA ẢNH</span>
+            </button>
+          </div>
+
+          <!-- Cột Phải: Thành Phẩm Xào Nấu & Đẩy Lên Facebook -->
+          <div class="panel output-panel">
+            <div class="panel-header">
+              <div>
+                <h2>2. Thành Phẩm Mới & Đẩy Lên Facebook</h2>
+                <span class="tag-hint" id="remixStatusTag">Đang chờ nội dung</span>
+              </div>
+            </div>
+
+            <!-- Trạng thái trống -->
+            <div class="empty-state" id="remixEmptyState">
+              <div class="empty-icon">🍳</div>
+              <h3>Chưa Có Bài Viết Nào Được Xào Nấu</h3>
+              <p>Dán bài viết hoặc tải ảnh của đối thủ ở cột bên trái và bấm <b>"AI XÀO NẤU BÀI VIẾT & BIẾN HÓA ẢNH"</b> để tạo nội dung mới 100%.</p>
+            </div>
+
+            <!-- Kết quả xào nấu -->
+            <div class="result-content" id="remixResultContent" style="display: none;">
+              <!-- Khung 1: Biến Hóa Ảnh Độc Quyền & Prompt AI -->
+              <div class="remix-box-section" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                  <h3 style="font-size: 13.5px; font-weight: 700; color: #38bdf8; margin: 0;">🖼️ Ảnh Biến Hóa & Phá Trùng Lặp Meta</h3>
+                  <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 11px; padding: 2px 8px; border-radius: 8px;">Đã Khử AI Cũ</span>
+                </div>
+
+                <div style="display: flex; gap: 14px; align-items: flex-start; margin-bottom: 12px;">
+                  <div style="width: 140px; flex-shrink: 0; text-align: center;">
+                    <img id="remixResultImg" src="" alt="Ảnh thành phẩm" style="width: 100%; height: 140px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                    <small style="display: block; font-size: 10.5px; color: #94a3b8; margin-top: 4px;" id="remixImgTag">Ảnh đã xử lý</small>
+                  </div>
+                  <div style="flex: 1;">
+                    <label style="font-size: 11.5px; color: #cbd5e1; font-weight: 600; margin-bottom: 4px; display: block;">Công Cụ Biến Đổi Ảnh Trực Tiếp:</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;">
+                      <button type="button" class="btn btn-sm btn-secondary" id="btnRemixFlip" style="font-size: 11.5px; padding: 5px 9px;">🔄 Lật Gương (Flip)</button>
+                      <button type="button" class="btn btn-sm btn-secondary" id="btnRemixFilterVibrant" style="font-size: 11.5px; padding: 5px 9px;">🎨 Tươi Tắn</button>
+                      <button type="button" class="btn btn-sm btn-secondary" id="btnRemixFilterWarm" style="font-size: 11.5px; padding: 5px 9px;">☕ Ấm Áp</button>
+                      <button type="button" class="btn btn-sm btn-secondary" id="btnRemixFilterDramatic" style="font-size: 11.5px; padding: 5px 9px;">⚡ Sắc Nét</button>
+                      <button type="button" class="btn btn-sm btn-secondary" id="btnRemixApplyLogo" style="font-size: 11.5px; padding: 5px 9px;">🛡️ Đóng Dấu Logo</button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <input type="file" id="remixNewPhotoInput" accept="image/*" hidden>
+                      <button type="button" class="btn-xs btn-outline" id="btnUploadNewRemixPhoto" style="border: 1px dashed #38bdf8; color: #38bdf8; background: transparent; padding: 4px 8px; border-radius: 6px; cursor: pointer;">
+                        📁 Nạp ảnh mới vừa sinh từ AI khác...
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Hộp Prompt sinh ảnh AI -->
+                <div class="ai-prompt-box" style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 8px; padding: 10px; margin-top: 8px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                    <span style="font-size: 11px; color: #fbbf24; font-weight: 700;">💡 Prompt Sửa/Sinh Ảnh AI (Dán vào Midjourney/Flux/Leonardo):</span>
+                    <button type="button" class="btn-xs btn-warning" id="btnCopyAIPrompt" style="padding: 2px 8px; font-size: 11px;">📋 Copy Prompt</button>
+                  </div>
+                  <p id="outRemixAIPrompt" style="font-family: monospace; font-size: 11px; color: #e2e8f0; margin: 0; line-height: 1.4; word-break: break-word; user-select: all;"></p>
+                </div>
+              </div>
+
+              <!-- Khung 2: Nội Dung Bài Viết Mới -->
+              <div class="form-group">
+                <label for="outRemixTitle">Tiêu Đề Mới (Đã giật tít, không trùng bài cũ):</label>
+                <input type="text" id="outRemixTitle" class="form-control bold-input font-title">
+              </div>
+
+              <div class="form-group">
+                <label for="outRemixCaption">Nội Dung Bài Viết Mới (Caption chuẩn mộc mạc, không icon):</label>
+                <textarea id="outRemixCaption" class="form-control font-mono" rows="6"></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Hashtags Đề Xuất:</label>
+                <div class="hashtags-cloud" id="remixHashtagsCloud"></div>
+              </div>
+
+              <div class="form-group">
+                <label for="outRemixComment">Bình Luận Ghim Shopee Affiliate (Đã tự động khớp):</label>
+                <textarea id="outRemixComment" class="form-control" rows="4"></textarea>
+              </div>
+
+              <!-- Nút chuyển sang đăng bài -->
+              <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                <button type="button" class="btn btn-success btn-block btn-lg" id="btnTransferToPublish" style="background: linear-gradient(135deg, #10b981, #059669); font-weight: 800; font-size: 1rem; padding: 14px; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);">
+                  <span>🚀</span>
+                  <span>CHUYỂN SANG ĐĂNG BÀI FACEBOOK NGAY / LÊN LỊCH</span>
+                </button>
+                <small style="display: block; text-align: center; color: #94a3b8; font-size: 11.5px; margin-top: 6px;">Toàn bộ ảnh đã biến hóa và nội dung xào nấu sẽ được tự động điền sang Tab Đăng Ảnh để bạn kiểm tra lần cuối rồi phát sóng.</small>
               </div>
             </div>
           </div>

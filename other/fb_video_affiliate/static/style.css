@@ -2025,5 +2025,48 @@ input:checked + .slider:before {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
+/* ==========================================================================
+   Remix Studio (Xao Nau AI) Component Styles
+   ========================================================================== */
+.btn-style-opt {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: inherit;
+  user-select: none;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(30, 41, 59, 0.5);
+  color: #cbd5e1;
+}
+
+.btn-style-opt:hover {
+  border-color: rgba(245, 158, 11, 0.6) !important;
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: #fff !important;
+  transform: translateY(-1px);
+}
+
+.btn-style-opt.active {
+  border-color: #fbbf24 !important;
+  background: rgba(245, 158, 11, 0.25) !important;
+  color: #fff !important;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
+}
+
+.remix-box-section {
+  transition: var(--transition);
+}
+
+.remix-box-section:hover {
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.15);
+}
+
+.ai-prompt-box {
+  transition: var(--transition);
+}
+
+.ai-prompt-box:hover {
+  border-color: rgba(245, 158, 11, 0.4);
+}
+
 
 
