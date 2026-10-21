@@ -99,6 +99,14 @@ def serve_index():
         return FileResponse(index_file)
     return {"message": "ShortsRevoice AI Studio API is running."}
 
+@app.get("/style.css")
+def serve_root_style():
+    return FileResponse(STATIC_DIR / "style.css", media_type="text/css")
+
+@app.get("/app.js")
+def serve_root_app_js():
+    return FileResponse(STATIC_DIR / "app.js", media_type="application/javascript")
+
 @app.get("/api/config")
 def get_config():
     return load_config()
@@ -415,4 +423,4 @@ if __name__ == "__main__":
     import uvicorn
     cfg = load_config()
     port = int(cfg.get("server_port", 8008))
-    uvicorn.run("app:app", host="127.0.0.1", port=port, reload=True)
+    uvicorn.run(app, host="127.0.0.1", port=port)

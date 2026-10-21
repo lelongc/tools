@@ -257,16 +257,16 @@ def render_mixed_video(
     num_inputs = len(mix_inputs)
     if num_inputs > 1:
         filter_complex.append(f"{''.join(mix_inputs)}amix=inputs={num_inputs}:duration=first:dropout_transition=2[aout]")
-        map_audio = ["[aout]"]
+        map_audio = "[aout]"
     elif num_inputs == 1:
-        map_audio = [mix_inputs[0].strip("[]")]
+        map_audio = mix_inputs[0]
     else:
-        map_audio = []
+        map_audio = None
 
     filter_str = ";".join(filter_complex)
     cmd = ["ffmpeg", "-y"] + inputs + ["-filter_complex", filter_str, "-map", "0:v"]
     if map_audio:
-        cmd.extend(["-map", f"[{map_audio[0]}]"])
+        cmd.extend(["-map", map_audio])
     cmd.extend(["-c:v", "copy", "-c:a", "aac", "-b:a", "192k", output_path])
     
     run_ffmpeg(cmd)
