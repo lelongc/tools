@@ -1,0 +1,23 @@
+{
+  "gemini_api_key": "",
+  "default_model": "gemini-3.5-flash-lite",
+  "available_models": [
+    {
+      "id": "gemini-3.5-flash-lite",
+      "name": "Gemini 3.5 Flash-Lite (Tốc độ cao, tối ưu phân tích âm thanh & kịch bản)"
+    },
+    {
+      "id": "gemini-3.1-flash-lite",
+      "name": "Gemini 3.1 Flash Lite (Ổn định, hạn mức lớn)"
+    }
+  ],
+  "capcut_draft_path": "D:/YT/vid/CapCut Drafts",
+  "capcut_meta_path": "C:/Users/Acer/AppData/Local/CapCut/User Data/Projects/com.lveditor.draft/root_meta_info.json",
+  "default_voice": "vi-VN-HoaiMyNeural",
+  "available_voices": [
+    { "id": "vi-VN-HoaiMyNeural", "name": "Hoài My (Nữ - Truyền cảm, tự nhiên)" },
+    { "id": "vi-VN-NamMinhNeural", "name": "Nam Minh (Nam - Trầm ấm, dõng dạc)" }
+  ],
+  "default_niche": "cooking",
+  "server_port": 8008
+}

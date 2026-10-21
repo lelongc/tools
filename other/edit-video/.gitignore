@@ -1,0 +1,23 @@
+# Sensitive configuration & API keys
+config.json
+.env
+*.env
+
+# Uploads & User Media files
+uploads/
+*.mp4
+*.mkv
+*.mov
+*.webm
+
+# Generated Outputs (Audio, Rendered Videos, Batches, SRTs)
+outputs/
+*.mp3
+*.wav
+*.srt
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.log

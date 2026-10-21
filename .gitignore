@@ -8,6 +8,10 @@ other/fb_video_affiliate/config.json
 other/fb_video_affiliate/.env
 other/fb_video_affiliate/data/history.json
 other/fb_video_affiliate/uploads/
+other/edit-video/config.json
+other/edit-video/.env
+other/edit-video/uploads/
+other/edit-video/outputs/
 
 # Python Virtual Environments & Packages
 .venv/

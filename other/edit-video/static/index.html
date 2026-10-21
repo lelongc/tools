@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShortsRevoice AI Studio - Xào Nấu & Lồng Tiếng Video Ngắn Đa Năng</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=20261021_1">
+</head>
+<body>
+  <div class="app-wrapper">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-badge">🎬 REVOICE</div>
+        <div class="brand-titles">
+          <h1>ShortsRevoice <span>AI Studio</span></h1>
+          <p>Xào Nấu Kịch Bản, Lồng Tiếng Khớp Giây & Tích Hợp CapCut PC</p>
+        </div>
+      </div>
+      
+      <div class="header-actions">
+        <div class="badge status-badge" id="aiStatusBadge">
+          <span class="dot green"></span>
+          <span id="aiModelText">Gemini 3.5 Flash-Lite</span>
+        </div>
+        <button type="button" class="btn-icon" id="btnOpenSettings" title="Cài đặt hệ thống & API Key">
+          ⚙️
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="studio-grid">
+      <!-- CỘT TRÁI: VIDEO & ĐIỀU KHIỂN NGUỒN -->
+      <section class="panel video-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="panel-num">1</span>
+            <h2>Nạp Video Gốc & Thiết Lập</h2>
+          </div>
+          <span class="badge info-badge" id="videoDurationBadge">00:00</span>
+        </div>
+
+        <!-- Dropzone / Video Player -->
+        <div class="video-container" id="videoContainer">
+          <div class="dropzone" id="dropzone">
+            <div class="dropzone-content">
+              <div class="drop-icon">📹</div>
+              <h3>Kéo thả video vào đây</h3>
+              <p>Hỗ trợ MP4, WebM, MOV (video 15s - 3 phút)</p>
+              <label for="videoFileInput" class="btn btn-primary btn-sm">
+                <span>Chọn file từ máy</span>
+                <input type="file" id="videoFileInput" accept="video/mp4,video/webm,video/quicktime,video/mkv" style="display: none;">
+              </label>
+            </div>
+          </div>
+          
+          <video id="mainVideoPlayer" class="video-player" playsinline preload="metadata" style="display: none;"></video>
+        </div>
+
+        <!-- Video Time & Playback Controls -->
+        <div class="video-controls-bar" id="videoControlsBar" style="display: none;">
+          <button type="button" class="btn-play-pause" id="btnPlayPause" title="Phát / Tạm dừng (Space)">▶</button>
+          <div class="scrubber-wrap">
+            <input type="range" id="videoTimelineScrubber" min="0" max="100" value="0" step="0.1" class="scrubber">
+            <div class="time-display">
+              <span id="currentTimeDisplay">00:00.0</span> / <span id="totalTimeDisplay">00:00.0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cài đặt Thể loại & Phong cách Xào Nấu -->
+        <div class="setup-card">
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="nicheSelect">🍳 Thể loại Video:</label>
+              <select id="nicheSelect" class="form-control">
+                <option value="cooking" selected>🍳 Ẩm thực / Nấu ăn (Mô tả nguyên liệu, vị giác)</option>
+                <option value="news">📰 Tin tức / Sự kiện nóng (Dồn dập, giật gân)</option>
+                <option value="tips">💡 Mẹo vặt / Sức khỏe (Vấn đề & Giải pháp)</option>
+                <option value="review">📦 Review sản phẩm / Mở hộp (Trải nghiệm thực tế)</option>
+                <option value="story">🎭 Kể chuyện cuốn hút (Tò mò, kịch tính)</option>
+              </select>
+            </div>
+            
+            <div class="form-group flex-1">
+              <label for="styleSelect">✨ Phong cách Kịch Bản:</label>
+              <select id="styleSelect" class="form-control">
+                <option value="natural" selected>🌿 Tự nhiên, dân dã, đời thường</option>
+                <option value="funny">😂 Hài hước, duyên dáng, bắt trend</option>
+                <option value="dramatic">🔥 Kịch tính, nhấn nhá, kích thích tò mò</option>
+                <option value="concise">⚡ Ngắn gọn, súc tích, đi thẳng vào việc</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Nút kích hoạt AI -->
+          <button type="button" class="btn btn-magic btn-block" id="btnAnalyzeAI" disabled>
+            <span class="btn-icon-spin">🪄</span>
+            <span id="btnAnalyzeText">1-Click: Gemini Nghe Audio & Xào Nấu Kịch Bản</span>
+          </button>
+          <p class="hint-text">Gemini Multimodal Audio sẽ nghe trực tiếp tiếng video, bóc tách từng giây và tự xào nấu kịch bản mới.</p>
+        </div>
+
+        <!-- Điều chỉnh Âm Lượng Nền -->
+        <div class="audio-mixer-card">
+          <h4>🎚️ Hòa Âm Nền & Lồng Tiếng</h4>
+          <div class="mixer-slider-group">
+            <div class="slider-label">
+              <span>Âm thanh video gốc (Tiếng dao thớt, xèo xèo, nhạc nền cũ):</span>
+              <span class="val" id="origVolVal">15%</span>
+            </div>
+            <input type="range" id="originalVolumeSlider" min="0" max="100" value="15" class="slider-vol">
+            <div class="slider-ticks">
+              <span>0% (Tắt hẳn)</span>
+              <span>15% (Chuẩn lồng tiếng)</span>
+              <span>100% (Gốc)</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CỘT PHẢI: KỊCH BẢN & LỒNG TIẾNG THEO GIÂY -->
+      <section class="panel script-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="panel-num">2</span>
+            <h2>Kịch Bản Xào Nấu & Lồng Tiếng Khớp Giây</h2>
+          </div>
+          <div class="script-counts" id="scriptCountsBadge">
+            <span id="totalSegmentsCount">0 câu</span>
+          </div>
+        </div>
+
+        <!-- Tiêu đề & Tóm tắt Video -->
+        <div class="video-meta-box" id="videoMetaBox" style="display: none;">
+          <div class="meta-title-row">
+            <span class="tag-label">Tiêu Đề Đề Xuất:</span>
+            <input type="text" id="suggestedTitleInput" class="input-title-edit" placeholder="Tiêu đề video cuốn hút...">
+          </div>
+          <p class="meta-summary" id="suggestedSummaryText"></p>
+        </div>
+
+        <!-- Tabs Chế Độ Lồng Tiếng -->
+        <div class="voice-mode-tabs">
+          <button type="button" class="voice-tab active" data-mode="tts" id="tabModeTTS">
+            <span class="tab-icon">🤖</span>
+            <span>Giọng AI Free (Edge-TTS)</span>
+          </button>
+          <button type="button" class="voice-tab" data-mode="mic" id="tabModeMic">
+            <span class="tab-icon">🎙️</span>
+            <span>Tự Thu Âm Từng Câu (Studio Mic)</span>
+          </button>
+          <button type="button" class="voice-tab" data-mode="full" id="tabModeFull">
+            <span class="tab-icon">📂</span>
+            <span>Nạp File Thu Âm Cả Bài</span>
+          </button>
+        </div>
+
+        <!-- Voice Mode Sub-bars -->
+        <!-- Sub-bar TTS -->
+        <div class="voice-sub-bar" id="subBarTTS">
+          <div class="tts-controls-inline">
+            <label for="voiceSelect">Giọng đọc:</label>
+            <select id="voiceSelect" class="form-control select-sm">
+              <option value="vi-VN-HoaiMyNeural" selected>Hoài My (Nữ - Truyền cảm, tự nhiên)</option>
+              <option value="vi-VN-NamMinhNeural">Nam Minh (Nam - Trầm ấm, dõng dạc)</option>
+            </select>
+            <button type="button" class="btn btn-outline btn-sm" id="btnGenerateAllTTS">
+              ⚡ Sinh Toàn Bộ Giọng Đọc
+            </button>
+          </div>
+        </div>
+
+        <!-- Sub-bar Full Recording -->
+        <div class="voice-sub-bar" id="subBarFull" style="display: none;">
+          <div class="full-rec-box">
+            <span>Tải file ghi âm bạn đọc 1 lèo từ điện thoại lên:</span>
+            <label for="fullAudioFileInput" class="btn btn-outline btn-sm">
+              <span>Chọn file âm thanh (.mp3, .m4a, .wav)</span>
+              <input type="file" id="fullAudioFileInput" accept="audio/*" style="display: none;">
+            </label>
+            <button type="button" class="btn btn-primary btn-sm" id="btnProcessFullAudio" disabled>
+              ✂️ Cắt Khoảng Lặng & Tự Động Ép Khớp
+            </button>
+          </div>
+        </div>
+
+        <!-- Sub-bar Mic Hint -->
+        <div class="voice-sub-bar" id="subBarMic" style="display: none;">
+          <div class="mic-hint-box">
+            <span>💡 <strong>Mẹo thu âm:</strong> Bấm nút 🎙️ ở từng câu dưới đây để thu. Hệ thống sẽ <strong>tự động cắt khoảng lặng</strong> và <strong>co giãn nhịp đọc</strong> để khớp chuẩn xác số giây của cảnh!</span>
+          </div>
+        </div>
+
+        <!-- Danh sách Segments Timeline -->
+        <div class="segments-container" id="segmentsContainer">
+          <div class="empty-state" id="emptySegmentsState">
+            <div class="empty-icon">📝</div>
+            <p>Chưa có kịch bản. Hãy nạp video và bấm <strong>"1-Click: Gemini Nghe Audio & Xào Nấu"</strong> ở cột bên trái!</p>
+          </div>
+        </div>
+
+        <!-- Action / Export Footer -->
+        <div class="export-footer" id="exportFooter" style="display: none;">
+          <div class="export-actions-row">
+            <button type="button" class="btn btn-capcut" id="btnExportCapCut">
+              <span class="btn-icon">🎬</span>
+              <span>Đẩy Thẳng Vào CapCut PC (Tạo Draft)</span>
+            </button>
+            <button type="button" class="btn btn-render" id="btnRenderVideo">
+              <span class="btn-icon">⚡</span>
+              <span>Render Video MP4 Ngay</span>
+            </button>
+            <button type="button" class="btn btn-outline" id="btnDownloadSRT">
+              <span>📥 Tải File SRT & Script</span>
+            </button>
+          </div>
+          
+          <div class="export-status-box" id="exportStatusBox" style="display: none;">
+            <div class="export-msg" id="exportMsg">Đang xử lý...</div>
+            <div class="export-links" id="exportLinks"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal Cài Đặt -->
+    <div class="modal-backdrop" id="settingsModal" style="display: none;">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3>⚙️ Cài Đặt Hệ Thống</h3>
+          <button type="button" class="modal-close" id="btnCloseSettings">✕</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="cfgGeminiKey">Google Gemini API Key:</label>
+            <input type="password" id="cfgGeminiKey" class="form-control" placeholder="AQ.Ab8RN6...">
+            <span class="field-hint">Dùng model Gemini 3.5 Flash-Lite miễn phí xử lý âm thanh & kịch bản.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="cfgCapCutDraft">Đường dẫn thư mục CapCut Drafts:</label>
+            <input type="text" id="cfgCapCutDraft" class="form-control" value="D:/YT/vid/CapCut Drafts">
+            <span class="field-hint">Dự án sẽ được ghi trực tiếp vào đây để CapCut PC mở được ngay.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="cfgModel">Model Gemini Mặc Định:</label>
+            <select id="cfgModel" class="form-control">
+              <option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite (Tối ưu âm thanh & kịch bản)</option>
+              <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash Lite</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" id="btnCancelSettings">Hủy</button>
+          <button type="button" class="btn btn-primary" id="btnSaveSettings">Lưu Cài Đặt</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast-container" id="toastContainer"></div>
+  </div>
+
+  <script src="app.js?v=20261021_1"></script>
+</body>
+</html>
