@@ -1,0 +1,7 @@
+# Private keys, master seeds, and credentials
+wallets_master.json
+*_master.json
+.env
+*.env
+__pycache__/
+*.log

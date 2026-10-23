@@ -1,6 +1,9 @@
 # API Keys & Sensitive Configs
 .env
 *.env
+wallets_master.json
+*_master.json
+other/agent-trade/wallets_master.json
 live-cap/config.js
 sub-video/config.js
 short/.env
