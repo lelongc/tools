@@ -5,6 +5,7 @@ import json
 import threading
 from datetime import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
+import requests
 
 # Import bot modules
 from config import Config
@@ -44,9 +45,27 @@ def add_log(msg: str):
         if len(BOT_STATE["logs"]) > 50:
             BOT_STATE["logs"].pop(0)
 
+def send_telegram_alert(message: str):
+    token = Config.TELEGRAM_BOT_TOKEN
+    chat_id = Config.TELEGRAM_CHAT_ID
+    if not token or not chat_id:
+        return
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": message,
+        "parse_mode": "HTML"
+    }
+    try:
+        requests.post(url, json=payload, timeout=6)
+    except Exception as e:
+        add_log(f"Lỗi gửi tin Telegram: {e}")
+
 def bot_worker_loop():
     """Vòng lặp ngầm 24/7 quét thị trường và cào tin Telegram"""
     add_log("🚀 Bắt đầu tiến trình Bot Worker 24/7...")
+    send_telegram_alert(f"🚀 <b>BOT BINANCE SCALPER 24/7 ĐÃ KHỞI ĐỘNG!</b>\nTheo dõi: {Config.SYMBOL} | Mục tiêu: +{Config.PROFIT_TARGET_USDT}$ | Cắt lỗ: -{Config.STOP_LOSS_USDT}$")
+
     
     binance = None
     try:
@@ -129,7 +148,11 @@ def bot_worker_loop():
                         BOT_STATE["confidence"] = analysis.get("confidence", 0)
                         BOT_STATE["advisor_reason"] = analysis.get("reasoning", "")
                     
-                    add_log(f"🤖 Gemini tư vấn: {analysis.get('action')} (Tin cậy: {analysis.get('confidence')}%) - {analysis.get('reasoning')[:80]}...")
+                    action = analysis.get("action", "HOLD")
+                    confidence = analysis.get("confidence", 0)
+                    if action in ("BUY", "SELL") and confidence >= Config.MIN_CONFIDENCE:
+                        send_telegram_alert(f"⚡ <b>TÍN HIỆU GEMINI AI!</b>\nCặp: {symbol}\nLệnh: <b>{action}</b> (Tin cậy: {confidence}%)\nGiá: ${current_price}\nLý do: {analysis.get('reasoning')[:150]}")
+                    add_log(f"🤖 Gemini tư vấn: {action} (Tin cậy: {confidence}%) - {analysis.get('reasoning')[:80]}...")
             
             # Nghỉ 30 giây trước vòng quét tiếp theo
             time.sleep(30)

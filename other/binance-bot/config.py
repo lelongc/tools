@@ -51,3 +51,7 @@ class Config:
     
     # Điểm tin cậy tối thiểu của Gemini để kích hoạt lệnh (0 - 100)
     MIN_CONFIDENCE = int(os.getenv("MIN_CONFIDENCE", "70"))
+
+    # Telegram Bot Thông Báo
+    TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
+    TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "").strip()
