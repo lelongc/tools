@@ -1,0 +1,10 @@
+{
+  "python.analysis.extraPaths": [
+    "./other/binance-bot",
+    "./other/agent-trade"
+  ],
+  "python.autoComplete.extraPaths": [
+    "./other/binance-bot",
+    "./other/agent-trade"
+  ]
+}

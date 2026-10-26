@@ -4,8 +4,14 @@ import time
 import json
 import threading
 from datetime import datetime
+from pathlib import Path
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import requests
+
+# Đảm bảo Python luôn tìm thấy các module nội bộ của bot
+CURRENT_DIR = Path(__file__).resolve().parent
+if str(CURRENT_DIR) not in sys.path:
+    sys.path.insert(0, str(CURRENT_DIR))
 
 # Import bot modules
 from config import Config
