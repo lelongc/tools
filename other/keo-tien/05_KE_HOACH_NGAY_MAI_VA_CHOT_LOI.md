@@ -53,6 +53,7 @@
 
 | STT | Tài Sản | Đang Có | Nơi Bán | Thời Điểm & Giá Mục Tiêu | Kế Hoạch Hành Động |
 | :---: | :--- | :---: | :--- | :--- | :--- |
+| **0** | **☠️ Moribundus (4,444 $SOUL)** | **1 Vé FCFS (Đã Whitelist on-chain)** | PancakeSwap (BSC) | **Ngay khi Dev mở pool thanh khoản (10 - 30 phút đầu):** Target FDV 1M$ - 3M$ | **Vốn 0$ (Freemint 19h 30/10). Xả 70% ngay nhịp pump đầu lấy USDT tiền tươi đút túi (Kinh nghiệm từ con FOREVER ăn 1,400$). Giữ 30% moonbag.** |
 | **1** | **NONCE Genesis NFT** | *Chờ mint 2 con tối nay* | Launchpad Nonce Protocol | **Ngay trong đêm nay:** 9.8 - 10 USDT / con | **Bán 1 con lấy 10$ tiền tươi (~250k VNĐ). Giữ 1 con chờ Airdrop token $NONCE Q4.** |
 | **2** | **$AISNACK** | 100 token *(mai lên 300)* | Chợ P2P nội bộ / PancakeSwap | • **Ngắn hạn:** Treo bán giá `0.0035 BNB / 100 token` (~2.6$).<br>• **Dài hạn (Khuyên dùng):** Chờ list PancakeSwap sau 01/11 (dự kiến ~5$ - 8$). | Nếu cần tiền nhanh: treo bán ngay trên chợ P2P. Nếu muốn tối ưu: đợi gom nốt Phase 2 & 3 rồi xả. |
 | **3** | **$BOLT (Boltbook)** | 2,429 BOLT *(đang đào tiếp)* | Flap.sh / PancakeSwap | • **Mốc 1:** Mcap chạm $70k - $100k (x5 lần giá hiện tại) ➔ Bán 30%.<br>• **Mốc 2:** Mcap chạm $300k - $500k (x20 lần) ➔ Bán hết. | **TUYỆT ĐỐI KHÔNG BÁN BÂY GIỜ** vì giá mới $15k mcap, bán chỉ được vài xu nhưng tiềm năng tăng giá rất lớn. |
