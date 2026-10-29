@@ -1,0 +1,19 @@
+# Secrets & Credentials
+.env
+*.env
+.env*
+*creds*.json
+*credentials*.json
+boltbook_creds.json
+*token*.json
+*secret*
+*.pem
+*.key
+qr_connect*.html
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log

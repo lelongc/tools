@@ -1,0 +1,15 @@
+# Ignore credentials and temporary files
+.env*
+*.env
+*creds*.json
+*credentials*.json
+*token*.json
+*secret*
+*.tmp
+*.tmp.*
+*token*.tmp
+qr_connect*.html
+chunk.js
+__pycache__/
+*.pyc
+*.log

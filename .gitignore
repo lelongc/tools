@@ -1,9 +1,27 @@
 # API Keys & Sensitive Configs
 .env
 *.env
+.env*
+**/.env*
+*creds*.json
+**/*creds*.json
+*credentials*.json
+**/*credentials*.json
+*token*.json
+**/*token*.json
+boltbook_creds.json
+**/boltbook_creds.json
 wallets_master.json
+**/wallets_master.json
+wallets_public.csv
+**/wallets_public.csv
 *_master.json
-other/agent-trade/wallets_master.json
+**/*_master.json
+qr_connect*.html
+**/qr_connect*.html
+*.pem
+*.key
+*secret*
 live-cap/config.js
 sub-video/config.js
 short/.env
@@ -44,6 +62,8 @@ game
  
 # Logs & Temporary files
 *.log
+*.tmp
+**/*.tmp
 .pytest_cache/
 .eslintcach
 

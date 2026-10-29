@@ -1,7 +1,17 @@
 # Private keys, master seeds, and credentials
 wallets_master.json
+wallets_public.csv
 *_master.json
+*creds*.json
+*credentials*.json
+*token*.json
+*secret*
+*.pem
+*.key
 .env
 *.env
+.env*
 __pycache__/
+*.pyc
 *.log
+qr_connect*.html
