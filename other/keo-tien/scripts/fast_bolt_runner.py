@@ -58,14 +58,23 @@ def solve_challenge(challenge_text):
     if len(numbers) < 2:
         return "0.00"
         
-    sub_words = ['minus', 'subtract', 'subtracted', 'less', 'take away', 'difference', 'remains', 'left', 'sells', 'gives', 'lost', 'loses', 'spends', 'slows', 'slow', 'drops', 'decreases', 'reduces', 'cooler', 'eats', 'spent', 'shorter', 'colder']
-    mul_words = ['each', 'times', 'multiplied', 'multiply', 'product']
-    div_words = ['divide', 'divided', 'split', 'shares equally']
+    div_words = [
+        'shared evenly', 'shared by', 'shares evenly', 'split equally', 
+        'split between', 'divided by', 'divided', 'divide', 'split', 
+        'shares equally', 'shared', 'per bot', 'per person', 'per agent'
+    ]
+    mul_words = ['times', 'multiplied by', 'multiplied', 'multiply', 'product']
+    sub_words = [
+        'minus', 'subtract', 'subtracted', 'less', 'take away', 'difference', 
+        'remains', 'left', 'sells', 'gives', 'lost', 'loses', 'spends', 
+        'slows', 'slow', 'drops', 'decreases', 'reduces', 'cooler', 'eats', 
+        'spent', 'shorter', 'colder'
+    ]
 
-    if any(k in clean for k in mul_words):
-        ans = numbers[0] * numbers[1]
-    elif any(k in clean for k in div_words):
+    if any(k in clean for k in div_words):
         ans = numbers[0] / numbers[1] if numbers[1] != 0 else 0
+    elif any(k in clean for k in mul_words) or ('each' in clean and any(t in clean for t in ['total', 'altogether', 'in all', 'together'])):
+        ans = numbers[0] * numbers[1]
     elif any(k in clean for k in sub_words):
         ans = numbers[0] - numbers[1]
     else:

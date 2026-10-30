@@ -1,50 +1,45 @@
-# ☠️ 07 - MORIBUNDUS · WHITELIST FREEMINT (4,444 $SOUL)
+# ☠️ 07 - MORIBUNDUS · SOUL NFT (#92) (4,444 $SOUL)
 
-> **Cập nhật:** 30/10/2026 00:05 (Giờ VN)  
-> **Trạng thái:** ✅ **ĐÃ GHI DANH THÀNH CÔNG VÀO SMART CONTRACT ON-CHAIN**  
-> **Hạng Whitelist:** **FCFS (First Come First Served)**  
-> **Thời gian mở Freemint:** **19:00:00 tối ngày 30/10/2026 (Giờ VN)**  
+> **Cập nhật:** 30/10/2026 19:01 (Giờ VN)  
+> **Trạng thái:** 🎉 **ĐÃ ĐÚC THÀNH CÔNG NFT MORIBUNDUS #92 TRÊN BNB CHAIN**  
+> **Thời gian bắt đầu đào:** 19:00:14 tối ngày 30/10/2026  
+> **Thời gian thu hoạch 4,444 $SOUL:** **11:00:14 trưa ngày 31/10/2026 (sau 16 tiếng)**  
 
 ---
 
-## 📌 1. THÔNG TIN KÈO & GIAO DỊCH ON-CHAIN
+## 📌 1. THÔNG TIN GIAO DỊCH ĐÚC NFT ON-CHAIN
 
+* **Token ID sở hữu:** **#92** (trong tổng cung 4,444 NFT)  
 * **Trang web chính thức:** [`https://moribundus.xyz/`](https://moribundus.xyz/)  
-* **Trang Whitelist:** [`https://moribundus.xyz/whitelist`](https://moribundus.xyz/whitelist)  
-* **Smart Contract Whitelist (BSC):** [`0xC633c2Cf66eAf36A8B1f8d970c17104423D9EAd6`](https://bscscan.com/address/0xC633c2Cf66eAf36A8B1f8d970c17104423D9EAd6#code)  
-* **Ví đăng ký:** [`0x988fECF5030C36351272aBB39293fb8A9043ED8b`](https://bscscan.com/address/0x988fECF5030C36351272aBB39293fb8A9043ED8b) (`smartflow.ai`)  
-* **Tài khoản X liên kết:** `@sadex_le`  
-* **Transaction Hash ghi danh:** [`0xa1a35e369e777a9de7bcd610b39991acb4810c945fac8bd2b2d54f8128e83e89`](https://bscscan.com/tx/0xa1a35e369e777a9de7bcd610b39991acb4810c945fac8bd2b2d54f8128e83e89)  
-* **Khối xác nhận (Block):** `#130509301`  
-* **Chi phí ghi danh thực tế:** `0.000006 BNB` (~0.004$ USD / ~100 VNĐ)  
+* **Smart Contract Moribundus (BSC):** [`0x5eB9936F910b1cFaA9994fbC7Ae98A279A3d0F89`](https://bscscan.com/address/0x5eB9936F910b1cFaA9994fbC7Ae98A279A3d0F89)  
+* **Ví sở hữu:** [`0x988fECF5030C36351272aBB39293fb8A9043ED8b`](https://bscscan.com/address/0x988fECF5030C36351272aBB39293fb8A9043ED8b) (`smartflow.ai`)  
+* **Transaction Hash đúc NFT:** [`0x4aecc22aa8ea189621b1601ca1440448b08727add8232b7eed1c25d4eb77e602`](https://bscscan.com/tx/0x4aecc22aa8ea189621b1601ca1440448b08727add8232b7eed1c25d4eb77e602)  
+* **Khối xác nhận (Block):** `#130661345`  
+* **Chi phí Mint thực tế:** `0.0044 BNB` (~$3.29 USD) + gas siêu rẻ.  
 
 ---
 
-## ⚙️ 2. CƠ CHẾ VẬN HÀNH & PHẦN THƯỞNG ($SOUL)
+## ⚙️ 2. TIẾN TRÌNH ĐÀO TỰ ĐỘNG (16 TIẾNG)
 
-* **Tổng cung NFT:** 4,444 Moribundus Soul NFTs (Giới hạn tối đa 1 NFT / ví Binance Agent ID).
-* **Giá Mint:** **0 BNB (Free Mint 100%)**, chỉ tốn phí gas mạng BSC.
-* **Quy trình 4 bước:**
-  1. **Bước 1 (19:00 ngày 30/10):** Gọi lệnh Freemint qua Binance Agentic Wallet.
-  2. **Bước 2 (Giai đoạn đào - Mining):** NFT tự động "sống" và đào trong **16 tiếng** (chia làm 4 epoch, mỗi epoch 4 tiếng). Không cần treo máy, không tốn thêm gas.
-  3. **Bước 3 (Thụ hưởng phần thưởng - 11:00 trưa 31/10):** Sau 16 tiếng, NFT tự thiêu hủy và Smart Contract tự động giải ngân **`4,444 token $SOUL`** trả thẳng về ví.
-  4. **Bước 4 (List sàn PancakeSwap):** Dev add thanh khoản `$SOUL / USDT` hoặc `$SOUL / BNB` để cộng đồng giao dịch.
+* **Cơ chế:** NFT tự sống và đào trong 4 epoch (mỗi epoch 4 tiếng). Không cần cắm máy, không tốn gas.
+* **Mốc đếm ngược:**
+  * **Epoch 1 (19:00 - 23:00 30/10):** Đào 1,111 $SOUL (Alive).
+  * **Epoch 2 (23:00 30/10 - 03:00 31/10):** Đào 2,222 $SOUL (Fading).
+  * **Epoch 3 (03:00 - 07:00 31/10):** Đào 3,333 $SOUL (Critical).
+  * **Epoch 4 (07:00 - 11:00 31/10):** Đào trọn vẹn **4,444 $SOUL** (Dead & Delivered).
+* **Sau 16 tiếng (11:00 trưa 31/10):** Hệ thống bot dự án sẽ tự động chuyển giao 4,444 $SOUL vào ví thông qua Soul Altar [`0x01a451256aC22070D4aF503fA7Fe03b7337273e0`](https://bscscan.com/address/0x01a451256aC22070D4aF503fA7Fe03b7337273e0) hoàn toàn miễn phí gas!
 
 ---
 
-## 🎯 3. CHIẾN LƯỢC CHỐT LỜI ("BÚ ĐẪM")
-
-* **Kinh nghiệm từ kèo FOREVER vừa rồi:**
-  * Dự án mở whitelist giá rẻ/freemint $\rightarrow$ Khi mở pool sàn Uniswap/PancakeSwap, cộng đồng FOMO mua tranh đẩy giá tăng x10 - x50 trong 10-30 phút đầu.
-  * Ví cầm hàng đợt đầu chốt lời thu về hơn **1,400$ tiền tươi** trong tiếng đầu tiên.
-* **Chiến thuật áp dụng cho $SOUL:**
-  * **Vị thế:** Vốn = 0$ (Freemint). Bán bất kỳ giá nào cũng là lãi 100%.
-  * **10 - 30 phút đầu khi mở sàn:** Bán **70%** lượng $SOUL thu thẳng **USDT/BNB** đút túi bảo toàn lợi nhuận tối đa.
-  * **30% còn lại (Moonbag):** Giữ lại đề phòng dự án đẩy tiếp lên sàn lớn CEX (KuCoin, Bitget, Binance).
+## 🎯 3. KẾ HOẠCH CHỐT LỜI SÀN PANCAKESWAP (THEO CHỈ ĐẠO CỦA BẠN)
+* **Mục tiêu ưu tiên số 1:** Thu tiền tươi **USDT** (tránh biến động giá BNB giảm).
+* **Quy tắc chốt lời:**
+  * **Bán 50% (khoảng 2,222 $SOUL):** Bán đổi thẳng sang **USDT** với mục tiêu thu về **lãi ròng từ 10$ USD trở lên** (hoàn vốn 3.3$ + đút túi chắc chắn >10$ tiền tươi).
+  * **Hold 50% còn lại (khoảng 2,222 $SOUL):** Giữ chặt làm moonbag đề phòng dự án bùng nổ đường dài.
+* **Thời điểm hành động:** Ngay khi Dev mở thanh khoản PancakeSwap sau 11:00 trưa mai (31/10).
 
 ---
 
 ## ⏰ 4. LỊCH NHẮC THỰC THI
-* **19:00:00 tối 30/10/2026 (Giờ VN):** Kích hoạt lệnh Freemint Moribundus qua script / BAW.
-* **11:00:00 trưa 31/10/2026 (Giờ VN):** Kiểm tra số dư 4,444 $SOUL và theo dõi pool thanh khoản PancakeSwap để chốt lời.
+* **11:00:14 trưa 31/10/2026 (Giờ VN):** Kiểm tra số dư 4,444 $SOUL và theo dõi pool thanh khoản PancakeSwap để bán 50% sang USDT thu lãi ≥ 10$ USD.
 

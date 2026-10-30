@@ -68,6 +68,8 @@ def main():
     shiba = get_nft_balance("0xFdD6C5fF6dAbFF40cb27B39D72E5C9517Af27Fdc", WALLET)
     sigil = get_nft_balance("0xDd8BdfC91cbD572935B09863A742d8296fed0ACf", WALLET)
     repsol = get_nft_balance("0x0cdbc22056631a399d1c8caa3f5a70e65935e26f", WALLET)
+    mori = get_nft_balance("0x5eB9936F910b1cFaA9994fbC7Ae98A279A3d0F89", WALLET)
+    print(f"• Moribundus Soul NFT: {mori} con (Token #92 - Đang đào 4,444 $SOUL)")
     print(f"• Pixel Shiba Club NFT: {shiba} con")
     print(f"• Nemotron Sigil NFT: {sigil} con")
     print(f"• Repsol NFT (Cực hiếm): {repsol} con")
