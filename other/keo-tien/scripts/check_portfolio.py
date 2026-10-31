@@ -64,6 +64,10 @@ def main():
     aisnack = get_erc20_balance("0x4903Ce0f68f763B8EdBB80A6E9E836373d3190C8", WALLET, 18)
     print(f"• $AISNACK Token: {aisnack:,.1f} AISNACK")
 
+    # 4. $MAOAI
+    maoai = get_erc20_balance("0xBB357ecA84A438Caaa3a8783d78eDAA57B5d665d", WALLET, 18)
+    print(f"• $MAOAI Token: {maoai:,.0f} MAOAI")
+
     # 4. NFTs
     shiba = get_nft_balance("0xFdD6C5fF6dAbFF40cb27B39D72E5C9517Af27Fdc", WALLET)
     sigil = get_nft_balance("0xDd8BdfC91cbD572935B09863A742d8296fed0ACf", WALLET)
